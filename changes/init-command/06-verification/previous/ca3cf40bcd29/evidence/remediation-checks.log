@@ -1,0 +1,113 @@
+### ruby: /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby (ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23])
+### target: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/remediation-target
+
+### R1 (EVAL-F-001): init --root with no value (expect exit 1, plain '--root requires a value', no 'defect in Soft Foundry')
+$ soft-foundry init --root
+exit=1
+--- combined stdout+stderr ---
+soft-foundry: --root requires a value
+--- end ---
+$ grep -c 'requires a value' r1.out
+1
+$ grep -ci 'defect in Soft Foundry' r1.out (expect 0)
+0
+$ grep -ci 'internal failure' r1.out (expect 0)
+0
+$ grep -c 'pull' r1.out (upstream guidance; expect 0)
+0
+$ line count of output:
+       1
+$ files written to target (expect only app.rb and r1.out):
+app.rb
+r1.out
+
+### R2 setup: install, commit, then commit a maintainer edit to two managed files
+init exit=0
+
+### R2 (EVAL-F-003/F-004): conflict run (expect exit 3, 'conflicts:' naming both paths, 'next:' mentioning --force)
+$ soft-foundry init --no-onboard
+exit=3
+--- non-skipped lines ---
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/remediation-target
+conflict  .ai/rules/general.md  (differs from manifest hash)
+conflict  .ai/rules/ruby.md  (differs from manifest hash)
+check: ok
+summary: created 0, updated 0, skipped 169, conflict 2, forced 0
+conflicts: .ai/rules/general.md, .ai/rules/ruby.md
+next: compare with `git diff`, keep your version, or commit it and rerun with --force to take the canonical version (uncommitted edits are never overwritten)
+--- end ---
+$ conflicts: line
+conflicts: .ai/rules/general.md, .ai/rules/ruby.md
+grep exit=0
+$ conflicts line names .ai/rules/general.md:
+yes
+$ conflicts line names .ai/rules/ruby.md:
+yes
+$ next: line
+next: compare with `git diff`, keep your version, or commit it and rerun with --force to take the canonical version (uncommitted edits are never overwritten)
+grep exit=0
+$ next line mentions --force:
+yes
+$ ASCII-stripped status words still identifiable:
+   2 conflict
+ 169 skipped
+$ git status --porcelain (expect clean; r2.out untracked is this script's own file)
+?? r2.out
+$ --force to clear:
+exit=0
+forced    .ai/rules/general.md  (differs from manifest hash)
+forced    .ai/rules/ruby.md  (differs from manifest hash)
+summary: created 0, updated 0, skipped 169, conflict 0, forced 2
+
+### R3 (EVAL-F-005 / AC-015): init with onboarding, provider keys unset (expect exit 0, 'not configured (set <ENV>)' lines, .soft-foundry/runtime.yml exists)
+$ env -u OPENAI_API_KEY -u ANTHROPIC_API_KEY -u XAI_API_KEY soft-foundry init
+exit=0
+--- non-skipped lines ---
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/remediation-target
+check: ok
+
+LLM provider discovery
+openai     not configured (set OPENAI_API_KEY)
+anthropic  not configured (set ANTHROPIC_API_KEY)
+xai        not configured (set XAI_API_KEY)
+
+Local model inventory written to .soft-foundry/runtime.yml (gitignored).
+summary: created 0, updated 0, skipped 171, conflict 0, forced 0
+--- end ---
+$ 'not configured (set ...)' lines:
+openai     not configured (set OPENAI_API_KEY)
+anthropic  not configured (set ANTHROPIC_API_KEY)
+xai        not configured (set XAI_API_KEY)
+count: 3
+$ each expected env var named:
+yes  OPENAI_API_KEY
+yes  ANTHROPIC_API_KEY
+yes  XAI_API_KEY
+$ ls -la .soft-foundry/
+total 8
+drwxr-xr-x@  4 jscholen-iou  wheel  128 Sep  9 12:58 .
+drwxr-xr-x@ 12 jscholen-iou  wheel  384 Sep  9 12:58 ..
+-rw-r--r--@  1 jscholen-iou  wheel    0 Sep  9 12:58 init.lock
+-rw-r--r--@  1 jscholen-iou  wheel  200 Sep  9 12:58 runtime.yml
+$ cat .soft-foundry/runtime.yml
+---
+version: 1
+providers:
+  openai:
+    configured: false
+    models: []
+    error:
+  anthropic:
+    configured: false
+    models: []
+    error:
+  xai:
+    configured: false
+    models: []
+    error:
+$ git check-ignore -v .soft-foundry/runtime.yml
+.gitignore:1:.soft-foundry/	.soft-foundry/runtime.yml
+$ git status --porcelain (expect only r3.out, which this script wrote)
+?? r3.out
+
+### EXIT CODES: root_no_value=1 conflict=3 init_with_onboarding=0

@@ -114,7 +114,34 @@ class GateRemediationTest < Minitest::Test
     end
   end
 
-  def test_remediation_still_needs_a_complete_predecessor_when_nothing_is_blocked
+  def test_remediation_stays_valid_after_the_blocked_phase_is_rerun
+    with_fixture_repo do |dir|
+      plane = SoftFoundry::ControlPlane.new(dir)
+      record = SoftFoundry::ChangeRecord.create(dir, "c11", control_plane: plane)
+      gate = SoftFoundry::Gate.new(record, git: SoftFoundry::Git.new(dir))
+      sha = head(dir)
+      %w[intake discover specify threat_model plan implement verify evaluate remediate].each { |id| complete_phase!(record, id, sha: sha) }
+      refute gate.evaluate("remediate").failed?, "attack pending must not block a completed remediation"
+      complete_phase!(record, "attack", sha: sha)
+      complete_phase!(record, "document", sha: sha)
+      refute gate.evaluate("document").failed?
+    end
+  end
+
+  def test_optional_remediation_is_skipped_over_when_it_never_ran
+    with_fixture_repo do |dir|
+      plane = SoftFoundry::ControlPlane.new(dir)
+      record = SoftFoundry::ChangeRecord.create(dir, "c12", control_plane: plane)
+      gate = SoftFoundry::Gate.new(record, git: SoftFoundry::Git.new(dir))
+      sha = head(dir)
+      %w[intake discover specify threat_model plan implement verify evaluate attack document].each { |id| complete_phase!(record, id, sha: sha) }
+      result = gate.evaluate("document")
+      refute result.failed?, result.checks.map { |c| "#{c.name}: #{c.detail}" }.join("\n")
+      assert_includes result.checks.find { |c| c.name == "predecessor complete" }.detail, "08-attack"
+    end
+  end
+
+  def test_remediation_requires_implementation_complete
     with_fixture_repo do |dir|
       plane = SoftFoundry::ControlPlane.new(dir)
       record = SoftFoundry::ChangeRecord.create(dir, "c10", control_plane: plane)

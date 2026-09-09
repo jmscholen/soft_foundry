@@ -32,6 +32,8 @@ lifecycle:
   - id: remediate
     skill: remediation
     output: 09-remediation
+    optional: true        # only runs when a gated phase produced findings
+    after: implement      # loop phase: its predecessor is implementation, not attack
   - id: document
     skill: product-documentation
     output: 10-user-documentation
@@ -52,6 +54,8 @@ lifecycle:
     output: 15-learning
 
 # Non-linear edges. Every other phase proceeds to the next lifecycle entry.
+# A phase's completion gate requires its predecessor complete; `after`
+# overrides the predecessor and pending `optional` phases are skipped over.
 # Any transition back to `verify` marks verify, evaluate, attack, review, and
 # judge evidence stale for the change.
 transitions:

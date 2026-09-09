@@ -40,6 +40,17 @@ class CheckTest < Minitest::Test
     end
   end
 
+  def test_bad_after_target_is_reported
+    with_fixture_repo do |dir|
+      path = File.join(dir, ".ai/workflow.yml")
+      wf = YAML.safe_load_file(path)
+      wf["lifecycle"].find { |e| e["id"] == "remediate" }["after"] = "nowhere"
+      File.write(path, YAML.dump(wf))
+      findings = SoftFoundry::Check.new(SoftFoundry::ControlPlane.new(dir)).run
+      assert findings.any? { |f| f.message.include?("after") && f.message.include?("nowhere") }
+    end
+  end
+
   def test_bad_transition_target_is_reported
     with_fixture_repo do |dir|
       path = File.join(dir, ".ai/workflow.yml")

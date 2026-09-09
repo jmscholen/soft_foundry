@@ -30,3 +30,6 @@ Verification, then evaluation, then attack, all against the remediated commit or
 ## Harness follow-ups for learning
 - A `soft-foundry change invalidate <phase>` command should perform the archive-and-reset step this remediation did by hand.
 - The gate should read `transitions` from `workflow.yml` instead of special-casing `remediate`.
+
+## Harness follow-up applied after evaluation passed
+Once evaluation was re-run and passed, nothing was blocked and the gate fell back to the linear rule, failing remediation on "08-attack is pending" and blocking the commit through the pre-commit hook. The special case above was the wrong model. `workflow.yml` now declares remediation `optional: true` with `after: implement`, the control plane resolves an effective predecessor that honors `after` and skips optional phases that never ran, and `check` validates `after` targets. This is harness code under `${APP}` for this repository, so verification and evaluation evidence at c29509c was archived under `previous/` and reset for a second rerun. Learning should capture that harness fixes discovered mid-change force evidence reruns when the harness and the product share a repository.

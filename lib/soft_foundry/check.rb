@@ -42,7 +42,10 @@ module SoftFoundry
 
     def check_transitions
       ids = @plane.phases.map(&:id)
-      @plane.transitions.flat_map do |from, edges|
+      after_problems = @plane.phases.filter_map do |p|
+        Finding.new(:error, "lifecycle: '#{p.id}' has after: '#{p.after}' which is not a lifecycle phase") if p.after && !ids.include?(p.after)
+      end
+      after_problems + @plane.transitions.flat_map do |from, edges|
         problems = []
         problems << Finding.new(:error, "transitions: '#{from}' is not a lifecycle phase") unless ids.include?(from)
         Hash(edges).each_value { |to| problems << Finding.new(:error, "transitions: '#{from}' targets unknown phase '#{to}'") unless ids.include?(to) }

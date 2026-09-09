@@ -87,15 +87,10 @@ module SoftFoundry
       Check.new("commit_sha recorded", :pass, sha)
     end
 
-    # Remediation is the workflow's loop target: it may close while an earlier
-    # gated phase is blocked, because that blockage is what it repairs.
+    # Honors `after` overrides and skips optional phases that never ran.
     def predecessor_check(phase)
-      prev = @plane.predecessor(phase)
+      prev = @plane.effective_predecessor(phase) { |p| @record.phase_status(p) }
       return Check.new("predecessor complete", :pass, "first phase") unless prev
-      if phase.id == "remediate"
-        blocked = @plane.phases.select { |p| @record.phase_status(p) == "blocked" }
-        return Check.new("predecessor complete", :pass, "repairing blocked #{blocked.map(&:output).join(', ')}") unless blocked.empty?
-      end
       prev_status = @record.phase_status(prev)
       prev_status == "complete" ? Check.new("predecessor complete", :pass, prev.output) : Check.new("predecessor complete", :fail, "#{prev.output} is #{prev_status || 'missing'}")
     end

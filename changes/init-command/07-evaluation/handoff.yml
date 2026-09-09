@@ -1,113 +1,17 @@
 ---
 phase: 07-evaluation
 skill: evaluation
-status: blocked
-commit_sha: 6a41afd123ca1ea6f72b1ac6b686e2b2c419b10e
-started_at: '2026-09-09T16:16:25Z'
-completed_at: '2026-09-09T16:52:30Z'
+status: pending
+commit_sha:
+started_at:
+completed_at:
 resolved_model:
   profile: reasoning_high
-  provider: anthropic
-  model: claude-fable-5-1
-outputs:
-- evaluation-plan.md
-- journeys.yml
-- results.md
-- evidence/manifest.yml
-- evidence/EVAL-001-first-install-idempotent.log
-- evidence/EVAL-002-pointer-files-preserved.log
-- evidence/EVAL-003-dry-run-then-real.log
-- evidence/EVAL-004-conflict-then-force.log
-- evidence/EVAL-005-uncommitted-edit.log
-- evidence/EVAL-006-non-git.log
-- evidence/EVAL-007-docs-without-user.log
-- evidence/EVAL-008-gitignore.log
-- evidence/EVAL-009-root-option.log
-- evidence/EVAL-010-no-provider-keys.log
-- evidence/EVAL-011-ascii-status-words.log
-- evidence/EVAL-012-internal-failure.log
-- evidence/EVAL-013-hand-copied-ai.log
-- evidence/EVAL-014-cli-surface.log
-- evidence/EVAL-015-symlinked-ai.log
-- evidence/scripts/lib.sh
-- evidence/scripts/eval-001.sh
-- evidence/scripts/eval-002.sh
-- evidence/scripts/eval-003.sh
-- evidence/scripts/eval-004.sh
-- evidence/scripts/eval-005.sh
-- evidence/scripts/eval-006.sh
-- evidence/scripts/eval-007.sh
-- evidence/scripts/eval-008.sh
-- evidence/scripts/eval-009.sh
-- evidence/scripts/eval-010.sh
-- evidence/scripts/eval-011.sh
-- evidence/scripts/eval-012.sh
-- evidence/scripts/eval-013.sh
-- evidence/scripts/eval-014.sh
-- evidence/scripts/eval-015.sh
-blocking:
-- 'EVAL-014 failed: soft-foundry init --root with no value exits 4 with ''internal
-  failure in installer: ArgumentError: --root requires a value'', ''This is a defect
-  in Soft Foundry 0.2.0, not in your repository'', a backtrace diagnostic, and fork/pull-request
-  guidance; the specification''s exit-code contract requires exit 1 for a usage error
-  with a plain explanation (evidence/EVAL-014-cli-surface.log step 5, finding EVAL-F-001).
-  All other journeys (EVAL-001..013, EVAL-015) pass and cover AC-001..AC-016.'
-findings:
-- id: EVAL-F-001
-  severity: major
-  summary: init --root with no value exits 4 with "This is a defect in Soft Foundry"
-    and fork/pull-request guidance instead of a usage error with exit 1 (specification
-    Exit codes); the option parser's ArgumentError is wrapped as an internal failure
-    by init's catch-all rescue. EVAL-014 fails on this; nothing is written to the
-    target.
-- id: EVAL-F-002
-  severity: minor
-  summary: init --help is refused as "unknown option(s) --help" with exit 1; there
-    is no per-command help, only the top-level listing printed by bare soft-foundry.
-- id: EVAL-F-003
-  severity: minor
-  summary: Conflict runs print no resolving action (no mention of --force, git commit,
-    or git checkout), contrary to the specification's failure-behaviour text for target-side
-    failures; "check ok" directly precedes an exit-3 summary and reads as success.
-- id: EVAL-F-004
-  severity: minor
-  summary: The summary line does not name conflicted paths and conflict lines are
-    interleaved in path order among up to 170 skipped lines; the MIT-004 git diff
-    hint (VER-006) and the dry-run ordering of updated/forced first are absent.
-- id: EVAL-F-005
-  severity: minor
-  summary: Onboarding reports "not configured" per provider without naming the environment
-    variable (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY) the maintainer must
-    set.
-- id: EVAL-F-006
-  severity: info
-  summary: Conflict reasons ("differs from manifest hash", "not in manifest", "owned
-    by manifest") presume the reader knows what .ai/manifest.yml is; user documentation
-    should define the manifest and the five statuses.
-- id: EVAL-F-007
-  severity: info
-  summary: The updated upgrade path for an owned .ai/ file now has end-to-end evidence
-    (EVAL-004 shows "updated .ai/rules/ruby.md (owned by manifest)" rewritten with
-    the manifest hash refreshed), closing the evidence half of VER-001; the automated-test
-    half remains open.
-- id: EVAL-F-008
-  severity: info
-  summary: Every other behaviour in AC-001..AC-016 matched the specification from
-    the user's side across four personas and fifteen journeys - idempotent to the
-    modification time, pointer prose preserved byte for byte, uncommitted edits never
-    overwritten even with --force, no secrets or absolute paths in the internal-failure
-    diagnostic, nothing written on any refusal. AC-017 was proven by verification
-    and not repeated.
+  provider:
+  model:
+outputs: []
+blocking: []
+findings: []
 next: attack
-notes: 'Compatibility mode: performed by a fresh-context agent under evaluation permissions.
-  Status is blocked because one journey (EVAL-014) failed on a specification mismatch;
-  the failure is recorded in blocking and must be resolved by remediation and re-verification,
-  never by editing this handoff. Every journey except EVAL-010 used --no-onboard because
-  the host environment carries real provider keys; EVAL-010 unset them and ran onboarding.
-  Journeys needing a different Soft Foundry package (EVAL-004 next-version, EVAL-012
-  broken package) used rsync copies of the repository under the scratchpad; the repository
-  itself was not modified. Four transcripts were regenerated once after fixing harness
-  defects (quoting and ordering in the evaluation scripts); expected outcomes were
-  not changed. Still blocked after 09-remediation at 420acdc5f35d; this run is archived
-  under previous/6a41afd123ca/ and evaluation must be rerun against the remediated
-  commit.'
+notes: Invalidated by the gate harness fix recorded in 09-remediation; the passing
+  run at c29509c3cee8 is archived under previous/c29509c3cee8/ and must be rerun.

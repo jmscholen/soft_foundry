@@ -5,7 +5,7 @@ require "yaml"
 module SoftFoundry
   # Reads the `.ai/` directory: workflow, skills, path groups, profiles.
   class ControlPlane
-    Phase = Data.define(:id, :skill, :output)
+    Phase = Data.define(:id, :skill, :output, :optional, :after)
     Skill = Data.define(:name, :dir, :definition, :permissions, :requirements, :completion) do
       def template_dir = File.join(dir, "template")
       def profile = definition["model"]
@@ -32,7 +32,9 @@ module SoftFoundry
     end
 
     def phases
-      @phases ||= Array(workflow["lifecycle"]).map { |entry| Phase.new(id: entry["id"], skill: entry["skill"], output: entry["output"]) }
+      @phases ||= Array(workflow["lifecycle"]).map do |entry|
+        Phase.new(id: entry["id"], skill: entry["skill"], output: entry["output"], optional: entry["optional"] == true, after: entry["after"])
+      end
     end
 
     def phase(key)
@@ -40,8 +42,17 @@ module SoftFoundry
     end
 
     def predecessor(phase)
+      return phase(phase.after) if phase.after
       index = phases.index(phase)
       index&.positive? ? phases[index - 1] : nil
+    end
+
+    # The phase whose completion gates `phase`, skipping optional phases that
+    # never ran. `status_of` maps a phase to its recorded handoff status.
+    def effective_predecessor(phase, &status_of)
+      prev = predecessor(phase)
+      prev = predecessor(prev) while prev&.optional && status_of.call(prev) == "pending"
+      prev
     end
 
     def successor(phase)
