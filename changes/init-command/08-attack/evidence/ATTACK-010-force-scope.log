@@ -1,0 +1,75 @@
+
+##### ATTACK-010 THREAT-006: --force must not extend beyond .ai/ conflicts
+before AGENTS.md: 92d50c9629c1139e
+before .ai/repository.yml: fce8fdb5654086ef
+before changes/README.md: 5d460dc60dcf357b
+before docs/user/README.md: d499d86e5402c113
+before .gitignore: 471514a1f46ac21d
+before .ai/rules/general.md: e1ee3d627c1931ea
+
+##### 10a: --force --dry-run with a symlinked conflict file present
+[stdout]
+[stderr]
+soft-foundry: .ai/rules/ruby.md is a symlink; init does not write through symlinks
+[exit 1]
+
+##### 10b: symlink removed; --force --dry-run
+[stdout]
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a010c/t
+mode: dry run, nothing written
+conflict  .gitignore  (.soft-foundry/ line present but not effective)
+conflict  AGENTS.md  (marker present without the canonical block)
+forced    .ai/rules/general.md  (not in manifest)
+summary: created 165, updated 0, skipped 3, conflict 2, forced 1
+conflicts: .gitignore, AGENTS.md
+next: compare with `git diff`, keep your version, or commit it and rerun with --force to take the canonical version (uncommitted edits are never overwritten)
+[stderr]
+[exit 3]
+anything written by dry-run? 0 dirty paths
+
+##### 10c: real --force
+[stdout]
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a010c/t
+conflict  .gitignore  (.soft-foundry/ line present but not effective)
+conflict  AGENTS.md  (marker present without the canonical block)
+forced    .ai/rules/general.md  (not in manifest)
+check: ok
+summary: created 165, updated 0, skipped 3, conflict 2, forced 1
+conflicts: .gitignore, AGENTS.md
+next: compare with `git diff`, keep your version, or commit it and rerun with --force to take the canonical version (uncommitted edits are never overwritten)
+[stderr]
+[exit 3]
+after  AGENTS.md: 92d50c9629c1139e
+after  .ai/repository.yml: fce8fdb5654086ef
+after  changes/README.md: 5d460dc60dcf357b
+after  docs/user/README.md: d499d86e5402c113
+after  .gitignore: 471514a1f46ac21d
+after  .ai/rules/general.md: 4ea1f1dd276ab7bb
+victim: VICTIM; repository.yml head: version: 1 repository:   assessed: true   note: precious assessment 
+
+##### 10d: uncommitted edit to an owned file + --force
+[stdout]
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a010c/t
+conflict  .gitignore  (.soft-foundry/ line present but not effective)
+conflict  AGENTS.md  (marker present without the canonical block)
+conflict  .ai/rules/ruby.md  (uncommitted modifications)
+check: ok
+summary: created 0, updated 0, skipped 168, conflict 3, forced 0
+conflicts: .gitignore, AGENTS.md, .ai/rules/ruby.md
+next: compare with `git diff`, keep your version, or commit it and rerun with --force to take the canonical version (uncommitted edits are never overwritten)
+[stderr]
+[exit 3]
+ruby.md last line: edit
+
+##### 10e: --force --allow-non-git
+[stdout]
+[stderr]
+soft-foundry: --force cannot be combined with --allow-non-git: overwrites would be unrecoverable
+[exit 1]
+
+##### 10f: --force where the only conflict is a symlinked managed file
+[stdout]
+[stderr]
+soft-foundry: .ai/rules/ruby.md is a symlink; init does not write through symlinks
+[exit 1]
+victim: VICTIM

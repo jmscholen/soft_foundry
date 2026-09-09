@@ -1,0 +1,650 @@
+
+##### ATTACK-005 THREAT-001 (unlisted vector): .soft-foundry is a symlink to a directory outside the root; onboarding runs with no provider keys (no network)
+$ ls -la /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a005/target
+total 0
+drwxr-xr-x@  5 jscholen-iou  wheel  160 Sep  9 17:04 .
+drwxr-xr-x@  4 jscholen-iou  wheel  128 Sep  9 17:04 ..
+drwxr-xr-x@ 12 jscholen-iou  wheel  384 Sep  9 17:04 .git
+lrwxr-xr-x@  1 jscholen-iou  wheel  139 Sep  9 17:04 .soft-foundry -> /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a005/outside/dir
+drwxr-xr-x@  3 jscholen-iou  wheel   96 Sep  9 17:04 lib
+[exit 0]
+$ ls -la /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a005/outside/dir
+total 0
+drwxr-xr-x@ 2 jscholen-iou  wheel  64 Sep  9 17:04 .
+drwxr-xr-x@ 3 jscholen-iou  wheel  96 Sep  9 17:04 ..
+[exit 0]
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a005/target
+created   .gitignore
+created   AGENTS.md
+created   CLAUDE.md
+created   .ai/README.md
+created   .ai/harness-evals/README.md
+created   .ai/maturity.yml
+created   .ai/paths.yml
+created   .ai/policies/human-boundaries.yml
+created   .ai/policies/skill-permissions.yml
+created   .ai/profiles/adversarial-high.yml
+created   .ai/profiles/coding-high.yml
+created   .ai/profiles/judgment-high.yml
+created   .ai/profiles/reasoning-high.yml
+created   .ai/profiles/writing-medium.yml
+created   .ai/repository.yml
+created   .ai/rules/README.md
+created   .ai/rules/architecture.md
+created   .ai/rules/database.md
+created   .ai/rules/dependencies.md
+created   .ai/rules/errors.md
+created   .ai/rules/general.md
+created   .ai/rules/git.md
+created   .ai/rules/infrastructure.md
+created   .ai/rules/observability.md
+created   .ai/rules/rails.md
+created   .ai/rules/ruby.md
+created   .ai/rules/security.md
+created   .ai/rules/testing.md
+created   .ai/runtime/models.yml
+created   .ai/schemas.md
+created   .ai/skills/adversarial-testing/SKILL.md
+created   .ai/skills/adversarial-testing/completion.yml
+created   .ai/skills/adversarial-testing/permissions.yml
+created   .ai/skills/adversarial-testing/requirements.yml
+created   .ai/skills/adversarial-testing/skill.yml
+created   .ai/skills/adversarial-testing/template/attack-plan.md
+created   .ai/skills/adversarial-testing/template/cases.yml
+created   .ai/skills/adversarial-testing/template/evidence/manifest.yml
+created   .ai/skills/adversarial-testing/template/results.md
+created   .ai/skills/evaluation/SKILL.md
+created   .ai/skills/evaluation/completion.yml
+created   .ai/skills/evaluation/permissions.yml
+created   .ai/skills/evaluation/requirements.yml
+created   .ai/skills/evaluation/skill.yml
+created   .ai/skills/evaluation/template/evaluation-plan.md
+created   .ai/skills/evaluation/template/evidence/manifest.yml
+created   .ai/skills/evaluation/template/journeys.yml
+created   .ai/skills/evaluation/template/results.md
+created   .ai/skills/faq-indexing/SKILL.md
+created   .ai/skills/faq-indexing/completion.yml
+created   .ai/skills/faq-indexing/permissions.yml
+created   .ai/skills/faq-indexing/requirements.yml
+created   .ai/skills/faq-indexing/skill.yml
+created   .ai/skills/faq-indexing/template/records.yml
+created   .ai/skills/final-judgment/SKILL.md
+created   .ai/skills/final-judgment/completion.yml
+created   .ai/skills/final-judgment/permissions.yml
+created   .ai/skills/final-judgment/requirements.yml
+created   .ai/skills/final-judgment/skill.yml
+created   .ai/skills/final-judgment/template/evidence.yml
+created   .ai/skills/final-judgment/template/final.md
+created   .ai/skills/final-judgment/template/residual-risk.md
+created   .ai/skills/implementation/SKILL.md
+created   .ai/skills/implementation/completion.yml
+created   .ai/skills/implementation/permissions.yml
+created   .ai/skills/implementation/requirements.yml
+created   .ai/skills/implementation/skill.yml
+created   .ai/skills/implementation/template/decisions.md
+created   .ai/skills/implementation/template/deviations.md
+created   .ai/skills/implementation/template/log.md
+created   .ai/skills/intake/SKILL.md
+created   .ai/skills/intake/completion.yml
+created   .ai/skills/intake/permissions.yml
+created   .ai/skills/intake/requirements.yml
+created   .ai/skills/intake/skill.yml
+created   .ai/skills/intake/template/assumptions.md
+created   .ai/skills/intake/template/request.md
+created   .ai/skills/learning/SKILL.md
+created   .ai/skills/learning/completion.yml
+created   .ai/skills/learning/permissions.yml
+created   .ai/skills/learning/requirements.yml
+created   .ai/skills/learning/skill.yml
+created   .ai/skills/learning/template/findings.md
+created   .ai/skills/learning/template/proposed-evals.md
+created   .ai/skills/learning/template/proposed-rules.md
+created   .ai/skills/observability/SKILL.md
+created   .ai/skills/observability/completion.yml
+created   .ai/skills/observability/permissions.yml
+created   .ai/skills/observability/requirements.yml
+created   .ai/skills/observability/skill.yml
+created   .ai/skills/observability/template/alarms.md
+created   .ai/skills/observability/template/dashboard.md
+created   .ai/skills/observability/template/metrics.md
+created   .ai/skills/observability/template/runbook.md
+created   .ai/skills/observability/template/signals.md
+created   .ai/skills/planning/SKILL.md
+created   .ai/skills/planning/completion.yml
+created   .ai/skills/planning/permissions.yml
+created   .ai/skills/planning/requirements.yml
+created   .ai/skills/planning/skill.yml
+created   .ai/skills/planning/template/implementation.md
+created   .ai/skills/planning/template/rollback.md
+created   .ai/skills/planning/template/rollout.md
+created   .ai/skills/planning/template/testing.md
+created   .ai/skills/product-documentation/SKILL.md
+created   .ai/skills/product-documentation/completion.yml
+created   .ai/skills/product-documentation/permissions.yml
+created   .ai/skills/product-documentation/requirements.yml
+created   .ai/skills/product-documentation/skill.yml
+created   .ai/skills/product-documentation/template/faq.md
+created   .ai/skills/product-documentation/template/instructions.md
+created   .ai/skills/product-documentation/template/search-records.yml
+created   .ai/skills/remediation/SKILL.md
+created   .ai/skills/remediation/completion.yml
+created   .ai/skills/remediation/permissions.yml
+created   .ai/skills/remediation/requirements.yml
+created   .ai/skills/remediation/skill.yml
+created   .ai/skills/remediation/template/summary.md
+created   .ai/skills/repository-discovery/SKILL.md
+created   .ai/skills/repository-discovery/completion.yml
+created   .ai/skills/repository-discovery/permissions.yml
+created   .ai/skills/repository-discovery/requirements.yml
+created   .ai/skills/repository-discovery/skill.yml
+created   .ai/skills/repository-discovery/template/affected-components.md
+created   .ai/skills/repository-discovery/template/dependencies.md
+created   .ai/skills/repository-discovery/template/repository-context.md
+created   .ai/skills/repository-discovery/template/unknowns.md
+created   .ai/skills/review/SKILL.md
+created   .ai/skills/review/completion.yml
+created   .ai/skills/review/permissions.yml
+created   .ai/skills/review/requirements.yml
+created   .ai/skills/review/skill.yml
+created   .ai/skills/review/template/accessibility.md
+created   .ai/skills/review/template/architecture.md
+created   .ai/skills/review/template/consolidated.md
+created   .ai/skills/review/template/functional.md
+created   .ai/skills/review/template/infrastructure.md
+created   .ai/skills/review/template/operations.md
+created   .ai/skills/review/template/security.md
+created   .ai/skills/specification/SKILL.md
+created   .ai/skills/specification/completion.yml
+created   .ai/skills/specification/permissions.yml
+created   .ai/skills/specification/requirements.yml
+created   .ai/skills/specification/skill.yml
+created   .ai/skills/specification/template/acceptance-criteria.yml
+created   .ai/skills/specification/template/readiness.md
+created   .ai/skills/specification/template/requirements.yml
+created   .ai/skills/specification/template/specification.md
+created   .ai/skills/threat-modeling/SKILL.md
+created   .ai/skills/threat-modeling/completion.yml
+created   .ai/skills/threat-modeling/permissions.yml
+created   .ai/skills/threat-modeling/requirements.yml
+created   .ai/skills/threat-modeling/skill.yml
+created   .ai/skills/threat-modeling/template/attack-surface.md
+created   .ai/skills/threat-modeling/template/mitigations.md
+created   .ai/skills/threat-modeling/template/threats.yml
+created   .ai/skills/threat-modeling/template/trust-boundaries.md
+created   .ai/skills/verification/SKILL.md
+created   .ai/skills/verification/completion.yml
+created   .ai/skills/verification/permissions.yml
+created   .ai/skills/verification/requirements.yml
+created   .ai/skills/verification/skill.yml
+created   .ai/skills/verification/template/evidence/manifest.yml
+created   .ai/skills/verification/template/results.md
+created   .ai/skills/verification/template/tests.yml
+created   .ai/templates/change/metadata.yml
+created   .ai/templates/handoff.yml
+created   .ai/templates/repository.yml
+created   .ai/workflow.yml
+created   changes/README.md
+created   docs/user/README.md
+check: ok
+
+LLM provider discovery
+openai     not configured (set OPENAI_API_KEY)
+anthropic  not configured (set ANTHROPIC_API_KEY)
+xai        not configured (set XAI_API_KEY)
+
+Local model inventory written to .soft-foundry/runtime.yml (gitignored).
+summary: created 171, updated 0, skipped 0, conflict 0, forced 0
+[exit 0]
+
+##### outside dir afterwards (expect empty)
+$ ls -la /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a005/outside/dir
+total 8
+drwxr-xr-x@ 4 jscholen-iou  wheel  128 Sep  9 17:04 .
+drwxr-xr-x@ 3 jscholen-iou  wheel   96 Sep  9 17:04 ..
+-rw-r--r--@ 1 jscholen-iou  wheel    0 Sep  9 17:04 init.lock
+-rw-r--r--@ 1 jscholen-iou  wheel  200 Sep  9 17:04 runtime.yml
+[exit 0]
+--- runtime.yml landed outside:
+---
+version: 1
+providers:
+  openai:
+    configured: false
+    models: []
+    error:
+  anthropic:
+    configured: false
+    models: []
+    error:
+  xai:
+    configured: false
+    models: []
+    error:
+
+##### git view of the symlink (is .soft-foundry itself ignored?)
+$ git status --porcelain --ignored=no
+?? .ai/
+?? .gitignore
+?? AGENTS.md
+?? CLAUDE.md
+?? changes/
+?? docs/
+[exit 0]
+$ git check-ignore -v .soft-foundry
+[exit 1]
+$ git check-ignore -v .soft-foundry/
+fatal: pathspec '.soft-foundry/' is beyond a symbolic link
+[exit 128]
+
+##### ATTACK-005b: .soft-foundry/runtime.yml is a symlink to an outside victim file (overwrite through link)
+victim before: VICTIM ORIGINAL CONTENT
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a005/target2
+created   .gitignore
+created   AGENTS.md
+created   CLAUDE.md
+created   .ai/README.md
+created   .ai/harness-evals/README.md
+created   .ai/maturity.yml
+created   .ai/paths.yml
+created   .ai/policies/human-boundaries.yml
+created   .ai/policies/skill-permissions.yml
+created   .ai/profiles/adversarial-high.yml
+created   .ai/profiles/coding-high.yml
+created   .ai/profiles/judgment-high.yml
+created   .ai/profiles/reasoning-high.yml
+created   .ai/profiles/writing-medium.yml
+created   .ai/repository.yml
+created   .ai/rules/README.md
+created   .ai/rules/architecture.md
+created   .ai/rules/database.md
+created   .ai/rules/dependencies.md
+created   .ai/rules/errors.md
+created   .ai/rules/general.md
+created   .ai/rules/git.md
+created   .ai/rules/infrastructure.md
+created   .ai/rules/observability.md
+created   .ai/rules/rails.md
+created   .ai/rules/ruby.md
+created   .ai/rules/security.md
+created   .ai/rules/testing.md
+created   .ai/runtime/models.yml
+created   .ai/schemas.md
+created   .ai/skills/adversarial-testing/SKILL.md
+created   .ai/skills/adversarial-testing/completion.yml
+created   .ai/skills/adversarial-testing/permissions.yml
+created   .ai/skills/adversarial-testing/requirements.yml
+created   .ai/skills/adversarial-testing/skill.yml
+created   .ai/skills/adversarial-testing/template/attack-plan.md
+created   .ai/skills/adversarial-testing/template/cases.yml
+created   .ai/skills/adversarial-testing/template/evidence/manifest.yml
+created   .ai/skills/adversarial-testing/template/results.md
+created   .ai/skills/evaluation/SKILL.md
+created   .ai/skills/evaluation/completion.yml
+created   .ai/skills/evaluation/permissions.yml
+created   .ai/skills/evaluation/requirements.yml
+created   .ai/skills/evaluation/skill.yml
+created   .ai/skills/evaluation/template/evaluation-plan.md
+created   .ai/skills/evaluation/template/evidence/manifest.yml
+created   .ai/skills/evaluation/template/journeys.yml
+created   .ai/skills/evaluation/template/results.md
+created   .ai/skills/faq-indexing/SKILL.md
+created   .ai/skills/faq-indexing/completion.yml
+created   .ai/skills/faq-indexing/permissions.yml
+created   .ai/skills/faq-indexing/requirements.yml
+created   .ai/skills/faq-indexing/skill.yml
+created   .ai/skills/faq-indexing/template/records.yml
+created   .ai/skills/final-judgment/SKILL.md
+created   .ai/skills/final-judgment/completion.yml
+created   .ai/skills/final-judgment/permissions.yml
+created   .ai/skills/final-judgment/requirements.yml
+created   .ai/skills/final-judgment/skill.yml
+created   .ai/skills/final-judgment/template/evidence.yml
+created   .ai/skills/final-judgment/template/final.md
+created   .ai/skills/final-judgment/template/residual-risk.md
+created   .ai/skills/implementation/SKILL.md
+created   .ai/skills/implementation/completion.yml
+created   .ai/skills/implementation/permissions.yml
+created   .ai/skills/implementation/requirements.yml
+created   .ai/skills/implementation/skill.yml
+created   .ai/skills/implementation/template/decisions.md
+created   .ai/skills/implementation/template/deviations.md
+created   .ai/skills/implementation/template/log.md
+created   .ai/skills/intake/SKILL.md
+created   .ai/skills/intake/completion.yml
+created   .ai/skills/intake/permissions.yml
+created   .ai/skills/intake/requirements.yml
+created   .ai/skills/intake/skill.yml
+created   .ai/skills/intake/template/assumptions.md
+created   .ai/skills/intake/template/request.md
+created   .ai/skills/learning/SKILL.md
+created   .ai/skills/learning/completion.yml
+created   .ai/skills/learning/permissions.yml
+created   .ai/skills/learning/requirements.yml
+created   .ai/skills/learning/skill.yml
+created   .ai/skills/learning/template/findings.md
+created   .ai/skills/learning/template/proposed-evals.md
+created   .ai/skills/learning/template/proposed-rules.md
+created   .ai/skills/observability/SKILL.md
+created   .ai/skills/observability/completion.yml
+created   .ai/skills/observability/permissions.yml
+created   .ai/skills/observability/requirements.yml
+created   .ai/skills/observability/skill.yml
+created   .ai/skills/observability/template/alarms.md
+created   .ai/skills/observability/template/dashboard.md
+created   .ai/skills/observability/template/metrics.md
+created   .ai/skills/observability/template/runbook.md
+created   .ai/skills/observability/template/signals.md
+created   .ai/skills/planning/SKILL.md
+created   .ai/skills/planning/completion.yml
+created   .ai/skills/planning/permissions.yml
+created   .ai/skills/planning/requirements.yml
+created   .ai/skills/planning/skill.yml
+created   .ai/skills/planning/template/implementation.md
+created   .ai/skills/planning/template/rollback.md
+created   .ai/skills/planning/template/rollout.md
+created   .ai/skills/planning/template/testing.md
+created   .ai/skills/product-documentation/SKILL.md
+created   .ai/skills/product-documentation/completion.yml
+created   .ai/skills/product-documentation/permissions.yml
+created   .ai/skills/product-documentation/requirements.yml
+created   .ai/skills/product-documentation/skill.yml
+created   .ai/skills/product-documentation/template/faq.md
+created   .ai/skills/product-documentation/template/instructions.md
+created   .ai/skills/product-documentation/template/search-records.yml
+created   .ai/skills/remediation/SKILL.md
+created   .ai/skills/remediation/completion.yml
+created   .ai/skills/remediation/permissions.yml
+created   .ai/skills/remediation/requirements.yml
+created   .ai/skills/remediation/skill.yml
+created   .ai/skills/remediation/template/summary.md
+created   .ai/skills/repository-discovery/SKILL.md
+created   .ai/skills/repository-discovery/completion.yml
+created   .ai/skills/repository-discovery/permissions.yml
+created   .ai/skills/repository-discovery/requirements.yml
+created   .ai/skills/repository-discovery/skill.yml
+created   .ai/skills/repository-discovery/template/affected-components.md
+created   .ai/skills/repository-discovery/template/dependencies.md
+created   .ai/skills/repository-discovery/template/repository-context.md
+created   .ai/skills/repository-discovery/template/unknowns.md
+created   .ai/skills/review/SKILL.md
+created   .ai/skills/review/completion.yml
+created   .ai/skills/review/permissions.yml
+created   .ai/skills/review/requirements.yml
+created   .ai/skills/review/skill.yml
+created   .ai/skills/review/template/accessibility.md
+created   .ai/skills/review/template/architecture.md
+created   .ai/skills/review/template/consolidated.md
+created   .ai/skills/review/template/functional.md
+created   .ai/skills/review/template/infrastructure.md
+created   .ai/skills/review/template/operations.md
+created   .ai/skills/review/template/security.md
+created   .ai/skills/specification/SKILL.md
+created   .ai/skills/specification/completion.yml
+created   .ai/skills/specification/permissions.yml
+created   .ai/skills/specification/requirements.yml
+created   .ai/skills/specification/skill.yml
+created   .ai/skills/specification/template/acceptance-criteria.yml
+created   .ai/skills/specification/template/readiness.md
+created   .ai/skills/specification/template/requirements.yml
+created   .ai/skills/specification/template/specification.md
+created   .ai/skills/threat-modeling/SKILL.md
+created   .ai/skills/threat-modeling/completion.yml
+created   .ai/skills/threat-modeling/permissions.yml
+created   .ai/skills/threat-modeling/requirements.yml
+created   .ai/skills/threat-modeling/skill.yml
+created   .ai/skills/threat-modeling/template/attack-surface.md
+created   .ai/skills/threat-modeling/template/mitigations.md
+created   .ai/skills/threat-modeling/template/threats.yml
+created   .ai/skills/threat-modeling/template/trust-boundaries.md
+created   .ai/skills/verification/SKILL.md
+created   .ai/skills/verification/completion.yml
+created   .ai/skills/verification/permissions.yml
+created   .ai/skills/verification/requirements.yml
+created   .ai/skills/verification/skill.yml
+created   .ai/skills/verification/template/evidence/manifest.yml
+created   .ai/skills/verification/template/results.md
+created   .ai/skills/verification/template/tests.yml
+created   .ai/templates/change/metadata.yml
+created   .ai/templates/handoff.yml
+created   .ai/templates/repository.yml
+created   .ai/workflow.yml
+created   changes/README.md
+created   docs/user/README.md
+check: ok
+
+LLM provider discovery
+openai     not configured (set OPENAI_API_KEY)
+anthropic  not configured (set ANTHROPIC_API_KEY)
+xai        not configured (set XAI_API_KEY)
+
+Local model inventory written to .soft-foundry/runtime.yml (gitignored).
+summary: created 171, updated 0, skipped 0, conflict 0, forced 0
+[exit 0]
+victim after:
+---
+version: 1
+providers:
+  openai:
+    configured: false
+    models: []
+    error:
+  anthropic:
+    configured: false
+    models: []
+    error:
+  xai:
+    configured: false
+    models: []
+    error:
+$ ls -la /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a005/outside2
+total 8
+drwxr-xr-x@ 4 jscholen-iou  wheel  128 Sep  9 17:04 .
+drwxr-xr-x@ 6 jscholen-iou  wheel  192 Sep  9 17:04 ..
+-rw-r--r--@ 1 jscholen-iou  wheel    0 Sep  9 17:04 lockvictim
+-rw-r--r--@ 1 jscholen-iou  wheel  200 Sep  9 17:04 victim
+[exit 0]
+
+##### ATTACK-005c: same via plain onboard command
+skipped   .gitignore  (.soft-foundry/ is ignored)
+skipped   AGENTS.md  (block present)
+skipped   CLAUDE.md  (block present)
+
+LLM provider discovery
+openai     not configured (set OPENAI_API_KEY)
+anthropic  not configured (set ANTHROPIC_API_KEY)
+xai        not configured (set XAI_API_KEY)
+
+Local model inventory written to .soft-foundry/runtime.yml (gitignored).
+[exit 0]
+victim after onboard:
+---
+version: 1
+providers:
+
+##### ATTACK-005d: hardlink runtime.yml -> outside victim (same filesystem)
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a005/target3
+created   .gitignore
+created   AGENTS.md
+created   CLAUDE.md
+created   .ai/README.md
+created   .ai/harness-evals/README.md
+created   .ai/maturity.yml
+created   .ai/paths.yml
+created   .ai/policies/human-boundaries.yml
+created   .ai/policies/skill-permissions.yml
+created   .ai/profiles/adversarial-high.yml
+created   .ai/profiles/coding-high.yml
+created   .ai/profiles/judgment-high.yml
+created   .ai/profiles/reasoning-high.yml
+created   .ai/profiles/writing-medium.yml
+created   .ai/repository.yml
+created   .ai/rules/README.md
+created   .ai/rules/architecture.md
+created   .ai/rules/database.md
+created   .ai/rules/dependencies.md
+created   .ai/rules/errors.md
+created   .ai/rules/general.md
+created   .ai/rules/git.md
+created   .ai/rules/infrastructure.md
+created   .ai/rules/observability.md
+created   .ai/rules/rails.md
+created   .ai/rules/ruby.md
+created   .ai/rules/security.md
+created   .ai/rules/testing.md
+created   .ai/runtime/models.yml
+created   .ai/schemas.md
+created   .ai/skills/adversarial-testing/SKILL.md
+created   .ai/skills/adversarial-testing/completion.yml
+created   .ai/skills/adversarial-testing/permissions.yml
+created   .ai/skills/adversarial-testing/requirements.yml
+created   .ai/skills/adversarial-testing/skill.yml
+created   .ai/skills/adversarial-testing/template/attack-plan.md
+created   .ai/skills/adversarial-testing/template/cases.yml
+created   .ai/skills/adversarial-testing/template/evidence/manifest.yml
+created   .ai/skills/adversarial-testing/template/results.md
+created   .ai/skills/evaluation/SKILL.md
+created   .ai/skills/evaluation/completion.yml
+created   .ai/skills/evaluation/permissions.yml
+created   .ai/skills/evaluation/requirements.yml
+created   .ai/skills/evaluation/skill.yml
+created   .ai/skills/evaluation/template/evaluation-plan.md
+created   .ai/skills/evaluation/template/evidence/manifest.yml
+created   .ai/skills/evaluation/template/journeys.yml
+created   .ai/skills/evaluation/template/results.md
+created   .ai/skills/faq-indexing/SKILL.md
+created   .ai/skills/faq-indexing/completion.yml
+created   .ai/skills/faq-indexing/permissions.yml
+created   .ai/skills/faq-indexing/requirements.yml
+created   .ai/skills/faq-indexing/skill.yml
+created   .ai/skills/faq-indexing/template/records.yml
+created   .ai/skills/final-judgment/SKILL.md
+created   .ai/skills/final-judgment/completion.yml
+created   .ai/skills/final-judgment/permissions.yml
+created   .ai/skills/final-judgment/requirements.yml
+created   .ai/skills/final-judgment/skill.yml
+created   .ai/skills/final-judgment/template/evidence.yml
+created   .ai/skills/final-judgment/template/final.md
+created   .ai/skills/final-judgment/template/residual-risk.md
+created   .ai/skills/implementation/SKILL.md
+created   .ai/skills/implementation/completion.yml
+created   .ai/skills/implementation/permissions.yml
+created   .ai/skills/implementation/requirements.yml
+created   .ai/skills/implementation/skill.yml
+created   .ai/skills/implementation/template/decisions.md
+created   .ai/skills/implementation/template/deviations.md
+created   .ai/skills/implementation/template/log.md
+created   .ai/skills/intake/SKILL.md
+created   .ai/skills/intake/completion.yml
+created   .ai/skills/intake/permissions.yml
+created   .ai/skills/intake/requirements.yml
+created   .ai/skills/intake/skill.yml
+created   .ai/skills/intake/template/assumptions.md
+created   .ai/skills/intake/template/request.md
+created   .ai/skills/learning/SKILL.md
+created   .ai/skills/learning/completion.yml
+created   .ai/skills/learning/permissions.yml
+created   .ai/skills/learning/requirements.yml
+created   .ai/skills/learning/skill.yml
+created   .ai/skills/learning/template/findings.md
+created   .ai/skills/learning/template/proposed-evals.md
+created   .ai/skills/learning/template/proposed-rules.md
+created   .ai/skills/observability/SKILL.md
+created   .ai/skills/observability/completion.yml
+created   .ai/skills/observability/permissions.yml
+created   .ai/skills/observability/requirements.yml
+created   .ai/skills/observability/skill.yml
+created   .ai/skills/observability/template/alarms.md
+created   .ai/skills/observability/template/dashboard.md
+created   .ai/skills/observability/template/metrics.md
+created   .ai/skills/observability/template/runbook.md
+created   .ai/skills/observability/template/signals.md
+created   .ai/skills/planning/SKILL.md
+created   .ai/skills/planning/completion.yml
+created   .ai/skills/planning/permissions.yml
+created   .ai/skills/planning/requirements.yml
+created   .ai/skills/planning/skill.yml
+created   .ai/skills/planning/template/implementation.md
+created   .ai/skills/planning/template/rollback.md
+created   .ai/skills/planning/template/rollout.md
+created   .ai/skills/planning/template/testing.md
+created   .ai/skills/product-documentation/SKILL.md
+created   .ai/skills/product-documentation/completion.yml
+created   .ai/skills/product-documentation/permissions.yml
+created   .ai/skills/product-documentation/requirements.yml
+created   .ai/skills/product-documentation/skill.yml
+created   .ai/skills/product-documentation/template/faq.md
+created   .ai/skills/product-documentation/template/instructions.md
+created   .ai/skills/product-documentation/template/search-records.yml
+created   .ai/skills/remediation/SKILL.md
+created   .ai/skills/remediation/completion.yml
+created   .ai/skills/remediation/permissions.yml
+created   .ai/skills/remediation/requirements.yml
+created   .ai/skills/remediation/skill.yml
+created   .ai/skills/remediation/template/summary.md
+created   .ai/skills/repository-discovery/SKILL.md
+created   .ai/skills/repository-discovery/completion.yml
+created   .ai/skills/repository-discovery/permissions.yml
+created   .ai/skills/repository-discovery/requirements.yml
+created   .ai/skills/repository-discovery/skill.yml
+created   .ai/skills/repository-discovery/template/affected-components.md
+created   .ai/skills/repository-discovery/template/dependencies.md
+created   .ai/skills/repository-discovery/template/repository-context.md
+created   .ai/skills/repository-discovery/template/unknowns.md
+created   .ai/skills/review/SKILL.md
+created   .ai/skills/review/completion.yml
+created   .ai/skills/review/permissions.yml
+created   .ai/skills/review/requirements.yml
+created   .ai/skills/review/skill.yml
+created   .ai/skills/review/template/accessibility.md
+created   .ai/skills/review/template/architecture.md
+created   .ai/skills/review/template/consolidated.md
+created   .ai/skills/review/template/functional.md
+created   .ai/skills/review/template/infrastructure.md
+created   .ai/skills/review/template/operations.md
+created   .ai/skills/review/template/security.md
+created   .ai/skills/specification/SKILL.md
+created   .ai/skills/specification/completion.yml
+created   .ai/skills/specification/permissions.yml
+created   .ai/skills/specification/requirements.yml
+created   .ai/skills/specification/skill.yml
+created   .ai/skills/specification/template/acceptance-criteria.yml
+created   .ai/skills/specification/template/readiness.md
+created   .ai/skills/specification/template/requirements.yml
+created   .ai/skills/specification/template/specification.md
+created   .ai/skills/threat-modeling/SKILL.md
+created   .ai/skills/threat-modeling/completion.yml
+created   .ai/skills/threat-modeling/permissions.yml
+created   .ai/skills/threat-modeling/requirements.yml
+created   .ai/skills/threat-modeling/skill.yml
+created   .ai/skills/threat-modeling/template/attack-surface.md
+created   .ai/skills/threat-modeling/template/mitigations.md
+created   .ai/skills/threat-modeling/template/threats.yml
+created   .ai/skills/threat-modeling/template/trust-boundaries.md
+created   .ai/skills/verification/SKILL.md
+created   .ai/skills/verification/completion.yml
+created   .ai/skills/verification/permissions.yml
+created   .ai/skills/verification/requirements.yml
+created   .ai/skills/verification/skill.yml
+created   .ai/skills/verification/template/evidence/manifest.yml
+created   .ai/skills/verification/template/results.md
+created   .ai/skills/verification/template/tests.yml
+created   .ai/templates/change/metadata.yml
+created   .ai/templates/handoff.yml
+created   .ai/templates/repository.yml
+created   .ai/workflow.yml
+created   changes/README.md
+created   docs/user/README.md
+check: ok
+
+LLM provider discovery
+openai     not configured (set OPENAI_API_KEY)
+anthropic  not configured (set ANTHROPIC_API_KEY)
+xai        not configured (set XAI_API_KEY)
+
+Local model inventory written to .soft-foundry/runtime.yml (gitignored).
+summary: created 171, updated 0, skipped 0, conflict 0, forced 0
+[exit 0]
+victim after (hardlink):
+---
+version: 1
+providers:

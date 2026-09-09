@@ -1,5 +1,64 @@
-commit_sha: TBD
+commit_sha: 06a4830966d32fb135267d5160ab038af216c0b0
+executed_at_commit: a733f84086d099ae48a209725d3ae037806c96dc
+hash_algorithm: sha256 (shasum -a 256)
 artifacts:
-  - path: TBD
+  - path: evidence/ATTACK-001-symlinked-ai.log
     case: ATTACK-001
-    sha256: TBD
+    sha256: 4effb2c8d468d02c9b0ad438d93e1c32397587782d49cae0a301fbcc1b97493f
+  - path: evidence/ATTACK-002-symlinked-subdirectory.log
+    case: ATTACK-002
+    sha256: 29ac7818fdc1db29103899c8e61833a615e901089effa571160d37c9554a814c
+  - path: evidence/ATTACK-003-symlinked-managed-files.log
+    case: ATTACK-003
+    sha256: abe53baee5ad84a47d3bb41a861b289873d95b57cef5808d1f8e033ecddf282c
+  - path: evidence/ATTACK-004-tmp-sibling-symlink.log
+    case: ATTACK-004
+    sha256: 1427e508949aa164045198224a3d49b6ee42da1edbc724304a68bd3063521ca6
+  - path: evidence/ATTACK-005-soft-foundry-dir-symlink.log
+    case: ATTACK-005
+    sha256: 01cb6eeb070d8114ccd64b4e814d5faa8292078b4f9b4ceadced8b45da83d5f4
+  - path: evidence/ATTACK-006-fifos.log
+    case: ATTACK-006, ATTACK-015
+    sha256: 11b00395c8a1ed1f0cb0e1be4ab9c98b47bddfc0e5b6fac47a77e76f76d5174c
+  - path: evidence/ATTACK-007-tampered-package.log
+    case: ATTACK-007
+    sha256: a16782135745da1d8312fe9d39f460ee5f8f18151864a914049243a47ff740a1
+  - path: evidence/ATTACK-008-manifest-forgery.log
+    case: ATTACK-008, ATTACK-021
+    sha256: 29041ecc5bf12ff4493d5658dd3efb1d95639f296980c6f24d9ef2188bb2f60d
+  - path: evidence/ATTACK-009-manifest-scope.log
+    case: ATTACK-009, ATTACK-015
+    sha256: 60d749da374884a069ed31f0062fea7a41eef401f0a5368822767127bfcba248
+  - path: evidence/ATTACK-010-force-scope.log
+    case: ATTACK-010
+    sha256: b96f90a9a14064e4b9a68112a7cb21f4da04ee5dd9531133f2784340d9fcaf92
+  - path: evidence/ATTACK-011-wrong-root.log
+    case: ATTACK-011
+    sha256: 09c3b54b90519565fe87234b23d7fdd1f9f2ad9d2f893d5e2b791d05b106fb45
+  - path: evidence/ATTACK-012-marker-spoofing.log
+    case: ATTACK-012
+    sha256: 6f12a03535fa5cc6d7e302f4d4429db36979bee5395417a37693461dbc3f1db6
+  - path: evidence/ATTACK-013-repository-overrides.log
+    case: ATTACK-013, ATTACK-015
+    sha256: a72dd43cf84f857eee4586468d7d3f357458769271e5f15c8119934ee5491192
+  - path: evidence/ATTACK-014-gitignore-neutralization.log
+    case: ATTACK-014, ATTACK-005
+    sha256: cf93eb5853a89b94da9d6883c5543004023d5fa33a21b500ec4d130468ae76ec
+  - path: evidence/ATTACK-015-diagnostic-leakage.log
+    case: ATTACK-015
+    sha256: 43ba388fe230107d151e7f7df54d8a8ab047190ae0a48826953ddc0d8ec4bcbd
+  - path: evidence/ATTACK-016-partial-writes.log
+    case: ATTACK-016
+    sha256: de732c50bb71436e117aa3a72a5f15c396a30d22de6bb0597778cb8d3df9ebfb
+  - path: evidence/ATTACK-017-concurrent-init.log
+    case: ATTACK-017
+    sha256: 320ec83d6fe77f17c0a0b7c0572e3e264016cb8dae666fedf38d9d6307f3837b
+  - path: evidence/ATTACK-018-large-files.log
+    case: ATTACK-018
+    sha256: ae957f0737ce35717cb3bc96f3aec726a843a09fdcb457987076e8e381523bf4
+  - path: evidence/ATTACK-019-provider-injection-stub.log
+    case: ATTACK-019
+    sha256: 7fadaccd2e900d16b367e928ce73664b4f7ff3df38e83673df35e6ac50d63c0f
+  - path: evidence/ATTACK-020-tampered-package-upgrade.log
+    case: ATTACK-020
+    sha256: 190506e49df502a1fbb00d77edf6d8f27c3973c4e910e9644f644febe600282b

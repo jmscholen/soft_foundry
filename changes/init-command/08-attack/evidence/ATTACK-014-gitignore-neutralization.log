@@ -1,0 +1,228 @@
+
+##### ATTACK-014 THREAT-011: .gitignore neutralization
+
+##### 14a: negation appended after a first init
+conflict  .gitignore  (.soft-foundry/ line present but not effective)
+skipped   .ai/skills/remediation/template/summary.md  (identical)
+summary: created 0, updated 0, skipped 170, conflict 1, forced 0
+conflicts: .gitignore
+[exit 3]
+$ git status --porcelain --untracked-files=all
+[exit 0]
+runtime.yml contains API_KEY value? 0
+---
+version: 1
+providers:
+  openai:
+    configured: false
+    models: []
+    error:
+  anthropic:
+
+##### 14b (unlisted): .soft-foundry/ ignored only by the machine-local .git/info/exclude; no .gitignore line is ever added
+created   .gitignore
+created   .ai/skills/remediation/template/summary.md
+summary: created 171, updated 0, skipped 0, conflict 0, forced 0
+[exit 0]
+.gitignore content: [.soft-foundry/]  exists: yes
+$ git status --porcelain --untracked-files=all
+[exit 0]
+
+##### 14c (unlisted): .soft-foundry is a committed symlink to a directory inside the repo; pattern .soft-foundry/ only matches directories
+created   .gitignore
+created   .ai/skills/remediation/template/summary.md
+summary: created 171, updated 0, skipped 0, conflict 0, forced 0
+[exit 0]
+$ git status --porcelain --untracked-files=all
+?? .ai/README.md
+?? .ai/harness-evals/README.md
+?? .ai/manifest.yml
+?? .ai/maturity.yml
+?? .ai/paths.yml
+?? .ai/policies/human-boundaries.yml
+?? .ai/policies/skill-permissions.yml
+?? .ai/profiles/adversarial-high.yml
+?? .ai/profiles/coding-high.yml
+?? .ai/profiles/judgment-high.yml
+?? .ai/profiles/reasoning-high.yml
+?? .ai/profiles/writing-medium.yml
+?? .ai/repository.yml
+?? .ai/rules/README.md
+?? .ai/rules/architecture.md
+?? .ai/rules/database.md
+?? .ai/rules/dependencies.md
+?? .ai/rules/errors.md
+?? .ai/rules/general.md
+?? .ai/rules/git.md
+?? .ai/rules/infrastructure.md
+?? .ai/rules/observability.md
+?? .ai/rules/rails.md
+?? .ai/rules/ruby.md
+?? .ai/rules/security.md
+?? .ai/rules/testing.md
+?? .ai/runtime/models.yml
+?? .ai/schemas.md
+?? .ai/skills/adversarial-testing/SKILL.md
+?? .ai/skills/adversarial-testing/completion.yml
+?? .ai/skills/adversarial-testing/permissions.yml
+?? .ai/skills/adversarial-testing/requirements.yml
+?? .ai/skills/adversarial-testing/skill.yml
+?? .ai/skills/adversarial-testing/template/attack-plan.md
+?? .ai/skills/adversarial-testing/template/cases.yml
+?? .ai/skills/adversarial-testing/template/evidence/manifest.yml
+?? .ai/skills/adversarial-testing/template/results.md
+?? .ai/skills/evaluation/SKILL.md
+?? .ai/skills/evaluation/completion.yml
+?? .ai/skills/evaluation/permissions.yml
+?? .ai/skills/evaluation/requirements.yml
+?? .ai/skills/evaluation/skill.yml
+?? .ai/skills/evaluation/template/evaluation-plan.md
+?? .ai/skills/evaluation/template/evidence/manifest.yml
+?? .ai/skills/evaluation/template/journeys.yml
+?? .ai/skills/evaluation/template/results.md
+?? .ai/skills/faq-indexing/SKILL.md
+?? .ai/skills/faq-indexing/completion.yml
+?? .ai/skills/faq-indexing/permissions.yml
+?? .ai/skills/faq-indexing/requirements.yml
+?? .ai/skills/faq-indexing/skill.yml
+?? .ai/skills/faq-indexing/template/records.yml
+?? .ai/skills/final-judgment/SKILL.md
+?? .ai/skills/final-judgment/completion.yml
+?? .ai/skills/final-judgment/permissions.yml
+?? .ai/skills/final-judgment/requirements.yml
+?? .ai/skills/final-judgment/skill.yml
+?? .ai/skills/final-judgment/template/evidence.yml
+?? .ai/skills/final-judgment/template/final.md
+?? .ai/skills/final-judgment/template/residual-risk.md
+?? .ai/skills/implementation/SKILL.md
+?? .ai/skills/implementation/completion.yml
+?? .ai/skills/implementation/permissions.yml
+?? .ai/skills/implementation/requirements.yml
+?? .ai/skills/implementation/skill.yml
+?? .ai/skills/implementation/template/decisions.md
+?? .ai/skills/implementation/template/deviations.md
+?? .ai/skills/implementation/template/log.md
+?? .ai/skills/intake/SKILL.md
+?? .ai/skills/intake/completion.yml
+?? .ai/skills/intake/permissions.yml
+?? .ai/skills/intake/requirements.yml
+?? .ai/skills/intake/skill.yml
+?? .ai/skills/intake/template/assumptions.md
+?? .ai/skills/intake/template/request.md
+?? .ai/skills/learning/SKILL.md
+?? .ai/skills/learning/completion.yml
+?? .ai/skills/learning/permissions.yml
+?? .ai/skills/learning/requirements.yml
+?? .ai/skills/learning/skill.yml
+?? .ai/skills/learning/template/findings.md
+?? .ai/skills/learning/template/proposed-evals.md
+?? .ai/skills/learning/template/proposed-rules.md
+?? .ai/skills/observability/SKILL.md
+?? .ai/skills/observability/completion.yml
+?? .ai/skills/observability/permissions.yml
+?? .ai/skills/observability/requirements.yml
+?? .ai/skills/observability/skill.yml
+?? .ai/skills/observability/template/alarms.md
+?? .ai/skills/observability/template/dashboard.md
+?? .ai/skills/observability/template/metrics.md
+?? .ai/skills/observability/template/runbook.md
+?? .ai/skills/observability/template/signals.md
+?? .ai/skills/planning/SKILL.md
+?? .ai/skills/planning/completion.yml
+?? .ai/skills/planning/permissions.yml
+?? .ai/skills/planning/requirements.yml
+?? .ai/skills/planning/skill.yml
+?? .ai/skills/planning/template/implementation.md
+?? .ai/skills/planning/template/rollback.md
+?? .ai/skills/planning/template/rollout.md
+?? .ai/skills/planning/template/testing.md
+?? .ai/skills/product-documentation/SKILL.md
+?? .ai/skills/product-documentation/completion.yml
+?? .ai/skills/product-documentation/permissions.yml
+?? .ai/skills/product-documentation/requirements.yml
+?? .ai/skills/product-documentation/skill.yml
+?? .ai/skills/product-documentation/template/faq.md
+?? .ai/skills/product-documentation/template/instructions.md
+?? .ai/skills/product-documentation/template/search-records.yml
+?? .ai/skills/remediation/SKILL.md
+?? .ai/skills/remediation/completion.yml
+?? .ai/skills/remediation/permissions.yml
+?? .ai/skills/remediation/requirements.yml
+?? .ai/skills/remediation/skill.yml
+?? .ai/skills/remediation/template/summary.md
+?? .ai/skills/repository-discovery/SKILL.md
+?? .ai/skills/repository-discovery/completion.yml
+?? .ai/skills/repository-discovery/permissions.yml
+?? .ai/skills/repository-discovery/requirements.yml
+?? .ai/skills/repository-discovery/skill.yml
+?? .ai/skills/repository-discovery/template/affected-components.md
+?? .ai/skills/repository-discovery/template/dependencies.md
+?? .ai/skills/repository-discovery/template/repository-context.md
+?? .ai/skills/repository-discovery/template/unknowns.md
+?? .ai/skills/review/SKILL.md
+?? .ai/skills/review/completion.yml
+?? .ai/skills/review/permissions.yml
+?? .ai/skills/review/requirements.yml
+?? .ai/skills/review/skill.yml
+?? .ai/skills/review/template/accessibility.md
+?? .ai/skills/review/template/architecture.md
+?? .ai/skills/review/template/consolidated.md
+?? .ai/skills/review/template/functional.md
+?? .ai/skills/review/template/infrastructure.md
+?? .ai/skills/review/template/operations.md
+?? .ai/skills/review/template/security.md
+?? .ai/skills/specification/SKILL.md
+?? .ai/skills/specification/completion.yml
+?? .ai/skills/specification/permissions.yml
+?? .ai/skills/specification/requirements.yml
+?? .ai/skills/specification/skill.yml
+?? .ai/skills/specification/template/acceptance-criteria.yml
+?? .ai/skills/specification/template/readiness.md
+?? .ai/skills/specification/template/requirements.yml
+?? .ai/skills/specification/template/specification.md
+?? .ai/skills/threat-modeling/SKILL.md
+?? .ai/skills/threat-modeling/completion.yml
+?? .ai/skills/threat-modeling/permissions.yml
+?? .ai/skills/threat-modeling/requirements.yml
+?? .ai/skills/threat-modeling/skill.yml
+?? .ai/skills/threat-modeling/template/attack-surface.md
+?? .ai/skills/threat-modeling/template/mitigations.md
+?? .ai/skills/threat-modeling/template/threats.yml
+?? .ai/skills/threat-modeling/template/trust-boundaries.md
+?? .ai/skills/verification/SKILL.md
+?? .ai/skills/verification/completion.yml
+?? .ai/skills/verification/permissions.yml
+?? .ai/skills/verification/requirements.yml
+?? .ai/skills/verification/skill.yml
+?? .ai/skills/verification/template/evidence/manifest.yml
+?? .ai/skills/verification/template/results.md
+?? .ai/skills/verification/template/tests.yml
+?? .ai/templates/change/metadata.yml
+?? .ai/templates/handoff.yml
+?? .ai/templates/repository.yml
+?? .ai/workflow.yml
+?? .gitignore
+?? AGENTS.md
+?? CLAUDE.md
+?? changes/README.md
+?? docs/user/README.md
+?? state/init.lock
+?? state/runtime.yml
+[exit 0]
+$ git check-ignore -v state/runtime.yml
+[exit 1]
+
+##### ADDENDUM 14b (corrected): the earlier 14b had no pre-existing .gitignore, so the file was created with the line. This repeats it with an existing .gitignore that lacks the line while .soft-foundry/ is ignored only by the machine-local .git/info/exclude.
+Local model inventory written to .soft-foundry/runtime.yml (gitignored).
+summary: created 170, updated 0, skipped 1, conflict 0, forced 0
+[stderr]
+[exit 0]
+.gitignore content now: [node_modules/|]
+in a fresh clone on another machine (simulated), git status shows:
+     M .gitignore
+check-ignore in the clone: .gitignore:2:.soft-foundry/	.soft-foundry/runtime.yml
+
+##### 14b variant: same via core.excludesFile set in the repository-local config
+summary: created 170, updated 0, skipped 1, conflict 0, forced 0
+[exit 0]
+.gitignore content now: [node_modules/|]

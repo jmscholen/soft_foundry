@@ -1,0 +1,74 @@
+
+##### ATTACK-008 THREAT-004: hand-edited manifest claiming ownership of a hardened file
+
+##### 8a: hardened edit COMMITTED, manifest forged and committed, then init from the newer package
+before: 1 HARDENED lines; git clean: []
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a008/committed
+updated   .ai/rules/general.md  (owned by manifest)
+check: ok
+summary: created 0, updated 1, skipped 170, conflict 0, forced 0
+[exit 0]
+after: 0 HARDENED lines; canonical-v2 marker present: 1
+$ git diff --stat
+ .ai/manifest.yml     | 2 +-
+ .ai/rules/general.md | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+[exit 0]
+recovered via git checkout: 1 HARDENED lines
+
+##### 8b: hardened edit UNCOMMITTED, manifest forged (committed)
+dirty: [ M .ai/rules/general.md]
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a008/uncommitted
+conflict  .ai/rules/general.md  (uncommitted modifications)
+check: ok
+summary: created 0, updated 0, skipped 170, conflict 1, forced 0
+conflicts: .ai/rules/general.md
+next: compare with `git diff`, keep your version, or commit it and rerun with --force to take the canonical version (uncommitted edits are never overwritten)
+[exit 3]
+after: 1 HARDENED lines
+
+##### 8b2: same with --force
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a008/uncommitted
+conflict  .ai/rules/general.md  (uncommitted modifications)
+check: ok
+summary: created 0, updated 0, skipped 170, conflict 1, forced 0
+conflicts: .ai/rules/general.md
+next: compare with `git diff`, keep your version, or commit it and rerun with --force to take the canonical version (uncommitted edits are never overwritten)
+[exit 3]
+after --force: 1 HARDENED lines
+
+##### 8c (unlisted): .gitignore ignores .ai/rules/ so git status never reports edits there; uncommitted hardened edit, plain --force
+updated   .gitignore  (appended .soft-foundry/)
+created   .ai/skills/remediation/template/summary.md
+summary: created 170, updated 1, skipped 0, conflict 0, forced 0
+[exit 0]
+git status shows the edit? []  (empty means git cannot see it)
+is general.md tracked? 0 (0 = untracked/ignored, unrecoverable)
+conflict  .ai/rules/general.md  (differs from manifest hash)
+skipped   .ai/skills/remediation/template/summary.md  (identical)
+summary: created 0, updated 0, skipped 170, conflict 1, forced 0
+conflicts: .ai/rules/general.md
+next: compare with `git diff`, keep your version, or commit it and rerun with --force to take the canonical version (uncommitted edits are never overwritten)
+[exit 3]
+forced    .ai/rules/general.md  (differs from manifest hash)
+skipped   .ai/skills/remediation/template/summary.md  (identical)
+summary: created 0, updated 0, skipped 170, conflict 0, forced 1
+[exit 0]
+after --force: 0 HARDENED lines; recoverable from git? error: pathspec '.ai/rules/general.md' did not match any file(s) known to git
+0
+
+##### 8c2 (unlisted): same ignore rule, forged manifest, NO --force, newer package: updated path
+updated   .ai/rules/general.md  (owned by manifest)
+skipped   .ai/skills/remediation/template/summary.md  (identical)
+summary: created 0, updated 1, skipped 170, conflict 0, forced 0
+[exit 0]
+after: 0 HARDENED lines; git can recover? tracked=0
+
+##### 8d (unlisted): --allow-non-git inside a git repository disables the uncommitted check; forged manifest, uncommitted hardened edit
+dirty: [ M .ai/manifest.yml  M .ai/rules/general.md ]
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a008/allownongit
+updated   .ai/rules/general.md  (owned by manifest)
+skipped   .ai/skills/remediation/template/summary.md  (identical)
+summary: created 0, updated 1, skipped 170, conflict 0, forced 0
+[exit 0]
+after: 0 HARDENED lines (uncommitted edit lost = unrecoverable)
