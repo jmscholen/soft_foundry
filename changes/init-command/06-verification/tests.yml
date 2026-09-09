@@ -1,8 +1,86 @@
-commit_sha: TBD
+commit_sha: 6df4d15e73d8d8bf53555e73addbf42ca7b3494f
+ruby: ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23]
 checks:
   - id: CHECK-001
-    kind: tests   # tests | lint | static_analysis | security_scan | iac_validate | migration_check | custom
-    command: TBD
-    result: TBD   # pass | fail | error | skipped
-    evidence: evidence/TBD
+    kind: custom
+    command: git rev-parse HEAD && git status --porcelain
+    result: pass
+    evidence: evidence/git-state.log
+    criteria: []
+    notes: Worktree clean at start; the only untracked entries are this phase's own evidence files.
+  - id: CHECK-002
+    kind: custom
+    command: ruby -v
+    result: pass
+    evidence: evidence/ruby-version.log
+    criteria: []
+  - id: CHECK-003
+    kind: tests
+    command: bundle exec rake test
+    result: pass
+    evidence: evidence/tests.log
+    criteria: [AC-001, AC-002, AC-003, AC-004, AC-005, AC-006, AC-007, AC-008, AC-009, AC-010, AC-011, AC-012, AC-013, AC-014, AC-015, AC-016, AC-017]
+    notes: 67 runs, 740 assertions, 0 failures, 0 errors, 0 skips. Bundler was available; the fallback runner was not needed.
+  - id: CHECK-004
+    kind: lint
+    command: for f in $(find lib -name '*.rb' | sort); do ruby -wc $f; done
+    result: pass
+    evidence: evidence/ruby-wc.log
+    criteria: []
+    notes: 18 files, all Syntax OK, zero warnings.
+  - id: CHECK-005
+    kind: custom
+    command: ruby -Ilib exe/soft-foundry check
+    result: pass
+    evidence: evidence/check.log
     criteria: [AC-001]
+    notes: Exit 0; 16 phases, 16 skills, no errors. Covers REQ-016 on this repository.
+  - id: CHECK-006
+    kind: custom
+    command: ruby -Ilib exe/soft-foundry ci
+    result: pass
+    evidence: evidence/ci.log
+    criteria: []
+    notes: Exit 0; control plane passes and phases 00-05 of init-command gate PASS at their recorded SHAs.
+  - id: CHECK-007
+    kind: custom
+    command: ruby -Ilib exe/soft-foundry doctor
+    result: pass
+    evidence: evidence/doctor.log
+    criteria: []
+    notes: Exit 2, expected on this repository. The two failing lines are `.ai/manifest.yml` (self-install not performed, see 05-implementation/decisions.md) and `local runtime`. The new manifest line is present, which is what REQ-016 requires of doctor.
+  - id: CHECK-008
+    kind: custom
+    command: ruby -Ilib exe/soft-foundry init --dry-run --no-onboard
+    result: pass
+    evidence: evidence/init-dry-run-self.log
+    criteria: [AC-012]
+    notes: Exit 0; `mode: dry run, nothing written`; 170 skipped, CLAUDE.md the only `created`; git status unchanged afterwards.
+  - id: CHECK-009
+    kind: custom
+    command: gem build soft_foundry.gemspec --output <scratch>/soft_foundry.gem (in an rsync copy of the repository); tar -xOf <gem> data.tar.gz | tar -tz
+    result: pass
+    evidence: evidence/gem-build.log
+    criteria: [AC-017]
+    notes: Built soft_foundry 0.2.0 with 189 files; changes/README.md, docs/user/README.md, .ai/templates/repository.yml present; .ai/harness-evals/README.md is the only harness-evals entry; .ai/manifest.yml absent; required_ruby_version >= 3.2. No .gem left in the repository. RubyGems warned about missing license and homepage.
+  - id: CHECK-010
+    kind: custom
+    command: scratch git repository with one application file; soft-foundry init --no-onboard (twice); check; doctor; edit .ai/rules/general.md and commit; init (conflict); init --force; init
+    result: pass
+    evidence: evidence/e2e-install.log
+    criteria: [AC-001, AC-003, AC-006, AC-007, AC-010, AC-016]
+    notes: First init exit 0 with 171 created and `check: ok`; app.rb byte-identical; second init exit 0 with 171 skipped and clean git status; check exit 0; doctor exit 2 (manifest present, hook and runtime absent, as expected); conflict run exit 3 with `conflict  .ai/rules/general.md  (differs from manifest hash)`; --force exit 0 with `forced` and canonical content restored; final run 171 skipped.
+  - id: CHECK-011
+    kind: custom
+    command: ruby verify_manifest.rb <e2e target> (YAML-load .ai/manifest.yml, compare against every file under .ai/, recompute SHA-256)
+    result: pass
+    evidence: evidence/e2e-manifest-verify.log
+    criteria: [AC-001, AC-007]
+    notes: soft_foundry_version 0.2.0; 165 entries covering every .ai/ file except .ai/repository.yml (excluded by rule); 0 hash mismatches after --force.
+  - id: CHECK-012
+    kind: custom
+    command: same end-to-end script, first attempt, where the scratch directory resolved `ruby` to 2.7.8 via asdf
+    result: error
+    evidence: evidence/e2e-install-ruby27-attempt.log
+    criteria: []
+    notes: Environment error in the verification setup, not a failure of the change. Retained because it shows that running from source below the declared Ruby floor fails with a SyntaxError in lib/soft_foundry/cli.rb rather than a version message. Superseded by CHECK-010.
