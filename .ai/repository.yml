@@ -1,42 +1,183 @@
 version: 1
 
-# This file is the committed repository capability profile. It is populated and
-# refreshed by onboarding/discovery. Evidence should be repository-relative and
-# must not contain credentials or machine-local provider state.
+# Committed repository capability profile. Populated by repository discovery
+# for change init-command at commit cc348f93f3d265af3f92f7fa7d0b09cbbf8a520a. Evidence is repository-relative
+# and contains no credentials or machine-local provider state.
 
 repository:
-  assessed: false
-  assessed_at: null
-  commit_sha: null
+  assessed: true
+  assessed_at: "2026-09-09T15:35:27Z"
+  commit_sha: cc348f93f3d265af3f92f7fa7d0b09cbbf8a520a
+  assessed_by: changes/init-command/01-discovery
+
+paths:
+  APP:
+    - lib/**
+    - exe/**
+  TESTS:
+    - test/**
 
 technology:
-  languages: []
+  languages: [ruby]
   frameworks: []
   databases: []
-  testing: []
+  testing: [minitest, rake]
 
 infrastructure:
-  detected: []
+  detected: [github-actions]
   iac:
     tools: []
-  deployment_targets: []
+  deployment_targets: [rubygems]
 
-capabilities: {}
-
-# Capability entry example:
-# capabilities:
-#   observability.operational_visibility:
-#     status: PARTIAL
-#     evidence:
-#       - infra/monitoring.ts
-#     findings:
-#       - application_dashboard_not_detected
-#     rationale: CloudWatch alarms exist, but no operator health surface was found.
-#
-# Allowed status values are defined by .ai/maturity.yml:
-# PASS, PARTIAL, MISSING, UNKNOWN, EXTERNAL, NOT_APPLICABLE
+capabilities:
+  repository.git_detected:
+    status: PASS
+    evidence: [.git]
+  repository.agent_bootstrap:
+    status: PASS
+    evidence: [AGENTS.md, .ai/README.md]
+  repository.execution_path_known:
+    status: PASS
+    evidence: [README.md, Rakefile, .github/workflows/ci.yml]
+  architecture.documented_or_discoverable:
+    status: PASS
+    evidence: [README.md, .ai/README.md]
+  coding_standards.defined:
+    status: PASS
+    evidence: [.ai/rules]
+  technology.languages_detected:
+    status: PASS
+    evidence: [soft_foundry.gemspec, Gemfile]
+  technology.frameworks_detected:
+    status: PASS
+    evidence: [soft_foundry.gemspec]
+    rationale: Plain Ruby gem; absence of an application framework is established.
+  infrastructure.detected_or_not_applicable:
+    status: NOT_APPLICABLE
+    evidence: [.github/workflows/ci.yml]
+    rationale: Library gem with no deployed service; CI is the only automation.
+  testing.strategy_detected:
+    status: PASS
+    evidence: [test, Rakefile]
+  change.intake_required:
+    status: PASS
+    evidence: [.ai/workflow.yml, lib/soft_foundry/gate.rb]
+  change.specification_required:
+    status: PASS
+    evidence: [.ai/workflow.yml, .ai/skills/specification]
+  change.acceptance_criteria_required:
+    status: PASS
+    evidence: [.ai/skills/specification/template/acceptance-criteria.yml]
+  change.provenance_enabled:
+    status: PASS
+    evidence: [changes, lib/soft_foundry/change_record.rb]
+  change.acceptance_criteria_locking:
+    status: PARTIAL
+    evidence: [.ai/skills/evaluation/permissions.yml]
+    findings: [no_deterministic_check_that_criteria_are_unchanged_after_specification_completes]
+    rationale: Downstream skills are denied writes to the specification, but the gate does not detect edits.
+  verification.automated_tests:
+    status: PASS
+    evidence: [test, .github/workflows/ci.yml]
+  verification.gate:
+    status: PASS
+    evidence: [lib/soft_foundry/gate.rb]
+  evaluation.user_journey_gate:
+    status: PARTIAL
+    evidence: [.ai/skills/evaluation]
+    findings: [no_evaluation_phase_has_run_yet]
+  evidence.commit_binding:
+    status: PASS
+    evidence: [lib/soft_foundry/gate.rb, .ai/schemas.md]
+  evidence.failed_results_retained:
+    status: PARTIAL
+    evidence: [.ai/policies/skill-permissions.yml]
+    findings: [policy_only_no_enforcement]
+  governance.risk_classification:
+    status: PARTIAL
+    evidence: [.ai/templates/change/metadata.yml]
+    findings: [risk_does_not_select_required_phases]
+  governance.skill_permissions:
+    status: PARTIAL
+    evidence: [.ai/skills, lib/soft_foundry/check.rb]
+    findings: [declared_and_linted_not_enforced_at_runtime]
+  governance.human_boundaries:
+    status: PARTIAL
+    evidence: [.ai/policies/human-boundaries.yml]
+    findings: [no_awaiting_human_mechanism]
+  governance.separation_of_duties:
+    status: PARTIAL
+    evidence: [.ai/skills]
+    findings: [not_enforced_at_runtime]
+  security.threat_modeling:
+    status: PARTIAL
+    evidence: [.ai/skills/threat-modeling]
+    findings: [no_threat_model_phase_has_run_yet]
+  security.adversarial_validation:
+    status: PARTIAL
+    evidence: [.ai/skills/adversarial-testing]
+    findings: [no_attack_phase_has_run_yet]
+  observability.failure_detection:
+    status: NOT_APPLICABLE
+    rationale: No production service; the CLI fails loudly with a non-zero exit code.
+  observability.health_signal:
+    status: NOT_APPLICABLE
+    rationale: No production service.
+  observability.operational_visibility:
+    status: NOT_APPLICABLE
+    rationale: No production service.
+  observability.alerting:
+    status: NOT_APPLICABLE
+    rationale: No production service.
+  judgment.final_gate:
+    status: PARTIAL
+    evidence: [.ai/skills/final-judgment, lib/soft_foundry/gate.rb]
+    findings: [no_judgment_has_run_yet]
+  harness.benchmark_suite:
+    status: MISSING
+    evidence: [.ai/harness-evals/README.md]
+  harness.model_evaluation:
+    status: MISSING
+  harness.workflow_evaluation:
+    status: MISSING
+  harness.regression_detection:
+    status: MISSING
+  learning.finding_capture:
+    status: PARTIAL
+    evidence: [.ai/skills/learning]
+    findings: [no_learning_phase_has_run_yet]
+  learning.feedback_loop:
+    status: MISSING
+    findings: [no_governance_path_for_proposed_rule_changes]
+  learning.regression_creation:
+    status: MISSING
+  learning.standards_feedback:
+    status: MISSING
+  learning.workflow_feedback:
+    status: MISSING
 
 maturity:
-  current_level: 0
-  current_id: unknown
-  gaps: []
+  current_level: 2
+  current_id: contextualized
+  gaps:
+    - level: 3
+      capability: change.acceptance_criteria_locking
+      status: PARTIAL
+    - level: 4
+      capability: evaluation.user_journey_gate
+      status: PARTIAL
+    - level: 4
+      capability: evidence.failed_results_retained
+      status: PARTIAL
+    - level: 5
+      capability: governance.skill_permissions
+      status: PARTIAL
+    - level: 5
+      capability: governance.human_boundaries
+      status: PARTIAL
+    - level: 6
+      capability: harness.benchmark_suite
+      status: MISSING
+    - level: 7
+      capability: learning.feedback_loop
+      status: MISSING

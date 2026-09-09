@@ -1,16 +1,40 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 01-discovery
 skill: repository-discovery
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: cc348f93f3d265af3f92f7fa7d0b09cbbf8a520a
+started_at: '2026-09-09T15:35:27Z'
+completed_at: '2026-09-09T15:35:27Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- repository-context.md
+- affected-components.md
+- dependencies.md
+- unknowns.md
+- ".ai/repository.yml"
+blocking: []
+findings:
+- id: DISC-001
+  severity: major
+  summary: gemspec allows Ruby >= 3.1 but lib/ uses Data.define, which requires 3.2
+- id: DISC-002
+  severity: major
+  summary: gem packages this repository's own .ai/repository.yml and .ai/harness-evals/,
+    and omits changes/README.md and docs/user/README.md
+- id: DISC-003
+  severity: major
+  summary: init and onboard are aliases; nothing installs .ai/ today
+- id: DISC-004
+  severity: minor
+  summary: AGENTS.md has no marker block, so safe update is not possible with the
+    current adapter
+- id: DISC-005
+  severity: info
+  summary: no mechanism distinguishes canonical from user-edited .ai/ files; specification
+    must choose one
 next: specify
-notes: ""
+notes: 'Compatibility mode: performed by an interactive coding agent. Only 01-discovery/
+  and .ai/repository.yml were written.'
