@@ -43,15 +43,20 @@ module SoftFoundry
 
     def predecessor(phase)
       return phase(phase.after) if phase.after
+      previous_in_lifecycle(phase)
+    end
+
+    def previous_in_lifecycle(phase)
       index = phases.index(phase)
       index&.positive? ? phases[index - 1] : nil
     end
 
-    # The phase whose completion gates `phase`, skipping optional phases that
-    # never ran. `status_of` maps a phase to its recorded handoff status.
+    # The phase whose completion gates `phase`: its predecessor, stepping back
+    # in lifecycle order over optional phases that never ran. `status_of` maps
+    # a phase to its recorded handoff status.
     def effective_predecessor(phase, &status_of)
       prev = predecessor(phase)
-      prev = predecessor(prev) while prev&.optional && status_of.call(prev) == "pending"
+      prev = previous_in_lifecycle(prev) while prev&.optional && status_of.call(prev) == "pending"
       prev
     end
 

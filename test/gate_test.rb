@@ -110,7 +110,7 @@ class GateRemediationTest < Minitest::Test
       complete_phase!(record, "remediate", sha: sha)
       result = gate.evaluate("remediate")
       refute result.failed?, result.checks.map { |c| "#{c.name}: #{c.detail}" }.join("\n")
-      assert_includes result.checks.find { |c| c.name == "predecessor complete" }.detail, "07-evaluation"
+      assert_includes result.checks.find { |c| c.name == "predecessor complete" }.detail, "05-implementation"
     end
   end
 
