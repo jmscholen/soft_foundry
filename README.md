@@ -2,6 +2,52 @@
 
 Soft Foundry is a repository-native control plane for autonomous software engineering. The repository contains the engineering constitution; the CLI provides onboarding, runtime discovery, agent adapters, and eventually enforced lifecycle orchestration.
 
+## Agent: next implementation milestone
+
+If you are an engineering agent reading this repository because you were asked to continue implementing Soft Foundry, read `AGENTS.md`, `.ai/README.md`, and `.ai/workflow.yml` before changing code. Follow the Soft Foundry lifecycle and implement the work through a pull request rather than pushing directly to `main`.
+
+### Goal
+
+Make `soft-foundry init` install the Soft Foundry control plane into an existing Git repository safely and idempotently.
+
+### Required behavior
+
+- Treat `AGENTS.md` and `.ai/` in this repository as the canonical source of truth.
+- Package the installable repository control-plane files with the gem.
+- Detect the target repository root and refuse unsafe/non-repository targets unless explicitly supported.
+- Install the canonical `.ai/` control plane into the target repository.
+- Install or safely update `AGENTS.md` without destroying repository-specific instructions.
+- Create `changes/` scaffolding.
+- Create user-documentation scaffolding only where appropriate.
+- Ensure `.soft-foundry/` is gitignored.
+- Preserve all existing application files.
+- Preserve existing `CLAUDE.md` content and add only a Soft Foundry pointer when one is missing.
+- Be idempotent: repeated `soft-foundry init` runs must not duplicate content or unexpectedly rewrite unchanged files.
+- Report files as created, updated, skipped, or conflicting.
+- Do not blindly create provider-specific infrastructure.
+- Do not overwrite conflicting user-owned files without an explicit conflict strategy.
+- Keep provider discovery for OpenAI, Anthropic, and xAI/Grok intact.
+
+### Required tests
+
+Cover at minimum:
+
+- installation into a clean Git repository
+- an existing `AGENTS.md`
+- an existing `CLAUDE.md`
+- repeated initialization
+- conflicting `.ai/` content
+- `.gitignore` behavior
+- preservation of unrelated application files
+
+### Scope boundaries
+
+Do **not** implement autonomous skill execution in this milestone. Do **not** implement the full `soft-foundry change` workflow unless a minimal abstraction is strictly required by initialization. Do not weaken existing Soft Foundry policies or lifecycle semantics to simplify the implementation.
+
+Before coding, inspect the current CLI/gem structure and produce a short implementation plan in the pull request description. The PR must include implementation, automated tests, updated usage documentation, relevant internal documentation, design decisions, tradeoffs, and known limitations.
+
+The quality of this PR is also an evaluation of Soft Foundry itself: if repository instructions are ambiguous, contradictory, incomplete, or prevent safe implementation, document those problems rather than silently inventing new workflow semantics.
+
 ## Install from this repository
 
 ```bash
