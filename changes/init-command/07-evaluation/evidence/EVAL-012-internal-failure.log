@@ -1,0 +1,85 @@
+### journey: EVAL-012 broken package (missing .ai/workflow.yml): exit 4, upstream guidance, nothing written, no secrets
+### ruby: /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby (ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23])
+### soft-foundry source: /Users/jscholen-iou/dev/soft_foundry (HEAD 6a41afd123ca1ea6f72b1ac6b686e2b2c419b10e)
+### captured: 2026-09-09T16:21:46Z
+
+$ rsync -a --exclude .git --exclude .soft-foundry --exclude 'changes/*/' /Users/jscholen-iou/dev/soft_foundry/ /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/soft-foundry-broken/ && rm /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/soft-foundry-broken/.ai/workflow.yml && test ! -e /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/soft-foundry-broken/.ai/workflow.yml && echo 'broken copy ready without .ai/workflow.yml'
+broken copy ready without .ai/workflow.yml
+exit=0
+
+$ git add -A
+exit=0
+
+$ git commit -q -m Project files
+exit=0
+
+### STEP 1: init from the broken copy with canary secrets in the environment (stdout and stderr captured separately)
+
+$ cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-012 && env OPENAI_API_KEY=sk-canary-EVAL012-SECRET-VALUE ANTHROPIC_API_KEY=sk-canary-EVAL012-SECRET-VALUE XAI_API_KEY=sk-canary-EVAL012-SECRET-VALUE /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/soft-foundry-broken/lib /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/soft-foundry-broken/exe/soft-foundry init > /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-012.stdout 2> /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-012.stderr; echo exit=$?
+exit=4
+exit=0
+
+### STEP 1 stdout
+
+$ cat /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-012.stdout; echo '[end of stdout]'
+[end of stdout]
+exit=0
+
+### STEP 1 stderr
+
+$ cat /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-012.stderr; echo '[end of stderr]'
+soft-foundry: internal failure in package: packaged file missing: .ai/workflow.yml
+This is a defect in Soft Foundry 0.2.0, not in your repository. Nothing further was changed.
+diagnostic:
+  source: <soft-foundry>
+Help fix it upstream: fork https://github.com/jmscholen/soft_foundry, reproduce with the diagnostic above, and open a pull request or issue.
+  gh repo fork jmscholen/soft_foundry --clone
+[end of stderr]
+exit=0
+
+### STEP 1 post-state
+
+$ git status --porcelain --untracked-files=all
+exit=0
+
+$ ls -A
+.git
+app.rb
+exit=0
+
+### STEP 2: the same run with --dry-run also fails the same way
+
+$ cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-012 && env OPENAI_API_KEY=sk-canary-EVAL012-SECRET-VALUE /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/soft-foundry-broken/lib /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/soft-foundry-broken/exe/soft-foundry init --dry-run --no-onboard; echo exit=$?
+soft-foundry: internal failure in package: packaged file missing: .ai/workflow.yml
+This is a defect in Soft Foundry 0.2.0, not in your repository. Nothing further was changed.
+diagnostic:
+  source: <soft-foundry>
+Help fix it upstream: fork https://github.com/jmscholen/soft_foundry, reproduce with the diagnostic above, and open a pull request or issue.
+  gh repo fork jmscholen/soft_foundry --clone
+exit=4
+exit=0
+
+### STEP 3: secret and path scan of both streams
+
+$ grep -c 'EVAL012-SECRET' /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-012.stdout /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-012.stderr; grep -c '/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-012' /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-012.stdout /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-012.stderr; grep -c '/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/soft-foundry-broken' /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-012.stderr; grep -c "/Users/jscholen-iou" /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-012.stderr; true
+/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-012.stdout:0
+/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-012.stderr:0
+/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-012.stdout:0
+/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-012.stderr:0
+0
+0
+exit=0
+
+### ASSERTIONS
+ASSERT PASS: AC-013 exit 4
+ASSERT PASS: AC-013 message states the fault is in Soft Foundry
+ASSERT PASS: AC-013 message names the missing file and component
+ASSERT PASS: AC-013 points to the upstream repository with fork/pull-request guidance
+ASSERT PASS: AC-013 nothing written to the target
+ASSERT PASS: MIT-012 no secret value in stdout or stderr
+ASSERT PASS: MIT-012 no absolute target path in the diagnostic
+ASSERT PASS: MIT-012 no absolute gem/source path in the diagnostic
+ASSERT PASS: MIT-012 no home directory path in the diagnostic
+ASSERT PASS: AC-013 guidance goes to stderr, stdout is empty
+
+### assertions: 10 passed, 0 failed
