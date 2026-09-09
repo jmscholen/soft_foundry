@@ -1,0 +1,61 @@
+
+##### ATTACK-007 THREAT-002: tampered packaged copies
+
+##### 7a: packaged symlinked file .ai/rules/evil.md -> outside file
+soft-foundry: internal failure in package: packaged entry is a symlink: .ai/rules/evil.md
+This is a defect in Soft Foundry 0.2.0, not in your repository. Nothing further was changed.
+Help fix it upstream: fork https://github.com/jmscholen/soft_foundry, reproduce with the diagnostic above, and open a pull request or issue.
+  gh repo fork jmscholen/soft_foundry --clone
+[exit 4]
+target contents:
+.git
+lib
+
+##### 7b: packaged symlinked directory .ai/extra -> outside directory (with a file inside)
+soft-foundry: internal failure in package: packaged entry is a symlink: .ai/extra
+This is a defect in Soft Foundry 0.2.0, not in your repository. Nothing further was changed.
+Help fix it upstream: fork https://github.com/jmscholen/soft_foundry, reproduce with the diagnostic above, and open a pull request or issue.
+  gh repo fork jmscholen/soft_foundry --clone
+[exit 4]
+target contents:
+.git
+lib
+
+##### 7c: packaged file whose basename contains dots: .ai/rules/..evil.md (must not false-positive) and a real '..' component cannot exist on a POSIX filesystem
+created   .ai/rules/..evil.md
+created   .ai/skills/remediation/template/summary.md
+summary: created 172, updated 0, skipped 0, conflict 0, forced 0
+[exit 0]
+$ mkdir -p /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a007/pkg-c/.ai/rules/..
+[exit 0]
+$ sh -c touch '/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a007/pkg-c/.ai/rules/../x' && ls -la '/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a007/pkg-c/.ai/x'
+-rw-r--r--@ 1 jscholen-iou  staff  0 Sep  9 17:07 /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a007/pkg-c/.ai/x
+[exit 0]
+
+##### 7d: traversal check exercised through the Source API with a synthetic relative name (in-process, no code change)
+rejected: packaged entry traverses directories: .ai/../../evil [package]
+absolute accepted? (entry_for returns nil unless file under root): nil
+
+##### 7e: packaged copy missing .ai/templates/repository.yml and with AGENTS.md removed
+soft-foundry: internal failure in package: packaged file missing: .ai/templates/repository.yml
+This is a defect in Soft Foundry 0.2.0, not in your repository. Nothing further was changed.
+diagnostic:
+  source: <soft-foundry>
+Help fix it upstream: fork https://github.com/jmscholen/soft_foundry, reproduce with the diagnostic above, and open a pull request or issue.
+  gh repo fork jmscholen/soft_foundry --clone
+[exit 4]
+.git
+lib
+soft-foundry: internal failure in installer: Errno::ENOENT: No such file or directory @ rb_sysopen - <soft-foundry>/AGENTS.md
+This is a defect in Soft Foundry 0.2.0, not in your repository. Nothing further was changed.
+diagnostic:
+  <soft-foundry>/lib/soft_foundry/installer/source.rb:43:in `read'
+  <soft-foundry>/lib/soft_foundry/installer/source.rb:43:in `agents_interior'
+  <soft-foundry>/lib/soft_foundry/installer.rb:82:in `adapter_actions'
+  <soft-foundry>/lib/soft_foundry/installer.rb:47:in `plan'
+  <soft-foundry>/lib/soft_foundry/cli.rb:75:in `init'
+Help fix it upstream: fork https://github.com/jmscholen/soft_foundry, reproduce with the diagnostic above, and open a pull request or issue.
+  gh repo fork jmscholen/soft_foundry --clone
+[exit 4]
+.git
+lib

@@ -1,77 +1,17 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 07-evaluation
 skill: evaluation
-status: complete
-commit_sha: a733f84086d099ae48a209725d3ae037806c96dc
-started_at: '2026-09-09T20:55:57Z'
-completed_at: '2026-09-09T20:57:24Z'
+status: pending
+commit_sha:
+started_at:
+completed_at:
 resolved_model:
   profile: reasoning_high
-  provider: anthropic
-  model: claude-fable-5-1
-outputs:
-  - evaluation-plan.md
-  - journeys.yml
-  - results.md
-  - evidence/manifest.yml
-  - evidence/EVAL-001-first-install-idempotent.log
-  - evidence/EVAL-002-pointer-files-preserved.log
-  - evidence/EVAL-003-dry-run-then-real.log
-  - evidence/EVAL-004-conflict-then-force.log
-  - evidence/EVAL-005-uncommitted-edit.log
-  - evidence/EVAL-006-non-git.log
-  - evidence/EVAL-007-docs-without-user.log
-  - evidence/EVAL-008-gitignore.log
-  - evidence/EVAL-009-root-option.log
-  - evidence/EVAL-010-no-provider-keys.log
-  - evidence/EVAL-011-ascii-status-words.log
-  - evidence/EVAL-012-internal-failure.log
-  - evidence/EVAL-013-hand-copied-ai.log
-  - evidence/EVAL-014-cli-surface.log
-  - evidence/EVAL-015-symlinked-ai.log
-  - evidence/EVAL-016-dry-run-conflict-preview.log
-  - evidence/scripts/eval-001.sh
-  - evidence/scripts/eval-002.sh
-  - evidence/scripts/eval-003.sh
-  - evidence/scripts/eval-004.sh
-  - evidence/scripts/eval-005.sh
-  - evidence/scripts/eval-006.sh
-  - evidence/scripts/eval-007.sh
-  - evidence/scripts/eval-008.sh
-  - evidence/scripts/eval-009.sh
-  - evidence/scripts/eval-010.sh
-  - evidence/scripts/eval-011.sh
-  - evidence/scripts/eval-012.sh
-  - evidence/scripts/eval-013.sh
-  - evidence/scripts/eval-014.sh
-  - evidence/scripts/eval-015.sh
-  - evidence/scripts/eval-016.sh
-  - evidence/scripts/lib.sh
+  provider:
+  model:
+outputs: []
 blocking: []
-findings:
-  - id: EVAL-F-001
-    severity: info
-    summary: "Resolved (carried). init --root with no value exits 1 with the single line 'soft-foundry: --root requires a value' and no defect or fork guidance, nothing written (EVAL-014 step 5); the blocking failure of the first run at 6a41afd remains closed. The genuine Soft Foundry-side path still exits 4 with upstream guidance (EVAL-012)."
-  - id: EVAL-F-002
-    severity: minor
-    summary: "Carried, still observed. init --help and init -h are refused as 'unknown option(s)' with exit 1; there is no per-command help, and 'soft-foundry help' prints the global usage but exits 1 (EVAL-014 steps 2 and 6). Deliberately left for review by remediation (REM-002, VER-009)."
-  - id: EVAL-F-003
-    severity: minor
-    summary: "Carried, still observed. The next guidance is a single generic 150-character sentence; on an uncommitted-edit conflict the operative step (commit first) is only implied by the parenthetical, and the line wraps on narrow terminals. conflicts and next lines are otherwise correct on every conflict run (EVAL-004, 005, 011, 013, 016) and absent on every clean run."
-  - id: EVAL-F-004
-    severity: minor
-    summary: "Carried, still observed. The line 'check: ok' immediately precedes an exit-3 summary on conflict runs and can read as success; the conflicts line below it mitigates this. The MIT-004(b) git diff hint after updated/forced on non-conflict runs is still absent (VER-006)."
-  - id: EVAL-F-005
-    severity: info
-    summary: "Resolved (carried). Onboarding prints 'not configured (set OPENAI_API_KEY)' style lines for openai, anthropic and xai (EVAL-010); runtime.yml records only configured false and no key values."
-  - id: EVAL-F-006
-    severity: info
-    summary: "Carried. Conflict reasons (differs from manifest hash, not in manifest, owned by manifest) presume knowledge of .ai/manifest.yml; user documentation should define the manifest, the five statuses, the conflicts/next lines, exit codes 0/1/3/4, and the .soft-foundry/init.lock file left after every run (VER-010)."
-  - id: EVAL-F-007
-    severity: info
-    summary: "Carried. The updated upgrade path for an owned .ai/ file has end-to-end evidence (EVAL-004 shows 'updated .ai/rules/ruby.md (owned by manifest)' rewritten with the manifest hash refreshed); the automated-test half of VER-001 remains open."
-  - id: EVAL-F-008
-    severity: info
-    summary: "Every behaviour in AC-001..AC-016 matched the specification from the user's side across four personas and sixteen journeys at a733f84 (135 assertions, all passing, identical to the c29509c run as expected because the init product code is byte-identical); no journey failed and no transcript was regenerated. AC-017 was proven by verification and not repeated."
+findings: []
 next: attack
-notes: "Compatibility mode: third run by a fresh-context agent under evaluation permissions after a harness fix. Previous runs archived under previous/6a41afd123ca/ and previous/c29509c3cee8/. The init product code is byte-identical between c29509c and a733f84 (git diff --quiet over cli.rb, installer.rb, installer/, onboarding.rb, provider.rb, agent_files.rb, manifest.rb, git.rb, exe/ before the run); every journey was re-executed with the unchanged scripts and expected outcomes, and every transcript header records HEAD a733f84. Every journey except EVAL-010 used --no-onboard because the host environment carries real provider keys; EVAL-010 unset them and ran onboarding. EVAL-004 and EVAL-012 ran rsync copies of the repository (next-version and broken package) under the scratchpad; the repository itself was not modified. An attack-phase agent ran concurrently writing only under 08-attack/; its files were ignored."
+notes: Invalidated by the second 09-remediation (attack findings); the passing run
+  at a733f84086d0 is archived under previous/a733f84086d0/ and must be rerun.

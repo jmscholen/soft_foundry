@@ -97,14 +97,32 @@ module SoftFoundry
       File.exist?(policy) ? Array(load_yaml(policy)["protected"]) : []
     end
 
-    # Path groups from paths.yml, overridden group by group from repository.yml.
-    def path_groups
-      @path_groups ||= begin
-        base = load_yaml(File.join(dir, "paths.yml")).fetch("groups", {})
+    # Groups that repository.yml may never override: they protect policy and
+    # harness material regardless of the repository's layout.
+    PROTECTED_GROUPS = %w[CONTROL_PLANE HARNESS_EVALS].freeze
+
+    def default_path_groups
+      @default_path_groups ||= load_yaml(File.join(dir, "paths.yml")).fetch("groups", {}).transform_values { |v| Array(v) }
+    end
+
+    def override_path_groups
+      @override_path_groups ||= begin
         repo = File.join(dir, "repository.yml")
-        overrides = File.exist?(repo) ? load_yaml(repo).fetch("paths", nil) || {} : {}
-        base.merge(overrides).transform_values { |v| Array(v) }
+        raw = File.exist?(repo) ? load_yaml(repo).fetch("paths", nil) || {} : {}
+        raw.is_a?(Hash) ? raw.transform_values { |v| Array(v) } : {}
       end
+    end
+
+    # Path groups from paths.yml, overridden group by group from repository.yml,
+    # except protected groups, which keep their defaults.
+    def path_groups
+      @path_groups ||= default_path_groups.merge(override_path_groups.reject { |g, _| PROTECTED_GROUPS.include?(g) })
+    end
+
+    # Files in this repository matched by a group's patterns.
+    def files_matching(globs)
+      globs.flat_map { |g| Dir.glob(g.end_with?("/**") ? "#{g}/*" : g, File::FNM_DOTMATCH, base: root) }
+           .select { |rel| File.file?(File.join(root, rel)) }.uniq
     end
 
     def code_globs

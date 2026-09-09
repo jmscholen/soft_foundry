@@ -1,0 +1,127 @@
+
+##### ATTACK-009 THREAT-005/THREAT-014: manifest entries outside .ai/, non-canonical entries, alias bomb, oversized, wrong type
+
+##### entry: ../../outside.txt
+soft-foundry: .ai/manifest.yml invalid: entry '../../outside.txt' is not a relative path under .ai/
+[exit 1]
+extra.yml still: [user policy]; outside.txt: [keep]; AGENTS.md sha: a03c882eee8739b6
+manifest still lists it? 1
+
+##### entry: ../../outside.txt with --force
+soft-foundry: .ai/manifest.yml invalid: entry '../../outside.txt' is not a relative path under .ai/
+[exit 1]
+extra.yml still: [user policy]
+manifest lists it after force? 1
+
+##### entry: /etc/hosts
+soft-foundry: .ai/manifest.yml invalid: entry '/etc/hosts' is not a relative path under .ai/
+[exit 1]
+extra.yml still: [user policy]; outside.txt: [keep]; AGENTS.md sha: a03c882eee8739b6
+manifest still lists it? 1
+
+##### entry: /etc/hosts with --force
+soft-foundry: .ai/manifest.yml invalid: entry '/etc/hosts' is not a relative path under .ai/
+[exit 1]
+extra.yml still: [user policy]
+manifest lists it after force? 1
+
+##### entry: AGENTS.md
+soft-foundry: .ai/manifest.yml invalid: entry 'AGENTS.md' is not a relative path under .ai/
+[exit 1]
+extra.yml still: [user policy]; outside.txt: [keep]; AGENTS.md sha: a03c882eee8739b6
+manifest still lists it? 1
+
+##### entry: AGENTS.md with --force
+soft-foundry: .ai/manifest.yml invalid: entry 'AGENTS.md' is not a relative path under .ai/
+[exit 1]
+extra.yml still: [user policy]
+manifest lists it after force? 1
+
+##### entry: .ai/../AGENTS.md
+soft-foundry: .ai/manifest.yml invalid: entry '.ai/../AGENTS.md' is not a relative path under .ai/
+[exit 1]
+extra.yml still: [user policy]; outside.txt: [keep]; AGENTS.md sha: a03c882eee8739b6
+manifest still lists it? 1
+
+##### entry: .ai/../AGENTS.md with --force
+soft-foundry: .ai/manifest.yml invalid: entry '.ai/../AGENTS.md' is not a relative path under .ai/
+[exit 1]
+extra.yml still: [user policy]
+manifest lists it after force? 1
+
+##### entry: .ai/policies/extra.yml
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a009/e21191
+warning: manifest entry ignored, not in the packaged set: .ai/policies/extra.yml
+check: ok
+summary: created 0, updated 0, skipped 171, conflict 0, forced 0
+[exit 0]
+extra.yml still: [user policy]; outside.txt: [keep]; AGENTS.md sha: a03c882eee8739b6
+manifest still lists it? 0
+
+##### entry: .ai/policies/extra.yml with --force
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a009/e21191
+check: ok
+summary: created 0, updated 0, skipped 171, conflict 0, forced 0
+[exit 0]
+extra.yml still: [user policy]
+manifest lists it after force? 0
+
+##### 9b: alias bomb in .ai/manifest.yml
+version: 1
+a: &a ["lol","lol","lol","lol","lol","lol","lol","lol","lol","lol"]
+b: &b [*a,*a,*a,*a,*a,*a,*a,*a,*a]
+soft-foundry: .ai/manifest.yml is not valid YAML: Alias parsing was not enabled. To enable it, pass `aliases: true` to `Psych::load` or `Psych::safe_load`.
+[exit 1]
+
+##### 9c: oversized manifest, 300000 entries (~28 MB), timed
+-rw-r--r--@ 1 jscholen-iou  wheel  25988936 Sep  9 17:07 /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a009/huge/.ai/manifest.yml
+soft-foundry: .ai/manifest.yml invalid: entry '.ai/junk/0.md' has no SHA-256 hash
+        5.38 real         5.19 user         0.17 sys
+           310345728  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+               21036  page reclaims
+                  44  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   2  signals received
+                   8  voluntary context switches
+                 166  involuntary context switches
+            16711135  instructions retired
+             7924572  cycles elapsed
+             1164096  peak memory footprint
+[exit 1]
+warnings printed: 0
+
+##### 9d: .ai/manifest.yml is a directory
+soft-foundry: internal failure in installer: Errno::EISDIR: Is a directory @ io_fread - ./.ai/manifest.yml
+This is a defect in Soft Foundry 0.2.0, not in your repository. Nothing further was changed.
+diagnostic:
+  <soft-foundry>/lib/soft_foundry/manifest.rb:25:in `binread'
+  <soft-foundry>/lib/soft_foundry/manifest.rb:25:in `load'
+  <soft-foundry>/lib/soft_foundry/installer.rb:45:in `plan'
+  <soft-foundry>/lib/soft_foundry/cli.rb:75:in `init'
+  <soft-foundry>/lib/soft_foundry/cli.rb:33:in `run'
+Help fix it upstream: fork https://github.com/jmscholen/soft_foundry, reproduce with the diagnostic above, and open a pull request or issue.
+  gh repo fork jmscholen/soft_foundry --clone
+[exit 4]
+
+##### 9e: manifest with invalid UTF-8 bytes
+soft-foundry: .ai/manifest.yml is not valid YAML: (<unknown>): invalid leading UTF-8 octet at line 1 column 1
+[exit 1]
+
+##### 9f: manifest version 2, files as list, hash uppercase
+soft-foundry: .ai/manifest.yml invalid: version must be 1
+[exit 1]
+soft-foundry: .ai/manifest.yml invalid: files must be a mapping
+[exit 1]
+soft-foundry: .ai/manifest.yml invalid: entry '.ai/workflow.yml' has no SHA-256 hash
+[exit 1]
+
+##### 9g: manifest with a !!ruby object tag
+soft-foundry: .ai/manifest.yml is not valid YAML: Tried to load unspecified class: Gem::Installer
+[exit 1]

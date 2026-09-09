@@ -26,19 +26,22 @@ module SoftFoundry
       response = Net::HTTP.start(models_uri.host, models_uri.port, use_ssl: models_uri.scheme == "https", read_timeout: 10, open_timeout: 5) { |http| http.request(request) }
 
       unless response.is_a?(Net::HTTPSuccess)
-        return Result.new(name:, configured: true, models: [], error: "HTTP #{response.code}", api_key_env:)
+        return Result.new(name:, configured: true, models: [], error: "HTTP #{self.class.sanitize(response.code)}", api_key_env:)
       end
 
       payload = JSON.parse(response.body)
       models = Array(payload["data"]).filter_map { |entry| self.class.sanitize(entry["id"]) }.reject(&:empty?).sort
       Result.new(name:, configured: true, models:, error: nil, api_key_env:)
     rescue StandardError => e
-      Result.new(name:, configured: true, models: [], error: e.message, api_key_env:)
+      Result.new(name:, configured: true, models: [], error: self.class.sanitize(e.message), api_key_env:)
     end
 
-    # Provider responses are untrusted; keep report lines to printable ASCII.
+    MAX_LENGTH = 200
+
+    # Provider responses are untrusted; keep them printable ASCII and bounded.
     def self.sanitize(value)
-      value.to_s.gsub(/[^ -~]/, "?")
+      text = value.to_s.gsub(/[^ -~]/, "?")
+      text.length > MAX_LENGTH ? "#{text[0, MAX_LENGTH]}..." : text
     end
 
     private

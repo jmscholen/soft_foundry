@@ -1,0 +1,135 @@
+
+##### ATTACK-013 THREAT-010: pre-seeded .ai/repository.yml path overrides
+
+##### 13a: overrides EMPTY the required groups; fresh init
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a013/empty
+skipped   .ai/repository.yml  (repository state is owned by this repository)
+This is a defect in Soft Foundry 0.2.0, not in your repository. Nothing further was changed.
+diagnostic:
+  path group APP resolves to no patterns (check repository.yml overrides)
+  path group TESTS resolves to no patterns (check repository.yml overrides)
+  path group INFRA resolves to no patterns (check repository.yml overrides)
+  path group HARNESS_EVALS resolves to no patterns (check repository.yml overrides)
+Help fix it upstream: fork https://github.com/jmscholen/soft_foundry, reproduce with the diagnostic above, and open a pull request or issue.
+  gh repo fork jmscholen/soft_foundry --clone
+
+[exit 4]
+installed .ai files: 167; manifest present: yes; repository.yml unchanged: 1
+
+##### 13a check afterwards
+✗ path group APP resolves to no patterns (check repository.yml overrides)
+✗ path group TESTS resolves to no patterns (check repository.yml overrides)
+✗ path group INFRA resolves to no patterns (check repository.yml overrides)
+✗ path group HARNESS_EVALS resolves to no patterns (check repository.yml overrides)
+✗ control plane: 4 error(s)
+[exit 2]
+
+##### 13b: overrides REDIRECT the groups to a non-existent tree (not empty): APP/TESTS/INFRA/HARNESS_EVALS -> nothing/**
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a013/redirect
+skipped   .ai/repository.yml  (repository state is owned by this repository)
+check: ok
+summary: created 170, updated 0, skipped 1, conflict 0, forced 0
+[exit 0]
+
+##### 13b check afterwards
+✓ control plane: 16 phases, 16 skills, no errors
+[exit 0]
+
+##### 13b: effective path groups and code globs as the harness now sees them
+{"APP"=>["nothing/**"], "TESTS"=>["nothing/**"], "INFRA"=>["nothing/**"], "HARNESS_EVALS"=>["nothing/**"]}
+["nothing/**", "nothing/**", "nothing/**"]
+lib/app.rb counts as code? false
+.ai/harness-evals/x.yml denied by adversarial-testing deny_read? false
+
+##### 13c: gate staleness with redirected APP: change record + implementation marked complete, then edit lib/app.rb; is 05-implementation STALE?
+05-implementation  complete  PASS
+  ✓ handoff identity
+  ✓ required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✓ no placeholders
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: 7684be29f352b6ce3daf1d4342643fbb97c4e16d
+  ✓ completed_at recorded: 2026-09-09T00:00:00Z
+  ✓ predecessor complete: 04-plan
+[exit 0]
+
+##### 13c control: same in a repo WITHOUT the override
+05-implementation  complete  PASS
+  ✓ handoff identity
+  ✓ required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✓ no placeholders
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: 6924d6fd061d3f2aa3bb8c1403a0926c5cd80ae6
+  ✓ completed_at recorded: 2026-09-09T00:00:00Z
+  ✓ predecessor complete: 04-plan
+[exit 0]
+
+##### 13d: alias bomb in a pre-existing .ai/repository.yml (ControlPlane loads with aliases: true); timed
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a013/bomb
+This is a defect in Soft Foundry 0.2.0, not in your repository. Nothing further was changed.
+  <soft-foundry>/lib/soft_foundry/check.rb:101:in `overlap?'
+  <soft-foundry>/lib/soft_foundry/check.rb:90:in `block (2 levels) in check_permissions'
+  <soft-foundry>/lib/soft_foundry/check.rb:89:in `each'
+  <soft-foundry>/lib/soft_foundry/check.rb:89:in `block in check_permissions'
+  <soft-foundry>/lib/soft_foundry/check.rb:88:in `each'
+        0.19 real         0.11 user         0.07 sys
+            27344896  maximum resident set size
+[exit 4]
+
+##### ADDENDUM 13a (repeated with stdout and stderr captured separately; the earlier capture lost the first stderr line to stdout buffering)
+[stdout]
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a013x/empty
+[stderr]
+soft-foundry: internal failure in control plane: control-plane check failed immediately after a clean install
+This is a defect in Soft Foundry 0.2.0, not in your repository. Nothing further was changed.
+diagnostic:
+  path group APP resolves to no patterns (check repository.yml overrides)
+  path group TESTS resolves to no patterns (check repository.yml overrides)
+  path group INFRA resolves to no patterns (check repository.yml overrides)
+  path group HARNESS_EVALS resolves to no patterns (check repository.yml overrides)
+Help fix it upstream: fork https://github.com/jmscholen/soft_foundry, reproduce with the diagnostic above, and open a pull request or issue.
+  gh repo fork jmscholen/soft_foundry --clone
+[exit 4]
+installed .ai files: 167; manifest present: yes
+
+##### ADDENDUM 13d (alias bomb in repository.yml, separated streams)
+[stdout]
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a013x/bomb
+[stderr]
+soft-foundry: internal failure in installer: NoMethodError: undefined method `delete_suffix' for an instance of Array
+This is a defect in Soft Foundry 0.2.0, not in your repository. Nothing further was changed.
+diagnostic:
+  <soft-foundry>/lib/soft_foundry/check.rb:101:in `overlap?'
+  <soft-foundry>/lib/soft_foundry/check.rb:90:in `block (2 levels) in check_permissions'
+  <soft-foundry>/lib/soft_foundry/check.rb:89:in `each'
+  <soft-foundry>/lib/soft_foundry/check.rb:89:in `block in check_permissions'
+  <soft-foundry>/lib/soft_foundry/check.rb:88:in `each'
+Help fix it upstream: fork https://github.com/jmscholen/soft_foundry, reproduce with the diagnostic above, and open a pull request or issue.
+  gh repo fork jmscholen/soft_foundry --clone
+[exit 4]
+manifest present: yes
+
+##### ADDENDUM 13c (corrected): the earlier 13c probed 05-implementation, which is not a commit_bound phase, so STALE could never appear. This repeats the probe with 06-verification (evidence: commit_bound) complete, then edits lib/app.rb.
+
+##### 13c redirect: gate verify BEFORE editing code
+06-verification  complete  PASS
+  ✓ required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ evidence current: no code changes since 631032258aa8
+[exit 0]
+
+##### 13c redirect: gate verify AFTER editing lib/app.rb (uncommitted)
+06-verification  complete  PASS
+  ✓ required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ evidence current: no code changes since 631032258aa8
+[exit 0]
+
+##### 13c control: gate verify BEFORE editing code
+06-verification  complete  PASS
+  ✓ required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ evidence current: no code changes since 540b2f2ad77c
+[exit 0]
+
+##### 13c control: gate verify AFTER editing lib/app.rb (uncommitted)
+06-verification  complete  FAIL
+  ✓ required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✗ evidence current: STALE: code changed since 540b2f2ad77c: lib/app.rb
+[exit 2]

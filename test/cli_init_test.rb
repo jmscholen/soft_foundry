@@ -239,3 +239,49 @@ class CLIInitRemediationTest < Minitest::Test
     end
   end
 end
+
+class CLIInitAttackRemediationTest < Minitest::Test
+  include FoundryFixture
+
+  def test_regular_file_at_soft_foundry_is_target_side # ATTACK-015
+    with_target_repo do |dir|
+      File.write(File.join(dir, ".soft-foundry"), "x")
+      code, out = init(dir)
+      assert_equal 1, code, out
+      refute_includes out, "defect in Soft Foundry"
+    end
+  end
+
+  def test_invalid_user_yaml_under_ai_is_target_side # ATTACK-015
+    with_target_repo do |dir|
+      FileUtils.mkdir_p(File.join(dir, ".ai/profiles")); File.write(File.join(dir, ".ai/profiles/mine.yml"), "not: [valid")
+      code, out = init(dir)
+      refute_equal 4, code, out
+      refute_includes out, "defect in Soft Foundry"
+      assert_includes out, "check: failed"
+    end
+  end
+
+  def test_diagnostic_hides_resolved_root_when_cwd_is_elsewhere # ATTACK-015
+    with_target_repo do |dir|
+      Dir.mktmpdir do |cwd|
+        Dir.mktmpdir do |src|
+          FileUtils.cp_r(File.join(REPO_ROOT, ".ai"), src); FileUtils.cp(File.join(REPO_ROOT, "AGENTS.md"), src)
+          FileUtils.mkdir_p(File.join(src, "changes")); FileUtils.mkdir_p(File.join(src, "docs/user"))
+          File.write(File.join(src, "changes/README.md"), "x"); File.write(File.join(src, "docs/user/README.md"), "x")
+          File.delete(File.join(src, ".ai/workflow.yml"))
+          out = StringIO.new
+          code = SoftFoundry::CLI.new(["init", "--no-onboard", "--root", dir], out: out, err: out, root: cwd, source: SoftFoundry::Installer::Source.new(src)).run
+          assert_equal 4, code
+          refute_includes out.string.lines.grep(/^\s/).join, dir
+        end
+      end
+    end
+  end
+
+  def test_filesystem_root_is_refused
+    code, out = init("/", "--allow-non-git")
+    assert_equal 1, code
+    assert_includes out, "filesystem root"
+  end
+end

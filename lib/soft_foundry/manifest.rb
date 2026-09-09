@@ -21,6 +21,7 @@ module SoftFoundry
       path = File.join(root, PATH)
       return new unless File.exist?(path) || File.symlink?(path)
       raise TargetError, "#{PATH} is a symlink; refusing to read it" if File.symlink?(path)
+      raise TargetError, "#{PATH} is not a regular file; refusing to read it" unless File.file?(path)
 
       data = YAML.safe_load(File.binread(path), aliases: false)
       validate!(data)

@@ -11,6 +11,7 @@ require_relative "check"
 require_relative "hooks"
 require_relative "errors"
 require_relative "installer"
+require_relative "provider"
 
 module SoftFoundry
   class CLI
@@ -71,6 +72,7 @@ module SoftFoundry
       raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
 
       root = resolve_root(root_given, allow_non_git)
+      @resolved_root = root
       installer = Installer.new(root, source: @source || Installer::Source.packaged, force: force, allow_non_git: allow_non_git)
       plan = installer.plan
       @out.puts "root: #{root}"
@@ -80,7 +82,12 @@ module SoftFoundry
 
       unless dry_run
         installer.apply(plan)
-        errors = Check.new(ControlPlane.new(root)).run.select { |f| f.level == :error }
+        @applied = true
+        errors = begin
+          Check.new(ControlPlane.new(root)).run.select { |f| f.level == :error }
+        rescue StandardError => e
+          [Check::Finding.new(:error, "control plane unreadable: #{e.message}")]
+        end
         if errors.empty?
           @out.puts "check: ok"
         elsif plan.clean
@@ -108,6 +115,7 @@ module SoftFoundry
     def resolve_root(given, allow_non_git)
       candidate = File.expand_path(given || @root)
       raise TargetError, "#{candidate} is not a directory" unless File.directory?(candidate)
+      raise TargetError, "refusing to install into the filesystem root" if candidate == "/"
       return candidate if allow_non_git
 
       top = Git.new(candidate).toplevel
@@ -121,7 +129,8 @@ module SoftFoundry
     def upstream_guidance(error)
       url = (Gem.loaded_specs["soft_foundry"]&.metadata || {}).fetch("source_code_uri", UPSTREAM)
       lines = ["soft-foundry: internal failure in #{error.component}: #{sanitize(error.message)}",
-               "This is a defect in Soft Foundry #{SoftFoundry::VERSION}, not in your repository. Nothing further was changed."]
+               "This is a defect in Soft Foundry #{SoftFoundry::VERSION}, not in your repository. " +
+               (@applied ? "Files reported above were written before the failure; review them with `git status`." : "Nothing was changed.")]
       unless error.diagnostic.empty?
         lines << "diagnostic:"
         error.diagnostic.each { |d| lines << "  #{sanitize(d)}" }
@@ -134,7 +143,15 @@ module SoftFoundry
     # Diagnostics stay repository-relative and free of home or gem paths.
     def sanitize(text)
       gem_root = File.expand_path("../..", __dir__)
-      text.to_s.gsub(gem_root, "<soft-foundry>").gsub(@root, ".").gsub(Dir.home, "~").gsub(/[^ -~]/, "?")
+      out = text.to_s.gsub(gem_root, "<soft-foundry>")
+      [@resolved_root, @root].compact.uniq.each { |r| out = out.gsub(r, ".") }
+      home = begin
+        Dir.home
+      rescue StandardError
+        nil
+      end
+      out = out.gsub(home, "~") if home && !home.empty? && home != "/"
+      out.gsub(/[^ -~]/, "?")
     end
 
     def plane = @plane ||= ControlPlane.new(@root)
@@ -154,8 +171,8 @@ module SoftFoundry
       data.fetch("providers", {}).each do |name, provider|
         @out.puts "#{name}:"
         if provider["configured"]
-          Array(provider["models"]).each { |model| @out.puts "  - #{model}" }
-          @out.puts "  ! #{provider['error']}" if provider["error"]
+          Array(provider["models"]).each { |model| @out.puts "  - #{Provider.sanitize(model)}" }
+          @out.puts "  ! #{Provider.sanitize(provider['error'])}" if provider["error"]
         else
           @out.puts "  (not configured)"
         end

@@ -1,0 +1,37 @@
+---
+phase: '09-remediation'
+skill: remediation
+status: complete
+commit_sha: 420acdc5f35da00d2613439ba7243eafddd101df
+started_at: '2026-09-09T16:55:23Z'
+completed_at: '2026-09-09T16:55:23Z'
+resolved_model:
+  profile: coding_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- summary.md
+- lib/soft_foundry/cli.rb
+- lib/soft_foundry/onboarding.rb
+- lib/soft_foundry/provider.rb
+- lib/soft_foundry/gate.rb
+- test/cli_init_test.rb
+- test/gate_test.rb
+- 06-verification/previous/6df4d15e73d8/
+- 07-evaluation/previous/6a41afd123ca/
+blocking: []
+findings:
+- id: REM-001
+  severity: info
+  summary: EVAL-F-001, F-003, F-004, F-005 repaired at 420acdc5f35d; verify, evaluate,
+    attack must rerun
+- id: REM-002
+  severity: minor
+  summary: EVAL-F-002 (init --help) deliberately not addressed; review decides scope
+- id: REM-003
+  severity: major
+  summary: 'Harness gap: gate lacked remediation-loop semantics and there is no invalidate
+    command; fixed minimally in gate.rb, rest for learning'
+next: verify
+notes: 'Compatibility mode: performed by an interactive coding agent under remediation
+  permissions. Evaluation transcripts and expected outcomes untouched.'

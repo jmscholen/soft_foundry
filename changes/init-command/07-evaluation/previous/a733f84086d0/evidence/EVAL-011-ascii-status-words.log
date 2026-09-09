@@ -1,0 +1,99 @@
+### journey: EVAL-011 report statuses survive stripping non-ASCII and are parseable words
+### ruby: /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby (ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23])
+### soft-foundry source: /Users/jscholen-iou/dev/soft_foundry (HEAD a733f84086d099ae48a209725d3ae037806c96dc)
+### captured: 2026-09-09T20:56:17Z
+
+$ git add -A
+exit=0
+
+$ git commit -q -m Project files
+exit=0
+
+### STEP 1: run producing created, updated, skipped: capture raw bytes to a file
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init --no-onboard > /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-011-run1.raw 2>&1; echo exit=$?
+exit=0
+exit=0
+
+$ git add -A
+exit=0
+
+$ git commit -q -m Adopt
+exit=0
+
+$ printf '\nlocal edit\n' >> .ai/rules/git.md; git add -A; git commit -q -m 'Edit rule'; echo committed
+committed
+exit=0
+
+### STEP 2: run producing conflict (committed edit, canonical unchanged so init sees manifest mismatch): capture raw bytes
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init --no-onboard > /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-011-run2.raw 2>&1; echo exit=$?
+exit=3
+exit=0
+
+### STEP 3: run producing forced
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init --force --no-onboard > /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-011-run3.raw 2>&1; echo exit=$?
+exit=0
+exit=0
+
+### STEP 4: byte analysis of the raw outputs
+
+$ for f in /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-011-run1.raw /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-011-run2.raw /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-011-run3.raw; do printf '%s: bytes=%s non-ascii-bytes=%s\n' $(basename $f) $(wc -c < $f) $(LC_ALL=C tr -d '\000-\177' < $f | wc -c); done
+eval-011-run1.raw: bytes=8439 non-ascii-bytes=0
+eval-011-run2.raw: bytes=10926 non-ascii-bytes=0
+eval-011-run3.raw: bytes=10740 non-ascii-bytes=0
+exit=0
+
+### STEP 5: strip non-ASCII (LC_ALL=C tr -cd) and parse status words with awk as an agent would
+
+$ for f in /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-011-run1.raw /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-011-run2.raw /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-011-run3.raw; do echo "== $(basename $f)"; LC_ALL=C tr -cd '\011\012\040-\176' < $f | awk '$1 ~ /^(created|updated|skipped|conflict|forced)$/ {c[$1]++} /^summary:/ {print "summary line: " $0} END {for (k in c) printf "parsed %s %d\n", k, c[k]}' | sort; done
+== eval-011-run1.raw
+parsed created 170
+parsed updated 1
+summary line: summary: created 170, updated 1, skipped 0, conflict 0, forced 0
+== eval-011-run2.raw
+parsed conflict 1
+parsed skipped 170
+summary line: summary: created 0, updated 0, skipped 170, conflict 1, forced 0
+== eval-011-run3.raw
+parsed forced 1
+parsed skipped 170
+summary line: summary: created 0, updated 0, skipped 170, conflict 0, forced 1
+exit=0
+
+### STEP 6: the parsed counts must equal the summary counts
+
+$ for f in /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-011-run1.raw /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-011-run2.raw /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-011-run3.raw; do LC_ALL=C tr -cd '\011\012\040-\176' < $f | awk '$1 ~ /^(created|updated|skipped|conflict|forced)$/ {c[$1]++} /^summary:/ {s=$0} END {gsub(/^summary: /,"",s); n=split(s,parts,", "); ok=1; for(i=1;i<=n;i++){split(parts[i],kv," "); if (c[kv[1]]+0 != kv[2]+0) {ok=0; printf "MISMATCH %s parsed=%d summary=%d\n", kv[1], c[kv[1]], kv[2]}} print (ok ? "counts consistent" : "counts inconsistent")}'; done
+counts consistent
+counts consistent
+counts consistent
+exit=0
+
+### STEP 6b: conflicts:/next: guidance lines after stripping (run 2)
+
+$ LC_ALL=C tr -cd '\011\012\040-\176' < /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-011-run2.raw | grep -E '^(conflicts|next): '
+conflicts: .ai/rules/git.md
+next: compare with `git diff`, keep your version, or commit it and rerun with --force to take the canonical version (uncommitted edits are never overwritten)
+exit=0
+
+### STEP 7: lines that carry a reason keep it in parentheses after two spaces
+
+$ LC_ALL=C tr -cd '\011\012\040-\176' < /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-011-run2.raw | grep -E '^(conflict|updated|skipped) ' | grep '(' | head -4
+skipped   .gitignore  (.soft-foundry/ is ignored)
+skipped   AGENTS.md  (block present)
+skipped   CLAUDE.md  (block present)
+skipped   .ai/README.md  (identical)
+exit=0
+
+### ASSERTIONS
+ASSERT PASS: AC-016 raw outputs contain no non-ASCII bytes
+ASSERT PASS: AC-016 created/updated/skipped parsed after stripping (run 1)
+ASSERT PASS: AC-016 conflict parsed after stripping (run 2)
+ASSERT PASS: AC-016 forced parsed after stripping (run 3)
+ASSERT PASS: AC-016 parsed counts equal summary counts in all three runs
+ASSERT PASS: REM conflicts: and next: lines identifiable by prefix after stripping
+ASSERT PASS: REM conflicts: prefix is not mistaken for a per-file conflict status by the parser (run 2 parsed conflict 1)
+ASSERT PASS: exit codes 0, 3, 0 across the three runs
+
+### assertions: 8 passed, 0 failed

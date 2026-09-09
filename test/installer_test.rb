@@ -116,3 +116,108 @@ class InstallerTest < Minitest::Test
     end
   end
 end
+
+class InstallerAttackRemediationTest < Minitest::Test
+  include FoundryFixture
+
+  def installer(dir, **opts) = SoftFoundry::Installer.new(dir, source: source, **opts)
+  def action(plan, path) = plan.actions.find { |a| a.path == path }
+
+  def test_planted_temp_sibling_symlink_is_refused_and_victim_untouched # ATTACK-004
+    with_target_repo do |dir|
+      Dir.mktmpdir do |outside|
+        victim = File.join(outside, "victim"); File.write(victim, "precious\n")
+        FileUtils.mkdir_p(File.join(dir, ".ai"))
+        File.symlink(victim, File.join(dir, ".ai/workflow.yml.soft-foundry-tmp"))
+        e = assert_raises(SoftFoundry::TargetError) { installer(dir).plan }
+        assert_includes e.message, "soft-foundry-tmp"
+        assert_equal "precious\n", File.read(victim)
+        assert_empty Dir.children(outside) - ["victim"]
+      end
+    end
+  end
+
+  def test_safe_write_never_follows_a_temp_sibling_symlink
+    Dir.mktmpdir do |dir|
+      victim = File.join(dir, "victim"); File.write(victim, "precious\n")
+      dest = File.join(dir, "out.txt")
+      File.symlink(victim, dest + ".soft-foundry-tmp")
+      assert_raises(SoftFoundry::TargetError) { SoftFoundry::SafeWrite.write(dest, "canonical") }
+      assert_equal "precious\n", File.read(victim)
+      refute File.exist?(dest)
+    end
+  end
+
+  def test_soft_foundry_dir_symlink_is_refused # ATTACK-005
+    with_target_repo do |dir|
+      Dir.mktmpdir do |outside|
+        File.symlink(outside, File.join(dir, ".soft-foundry"))
+        assert_raises(SoftFoundry::TargetError) { installer(dir).plan }
+        assert_empty Dir.children(outside)
+      end
+    end
+  end
+
+  def test_runtime_yml_symlink_is_refused_by_onboarding # ATTACK-005
+    with_target_repo do |dir|
+      Dir.mktmpdir do |outside|
+        victim = File.join(outside, "victim"); File.write(victim, "precious\n")
+        FileUtils.mkdir_p(File.join(dir, ".soft-foundry"))
+        File.symlink(victim, File.join(dir, ".soft-foundry/runtime.yml"))
+        with_env("OPENAI_API_KEY" => nil, "ANTHROPIC_API_KEY" => nil, "XAI_API_KEY" => nil) do
+          assert_raises(SoftFoundry::TargetError) { SoftFoundry::Onboarding.new(dir, out: StringIO.new, source: source).run(providers_only: true) }
+        end
+        assert_equal "precious\n", File.read(victim)
+      end
+    end
+  end
+
+  def test_git_ignored_uncommitted_edit_is_still_a_conflict_even_under_force # ATTACK-021
+    with_target_repo do |dir|
+      installer(dir).apply(installer(dir).plan)
+      commit_all(dir)
+      File.write(File.join(dir, ".gitignore"), ".soft-foundry/\n.ai/rules/\n")
+      sh(dir, "git", "rm", "-rq", "--cached", ".ai/rules")
+      commit_all(dir, "ignore rules")
+      File.write(File.join(dir, ".ai/rules/general.md"), "hardened\n")
+      a = action(installer(dir, force: true).plan, ".ai/rules/general.md")
+      assert_equal "conflict", a.status
+      assert_equal "uncommitted modifications", a.reason
+    end
+  end
+
+  def test_allow_non_git_inside_a_repository_still_protects_uncommitted_edits # ATTACK-021
+    with_target_repo do |dir|
+      installer(dir).apply(installer(dir).plan)
+      commit_all(dir)
+      File.write(File.join(dir, ".ai/rules/general.md"), "hardened\n")
+      assert_equal "conflict", action(installer(dir, allow_non_git: true).plan, ".ai/rules/general.md").status
+    end
+  end
+
+  def test_fifo_at_manifest_or_gitignore_is_refused_without_hanging # ATTACK-006
+    require "timeout"
+    with_target_repo do |dir|
+      FileUtils.mkdir_p(File.join(dir, ".ai")); File.mkfifo(File.join(dir, ".ai/manifest.yml"))
+      Timeout.timeout(5) { assert_raises(SoftFoundry::TargetError) { installer(dir).plan } }
+    end
+    with_target_repo do |dir|
+      File.mkfifo(File.join(dir, ".gitignore"))
+      Timeout.timeout(5) { assert_raises(SoftFoundry::TargetError) { installer(dir).plan } }
+    end
+  end
+
+  def test_plan_is_not_clean_when_ai_has_extra_or_preexisting_files # ATTACK-015
+    with_target_repo do |dir|
+      FileUtils.mkdir_p(File.join(dir, ".ai/profiles")); File.write(File.join(dir, ".ai/profiles/mine.yml"), "not: [valid")
+      plan = installer(dir).plan
+      refute plan.clean
+      assert_includes plan.extra_files, ".ai/profiles/mine.yml"
+    end
+    with_target_repo do |dir|
+      FileUtils.mkdir_p(File.join(dir, ".ai")); File.write(File.join(dir, ".ai/repository.yml"), "version: 1\n")
+      refute installer(dir).plan.clean
+    end
+    with_target_repo { |dir| assert installer(dir).plan.clean }
+  end
+end

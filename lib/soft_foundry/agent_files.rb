@@ -35,12 +35,14 @@ module SoftFoundry
       raise TargetError, "#{name} is a symlink; init does not write through symlinks" if File.symlink?(path)
       raise TargetError, "#{name} is not a regular file" if File.exist?(path) && !File.file?(path)
 
-      block = "\n#{BEGIN_MARKER}\n#{interior}\n#{END_MARKER}\n"
+      core = "#{BEGIN_MARKER}\n#{interior}\n#{END_MARKER}"
+      block = "\n#{core}\n"
       return Plan.new(path: name, status: "created", reason: "", bytes: title + block) unless File.exist?(path)
 
       body = File.binread(path)
-      return Plan.new(path: name, status: "skipped", reason: "block present", bytes: body) if body.include?(block)
-      return Plan.new(path: name, status: "skipped", reason: "legacy block present", bytes: body) if name == "CLAUDE.md" && body.include?(LEGACY_CLAUDE_BLOCK)
+      normalized = body.gsub("\r\n", "\n")
+      return Plan.new(path: name, status: "skipped", reason: "block present", bytes: body) if normalized.include?(core)
+      return Plan.new(path: name, status: "skipped", reason: "legacy block present", bytes: body) if name == "CLAUDE.md" && normalized.include?(LEGACY_CLAUDE_BLOCK.strip)
       if [BEGIN_MARKER, END_MARKER, LEGACY_CLAUDE_MARKER].any? { |m| body.include?(m) }
         return Plan.new(path: name, status: "conflict", reason: "marker present without the canonical block", bytes: body)
       end

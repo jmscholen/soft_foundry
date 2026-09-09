@@ -1,0 +1,248 @@
+commit_sha: a733f84086d099ae48a209725d3ae037806c96dc
+previous_runs: "6a41afd123ca (blocked on EVAL-014) and c29509c3cee8 (passed; invalidated by a harness fix), archived under previous/6a41afd123ca/ and previous/c29509c3cee8/"
+runtime: "ruby 3.3.1 at /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby; soft-foundry run from source as ruby -I<repo>/lib <repo>/exe/soft-foundry"
+journeys:
+  - id: EVAL-001
+    criteria: [AC-001, AC-003, AC-010]
+    persona: first-time maintainer (a)
+    starting_state: scratch Git repository with a committed app.rb and no Soft Foundry files
+    steps:
+      - soft-foundry init --no-onboard
+      - inspect tree, manifest, repository.yml, harness-evals, .gitignore, AGENTS.md, CLAUDE.md; recompute every manifest hash; cmp every installed .ai file against the packaged set
+      - soft-foundry check; soft-foundry doctor
+      - git add -A; git commit; record mtimes; sleep 1
+      - soft-foundry init --no-onboard (second run); record mtimes; git status
+    assertions:
+      - "first run exit 0, report begins with root: <target>, check: ok, summary created 171"
+      - app.rb SHA-256 identical before and after
+      - manifest has 165 entries, 0 hash mismatches, every on-disk .ai file (except manifest and repository.yml) listed, soft_foundry_version 0.2.0
+      - every installed .ai file byte-identical to the packaged source; repository.yml equals the template (assessed false, capabilities {}); harness-evals contains only README.md
+      - changes/README.md exists; .gitignore contains .soft-foundry/; both pointer files carry the marker; check passes in the target
+      - second run exit 0, only skipped lines, summary created 0 updated 0 conflict 0 forced 0, git status clean, all modification times unchanged (stretch)
+    evidence: [evidence/EVAL-001-first-install-idempotent.log, evidence/scripts/eval-001.sh]
+    result: pass
+  - id: EVAL-002
+    criteria: [AC-004, AC-005]
+    persona: upgrading maintainer (b)
+    starting_state: repository with a committed AGENTS.md holding project rules and a CLAUDE.md without trailing newline, no markers
+    steps:
+      - soft-foundry init --no-onboard
+      - cat both files; cmp the original byte-length prefix; count markers; git diff --stat; commit
+      - soft-foundry init --no-onboard (second run); count markers; git status
+    assertions:
+      - AGENTS.md and CLAUDE.md reported updated (block appended), exit 0
+      - original bytes of each file preserved verbatim as the prefix of the new file
+      - exactly one soft-foundry:begin marker in each file
+      - second run exit 0, both reported skipped (block present), nothing appended, git status clean
+    evidence: [evidence/EVAL-002-pointer-files-preserved.log, evidence/scripts/eval-002.sh]
+    result: pass
+  - id: EVAL-003
+    criteria: [AC-012]
+    persona: engineering agent (c)
+    starting_state: repository with a committed main.rs
+    steps:
+      - soft-foundry init --dry-run --no-onboard; git status --untracked-files=all; ls -A; test for manifest, .ai, .soft-foundry
+      - soft-foundry init --no-onboard
+      - diff the two reports ignoring the dry-run mode line and the real-run check line
+    assertions:
+      - "dry run exit 0 and prints mode: dry run, nothing written"
+      - dry run created no .ai, no .soft-foundry, no manifest; git status clean with no untracked paths
+      - real run exit 0, wrote the manifest, and its report is identical to the dry-run report line for line
+    evidence: [evidence/EVAL-003-dry-run-then-real.log, evidence/scripts/eval-003.sh]
+    result: pass
+  - id: EVAL-004
+    criteria: [AC-006, AC-007, AC-003]
+    persona: upgrading maintainer (b), first installed as (a)
+    starting_state: init installed and committed; maintainer appended an addendum to .ai/rules/general.md and committed it; an rsync copy of Soft Foundry (next version) with .ai/rules/general.md and .ai/rules/ruby.md canonically changed
+    steps:
+      - next-version init --no-onboard; git status; hash general.md; inspect ruby.md and manifest; commit
+      - next-version init --force --no-onboard; git status; git diff --stat; cmp general.md against next canonical; compare manifest hash to on-disk hash; commit
+      - next-version init --no-onboard
+    assertions:
+      - upgrade run exit 3 with conflict .ai/rules/general.md (differs from manifest hash); general.md hash unchanged
+      - .ai/rules/ruby.md reported updated (owned by manifest) and rewritten to the new canonical content; only ruby.md and manifest modified
+      - "REM: conflict run prints 'conflicts: .ai/rules/general.md' and a 'next:' line mentioning git diff and --force, both after the summary line"
+      - "REM: the --force run, which has no conflicts, prints no conflicts: or next: line"
+      - --force run exit 0 with forced .ai/rules/general.md; content equals next canonical; manifest hash equals on-disk SHA-256
+      - final run exit 0 with every file skipped
+    evidence: [evidence/EVAL-004-conflict-then-force.log, evidence/scripts/eval-004.sh]
+    result: pass
+  - id: EVAL-005
+    criteria: [AC-006]
+    persona: upgrading maintainer (b)
+    starting_state: init installed and committed; an uncommitted append to .ai/rules/general.md
+    steps:
+      - soft-foundry init --no-onboard
+      - soft-foundry init --force --no-onboard; hash the file; git status
+    assertions:
+      - plain run exit 3 with conflict .ai/rules/general.md (uncommitted modifications)
+      - --force run still exit 3, still conflict, no forced line
+      - uncommitted edit intact after --force (hash unchanged)
+      - "REM: both runs print 'conflicts: .ai/rules/general.md' and a 'next:' line; the next line states that uncommitted edits are never overwritten"
+    evidence: [evidence/EVAL-005-uncommitted-edit.log, evidence/scripts/eval-005.sh]
+    result: pass
+  - id: EVAL-006
+    criteria: [AC-002]
+    persona: engineering agent (c)
+    starting_state: plain directory containing file.txt, GIT_CEILING_DIRECTORIES set so no enclosing repository is discovered
+    steps:
+      - soft-foundry init --no-onboard; ls -A
+      - soft-foundry init --allow-non-git --no-onboard; ls
+      - soft-foundry init --allow-non-git --force --no-onboard
+    assertions:
+      - refusal exit 1; message names the missing Git work tree and the --allow-non-git flag; directory still holds only file.txt
+      - --allow-non-git installs (manifest and AGENTS.md present), exit 0
+      - --force combined with --allow-non-git refused as unrecoverable, exit 1
+    evidence: [evidence/EVAL-006-non-git.log, evidence/scripts/eval-006.sh]
+    result: pass
+  - id: EVAL-007
+    criteria: [AC-011]
+    persona: first-time maintainer (a)
+    starting_state: repository with docs/architecture/README.md and no docs/user/; control repository with docs/user/guide.md
+    steps:
+      - soft-foundry init --no-onboard in the docs-without-user repository; ls docs
+      - soft-foundry init --no-onboard in the control repository; ls docs/user
+    assertions:
+      - exit 0; docs/user/README.md reported skipped (docs/ exists without docs/user/); file not created
+      - control repository gets created docs/user/README.md
+    evidence: [evidence/EVAL-007-docs-without-user.log, evidence/scripts/eval-007.sh]
+    result: pass
+  - id: EVAL-008
+    criteria: [AC-009]
+    persona: upgrading maintainer (b)
+    starting_state: committed .gitignore already containing .soft-foundry/ among other entries; control repository whose .gitignore lacks the line and has no trailing newline
+    steps:
+      - soft-foundry init --no-onboard; hash and cat .gitignore; git status -- .gitignore
+      - control run; cat .gitignore; git check-ignore -v .soft-foundry/runtime.yml
+    assertions:
+      - exit 0; .gitignore reported skipped (.soft-foundry/ is ignored); SHA-256 and git status unchanged
+      - "control: .soft-foundry/ appended on its own line after the existing entry, and git check-ignore confirms it is effective"
+    evidence: [evidence/EVAL-008-gitignore.log, evidence/scripts/eval-008.sh]
+    result: pass
+  - id: EVAL-009
+    criteria: [AC-001, AC-002]
+    persona: engineering agent (c)
+    starting_state: repository with services/api/app.rb committed
+    steps:
+      - from outside the repository, soft-foundry init --root <repo>/services/api --no-onboard; git status
+      - from inside services/api, soft-foundry init --dry-run --no-onboard
+      - from outside, soft-foundry init --root <repo> --no-onboard
+      - soft-foundry init --root <nonexistent> --no-onboard
+    assertions:
+      - subdirectory --root refused exit 1 with --root must be the repository top-level (<top>); nothing written
+      - "cwd inside the subdirectory resolves to the top-level and prints root: <top-level>"
+      - --root at the top-level installs, exit 0, root printed
+      - nonexistent --root refused exit 1 with is not a directory
+    evidence: [evidence/EVAL-009-root-option.log, evidence/scripts/eval-009.sh]
+    result: pass
+  - id: EVAL-010
+    criteria: [AC-015]
+    persona: first-time maintainer (a)
+    starting_state: repository with committed app.rb; OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY removed from the environment for the run
+    steps:
+      - env -u OPENAI_API_KEY -u ANTHROPIC_API_KEY -u XAI_API_KEY soft-foundry init (onboarding enabled)
+      - cat .soft-foundry/runtime.yml; git status --untracked-files=all; git check-ignore -v .soft-foundry/runtime.yml
+    assertions:
+      - "exit 0; check: ok; manifest present"
+      - openai, anthropic, xai each reported not configured
+      - "REM: each line names the variable to set - 'openai  not configured (set OPENAI_API_KEY)', 'anthropic  not configured (set ANTHROPIC_API_KEY)', 'xai  not configured (set XAI_API_KEY)'"
+      - "REM: runtime.yml contains no key values"
+      - ".soft-foundry/runtime.yml exists with configured: false for all three providers and is gitignored (absent from git status)"
+      - summary line printed after the onboarding section
+    evidence: [evidence/EVAL-010-no-provider-keys.log, evidence/scripts/eval-010.sh]
+    result: pass
+  - id: EVAL-011
+    criteria: [AC-016]
+    persona: engineering agent (c)
+    starting_state: repository with AGENTS.md and app.rb committed; later a committed local edit to .ai/rules/git.md
+    steps:
+      - "capture raw bytes of three runs: first install (created, updated, skipped), plain rerun after the edit (conflict), --force rerun (forced)"
+      - count non-ASCII bytes in each capture
+      - strip with LC_ALL=C tr -cd to printable ASCII and parse status words with awk; compare parsed counts to the summary line
+      - "grep the stripped conflict-run output for the conflicts: and next: prefixes"
+    assertions:
+      - zero non-ASCII bytes in all three outputs
+      - after stripping, created, updated, skipped, conflict and forced are each identifiable as the first word of their lines
+      - parsed per-status counts equal the summary counts in all three runs; exit codes 0, 3, 0
+      - "REM: 'conflicts: .ai/rules/git.md' and 'next:' survive stripping and are identifiable by prefix; the conflicts: prefix is not counted as a per-file conflict status (run 2 parses conflict 1)"
+    evidence: [evidence/EVAL-011-ascii-status-words.log, evidence/scripts/eval-011.sh]
+    result: pass
+  - id: EVAL-012
+    criteria: [AC-013]
+    persona: first-time maintainer (a) using a broken package
+    starting_state: rsync copy of Soft Foundry with .ai/workflow.yml deleted; clean target repository; canary secret values in OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY
+    steps:
+      - run the broken copy's exe/soft-foundry init against the target with stdout and stderr captured separately
+      - git status --untracked-files=all; ls -A
+      - run the broken copy's init --dry-run --no-onboard
+      - grep both streams for the canary, the target path, the source path, and the home directory
+    assertions:
+      - exit 4; stderr names the component and the missing file, states the defect is in Soft Foundry not the repository, and points to https://github.com/jmscholen/soft_foundry with fork / pull request or issue guidance
+      - nothing written to the target (git clean, no .ai, no .soft-foundry)
+      - no secret value, no absolute target path, no absolute source path, no home path in stdout or stderr; stdout empty
+    evidence: [evidence/EVAL-012-internal-failure.log, evidence/scripts/eval-012.sh]
+    result: pass
+  - id: EVAL-013
+    criteria: [AC-008, AC-010, AC-007]
+    persona: pre-manifest maintainer (d)
+    starting_state: .ai/ hand-copied from the Soft Foundry source without harness-evals, repository.yml edited to assessed true, .ai/rules/security.md and .ai/skills/review/SKILL.md locally edited, .ai/rules/testing.md deleted, no manifest, all committed
+    steps:
+      - soft-foundry init --no-onboard; git status; inspect manifest membership and hashes; tail the edited file; commit
+      - soft-foundry init --force --no-onboard; git status; cmp both forced files against canonical; grep assessed in repository.yml
+    assertions:
+      - exit 3; identical files skipped (identical); the two edited files conflict (not in manifest) and untouched; deleted file created; summary conflict 2
+      - manifest lists 163 files with 0 mismatches and excludes both conflict files and repository.yml
+      - repository.yml skipped (repository state is owned by this repository) with assessed true preserved
+      - "REM: 'conflicts: .ai/rules/security.md, .ai/skills/review/SKILL.md' names both paths; exactly one next: line on the conflict run and none on the force run"
+      - --force exit 0, exactly two forced lines, both files canonical, repository.yml still assessed true
+    evidence: [evidence/EVAL-013-hand-copied-ai.log, evidence/scripts/eval-013.sh]
+    result: pass
+  - id: EVAL-014
+    criteria: []
+    specification_section: "Exit codes: 1 usage or environment error; 4 installation failed because of Soft Foundry itself"
+    persona: engineering agent (c)
+    starting_state: repository with committed app.rb
+    steps:
+      - soft-foundry (no arguments)
+      - soft-foundry init --help
+      - soft-foundry init --dry_run --no-onboard; git status
+      - soft-foundry version
+      - soft-foundry init --root (no value); git status
+      - informational probes soft-foundry init -h and soft-foundry help
+    assertions:
+      - help lists init with --dry-run --force --no-onboard --root PATH --allow-non-git, exit 0
+      - --help and a misspelled option are refused with exit 1 and unknown option(s), nothing written
+      - version prints 0.2.0, exit 0
+      - "--root without a value is a usage error and exits 1 (failed at 6a41afd with exit 4; passes at c29509c and a733f84)"
+      - "REM: the message is the single line 'soft-foundry: --root requires a value' with no defect, diagnostic, or fork guidance, and nothing is written"
+      - informational probes write nothing
+    evidence: [evidence/EVAL-014-cli-surface.log, evidence/scripts/eval-014.sh]
+    result: pass
+  - id: EVAL-015
+    criteria: [AC-014]
+    persona: upgrading maintainer (b) with an accidental or hostile layout
+    starting_state: .ai is a symlink to an empty directory outside the repository, committed
+    steps:
+      - soft-foundry init --no-onboard
+      - count entries in the outside directory; ls -la .ai; git status --untracked-files=all
+    assertions:
+      - exit 1 with .ai is a symlink; init does not write through symlinks
+      - outside directory still empty; nothing written inside the repository
+    evidence: [evidence/EVAL-015-symlinked-ai.log, evidence/scripts/eval-015.sh]
+    result: pass
+  - id: EVAL-016
+    criteria: [AC-012, AC-006]
+    persona: engineering agent (c) previewing an upgrade
+    starting_state: init installed and committed; a committed team edit to .ai/rules/errors.md (differs from its manifest hash)
+    steps:
+      - soft-foundry init --dry-run --no-onboard; git status --untracked-files=all; tail the edited file
+      - soft-foundry init --dry-run --force --no-onboard; git status --untracked-files=all; tail the edited file
+    assertions:
+      - "dry run exits 3, the code a real run would return, and prints mode: dry run, nothing written, the conflict line, 'conflicts: .ai/rules/errors.md' and a next: line"
+      - dry run wrote nothing; git clean; team edit intact
+      - dry run with --force shows forced .ai/rules/errors.md and exit 0, and still writes nothing
+    evidence: [evidence/EVAL-016-dry-run-conflict-preview.log, evidence/scripts/eval-016.sh]
+    result: pass
+not_evaluated:
+  - criterion: AC-017
+    reason: packaging property of the built gem, proven by verification check 9 (06-verification/evidence/gem-build.log); not a user journey

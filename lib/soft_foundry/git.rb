@@ -49,8 +49,10 @@ module SoftFoundry
       (committed + dirty_paths).uniq.sort
     end
 
+    # Modified, staged, untracked, and ignored paths. Ignored directories are
+    # reported with a trailing slash and cover everything beneath them.
     def dirty_paths
-      out, ok = run("status", "--porcelain", "--untracked-files=all")
+      out, ok = run("status", "--porcelain", "--untracked-files=all", "--ignored=matching")
       return [] unless ok
       out.lines(chomp: true).map { |line| line[3..].to_s.split(" -> ").last }
     end

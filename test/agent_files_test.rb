@@ -52,3 +52,19 @@ class AgentFilesTest < Minitest::Test
     end
   end
 end
+
+class AgentFilesBlockDetectionTest < Minitest::Test
+  include FoundryFixture
+
+  def files(dir) = SoftFoundry::AgentFiles.new(dir, agents_interior: "1. Read `.ai/README.md`.")
+
+  def test_block_at_byte_zero_crlf_and_no_trailing_newline_are_skipped # ATTACK-012 false conflicts
+    Dir.mktmpdir do |dir|
+      core = "#{SoftFoundry::AgentFiles::BEGIN_MARKER}\n1. Read `.ai/README.md`.\n#{SoftFoundry::AgentFiles::END_MARKER}"
+      File.write(File.join(dir, "AGENTS.md"), core)
+      assert_equal "skipped", files(dir).plan_agents.status
+      File.write(File.join(dir, "AGENTS.md"), "# t\r\n\r\n" + core.gsub("\n", "\r\n") + "\r\n")
+      assert_equal "skipped", files(dir).plan_agents.status
+    end
+  end
+end

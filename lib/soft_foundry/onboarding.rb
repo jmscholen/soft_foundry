@@ -4,6 +4,7 @@ require "fileutils"
 require "yaml"
 require_relative "providers"
 require_relative "installer"
+require_relative "safe_write"
 
 module SoftFoundry
   # Runtime onboarding: repair adapter files and discover model providers.
@@ -36,14 +37,14 @@ module SoftFoundry
 
     def write_runtime(results)
       dir = File.join(@root, LOCAL_DIR)
-      FileUtils.mkdir_p(dir)
+      SafeWrite.ensure_directory!(dir)
       payload = {
         "version" => 1,
         "providers" => results.to_h do |result|
           [result.name, { "configured" => result.configured, "models" => result.models, "error" => result.error }]
         end
       }
-      File.write(File.join(dir, "runtime.yml"), YAML.dump(payload))
+      SafeWrite.write(File.join(dir, "runtime.yml"), YAML.dump(payload))
     end
 
     def print_results(results)

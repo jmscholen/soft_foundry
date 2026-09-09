@@ -35,6 +35,17 @@ module SoftFoundry
       (ControlPlane::REQUIRED_GROUPS - missing).each do |g|
         findings << Finding.new(:error, "path group #{g} resolves to no patterns (check repository.yml overrides)") if @plane.path_groups[g].empty?
       end
+      @plane.override_path_groups.each do |g, globs|
+        if ControlPlane::PROTECTED_GROUPS.include?(g)
+          findings << Finding.new(:error, "repository.yml overrides protected path group #{g}; the default is kept and the override must be removed")
+          next
+        end
+        next unless ControlPlane::REQUIRED_GROUPS.include?(g)
+        defaults = @plane.default_path_groups.fetch(g, [])
+        if @plane.files_matching(globs).empty? && !@plane.files_matching(defaults).empty?
+          findings << Finding.new(:error, "repository.yml override for #{g} matches no files while the default patterns do; staleness and permissions would be blind")
+        end
+      end
       findings
     rescue Errno::ENOENT
       [Finding.new(:error, ".ai/paths.yml is missing")]

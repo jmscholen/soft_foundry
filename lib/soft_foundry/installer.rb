@@ -6,6 +6,7 @@ require_relative "git"
 require_relative "manifest"
 require_relative "agent_files"
 require_relative "installer/source"
+require_relative "safe_write"
 require_relative "version"
 
 module SoftFoundry
@@ -22,7 +23,7 @@ module SoftFoundry
       def writes? = WRITING.include?(status)
     end
 
-    Plan = Data.define(:actions, :warnings, :manifest, :clean) do
+    Plan = Data.define(:actions, :warnings, :manifest, :clean, :extra_files) do
       def conflicts = actions.count { |a| a.status == "conflict" }
       def counts = STATUSES.to_h { |s| [s, actions.count { |a| a.status == s }] }
     end
@@ -42,8 +43,14 @@ module SoftFoundry
     def plan
       raise TargetError, "--force cannot be combined with --allow-non-git: overwrites would be unrecoverable" if @force && @allow_non_git
 
+      # Guard every managed path before anything reads the target, so a FIFO or
+      # symlink cannot hang or redirect the git and manifest reads below.
+      SafeWrite.refuse_non_regular!(File.join(root, File.dirname(LOCK)), directory: true)
+      ([".gitignore", "AGENTS.md", "CLAUDE.md", Manifest::PATH, LOCK] + source.paths).each { |rel| guard_path!(rel) }
       previous = Manifest.load(root)
-      dirty = @allow_non_git ? [] : @git.dirty_paths
+      # Uncommitted edits are protected whenever a repository exists, even
+      # under --allow-non-git; git-ignored files count as uncommitted.
+      dirty = @git.repository? ? @git.dirty_paths : []
       actions = adapter_actions + source.entries.map { |entry| entry_action(entry, previous, dirty) }
 
       packaged = source.paths.select { |p| p.start_with?(".ai/") }
@@ -59,8 +66,15 @@ module SoftFoundry
         end
       end
 
-      clean = actions.none? { |a| %w[conflict updated forced].include?(a.status) }
-      Plan.new(actions:, warnings:, manifest:, clean:)
+      extra_files = Dir.glob(".ai/**/*", File::FNM_DOTMATCH, base: root)
+                       .select { |rel| File.file?(File.join(root, rel)) && !File.symlink?(File.join(root, rel)) } - packaged - [".ai/repository.yml", Manifest::PATH]
+      # A clean install touched nothing pre-existing: everything under .ai/
+      # was created by this run or is byte-identical, and nothing else lives
+      # there. Only then can a failing post-install check blame Soft Foundry.
+      clean = actions.none? { |a| %w[conflict updated forced].include?(a.status) } &&
+              actions.any? { |a| a.path == ".ai/repository.yml" && a.status == "created" } &&
+              extra_files.empty?
+      Plan.new(actions:, warnings:, manifest:, clean:, extra_files:)
     end
 
     # Writes every writing action, then the manifest. Returns written paths.
@@ -138,7 +152,7 @@ module SoftFoundry
         return act(entry, "created", "", :ai, true) unless exists
         existing = File.binread(dest)
         return act(entry, "skipped", "identical", :ai, true) if existing == entry.bytes
-        return act(entry, "conflict", "uncommitted modifications", :ai, false) if dirty.include?(entry.path)
+        return act(entry, "conflict", "uncommitted modifications", :ai, false) if dirty?(entry.path, dirty)
         return act(entry, "updated", "owned by manifest", :ai, true) if previous.owned?(entry.path, existing)
         reason = previous.include?(entry.path) ? "differs from manifest hash" : "not in manifest"
         @force ? act(entry, "forced", reason, :ai, true) : act(entry, "conflict", reason, :ai, false)
@@ -149,8 +163,17 @@ module SoftFoundry
       Action.new(path: entry.path, status: status, reason: reason, bytes: entry.bytes, kind: kind, adopt: adopt)
     end
 
-    # No symlink or non-regular file may sit at or above a managed destination.
+    def dirty?(path, dirty)
+      dirty.any? { |d| d == path || (d.end_with?("/") && path.start_with?(d)) }
+    end
+
+    # No symlink or non-regular file may sit at or above a managed destination,
+    # and no temporary sibling may be waiting to be written through.
     def guard_path!(rel)
+      sibling = File.join(root, rel + SafeWrite::TMP_SUFFIX)
+      if File.symlink?(sibling) || File.exist?(sibling)
+        raise TargetError, "#{rel}#{SafeWrite::TMP_SUFFIX} exists (planted or leftover temporary file); remove it and rerun"
+      end
       parts = rel.split("/")
       parts.each_index do |i|
         sub = parts[0..i].join("/")
@@ -164,8 +187,9 @@ module SoftFoundry
     end
 
     def with_lock
-      FileUtils.mkdir_p(File.join(root, File.dirname(LOCK)))
-      File.open(File.join(root, LOCK), File::RDWR | File::CREAT, 0o644) do |lock|
+      SafeWrite.ensure_directory!(File.join(root, File.dirname(LOCK)))
+      SafeWrite.refuse_symlink!(File.join(root, LOCK))
+      File.open(File.join(root, LOCK), File::RDWR | File::CREAT | File::NOFOLLOW, 0o644) do |lock|
         raise TargetError, "another soft-foundry init is running (#{LOCK} is locked)" unless lock.flock(File::LOCK_EX | File::LOCK_NB)
         yield
       end
@@ -173,6 +197,8 @@ module SoftFoundry
 
     def write(path, bytes, written)
       @writer.call(path, bytes)
+    rescue TargetError => e
+      raise TargetError, "#{e.message}; files already written: #{written.empty? ? 'none' : written.join(', ')}; manifest #{written.include?(Manifest::PATH) ? 'written' : 'not written'}"
     rescue SystemCallError, IOError => e
       rel = path.delete_prefix("#{root}/")
       raise TargetError, "write failed at #{rel} (#{e.message}); files already written: #{written.empty? ? 'none' : written.join(', ')}; manifest #{written.include?(Manifest::PATH) ? 'written' : 'not written'}"
@@ -180,9 +206,7 @@ module SoftFoundry
 
     def atomic_write(path, bytes)
       FileUtils.mkdir_p(File.dirname(path))
-      tmp = "#{path}.soft-foundry-tmp"
-      File.binwrite(tmp, bytes)
-      File.rename(tmp, path)
+      SafeWrite.write(path, bytes)
     end
   end
 end
