@@ -9,20 +9,29 @@ require_relative "change_record"
 require_relative "gate"
 require_relative "check"
 require_relative "hooks"
+require_relative "errors"
+require_relative "installer"
 
 module SoftFoundry
   class CLI
-    def initialize(argv, out: $stdout, err: $stderr, root: Dir.pwd)
+    UPSTREAM = "https://github.com/jmscholen/soft_foundry"
+    EXIT_TARGET = 1
+    EXIT_CONFLICTS = 3
+    EXIT_INTERNAL = 4
+
+    def initialize(argv, out: $stdout, err: $stderr, root: Dir.pwd, source: nil)
       @argv = argv.dup
       @out = out
       @err = err
       @root = File.expand_path(root)
+      @source = source
     end
 
     def run
       command = @argv.shift
       case command
-      when "init", "onboard" then Onboarding.new(@root, out: @out).run && 0
+      when "init" then init
+      when "onboard" then Onboarding.new(@root, out: @out, source: @source).run && 0
       when "models" then models
       when "doctor" then doctor
       when "check" then check
@@ -41,12 +50,87 @@ module SoftFoundry
         help
         command.nil? ? 0 : 1
       end
+    rescue InternalError => e
+      @err.puts upstream_guidance(e)
+      EXIT_INTERNAL
     rescue StandardError => e
       @err.puts "soft-foundry: #{e.message}"
-      1
+      EXIT_TARGET
     end
 
     private
+
+    def flag(name) = !!@argv.delete(name)
+
+    def init
+      dry_run = flag("--dry-run")
+      force = flag("--force")
+      no_onboard = flag("--no-onboard")
+      allow_non_git = flag("--allow-non-git")
+      root_given = option("--root")
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+
+      root = resolve_root(root_given, allow_non_git)
+      installer = Installer.new(root, source: @source || Installer::Source.packaged, force: force, allow_non_git: allow_non_git)
+      plan = installer.plan
+      @out.puts "root: #{root}"
+      @out.puts "mode: dry run, nothing written" if dry_run
+      plan.actions.each { |a| @out.puts format("%-9s %s%s", a.status, a.path, a.reason.empty? ? "" : "  (#{a.reason})") }
+      plan.warnings.each { |w| @out.puts "warning: #{w}" }
+
+      unless dry_run
+        installer.apply(plan)
+        errors = Check.new(ControlPlane.new(root)).run.select { |f| f.level == :error }
+        if errors.empty?
+          @out.puts "check: ok"
+        elsif plan.clean
+          raise InternalError.new("control-plane check failed immediately after a clean install", component: "control plane", diagnostic: errors.map(&:message))
+        else
+          @out.puts "check: failed, resolve the conflicts above and rerun"
+          errors.each { |f| @out.puts "  #{f.message}" }
+        end
+        Onboarding.new(root, out: @out).run(providers_only: true) unless no_onboard
+      end
+
+      @out.puts "summary: #{plan.counts.map { |k, v| "#{k} #{v}" }.join(', ')}"
+      plan.conflicts.positive? ? EXIT_CONFLICTS : 0
+    rescue Error
+      raise
+    rescue StandardError => e
+      raise InternalError.new("#{e.class}: #{e.message}", component: "installer", diagnostic: Array(e.backtrace).first(5))
+    end
+
+    def resolve_root(given, allow_non_git)
+      candidate = File.expand_path(given || @root)
+      raise TargetError, "#{candidate} is not a directory" unless File.directory?(candidate)
+      return candidate if allow_non_git
+
+      top = Git.new(candidate).toplevel
+      raise TargetError, "#{candidate} is not inside a Git work tree; pass --allow-non-git to install anyway" unless top
+      if given && File.realpath(candidate) != File.realpath(top)
+        raise TargetError, "--root must be the repository top-level (#{top})"
+      end
+      top
+    end
+
+    def upstream_guidance(error)
+      url = (Gem.loaded_specs["soft_foundry"]&.metadata || {}).fetch("source_code_uri", UPSTREAM)
+      lines = ["soft-foundry: internal failure in #{error.component}: #{sanitize(error.message)}",
+               "This is a defect in Soft Foundry #{SoftFoundry::VERSION}, not in your repository. Nothing further was changed."]
+      unless error.diagnostic.empty?
+        lines << "diagnostic:"
+        error.diagnostic.each { |d| lines << "  #{sanitize(d)}" }
+      end
+      lines << "Help fix it upstream: fork #{url}, reproduce with the diagnostic above, and open a pull request or issue."
+      lines << "  gh repo fork #{url.delete_prefix('https://github.com/')} --clone"
+      lines.join("\n")
+    end
+
+    # Diagnostics stay repository-relative and free of home or gem paths.
+    def sanitize(text)
+      gem_root = File.expand_path("../..", __dir__)
+      text.to_s.gsub(gem_root, "<soft-foundry>").gsub(@root, ".").gsub(Dir.home, "~").gsub(/[^ -~]/, "?")
+    end
 
     def plane = @plane ||= ControlPlane.new(@root)
     def git = @git ||= Git.new(@root)
@@ -82,6 +166,7 @@ module SoftFoundry
         ".ai/workflow.yml" => File.exist?(File.join(@root, ".ai/workflow.yml")),
         ".ai/paths.yml" => File.exist?(File.join(@root, ".ai/paths.yml")),
         "control plane check" => plane.present? && Check.new(plane).run.none? { |f| f.level == :error },
+        ".ai/manifest.yml" => File.exist?(File.join(@root, Manifest::PATH)),
         "pre-commit hook" => File.exist?(File.join(@root, ".git/hooks/pre-commit")) && File.read(File.join(@root, ".git/hooks/pre-commit")).include?(Hooks::MARKER),
         "local runtime" => File.exist?(File.join(@root, ".soft-foundry/runtime.yml"))
       }
@@ -200,7 +285,8 @@ module SoftFoundry
         Soft Foundry #{SoftFoundry::VERSION}
 
         Usage:
-          soft-foundry init                       bootstrap/onboard the current repository
+          soft-foundry init [options]             install the control plane into this repository, then onboard
+              --dry-run  --force  --no-onboard  --root PATH  --allow-non-git
           soft-foundry onboard                    discover providers and repair agent adapters
           soft-foundry doctor                     validate repository bootstrap
           soft-foundry check                      lint the .ai/ control plane

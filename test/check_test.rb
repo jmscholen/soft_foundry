@@ -51,3 +51,15 @@ class CheckTest < Minitest::Test
     end
   end
 end
+
+class CheckPathGroupTest < Minitest::Test
+  include FoundryFixture
+
+  def test_emptied_required_group_is_an_error # DC-9
+    with_fixture_repo do |dir|
+      File.write(File.join(dir, ".ai", "repository.yml"), YAML.dump("version" => 1, "paths" => { "HARNESS_EVALS" => [] }))
+      findings = SoftFoundry::Check.new(SoftFoundry::ControlPlane.new(dir)).run
+      assert findings.any? { |f| f.message.include?("HARNESS_EVALS") && f.message.include?("no patterns") }
+    end
+  end
+end

@@ -25,6 +25,18 @@ module SoftFoundry
       ok ? out.strip : nil
     end
 
+    def toplevel
+      out, ok = run("rev-parse", "--show-toplevel")
+      ok ? out.strip : nil
+    rescue Errno::ENOENT
+      nil
+    end
+
+    def ignored?(path)
+      _, ok = run("check-ignore", "-q", path)
+      ok
+    end
+
     def commit?(sha)
       _, ok = run("cat-file", "-e", "#{sha}^{commit}")
       ok
@@ -45,8 +57,10 @@ module SoftFoundry
 
     private
 
+    # GIT_DIR and GIT_WORK_TREE are cleared so the target directory alone
+    # decides which repository is inspected.
     def run(*args)
-      out, _err, status = Open3.capture3("git", "-C", @root, *args)
+      out, _err, status = Open3.capture3({ "GIT_DIR" => nil, "GIT_WORK_TREE" => nil }, "git", "-C", @root, *args)
       [out, status.success?]
     end
   end

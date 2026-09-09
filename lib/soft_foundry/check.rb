@@ -31,7 +31,11 @@ module SoftFoundry
 
     def check_path_groups
       missing = ControlPlane::REQUIRED_GROUPS - @plane.path_groups.keys
-      missing.map { |g| Finding.new(:error, "paths.yml lacks required group #{g}") }
+      findings = missing.map { |g| Finding.new(:error, "paths.yml lacks required group #{g}") }
+      (ControlPlane::REQUIRED_GROUPS - missing).each do |g|
+        findings << Finding.new(:error, "path group #{g} resolves to no patterns (check repository.yml overrides)") if @plane.path_groups[g].empty?
+      end
+      findings
     rescue Errno::ENOENT
       [Finding.new(:error, ".ai/paths.yml is missing")]
     end

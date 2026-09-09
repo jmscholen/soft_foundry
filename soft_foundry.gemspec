@@ -7,8 +7,8 @@ Gem::Specification.new do |spec|
   spec.version = SoftFoundry::VERSION
   spec.authors = ["Jeff Scholen"]
   spec.summary = "Repository-native control plane for autonomous software engineering"
-  spec.required_ruby_version = ">= 3.1"
-  spec.files = Dir["lib/**/*", "exe/*", "README.md", "AGENTS.md", ".ai/**/*"]
+  spec.required_ruby_version = ">= 3.2"
+  spec.files = Dir["lib/**/*", "exe/*", "README.md", "AGENTS.md", ".ai/**/*", "changes/README.md", "docs/user/README.md"]
   spec.bindir = "exe"
   spec.executables = ["soft-foundry"]
   spec.require_paths = ["lib"]

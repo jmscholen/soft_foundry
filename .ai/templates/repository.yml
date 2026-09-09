@@ -1,0 +1,42 @@
+version: 1
+
+# This file is the committed repository capability profile (unassessed template). It is populated and
+# refreshed by onboarding/discovery. Evidence should be repository-relative and
+# must not contain credentials or machine-local provider state.
+
+repository:
+  assessed: false
+  assessed_at: null
+  commit_sha: null
+
+technology:
+  languages: []
+  frameworks: []
+  databases: []
+  testing: []
+
+infrastructure:
+  detected: []
+  iac:
+    tools: []
+  deployment_targets: []
+
+capabilities: {}
+
+# Capability entry example:
+# capabilities:
+#   observability.operational_visibility:
+#     status: PARTIAL
+#     evidence:
+#       - infra/monitoring.ts
+#     findings:
+#       - application_dashboard_not_detected
+#     rationale: CloudWatch alarms exist, but no operator health surface was found.
+#
+# Allowed status values are defined by .ai/maturity.yml:
+# PASS, PARTIAL, MISSING, UNKNOWN, EXTERNAL, NOT_APPLICABLE
+
+maturity:
+  current_level: 0
+  current_id: unknown
+  gaps: []

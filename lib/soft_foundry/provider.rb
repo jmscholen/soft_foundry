@@ -30,10 +30,15 @@ module SoftFoundry
       end
 
       payload = JSON.parse(response.body)
-      models = Array(payload["data"]).filter_map { |entry| entry["id"] }.sort
+      models = Array(payload["data"]).filter_map { |entry| self.class.sanitize(entry["id"]) }.reject(&:empty?).sort
       Result.new(name:, configured: true, models:, error: nil)
     rescue StandardError => e
       Result.new(name:, configured: true, models: [], error: e.message)
+    end
+
+    # Provider responses are untrusted; keep report lines to printable ASCII.
+    def self.sanitize(value)
+      value.to_s.gsub(/[^ -~]/, "?")
     end
 
     private

@@ -12,4 +12,9 @@ class ProviderTest < Minitest::Test
     assert_empty result.models
     assert_nil result.error
   end
+
+  def test_model_ids_are_sanitized_to_printable_ascii # MIT-015
+    assert_equal "gpt?\e-x".gsub(/[^ -~]/, "?"), SoftFoundry::Provider.sanitize("gpt\n\e-x")
+    refute_includes SoftFoundry::Provider.sanitize("a\e[31mb\n"), "\e"
+  end
 end

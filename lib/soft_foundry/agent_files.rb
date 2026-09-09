@@ -1,50 +1,52 @@
 # frozen_string_literal: true
 
-module SoftFoundry
-  class AgentFiles
-    CLAUDE_MARKER = "<!-- soft-foundry:canonical-agent-reference -->"
-    CLAUDE_BLOCK = <<~MARKDOWN.freeze
+require_relative "errors"
 
-      #{CLAUDE_MARKER}
+module SoftFoundry
+  # Vendor-facing pointer files. Soft Foundry owns only the block between its
+  # markers; the rest of the file belongs to the repository and is never
+  # rewritten. A marker without the full canonical block is a conflict.
+  class AgentFiles
+    BEGIN_MARKER = "<!-- soft-foundry:begin -->"
+    END_MARKER = "<!-- soft-foundry:end -->"
+    # Written by 0.1.0; recognized so existing repositories do not conflict.
+    LEGACY_CLAUDE_MARKER = "<!-- soft-foundry:canonical-agent-reference -->"
+    CLAUDE_INTERIOR = <<~MARKDOWN.strip
       ## Soft Foundry
 
       This repository uses Soft Foundry. Before performing engineering work, read and follow `AGENTS.md` and the workflow under `.ai/`. Those files are canonical; do not duplicate or override their engineering policy here.
     MARKDOWN
+    LEGACY_CLAUDE_BLOCK = "\n#{LEGACY_CLAUDE_MARKER}\n#{CLAUDE_INTERIOR}\n"
 
-    def initialize(root = Dir.pwd)
+    Plan = Data.define(:path, :status, :reason, :bytes)
+
+    def initialize(root, agents_interior:)
       @root = File.expand_path(root)
+      @agents_interior = agents_interior
     end
 
-    def ensure_agents!
-      path = File.join(@root, "AGENTS.md")
-      return :present if File.exist?(path)
+    def plan_agents = plan_file("AGENTS.md", "# Agent Instructions\n", @agents_interior)
+    def plan_claude = plan_file("CLAUDE.md", "# Claude Code Instructions\n", CLAUDE_INTERIOR)
 
-      File.write(path, <<~MARKDOWN)
-        # Agent Instructions
+    private
 
-        This repository uses Soft Foundry.
+    def plan_file(name, title, interior)
+      path = File.join(@root, name)
+      raise TargetError, "#{name} is a symlink; init does not write through symlinks" if File.symlink?(path)
+      raise TargetError, "#{name} is not a regular file" if File.exist?(path) && !File.file?(path)
 
-        1. Read `.ai/README.md`.
-        2. Load `.ai/workflow.yml`.
-        3. Determine the active change and lifecycle phase.
-        4. Load the assigned skill's `SKILL.md`, `skill.yml`, `permissions.yml`, `requirements.yml`, and `completion.yml`.
-        5. Never skip required gates or modify another skill's evidence.
-        6. Never declare completion without final judgment.
-      MARKDOWN
-      :created
-    end
+      block = "\n#{BEGIN_MARKER}\n#{interior}\n#{END_MARKER}\n"
+      return Plan.new(path: name, status: "created", reason: "", bytes: title + block) unless File.exist?(path)
 
-    def ensure_claude!
-      path = File.join(@root, "CLAUDE.md")
-      if File.exist?(path)
-        body = File.read(path)
-        return :present if body.include?(CLAUDE_MARKER)
-        File.open(path, "a") { |f| f.write(CLAUDE_BLOCK) }
-        :updated
-      else
-        File.write(path, "# Claude Code Instructions\n#{CLAUDE_BLOCK}")
-        :created
+      body = File.binread(path)
+      return Plan.new(path: name, status: "skipped", reason: "block present", bytes: body) if body.include?(block)
+      return Plan.new(path: name, status: "skipped", reason: "legacy block present", bytes: body) if name == "CLAUDE.md" && body.include?(LEGACY_CLAUDE_BLOCK)
+      if [BEGIN_MARKER, END_MARKER, LEGACY_CLAUDE_MARKER].any? { |m| body.include?(m) }
+        return Plan.new(path: name, status: "conflict", reason: "marker present without the canonical block", bytes: body)
       end
+
+      separator = body.empty? || body.end_with?("\n") ? "" : "\n"
+      Plan.new(path: name, status: "updated", reason: "block appended", bytes: body + separator + block)
     end
   end
 end

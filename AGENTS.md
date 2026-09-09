@@ -1,5 +1,6 @@
 # Agent Bootstrap Contract
 
+<!-- soft-foundry:begin -->
 This file is the only required vendor-facing entry point. Canonical instructions live under `.ai/`.
 
 1. Read `.ai/README.md` and `.ai/workflow.yml` before making changes.
@@ -15,3 +16,4 @@ This file is the only required vendor-facing entry point. Canonical instructions
 11. Never declare the change complete without a final judgment artifact.
 
 If the host platform cannot technically enforce a permission, treat the declared restriction as mandatory policy and record the limitation in the phase handoff's `notes`.
+<!-- soft-foundry:end -->
