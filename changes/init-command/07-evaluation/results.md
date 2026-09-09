@@ -1,8 +1,8 @@
 # Evaluation Results
 
-Commit SHA: c29509c3cee8e74dfb4266906f47a59ab82a90e6 (branch `change/init-command`)
+Commit SHA: a733f84086d099ae48a209725d3ae037806c96dc (branch `change/init-command`)
 
-Rerun after remediation. The previous run at `6a41afd123ca` was blocked on EVAL-014 and is archived under `previous/6a41afd123ca/` (untouched). Runtime: ruby 3.3.1 (`/Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby`), Soft Foundry run from source at this commit. Sixteen journeys (fifteen re-executed with unchanged expected outcomes plus the new EVAL-016), four personas, fresh scratch repositories; every command, output, exit code, and post-state is in the transcripts under `evidence/`, produced by the scripts under `evidence/scripts/`. No file outside `changes/init-command/07-evaluation/` was modified; the worktree carried only the pre-existing `metadata.yml` change (`current_phase: evaluate`).
+Third run. The first run at `6a41afd123ca` was blocked on EVAL-014; the second at `c29509c3cee8` passed after remediation but was invalidated by a harness fix under `${APP}` (gate loop semantics in `gate.rb`/`control_plane.rb`/`check.rb`). Both are archived untouched under `previous/`. The `init` product code is byte-identical between `c29509c` and `a733f84` (`git diff --quiet` over `cli.rb`, `installer.rb`, `installer/`, `onboarding.rb`, `provider.rb`, `agent_files.rb`, `manifest.rb`, `git.rb`, `exe/` confirmed before the run). Runtime: ruby 3.3.1 (`/Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby`), Soft Foundry run from source at this commit. Sixteen journeys re-executed with the same scripts and unchanged expected outcomes (135 assertions, all passing, identical per-journey counts to the second run), four personas, fresh scratch repositories; every command, output, exit code, and post-state is in the transcripts under `evidence/`, each of which records `HEAD a733f84086d099ae48a209725d3ae037806c96dc` in its header. No file outside `changes/init-command/07-evaluation/` was modified; the worktree carried only the pre-existing `metadata.yml` change and the concurrent attack phase's own files under `08-attack/`.
 
 ## Journey outcomes
 | Journey | Persona | Criteria | Result | Evidence |
@@ -20,9 +20,9 @@ Rerun after remediation. The previous run at `6a41afd123ca` was blocked on EVAL-
 | EVAL-011 ASCII-stripped status parsing incl. guidance lines | (c) | AC-016 | pass (8/8) | `evidence/EVAL-011-ascii-status-words.log` |
 | EVAL-012 broken package: exit 4 and upstream guidance | (a) | AC-013 | pass (10/10) | `evidence/EVAL-012-internal-failure.log` |
 | EVAL-013 hand-copied .ai/ without manifest | (d) | AC-008, AC-010, AC-007 | pass (13/13) | `evidence/EVAL-013-hand-copied-ai.log` |
-| EVAL-014 CLI scripting surface | (c) | specification "Exit codes" | pass (9/9; was fail at 6a41afd) | `evidence/EVAL-014-cli-surface.log` |
+| EVAL-014 CLI scripting surface | (c) | specification "Exit codes" | pass (9/9; was fail at 6a41afd, pass at c29509c) | `evidence/EVAL-014-cli-surface.log` |
 | EVAL-015 .ai symlinked outside the repository | (b) | AC-014 | pass (4/4) | `evidence/EVAL-015-symlinked-ai.log` |
-| EVAL-016 dry-run preview of a conflicting upgrade (new) | (c) | AC-012, AC-006 | pass (4/4) | `evidence/EVAL-016-dry-run-conflict-preview.log` |
+| EVAL-016 dry-run preview of a conflicting upgrade | (c) | AC-012, AC-006 | pass (4/4) | `evidence/EVAL-016-dry-run-conflict-preview.log` |
 
 Acceptance criteria coverage: AC-001 through AC-016 each have at least one passing journey. AC-017 (gem packaging) was proven by verification check 9 and is not a user journey.
 
@@ -34,7 +34,7 @@ Acceptance criteria coverage: AC-001 through AC-016 each have at least one passi
 Other confirmations unchanged from the previous run: idempotent to the modification time (EVAL-001), pointer prose preserved byte for byte (EVAL-002), `updated` upgrade path exercised end to end (EVAL-004, VER-001 evidence half), `--force` never touches `.ai/repository.yml` and is refused with `--allow-non-git` (EVAL-013, EVAL-006), diagnostic free of secrets and absolute paths (EVAL-012).
 
 ## Failures
-None. Every assertion in all sixteen journeys passed. One transcript (EVAL-013) was regenerated once after fixing a quoting defect in a newly added harness assertion (an unexpanded `$LOG` inside a command substitution, the same class of harness bug fixed in the previous run); the expected outcome was not changed and the transcript already showed the behaviour the assertion checks. The scripts under `evidence/scripts/` are the fixed versions.
+None. Every assertion in all sixteen journeys passed on the first execution at this commit; no transcript was regenerated and no script was changed (the scripts are byte-identical to those archived with the second run).
 
 ## Report usability
 The terminal report is the product's whole UI. Assessed on its own terms after remediation:
@@ -63,4 +63,4 @@ The terminal report is the product's whole UI. Assessed on its own terms after r
 | EVAL-F-005 | info | Resolved. Onboarding prints `not configured (set OPENAI_API_KEY)` style lines for all three providers (EVAL-010); `runtime.yml` carries no key values. |
 | EVAL-F-006 | info | Carried. Conflict reasons presume knowledge of `.ai/manifest.yml`; user documentation should define the manifest, the five statuses, the `conflicts:`/`next:` lines, exit codes 0/1/3/4, and the `.soft-foundry/init.lock` file (VER-010). |
 | EVAL-F-007 | info | Carried. The `updated` upgrade path for an owned `.ai/` file has end-to-end evidence (EVAL-004); the automated-test half of VER-001 remains open. |
-| EVAL-F-008 | info | Every behaviour in AC-001..AC-016 matched the specification from the user's side across four personas and sixteen journeys at c29509c, including the three remediated report behaviours; no journey failed. |
+| EVAL-F-008 | info | Every behaviour in AC-001..AC-016 matched the specification from the user's side across four personas and sixteen journeys at a733f84, identical to the c29509c run as expected from unchanged `init` code, including the three remediated report behaviours; no journey failed. |

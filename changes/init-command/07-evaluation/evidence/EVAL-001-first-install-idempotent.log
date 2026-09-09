@@ -1,7 +1,7 @@
 ### journey: EVAL-001 first install, commit, re-run
 ### ruby: /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby (ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23])
-### soft-foundry source: /Users/jscholen-iou/dev/soft_foundry (HEAD c29509c3cee8e74dfb4266906f47a59ab82a90e6)
-### captured: 2026-09-09T20:39:27Z
+### soft-foundry source: /Users/jscholen-iou/dev/soft_foundry (HEAD a733f84086d099ae48a209725d3ae037806c96dc)
+### captured: 2026-09-09T20:56:07Z
 
 $ git add app.rb
 exit=0

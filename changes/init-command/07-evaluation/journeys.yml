@@ -1,5 +1,5 @@
-commit_sha: c29509c3cee8e74dfb4266906f47a59ab82a90e6
-previous_run: "6a41afd123ca (blocked on EVAL-014), archived under previous/6a41afd123ca/"
+commit_sha: a733f84086d099ae48a209725d3ae037806c96dc
+previous_runs: "6a41afd123ca (blocked on EVAL-014) and c29509c3cee8 (passed; invalidated by a harness fix), archived under previous/6a41afd123ca/ and previous/c29509c3cee8/"
 runtime: "ruby 3.3.1 at /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby; soft-foundry run from source as ruby -I<repo>/lib <repo>/exe/soft-foundry"
 journeys:
   - id: EVAL-001
@@ -213,7 +213,7 @@ journeys:
       - help lists init with --dry-run --force --no-onboard --root PATH --allow-non-git, exit 0
       - --help and a misspelled option are refused with exit 1 and unknown option(s), nothing written
       - version prints 0.2.0, exit 0
-      - "--root without a value is a usage error and exits 1 (failed at 6a41afd with exit 4; passes at c29509c)"
+      - "--root without a value is a usage error and exits 1 (failed at 6a41afd with exit 4; passes at c29509c and a733f84)"
       - "REM: the message is the single line 'soft-foundry: --root requires a value' with no defect, diagnostic, or fork guidance, and nothing is written"
       - informational probes write nothing
     evidence: [evidence/EVAL-014-cli-surface.log, evidence/scripts/eval-014.sh]
