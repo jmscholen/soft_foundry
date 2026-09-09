@@ -1,54 +1,57 @@
 $ ruby -wc lib/soft_foundry.rb
 Syntax OK
-exit: 0
+EXIT: 0
 $ ruby -wc lib/soft_foundry/agent_files.rb
 Syntax OK
-exit: 0
+EXIT: 0
 $ ruby -wc lib/soft_foundry/change_record.rb
 Syntax OK
-exit: 0
+EXIT: 0
 $ ruby -wc lib/soft_foundry/check.rb
 Syntax OK
-exit: 0
+EXIT: 0
 $ ruby -wc lib/soft_foundry/cli.rb
 Syntax OK
-exit: 0
+EXIT: 0
 $ ruby -wc lib/soft_foundry/control_plane.rb
 Syntax OK
-exit: 0
+EXIT: 0
 $ ruby -wc lib/soft_foundry/errors.rb
 Syntax OK
-exit: 0
+EXIT: 0
 $ ruby -wc lib/soft_foundry/gate.rb
 Syntax OK
-exit: 0
+EXIT: 0
 $ ruby -wc lib/soft_foundry/git.rb
 Syntax OK
-exit: 0
+EXIT: 0
 $ ruby -wc lib/soft_foundry/hooks.rb
 Syntax OK
-exit: 0
+EXIT: 0
 $ ruby -wc lib/soft_foundry/installer.rb
 Syntax OK
-exit: 0
+EXIT: 0
 $ ruby -wc lib/soft_foundry/installer/source.rb
 Syntax OK
-exit: 0
+EXIT: 0
 $ ruby -wc lib/soft_foundry/manifest.rb
 Syntax OK
-exit: 0
+EXIT: 0
 $ ruby -wc lib/soft_foundry/onboarding.rb
 Syntax OK
-exit: 0
+EXIT: 0
 $ ruby -wc lib/soft_foundry/provider.rb
 Syntax OK
-exit: 0
+EXIT: 0
 $ ruby -wc lib/soft_foundry/providers.rb
 Syntax OK
-exit: 0
+EXIT: 0
+$ ruby -wc lib/soft_foundry/safe_write.rb
+Syntax OK
+EXIT: 0
 $ ruby -wc lib/soft_foundry/shell.rb
 Syntax OK
-exit: 0
+EXIT: 0
 $ ruby -wc lib/soft_foundry/version.rb
 Syntax OK
-exit: 0
+EXIT: 0

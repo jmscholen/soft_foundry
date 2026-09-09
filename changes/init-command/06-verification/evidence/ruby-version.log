@@ -1,7 +1,3 @@
-$ which ruby
 /Users/jscholen-iou/.asdf/shims/ruby
-$ ruby -v
 ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23]
-exit: 0
-$ ruby -e "puts RbConfig.ruby"
 /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby

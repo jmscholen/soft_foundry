@@ -1,29 +1,9 @@
-### ruby: /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby (ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23])
-### target: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/e2e-target-3
-### soft-foundry invoked as: ruby -I<repo>/lib <repo>/exe/soft-foundry (source tree at HEAD 52971d8f2fbcad692403709c8f9368c51b5c2eaa)
+=== ruby binary ===
+/Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby
+ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23]
 
-$ git init -q
-exit=0
-
-$ git config user.email verify@example.invalid
-exit=0
-
-$ git config user.name Verification
-exit=0
-
-$ shasum -a 256 app.rb
-8598a6865b7bf38b0a837253ddc21f8e583cada31aa068ed7094b3a5405e446a  app.rb
-exit=0
-
-$ git add app.rb
-exit=0
-
-$ git commit -q -m Add application file
-exit=0
-
-### STEP 1: first init --no-onboard (expect exit 0, everything created)
-$ soft-foundry init --no-onboard
-root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/e2e-target-3
+=== first init --no-onboard (exit expected 0) ===
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/e2e-target
 created   .gitignore
 created   AGENTS.md
 created   CLAUDE.md
@@ -197,194 +177,601 @@ created   changes/README.md
 created   docs/user/README.md
 check: ok
 summary: created 171, updated 0, skipped 0, conflict 0, forced 0
-exit=0
+EXIT: 0
+app.rb sha before=8598a6865b7bf38b0a837253ddc21f8e583cada31aa068ed7094b3a5405e446a after=8598a6865b7bf38b0a837253ddc21f8e583cada31aa068ed7094b3a5405e446a
+git status --porcelain after commit-less run:
+?? .ai/
+?? .gitignore
+?? AGENTS.md
+?? CLAUDE.md
+?? changes/
+?? docs/
 
-$ shasum -a 256 app.rb
-8598a6865b7bf38b0a837253ddc21f8e583cada31aa068ed7094b3a5405e446a  app.rb
-exit=0
-$ status-word counts:
- 171 created 
+=== git add -A && commit ===
 
-$ git add -A
-exit=0
-
-$ git commit -q -m soft-foundry init
-exit=0
-$ git status --porcelain
-exit=0
-
-### STEP 2: second init --no-onboard (expect exit 0, everything skipped)
-$ soft-foundry init --no-onboard
-exit=0
-$ status-word counts of STEP 2 output:
- 171 skipped 
-$ non-skipped status lines (expect none):
-grep exit=1 (1 = none)
-$ summary line:
+=== second init --no-onboard (expect all skipped, exit 0) ===
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/e2e-target
+skipped   .gitignore  (.soft-foundry/ is ignored)
+skipped   AGENTS.md  (block present)
+skipped   CLAUDE.md  (block present)
+skipped   .ai/README.md  (identical)
+skipped   .ai/harness-evals/README.md  (identical)
+skipped   .ai/maturity.yml  (identical)
+skipped   .ai/paths.yml  (identical)
+skipped   .ai/policies/human-boundaries.yml  (identical)
+skipped   .ai/policies/skill-permissions.yml  (identical)
+skipped   .ai/profiles/adversarial-high.yml  (identical)
+skipped   .ai/profiles/coding-high.yml  (identical)
+skipped   .ai/profiles/judgment-high.yml  (identical)
+skipped   .ai/profiles/reasoning-high.yml  (identical)
+skipped   .ai/profiles/writing-medium.yml  (identical)
+skipped   .ai/repository.yml  (repository state is owned by this repository)
+skipped   .ai/rules/README.md  (identical)
+skipped   .ai/rules/architecture.md  (identical)
+skipped   .ai/rules/database.md  (identical)
+skipped   .ai/rules/dependencies.md  (identical)
+skipped   .ai/rules/errors.md  (identical)
+skipped   .ai/rules/general.md  (identical)
+skipped   .ai/rules/git.md  (identical)
+skipped   .ai/rules/infrastructure.md  (identical)
+skipped   .ai/rules/observability.md  (identical)
+skipped   .ai/rules/rails.md  (identical)
+skipped   .ai/rules/ruby.md  (identical)
+skipped   .ai/rules/security.md  (identical)
+skipped   .ai/rules/testing.md  (identical)
+skipped   .ai/runtime/models.yml  (identical)
+skipped   .ai/schemas.md  (identical)
+skipped   .ai/skills/adversarial-testing/SKILL.md  (identical)
+skipped   .ai/skills/adversarial-testing/completion.yml  (identical)
+skipped   .ai/skills/adversarial-testing/permissions.yml  (identical)
+skipped   .ai/skills/adversarial-testing/requirements.yml  (identical)
+skipped   .ai/skills/adversarial-testing/skill.yml  (identical)
+skipped   .ai/skills/adversarial-testing/template/attack-plan.md  (identical)
+skipped   .ai/skills/adversarial-testing/template/cases.yml  (identical)
+skipped   .ai/skills/adversarial-testing/template/evidence/manifest.yml  (identical)
+skipped   .ai/skills/adversarial-testing/template/results.md  (identical)
+skipped   .ai/skills/evaluation/SKILL.md  (identical)
+skipped   .ai/skills/evaluation/completion.yml  (identical)
+skipped   .ai/skills/evaluation/permissions.yml  (identical)
+skipped   .ai/skills/evaluation/requirements.yml  (identical)
+skipped   .ai/skills/evaluation/skill.yml  (identical)
+skipped   .ai/skills/evaluation/template/evaluation-plan.md  (identical)
+skipped   .ai/skills/evaluation/template/evidence/manifest.yml  (identical)
+skipped   .ai/skills/evaluation/template/journeys.yml  (identical)
+skipped   .ai/skills/evaluation/template/results.md  (identical)
+skipped   .ai/skills/faq-indexing/SKILL.md  (identical)
+skipped   .ai/skills/faq-indexing/completion.yml  (identical)
+skipped   .ai/skills/faq-indexing/permissions.yml  (identical)
+skipped   .ai/skills/faq-indexing/requirements.yml  (identical)
+skipped   .ai/skills/faq-indexing/skill.yml  (identical)
+skipped   .ai/skills/faq-indexing/template/records.yml  (identical)
+skipped   .ai/skills/final-judgment/SKILL.md  (identical)
+skipped   .ai/skills/final-judgment/completion.yml  (identical)
+skipped   .ai/skills/final-judgment/permissions.yml  (identical)
+skipped   .ai/skills/final-judgment/requirements.yml  (identical)
+skipped   .ai/skills/final-judgment/skill.yml  (identical)
+skipped   .ai/skills/final-judgment/template/evidence.yml  (identical)
+skipped   .ai/skills/final-judgment/template/final.md  (identical)
+skipped   .ai/skills/final-judgment/template/residual-risk.md  (identical)
+skipped   .ai/skills/implementation/SKILL.md  (identical)
+skipped   .ai/skills/implementation/completion.yml  (identical)
+skipped   .ai/skills/implementation/permissions.yml  (identical)
+skipped   .ai/skills/implementation/requirements.yml  (identical)
+skipped   .ai/skills/implementation/skill.yml  (identical)
+skipped   .ai/skills/implementation/template/decisions.md  (identical)
+skipped   .ai/skills/implementation/template/deviations.md  (identical)
+skipped   .ai/skills/implementation/template/log.md  (identical)
+skipped   .ai/skills/intake/SKILL.md  (identical)
+skipped   .ai/skills/intake/completion.yml  (identical)
+skipped   .ai/skills/intake/permissions.yml  (identical)
+skipped   .ai/skills/intake/requirements.yml  (identical)
+skipped   .ai/skills/intake/skill.yml  (identical)
+skipped   .ai/skills/intake/template/assumptions.md  (identical)
+skipped   .ai/skills/intake/template/request.md  (identical)
+skipped   .ai/skills/learning/SKILL.md  (identical)
+skipped   .ai/skills/learning/completion.yml  (identical)
+skipped   .ai/skills/learning/permissions.yml  (identical)
+skipped   .ai/skills/learning/requirements.yml  (identical)
+skipped   .ai/skills/learning/skill.yml  (identical)
+skipped   .ai/skills/learning/template/findings.md  (identical)
+skipped   .ai/skills/learning/template/proposed-evals.md  (identical)
+skipped   .ai/skills/learning/template/proposed-rules.md  (identical)
+skipped   .ai/skills/observability/SKILL.md  (identical)
+skipped   .ai/skills/observability/completion.yml  (identical)
+skipped   .ai/skills/observability/permissions.yml  (identical)
+skipped   .ai/skills/observability/requirements.yml  (identical)
+skipped   .ai/skills/observability/skill.yml  (identical)
+skipped   .ai/skills/observability/template/alarms.md  (identical)
+skipped   .ai/skills/observability/template/dashboard.md  (identical)
+skipped   .ai/skills/observability/template/metrics.md  (identical)
+skipped   .ai/skills/observability/template/runbook.md  (identical)
+skipped   .ai/skills/observability/template/signals.md  (identical)
+skipped   .ai/skills/planning/SKILL.md  (identical)
+skipped   .ai/skills/planning/completion.yml  (identical)
+skipped   .ai/skills/planning/permissions.yml  (identical)
+skipped   .ai/skills/planning/requirements.yml  (identical)
+skipped   .ai/skills/planning/skill.yml  (identical)
+skipped   .ai/skills/planning/template/implementation.md  (identical)
+skipped   .ai/skills/planning/template/rollback.md  (identical)
+skipped   .ai/skills/planning/template/rollout.md  (identical)
+skipped   .ai/skills/planning/template/testing.md  (identical)
+skipped   .ai/skills/product-documentation/SKILL.md  (identical)
+skipped   .ai/skills/product-documentation/completion.yml  (identical)
+skipped   .ai/skills/product-documentation/permissions.yml  (identical)
+skipped   .ai/skills/product-documentation/requirements.yml  (identical)
+skipped   .ai/skills/product-documentation/skill.yml  (identical)
+skipped   .ai/skills/product-documentation/template/faq.md  (identical)
+skipped   .ai/skills/product-documentation/template/instructions.md  (identical)
+skipped   .ai/skills/product-documentation/template/search-records.yml  (identical)
+skipped   .ai/skills/remediation/SKILL.md  (identical)
+skipped   .ai/skills/remediation/completion.yml  (identical)
+skipped   .ai/skills/remediation/permissions.yml  (identical)
+skipped   .ai/skills/remediation/requirements.yml  (identical)
+skipped   .ai/skills/remediation/skill.yml  (identical)
+skipped   .ai/skills/remediation/template/summary.md  (identical)
+skipped   .ai/skills/repository-discovery/SKILL.md  (identical)
+skipped   .ai/skills/repository-discovery/completion.yml  (identical)
+skipped   .ai/skills/repository-discovery/permissions.yml  (identical)
+skipped   .ai/skills/repository-discovery/requirements.yml  (identical)
+skipped   .ai/skills/repository-discovery/skill.yml  (identical)
+skipped   .ai/skills/repository-discovery/template/affected-components.md  (identical)
+skipped   .ai/skills/repository-discovery/template/dependencies.md  (identical)
+skipped   .ai/skills/repository-discovery/template/repository-context.md  (identical)
+skipped   .ai/skills/repository-discovery/template/unknowns.md  (identical)
+skipped   .ai/skills/review/SKILL.md  (identical)
+skipped   .ai/skills/review/completion.yml  (identical)
+skipped   .ai/skills/review/permissions.yml  (identical)
+skipped   .ai/skills/review/requirements.yml  (identical)
+skipped   .ai/skills/review/skill.yml  (identical)
+skipped   .ai/skills/review/template/accessibility.md  (identical)
+skipped   .ai/skills/review/template/architecture.md  (identical)
+skipped   .ai/skills/review/template/consolidated.md  (identical)
+skipped   .ai/skills/review/template/functional.md  (identical)
+skipped   .ai/skills/review/template/infrastructure.md  (identical)
+skipped   .ai/skills/review/template/operations.md  (identical)
+skipped   .ai/skills/review/template/security.md  (identical)
+skipped   .ai/skills/specification/SKILL.md  (identical)
+skipped   .ai/skills/specification/completion.yml  (identical)
+skipped   .ai/skills/specification/permissions.yml  (identical)
+skipped   .ai/skills/specification/requirements.yml  (identical)
+skipped   .ai/skills/specification/skill.yml  (identical)
+skipped   .ai/skills/specification/template/acceptance-criteria.yml  (identical)
+skipped   .ai/skills/specification/template/readiness.md  (identical)
+skipped   .ai/skills/specification/template/requirements.yml  (identical)
+skipped   .ai/skills/specification/template/specification.md  (identical)
+skipped   .ai/skills/threat-modeling/SKILL.md  (identical)
+skipped   .ai/skills/threat-modeling/completion.yml  (identical)
+skipped   .ai/skills/threat-modeling/permissions.yml  (identical)
+skipped   .ai/skills/threat-modeling/requirements.yml  (identical)
+skipped   .ai/skills/threat-modeling/skill.yml  (identical)
+skipped   .ai/skills/threat-modeling/template/attack-surface.md  (identical)
+skipped   .ai/skills/threat-modeling/template/mitigations.md  (identical)
+skipped   .ai/skills/threat-modeling/template/threats.yml  (identical)
+skipped   .ai/skills/threat-modeling/template/trust-boundaries.md  (identical)
+skipped   .ai/skills/verification/SKILL.md  (identical)
+skipped   .ai/skills/verification/completion.yml  (identical)
+skipped   .ai/skills/verification/permissions.yml  (identical)
+skipped   .ai/skills/verification/requirements.yml  (identical)
+skipped   .ai/skills/verification/skill.yml  (identical)
+skipped   .ai/skills/verification/template/evidence/manifest.yml  (identical)
+skipped   .ai/skills/verification/template/results.md  (identical)
+skipped   .ai/skills/verification/template/tests.yml  (identical)
+skipped   .ai/templates/change/metadata.yml  (identical)
+skipped   .ai/templates/handoff.yml  (identical)
+skipped   .ai/templates/repository.yml  (identical)
+skipped   .ai/workflow.yml  (identical)
+skipped   changes/README.md  (user-owned scaffold)
+skipped   docs/user/README.md  (user-owned scaffold)
+check: ok
 summary: created 0, updated 0, skipped 171, conflict 0, forced 0
-$ git status --porcelain
-exit=0
+EXIT: 0
+git status --porcelain:
 
-### STEP 3: check inside the target
-$ soft-foundry check
+=== check in target (expect exit 0) ===
 ✓ control plane: 16 phases, 16 skills, no errors
-exit=0
+EXIT: 0
 
-### STEP 4: doctor inside the target
-$ soft-foundry doctor
-✓ git repository
-✓ AGENTS.md
-✓ .ai/README.md
-✓ .ai/workflow.yml
-✓ .ai/paths.yml
-✓ control plane check
-✓ .ai/manifest.yml
-✗ pre-commit hook
-✗ local runtime
-exit=2
-
-### STEP 5: installed state
-
-$ head -3 .ai/manifest.yml
----
-version: 1
-soft_foundry_version: 0.2.0
-exit=0
-
-$ cat .ai/repository.yml
-version: 1
-
-# This file is the committed repository capability profile (unassessed template). It is populated and
-# refreshed by onboarding/discovery. Evidence should be repository-relative and
-# must not contain credentials or machine-local provider state.
-
-repository:
-  assessed: false
-  assessed_at: null
-  commit_sha: null
-
-technology:
-  languages: []
-  frameworks: []
-  databases: []
-  testing: []
-
-infrastructure:
-  detected: []
-  iac:
-    tools: []
-  deployment_targets: []
-
-capabilities: {}
-
-# Capability entry example:
-# capabilities:
-#   observability.operational_visibility:
-#     status: PARTIAL
-#     evidence:
-#       - infra/monitoring.ts
-#     findings:
-#       - application_dashboard_not_detected
-#     rationale: CloudWatch alarms exist, but no operator health surface was found.
-#
-# Allowed status values are defined by .ai/maturity.yml:
-# PASS, PARTIAL, MISSING, UNKNOWN, EXTERNAL, NOT_APPLICABLE
-
-maturity:
-  current_level: 0
-  current_id: unknown
-  gaps: []
-exit=0
-
-$ ls -A .ai/harness-evals
-README.md
-exit=0
-
-$ cat .gitignore
-.soft-foundry/
-exit=0
-
-$ git check-ignore -v .soft-foundry/
-.gitignore:1:.soft-foundry/	.soft-foundry/
-exit=0
-
-$ grep -c soft-foundry:begin AGENTS.md CLAUDE.md
-AGENTS.md:1
-CLAUDE.md:1
-exit=0
-
-$ ls docs/user/README.md changes/README.md
-changes/README.md
-docs/user/README.md
-exit=0
-
-$ ls -la .soft-foundry
-total 0
-drwxr-xr-x@  3 jscholen-iou  wheel   96 Sep  9 16:51 .
-drwxr-xr-x@ 11 jscholen-iou  wheel  352 Sep  9 16:51 ..
--rw-r--r--@  1 jscholen-iou  wheel    0 Sep  9 16:51 init.lock
-exit=0
-
-### STEP 6: committed maintainer edit to .ai/rules/general.md, then init (expect exit 3, conflict)
-
-$ git add .ai/rules/general.md
-exit=0
-
-$ git commit -q -m Maintainer edit to general.md
-exit=0
-$ soft-foundry init --no-onboard
-exit=3
-$ non-skipped status lines:
-root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/e2e-target-3
+=== edit committed .ai/rules/general.md, commit, then init (expect conflict, exit 3) ===
+total 104
+drwxr-xr-x@ 15 jscholen-iou  wheel   480B Sep  9 17:42 .
+drwxr-xr-x@ 16 jscholen-iou  wheel   512B Sep  9 17:42 ..
+-rw-r--r--@  1 jscholen-iou  wheel   921B Sep  9 17:42 README.md
+-rw-r--r--@  1 jscholen-iou  wheel   867B Sep  9 17:42 architecture.md
+-rw-r--r--@  1 jscholen-iou  wheel   778B Sep  9 17:42 database.md
+-rw-r--r--@  1 jscholen-iou  wheel   516B Sep  9 17:42 dependencies.md
+-rw-r--r--@  1 jscholen-iou  wheel   535B Sep  9 17:42 errors.md
+-rw-r--r--@  1 jscholen-iou  wheel   1.3K Sep  9 17:42 general.md
+-rw-r--r--@  1 jscholen-iou  wheel   557B Sep  9 17:42 git.md
+-rw-r--r--@  1 jscholen-iou  wheel   3.3K Sep  9 17:42 infrastructure.md
+-rw-r--r--@  1 jscholen-iou  wheel   581B Sep  9 17:42 observability.md
+-rw-r--r--@  1 jscholen-iou  wheel   1.2K Sep  9 17:42 rails.md
+-rw-r--r--@  1 jscholen-iou  wheel   759B Sep  9 17:42 ruby.md
+-rw-r--r--@  1 jscholen-iou  wheel   787B Sep  9 17:42 security.md
+-rw-r--r--@  1 jscholen-iou  wheel   722B Sep  9 17:42 testing.md
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/e2e-target
+skipped   .gitignore  (.soft-foundry/ is ignored)
+skipped   AGENTS.md  (block present)
+skipped   CLAUDE.md  (block present)
+skipped   .ai/README.md  (identical)
+skipped   .ai/harness-evals/README.md  (identical)
+skipped   .ai/maturity.yml  (identical)
+skipped   .ai/paths.yml  (identical)
+skipped   .ai/policies/human-boundaries.yml  (identical)
+skipped   .ai/policies/skill-permissions.yml  (identical)
+skipped   .ai/profiles/adversarial-high.yml  (identical)
+skipped   .ai/profiles/coding-high.yml  (identical)
+skipped   .ai/profiles/judgment-high.yml  (identical)
+skipped   .ai/profiles/reasoning-high.yml  (identical)
+skipped   .ai/profiles/writing-medium.yml  (identical)
+skipped   .ai/repository.yml  (repository state is owned by this repository)
+skipped   .ai/rules/README.md  (identical)
+skipped   .ai/rules/architecture.md  (identical)
+skipped   .ai/rules/database.md  (identical)
+skipped   .ai/rules/dependencies.md  (identical)
+skipped   .ai/rules/errors.md  (identical)
 conflict  .ai/rules/general.md  (differs from manifest hash)
+skipped   .ai/rules/git.md  (identical)
+skipped   .ai/rules/infrastructure.md  (identical)
+skipped   .ai/rules/observability.md  (identical)
+skipped   .ai/rules/rails.md  (identical)
+skipped   .ai/rules/ruby.md  (identical)
+skipped   .ai/rules/security.md  (identical)
+skipped   .ai/rules/testing.md  (identical)
+skipped   .ai/runtime/models.yml  (identical)
+skipped   .ai/schemas.md  (identical)
+skipped   .ai/skills/adversarial-testing/SKILL.md  (identical)
+skipped   .ai/skills/adversarial-testing/completion.yml  (identical)
+skipped   .ai/skills/adversarial-testing/permissions.yml  (identical)
+skipped   .ai/skills/adversarial-testing/requirements.yml  (identical)
+skipped   .ai/skills/adversarial-testing/skill.yml  (identical)
+skipped   .ai/skills/adversarial-testing/template/attack-plan.md  (identical)
+skipped   .ai/skills/adversarial-testing/template/cases.yml  (identical)
+skipped   .ai/skills/adversarial-testing/template/evidence/manifest.yml  (identical)
+skipped   .ai/skills/adversarial-testing/template/results.md  (identical)
+skipped   .ai/skills/evaluation/SKILL.md  (identical)
+skipped   .ai/skills/evaluation/completion.yml  (identical)
+skipped   .ai/skills/evaluation/permissions.yml  (identical)
+skipped   .ai/skills/evaluation/requirements.yml  (identical)
+skipped   .ai/skills/evaluation/skill.yml  (identical)
+skipped   .ai/skills/evaluation/template/evaluation-plan.md  (identical)
+skipped   .ai/skills/evaluation/template/evidence/manifest.yml  (identical)
+skipped   .ai/skills/evaluation/template/journeys.yml  (identical)
+skipped   .ai/skills/evaluation/template/results.md  (identical)
+skipped   .ai/skills/faq-indexing/SKILL.md  (identical)
+skipped   .ai/skills/faq-indexing/completion.yml  (identical)
+skipped   .ai/skills/faq-indexing/permissions.yml  (identical)
+skipped   .ai/skills/faq-indexing/requirements.yml  (identical)
+skipped   .ai/skills/faq-indexing/skill.yml  (identical)
+skipped   .ai/skills/faq-indexing/template/records.yml  (identical)
+skipped   .ai/skills/final-judgment/SKILL.md  (identical)
+skipped   .ai/skills/final-judgment/completion.yml  (identical)
+skipped   .ai/skills/final-judgment/permissions.yml  (identical)
+skipped   .ai/skills/final-judgment/requirements.yml  (identical)
+skipped   .ai/skills/final-judgment/skill.yml  (identical)
+skipped   .ai/skills/final-judgment/template/evidence.yml  (identical)
+skipped   .ai/skills/final-judgment/template/final.md  (identical)
+skipped   .ai/skills/final-judgment/template/residual-risk.md  (identical)
+skipped   .ai/skills/implementation/SKILL.md  (identical)
+skipped   .ai/skills/implementation/completion.yml  (identical)
+skipped   .ai/skills/implementation/permissions.yml  (identical)
+skipped   .ai/skills/implementation/requirements.yml  (identical)
+skipped   .ai/skills/implementation/skill.yml  (identical)
+skipped   .ai/skills/implementation/template/decisions.md  (identical)
+skipped   .ai/skills/implementation/template/deviations.md  (identical)
+skipped   .ai/skills/implementation/template/log.md  (identical)
+skipped   .ai/skills/intake/SKILL.md  (identical)
+skipped   .ai/skills/intake/completion.yml  (identical)
+skipped   .ai/skills/intake/permissions.yml  (identical)
+skipped   .ai/skills/intake/requirements.yml  (identical)
+skipped   .ai/skills/intake/skill.yml  (identical)
+skipped   .ai/skills/intake/template/assumptions.md  (identical)
+skipped   .ai/skills/intake/template/request.md  (identical)
+skipped   .ai/skills/learning/SKILL.md  (identical)
+skipped   .ai/skills/learning/completion.yml  (identical)
+skipped   .ai/skills/learning/permissions.yml  (identical)
+skipped   .ai/skills/learning/requirements.yml  (identical)
+skipped   .ai/skills/learning/skill.yml  (identical)
+skipped   .ai/skills/learning/template/findings.md  (identical)
+skipped   .ai/skills/learning/template/proposed-evals.md  (identical)
+skipped   .ai/skills/learning/template/proposed-rules.md  (identical)
+skipped   .ai/skills/observability/SKILL.md  (identical)
+skipped   .ai/skills/observability/completion.yml  (identical)
+skipped   .ai/skills/observability/permissions.yml  (identical)
+skipped   .ai/skills/observability/requirements.yml  (identical)
+skipped   .ai/skills/observability/skill.yml  (identical)
+skipped   .ai/skills/observability/template/alarms.md  (identical)
+skipped   .ai/skills/observability/template/dashboard.md  (identical)
+skipped   .ai/skills/observability/template/metrics.md  (identical)
+skipped   .ai/skills/observability/template/runbook.md  (identical)
+skipped   .ai/skills/observability/template/signals.md  (identical)
+skipped   .ai/skills/planning/SKILL.md  (identical)
+skipped   .ai/skills/planning/completion.yml  (identical)
+skipped   .ai/skills/planning/permissions.yml  (identical)
+skipped   .ai/skills/planning/requirements.yml  (identical)
+skipped   .ai/skills/planning/skill.yml  (identical)
+skipped   .ai/skills/planning/template/implementation.md  (identical)
+skipped   .ai/skills/planning/template/rollback.md  (identical)
+skipped   .ai/skills/planning/template/rollout.md  (identical)
+skipped   .ai/skills/planning/template/testing.md  (identical)
+skipped   .ai/skills/product-documentation/SKILL.md  (identical)
+skipped   .ai/skills/product-documentation/completion.yml  (identical)
+skipped   .ai/skills/product-documentation/permissions.yml  (identical)
+skipped   .ai/skills/product-documentation/requirements.yml  (identical)
+skipped   .ai/skills/product-documentation/skill.yml  (identical)
+skipped   .ai/skills/product-documentation/template/faq.md  (identical)
+skipped   .ai/skills/product-documentation/template/instructions.md  (identical)
+skipped   .ai/skills/product-documentation/template/search-records.yml  (identical)
+skipped   .ai/skills/remediation/SKILL.md  (identical)
+skipped   .ai/skills/remediation/completion.yml  (identical)
+skipped   .ai/skills/remediation/permissions.yml  (identical)
+skipped   .ai/skills/remediation/requirements.yml  (identical)
+skipped   .ai/skills/remediation/skill.yml  (identical)
+skipped   .ai/skills/remediation/template/summary.md  (identical)
+skipped   .ai/skills/repository-discovery/SKILL.md  (identical)
+skipped   .ai/skills/repository-discovery/completion.yml  (identical)
+skipped   .ai/skills/repository-discovery/permissions.yml  (identical)
+skipped   .ai/skills/repository-discovery/requirements.yml  (identical)
+skipped   .ai/skills/repository-discovery/skill.yml  (identical)
+skipped   .ai/skills/repository-discovery/template/affected-components.md  (identical)
+skipped   .ai/skills/repository-discovery/template/dependencies.md  (identical)
+skipped   .ai/skills/repository-discovery/template/repository-context.md  (identical)
+skipped   .ai/skills/repository-discovery/template/unknowns.md  (identical)
+skipped   .ai/skills/review/SKILL.md  (identical)
+skipped   .ai/skills/review/completion.yml  (identical)
+skipped   .ai/skills/review/permissions.yml  (identical)
+skipped   .ai/skills/review/requirements.yml  (identical)
+skipped   .ai/skills/review/skill.yml  (identical)
+skipped   .ai/skills/review/template/accessibility.md  (identical)
+skipped   .ai/skills/review/template/architecture.md  (identical)
+skipped   .ai/skills/review/template/consolidated.md  (identical)
+skipped   .ai/skills/review/template/functional.md  (identical)
+skipped   .ai/skills/review/template/infrastructure.md  (identical)
+skipped   .ai/skills/review/template/operations.md  (identical)
+skipped   .ai/skills/review/template/security.md  (identical)
+skipped   .ai/skills/specification/SKILL.md  (identical)
+skipped   .ai/skills/specification/completion.yml  (identical)
+skipped   .ai/skills/specification/permissions.yml  (identical)
+skipped   .ai/skills/specification/requirements.yml  (identical)
+skipped   .ai/skills/specification/skill.yml  (identical)
+skipped   .ai/skills/specification/template/acceptance-criteria.yml  (identical)
+skipped   .ai/skills/specification/template/readiness.md  (identical)
+skipped   .ai/skills/specification/template/requirements.yml  (identical)
+skipped   .ai/skills/specification/template/specification.md  (identical)
+skipped   .ai/skills/threat-modeling/SKILL.md  (identical)
+skipped   .ai/skills/threat-modeling/completion.yml  (identical)
+skipped   .ai/skills/threat-modeling/permissions.yml  (identical)
+skipped   .ai/skills/threat-modeling/requirements.yml  (identical)
+skipped   .ai/skills/threat-modeling/skill.yml  (identical)
+skipped   .ai/skills/threat-modeling/template/attack-surface.md  (identical)
+skipped   .ai/skills/threat-modeling/template/mitigations.md  (identical)
+skipped   .ai/skills/threat-modeling/template/threats.yml  (identical)
+skipped   .ai/skills/threat-modeling/template/trust-boundaries.md  (identical)
+skipped   .ai/skills/verification/SKILL.md  (identical)
+skipped   .ai/skills/verification/completion.yml  (identical)
+skipped   .ai/skills/verification/permissions.yml  (identical)
+skipped   .ai/skills/verification/requirements.yml  (identical)
+skipped   .ai/skills/verification/skill.yml  (identical)
+skipped   .ai/skills/verification/template/evidence/manifest.yml  (identical)
+skipped   .ai/skills/verification/template/results.md  (identical)
+skipped   .ai/skills/verification/template/tests.yml  (identical)
+skipped   .ai/templates/change/metadata.yml  (identical)
+skipped   .ai/templates/handoff.yml  (identical)
+skipped   .ai/templates/repository.yml  (identical)
+skipped   .ai/workflow.yml  (identical)
+skipped   changes/README.md  (user-owned scaffold)
+skipped   docs/user/README.md  (user-owned scaffold)
 check: ok
 summary: created 0, updated 0, skipped 170, conflict 1, forced 0
 conflicts: .ai/rules/general.md
 next: compare with `git diff`, keep your version, or commit it and rerun with --force to take the canonical version (uncommitted edits are never overwritten)
-$ skipped count:
-170
-$ conflicts: line present?
-1
-$ next: line present?
-1
-$ git status --porcelain (expect clean: conflict run writes nothing)
-exit=0
-$ tail -3 .ai/rules/general.md (maintainer note still present)
+EXIT: 3
 
-## Maintainer note
-Keep this.
-
-### STEP 7: init --force (expect exit 0, forced)
-$ soft-foundry init --force --no-onboard
-exit=0
-$ non-skipped status lines:
-root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/e2e-target-3
+=== init --force (expect forced, exit 0) ===
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/e2e-target
+skipped   .gitignore  (.soft-foundry/ is ignored)
+skipped   AGENTS.md  (block present)
+skipped   CLAUDE.md  (block present)
+skipped   .ai/README.md  (identical)
+skipped   .ai/harness-evals/README.md  (identical)
+skipped   .ai/maturity.yml  (identical)
+skipped   .ai/paths.yml  (identical)
+skipped   .ai/policies/human-boundaries.yml  (identical)
+skipped   .ai/policies/skill-permissions.yml  (identical)
+skipped   .ai/profiles/adversarial-high.yml  (identical)
+skipped   .ai/profiles/coding-high.yml  (identical)
+skipped   .ai/profiles/judgment-high.yml  (identical)
+skipped   .ai/profiles/reasoning-high.yml  (identical)
+skipped   .ai/profiles/writing-medium.yml  (identical)
+skipped   .ai/repository.yml  (repository state is owned by this repository)
+skipped   .ai/rules/README.md  (identical)
+skipped   .ai/rules/architecture.md  (identical)
+skipped   .ai/rules/database.md  (identical)
+skipped   .ai/rules/dependencies.md  (identical)
+skipped   .ai/rules/errors.md  (identical)
 forced    .ai/rules/general.md  (differs from manifest hash)
+skipped   .ai/rules/git.md  (identical)
+skipped   .ai/rules/infrastructure.md  (identical)
+skipped   .ai/rules/observability.md  (identical)
+skipped   .ai/rules/rails.md  (identical)
+skipped   .ai/rules/ruby.md  (identical)
+skipped   .ai/rules/security.md  (identical)
+skipped   .ai/rules/testing.md  (identical)
+skipped   .ai/runtime/models.yml  (identical)
+skipped   .ai/schemas.md  (identical)
+skipped   .ai/skills/adversarial-testing/SKILL.md  (identical)
+skipped   .ai/skills/adversarial-testing/completion.yml  (identical)
+skipped   .ai/skills/adversarial-testing/permissions.yml  (identical)
+skipped   .ai/skills/adversarial-testing/requirements.yml  (identical)
+skipped   .ai/skills/adversarial-testing/skill.yml  (identical)
+skipped   .ai/skills/adversarial-testing/template/attack-plan.md  (identical)
+skipped   .ai/skills/adversarial-testing/template/cases.yml  (identical)
+skipped   .ai/skills/adversarial-testing/template/evidence/manifest.yml  (identical)
+skipped   .ai/skills/adversarial-testing/template/results.md  (identical)
+skipped   .ai/skills/evaluation/SKILL.md  (identical)
+skipped   .ai/skills/evaluation/completion.yml  (identical)
+skipped   .ai/skills/evaluation/permissions.yml  (identical)
+skipped   .ai/skills/evaluation/requirements.yml  (identical)
+skipped   .ai/skills/evaluation/skill.yml  (identical)
+skipped   .ai/skills/evaluation/template/evaluation-plan.md  (identical)
+skipped   .ai/skills/evaluation/template/evidence/manifest.yml  (identical)
+skipped   .ai/skills/evaluation/template/journeys.yml  (identical)
+skipped   .ai/skills/evaluation/template/results.md  (identical)
+skipped   .ai/skills/faq-indexing/SKILL.md  (identical)
+skipped   .ai/skills/faq-indexing/completion.yml  (identical)
+skipped   .ai/skills/faq-indexing/permissions.yml  (identical)
+skipped   .ai/skills/faq-indexing/requirements.yml  (identical)
+skipped   .ai/skills/faq-indexing/skill.yml  (identical)
+skipped   .ai/skills/faq-indexing/template/records.yml  (identical)
+skipped   .ai/skills/final-judgment/SKILL.md  (identical)
+skipped   .ai/skills/final-judgment/completion.yml  (identical)
+skipped   .ai/skills/final-judgment/permissions.yml  (identical)
+skipped   .ai/skills/final-judgment/requirements.yml  (identical)
+skipped   .ai/skills/final-judgment/skill.yml  (identical)
+skipped   .ai/skills/final-judgment/template/evidence.yml  (identical)
+skipped   .ai/skills/final-judgment/template/final.md  (identical)
+skipped   .ai/skills/final-judgment/template/residual-risk.md  (identical)
+skipped   .ai/skills/implementation/SKILL.md  (identical)
+skipped   .ai/skills/implementation/completion.yml  (identical)
+skipped   .ai/skills/implementation/permissions.yml  (identical)
+skipped   .ai/skills/implementation/requirements.yml  (identical)
+skipped   .ai/skills/implementation/skill.yml  (identical)
+skipped   .ai/skills/implementation/template/decisions.md  (identical)
+skipped   .ai/skills/implementation/template/deviations.md  (identical)
+skipped   .ai/skills/implementation/template/log.md  (identical)
+skipped   .ai/skills/intake/SKILL.md  (identical)
+skipped   .ai/skills/intake/completion.yml  (identical)
+skipped   .ai/skills/intake/permissions.yml  (identical)
+skipped   .ai/skills/intake/requirements.yml  (identical)
+skipped   .ai/skills/intake/skill.yml  (identical)
+skipped   .ai/skills/intake/template/assumptions.md  (identical)
+skipped   .ai/skills/intake/template/request.md  (identical)
+skipped   .ai/skills/learning/SKILL.md  (identical)
+skipped   .ai/skills/learning/completion.yml  (identical)
+skipped   .ai/skills/learning/permissions.yml  (identical)
+skipped   .ai/skills/learning/requirements.yml  (identical)
+skipped   .ai/skills/learning/skill.yml  (identical)
+skipped   .ai/skills/learning/template/findings.md  (identical)
+skipped   .ai/skills/learning/template/proposed-evals.md  (identical)
+skipped   .ai/skills/learning/template/proposed-rules.md  (identical)
+skipped   .ai/skills/observability/SKILL.md  (identical)
+skipped   .ai/skills/observability/completion.yml  (identical)
+skipped   .ai/skills/observability/permissions.yml  (identical)
+skipped   .ai/skills/observability/requirements.yml  (identical)
+skipped   .ai/skills/observability/skill.yml  (identical)
+skipped   .ai/skills/observability/template/alarms.md  (identical)
+skipped   .ai/skills/observability/template/dashboard.md  (identical)
+skipped   .ai/skills/observability/template/metrics.md  (identical)
+skipped   .ai/skills/observability/template/runbook.md  (identical)
+skipped   .ai/skills/observability/template/signals.md  (identical)
+skipped   .ai/skills/planning/SKILL.md  (identical)
+skipped   .ai/skills/planning/completion.yml  (identical)
+skipped   .ai/skills/planning/permissions.yml  (identical)
+skipped   .ai/skills/planning/requirements.yml  (identical)
+skipped   .ai/skills/planning/skill.yml  (identical)
+skipped   .ai/skills/planning/template/implementation.md  (identical)
+skipped   .ai/skills/planning/template/rollback.md  (identical)
+skipped   .ai/skills/planning/template/rollout.md  (identical)
+skipped   .ai/skills/planning/template/testing.md  (identical)
+skipped   .ai/skills/product-documentation/SKILL.md  (identical)
+skipped   .ai/skills/product-documentation/completion.yml  (identical)
+skipped   .ai/skills/product-documentation/permissions.yml  (identical)
+skipped   .ai/skills/product-documentation/requirements.yml  (identical)
+skipped   .ai/skills/product-documentation/skill.yml  (identical)
+skipped   .ai/skills/product-documentation/template/faq.md  (identical)
+skipped   .ai/skills/product-documentation/template/instructions.md  (identical)
+skipped   .ai/skills/product-documentation/template/search-records.yml  (identical)
+skipped   .ai/skills/remediation/SKILL.md  (identical)
+skipped   .ai/skills/remediation/completion.yml  (identical)
+skipped   .ai/skills/remediation/permissions.yml  (identical)
+skipped   .ai/skills/remediation/requirements.yml  (identical)
+skipped   .ai/skills/remediation/skill.yml  (identical)
+skipped   .ai/skills/remediation/template/summary.md  (identical)
+skipped   .ai/skills/repository-discovery/SKILL.md  (identical)
+skipped   .ai/skills/repository-discovery/completion.yml  (identical)
+skipped   .ai/skills/repository-discovery/permissions.yml  (identical)
+skipped   .ai/skills/repository-discovery/requirements.yml  (identical)
+skipped   .ai/skills/repository-discovery/skill.yml  (identical)
+skipped   .ai/skills/repository-discovery/template/affected-components.md  (identical)
+skipped   .ai/skills/repository-discovery/template/dependencies.md  (identical)
+skipped   .ai/skills/repository-discovery/template/repository-context.md  (identical)
+skipped   .ai/skills/repository-discovery/template/unknowns.md  (identical)
+skipped   .ai/skills/review/SKILL.md  (identical)
+skipped   .ai/skills/review/completion.yml  (identical)
+skipped   .ai/skills/review/permissions.yml  (identical)
+skipped   .ai/skills/review/requirements.yml  (identical)
+skipped   .ai/skills/review/skill.yml  (identical)
+skipped   .ai/skills/review/template/accessibility.md  (identical)
+skipped   .ai/skills/review/template/architecture.md  (identical)
+skipped   .ai/skills/review/template/consolidated.md  (identical)
+skipped   .ai/skills/review/template/functional.md  (identical)
+skipped   .ai/skills/review/template/infrastructure.md  (identical)
+skipped   .ai/skills/review/template/operations.md  (identical)
+skipped   .ai/skills/review/template/security.md  (identical)
+skipped   .ai/skills/specification/SKILL.md  (identical)
+skipped   .ai/skills/specification/completion.yml  (identical)
+skipped   .ai/skills/specification/permissions.yml  (identical)
+skipped   .ai/skills/specification/requirements.yml  (identical)
+skipped   .ai/skills/specification/skill.yml  (identical)
+skipped   .ai/skills/specification/template/acceptance-criteria.yml  (identical)
+skipped   .ai/skills/specification/template/readiness.md  (identical)
+skipped   .ai/skills/specification/template/requirements.yml  (identical)
+skipped   .ai/skills/specification/template/specification.md  (identical)
+skipped   .ai/skills/threat-modeling/SKILL.md  (identical)
+skipped   .ai/skills/threat-modeling/completion.yml  (identical)
+skipped   .ai/skills/threat-modeling/permissions.yml  (identical)
+skipped   .ai/skills/threat-modeling/requirements.yml  (identical)
+skipped   .ai/skills/threat-modeling/skill.yml  (identical)
+skipped   .ai/skills/threat-modeling/template/attack-surface.md  (identical)
+skipped   .ai/skills/threat-modeling/template/mitigations.md  (identical)
+skipped   .ai/skills/threat-modeling/template/threats.yml  (identical)
+skipped   .ai/skills/threat-modeling/template/trust-boundaries.md  (identical)
+skipped   .ai/skills/verification/SKILL.md  (identical)
+skipped   .ai/skills/verification/completion.yml  (identical)
+skipped   .ai/skills/verification/permissions.yml  (identical)
+skipped   .ai/skills/verification/requirements.yml  (identical)
+skipped   .ai/skills/verification/skill.yml  (identical)
+skipped   .ai/skills/verification/template/evidence/manifest.yml  (identical)
+skipped   .ai/skills/verification/template/results.md  (identical)
+skipped   .ai/skills/verification/template/tests.yml  (identical)
+skipped   .ai/templates/change/metadata.yml  (identical)
+skipped   .ai/templates/handoff.yml  (identical)
+skipped   .ai/templates/repository.yml  (identical)
+skipped   .ai/workflow.yml  (identical)
+skipped   changes/README.md  (user-owned scaffold)
+skipped   docs/user/README.md  (user-owned scaffold)
 check: ok
 summary: created 0, updated 0, skipped 170, conflict 0, forced 1
-$ conflicts:/next: lines on a forced run (expect 0):
-0
+EXIT: 0
+ M .ai/rules/general.md
 
-$ git diff --stat
- .ai/rules/general.md | 3 ---
- 1 file changed, 3 deletions(-)
-exit=0
-$ on-disk hash vs manifest entry for .ai/rules/general.md:
-4ea1f1dd276ab7bb44babbfaadd24196e16c8e80b5b0e97a37a8f6f1061c611b  .ai/rules/general.md
-  ".ai/rules/general.md": 4ea1f1dd276ab7bb44babbfaadd24196e16c8e80b5b0e97a37a8f6f1061c611b
+=== init --root with no value (expect exit 1) ===
+soft-foundry: --root requires a value
+EXIT: 1
 
-$ git add -A
-exit=0
+=== onboarding with three provider keys unset (expect exit 0) ===
+skipped   .gitignore  (.soft-foundry/ is ignored)
+skipped   AGENTS.md  (block present)
+skipped   CLAUDE.md  (block present)
 
-$ git commit -q -m Take canonical general.md
-exit=0
+LLM provider discovery
+openai     not configured (set OPENAI_API_KEY)
+anthropic  not configured (set ANTHROPIC_API_KEY)
+xai        not configured (set XAI_API_KEY)
 
-### STEP 8: final init --no-onboard (expect exit 0, all skipped)
-$ soft-foundry init --no-onboard
-exit=0
-$ status-word counts:
- 171 skipped 
-$ git status --porcelain
-exit=0
-
-### EXIT CODES: init1=0 init2=0 check=0 doctor=2 conflict=3 force=0 final=0
+Local model inventory written to .soft-foundry/runtime.yml (gitignored).
+EXIT: 0
+---
+version: 1
+providers:
+  openai:
+    configured: false
+    models: []
+    error:
+  anthropic:
+    configured: false
+    models: []
+    error:
+  xai:
+    configured: false
+    models: []
+    error:

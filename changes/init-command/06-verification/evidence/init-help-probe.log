@@ -1,13 +1,12 @@
-### EVAL-F-002 carry-forward probe: is there per-command help for init?
 $ ruby -Ilib exe/soft-foundry init --help
 soft-foundry: unknown option(s): --help
-exit=1
+EXIT: 1
 
 $ ruby -Ilib exe/soft-foundry init -h
 soft-foundry: unknown option(s): -h
-exit=1
+EXIT: 1
 
-$ ruby -Ilib exe/soft-foundry help (global help; init line shown if any)
+$ ruby -Ilib exe/soft-foundry help
 Soft Foundry 0.2.0
 
 Usage:
@@ -28,6 +27,4 @@ Usage:
   soft-foundry version
 
 `AGENTS.md` and `.ai/` are canonical. Vendor files such as `CLAUDE.md` only point to them.
-exit=1
-
-$ git status --porcelain -- . ':!changes/init-command/06-verification' (must be empty after the probes)
+EXIT: 1

@@ -1,4 +1,3 @@
-$ ruby -Ilib exe/soft-foundry doctor
 ✓ git repository
 ✓ AGENTS.md
 ✓ .ai/README.md
@@ -8,4 +7,4 @@ $ ruby -Ilib exe/soft-foundry doctor
 ✗ .ai/manifest.yml
 ✓ pre-commit hook
 ✗ local runtime
-exit: 2
+EXIT: 2

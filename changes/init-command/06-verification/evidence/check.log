@@ -1,3 +1,2 @@
-$ ruby -Ilib exe/soft-foundry check
 ✓ control plane: 16 phases, 16 skills, no errors
-exit: 0
+EXIT: 0

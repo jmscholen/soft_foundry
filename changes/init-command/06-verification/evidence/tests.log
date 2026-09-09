@@ -1,11 +1,10 @@
-$ bundle exec rake test
-Run options: --seed 20857
+Run options: --seed 25859
 
 # Running:
 
-..........................................................................
+..........................................................................................
 
-Finished in 14.122717s, 5.2398 runs/s, 53.8848 assertions/s.
+Finished in 15.431969s, 5.8320 runs/s, 52.1644 assertions/s.
 
-74 runs, 761 assertions, 0 failures, 0 errors, 0 skips
-exit: 0
+90 runs, 805 assertions, 0 failures, 0 errors, 0 skips
+EXIT: 0
