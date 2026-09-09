@@ -1,16 +1,44 @@
 ---
 phase: 05-implementation
 skill: implementation
-status: in_progress
-commit_sha:
+status: complete
+commit_sha: 017e14984035cd00d7320db31daf87ab44a3a98f
 started_at: '2026-09-09T16:05:36Z'
-completed_at:
+completed_at: '2026-09-09T16:05:36Z'
 resolved_model:
   profile: coding_high
-  provider:
-  model:
-outputs: []
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- log.md
+- decisions.md
+- deviations.md
+- lib/soft_foundry/installer.rb
+- lib/soft_foundry/installer/source.rb
+- lib/soft_foundry/manifest.rb
+- lib/soft_foundry/errors.rb
+- lib/soft_foundry/agent_files.rb
+- lib/soft_foundry/onboarding.rb
+- lib/soft_foundry/cli.rb
+- lib/soft_foundry/git.rb
+- lib/soft_foundry/check.rb
+- lib/soft_foundry/provider.rb
+- test/
 blocking: []
-findings: []
+findings:
+- id: IMPL-001
+  severity: major
+  summary: Three writes outside the implementation permission set were required by
+    the plan (.ai/templates/repository.yml, AGENTS.md markers) and README docs were
+    deferred; see deviations.md
+- id: IMPL-002
+  severity: minor
+  summary: Pointer-file block that differs from canonical is conflict, so bootstrap-text
+    upgrades need manual edits in targets
+- id: IMPL-003
+  severity: info
+  summary: Implementation commit is 017e14984035; verification must bind to it or
+    later
 next: verify
-notes: ''
+notes: 'Compatibility mode: performed by an interactive coding agent under implementation
+  permissions. Deviations recorded, not silently absorbed.'
