@@ -1,16 +1,60 @@
 # Phase handoff. One per phase directory. The gate checker validates this file.
 phase: 03-threat-model
 skill: threat-modeling
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 43d62f3ff0b1c085e689615440b9702c63f161e3
+started_at: '2026-09-09T15:54:10Z'
+completed_at: '2026-09-09T15:54:10Z'
 resolved_model:
   profile: adversarial_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- attack-surface.md
+- trust-boundaries.md
+- threats.yml
+- mitigations.md
+blocking: []
+findings:
+- id: TM-001
+  severity: major
+  summary: THREAT-001 symlink escape; AC-014 covers only the top-level .ai symlink,
+    while subdirectory, managed-file, AGENTS.md, CLAUDE.md, and .gitignore symlinks
+    are unaddressed and the current AgentFiles/Onboarding code writes through them (MIT-001).
+- id: TM-002
+  severity: major
+  summary: THREAT-006 and THREAT-004; --force and manifest-matched updates can overwrite
+    uncommitted edits git cannot restore, and --force scope over pointer and user-owned
+    files is undefined (MIT-004, MIT-006; specification gaps 1 and 2).
+- id: TM-003
+  severity: major
+  summary: THREAT-012; the Soft Foundry-side diagnostic the maintainer is told to post
+    upstream must not carry env values, absolute paths, or hostnames, and check failures
+    with pre-existing conflicts must be classified target-side (MIT-012; gap 7).
+- id: TM-004
+  severity: major
+  summary: THREAT-009; a bare marker line neutralizes the bootstrap under the current
+    include? matching; skipped must require the full canonical block (MIT-009; gap 5).
+- id: TM-005
+  severity: major
+  summary: THREAT-008; --root and GIT_WORK_TREE can redirect the install to HOME or
+    another repository; require a Git top-level and print the resolved root (MIT-008; gap 6).
+- id: TM-006
+  severity: minor
+  summary: THREAT-005 and THREAT-014; the manifest must be schema-validated, scoped to
+    the packaged set, loaded without YAML aliases, and init must never delete (MIT-005, MIT-014; gaps 3 and 4).
+- id: TM-007
+  severity: minor
+  summary: THREAT-010; user-owned repository.yml path overrides survive init and can
+    empty required path groups; planning decides whether check warns or errors (MIT-010; gap 9).
+- id: TM-008
+  severity: minor
+  summary: THREAT-011, THREAT-013, THREAT-015, THREAT-007; .gitignore effectiveness via
+    git check-ignore, temp-and-rename writes, provider string sanitization, and a lock
+    file are needed but unspecified (MIT-007, MIT-011, MIT-013, MIT-015; gaps 8 and 10).
+- id: TM-009
+  severity: info
+  summary: THREAT-003 tampered gem is accepted residual risk; init cannot authenticate
+    the package and mitigates only by reviewability and manifest versioning (MIT-003).
 next: plan
-notes: ""
+notes: 'Compatibility mode: performed by a fresh-context agent under threat-modeling permissions.'
