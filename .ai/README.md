@@ -9,7 +9,25 @@ The host may operate in either mode:
 - **Enforced mode:** a harness technically constrains filesystem, commands, credentials, context, and model selection.
 - **Compatibility mode:** a coding platform follows the same contracts from repository instructions when hard sandboxing is unavailable.
 
-Canonical source templates under `.ai/skills/*/template/` are immutable workflow definitions. Copies under `changes/<change>/` are mutable execution records.
+Canonical source templates under `.ai/skills/*/template/` and `.ai/templates/` are immutable workflow definitions. Copies under `changes/<change>/` are mutable execution records, created by `soft-foundry change new`. Schemas for the record and its per-phase `handoff.yml` are in `schemas.md`.
+
+## Layout
+
+| Path | Purpose |
+| --- | --- |
+| `workflow.yml` | Lifecycle phases, non-linear `transitions`, global rules, permitted judgments. |
+| `paths.yml` | Named path groups (`APP`, `TESTS`, `INFRA`, `DOCS`, `CONTROL_PLANE`, `HARNESS_EVALS`) that skill permissions reference as `${GROUP}`. `repository.yml` may override a group with the repository's real layout. |
+| `skills/<name>/` | One declarative skill per phase: contract files plus `template/` holding every file its completion gate requires. |
+| `templates/` | Shared templates: the phase `handoff.yml` and the change `metadata.yml`. |
+| `profiles/` | Capability profiles skills request; provider/model resolution is a runtime concern. |
+| `rules/` | Coding and infrastructure standards loaded by implementation and checked by review. |
+| `policies/` | Permission principles, protected paths, anti-fudging rules, human boundaries. Protected from every skill's write set. |
+| `maturity.yml`, `repository.yml` | Maturity policy and the evidence-backed repository profile. |
+| `harness-evals/` | Evaluations of the harness itself; denied to execution skills. |
+
+`soft-foundry check` verifies this structure: every phase has a skill, every required file has a template, every permission references a known path group, no skill can write protected policy, and every skill denies reading harness evals. `soft-foundry gate` applies each skill's `completion.yml` to a change record.
+
+Repository discovery is the only skill permitted to write inside `.ai/`, and only to `repository.yml`, because that file is evidence rather than policy.
 
 ## Repository maturity and gap analysis
 

@@ -1,0 +1,25 @@
+version: 1
+
+# Named path groups referenced by skill permissions as ${GROUP}. Defaults assume a
+# conventional application layout. Repository discovery records the actual layout
+# under `paths:` in .ai/repository.yml, which overrides these defaults group by group.
+#
+# ${CHANGE} is not a path group; it expands to the active change slug.
+groups:
+  APP:
+    - app/**
+    - lib/**
+    - config/**
+    - db/**
+    - exe/**
+  TESTS:
+    - spec/**
+    - test/**
+  INFRA:
+    - infra/**
+  DOCS:
+    - docs/**
+  CONTROL_PLANE:
+    - .ai/**
+  HARNESS_EVALS:
+    - .ai/harness-evals/**

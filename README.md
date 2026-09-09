@@ -4,49 +4,14 @@ Soft Foundry is a repository-native control plane for autonomous software engine
 
 ## Agent: next implementation milestone
 
-If you are an engineering agent reading this repository because you were asked to continue implementing Soft Foundry, read `AGENTS.md`, `.ai/README.md`, and `.ai/workflow.yml` before changing code. Follow the Soft Foundry lifecycle and implement the work through a pull request rather than pushing directly to `main`.
+The next milestone is tracked as the change record `changes/init-command/`. Its intake phase is complete; the next phase is `discover`. If you are an engineering agent asked to continue implementing Soft Foundry, read `AGENTS.md`, `.ai/README.md`, and `.ai/workflow.yml`, then:
 
-### Goal
+```bash
+git checkout -b change/init-command
+soft-foundry change status init-command
+```
 
-Make `soft-foundry init` install the Soft Foundry control plane into an existing Git repository safely and idempotently.
-
-### Required behavior
-
-- Treat `AGENTS.md` and `.ai/` in this repository as the canonical source of truth.
-- Package the installable repository control-plane files with the gem.
-- Detect the target repository root and refuse unsafe/non-repository targets unless explicitly supported.
-- Install the canonical `.ai/` control plane into the target repository.
-- Install or safely update `AGENTS.md` without destroying repository-specific instructions.
-- Create `changes/` scaffolding.
-- Create user-documentation scaffolding only where appropriate.
-- Ensure `.soft-foundry/` is gitignored.
-- Preserve all existing application files.
-- Preserve existing `CLAUDE.md` content and add only a Soft Foundry pointer when one is missing.
-- Be idempotent: repeated `soft-foundry init` runs must not duplicate content or unexpectedly rewrite unchanged files.
-- Report files as created, updated, skipped, or conflicting.
-- Do not blindly create provider-specific infrastructure.
-- Do not overwrite conflicting user-owned files without an explicit conflict strategy.
-- Keep provider discovery for OpenAI, Anthropic, and xAI/Grok intact.
-
-### Required tests
-
-Cover at minimum:
-
-- installation into a clean Git repository
-- an existing `AGENTS.md`
-- an existing `CLAUDE.md`
-- repeated initialization
-- conflicting `.ai/` content
-- `.gitignore` behavior
-- preservation of unrelated application files
-
-### Scope boundaries
-
-Do **not** implement autonomous skill execution in this milestone. Do **not** implement the full `soft-foundry change` workflow unless a minimal abstraction is strictly required by initialization. Do not weaken existing Soft Foundry policies or lifecycle semantics to simplify the implementation.
-
-Before coding, inspect the current CLI/gem structure and produce a short implementation plan in the pull request description. The PR must include implementation, automated tests, updated usage documentation, relevant internal documentation, design decisions, tradeoffs, and known limitations.
-
-The quality of this PR is also an evaluation of Soft Foundry itself: if repository instructions are ambiguous, contradictory, incomplete, or prevent safe implementation, document those problems rather than silently inventing new workflow semantics.
+Work the phases in lifecycle order, complete each phase's handoff, and run `soft-foundry gate <phase>` before moving on. The quality of that pull request is also an evaluation of Soft Foundry itself: if repository instructions are ambiguous, contradictory, incomplete, or prevent safe implementation, document those problems in the change record rather than silently inventing new workflow semantics.
 
 ## Install from this repository
 
@@ -84,6 +49,22 @@ soft-foundry models
 soft-foundry doctor
 ```
 
+## Change records and gates
+
+Every change gets a durable record under `changes/<slug>/`, scaffolded from the phase templates:
+
+```bash
+git checkout -b change/<slug>
+soft-foundry change new <slug> --title "..."
+soft-foundry change status            # phase-by-phase status for the current branch
+soft-foundry gate verify              # evaluate one phase's completion gate
+soft-foundry gate all --change <slug>
+```
+
+A gate passes only when the phase's required files exist with no `TBD` placeholders, the handoff is valid, nothing is blocking, the predecessor phase is complete, and commit-bound evidence is not stale. Evidence is stale when any file in the `APP`, `TESTS`, or `INFRA` path groups changed after the recorded commit. See `.ai/schemas.md`.
+
+`soft-foundry check` lints the control plane itself. `soft-foundry ci` runs the lint plus every change record's gates, and `soft-foundry hooks install` wires it into a pre-commit hook. The GitHub Actions workflow runs the same two commands.
+
 ## Coding shells
 
 Soft Foundry can launch an installed coding shell from inside the repository:
@@ -108,7 +89,7 @@ In short: the harness determines **what is authorized**; the adversarial model d
 
 ## Architecture
 
-- `.ai/` — how engineering is performed: workflow, skills, rules, policies, profiles, gates.
+- `.ai/` — how engineering is performed: workflow, skills, rules, policies, profiles, path groups, templates, gates.
 - `AGENTS.md` — universal bootstrap for coding agents.
 - `CLAUDE.md` and future vendor files — thin compatibility pointers only.
 - `.soft-foundry/` — local provider/model runtime state; never committed.

@@ -1,3 +1,14 @@
-read: [docs/user/**, changes/${CHANGE}/10-user-documentation/**]
-write: [changes/${CHANGE}/11-faq-index/**, docs/user/faq/**]
-deny_write: [app/**, lib/**, config/**, db/**, infra/**, spec/**, .ai/**]
+read:
+  - "${DOCS}"
+  - "${CONTROL_PLANE}"
+  - "changes/${CHANGE}/10-user-documentation/**"
+write:
+  - "changes/${CHANGE}/11-faq-index/**"
+  - "docs/user/faq/**"
+deny_read:
+  - "${HARNESS_EVALS}"
+deny_write:
+  - "${APP}"
+  - "${TESTS}"
+  - "${INFRA}"
+  - "${CONTROL_PLANE}"

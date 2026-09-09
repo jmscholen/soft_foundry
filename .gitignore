@@ -1,0 +1,3 @@
+.soft-foundry/
+*.gem
+Gemfile.lock

@@ -2,3 +2,4 @@ name: adversarial-testing
 model: adversarial_high
 phase: 08-attack
 outputs: [attack_cases, attack_results, evidence]
+evidence: commit_bound

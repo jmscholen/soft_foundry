@@ -1,3 +1,31 @@
-read: [app/**, lib/**, config/**, db/**, infra/**, docs/**, changes/${CHANGE}/**]
-write: [changes/${CHANGE}/14-judgment/**]
-deny_write: [app/**, lib/**, config/**, db/**, infra/**, spec/**, docs/**, .ai/**, changes/${CHANGE}/00-intake/**, changes/${CHANGE}/01-discovery/**, changes/${CHANGE}/02-specification/**, changes/${CHANGE}/03-threat-model/**, changes/${CHANGE}/04-plan/**, changes/${CHANGE}/05-implementation/**, changes/${CHANGE}/06-verification/**, changes/${CHANGE}/07-evaluation/**, changes/${CHANGE}/08-attack/**, changes/${CHANGE}/09-remediation/**, changes/${CHANGE}/10-user-documentation/**, changes/${CHANGE}/11-faq-index/**, changes/${CHANGE}/12-observability/**, changes/${CHANGE}/13-review/**]
+read:
+  - "${APP}"
+  - "${TESTS}"
+  - "${INFRA}"
+  - "${DOCS}"
+  - "${CONTROL_PLANE}"
+  - "changes/${CHANGE}/**"
+write:
+  - "changes/${CHANGE}/14-judgment/**"
+deny_read:
+  - "${HARNESS_EVALS}"
+deny_write:
+  - "${APP}"
+  - "${TESTS}"
+  - "${INFRA}"
+  - "${DOCS}"
+  - "${CONTROL_PLANE}"
+  - "changes/${CHANGE}/00-intake/**"
+  - "changes/${CHANGE}/01-discovery/**"
+  - "changes/${CHANGE}/02-specification/**"
+  - "changes/${CHANGE}/03-threat-model/**"
+  - "changes/${CHANGE}/04-plan/**"
+  - "changes/${CHANGE}/05-implementation/**"
+  - "changes/${CHANGE}/06-verification/**"
+  - "changes/${CHANGE}/07-evaluation/**"
+  - "changes/${CHANGE}/08-attack/**"
+  - "changes/${CHANGE}/09-remediation/**"
+  - "changes/${CHANGE}/10-user-documentation/**"
+  - "changes/${CHANGE}/11-faq-index/**"
+  - "changes/${CHANGE}/12-observability/**"
+  - "changes/${CHANGE}/13-review/**"

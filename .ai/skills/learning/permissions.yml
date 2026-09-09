@@ -1,4 +1,13 @@
-read: [changes/${CHANGE}/**, .ai/rules/**]
-write: [changes/${CHANGE}/15-learning/**]
-deny_write: [app/**, lib/**, config/**, db/**, infra/**, spec/**, docs/**, .ai/**]
-deny_read: [.ai/harness-evals/**]
+read:
+  - "${CONTROL_PLANE}"
+  - "changes/${CHANGE}/**"
+write:
+  - "changes/${CHANGE}/15-learning/**"
+deny_read:
+  - "${HARNESS_EVALS}"
+deny_write:
+  - "${APP}"
+  - "${TESTS}"
+  - "${INFRA}"
+  - "${DOCS}"
+  - "${CONTROL_PLANE}"

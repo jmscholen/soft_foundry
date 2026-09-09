@@ -32,7 +32,6 @@ lifecycle:
   - id: remediate
     skill: remediation
     output: 09-remediation
-    loop_to: verify
   - id: document
     skill: product-documentation
     output: 10-user-documentation
@@ -52,6 +51,23 @@ lifecycle:
     skill: learning
     output: 15-learning
 
+# Non-linear edges. Every other phase proceeds to the next lifecycle entry.
+# Any transition back to `verify` marks verify, evaluate, attack, review, and
+# judge evidence stale for the change.
+transitions:
+  remediate:
+    next: verify
+  observe:
+    next: review
+    on_code_change: verify
+  review:
+    next: judge
+    on_blocking_findings: remediate
+  judge:
+    next: learn
+    on_blocked: remediate
+    on_rejected: intake
+
 rules:
   templates_required: true
   phase_handoff_required: true
@@ -60,6 +76,8 @@ rules:
   implementation_may_not_grade_itself: true
   final_judgment_required: true
   human_boundary_policy: .ai/policies/human-boundaries.yml
+  path_groups: .ai/paths.yml
+  handoff_template: .ai/templates/handoff.yml
 
 judgments:
   - APPROVED

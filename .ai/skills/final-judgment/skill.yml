@@ -2,3 +2,4 @@ name: final-judgment
 model: judgment_high
 phase: 14-judgment
 outputs: [final_judgment, residual_risk, evidence_manifest]
+evidence: commit_bound

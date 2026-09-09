@@ -1,4 +1,24 @@
-read: [app/**, lib/**, config/**, infra/**, changes/${CHANGE}/02-specification/**, changes/${CHANGE}/07-evaluation/**, changes/${CHANGE}/08-attack/**]
-write: [infra/**, app/**, lib/**, config/**, changes/${CHANGE}/12-observability/**]
-deny_write: [.ai/**, spec/**, changes/${CHANGE}/06-verification/**, changes/${CHANGE}/07-evaluation/**, changes/${CHANGE}/08-attack/**, changes/${CHANGE}/14-judgment/**]
-deny_read: [.ai/harness-evals/**]
+# Observability may add instrumentation and its tests. Any such code change
+# routes the workflow back to verify (see workflow.yml transitions).
+read:
+  - "${APP}"
+  - "${TESTS}"
+  - "${INFRA}"
+  - "${CONTROL_PLANE}"
+  - "changes/${CHANGE}/02-specification/**"
+  - "changes/${CHANGE}/07-evaluation/**"
+  - "changes/${CHANGE}/08-attack/**"
+write:
+  - "${APP}"
+  - "${TESTS}"
+  - "${INFRA}"
+  - "changes/${CHANGE}/12-observability/**"
+deny_read:
+  - "${HARNESS_EVALS}"
+deny_write:
+  - "${CONTROL_PLANE}"
+  - "${DOCS}"
+  - "changes/${CHANGE}/06-verification/**"
+  - "changes/${CHANGE}/07-evaluation/**"
+  - "changes/${CHANGE}/08-attack/**"
+  - "changes/${CHANGE}/14-judgment/**"

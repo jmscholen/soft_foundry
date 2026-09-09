@@ -1,4 +1,19 @@
-read: ["**"]
-write: [changes/${CHANGE}/01-discovery/**]
-deny_write: [app/**, lib/**, config/**, db/**, infra/**, spec/**, .ai/**]
-deny_read: [.ai/harness-evals/**]
+read:
+  - "**"
+# .ai/repository.yml is the one control-plane file discovery may write: it is
+# evidence-backed state, not policy.
+write:
+  - "changes/${CHANGE}/01-discovery/**"
+  - ".ai/repository.yml"
+deny_read:
+  - "${HARNESS_EVALS}"
+deny_write:
+  - "${APP}"
+  - "${TESTS}"
+  - "${INFRA}"
+  - "${DOCS}"
+  - ".ai/policies/**"
+  - ".ai/skills/**"
+  - ".ai/rules/**"
+  - ".ai/workflow.yml"
+  - ".ai/maturity.yml"

@@ -1,0 +1,19 @@
+---
+change:
+  id: init-command
+  title: soft-foundry init installs the control plane into an existing repository
+git:
+  worktree: "/Users/jscholen-iou/dev/soft_foundry"
+  branch: change/init-command
+type: feature
+risk: medium
+status: in_progress
+current_phase: discover
+created_at: 2026-09-09 15:26:20.000000000 Z
+surfaces:
+  application: true
+  database: false
+  infrastructure: false
+  security: false
+  accessibility: false
+  observability: false

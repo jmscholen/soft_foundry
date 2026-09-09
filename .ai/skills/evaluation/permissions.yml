@@ -1,4 +1,19 @@
-read: [app/**, config/**, db/**, infra/**, changes/${CHANGE}/02-specification/**, changes/${CHANGE}/03-threat-model/**, changes/${CHANGE}/06-verification/**]
-write: [changes/${CHANGE}/07-evaluation/**]
-deny_write: [app/**, lib/**, config/**, db/**, infra/**, spec/**, .ai/**, changes/${CHANGE}/02-specification/**]
-deny_read: [.ai/harness-evals/**]
+read:
+  - "${APP}"
+  - "${TESTS}"
+  - "${INFRA}"
+  - "${CONTROL_PLANE}"
+  - "changes/${CHANGE}/02-specification/**"
+  - "changes/${CHANGE}/03-threat-model/**"
+  - "changes/${CHANGE}/06-verification/**"
+write:
+  - "changes/${CHANGE}/07-evaluation/**"
+deny_read:
+  - "${HARNESS_EVALS}"
+deny_write:
+  - "${APP}"
+  - "${TESTS}"
+  - "${INFRA}"
+  - "${DOCS}"
+  - "${CONTROL_PLANE}"
+  - "changes/${CHANGE}/02-specification/**"

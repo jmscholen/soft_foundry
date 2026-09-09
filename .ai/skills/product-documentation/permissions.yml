@@ -1,3 +1,18 @@
-read: [docs/user/**, changes/${CHANGE}/02-specification/**, changes/${CHANGE}/07-evaluation/**, changes/${CHANGE}/08-attack/results.md]
-write: [changes/${CHANGE}/10-user-documentation/**, docs/user/**]
-deny_write: [app/**, lib/**, config/**, db/**, infra/**, spec/**, .ai/**, changes/${CHANGE}/07-evaluation/**, changes/${CHANGE}/08-attack/**]
+read:
+  - "${DOCS}"
+  - "${CONTROL_PLANE}"
+  - "changes/${CHANGE}/02-specification/**"
+  - "changes/${CHANGE}/07-evaluation/**"
+  - "changes/${CHANGE}/08-attack/results.md"
+write:
+  - "changes/${CHANGE}/10-user-documentation/**"
+  - "docs/user/**"
+deny_read:
+  - "${HARNESS_EVALS}"
+deny_write:
+  - "${APP}"
+  - "${TESTS}"
+  - "${INFRA}"
+  - "${CONTROL_PLANE}"
+  - "changes/${CHANGE}/07-evaluation/**"
+  - "changes/${CHANGE}/08-attack/**"
