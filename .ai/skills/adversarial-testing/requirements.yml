@@ -1,1 +1,23 @@
-required: [intent_violation_cases, threat_traceability, unauthorized_journeys, abuse_cases, evidence, commit_sha_recorded]
+required:
+  - authorization_envelope
+  - target_environment
+  - allowed_surfaces
+  - prohibited_surfaces
+  - data_constraints
+  - network_constraints
+  - destructive_action_policy
+  - intent_violation_cases
+  - threat_traceability
+  - unauthorized_journeys
+  - abuse_cases
+  - evidence
+  - commit_sha_recorded
+
+provider_refusal:
+  safety_or_authorization_block:
+    action: stop_and_record
+    provider_fallback: prohibited
+  capability_or_runtime_failure:
+    action: may_reresolve_adversarial_high
+    provider_fallback: permitted
+    preserve_authorization_envelope: true
