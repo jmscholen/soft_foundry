@@ -20,7 +20,8 @@
 - Not changed: EVAL-F-002 (`init --help`) is left for review to decide whether per-command help is in scope; the evaluation phase's expected outcomes and transcripts are untouched.
 
 ## Evidence invalidated
-- `06-verification` (was complete at 6df4d15e73d8) and `07-evaluation` (was blocked at 6a41afd123ca). Both previous runs are retained verbatim under `<phase>/previous/<sha12>/` per the no-deleting-failed-results rule, and their handoffs are reset to `pending` so the reruns start from the templates.
+- `06-verification` (was complete at 6df4d15e73d8): its passing evidence no longer describes the code, so its handoff is reset to `pending` and the run is archived under `previous/6df4d15e73d8/`.
+- `07-evaluation` (blocked at 6a41afd123ca): stays `blocked` until re-evaluated, because the blockage is the fact remediation answers and the gate uses it to let remediation close. The run is archived under `previous/6a41afd123ca/`. Nothing from either run was deleted, per the no-deleting-failed-results rule.
 - `08-attack` never ran and is unaffected.
 
 ## Required reruns
