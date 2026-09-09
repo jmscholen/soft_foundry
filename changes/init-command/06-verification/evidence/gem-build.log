@@ -1,5 +1,5 @@
-scratch copy: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/gembuild/src (rsync of repo, excluding .git and the in-progress 06-verification dir)
-gem binary: /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/gem
+scratch copy: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/gembuild3/src (rsync of repo, excluding .git and the in-progress 06-verification dir)
+gem binary: /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/gem (3.5.9)
 $ cd $S/src && gem build soft_foundry.gemspec --output $S/soft_foundry.gem
 WARNING:  licenses is empty, but is recommended. Use an license identifier from
 https://spdx.org/licenses or 'Nonstandard' for a nonstandard license,
@@ -202,29 +202,31 @@ lib/soft_foundry/provider.rb
 lib/soft_foundry/providers.rb
 lib/soft_foundry/shell.rb
 lib/soft_foundry/version.rb
-exit=0
+packaged file count: 189
 
-$ file count:
-     189
-
-$ scaffolding presence (grep -x):
-present  changes/README.md
-present  docs/user/README.md
-present  .ai/templates/repository.yml
-present  .ai/workflow.yml
-present  exe/soft-foundry
-present  AGENTS.md
-$ harness-evals entries:
+$ scaffolding and key entries present? (expect yes for each)
+yes  changes/README.md
+yes  docs/user/README.md
+yes  .ai/templates/repository.yml
+yes  .ai/workflow.yml
+yes  exe/soft-foundry
+yes  AGENTS.md
+yes  .ai/templates/handoff.yml
+$ harness-evals entries in the gem (expect only README.md):
 .ai/harness-evals/README.md
-$ .ai/manifest.yml packaged? (expect no)
+$ .ai/manifest.yml in the gem? (expect none)
+0
+$ test/ or changes/init-command in the gem? (expect 0)
 0
 
-$ tar -xOf $S/soft_foundry.gem metadata.gz | gunzip | grep -A3 required_ruby_version
+$ tar -xOf $S/soft_foundry.gem metadata.gz | gunzip | grep -A6 required_ruby_version
 required_ruby_version: !ruby/object:Gem::Requirement
   requirements:
   - - ">="
     - !ruby/object:Gem::Version
       version: '3.2'
+required_rubygems_version: !ruby/object:Gem::Requirement
+  requirements:
 $ gem specification $S/soft_foundry.gem required_ruby_version
 --- !ruby/object:Gem::Requirement
 requirements:
@@ -233,6 +235,10 @@ requirements:
     version: '3.2'
 
 exit=0
+$ gem specification $S/soft_foundry.gem version
+--- !ruby/object:Gem::Version
+version: 0.2.0
 
-$ .gem files inside the repository (must be none):
+
+$ find $REPO -name "*.gem" (expect none in the repository)
 count: 0

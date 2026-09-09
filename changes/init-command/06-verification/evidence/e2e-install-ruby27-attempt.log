@@ -1,5 +1,4 @@
-### Carry-forward probe of VER-004 at the current commit: running from source under a Ruby below the declared floor (required_ruby_version >= 3.2).
-### The previous run hit this accidentally when asdf resolved ruby 2.7.8 in a scratch directory; this rerun reproduces it deliberately with the absolute 2.7.8 binary. Environment probe, not a required gate.
+### Carry-forward probe of VER-004 at the current commit: running from source under a Ruby below the declared floor (required_ruby_version >= 3.2). Environment probe, not a required gate.
 $ /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/bin/ruby -v
 ruby 2.7.8p225 (2023-03-30 revision 1f4d455848) [arm64-darwin23]
 $ /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/bin/ruby -Ilib exe/soft-foundry version

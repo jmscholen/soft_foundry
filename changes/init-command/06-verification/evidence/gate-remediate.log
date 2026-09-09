@@ -1,0 +1,48 @@
+$ ruby -Ilib exe/soft-foundry gate remediate
+09-remediation  complete  PASS
+  ✓ handoff identity
+  ✓ required files present: summary.md, handoff.yml
+  ✓ no placeholders
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: 420acdc5f35da00d2613439ba7243eafddd101df
+  ✓ completed_at recorded: 2026-09-09T16:55:23Z
+  ✓ predecessor complete: 05-implementation
+exit: 0
+
+$ ruby -Ilib exe/soft-foundry gate remediate --change init-command
+09-remediation  complete  PASS
+  ✓ handoff identity
+  ✓ required files present: summary.md, handoff.yml
+  ✓ no placeholders
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: 420acdc5f35da00d2613439ba7243eafddd101df
+  ✓ completed_at recorded: 2026-09-09T16:55:23Z
+  ✓ predecessor complete: 05-implementation
+exit: 0
+
+$ ruby -Ilib exe/soft-foundry change status init-command
+init-command: soft-foundry init installs the control plane into an existing repository  [status: in_progress, phase: verify, risk: medium]
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        pending      
+  07-evaluation          pending      
+  08-attack              pending      
+  09-remediation         complete     ok
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              pending      
+  14-judgment            pending      
+  15-learning            pending      
+exit: 0
+
+# workflow.yml remediate entry (harness change under test):
+$ grep -n -A3 "id: remediate" .ai/workflow.yml
+32:  - id: remediate
+33-    skill: remediation
+34-    output: 09-remediation
+35-    optional: true        # only runs when a gated phase produced findings

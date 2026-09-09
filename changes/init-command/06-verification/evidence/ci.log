@@ -50,9 +50,6 @@ change init-command
   ✓ commit_sha recorded: 017e14984035cd00d7320db31daf87ab44a3a98f
   ✓ completed_at recorded: 2026-09-09T16:05:36Z
   ✓ predecessor complete: 04-plan
-07-evaluation  blocked  PASS
-  ✓ handoff identity
-  ! blocking recorded: EVAL-014 failed: soft-foundry init --root with no value exits 4 with 'internal failure in installer: ArgumentError: --root requires a value', 'This is a defect in Soft Foundry 0.2.0, not in your repository', a backtrace diagnostic, and fork/pull-request guidance; the specification's exit-code contract requires exit 1 for a usage error with a plain explanation (evidence/EVAL-014-cli-surface.log step 5, finding EVAL-F-001). All other journeys (EVAL-001..013, EVAL-015) pass and cover AC-001..AC-016.
 09-remediation  complete  PASS
   ✓ handoff identity
   ✓ required files present: summary.md, handoff.yml
@@ -60,7 +57,7 @@ change init-command
   ✓ no blocking conditions
   ✓ commit_sha recorded: 420acdc5f35da00d2613439ba7243eafddd101df
   ✓ completed_at recorded: 2026-09-09T16:55:23Z
-  ✓ predecessor complete: repairing blocked 07-evaluation
+  ✓ predecessor complete: 05-implementation
 
 change upstream-failure-reporting
 00-intake  complete  PASS

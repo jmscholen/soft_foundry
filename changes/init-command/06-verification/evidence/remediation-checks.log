@@ -1,5 +1,5 @@
 ### ruby: /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby (ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23])
-### target: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/remediation-target
+### target: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/remediation-target-3
 
 ### R1 (EVAL-F-001): init --root with no value (expect exit 1, plain '--root requires a value', no 'defect in Soft Foundry')
 $ soft-foundry init --root
@@ -28,7 +28,7 @@ init exit=0
 $ soft-foundry init --no-onboard
 exit=3
 --- non-skipped lines ---
-root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/remediation-target
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/remediation-target-3
 conflict  .ai/rules/general.md  (differs from manifest hash)
 conflict  .ai/rules/ruby.md  (differs from manifest hash)
 check: ok
@@ -49,7 +49,7 @@ grep exit=0
 $ next line mentions --force:
 yes
 $ ASCII-stripped status words still identifiable:
-   2 conflict
+   3 conflict
  169 skipped
 $ git status --porcelain (expect clean; r2.out untracked is this script's own file)
 ?? r2.out
@@ -63,7 +63,7 @@ summary: created 0, updated 0, skipped 169, conflict 0, forced 2
 $ env -u OPENAI_API_KEY -u ANTHROPIC_API_KEY -u XAI_API_KEY soft-foundry init
 exit=0
 --- non-skipped lines ---
-root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/remediation-target
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/remediation-target-3
 check: ok
 
 LLM provider discovery
@@ -85,10 +85,10 @@ yes  ANTHROPIC_API_KEY
 yes  XAI_API_KEY
 $ ls -la .soft-foundry/
 total 8
-drwxr-xr-x@  4 jscholen-iou  wheel  128 Sep  9 12:58 .
-drwxr-xr-x@ 12 jscholen-iou  wheel  384 Sep  9 12:58 ..
--rw-r--r--@  1 jscholen-iou  wheel    0 Sep  9 12:58 init.lock
--rw-r--r--@  1 jscholen-iou  wheel  200 Sep  9 12:58 runtime.yml
+drwxr-xr-x@  4 jscholen-iou  wheel  128 Sep  9 16:51 .
+drwxr-xr-x@ 12 jscholen-iou  wheel  384 Sep  9 16:51 ..
+-rw-r--r--@  1 jscholen-iou  wheel    0 Sep  9 16:51 init.lock
+-rw-r--r--@  1 jscholen-iou  wheel  200 Sep  9 16:51 runtime.yml
 $ cat .soft-foundry/runtime.yml
 ---
 version: 1
