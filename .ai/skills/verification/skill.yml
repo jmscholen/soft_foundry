@@ -1,0 +1,4 @@
+name: verification
+model: reasoning_high
+phase: 06-verification
+outputs: [deterministic_results, evidence]

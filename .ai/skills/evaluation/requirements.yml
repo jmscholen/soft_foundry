@@ -1,0 +1,1 @@
+required: [legitimate_user_journeys, acceptance_traceability, ui_evidence_when_applicable, keyboard_accessibility_when_applicable, commit_sha_recorded]

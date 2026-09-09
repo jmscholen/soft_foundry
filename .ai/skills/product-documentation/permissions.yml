@@ -1,0 +1,3 @@
+read: [docs/user/**, changes/${CHANGE}/02-specification/**, changes/${CHANGE}/07-evaluation/**, changes/${CHANGE}/08-attack/results.md]
+write: [changes/${CHANGE}/10-user-documentation/**, docs/user/**]
+deny_write: [app/**, lib/**, config/**, db/**, infra/**, spec/**, .ai/**, changes/${CHANGE}/07-evaluation/**, changes/${CHANGE}/08-attack/**]

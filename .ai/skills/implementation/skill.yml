@@ -1,0 +1,4 @@
+name: implementation
+model: coding_high
+phase: 05-implementation
+outputs: [code_changes, implementation_log, decisions, challenges]

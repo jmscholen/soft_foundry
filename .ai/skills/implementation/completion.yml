@@ -1,0 +1,2 @@
+required_files: [log.md, decisions.md, deviations.md, handoff.yml]
+blocking: [undocumented_deviation]

@@ -1,0 +1,1 @@
+required: [intent_violation_cases, threat_traceability, unauthorized_journeys, abuse_cases, evidence, commit_sha_recorded]

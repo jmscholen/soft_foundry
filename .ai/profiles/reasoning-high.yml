@@ -1,0 +1,6 @@
+name: reasoning_high
+requirements:
+  reasoning: high
+  tool_use: true
+  structured_output: true
+  long_context: preferred

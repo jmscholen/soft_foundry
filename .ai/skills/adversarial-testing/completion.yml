@@ -1,0 +1,1 @@
+required_files: [attack-plan.md, cases.yml, results.md, evidence/manifest.yml, handoff.yml]

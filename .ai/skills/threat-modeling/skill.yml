@@ -1,0 +1,4 @@
+name: threat-modeling
+model: adversarial_high
+phase: 03-threat-model
+outputs: [attack_surface, trust_boundaries, threats, mitigations, abuse_cases]

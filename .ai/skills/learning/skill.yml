@@ -1,0 +1,4 @@
+name: learning
+model: reasoning_high
+phase: 15-learning
+outputs: [findings, proposed_rules, proposed_harness_evals]

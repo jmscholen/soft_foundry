@@ -1,0 +1,1 @@
+required: [stable_id, question, answer, audience, feature, keywords, source_evals, introduced_by_change, last_verified_change, status]

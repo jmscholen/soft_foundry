@@ -1,0 +1,4 @@
+name: planning
+model: reasoning_high
+phase: 04-plan
+outputs: [implementation_plan, test_plan, rollout, rollback]

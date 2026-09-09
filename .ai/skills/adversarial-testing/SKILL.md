@@ -1,0 +1,2 @@
+# Adversarial Testing
+Try to make the implementation violate its intent. Use real UI, HTTP/API, job, file-processing, data, and infrastructure surfaces as applicable. Attempt unauthorized state changes, identifier substitution, malformed/large input, replay, concurrency, injection, XSS, SSRF, path traversal, resource exhaustion, and dependency failures. Never attack production or third parties without explicit authorization. Report findings; do not repair them.

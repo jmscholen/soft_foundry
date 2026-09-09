@@ -1,0 +1,14 @@
+version: 1
+require_human_approval:
+  - production destructive operations
+  - irreversible data deletion
+  - credential or secret disclosure
+  - legal commitments
+  - financial commitments or transfers
+  - security testing against production or third-party systems without explicit authorization
+  - changes that intentionally weaken required controls
+never_autonomous:
+  - bypassing access controls
+  - fabricating evidence
+  - modifying another skill's evidence to obtain a pass
+  - weakening acceptance criteria solely because implementation failed

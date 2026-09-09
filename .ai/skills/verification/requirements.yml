@@ -1,0 +1,1 @@
+required: [commit_sha_recorded, required_checks_run, failures_preserved, evidence_captured]

@@ -1,0 +1,7 @@
+name: coding_high
+requirements:
+  reasoning: high
+  code_generation: high
+  tool_use: true
+  shell: true
+  filesystem_write: true

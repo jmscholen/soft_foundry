@@ -1,0 +1,1 @@
+required_files: [results.md, tests.yml, evidence/manifest.yml, handoff.yml]

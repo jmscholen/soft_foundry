@@ -1,0 +1,1 @@
+required: [functional_requirements, acceptance_criteria, accessibility_requirements, security_requirements, failure_behavior, observability_expectations, traceable_ids]

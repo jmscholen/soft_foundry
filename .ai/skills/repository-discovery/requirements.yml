@@ -1,0 +1,1 @@
+required: [architecture_identified, runtime_identified, test_strategy_identified, infra_identified, auth_boundaries_identified, unknowns_recorded]

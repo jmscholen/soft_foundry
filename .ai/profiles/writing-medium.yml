@@ -1,0 +1,5 @@
+name: writing_medium
+requirements:
+  reasoning: medium
+  structured_output: true
+  grounded_generation: true

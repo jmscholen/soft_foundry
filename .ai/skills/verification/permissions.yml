@@ -1,0 +1,4 @@
+read: [app/**, lib/**, config/**, db/**, infra/**, spec/**, changes/${CHANGE}/02-specification/**, changes/${CHANGE}/03-threat-model/**, changes/${CHANGE}/04-plan/**, changes/${CHANGE}/05-implementation/**]
+write: [changes/${CHANGE}/06-verification/**]
+deny_write: [app/**, lib/**, config/**, db/**, infra/**, spec/**, .ai/**]
+deny_read: [.ai/harness-evals/**]

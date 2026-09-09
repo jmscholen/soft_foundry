@@ -1,0 +1,4 @@
+name: evaluation
+model: reasoning_high
+phase: 07-evaluation
+outputs: [user_journeys, acceptance_results, ui_evidence]

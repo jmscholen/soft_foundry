@@ -1,0 +1,4 @@
+name: faq-indexing
+model: writing_medium
+phase: 11-faq-index
+outputs: [searchable_faq_records]

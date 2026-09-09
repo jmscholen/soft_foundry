@@ -1,0 +1,68 @@
+version: 1
+name: soft-foundry
+
+lifecycle:
+  - id: intake
+    skill: intake
+    output: 00-intake
+  - id: discover
+    skill: repository-discovery
+    output: 01-discovery
+  - id: specify
+    skill: specification
+    output: 02-specification
+  - id: threat_model
+    skill: threat-modeling
+    output: 03-threat-model
+  - id: plan
+    skill: planning
+    output: 04-plan
+  - id: implement
+    skill: implementation
+    output: 05-implementation
+  - id: verify
+    skill: verification
+    output: 06-verification
+  - id: evaluate
+    skill: evaluation
+    output: 07-evaluation
+  - id: attack
+    skill: adversarial-testing
+    output: 08-attack
+  - id: remediate
+    skill: remediation
+    output: 09-remediation
+    loop_to: verify
+  - id: document
+    skill: product-documentation
+    output: 10-user-documentation
+  - id: index
+    skill: faq-indexing
+    output: 11-faq-index
+  - id: observe
+    skill: observability
+    output: 12-observability
+  - id: review
+    skill: review
+    output: 13-review
+  - id: judge
+    skill: final-judgment
+    output: 14-judgment
+  - id: learn
+    skill: learning
+    output: 15-learning
+
+rules:
+  templates_required: true
+  phase_handoff_required: true
+  evidence_commit_binding: true
+  stale_evidence_on_code_change: true
+  implementation_may_not_grade_itself: true
+  final_judgment_required: true
+  human_boundary_policy: .ai/policies/human-boundaries.yml
+
+judgments:
+  - APPROVED
+  - APPROVED_WITH_RESIDUAL_RISK
+  - BLOCKED
+  - REJECTED

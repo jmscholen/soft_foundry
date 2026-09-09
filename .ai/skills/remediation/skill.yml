@@ -1,0 +1,4 @@
+name: remediation
+model: coding_high
+phase: 09-remediation
+outputs: [remediations]

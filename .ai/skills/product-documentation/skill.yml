@@ -1,0 +1,4 @@
+name: product-documentation
+model: writing_medium
+phase: 10-user-documentation
+outputs: [user_instructions, faq_candidates]

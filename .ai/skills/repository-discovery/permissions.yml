@@ -1,0 +1,4 @@
+read: ["**"]
+write: [changes/${CHANGE}/01-discovery/**]
+deny_write: [app/**, lib/**, config/**, db/**, infra/**, spec/**, .ai/**]
+deny_read: [.ai/harness-evals/**]

@@ -1,0 +1,1 @@
+required: [failure_modes_detectable, signals_defined, dashboard_defined_when_applicable, alarms_defined_when_actionable, sensitive_data_excluded, runbook_defined]

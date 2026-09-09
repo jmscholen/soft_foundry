@@ -1,0 +1,4 @@
+name: observability
+model: reasoning_high
+phase: 12-observability
+outputs: [signals, metrics, alarms, dashboard, runbook]

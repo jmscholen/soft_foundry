@@ -1,0 +1,2 @@
+required_files: [request.md, assumptions.md, handoff.yml]
+blocking: [unresolved_unsafe_ambiguity]

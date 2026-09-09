@@ -1,0 +1,16 @@
+version: 1
+principles:
+  - least_privilege
+  - separation_of_duties
+  - implementation_cannot_grade_itself
+  - evidence_producers_cannot_repair_the_subject_under_test
+  - skill_permissions_may_narrow_but_not_broaden_global_policy
+protected:
+  - .ai/policies/**
+  - .ai/harness-evals/**
+anti_fudging:
+  - no_deleting_failed_results
+  - no_rewriting_expected_results_after_observation
+  - no_disabling_required_checks
+  - no_altering_other_phase_evidence
+  - no_suppressing_unresolved_findings

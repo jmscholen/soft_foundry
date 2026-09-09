@@ -1,0 +1,1 @@
+required: [all_required_gates_accounted_for, evidence_current_for_commit, unresolved_findings_accounted_for, residual_risk_explicit, permitted_outcome_only]

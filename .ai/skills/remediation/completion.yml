@@ -1,0 +1,2 @@
+required_files: [summary.md, handoff.yml]
+next: verify

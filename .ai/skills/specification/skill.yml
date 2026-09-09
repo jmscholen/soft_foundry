@@ -1,0 +1,4 @@
+name: specification
+model: reasoning_high
+phase: 02-specification
+outputs: [specification, requirements, acceptance_criteria, readiness]

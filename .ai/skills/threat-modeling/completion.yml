@@ -1,0 +1,1 @@
+required_files: [attack-surface.md, trust-boundaries.md, threats.yml, mitigations.md, handoff.yml]

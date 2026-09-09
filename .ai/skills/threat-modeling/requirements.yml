@@ -1,0 +1,1 @@
+required: [trust_boundaries, attacker_goals, abuse_cases, security_surfaces, mitigations, proposed_attack_cases]

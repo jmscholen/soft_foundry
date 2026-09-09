@@ -1,0 +1,1 @@
+required: [implementation_sequence, affected_files_or_components, testing_strategy, rollout, rollback, risks]

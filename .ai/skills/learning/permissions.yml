@@ -1,0 +1,4 @@
+read: [changes/${CHANGE}/**, .ai/rules/**]
+write: [changes/${CHANGE}/15-learning/**]
+deny_write: [app/**, lib/**, config/**, db/**, infra/**, spec/**, docs/**, .ai/**]
+deny_read: [.ai/harness-evals/**]

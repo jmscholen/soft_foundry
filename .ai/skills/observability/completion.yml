@@ -1,0 +1,1 @@
+required_files: [signals.md, metrics.md, alarms.md, dashboard.md, runbook.md, handoff.yml]

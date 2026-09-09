@@ -1,0 +1,1 @@
+required: [intent_captured, success_outcome_captured, assumptions_explicit, task_type_assigned, risk_initially_assessed]

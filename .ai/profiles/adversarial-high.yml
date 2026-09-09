@@ -1,0 +1,8 @@
+name: adversarial_high
+requirements:
+  reasoning: high
+  tool_use: true
+  browser_or_http_tools: preferred
+isolation:
+  fresh_context: true
+  inherit_implementation_conversation: false

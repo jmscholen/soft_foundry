@@ -1,0 +1,2 @@
+required_files: [specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml]
+blocking: [unresolved_blocking_unknowns, untestable_acceptance_criteria]

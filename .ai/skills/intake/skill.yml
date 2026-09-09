@@ -1,0 +1,6 @@
+name: intake
+model: reasoning_high
+phase: 00-intake
+inputs: [user_intent]
+outputs: [request, assumptions, classification]
+completion: completion.yml

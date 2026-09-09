@@ -1,0 +1,9 @@
+name: judgment_high
+requirements:
+  reasoning: high
+  structured_output: true
+isolation:
+  fresh_context: true
+  prefer_different_execution_context_from:
+    - implementation
+    - remediation

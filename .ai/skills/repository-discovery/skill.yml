@@ -1,0 +1,4 @@
+name: repository-discovery
+model: reasoning_high
+phase: 01-discovery
+outputs: [repository_context, affected_components, dependencies, unknowns]

@@ -1,0 +1,12 @@
+version: 1
+# Provider/model names are runtime concerns. Skills request capability profiles, not vendors.
+profiles:
+  reasoning_high: []
+  coding_high: []
+  adversarial_high: []
+  judgment_high: []
+  writing_medium: []
+resolution:
+  strategy: best_available
+  allow_fallback: true
+  record_resolved_model_in_handoff: true
