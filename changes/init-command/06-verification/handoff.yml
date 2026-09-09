@@ -1,17 +1,63 @@
----
+# Phase handoff. One per phase directory. The gate checker validates this file.
 phase: 06-verification
 skill: verification
-status: pending
-commit_sha:
-started_at:
-completed_at:
+status: complete
+commit_sha: ca3cf40bcd299e98bfd821c3cc9c0d70e79e27ad
+started_at: '2026-09-09T16:56:50Z'
+completed_at: '2026-09-09T17:02:55Z'
 resolved_model:
   profile: reasoning_high
-  provider:
-  model:
-outputs: []
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+  - results.md
+  - tests.yml
+  - evidence/manifest.yml
+  - evidence/git-state.log
+  - evidence/ruby-version.log
+  - evidence/tests.log
+  - evidence/ruby-wc.log
+  - evidence/check.log
+  - evidence/ci.log
+  - evidence/doctor.log
+  - evidence/init-dry-run-self.log
+  - evidence/gem-build.log
+  - evidence/e2e-install.log
+  - evidence/e2e-manifest-verify.log
+  - evidence/remediation-checks.log
+  - evidence/init-help-probe.log
+  - evidence/e2e-install-ruby27-attempt.log
 blocking: []
-findings: []
+findings:
+  - id: VER-001
+    severity: minor
+    summary: Carried from the previous run. The updated status for a managed .ai/ file (manifest hash matches, canonical differs; the upgrade path) still has no automated test and no end-to-end evidence; updated is only exercised for AGENTS.md and CLAUDE.md. The MIT-003 test was not written.
+  - id: VER-002
+    severity: minor
+    summary: Carried. AC-016 is asserted by a single ASCII-stripped regex on the created word inside the AC-001 test; AC-010 has no dedicated test; MIT-002 (.. traversal in packaged names) and MIT-014 (large-file streaming hash) have no test. EVAL-F-005's env-var naming has no automated test either (covered only by remediation-checks.log R3). Every AC-001..AC-017 criterion does have at least one automated test.
+  - id: VER-003
+    severity: info
+    summary: doctor on this repository exits 2 because .ai/manifest.yml is absent (implementation chose not to self-install) and no local runtime exists; the manifest line works and is present in the e2e target after init.
+  - id: VER-004
+    severity: minor
+    summary: Carried and reproduced deliberately at this commit. Running from source under Ruby 2.7.8 fails with SyntaxError on endless method definitions in lib/soft_foundry/cli.rb (lines 63, 140, 141) instead of a version message; gem install would refuse via required_ruby_version but source and bundler users get no guard. Evidence e2e-install-ruby27-attempt.log.
+  - id: VER-005
+    severity: info
+    summary: gem build warns that the gemspec declares no license and no homepage.
+  - id: VER-006
+    severity: minor
+    summary: Carried. The MIT-004(b) git diff hint for updated/forced files is still not printed after a forced run (e2e-install.log STEP 7); the new next line mentions git diff only on conflict runs. Review should decide whether the mitigation table or the implementation is authoritative.
+  - id: VER-007
+    severity: major
+    summary: Carried (from IMPL-001). Implementation deviations confirmed externally - .ai/templates/repository.yml written under CONTROL_PLANE and AGENTS.md marker wrapping were outside the implementation write set, and init still has no user documentation (README.md and docs/user/README.md unchanged; README.md mentions init only as the change-record pointer). Review must accept or reject; documentation must cover init, its options, exit codes 0/1/3/4, the conflicts/next report lines, and doctor's manifest line.
+  - id: VER-008
+    severity: info
+    summary: "All required gates pass at ca3cf40 - 71 tests / 755 assertions, ruby -wc clean on 18 files, check, ci, dry-run, gem packaging, and the end-to-end install (create, idempotent skip, conflict exit 3, force exit 0, manifest hashes verified). The four remediated findings are confirmed fixed - EVAL-F-001 (init --root with no value exits 1 with the single line 'soft-foundry: --root requires a value' and no defect guidance), EVAL-F-003/F-004 (conflict runs print a conflicts line naming every path and a next line mentioning --force), EVAL-F-005 (onboarding prints 'not configured (set OPENAI_API_KEY)' style lines and exits 0 with .soft-foundry/runtime.yml written)."
+  - id: VER-009
+    severity: minor
+    summary: Carried from EVAL-F-002 / REM-002, deliberately not remediated. init --help and init -h exit 1 with 'unknown option(s)'; there is no per-command help, and soft-foundry help itself exits 1 after printing the global usage. Evidence init-help-probe.log. Review decides scope.
+  - id: VER-010
+    severity: info
+    summary: .soft-foundry/init.lock (0 bytes) remains in the target after every init run; it is the flock file under the gitignored directory and does not affect idempotence or git status. Worth a sentence in the user documentation.
 next: evaluate
-notes: Invalidated by 09-remediation; the previous run at 6df4d15e73d8 is archived
-  under previous/6df4d15e73d8/ and must be rerun against the remediated commit.
+notes: "Compatibility mode: rerun after remediation by a fresh-context agent under verification permissions. Previous run archived under previous/6df4d15e73d8/."

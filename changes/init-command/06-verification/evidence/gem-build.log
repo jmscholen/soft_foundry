@@ -1,7 +1,9 @@
 scratch copy: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/gembuild/src (rsync of repo, excluding .git and the in-progress 06-verification dir)
+gem binary: /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/gem
 $ cd $S/src && gem build soft_foundry.gemspec --output $S/soft_foundry.gem
-WARNING:  licenses is empty, but is recommended.  Use a license identifier from
-http://spdx.org/licenses or 'Nonstandard' for a nonstandard license.
+WARNING:  licenses is empty, but is recommended. Use an license identifier from
+https://spdx.org/licenses or 'Nonstandard' for a nonstandard license,
+or set it to nil if you don't want to specify a license.
 WARNING:  no homepage specified
 WARNING:  See https://guides.rubygems.org/specification-reference/ for help
   Successfully built RubyGem
@@ -202,13 +204,35 @@ lib/soft_foundry/shell.rb
 lib/soft_foundry/version.rb
 exit=0
 
+$ file count:
+     189
+
+$ scaffolding presence (grep -x):
+present  changes/README.md
+present  docs/user/README.md
+present  .ai/templates/repository.yml
+present  .ai/workflow.yml
+present  exe/soft-foundry
+present  AGENTS.md
+$ harness-evals entries:
+.ai/harness-evals/README.md
+$ .ai/manifest.yml packaged? (expect no)
+0
+
 $ tar -xOf $S/soft_foundry.gem metadata.gz | gunzip | grep -A3 required_ruby_version
 required_ruby_version: !ruby/object:Gem::Requirement
   requirements:
   - - ">="
     - !ruby/object:Gem::Version
       version: '3.2'
+$ gem specification $S/soft_foundry.gem required_ruby_version
+--- !ruby/object:Gem::Requirement
+requirements:
+- - ">="
+  - !ruby/object:Gem::Version
+    version: '3.2'
+
 exit=0
 
-$ ls in repo root for stray .gem files
-ls: /Users/jscholen-iou/dev/soft_foundry/*.gem: No such file or directory
+$ .gem files inside the repository (must be none):
+count: 0

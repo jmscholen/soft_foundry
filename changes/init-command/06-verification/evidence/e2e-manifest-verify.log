@@ -1,4 +1,4 @@
-### manifest verification of the e2e target after STEP 10 (state: post --force, all skipped)
+### manifest verification of the e2e target after STEP 8 (state: post --force, all skipped)
 $ ruby verify_manifest.rb /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/e2e-target
 manifest version: 1  soft_foundry_version: 0.2.0
 files under .ai/ on disk (excluding manifest): 166
@@ -7,6 +7,17 @@ on disk but not in manifest: [".ai/repository.yml"]
 in manifest but not on disk: []
 hash mismatches: 0 []
 malformed entries: 0
+paths outside .ai/: []
 exit=0
 
-### .ai/repository.yml is excluded from the manifest by rule (user-owned once present; REQ-005/AC-001 test asserts refute include)
+### manifest head
+---
+version: 1
+soft_foundry_version: 0.2.0
+files:
+  ".ai/README.md": 57fa4e5c61f941bf7f1886b35807014ed2835eb0ced432157d232ae9af6d7d29
+  ".ai/harness-evals/README.md": 429fa88bfc1fa5bb68dfec593aa01f080f371b61603b4f7bf116479ad51b0385
+  ".ai/maturity.yml": b9b538e88a7970bdefea4cadf3ea8f6866df00ebbfb130077c4db81cb780ac4c
+  ".ai/paths.yml": d3dfc83b1904650a5e6b0aa06c6dc7db2b2b3c97feb9d441e780733677ded502
+
+### .ai/repository.yml is excluded from the manifest by rule (user-owned once present; AC-001 test asserts refute include)

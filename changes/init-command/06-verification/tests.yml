@@ -1,5 +1,6 @@
-commit_sha: 6df4d15e73d8d8bf53555e73addbf42ca7b3494f
+commit_sha: ca3cf40bcd299e98bfd821c3cc9c0d70e79e27ad
 ruby: ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23]
+rerun_of: 6df4d15e73d8d8bf53555e73addbf42ca7b3494f  # archived under previous/6df4d15e73d8/
 checks:
   - id: CHECK-001
     kind: custom
@@ -7,80 +8,95 @@ checks:
     result: pass
     evidence: evidence/git-state.log
     criteria: []
-    notes: Worktree clean at start; the only untracked entries are this phase's own evidence files.
+    notes: HEAD ca3cf40 on change/init-command. Worktree clean before any evidence was written; at capture time the only modified paths are this phase's own evidence files, and `git status --porcelain -- . ':!changes/init-command/06-verification'` is empty.
   - id: CHECK-002
     kind: custom
-    command: ruby -v
+    command: which ruby && ruby -v
     result: pass
     evidence: evidence/ruby-version.log
     criteria: []
+    notes: asdf shim resolving to /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby (RbConfig.ruby); the same absolute binary was used for every scratch-directory run.
   - id: CHECK-003
     kind: tests
     command: bundle exec rake test
     result: pass
     evidence: evidence/tests.log
     criteria: [AC-001, AC-002, AC-003, AC-004, AC-005, AC-006, AC-007, AC-008, AC-009, AC-010, AC-011, AC-012, AC-013, AC-014, AC-015, AC-016, AC-017]
-    notes: 67 runs, 740 assertions, 0 failures, 0 errors, 0 skips. Bundler was available; the fallback runner was not needed.
+    notes: 71 runs, 755 assertions, 0 failures, 0 errors, 0 skips (previous run 67/740; the four new tests are the two EVAL-F tests in cli_init_test.rb and the two remediation-loop tests in gate_test.rb). Zero warnings in the log. Bundler was available; the fallback runner was not needed.
   - id: CHECK-004
     kind: lint
     command: for f in $(find lib -name '*.rb' | sort); do ruby -wc $f; done
     result: pass
     evidence: evidence/ruby-wc.log
     criteria: []
-    notes: 18 files, all Syntax OK, zero warnings.
+    notes: 18 files, 18 x Syntax OK, zero warnings, every exit 0.
   - id: CHECK-005
     kind: custom
     command: ruby -Ilib exe/soft-foundry check
     result: pass
     evidence: evidence/check.log
     criteria: [AC-001]
-    notes: Exit 0; 16 phases, 16 skills, no errors. Covers REQ-016 on this repository.
+    notes: Exit 0; 16 phases, 16 skills, no errors.
   - id: CHECK-006
     kind: custom
     command: ruby -Ilib exe/soft-foundry ci
     result: pass
     evidence: evidence/ci.log
     criteria: []
-    notes: Exit 0; control plane passes and phases 00-05 of init-command gate PASS at their recorded SHAs.
+    notes: "Exit 0. Phases 00-05 PASS at their recorded SHAs; 07-evaluation reported blocked (does not fail the gate); 09-remediation PASS with `predecessor complete: repairing blocked 07-evaluation`, which is the new remediation-loop rule from gate.rb; upstream-failure-reporting 00-intake PASS."
   - id: CHECK-007
     kind: custom
     command: ruby -Ilib exe/soft-foundry doctor
     result: pass
     evidence: evidence/doctor.log
     criteria: []
-    notes: Exit 2, expected on this repository. The two failing lines are `.ai/manifest.yml` (self-install not performed, see 05-implementation/decisions.md) and `local runtime`. The new manifest line is present, which is what REQ-016 requires of doctor.
+    notes: Exit 2, expected on this repository. `.ai/manifest.yml` absent (self-install not performed by implementation) and `local runtime` absent; the pre-commit hook is now present here (it was absent in the previous run).
   - id: CHECK-008
     kind: custom
     command: ruby -Ilib exe/soft-foundry init --dry-run --no-onboard
     result: pass
     evidence: evidence/init-dry-run-self.log
     criteria: [AC-012]
-    notes: Exit 0; `mode: dry run, nothing written`; 170 skipped, CLAUDE.md the only `created`; git status unchanged afterwards.
+    notes: "Exit 0; `mode: dry run, nothing written`; 170 skipped, CLAUDE.md the only `created`; nothing outside this phase directory changed afterwards."
   - id: CHECK-009
     kind: custom
-    command: gem build soft_foundry.gemspec --output <scratch>/soft_foundry.gem (in an rsync copy of the repository); tar -xOf <gem> data.tar.gz | tar -tz
+    command: gem build soft_foundry.gemspec --output <scratch>/soft_foundry.gem (in an rsync copy of the repository); tar -xOf <gem> data.tar.gz | tar -tz; gem specification <gem> required_ruby_version
     result: pass
     evidence: evidence/gem-build.log
     criteria: [AC-017]
-    notes: Built soft_foundry 0.2.0 with 189 files; changes/README.md, docs/user/README.md, .ai/templates/repository.yml present; .ai/harness-evals/README.md is the only harness-evals entry; .ai/manifest.yml absent; required_ruby_version >= 3.2. No .gem left in the repository. RubyGems warned about missing license and homepage.
+    notes: Built soft_foundry 0.2.0 with 189 files; changes/README.md, docs/user/README.md, .ai/templates/repository.yml, .ai/workflow.yml, exe/soft-foundry, AGENTS.md present; .ai/harness-evals/README.md is the only harness-evals entry; .ai/manifest.yml not packaged; required_ruby_version >= 3.2 confirmed from metadata.gz and gem specification. No .gem left in the repository. RubyGems warned about missing license and homepage.
   - id: CHECK-010
     kind: custom
-    command: scratch git repository with one application file; soft-foundry init --no-onboard (twice); check; doctor; edit .ai/rules/general.md and commit; init (conflict); init --force; init
+    command: scratch git repository with app.rb, absolute ruby 3.3.1; init --no-onboard (twice); check; doctor; edit .ai/rules/general.md and commit; init (conflict); init --force; init
     result: pass
     evidence: evidence/e2e-install.log
     criteria: [AC-001, AC-003, AC-006, AC-007, AC-010, AC-016]
-    notes: First init exit 0 with 171 created and `check: ok`; app.rb byte-identical; second init exit 0 with 171 skipped and clean git status; check exit 0; doctor exit 2 (manifest present, hook and runtime absent, as expected); conflict run exit 3 with `conflict  .ai/rules/general.md  (differs from manifest hash)`; --force exit 0 with `forced` and canonical content restored; final run 171 skipped.
+    notes: "Exit codes 0 / 0 / 0 / 2 / 3 / 0 / 0. First init 171 created, `check: ok`, app.rb SHA-256 unchanged, git status clean after commit; second init 171 skipped and no created/updated/conflict/forced line; check exit 0; doctor exit 2 (manifest present, hook and runtime absent because --no-onboard); conflict run exit 3 with `conflict  .ai/rules/general.md  (differs from manifest hash)`, `conflicts: .ai/rules/general.md`, and a `next:` line naming --force, worktree untouched; --force exit 0 with `forced` line, git diff --stat shows the 3 maintainer lines removed, on-disk SHA-256 equals the manifest entry; final run 171 skipped."
   - id: CHECK-011
     kind: custom
-    command: ruby verify_manifest.rb <e2e target> (YAML-load .ai/manifest.yml, compare against every file under .ai/, recompute SHA-256)
+    command: ruby verify_manifest.rb <e2e target> (YAML safe_load without aliases, compare against every file under .ai/, recompute SHA-256)
     result: pass
     evidence: evidence/e2e-manifest-verify.log
     criteria: [AC-001, AC-007]
-    notes: soft_foundry_version 0.2.0; 165 entries covering every .ai/ file except .ai/repository.yml (excluded by rule); 0 hash mismatches after --force.
+    notes: version 1, soft_foundry_version 0.2.0; 165 entries covering every .ai/ file except .ai/repository.yml (excluded by rule); 0 hash mismatches, 0 malformed entries, no path outside .ai/, after --force.
   - id: CHECK-012
     kind: custom
-    command: same end-to-end script, first attempt, where the scratch directory resolved `ruby` to 2.7.8 via asdf
+    command: "scratch git repository, absolute ruby 3.3.1: init --root (no value); install, commit edits to .ai/rules/general.md and .ai/rules/ruby.md, init (conflict); init --force; env -u OPENAI_API_KEY -u ANTHROPIC_API_KEY -u XAI_API_KEY init (with onboarding)"
+    result: pass
+    evidence: evidence/remediation-checks.log
+    criteria: [AC-015, AC-016]
+    notes: "Remediation-specific. R1 (EVAL-F-001): exit 1, output is the single line `soft-foundry: --root requires a value`; zero matches for `defect in Soft Foundry`, `internal failure`, or pull-request guidance; nothing written to the target. R2 (EVAL-F-003/F-004): exit 3; `conflicts: .ai/rules/general.md, .ai/rules/ruby.md`; `next: compare with `git diff`, keep your version, or commit it and rerun with --force to take the canonical version (uncommitted edits are never overwritten)`; status words survive stripping to printable ASCII (2 conflict, 169 skipped); --force then exit 0 with 2 forced. R3 (EVAL-F-005 / AC-015): exit 0; `openai     not configured (set OPENAI_API_KEY)`, `anthropic  not configured (set ANTHROPIC_API_KEY)`, `xai        not configured (set XAI_API_KEY)`; .soft-foundry/runtime.yml written with configured: false for all three and ignored via .gitignore:1."
+  - id: CHECK-013
+    kind: custom
+    command: ruby -Ilib exe/soft-foundry init --help; ruby -Ilib exe/soft-foundry init -h; ruby -Ilib exe/soft-foundry help
+    result: fail
+    evidence: evidence/init-help-probe.log
+    criteria: []
+    notes: "Not a required gate; probe for the carried EVAL-F-002 / REM-002. `init --help` and `init -h` exit 1 with `soft-foundry: unknown option(s): --help`; the global usage does list init and its five options, but `soft-foundry help` itself exits 1 after printing it. Recorded as VER-009 for review, per remediation's deferral."
+  - id: CHECK-014
+    kind: custom
+    command: /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/bin/ruby -Ilib exe/soft-foundry version; same binary, init --dry-run --no-onboard
     result: error
     evidence: evidence/e2e-install-ruby27-attempt.log
     criteria: []
-    notes: Environment error in the verification setup, not a failure of the change. Retained because it shows that running from source below the declared Ruby floor fails with a SyntaxError in lib/soft_foundry/cli.rb rather than a version message. Superseded by CHECK-010.
+    notes: Environment probe below the declared Ruby floor, reproduced deliberately at this commit (the previous run hit it by accident). SyntaxError on endless method definitions at lib/soft_foundry/cli.rb lines 63, 140, 141; exit 1; no version guidance. gem install would refuse via required_ruby_version. Carried as VER-004.

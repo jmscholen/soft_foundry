@@ -8,4 +8,4 @@ $ ruby -Ilib exe/soft-foundry doctor
 ✗ .ai/manifest.yml
 ✓ pre-commit hook
 ✗ local runtime
-exit=2
+exit: 2

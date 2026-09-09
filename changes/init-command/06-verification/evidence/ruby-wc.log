@@ -1,55 +1,54 @@
-$ for f in $(find lib -name '*.rb' | sort); do ruby -wc $f; done
---- lib/soft_foundry.rb
+$ ruby -wc lib/soft_foundry.rb
 Syntax OK
-exit=0
---- lib/soft_foundry/agent_files.rb
+exit: 0
+$ ruby -wc lib/soft_foundry/agent_files.rb
 Syntax OK
-exit=0
---- lib/soft_foundry/change_record.rb
+exit: 0
+$ ruby -wc lib/soft_foundry/change_record.rb
 Syntax OK
-exit=0
---- lib/soft_foundry/check.rb
+exit: 0
+$ ruby -wc lib/soft_foundry/check.rb
 Syntax OK
-exit=0
---- lib/soft_foundry/cli.rb
+exit: 0
+$ ruby -wc lib/soft_foundry/cli.rb
 Syntax OK
-exit=0
---- lib/soft_foundry/control_plane.rb
+exit: 0
+$ ruby -wc lib/soft_foundry/control_plane.rb
 Syntax OK
-exit=0
---- lib/soft_foundry/errors.rb
+exit: 0
+$ ruby -wc lib/soft_foundry/errors.rb
 Syntax OK
-exit=0
---- lib/soft_foundry/gate.rb
+exit: 0
+$ ruby -wc lib/soft_foundry/gate.rb
 Syntax OK
-exit=0
---- lib/soft_foundry/git.rb
+exit: 0
+$ ruby -wc lib/soft_foundry/git.rb
 Syntax OK
-exit=0
---- lib/soft_foundry/hooks.rb
+exit: 0
+$ ruby -wc lib/soft_foundry/hooks.rb
 Syntax OK
-exit=0
---- lib/soft_foundry/installer.rb
+exit: 0
+$ ruby -wc lib/soft_foundry/installer.rb
 Syntax OK
-exit=0
---- lib/soft_foundry/installer/source.rb
+exit: 0
+$ ruby -wc lib/soft_foundry/installer/source.rb
 Syntax OK
-exit=0
---- lib/soft_foundry/manifest.rb
+exit: 0
+$ ruby -wc lib/soft_foundry/manifest.rb
 Syntax OK
-exit=0
---- lib/soft_foundry/onboarding.rb
+exit: 0
+$ ruby -wc lib/soft_foundry/onboarding.rb
 Syntax OK
-exit=0
---- lib/soft_foundry/provider.rb
+exit: 0
+$ ruby -wc lib/soft_foundry/provider.rb
 Syntax OK
-exit=0
---- lib/soft_foundry/providers.rb
+exit: 0
+$ ruby -wc lib/soft_foundry/providers.rb
 Syntax OK
-exit=0
---- lib/soft_foundry/shell.rb
+exit: 0
+$ ruby -wc lib/soft_foundry/shell.rb
 Syntax OK
-exit=0
---- lib/soft_foundry/version.rb
+exit: 0
+$ ruby -wc lib/soft_foundry/version.rb
 Syntax OK
-exit=0
+exit: 0

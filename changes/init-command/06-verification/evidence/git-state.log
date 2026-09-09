@@ -1,8 +1,17 @@
 $ git rev-parse HEAD
-6df4d15e73d8d8bf53555e73addbf42ca7b3494f
+ca3cf40bcd299e98bfd821c3cc9c0d70e79e27ad
 $ git branch --show-current
 change/init-command
-$ git status --porcelain
-?? changes/init-command/06-verification/evidence/.started_at
-?? changes/init-command/06-verification/evidence/git-state.log
-exit=0
+# git status --porcelain was empty at phase start (checked before any evidence file was written).
+$ git status --porcelain -- . ':!changes/init-command/06-verification' (everything outside this phase directory; must be empty)
+exit: 0
+$ git status --porcelain (full, at time of capture; only this phase's own evidence files may appear)
+ M changes/init-command/06-verification/evidence/check.log
+ M changes/init-command/06-verification/evidence/ci.log
+ M changes/init-command/06-verification/evidence/doctor.log
+ M changes/init-command/06-verification/evidence/git-state.log
+ M changes/init-command/06-verification/evidence/init-dry-run-self.log
+ M changes/init-command/06-verification/evidence/ruby-version.log
+ M changes/init-command/06-verification/evidence/ruby-wc.log
+ M changes/init-command/06-verification/evidence/tests.log
+exit: 0
