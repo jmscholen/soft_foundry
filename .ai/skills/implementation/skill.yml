@@ -1,4 +1,20 @@
 name: implementation
 model: coding_high
 phase: 05-implementation
+rules:
+  baseline:
+    - .ai/rules/general.md
+    - .ai/rules/architecture.md
+    - .ai/rules/security.md
+    - .ai/rules/errors.md
+    - .ai/rules/dependencies.md
+    - .ai/rules/observability.md
+    - .ai/rules/git.md
+  discovered:
+    language: true
+    framework: true
+    database: true
+    testing: true
+    infrastructure_as_code: true
+  infrastructure_rule: .ai/rules/infrastructure.md
 outputs: [code_changes, implementation_log, decisions, challenges]
