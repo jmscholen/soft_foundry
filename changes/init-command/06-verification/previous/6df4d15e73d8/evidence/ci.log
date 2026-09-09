@@ -1,0 +1,65 @@
+$ ruby -Ilib exe/soft-foundry ci
+✓ control plane: 16 phases, 16 skills, no errors
+
+change init-command
+00-intake  complete  PASS
+  ✓ handoff identity
+  ✓ required files present: request.md, assumptions.md, handoff.yml
+  ✓ no placeholders
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: 5a84acd982ce590b310682de02172d34f5138cab
+  ✓ completed_at recorded: 2026-09-09T15:27:16Z
+  ✓ predecessor complete: first phase
+01-discovery  complete  PASS
+  ✓ handoff identity
+  ✓ required files present: repository-context.md, affected-components.md, dependencies.md, unknowns.md, handoff.yml
+  ✓ no placeholders
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: cc348f93f3d265af3f92f7fa7d0b09cbbf8a520a
+  ✓ completed_at recorded: 2026-09-09T15:35:27Z
+  ✓ predecessor complete: 00-intake
+02-specification  complete  PASS
+  ✓ handoff identity
+  ✓ required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+  ✓ no placeholders
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: cc348f93f3d265af3f92f7fa7d0b09cbbf8a520a
+  ✓ completed_at recorded: 2026-09-09T15:42:57Z
+  ✓ predecessor complete: 01-discovery
+03-threat-model  complete  PASS
+  ✓ handoff identity
+  ✓ required files present: attack-surface.md, trust-boundaries.md, threats.yml, mitigations.md, handoff.yml
+  ✓ no placeholders
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: 43d62f3ff0b1c085e689615440b9702c63f161e3
+  ✓ completed_at recorded: 2026-09-09T15:54:10Z
+  ✓ predecessor complete: 02-specification
+04-plan  complete  PASS
+  ✓ handoff identity
+  ✓ required files present: implementation.md, testing.md, rollout.md, rollback.md, handoff.yml
+  ✓ no placeholders
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: e7916589eb61f788254eca7a4d881057ec0600e7
+  ✓ completed_at recorded: 2026-09-09T15:56:54Z
+  ✓ predecessor complete: 03-threat-model
+05-implementation  complete  PASS
+  ✓ handoff identity
+  ✓ required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✓ no placeholders
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: 017e14984035cd00d7320db31daf87ab44a3a98f
+  ✓ completed_at recorded: 2026-09-09T16:05:36Z
+  ✓ predecessor complete: 04-plan
+
+change upstream-failure-reporting
+00-intake  complete  PASS
+  ✓ handoff identity
+  ✓ required files present: request.md, assumptions.md, handoff.yml
+  ✓ no placeholders
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: cc348f93f3d265af3f92f7fa7d0b09cbbf8a520a
+  ✓ completed_at recorded: 2026-09-09T15:43:34Z
+  ✓ predecessor complete: first phase
+
+✓ ci passed
+exit=0

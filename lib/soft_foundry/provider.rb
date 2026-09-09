@@ -6,7 +6,7 @@ require "uri"
 
 module SoftFoundry
   class Provider
-    Result = Data.define(:name, :configured, :models, :error)
+    Result = Data.define(:name, :configured, :models, :error, :api_key_env)
 
     attr_reader :name, :api_key_env, :models_uri, :headers
 
@@ -19,21 +19,21 @@ module SoftFoundry
 
     def discover(env: ENV)
       key = env[api_key_env]
-      return Result.new(name:, configured: false, models: [], error: nil) if key.nil? || key.empty?
+      return Result.new(name:, configured: false, models: [], error: nil, api_key_env:) if key.nil? || key.empty?
 
       request = Net::HTTP::Get.new(models_uri)
       authorization_headers(key).merge(headers).each { |k, v| request[k] = v }
       response = Net::HTTP.start(models_uri.host, models_uri.port, use_ssl: models_uri.scheme == "https", read_timeout: 10, open_timeout: 5) { |http| http.request(request) }
 
       unless response.is_a?(Net::HTTPSuccess)
-        return Result.new(name:, configured: true, models: [], error: "HTTP #{response.code}")
+        return Result.new(name:, configured: true, models: [], error: "HTTP #{response.code}", api_key_env:)
       end
 
       payload = JSON.parse(response.body)
       models = Array(payload["data"]).filter_map { |entry| self.class.sanitize(entry["id"]) }.reject(&:empty?).sort
-      Result.new(name:, configured: true, models:, error: nil)
+      Result.new(name:, configured: true, models:, error: nil, api_key_env:)
     rescue StandardError => e
-      Result.new(name:, configured: true, models: [], error: e.message)
+      Result.new(name:, configured: true, models: [], error: e.message, api_key_env:)
     end
 
     # Provider responses are untrusted; keep report lines to printable ASCII.

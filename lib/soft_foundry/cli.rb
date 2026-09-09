@@ -93,7 +93,12 @@ module SoftFoundry
       end
 
       @out.puts "summary: #{plan.counts.map { |k, v| "#{k} #{v}" }.join(', ')}"
-      plan.conflicts.positive? ? EXIT_CONFLICTS : 0
+      if plan.conflicts.positive?
+        @out.puts "conflicts: #{plan.actions.select { |a| a.status == 'conflict' }.map(&:path).join(', ')}"
+        @out.puts "next: compare with `git diff`, keep your version, or commit it and rerun with --force to take the canonical version (uncommitted edits are never overwritten)"
+        return EXIT_CONFLICTS
+      end
+      0
     rescue Error
       raise
     rescue StandardError => e
@@ -139,7 +144,7 @@ module SoftFoundry
       index = @argv.index(name)
       return nil unless index
       @argv.delete_at(index)
-      @argv.delete_at(index) or raise ArgumentError, "#{name} requires a value"
+      @argv.delete_at(index) or raise TargetError, "#{name} requires a value"
     end
 
     def models

@@ -92,3 +92,35 @@ class GateTest < Minitest::Test
     end
   end
 end
+
+class GateRemediationTest < Minitest::Test
+  include FoundryFixture
+
+  def test_remediation_may_complete_while_an_earlier_phase_is_blocked
+    with_fixture_repo do |dir|
+      plane = SoftFoundry::ControlPlane.new(dir)
+      record = SoftFoundry::ChangeRecord.create(dir, "c9", control_plane: plane)
+      gate = SoftFoundry::Gate.new(record, git: SoftFoundry::Git.new(dir))
+      sha = head(dir)
+      plane.phases.take(7).each { |p| complete_phase!(record, p.id, sha: sha) } # through verify
+      path = record.handoff_path(plane.phase("evaluate"))
+      h = YAML.safe_load_file(path)
+      h.merge!("status" => "blocked", "blocking" => ["EVAL-001 failed"])
+      File.write(path, YAML.dump(h))
+      complete_phase!(record, "remediate", sha: sha)
+      result = gate.evaluate("remediate")
+      refute result.failed?, result.checks.map { |c| "#{c.name}: #{c.detail}" }.join("\n")
+      assert_includes result.checks.find { |c| c.name == "predecessor complete" }.detail, "07-evaluation"
+    end
+  end
+
+  def test_remediation_still_needs_a_complete_predecessor_when_nothing_is_blocked
+    with_fixture_repo do |dir|
+      plane = SoftFoundry::ControlPlane.new(dir)
+      record = SoftFoundry::ChangeRecord.create(dir, "c10", control_plane: plane)
+      gate = SoftFoundry::Gate.new(record, git: SoftFoundry::Git.new(dir))
+      complete_phase!(record, "remediate", sha: head(dir))
+      assert gate.evaluate("remediate").failed?
+    end
+  end
+end

@@ -212,3 +212,30 @@ class CLIInitTest < Minitest::Test
     %w[changes/README.md docs/user/README.md .ai/templates/repository.yml].each { |f| assert_includes spec.files, f }
   end
 end
+
+class CLIInitRemediationTest < Minitest::Test
+  include FoundryFixture
+
+  def test_root_without_value_is_a_usage_error_not_an_internal_failure # EVAL-F-001
+    with_target_repo do |dir|
+      code, out = init(dir, "--root")
+      assert_equal 1, code
+      assert_includes out, "--root requires a value"
+      refute_includes out, "defect in Soft Foundry"
+      refute File.exist?(File.join(dir, ".ai"))
+    end
+  end
+
+  def test_conflict_report_names_paths_and_next_step # EVAL-F-003, EVAL-F-004
+    with_target_repo do |dir|
+      init(dir)
+      commit_all(dir)
+      File.write(File.join(dir, ".ai/rules/general.md"), "hardened\n")
+      commit_all(dir, "harden")
+      code, out = init(dir)
+      assert_equal 3, code
+      assert_match(/^conflicts: \.ai\/rules\/general\.md$/, out)
+      assert_match(/^next: .*--force/, out)
+    end
+  end
+end

@@ -1,0 +1,8 @@
+$ git rev-parse HEAD
+6df4d15e73d8d8bf53555e73addbf42ca7b3494f
+$ git branch --show-current
+change/init-command
+$ git status --porcelain
+?? changes/init-command/06-verification/evidence/.started_at
+?? changes/init-command/06-verification/evidence/git-state.log
+exit=0

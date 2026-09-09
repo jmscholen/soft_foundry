@@ -49,7 +49,7 @@ module SoftFoundry
     def print_results(results)
       @out.puts "\nLLM provider discovery"
       results.each do |result|
-        status = if !result.configured then "not configured" elsif result.error then "error: #{Provider.sanitize(result.error)}" else "#{result.models.length} models" end
+        status = if !result.configured then "not configured (set #{result.api_key_env})" elsif result.error then "error: #{Provider.sanitize(result.error)}" else "#{result.models.length} models" end
         @out.puts format("%-10s %s", result.name, status)
       end
       @out.puts "\nLocal model inventory written to #{LOCAL_DIR}/runtime.yml (gitignored)."
