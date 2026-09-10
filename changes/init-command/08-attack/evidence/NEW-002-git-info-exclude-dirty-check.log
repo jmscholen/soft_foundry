@@ -1,0 +1,8 @@
+=== dirty-check bypass via .git/info/exclude instead of .gitignore ===
+-- git status --ignored=matching for the file --
+!! .ai/rules/
+-- init --force (should be conflict, uncommitted, per fix) --
+conflict  .ai/rules/general.md  (uncommitted modifications)
+summary: created 0, updated 0, skipped 170, conflict 1, forced 0
+conflicts: .ai/rules/general.md
+1

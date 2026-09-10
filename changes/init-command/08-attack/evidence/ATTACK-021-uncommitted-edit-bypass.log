@@ -1,0 +1,37 @@
+=== 21-8c: .ai/rules/ gitignored, uncommitted HARDENED edit, then init --force ===
+created   docs/user/README.md
+check: ok
+summary: created 171, updated 0, skipped 0, conflict 0, forced 0
+!! .ai/rules/
+-- init without force --
+conflict  .ai/rules/general.md  (uncommitted modifications)
+summary: created 0, updated 0, skipped 170, conflict 1, forced 0
+conflicts: .ai/rules/general.md
+-- init --force --
+conflict  .ai/rules/general.md  (uncommitted modifications)
+summary: created 0, updated 0, skipped 170, conflict 1, forced 0
+conflicts: .ai/rules/general.md
+1
+
+=== 21-8d: --allow-non-git inside an actual git repo with uncommitted edit ===
+created   docs/user/README.md
+check: ok
+summary: created 171, updated 0, skipped 0, conflict 0, forced 0
+-- git status (should show modified, not ignored) --
+?? .ai/rules/general.md
+-- init --allow-non-git (no --force) --
+conflict  .ai/rules/general.md  (uncommitted modifications)
+summary: created 0, updated 0, skipped 170, conflict 1, forced 0
+conflicts: .ai/rules/general.md
+1
+
+=== 21-8c2: gitignored path + forged manifest hash, no --force ===
+created   docs/user/README.md
+check: ok
+summary: created 171, updated 0, skipped 0, conflict 0, forced 0
+new hash: 1142dce418714110de97ce39964b9ef579c4562b42bd52028d44ae0e407535ac
+-- init (no force) --
+conflict  .ai/rules/general.md  (uncommitted modifications)
+summary: created 0, updated 0, skipped 170, conflict 1, forced 0
+conflicts: .ai/rules/general.md
+1

@@ -1,0 +1,10 @@
+=== full regression suite at commit a7b9df1 (repo test/, not attack-authored) ===
+Run options: --seed 28654
+
+# Running:
+
+..........................................................................................
+
+Finished in 15.439135s, 5.8293 runs/s, 52.1402 assertions/s.
+
+90 runs, 805 assertions, 0 failures, 0 errors, 0 skips

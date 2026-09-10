@@ -1,195 +1,68 @@
----
-phase: '08-attack'
+# Phase handoff. One per phase directory. The gate checker validates this file.
+phase: 08-attack
 skill: adversarial-testing
-status: blocked
-commit_sha: 06a4830966d32fb135267d5160ab038af216c0b0
-started_at: '2026-09-09T20:56:30Z'
-completed_at: '2026-09-09T21:26:13Z'
+status: complete
+commit_sha: c60aa7f16efdcee3d58eb953f9f94e9f5123e7a2
+started_at: '2026-09-10T02:46:00Z'
+completed_at: '2026-09-10T03:05:11Z'
 resolved_model:
   profile: adversarial_high
   provider: anthropic
-  model: claude-fable-5-1
+  model: claude-sonnet-5
 outputs:
-- attack-plan.md
-- cases.yml
-- results.md
-- evidence/manifest.yml
-- evidence/ATTACK-001-symlinked-ai.log
-- evidence/ATTACK-002-symlinked-subdirectory.log
-- evidence/ATTACK-003-symlinked-managed-files.log
-- evidence/ATTACK-004-tmp-sibling-symlink.log
-- evidence/ATTACK-005-soft-foundry-dir-symlink.log
-- evidence/ATTACK-006-fifos.log
-- evidence/ATTACK-007-tampered-package.log
-- evidence/ATTACK-008-manifest-forgery.log
-- evidence/ATTACK-009-manifest-scope.log
-- evidence/ATTACK-010-force-scope.log
-- evidence/ATTACK-011-wrong-root.log
-- evidence/ATTACK-012-marker-spoofing.log
-- evidence/ATTACK-013-repository-overrides.log
-- evidence/ATTACK-014-gitignore-neutralization.log
-- evidence/ATTACK-015-diagnostic-leakage.log
-- evidence/ATTACK-016-partial-writes.log
-- evidence/ATTACK-017-concurrent-init.log
-- evidence/ATTACK-018-large-files.log
-- evidence/ATTACK-019-provider-injection-stub.log
-- evidence/ATTACK-020-tampered-package-upgrade.log
-blocking:
-- 'ATTACK-004 violated (critical): a committed symlink at <managed path>.soft-foundry-tmp
-  makes init write canonical content, the generated AGENTS.md, and the manifest outside
-  the target root and leaves the managed paths as symlinks, while reporting exit 0
-  and check: ok'
-- 'ATTACK-005 violated (major): .soft-foundry symlinks and hardlinks redirect the
-  lock file and runtime.yml outside the root through init and onboard; the symlink
-  itself is not ignored by the .soft-foundry/ pattern'
-- 'ATTACK-021 violated (major): uncommitted edits under a git-ignored managed path,
-  and any uncommitted edit under --allow-non-git inside a git repo, are overwritten
-  (forced or updated) although the report states uncommitted edits are never overwritten;
-  the loss is unrecoverable'
-- 'ATTACK-013 violated (major): repository.yml overrides that redirect APP/TESTS/INFRA/HARNESS_EVALS
-  to a non-existent tree pass init and check, disable gate staleness detection, and
-  remove .ai/harness-evals/** from every deny_read'
-- 'ATTACK-015 violated (major): eight target-side conditions exit 4 as ''a defect
-  in Soft Foundry'' with upstream-reporting guidance (one after a complete install
-  while claiming nothing was changed), and the diagnostic carries the target''s absolute
-  path when cwd differs from --root'
-- 'ATTACK-006 violated (minor): init hangs on a FIFO at .ai/manifest.yml (binread
-  before type check) and at .gitignore (inside git status)'
-- 'ATTACK-019 violated (minor): runtime.yml keeps raw, untruncated provider strings
-  and soft-foundry models prints them raw (ESC sequences, report-shaped lines)'
+  - attack-plan.md
+  - cases.yml
+  - results.md
+  - evidence/manifest.yml
+  - evidence/ATTACK-004-tmp-sibling-symlink.log
+  - evidence/ATTACK-005-soft-foundry-dir-symlink.log
+  - evidence/ATTACK-006-fifos.log
+  - evidence/ATTACK-012-marker-false-conflict-retest.log
+  - evidence/ATTACK-013-repository-overrides.log
+  - evidence/ATTACK-015-diagnostic-leakage.log
+  - evidence/ATTACK-015b-sanitization-and-real-defect.log
+  - evidence/ATTACK-019-provider-injection-stub.log
+  - evidence/ATTACK-021-uncommitted-edit-bypass.log
+  - evidence/ATTACK-spotcheck-001-002-007-010.log
+  - evidence/NEW-001-worktree-submodule.log
+  - evidence/NEW-002-git-info-exclude-dirty-check.log
+  - evidence/NEW-003-large-ignored-tree-performance.log
+  - evidence/NEW-004-clean-install-classification.log
+  - evidence/NEW-005-regression-suite.log
+blocking: []
 findings:
-- id: ATTACK-F-001
-  severity: critical
-  summary: 'THREAT-001 / ATTACK-004: Installer#atomic_write writes <path>.soft-foundry-tmp
-    with a following File.binwrite and guard_path! never inspects that sibling; a
-    committed symlink there is an arbitrary out-of-root file write or creation with
-    the maintainer''s rights, reported as success. Remediate by refusing any existing
-    entry at the temp path (lstat), using an unpredictable temp name created with
-    O_EXCL|O_NOFOLLOW in the destination directory, and re-checking with lstat before
-    rename.'
-- id: ATTACK-F-002
-  severity: major
-  summary: 'THREAT-001 / ATTACK-005 (and ATTACK-014c): .soft-foundry/, init.lock and
-    runtime.yml are opened with following File.open/File.write and no symlink guard,
-    so a committed .soft-foundry symlink or a runtime.yml symlink/hardlink writes
-    outside the root through init and onboard; apply guard_path! to .soft-foundry
-    and its files and write runtime.yml with the same temp-and-rename primitive; note
-    the .soft-foundry/ ignore pattern does not cover a symlink of that name.'
-- id: ATTACK-F-003
-  severity: major
-  summary: 'THREAT-004/006 / ATTACK-021: Git#dirty_paths omits ignored files (git
-    status without --ignored), so edits under a git-ignored managed path are treated
-    as recoverable and overwritten by --force or by a manifest match; --allow-non-git
-    inside a git work tree sets dirty to [] and removes the protection entirely. Treat
-    ignored managed files as uncommitted (git status --ignored, or git ls-files --error-unmatch
-    per path) and refuse --allow-non-git when the root is inside a git work tree,
-    or keep the dirty check active there.'
-- id: ATTACK-F-004
-  severity: major
-  summary: 'THREAT-010 / ATTACK-013: Check#check_path_groups only rejects empty groups;
-    overrides that redirect APP/TESTS/INFRA/HARNESS_EVALS to a non-existent tree pass
-    init and check, gate verify never reports STALE for lib/app.rb, and .ai/harness-evals/**
-    falls outside every deny_read. Emptied groups are caught but surface as an exit-4
-    misclassification (ATTACK-F-005). check should validate overrides against paths.yml
-    defaults (HARNESS_EVALS must still cover .ai/harness-evals/**; a code group should
-    match at least one existing path or be explicitly declared absent).'
-- id: ATTACK-F-005
-  severity: major
-  summary: 'THREAT-012 / ATTACK-015 (with 006, 009, 013): CLI#init rescues every StandardError
-    into InternalError, so a regular file, unwritable directory, FIFO or directory
-    at .soft-foundry paths or .ai/manifest.yml, invalid YAML in a user .ai/profiles
-    file, emptied or malformed repository.yml overrides all exit 4 as ''a defect in
-    Soft Foundry'' with fork-and-file guidance; the runtime.yml case fires after a
-    complete install and manifest write while the text says nothing further was changed,
-    and the specification''s target-side exit 1 for permission denied is not honoured.
-    Classify SystemCallError/Psych errors raised on target paths as TargetError, guard
-    .soft-foundry and the manifest with lstat before reading, and make ''clean'' exclude
-    runs where user-owned-by-rule files or non-packaged .ai files exist.'
-- id: ATTACK-F-006
-  severity: minor
-  summary: 'THREAT-012 / ATTACK-015c-d: CLI#sanitize rewrites the cwd (@root), gem
-    root and Dir.home, not the resolved --root, so a diagnostic produced with cwd
-    elsewhere contains the target''s absolute path; the ~ rewrite depends on the HOME
-    variable. Sanitize against the resolved root as well and consider stripping any
-    remaining absolute path prefix.'
-- id: ATTACK-F-007
-  severity: minor
-  summary: 'THREAT-014 / ATTACK-006: a FIFO at .ai/manifest.yml hangs Manifest.load
-    (File.binread before any type check) and a FIFO at .gitignore hangs the git status
-    subprocess run before guard_path!; requires local filesystem access. Run guard_path!
-    (lstat) on the manifest and .gitignore before reading or invoking git, and consider
-    a timeout on the git subprocess.'
-- id: ATTACK-F-008
-  severity: minor
-  summary: 'THREAT-015 / ATTACK-019: provider-derived error strings and model ids
-    are stored raw and untruncated in runtime.yml (a 5000-character id kept) and soft-foundry
-    models prints them unsanitized (ESC bytes and a report-shaped ''conflicts:'' line
-    at column 0 observed); apply Provider.sanitize plus the MIT-015 200-character
-    truncation before writing runtime.yml and in the models command.'
-- id: ATTACK-F-009
-  severity: minor
-  summary: 'THREAT-008 / ATTACK-011: MIT-008''s refusal of --root / and warning on
-    a HOME root are not implemented (--root / --allow-non-git --dry-run plans 171
-    creates; a HOME root prints no warning). All other root probes (subdirectory,
-    other repo, parent, -x, empty, GIT_DIR, GIT_WORK_TREE, GIT_CEILING_DIRECTORIES,
-    symlinked root) were denied or explicit.'
-- id: ATTACK-F-010
-  severity: minor
-  summary: 'THREAT-014 / ATTACK-018 and ATTACK-009: whole files are read into memory
-    and the packaged set is held at once (peak RSS about twice the largest file: 1.09
-    GB for an identical 512 MiB managed file, 827 MB for a 256 MiB AGENTS.md); MIT-014''s
-    streaming hash, 8 MiB pointer/.gitignore cap, and manifest byte/entry caps (a
-    26 MB manifest is fully parsed in 5.4 s / 310 MB before validation) are not implemented.
-    No hang or crash at these sizes.'
-- id: ATTACK-F-011
-  severity: minor
-  summary: 'THREAT-011 / ATTACK-014b: when .soft-foundry/ is ignored only by .git/info/exclude
-    or a repo-local core.excludesFile, .gitignore is reported skipped and REQ-002''s
-    entry is never added on that machine; other clones add it on their first onboard/init.
-    The !.soft-foundry/ negation is correctly reported conflict, and runtime.yml never
-    contains a key value.'
-- id: ATTACK-F-012
-  severity: minor
-  summary: 'THREAT-009 / ATTACK-012 and ATTACK-003h: a verbatim block at byte 0, with
-    CRLF line endings, or without a trailing newline is reported conflict (false conflict,
-    breaks idempotence for hand-formatted pointer files); a symlinked docs directory
-    refuses the whole run although docs/user/README.md would only be skipped.'
-- id: ATTACK-F-013
-  severity: info
-  summary: 'Residual risks confirmed as designed: a forged manifest reverts committed
-    hardening as updated with git recovery and no git-diff hint (ATTACK-008, VER-006);
-    tampered package content installs faithfully and is reported updated/conflict
-    only on the next untampered run, with attacker prose in AGENTS.md persisting until
-    the conflict is resolved (ATTACK-020); a verbatim block inside a code fence or
-    HTML comment is skipped but remains readable (ATTACK-012c-d); prompt-injection
-    prose is preserved by requirement (ATTACK-012h).'
-- id: ATTACK-F-014
-  severity: info
-  summary: 'Controls that held under attack: symlinks at .ai, .ai subdirectories (outside
-    and internal), every managed, pointer and scaffold file, and dangling links are
-    refused before any write, with and without --force (ATTACK-001..003); packaged
-    symlinks and traversing names are rejected exit 4 with nothing written (ATTACK-007);
-    manifest entries outside .ai/, non-canonical entries, alias bombs and malformed
-    manifests are refused or ignored without writes or deletions (ATTACK-009); --force
-    never touches pointer, state, scaffold, .gitignore, symlinked or uncommitted files
-    and is refused with --allow-non-git (ATTACK-010); injected ENOSPC and kill -9
-    leave no truncated file, no manifest and no half block, and the rerun repairs
-    the tree (ATTACK-016); concurrent runs are serialized by the lock with a consistent
-    manifest (ATTACK-017); no key value appeared in any output or runtime.yml (ATTACK-015).'
-next: remediate
-notes: 'Compatibility mode: performed by a fresh-context agent under adversarial-testing
-  permissions within the recorded authorization envelope. All 21 cases ran while HEAD
-  was a733f84; the concurrent evaluation phase committed 06a4830 (07-evaluation only;
-  product code identical, git diff --stat a733f84..06a4830 -- lib exe test .ai is
-  empty) before this handoff was written, so commit_sha records the HEAD at write
-  time. The invoking environment held four real *_API_KEY variables; they were unset
-  for every scratch run, only literal canary strings were ever set, and no network
-  connection was attempted; the final evidence scan found no real key pattern. Scope
-  incident: one fixture command in the first ATTACK-012 attempt ran before its cd
-  into the scratch target and created an untracked CLAUDE.md (legacy-marker fixture)
-  at this repository''s root; it was deleted and git status outside 08-attack/ verified
-  empty afterwards. Two invalid kill -9 attempts (ATTACK-016) are retained in the
-  evidence and marked INVALID rather than removed. Scratch directories under the session
-  scratchpad were deleted after the evidence manifest was generated. Still blocked
-  after the second 09-remediation; this run is archived under previous/afbad2d5a9c1/
-  and attack must be rerun against the remediated commit.'
+  - id: ATTACK-F-001
+    severity: info
+    summary: "V1 FIXED (was critical, ATTACK-004). The predictable temp-sibling symlink race is closed: guard_path! checks the sibling during plan, and SafeWrite.write opens it with O_EXCL|O_NOFOLLOW, which atomically rejects a symlink or pre-existing file planted in the race window. Reproduced live: refused before any write, exit 1, nothing outside the root touched."
+  - id: ATTACK-F-002
+    severity: info
+    summary: "V2 FIXED (was major, ATTACK-005). .soft-foundry/, init.lock, and runtime.yml are now guarded like managed destinations; directory symlink, file symlink, dangling symlink, and internal symlink are all refused before any write, for both init and onboard. A hardlink at runtime.yml is not type-refused (a hardlink is a regular file) but is safe anyway because SafeWrite's temp-and-rename primitive replaces the destination's directory entry without touching the other hardlink's name or content, verified by inode number."
+  - id: ATTACK-F-003
+    severity: info
+    summary: "V3 FIXED (was major, ATTACK-021). Git#dirty_paths now passes --ignored=matching so git-ignored managed paths are treated as uncommitted, and Installer#plan computes the dirty check from @git.repository? regardless of --allow-non-git. Reproduced live across three sub-cases (gitignored edit, gitignored edit plus forged manifest hash, --allow-non-git inside a real repo): all three now report conflict (uncommitted modifications) and are not overwritten even under --force."
+  - id: ATTACK-F-004
+    severity: info
+    summary: "V4 FIXED for the reproduction case (was major, ATTACK-013). Empty AND redirect-to-nowhere repository.yml overrides for APP/TESTS/INFRA now produce check errors when the target has real files under the defaults; CONTROL_PLANE and HARNESS_EVALS overrides are refused unconditionally regardless of file layout, closing the highest-impact half of the threat (eval-denial and control-plane redirection) completely. Confirmed the protected-group check is invoked by init's own post-install check, not only by standalone check. See ATTACK-F-N01 for a narrower residual."
+  - id: ATTACK-F-005
+    severity: info
+    summary: "V5 FIXED (was major, ATTACK-015). Nine previously-misclassified target-side conditions (.soft-foundry as a plain file/unwritable/cwd-mismatch, runtime.yml or manifest as a directory, FIFO lock) now exit 1 target-side instead of exit 4. A genuinely broken package still correctly exits 4 with clean, path-free upstream guidance, confirming the fix narrowed misclassification without breaking real-defect detection. No canary key or stray absolute path found in roughly 15 sub-case outputs scanned."
+  - id: ATTACK-F-006
+    severity: info
+    summary: "V6 FIXED (was minor, ATTACK-006). All 8 FIFO placements (including .gitignore and .ai/manifest.yml, which previously hung, and .soft-foundry/init.lock, which previously crashed with a misclassified Errno::ENOTSUP) now refuse instantly via guard_path!'s lstat-only check, which now runs before Manifest.load, before any git subprocess, and before the lock file is opened."
+  - id: ATTACK-F-007
+    severity: info
+    summary: "V7 FIXED (was minor, ATTACK-019). Provider.sanitize (strip to printable ASCII, truncate to 200 chars) now runs inside Provider#discover itself for both models and error, before a Result is built, so runtime.yml persists already-clean values; soft-foundry models additionally re-sanitizes on read. A forged newline+report-line id, ANSI escapes, and a 5000+-character string with a forged line appended at the tail were all neutralized in both runtime.yml and models output."
+  - id: ATTACK-F-N01
+    severity: medium
+    summary: "NEW. Check#check_path_groups's redirect-detection rule ('override matches no files while the untouched default matches at least one') cannot fire when the target repository has no files under any default APP/TESTS/INFRA glob at all -- which describes a genuinely fresh repository or any non-conventional layout. A repository.yml committed before the maintainer's first init with APP/TESTS/INFRA redirected to a non-existent path passes both init and check completely silently (check: ok, exit 0) in that repository shape, reproducing THREAT-010's staleness-blinding goal for those three groups specifically (CONTROL_PLANE and HARNESS_EVALS remain unconditionally protected regardless). Verified: the same override with a real lib/app.rb present is correctly flagged; only the code-free/non-conventional case is silent."
+  - id: ATTACK-F-N02
+    severity: low
+    summary: "NEW, functional not security. Installer#plan.clean now requires the ENTIRE plan (not just .ai/ actions) to have no conflict/updated/forced action, so any repository with an ordinary pre-existing .gitignore or AGENTS.md -- the common case for adopting Soft Foundry into an existing repository -- can never satisfy clean. Consequence: a genuine Soft Foundry-side defect surfaced by the post-install check on such a repository is now reported as an ordinary target-side 'check failed' (exit 0) rather than exit 4 with upstream-fork guidance, even with zero .ai/ conflicts. This is a strict overcorrection of the V5 fix (cannot cause a false accusation, only a missed true one) and works against REQ-011's intent."
+  - id: ATTACK-F-N03
+    severity: info
+    summary: "New probes that found no issue: a real git worktree and a real git submodule both resolve to their own top-level and install correctly, with no leak into the main worktree or superproject (NEW-001). .git/info/exclude-only ignoring does NOT bypass the uncommitted-edit dirty-check (NEW-002) -- that is a different code path from the known, unchanged .gitignore-line-install residual (MIT-011). --ignored=matching on a 20,000-file ignored tree completed in 0.01s with a correct result (NEW-003). The SafeWrite TOCTOU window between guard checks and the final File.rename is real but not exploitable, because POSIX rename(2) replaces the destination directory entry without following a symlink or touching a hardlink's other name (analyzed and confirmed via the ATTACK-005 hardlink case)."
+  - id: ATTACK-F-N04
+    severity: info
+    summary: "Tester-side incident, disclosed for transparency, not a product defect: two onboarding calls early in this pass (ATTACK-005a, ATTACK-005e) ran before an explicit env-key unset was added to every command, causing real outbound HTTPS calls to the OpenAI/Anthropic APIs with real keys present in the shell profile (Bash tool state does not persist between invocations). No key value reached any evidence file (scanned and confirmed). Corrected immediately; both cases rerun cleanly with keys verified unset. See attack-plan.md and results.md for full detail."
+next: document
+notes: "Compatibility mode: second pass by a fresh-context agent under adversarial-testing permissions within the recorded authorization envelope. First pass archived under previous/06a4830966d3/ (the coordinator's briefing named this archive afbad2d5a9c1, which does not exist in this worktree; 06a4830966d3 is confirmed to be the actual first-pass archive because its results.md/cases.yml are byte-identical to what stood at the top level of 08-attack/ before this run overwrote it, matching the briefing's description of a blocked run with 7 violations). All 21 original cases were re-examined: the 7 originally violated (V1-V7, all in THREAT-001/010/012/014/015/004/006) were independently reproduced live against the remediated code and are confirmed fixed; several unchanged cases (003, 008 committed-half, 009 schema-validation half, 016, 017, 018, 020) were not independently re-executed this pass because the specific code paths they exercise were not touched by 09-remediation and the full regression suite (90 runs, 805 assertions, 0 failures) passed -- this is recorded per-case in cases.yml as inferred confidence rather than presented as an independent reproduction. Two new findings were discovered by probing the remediation's own new code (ATTACK-F-N01, ATTACK-F-N02); neither reproduces a case's original expected-safe-behavior failing the way the V1-V7 violations did, so per this project's established convention for residual gaps (see the first pass's own treatment of ATTACK-011/014/018), they are recorded as findings rather than blocking violations, and status is complete. commit_sha records HEAD (c60aa7f) at the time these outputs were produced; a concurrent evaluation agent committed c60aa7f during this run, touching only changes/init-command/07-evaluation/ and metadata.yml (git diff --stat a7b9df1..c60aa7f -- lib exe test soft_foundry.gemspec .ai is empty), matching the coordinator's briefing to ignore that agent's files. Environment-key discipline incident (two live network calls with real keys, no key value leaked) is disclosed in full in attack-plan.md/results.md and summarized as ATTACK-F-N04; it is a tester-side envelope deviation, corrected immediately, not a product finding. All scratch directories under the session scratchpad were deleted after evidence collection and the final real-key-pattern scan of all evidence files found none."

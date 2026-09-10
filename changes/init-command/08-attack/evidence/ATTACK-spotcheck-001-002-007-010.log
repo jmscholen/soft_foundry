@@ -1,0 +1,23 @@
+=== ATTACK-001: .ai top-level symlink ===
+soft-foundry: .ai is a symlink; init does not write through symlinks
+total 0
+drwxr-xr-x@ 2 jscholen-iou  wheel    64B Sep  9 22:58 .
+drwxr-xr-x@ 4 jscholen-iou  wheel   128B Sep  9 22:58 ..
+
+=== ATTACK-010: --force scope (pointer, repository.yml, symlinked conflict, uncommitted) ===
+skipped   AGENTS.md  (block present)
+skipped   .ai/repository.yml  (repository state is owned by this repository)
+conflict  .ai/rules/general.md  (uncommitted modifications)
+skipped   .ai/templates/repository.yml  (identical)
+conflicts: .ai/rules/general.md
+
+=== ATTACK-002: symlinked subdirectory (outside + internal) ===
+soft-foundry: .ai/rules is a symlink; init does not write through symlinks
+total 0
+drwxr-xr-x@ 2 jscholen-iou  wheel    64B Sep  9 22:58 .
+drwxr-xr-x@ 4 jscholen-iou  wheel   128B Sep  9 22:58 ..
+
+=== ATTACK-007: tampered package (symlinked file in .ai) ===
+Help fix it upstream: fork https://github.com/jmscholen/soft_foundry, reproduce with the diagnostic above, and open a pull request or issue.
+  gh repo fork jmscholen/soft_foundry --clone
+ls: .ai/rules/evil.md: No such file or directory

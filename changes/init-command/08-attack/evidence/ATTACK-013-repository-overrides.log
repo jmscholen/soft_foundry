@@ -1,135 +1,391 @@
-
-##### ATTACK-013 THREAT-010: pre-seeded .ai/repository.yml path overrides
-
-##### 13a: overrides EMPTY the required groups; fresh init
-root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a013/empty
+=== 13a: EMPTY overrides ===
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack2/a013a
+created   .gitignore
+created   AGENTS.md
+created   CLAUDE.md
+created   .ai/README.md
+created   .ai/harness-evals/README.md
+created   .ai/maturity.yml
+created   .ai/paths.yml
+created   .ai/policies/human-boundaries.yml
+created   .ai/policies/skill-permissions.yml
+created   .ai/profiles/adversarial-high.yml
+created   .ai/profiles/coding-high.yml
+created   .ai/profiles/judgment-high.yml
+created   .ai/profiles/reasoning-high.yml
+created   .ai/profiles/writing-medium.yml
 skipped   .ai/repository.yml  (repository state is owned by this repository)
-This is a defect in Soft Foundry 0.2.0, not in your repository. Nothing further was changed.
-diagnostic:
+created   .ai/rules/README.md
+created   .ai/rules/architecture.md
+created   .ai/rules/database.md
+created   .ai/rules/dependencies.md
+created   .ai/rules/errors.md
+created   .ai/rules/general.md
+created   .ai/rules/git.md
+created   .ai/rules/infrastructure.md
+created   .ai/rules/observability.md
+created   .ai/rules/rails.md
+created   .ai/rules/ruby.md
+created   .ai/rules/security.md
+created   .ai/rules/testing.md
+created   .ai/runtime/models.yml
+created   .ai/schemas.md
+created   .ai/skills/adversarial-testing/SKILL.md
+created   .ai/skills/adversarial-testing/completion.yml
+created   .ai/skills/adversarial-testing/permissions.yml
+created   .ai/skills/adversarial-testing/requirements.yml
+created   .ai/skills/adversarial-testing/skill.yml
+created   .ai/skills/adversarial-testing/template/attack-plan.md
+created   .ai/skills/adversarial-testing/template/cases.yml
+created   .ai/skills/adversarial-testing/template/evidence/manifest.yml
+created   .ai/skills/adversarial-testing/template/results.md
+created   .ai/skills/evaluation/SKILL.md
+created   .ai/skills/evaluation/completion.yml
+created   .ai/skills/evaluation/permissions.yml
+created   .ai/skills/evaluation/requirements.yml
+created   .ai/skills/evaluation/skill.yml
+created   .ai/skills/evaluation/template/evaluation-plan.md
+created   .ai/skills/evaluation/template/evidence/manifest.yml
+created   .ai/skills/evaluation/template/journeys.yml
+created   .ai/skills/evaluation/template/results.md
+created   .ai/skills/faq-indexing/SKILL.md
+created   .ai/skills/faq-indexing/completion.yml
+created   .ai/skills/faq-indexing/permissions.yml
+created   .ai/skills/faq-indexing/requirements.yml
+created   .ai/skills/faq-indexing/skill.yml
+created   .ai/skills/faq-indexing/template/records.yml
+created   .ai/skills/final-judgment/SKILL.md
+created   .ai/skills/final-judgment/completion.yml
+created   .ai/skills/final-judgment/permissions.yml
+created   .ai/skills/final-judgment/requirements.yml
+created   .ai/skills/final-judgment/skill.yml
+created   .ai/skills/final-judgment/template/evidence.yml
+created   .ai/skills/final-judgment/template/final.md
+created   .ai/skills/final-judgment/template/residual-risk.md
+created   .ai/skills/implementation/SKILL.md
+created   .ai/skills/implementation/completion.yml
+created   .ai/skills/implementation/permissions.yml
+created   .ai/skills/implementation/requirements.yml
+created   .ai/skills/implementation/skill.yml
+created   .ai/skills/implementation/template/decisions.md
+created   .ai/skills/implementation/template/deviations.md
+created   .ai/skills/implementation/template/log.md
+created   .ai/skills/intake/SKILL.md
+created   .ai/skills/intake/completion.yml
+created   .ai/skills/intake/permissions.yml
+created   .ai/skills/intake/requirements.yml
+created   .ai/skills/intake/skill.yml
+created   .ai/skills/intake/template/assumptions.md
+created   .ai/skills/intake/template/request.md
+created   .ai/skills/learning/SKILL.md
+created   .ai/skills/learning/completion.yml
+created   .ai/skills/learning/permissions.yml
+created   .ai/skills/learning/requirements.yml
+created   .ai/skills/learning/skill.yml
+created   .ai/skills/learning/template/findings.md
+created   .ai/skills/learning/template/proposed-evals.md
+created   .ai/skills/learning/template/proposed-rules.md
+created   .ai/skills/observability/SKILL.md
+created   .ai/skills/observability/completion.yml
+created   .ai/skills/observability/permissions.yml
+created   .ai/skills/observability/requirements.yml
+created   .ai/skills/observability/skill.yml
+created   .ai/skills/observability/template/alarms.md
+created   .ai/skills/observability/template/dashboard.md
+created   .ai/skills/observability/template/metrics.md
+created   .ai/skills/observability/template/runbook.md
+created   .ai/skills/observability/template/signals.md
+created   .ai/skills/planning/SKILL.md
+created   .ai/skills/planning/completion.yml
+created   .ai/skills/planning/permissions.yml
+created   .ai/skills/planning/requirements.yml
+created   .ai/skills/planning/skill.yml
+created   .ai/skills/planning/template/implementation.md
+created   .ai/skills/planning/template/rollback.md
+created   .ai/skills/planning/template/rollout.md
+created   .ai/skills/planning/template/testing.md
+created   .ai/skills/product-documentation/SKILL.md
+created   .ai/skills/product-documentation/completion.yml
+created   .ai/skills/product-documentation/permissions.yml
+created   .ai/skills/product-documentation/requirements.yml
+created   .ai/skills/product-documentation/skill.yml
+created   .ai/skills/product-documentation/template/faq.md
+created   .ai/skills/product-documentation/template/instructions.md
+created   .ai/skills/product-documentation/template/search-records.yml
+created   .ai/skills/remediation/SKILL.md
+created   .ai/skills/remediation/completion.yml
+created   .ai/skills/remediation/permissions.yml
+created   .ai/skills/remediation/requirements.yml
+created   .ai/skills/remediation/skill.yml
+created   .ai/skills/remediation/template/summary.md
+created   .ai/skills/repository-discovery/SKILL.md
+created   .ai/skills/repository-discovery/completion.yml
+created   .ai/skills/repository-discovery/permissions.yml
+created   .ai/skills/repository-discovery/requirements.yml
+created   .ai/skills/repository-discovery/skill.yml
+created   .ai/skills/repository-discovery/template/affected-components.md
+created   .ai/skills/repository-discovery/template/dependencies.md
+created   .ai/skills/repository-discovery/template/repository-context.md
+created   .ai/skills/repository-discovery/template/unknowns.md
+created   .ai/skills/review/SKILL.md
+created   .ai/skills/review/completion.yml
+created   .ai/skills/review/permissions.yml
+created   .ai/skills/review/requirements.yml
+created   .ai/skills/review/skill.yml
+created   .ai/skills/review/template/accessibility.md
+created   .ai/skills/review/template/architecture.md
+created   .ai/skills/review/template/consolidated.md
+created   .ai/skills/review/template/functional.md
+created   .ai/skills/review/template/infrastructure.md
+created   .ai/skills/review/template/operations.md
+created   .ai/skills/review/template/security.md
+created   .ai/skills/specification/SKILL.md
+created   .ai/skills/specification/completion.yml
+created   .ai/skills/specification/permissions.yml
+created   .ai/skills/specification/requirements.yml
+created   .ai/skills/specification/skill.yml
+created   .ai/skills/specification/template/acceptance-criteria.yml
+created   .ai/skills/specification/template/readiness.md
+created   .ai/skills/specification/template/requirements.yml
+created   .ai/skills/specification/template/specification.md
+created   .ai/skills/threat-modeling/SKILL.md
+created   .ai/skills/threat-modeling/completion.yml
+created   .ai/skills/threat-modeling/permissions.yml
+created   .ai/skills/threat-modeling/requirements.yml
+created   .ai/skills/threat-modeling/skill.yml
+created   .ai/skills/threat-modeling/template/attack-surface.md
+created   .ai/skills/threat-modeling/template/mitigations.md
+created   .ai/skills/threat-modeling/template/threats.yml
+created   .ai/skills/threat-modeling/template/trust-boundaries.md
+created   .ai/skills/verification/SKILL.md
+created   .ai/skills/verification/completion.yml
+created   .ai/skills/verification/permissions.yml
+created   .ai/skills/verification/requirements.yml
+created   .ai/skills/verification/skill.yml
+created   .ai/skills/verification/template/evidence/manifest.yml
+created   .ai/skills/verification/template/results.md
+created   .ai/skills/verification/template/tests.yml
+created   .ai/templates/change/metadata.yml
+created   .ai/templates/handoff.yml
+created   .ai/templates/repository.yml
+created   .ai/workflow.yml
+created   changes/README.md
+created   docs/user/README.md
+check: failed, resolve the conflicts above and rerun
   path group APP resolves to no patterns (check repository.yml overrides)
   path group TESTS resolves to no patterns (check repository.yml overrides)
   path group INFRA resolves to no patterns (check repository.yml overrides)
-  path group HARNESS_EVALS resolves to no patterns (check repository.yml overrides)
-Help fix it upstream: fork https://github.com/jmscholen/soft_foundry, reproduce with the diagnostic above, and open a pull request or issue.
-  gh repo fork jmscholen/soft_foundry --clone
-
-[exit 4]
-installed .ai files: 167; manifest present: yes; repository.yml unchanged: 1
-
-##### 13a check afterwards
+  repository.yml overrides protected path group HARNESS_EVALS; the default is kept and the override must be removed
+summary: created 170, updated 0, skipped 1, conflict 0, forced 0
+init_exit=0
 ✗ path group APP resolves to no patterns (check repository.yml overrides)
 ✗ path group TESTS resolves to no patterns (check repository.yml overrides)
 ✗ path group INFRA resolves to no patterns (check repository.yml overrides)
-✗ path group HARNESS_EVALS resolves to no patterns (check repository.yml overrides)
+✗ repository.yml overrides protected path group HARNESS_EVALS; the default is kept and the override must be removed
 ✗ control plane: 4 error(s)
-[exit 2]
+check_exit=2
 
-##### 13b: overrides REDIRECT the groups to a non-existent tree (not empty): APP/TESTS/INFRA/HARNESS_EVALS -> nothing/**
-root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a013/redirect
+=== 13b: REDIRECT overrides to nothing/** ===
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack2/a013b
+created   .gitignore
+created   AGENTS.md
+created   CLAUDE.md
+created   .ai/README.md
+created   .ai/harness-evals/README.md
+created   .ai/maturity.yml
+created   .ai/paths.yml
+created   .ai/policies/human-boundaries.yml
+created   .ai/policies/skill-permissions.yml
+created   .ai/profiles/adversarial-high.yml
+created   .ai/profiles/coding-high.yml
+created   .ai/profiles/judgment-high.yml
+created   .ai/profiles/reasoning-high.yml
+created   .ai/profiles/writing-medium.yml
 skipped   .ai/repository.yml  (repository state is owned by this repository)
+created   .ai/rules/README.md
+created   .ai/rules/architecture.md
+created   .ai/rules/database.md
+created   .ai/rules/dependencies.md
+created   .ai/rules/errors.md
+created   .ai/rules/general.md
+created   .ai/rules/git.md
+created   .ai/rules/infrastructure.md
+created   .ai/rules/observability.md
+created   .ai/rules/rails.md
+created   .ai/rules/ruby.md
+created   .ai/rules/security.md
+created   .ai/rules/testing.md
+created   .ai/runtime/models.yml
+created   .ai/schemas.md
+created   .ai/skills/adversarial-testing/SKILL.md
+created   .ai/skills/adversarial-testing/completion.yml
+created   .ai/skills/adversarial-testing/permissions.yml
+created   .ai/skills/adversarial-testing/requirements.yml
+created   .ai/skills/adversarial-testing/skill.yml
+created   .ai/skills/adversarial-testing/template/attack-plan.md
+created   .ai/skills/adversarial-testing/template/cases.yml
+created   .ai/skills/adversarial-testing/template/evidence/manifest.yml
+created   .ai/skills/adversarial-testing/template/results.md
+created   .ai/skills/evaluation/SKILL.md
+created   .ai/skills/evaluation/completion.yml
+created   .ai/skills/evaluation/permissions.yml
+created   .ai/skills/evaluation/requirements.yml
+created   .ai/skills/evaluation/skill.yml
+created   .ai/skills/evaluation/template/evaluation-plan.md
+created   .ai/skills/evaluation/template/evidence/manifest.yml
+created   .ai/skills/evaluation/template/journeys.yml
+created   .ai/skills/evaluation/template/results.md
+created   .ai/skills/faq-indexing/SKILL.md
+created   .ai/skills/faq-indexing/completion.yml
+created   .ai/skills/faq-indexing/permissions.yml
+created   .ai/skills/faq-indexing/requirements.yml
+created   .ai/skills/faq-indexing/skill.yml
+created   .ai/skills/faq-indexing/template/records.yml
+created   .ai/skills/final-judgment/SKILL.md
+created   .ai/skills/final-judgment/completion.yml
+created   .ai/skills/final-judgment/permissions.yml
+created   .ai/skills/final-judgment/requirements.yml
+created   .ai/skills/final-judgment/skill.yml
+created   .ai/skills/final-judgment/template/evidence.yml
+created   .ai/skills/final-judgment/template/final.md
+created   .ai/skills/final-judgment/template/residual-risk.md
+created   .ai/skills/implementation/SKILL.md
+created   .ai/skills/implementation/completion.yml
+created   .ai/skills/implementation/permissions.yml
+created   .ai/skills/implementation/requirements.yml
+created   .ai/skills/implementation/skill.yml
+created   .ai/skills/implementation/template/decisions.md
+created   .ai/skills/implementation/template/deviations.md
+created   .ai/skills/implementation/template/log.md
+created   .ai/skills/intake/SKILL.md
+created   .ai/skills/intake/completion.yml
+created   .ai/skills/intake/permissions.yml
+created   .ai/skills/intake/requirements.yml
+created   .ai/skills/intake/skill.yml
+created   .ai/skills/intake/template/assumptions.md
+created   .ai/skills/intake/template/request.md
+created   .ai/skills/learning/SKILL.md
+created   .ai/skills/learning/completion.yml
+created   .ai/skills/learning/permissions.yml
+created   .ai/skills/learning/requirements.yml
+created   .ai/skills/learning/skill.yml
+created   .ai/skills/learning/template/findings.md
+created   .ai/skills/learning/template/proposed-evals.md
+created   .ai/skills/learning/template/proposed-rules.md
+created   .ai/skills/observability/SKILL.md
+created   .ai/skills/observability/completion.yml
+created   .ai/skills/observability/permissions.yml
+created   .ai/skills/observability/requirements.yml
+created   .ai/skills/observability/skill.yml
+created   .ai/skills/observability/template/alarms.md
+created   .ai/skills/observability/template/dashboard.md
+created   .ai/skills/observability/template/metrics.md
+created   .ai/skills/observability/template/runbook.md
+created   .ai/skills/observability/template/signals.md
+created   .ai/skills/planning/SKILL.md
+created   .ai/skills/planning/completion.yml
+created   .ai/skills/planning/permissions.yml
+created   .ai/skills/planning/requirements.yml
+created   .ai/skills/planning/skill.yml
+created   .ai/skills/planning/template/implementation.md
+created   .ai/skills/planning/template/rollback.md
+created   .ai/skills/planning/template/rollout.md
+created   .ai/skills/planning/template/testing.md
+created   .ai/skills/product-documentation/SKILL.md
+created   .ai/skills/product-documentation/completion.yml
+created   .ai/skills/product-documentation/permissions.yml
+created   .ai/skills/product-documentation/requirements.yml
+created   .ai/skills/product-documentation/skill.yml
+created   .ai/skills/product-documentation/template/faq.md
+created   .ai/skills/product-documentation/template/instructions.md
+created   .ai/skills/product-documentation/template/search-records.yml
+created   .ai/skills/remediation/SKILL.md
+created   .ai/skills/remediation/completion.yml
+created   .ai/skills/remediation/permissions.yml
+created   .ai/skills/remediation/requirements.yml
+created   .ai/skills/remediation/skill.yml
+created   .ai/skills/remediation/template/summary.md
+created   .ai/skills/repository-discovery/SKILL.md
+created   .ai/skills/repository-discovery/completion.yml
+created   .ai/skills/repository-discovery/permissions.yml
+created   .ai/skills/repository-discovery/requirements.yml
+created   .ai/skills/repository-discovery/skill.yml
+created   .ai/skills/repository-discovery/template/affected-components.md
+created   .ai/skills/repository-discovery/template/dependencies.md
+created   .ai/skills/repository-discovery/template/repository-context.md
+created   .ai/skills/repository-discovery/template/unknowns.md
+created   .ai/skills/review/SKILL.md
+created   .ai/skills/review/completion.yml
+created   .ai/skills/review/permissions.yml
+created   .ai/skills/review/requirements.yml
+created   .ai/skills/review/skill.yml
+created   .ai/skills/review/template/accessibility.md
+created   .ai/skills/review/template/architecture.md
+created   .ai/skills/review/template/consolidated.md
+created   .ai/skills/review/template/functional.md
+created   .ai/skills/review/template/infrastructure.md
+created   .ai/skills/review/template/operations.md
+created   .ai/skills/review/template/security.md
+created   .ai/skills/specification/SKILL.md
+created   .ai/skills/specification/completion.yml
+created   .ai/skills/specification/permissions.yml
+created   .ai/skills/specification/requirements.yml
+created   .ai/skills/specification/skill.yml
+created   .ai/skills/specification/template/acceptance-criteria.yml
+created   .ai/skills/specification/template/readiness.md
+created   .ai/skills/specification/template/requirements.yml
+created   .ai/skills/specification/template/specification.md
+created   .ai/skills/threat-modeling/SKILL.md
+created   .ai/skills/threat-modeling/completion.yml
+created   .ai/skills/threat-modeling/permissions.yml
+created   .ai/skills/threat-modeling/requirements.yml
+created   .ai/skills/threat-modeling/skill.yml
+created   .ai/skills/threat-modeling/template/attack-surface.md
+created   .ai/skills/threat-modeling/template/mitigations.md
+created   .ai/skills/threat-modeling/template/threats.yml
+created   .ai/skills/threat-modeling/template/trust-boundaries.md
+created   .ai/skills/verification/SKILL.md
+created   .ai/skills/verification/completion.yml
+created   .ai/skills/verification/permissions.yml
+created   .ai/skills/verification/requirements.yml
+created   .ai/skills/verification/skill.yml
+created   .ai/skills/verification/template/evidence/manifest.yml
+created   .ai/skills/verification/template/results.md
+created   .ai/skills/verification/template/tests.yml
+created   .ai/templates/change/metadata.yml
+created   .ai/templates/handoff.yml
+created   .ai/templates/repository.yml
+created   .ai/workflow.yml
+created   changes/README.md
+created   docs/user/README.md
+check: failed, resolve the conflicts above and rerun
+  repository.yml overrides protected path group HARNESS_EVALS; the default is kept and the override must be removed
+  repository.yml overrides protected path group CONTROL_PLANE; the default is kept and the override must be removed
+summary: created 170, updated 0, skipped 1, conflict 0, forced 0
+init_exit=0
+✗ repository.yml overrides protected path group HARNESS_EVALS; the default is kept and the override must be removed
+✗ repository.yml overrides protected path group CONTROL_PLANE; the default is kept and the override must be removed
+✗ control plane: 2 error(s)
+check_exit=2
+
+=== 13c: REDIRECT overrides with real APP file present (lib/app.rb) -- does check catch it? ===
+check: failed, resolve the conflicts above and rerun
+  repository.yml override for APP matches no files while the default patterns do; staleness and permissions would be blind
+summary: created 170, updated 0, skipped 1, conflict 0, forced 0
+✗ repository.yml override for APP matches no files while the default patterns do; staleness and permissions would be blind
+✗ control plane: 1 error(s)
+check_exit=2
+
+=== 13d: REDIRECT overrides, NO real APP file (fresh/eval repo) -- confirm bypass ===
+created   docs/user/README.md
 check: ok
 summary: created 170, updated 0, skipped 1, conflict 0, forced 0
-[exit 0]
-
-##### 13b check afterwards
 ✓ control plane: 16 phases, 16 skills, no errors
-[exit 0]
+check_exit=0
 
-##### 13b: effective path groups and code globs as the harness now sees them
-{"APP"=>["nothing/**"], "TESTS"=>["nothing/**"], "INFRA"=>["nothing/**"], "HARNESS_EVALS"=>["nothing/**"]}
-["nothing/**", "nothing/**", "nothing/**"]
-lib/app.rb counts as code? false
-.ai/harness-evals/x.yml denied by adversarial-testing deny_read? false
-
-##### 13c: gate staleness with redirected APP: change record + implementation marked complete, then edit lib/app.rb; is 05-implementation STALE?
-05-implementation  complete  PASS
-  ✓ handoff identity
-  ✓ required files present: log.md, decisions.md, deviations.md, handoff.yml
-  ✓ no placeholders
-  ✓ no blocking conditions
-  ✓ commit_sha recorded: 7684be29f352b6ce3daf1d4342643fbb97c4e16d
-  ✓ completed_at recorded: 2026-09-09T00:00:00Z
-  ✓ predecessor complete: 04-plan
-[exit 0]
-
-##### 13c control: same in a repo WITHOUT the override
-05-implementation  complete  PASS
-  ✓ handoff identity
-  ✓ required files present: log.md, decisions.md, deviations.md, handoff.yml
-  ✓ no placeholders
-  ✓ no blocking conditions
-  ✓ commit_sha recorded: 6924d6fd061d3f2aa3bb8c1403a0926c5cd80ae6
-  ✓ completed_at recorded: 2026-09-09T00:00:00Z
-  ✓ predecessor complete: 04-plan
-[exit 0]
-
-##### 13d: alias bomb in a pre-existing .ai/repository.yml (ControlPlane loads with aliases: true); timed
-root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a013/bomb
-This is a defect in Soft Foundry 0.2.0, not in your repository. Nothing further was changed.
-  <soft-foundry>/lib/soft_foundry/check.rb:101:in `overlap?'
-  <soft-foundry>/lib/soft_foundry/check.rb:90:in `block (2 levels) in check_permissions'
-  <soft-foundry>/lib/soft_foundry/check.rb:89:in `each'
-  <soft-foundry>/lib/soft_foundry/check.rb:89:in `block in check_permissions'
-  <soft-foundry>/lib/soft_foundry/check.rb:88:in `each'
-        0.19 real         0.11 user         0.07 sys
-            27344896  maximum resident set size
-[exit 4]
-
-##### ADDENDUM 13a (repeated with stdout and stderr captured separately; the earlier capture lost the first stderr line to stdout buffering)
-[stdout]
-root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a013x/empty
-[stderr]
-soft-foundry: internal failure in control plane: control-plane check failed immediately after a clean install
-This is a defect in Soft Foundry 0.2.0, not in your repository. Nothing further was changed.
-diagnostic:
-  path group APP resolves to no patterns (check repository.yml overrides)
-  path group TESTS resolves to no patterns (check repository.yml overrides)
-  path group INFRA resolves to no patterns (check repository.yml overrides)
-  path group HARNESS_EVALS resolves to no patterns (check repository.yml overrides)
-Help fix it upstream: fork https://github.com/jmscholen/soft_foundry, reproduce with the diagnostic above, and open a pull request or issue.
-  gh repo fork jmscholen/soft_foundry --clone
-[exit 4]
-installed .ai files: 167; manifest present: yes
-
-##### ADDENDUM 13d (alias bomb in repository.yml, separated streams)
-[stdout]
-root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a013x/bomb
-[stderr]
-soft-foundry: internal failure in installer: NoMethodError: undefined method `delete_suffix' for an instance of Array
-This is a defect in Soft Foundry 0.2.0, not in your repository. Nothing further was changed.
-diagnostic:
-  <soft-foundry>/lib/soft_foundry/check.rb:101:in `overlap?'
-  <soft-foundry>/lib/soft_foundry/check.rb:90:in `block (2 levels) in check_permissions'
-  <soft-foundry>/lib/soft_foundry/check.rb:89:in `each'
-  <soft-foundry>/lib/soft_foundry/check.rb:89:in `block in check_permissions'
-  <soft-foundry>/lib/soft_foundry/check.rb:88:in `each'
-Help fix it upstream: fork https://github.com/jmscholen/soft_foundry, reproduce with the diagnostic above, and open a pull request or issue.
-  gh repo fork jmscholen/soft_foundry --clone
-[exit 4]
-manifest present: yes
-
-##### ADDENDUM 13c (corrected): the earlier 13c probed 05-implementation, which is not a commit_bound phase, so STALE could never appear. This repeats the probe with 06-verification (evidence: commit_bound) complete, then edits lib/app.rb.
-
-##### 13c redirect: gate verify BEFORE editing code
-06-verification  complete  PASS
-  ✓ required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
-  ✓ evidence current: no code changes since 631032258aa8
-[exit 0]
-
-##### 13c redirect: gate verify AFTER editing lib/app.rb (uncommitted)
-06-verification  complete  PASS
-  ✓ required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
-  ✓ evidence current: no code changes since 631032258aa8
-[exit 0]
-
-##### 13c control: gate verify BEFORE editing code
-06-verification  complete  PASS
-  ✓ required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
-  ✓ evidence current: no code changes since 540b2f2ad77c
-[exit 0]
-
-##### 13c control: gate verify AFTER editing lib/app.rb (uncommitted)
-06-verification  complete  FAIL
-  ✓ required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
-  ✗ evidence current: STALE: code changed since 540b2f2ad77c: lib/app.rb
-[exit 2]
+=== 13e: verify gate staleness bypass in 13d scenario (no APP files at all) using change record + verify gate ===
+created changes/probe with 16 phase directories
+branch: change/probe
+path_groups APP resolves to: (via check dump)
+["nothing/**"]
+[]

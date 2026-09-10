@@ -1,0 +1,29 @@
+=== git worktree target ===
+-- rev-parse --show-toplevel in worktree --
+/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack2/wtside
+-- .git entry type in worktree --
+-rw-r--r--@ 1 jscholen-iou  wheel   154B Sep  9 22:56 .git
+exit=0
+created   .ai/workflow.yml
+created   changes/README.md
+created   docs/user/README.md
+check: ok
+summary: created 171, updated 0, skipped 0, conflict 0, forced 0
+-- did it write into wtmain (the main worktree) by mistake? --
+ls: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack2/wtmain/.ai: No such file or directory
+-- did it write into wtside correctly? --
+-rw-r--r--@ 1 jscholen-iou  wheel   2.2K Sep  9 22:56 /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack2/wtside/.ai/workflow.yml
+
+=== git submodule target ===
+-- .git entry type in submodule --
+gitdir: ../.git/modules/sub
+exit=0
+created   .ai/workflow.yml
+created   changes/README.md
+created   docs/user/README.md
+check: ok
+summary: created 171, updated 0, skipped 0, conflict 0, forced 0
+-- did it write into sup (the superproject) by mistake? --
+ls: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack2/sup/.ai: No such file or directory
+-- did it write into sub correctly? --
+-rw-r--r--@ 1 jscholen-iou  wheel   2.2K Sep  9 22:56 /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack2/sup/sub/.ai/workflow.yml

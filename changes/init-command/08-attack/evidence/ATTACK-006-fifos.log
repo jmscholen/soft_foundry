@@ -1,242 +1,36 @@
-
-##### ATTACK-006 THREAT-014: FIFOs at managed paths; each run under timeout 15s
-
-##### FIFO at CLAUDE.md
-prw-r--r--@ 1 jscholen-iou  wheel  0 Sep  9 17:04 /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a006/claude/CLAUDE.md
+=== FIFO at CLAUDE.md (not committed; local filesystem presence only) ===
 soft-foundry: CLAUDE.md is not a regular file
-[exit 1]
-files written under target:
+exit=1
 
-##### FIFO at AGENTS.md
-prw-r--r--@ 1 jscholen-iou  wheel  0 Sep  9 17:04 /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a006/agents/AGENTS.md
+=== FIFO at AGENTS.md (not committed; local filesystem presence only) ===
 soft-foundry: AGENTS.md is not a regular file
-[exit 1]
-files written under target:
+exit=1
 
-##### FIFO at .ai/workflow.yml
-prw-r--r--@ 1 jscholen-iou  wheel  0 Sep  9 17:04 /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a006/workflow/.ai/workflow.yml
+=== FIFO at .ai/workflow.yml (not committed; local filesystem presence only) ===
 soft-foundry: .ai/workflow.yml is not a regular file
-[exit 1]
-files written under target:
+exit=1
 
-##### FIFO at .gitignore
-prw-r--r--@ 1 jscholen-iou  wheel  0 Sep  9 17:04 /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a006/gitignore/.gitignore
-#<Thread:0x0000000104ce44b0 /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/3.3.0/open3.rb:664 run> terminated with exception (report_on_exception is true):
-/Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/3.3.0/open3.rb:664:in `read': stream closed in another thread (IOError)
-	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/3.3.0/open3.rb:664:in `block (2 levels) in capture3'
-#<Thread:0x0000000104ce4398 /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/3.3.0/open3.rb:665 run> terminated with exception (report_on_exception is true):
-/Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/3.3.0/open3.rb:665:in `read': stream closed in another thread (IOError)
-	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/3.3.0/open3.rb:665:in `block (2 levels) in capture3'
-[exit 124]
-TIMED OUT: init hung on the FIFO
-files written under target:
+=== FIFO at .gitignore (not committed; local filesystem presence only) ===
+soft-foundry: .gitignore is not a regular file
+exit=1
 
-##### FIFO at .ai/repository.yml
-prw-r--r--@ 1 jscholen-iou  wheel  0 Sep  9 17:04 /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a006/repository/.ai/repository.yml
+=== FIFO at .ai/repository.yml (not committed; local filesystem presence only) ===
 soft-foundry: .ai/repository.yml is not a regular file
-[exit 1]
-files written under target:
+exit=1
 
-##### FIFO at .ai/manifest.yml
-prw-r--r--@ 1 jscholen-iou  wheel  0 Sep  9 17:04 /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a006/manifest/.ai/manifest.yml
-[exit 124]
-TIMED OUT: init hung on the FIFO
-files written under target:
+=== FIFO at .ai/manifest.yml (not committed; local filesystem presence only) ===
+soft-foundry: .ai/manifest.yml is not a regular file
+exit=1
 
-##### FIFO at .soft-foundry/init.lock
-prw-r--r--@ 1 jscholen-iou  wheel  0 Sep  9 17:05 /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a006/lock/.soft-foundry/init.lock
-root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a006/lock
-created   .gitignore
-created   AGENTS.md
-created   CLAUDE.md
-created   .ai/README.md
-created   .ai/harness-evals/README.md
-created   .ai/maturity.yml
-created   .ai/paths.yml
-created   .ai/policies/human-boundaries.yml
-created   .ai/policies/skill-permissions.yml
-created   .ai/profiles/adversarial-high.yml
-created   .ai/profiles/coding-high.yml
-created   .ai/profiles/judgment-high.yml
-created   .ai/profiles/reasoning-high.yml
-created   .ai/profiles/writing-medium.yml
-created   .ai/repository.yml
-created   .ai/rules/README.md
-created   .ai/rules/architecture.md
-created   .ai/rules/database.md
-created   .ai/rules/dependencies.md
-created   .ai/rules/errors.md
-created   .ai/rules/general.md
-created   .ai/rules/git.md
-created   .ai/rules/infrastructure.md
-created   .ai/rules/observability.md
-created   .ai/rules/rails.md
-created   .ai/rules/ruby.md
-created   .ai/rules/security.md
-created   .ai/rules/testing.md
-created   .ai/runtime/models.yml
-created   .ai/schemas.md
-created   .ai/skills/adversarial-testing/SKILL.md
-created   .ai/skills/adversarial-testing/completion.yml
-created   .ai/skills/adversarial-testing/permissions.yml
-created   .ai/skills/adversarial-testing/requirements.yml
-created   .ai/skills/adversarial-testing/skill.yml
-created   .ai/skills/adversarial-testing/template/attack-plan.md
-created   .ai/skills/adversarial-testing/template/cases.yml
-created   .ai/skills/adversarial-testing/template/evidence/manifest.yml
-created   .ai/skills/adversarial-testing/template/results.md
-created   .ai/skills/evaluation/SKILL.md
-created   .ai/skills/evaluation/completion.yml
-created   .ai/skills/evaluation/permissions.yml
-created   .ai/skills/evaluation/requirements.yml
-created   .ai/skills/evaluation/skill.yml
-created   .ai/skills/evaluation/template/evaluation-plan.md
-created   .ai/skills/evaluation/template/evidence/manifest.yml
-created   .ai/skills/evaluation/template/journeys.yml
-created   .ai/skills/evaluation/template/results.md
-created   .ai/skills/faq-indexing/SKILL.md
-created   .ai/skills/faq-indexing/completion.yml
-created   .ai/skills/faq-indexing/permissions.yml
-created   .ai/skills/faq-indexing/requirements.yml
-created   .ai/skills/faq-indexing/skill.yml
-created   .ai/skills/faq-indexing/template/records.yml
-created   .ai/skills/final-judgment/SKILL.md
-created   .ai/skills/final-judgment/completion.yml
-created   .ai/skills/final-judgment/permissions.yml
-created   .ai/skills/final-judgment/requirements.yml
-created   .ai/skills/final-judgment/skill.yml
-created   .ai/skills/final-judgment/template/evidence.yml
-created   .ai/skills/final-judgment/template/final.md
-created   .ai/skills/final-judgment/template/residual-risk.md
-created   .ai/skills/implementation/SKILL.md
-created   .ai/skills/implementation/completion.yml
-created   .ai/skills/implementation/permissions.yml
-created   .ai/skills/implementation/requirements.yml
-created   .ai/skills/implementation/skill.yml
-created   .ai/skills/implementation/template/decisions.md
-created   .ai/skills/implementation/template/deviations.md
-created   .ai/skills/implementation/template/log.md
-created   .ai/skills/intake/SKILL.md
-created   .ai/skills/intake/completion.yml
-created   .ai/skills/intake/permissions.yml
-created   .ai/skills/intake/requirements.yml
-created   .ai/skills/intake/skill.yml
-created   .ai/skills/intake/template/assumptions.md
-created   .ai/skills/intake/template/request.md
-created   .ai/skills/learning/SKILL.md
-created   .ai/skills/learning/completion.yml
-created   .ai/skills/learning/permissions.yml
-created   .ai/skills/learning/requirements.yml
-created   .ai/skills/learning/skill.yml
-created   .ai/skills/learning/template/findings.md
-created   .ai/skills/learning/template/proposed-evals.md
-created   .ai/skills/learning/template/proposed-rules.md
-created   .ai/skills/observability/SKILL.md
-created   .ai/skills/observability/completion.yml
-created   .ai/skills/observability/permissions.yml
-created   .ai/skills/observability/requirements.yml
-created   .ai/skills/observability/skill.yml
-created   .ai/skills/observability/template/alarms.md
-created   .ai/skills/observability/template/dashboard.md
-created   .ai/skills/observability/template/metrics.md
-created   .ai/skills/observability/template/runbook.md
-created   .ai/skills/observability/template/signals.md
-created   .ai/skills/planning/SKILL.md
-created   .ai/skills/planning/completion.yml
-created   .ai/skills/planning/permissions.yml
-created   .ai/skills/planning/requirements.yml
-created   .ai/skills/planning/skill.yml
-created   .ai/skills/planning/template/implementation.md
-created   .ai/skills/planning/template/rollback.md
-created   .ai/skills/planning/template/rollout.md
-created   .ai/skills/planning/template/testing.md
-created   .ai/skills/product-documentation/SKILL.md
-created   .ai/skills/product-documentation/completion.yml
-created   .ai/skills/product-documentation/permissions.yml
-created   .ai/skills/product-documentation/requirements.yml
-created   .ai/skills/product-documentation/skill.yml
-created   .ai/skills/product-documentation/template/faq.md
-created   .ai/skills/product-documentation/template/instructions.md
-created   .ai/skills/product-documentation/template/search-records.yml
-created   .ai/skills/remediation/SKILL.md
-created   .ai/skills/remediation/completion.yml
-created   .ai/skills/remediation/permissions.yml
-created   .ai/skills/remediation/requirements.yml
-created   .ai/skills/remediation/skill.yml
-created   .ai/skills/remediation/template/summary.md
-created   .ai/skills/repository-discovery/SKILL.md
-created   .ai/skills/repository-discovery/completion.yml
-created   .ai/skills/repository-discovery/permissions.yml
-created   .ai/skills/repository-discovery/requirements.yml
-created   .ai/skills/repository-discovery/skill.yml
-created   .ai/skills/repository-discovery/template/affected-components.md
-created   .ai/skills/repository-discovery/template/dependencies.md
-created   .ai/skills/repository-discovery/template/repository-context.md
-created   .ai/skills/repository-discovery/template/unknowns.md
-created   .ai/skills/review/SKILL.md
-created   .ai/skills/review/completion.yml
-created   .ai/skills/review/permissions.yml
-created   .ai/skills/review/requirements.yml
-created   .ai/skills/review/skill.yml
-created   .ai/skills/review/template/accessibility.md
-created   .ai/skills/review/template/architecture.md
-created   .ai/skills/review/template/consolidated.md
-created   .ai/skills/review/template/functional.md
-created   .ai/skills/review/template/infrastructure.md
-created   .ai/skills/review/template/operations.md
-created   .ai/skills/review/template/security.md
-created   .ai/skills/specification/SKILL.md
-created   .ai/skills/specification/completion.yml
-created   .ai/skills/specification/permissions.yml
-created   .ai/skills/specification/requirements.yml
-created   .ai/skills/specification/skill.yml
-created   .ai/skills/specification/template/acceptance-criteria.yml
-created   .ai/skills/specification/template/readiness.md
-created   .ai/skills/specification/template/requirements.yml
-created   .ai/skills/specification/template/specification.md
-created   .ai/skills/threat-modeling/SKILL.md
-created   .ai/skills/threat-modeling/completion.yml
-created   .ai/skills/threat-modeling/permissions.yml
-created   .ai/skills/threat-modeling/requirements.yml
-created   .ai/skills/threat-modeling/skill.yml
-created   .ai/skills/threat-modeling/template/attack-surface.md
-created   .ai/skills/threat-modeling/template/mitigations.md
-created   .ai/skills/threat-modeling/template/threats.yml
-created   .ai/skills/threat-modeling/template/trust-boundaries.md
-created   .ai/skills/verification/SKILL.md
-created   .ai/skills/verification/completion.yml
-created   .ai/skills/verification/permissions.yml
-created   .ai/skills/verification/requirements.yml
-created   .ai/skills/verification/skill.yml
-created   .ai/skills/verification/template/evidence/manifest.yml
-created   .ai/skills/verification/template/results.md
-created   .ai/skills/verification/template/tests.yml
-created   .ai/templates/change/metadata.ymlsoft-foundry: internal failure in installer: Errno::ENOTSUP: Operation not supported @ rb_file_flock - ./.soft-foundry/init.lock
-This is a defect in Soft Foundry 0.2.0, not in your repository. Nothing further was changed.
-diagnostic:
-  <soft-foundry>/lib/soft_foundry/installer.rb:169:in `flock'
-  <soft-foundry>/lib/soft_foundry/installer.rb:169:in `block in with_lock'
-  <soft-foundry>/lib/soft_foundry/installer.rb:168:in `open'
-  <soft-foundry>/lib/soft_foundry/installer.rb:168:in `with_lock'
-  <soft-foundry>/lib/soft_foundry/installer.rb:68:in `apply'
-Help fix it upstream: fork https://github.com/jmscholen/soft_foundry, reproduce with the diagnostic above, and open a pull request or issue.
-  gh repo fork jmscholen/soft_foundry --clone
-
-created   .ai/templates/handoff.yml
-created   .ai/templates/repository.yml
-created   .ai/workflow.yml
-created   changes/README.md
-created   docs/user/README.md
-[exit 4]
-files written under target:
-
-##### FIFO at changes/README.md
-prw-r--r--@ 1 jscholen-iou  wheel  0 Sep  9 17:05 /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a006/changes-readme/changes/README.md
+=== FIFO at changes/README.md (not committed; local filesystem presence only) ===
 soft-foundry: changes/README.md is not a regular file
-[exit 1]
-files written under target:
+exit=1
 
-##### FIFO at .ai/manifest.yml with doctor and check (do they hang too?)
+=== FIFO at .soft-foundry/init.lock (not committed; local filesystem presence only) ===
+soft-foundry: .soft-foundry/init.lock is not a regular file
+exit=1
+
+=== doctor and check with manifest FIFO ===
 ✓ git repository
 ✗ AGENTS.md
 ✗ .ai/README.md
@@ -246,7 +40,4 @@ files written under target:
 ✓ .ai/manifest.yml
 ✗ pre-commit hook
 ✗ local runtime
-[exit 2]
-✗ .ai/workflow.yml not found
-✗ control plane: 1 error(s)
-[exit 2]
+doctor_exit=2

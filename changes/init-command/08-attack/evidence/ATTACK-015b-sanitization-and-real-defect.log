@@ -1,0 +1,18 @@
+=== 15a: broken package (missing packaged workflow.yml) => real Soft-Foundry defect, exit 4 expected ===
+exit=4
+soft-foundry: internal failure in package: packaged file missing: .ai/workflow.yml
+This is a defect in Soft Foundry 0.2.0, not in your repository. Nothing was changed.
+diagnostic:
+  source: <soft-foundry>
+Help fix it upstream: fork https://github.com/jmscholen/soft_foundry, reproduce with the diagnostic above, and open a pull request or issue.
+  gh repo fork jmscholen/soft_foundry --clone
+--scan for canary / absolute home paths--
+/tmp/a15a.err:0
+/tmp/a15a.out:0
+/tmp/a15a.out:0
+/tmp/a15a.err:0
+
+=== 15d: HOME simulated, target under $HOME/projects/t, cwd=$HOME, trigger internal error via corrupted repository.yml override crashing check_path_groups (nested array) ===
+exit=0
+--scan for stray absolute paths not under target root or gem root--
+none found outside root/gem markers
