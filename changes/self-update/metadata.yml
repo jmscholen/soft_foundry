@@ -7,7 +7,7 @@ git:
   branch: change/self-update
 type: feature
 risk: low
-status: ready_for_pr
+status: closed
 current_phase: done
 created_at: 2026-09-10 16:06:19.000000000 Z
 surfaces:
