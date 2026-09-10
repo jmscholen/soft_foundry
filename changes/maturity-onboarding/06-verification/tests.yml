@@ -1,0 +1,26 @@
+commit_sha: b2f729d5a267e290d7bbf7607d84602d61fb244f
+checks:
+  - id: CHECK-001
+    kind: tests
+    command: "ruby -Ilib -Itest -e 'Dir[\"test/*_test.rb\"].each { |f| require \"./#{f}\" }'"
+    result: pass
+    evidence: evidence/tests.log
+    criteria: [maturity-scan-detection, maturity-scoring, maturity-deep-assess, cli-maturity-flags]
+  - id: CHECK-002
+    kind: lint
+    command: "soft-foundry check"
+    result: pass
+    evidence: evidence/check.log
+    criteria: [control-plane-consistency]
+  - id: CHECK-003
+    kind: static_analysis
+    command: "ruby -wc on every lib/ file"
+    result: pass
+    evidence: evidence/syntax-warnings.log
+    criteria: [coding-standard]
+  - id: CHECK-004
+    kind: custom
+    command: "end-to-end scan/skip/reassess in a fresh scratch repository"
+    result: pass
+    evidence: evidence/e2e-smoke.log
+    criteria: [maturity-scan-detection, skip-when-assessed, reassess-override]

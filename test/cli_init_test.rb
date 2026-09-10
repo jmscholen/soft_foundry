@@ -22,7 +22,11 @@ class CLIInitTest < Minitest::Test
       assert_includes File.read(File.join(dir, ".gitignore")), ".soft-foundry/"
       assert_includes File.read(File.join(dir, "AGENTS.md")), SoftFoundry::AgentFiles::BEGIN_MARKER
       assert_includes File.read(File.join(dir, "CLAUDE.md")), SoftFoundry::AgentFiles::BEGIN_MARKER
-      assert_equal false, YAML.safe_load_file(File.join(dir, ".ai/repository.yml")).dig("repository", "assessed")
+      # AC-010 predates the maturity-onboarding change: init now runs a free
+      # deterministic maturity scan by default (--maturity=scan), so a fresh
+      # install is assessed, not left at the pristine unassessed template.
+      # See changes/maturity-onboarding/.
+      assert_equal true, YAML.safe_load_file(File.join(dir, ".ai/repository.yml")).dig("repository", "assessed")
       assert_equal ["README.md"], Dir.children(File.join(dir, ".ai/harness-evals"))
       assert_includes out, "check: ok"
       ascii = out.gsub(/[^ -~\n]/, "")
@@ -315,6 +319,67 @@ class CLIBudgetTest < Minitest::Test
       code, out = cli(dir, "budget", "status", "--change", "bud2")
       assert_equal 2, code, out
       assert_includes out, "OVER CAP"
+    end
+  end
+end
+
+class CLIMaturityTest < Minitest::Test
+  include FoundryFixture
+
+  def test_init_scans_maturity_by_default
+    with_target_repo do |dir|
+      code, out = init(dir)
+      assert_equal 0, code, out
+      assert_includes out, "maturity: scanned"
+      data = YAML.safe_load_file(File.join(dir, ".ai/repository.yml"))
+      assert data.dig("repository", "assessed")
+    end
+  end
+
+  def test_second_init_skips_already_assessed_maturity
+    with_target_repo do |dir|
+      init(dir)
+      _, out = init(dir)
+      assert_includes out, "already assessed"
+      refute_includes out, "maturity: scanned"
+    end
+  end
+
+  def test_reassess_forces_a_fresh_scan
+    with_target_repo do |dir|
+      init(dir)
+      _, out = init(dir, "--reassess")
+      assert_includes out, "maturity: scanned"
+    end
+  end
+
+  def test_maturity_off_skips_entirely
+    with_target_repo do |dir|
+      _, out = init(dir, "--maturity", "off")
+      refute_includes out, "maturity:"
+      data = YAML.safe_load_file(File.join(dir, ".ai/repository.yml"))
+      refute data.dig("repository", "assessed")
+    end
+  end
+
+  def test_unknown_maturity_mode_is_a_usage_error
+    with_target_repo do |dir|
+      code, out = init(dir, "--maturity", "bogus")
+      assert_equal 1, code
+      assert_includes out, "unknown --maturity mode"
+      refute File.exist?(File.join(dir, ".ai"))
+    end
+  end
+
+  def test_onboard_alone_also_scans_maturity
+    with_target_repo do |dir|
+      init(dir, "--maturity", "off")
+      out = StringIO.new
+      code = with_env("OPENAI_API_KEY" => nil, "ANTHROPIC_API_KEY" => nil, "XAI_API_KEY" => nil, "OPENROUTER_API_KEY" => nil) do
+        SoftFoundry::CLI.new(["onboard"], out: out, err: out, root: dir, source: source).run
+      end
+      assert_equal 0, code, out.string
+      assert_includes out.string, "maturity: scanned"
     end
   end
 end

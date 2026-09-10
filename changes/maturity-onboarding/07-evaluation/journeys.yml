@@ -1,0 +1,26 @@
+commit_sha: b2f729d5a267e290d7bbf7607d84602d61fb244f
+journeys:
+  - id: EVAL-001
+    criteria: [maturity-scan-detection]
+    persona: repository maintainer, first onboarding
+    starting_state: fresh git repo, Gemfile with rails+rspec, lib/app.rb, spec/app_spec.rb
+    steps: ["soft-foundry init --no-onboard"]
+    assertions: ["languages=[ruby], frameworks=[rails], testing=[ruby]", "infrastructure NOT_APPLICABLE with rationale, not guessed missing", "a computed level and gap list printed"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-002
+    criteria: [skip-when-assessed]
+    persona: repository maintainer, re-running onboarding
+    starting_state: repo from EVAL-001, already assessed
+    steps: ["soft-foundry init --no-onboard"]
+    assertions: ["maturity step skipped with a clear message", "repository.yml unchanged"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-003
+    criteria: [reassess-override]
+    persona: repository maintainer wanting a fresh number
+    starting_state: repo from EVAL-002
+    steps: ["soft-foundry init --no-onboard --reassess"]
+    assertions: ["scan re-runs despite prior assessment"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass

@@ -1,0 +1,8 @@
+# Implementation-independent requirements. IDs are stable and referenced by
+# acceptance criteria, tests, evaluation journeys, and attack cases.
+requirements:
+  - id: REQ-001
+    category: functional   # functional | accessibility | security | data | failure | performance | operations | infrastructure | observability
+    statement: TBD
+    rationale: TBD
+    source: 00-intake/request.md

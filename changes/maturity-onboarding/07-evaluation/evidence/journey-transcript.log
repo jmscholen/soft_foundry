@@ -1,0 +1,18 @@
+Command sequence (Ruby 3.3.1, /tmp/sf-maturity-demo, fresh git repo with
+Gemfile containing rails+rspec, lib/app.rb, spec/app_spec.rb):
+
+  soft-foundry init --no-onboard
+    -> maturity: scanned - level 0 (unknown), 1 gap(s) to the next level.
+    -> .ai/repository.yml: technology.languages=[ruby], technology.frameworks=[rails],
+       technology.testing=[ruby], infrastructure.detected_or_not_applicable=NOT_APPLICABLE
+       (no IaC found), repository.execution_path_known=UNKNOWN (fewer than two signals:
+       Gemfile-only repo has no README/Rakefile/CI in this minimal fixture)
+    -> maturity.gaps = [{level: 1, capability: repository.execution_path_known, status: UNKNOWN}]
+
+  soft-foundry init --no-onboard   (second run)
+    -> maturity: already assessed (unknown); skipping. Use --reassess to force.
+    -> .ai/repository.yml unchanged
+
+  soft-foundry init --no-onboard --reassess
+    -> maturity: scanned - level 0 (unknown), 1 gap(s) to the next level.
+    -> re-ran despite prior assessment, as requested

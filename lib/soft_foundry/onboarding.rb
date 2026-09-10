@@ -4,6 +4,10 @@ require "fileutils"
 require "yaml"
 require_relative "providers"
 require_relative "installer"
+require_relative "control_plane"
+require_relative "maturity_scan"
+require_relative "maturity_deep_assess"
+require_relative "errors"
 require_relative "safe_write"
 
 module SoftFoundry
@@ -18,12 +22,44 @@ module SoftFoundry
       @source = source
     end
 
-    def run(providers_only: false)
+    def run(providers_only: false, maturity: "scan", reassess: false)
       repair_adapters unless providers_only
+      assess_maturity(mode: maturity, reassess: reassess) unless maturity == "off"
       results = Providers.all.map(&:discover)
       write_runtime(results)
       print_results(results)
       results
+    end
+
+    # Public so init can assess maturity independent of --no-onboard, which
+    # only concerns provider discovery (a network operation); maturity's
+    # scan mode is offline and has nothing to do with that flag.
+    def assess_maturity(mode:, reassess:)
+      plane = ControlPlane.new(@root)
+      unless plane.present?
+        @out.puts "maturity: .ai/ is not installed here; run `soft-foundry init` first"
+        return
+      end
+      repo_path = File.join(@root, ".ai", "repository.yml")
+      already = File.exist?(repo_path) && (YAML.safe_load_file(repo_path, permitted_classes: [Time, Date])["repository"] || {})["assessed"]
+      if already && !reassess
+        level = (YAML.safe_load_file(repo_path, permitted_classes: [Time, Date])["maturity"] || {})["current_id"]
+        @out.puts "maturity: already assessed (#{level || 'unknown level'}); skipping. Use --reassess to force."
+        return
+      end
+
+      case mode
+      when "scan"
+        result = MaturityScan.new(@root, control_plane: plane).run!
+        @out.puts "maturity: scanned - level #{result['current_level']} (#{result['current_id']}), #{result['gaps'].size} gap(s) to the next level. Run with --maturity=deep for a judgment-based assessment."
+      when "deep"
+        result = MaturityDeepAssess.new(@root).run!
+        @out.puts "maturity: #{result.ok ? result.message : "deep assessment failed: #{result.message}"}"
+      else
+        raise ArgumentError, "unknown --maturity mode '#{mode}' (expected scan, deep, or off)"
+      end
+    rescue TargetError => e
+      @out.puts "maturity: #{e.message}"
     end
 
     private
