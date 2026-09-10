@@ -16,3 +16,10 @@ surfaces:
   security: false
   accessibility: false
   observability: false
+
+# Phases the harness would otherwise require, deliberately not run for
+# this change, each with a non-empty rationale. An entry with an empty
+# rationale does not count as a skip - the phase stays required.
+skipped_phases: []
+# - phase: threat_model
+#   rationale: TBD

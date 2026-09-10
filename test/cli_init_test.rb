@@ -285,3 +285,53 @@ class CLIInitAttackRemediationTest < Minitest::Test
     assert_includes out, "filesystem root"
   end
 end
+
+class CLIBudgetTest < Minitest::Test
+  include FoundryFixture
+
+  def test_status_and_record_round_trip
+    with_fixture_repo do |dir|
+      cli(dir, "change", "new", "bud1", "--title", "x")
+      code, out = cli(dir, "budget", "status", "--change", "bud1")
+      assert_equal 0, code, out
+      assert_includes out, "unknown"
+
+      code, out = cli(dir, "budget", "record", "--change", "bud1", "--phase", "00-intake", "--provider", "anthropic", "--model", "claude-sonnet-5", "--tokens-in", "1000", "--tokens-out", "200", "--usd", "0.10")
+      assert_equal 0, code, out
+      assert_includes out, "recorded:"
+
+      code, out = cli(dir, "budget", "status", "--change", "bud1")
+      assert_equal 0, code, out
+      assert_includes out, "$0.10"
+    end
+  end
+
+  def test_status_reports_over_cap_with_exit_2
+    with_fixture_repo do |dir|
+      cli(dir, "change", "new", "bud2", "--title", "x")
+      record = SoftFoundry::ChangeRecord.new(dir, "bud2", control_plane: SoftFoundry::ControlPlane.new(dir))
+      d = YAML.safe_load_file(File.join(record.dir, "metadata.yml"), permitted_classes: [Time, Date]); d["risk"] = "low"; File.write(File.join(record.dir, "metadata.yml"), YAML.dump(d))
+      cli(dir, "budget", "record", "--change", "bud2", "--phase", "05-implementation", "--provider", "anthropic", "--model", "m", "--tokens-in", "1", "--tokens-out", "1", "--usd", "20.00")
+      code, out = cli(dir, "budget", "status", "--change", "bud2")
+      assert_equal 2, code, out
+      assert_includes out, "OVER CAP"
+    end
+  end
+end
+
+class CLIClosedChangeCiTest < Minitest::Test
+  include FoundryFixture
+
+  def test_ci_skips_a_closed_change
+    with_fixture_repo do |dir|
+      cli(dir, "change", "new", "old1", "--title", "x")
+      record = SoftFoundry::ChangeRecord.new(dir, "old1", control_plane: SoftFoundry::ControlPlane.new(dir))
+      m = YAML.safe_load_file(record.dir + "/metadata.yml", permitted_classes: [Time, Date])
+      m["status"] = "closed"
+      File.write(record.dir + "/metadata.yml", YAML.dump(m))
+      code, out = cli(dir, "ci")
+      assert_equal 0, code, out
+      assert_includes out, "old1 (closed, skipped)"
+    end
+  end
+end

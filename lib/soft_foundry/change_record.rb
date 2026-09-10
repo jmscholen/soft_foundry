@@ -46,6 +46,7 @@ module SoftFoundry
       FileUtils.mkdir_p(dir)
       write_template(File.join(control_plane.dir, "templates", "change", "metadata.yml"), File.join(dir, "metadata.yml"),
                      "CHANGE" => slug, "TITLE" => title, "BRANCH" => branch, "WORKTREE" => worktree, "CREATED_AT" => now.utc.iso8601)
+      write_template(File.join(control_plane.dir, "templates", "change", "budget.yml"), File.join(dir, "budget.yml"), "CHANGE" => slug)
       control_plane.phases.each do |phase|
         skill = control_plane.skill(phase.skill)
         target = phase_dir(phase)

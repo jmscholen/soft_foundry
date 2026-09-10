@@ -1,0 +1,8 @@
+commit_sha: TBD
+checks:
+  - id: CHECK-001
+    kind: tests   # tests | lint | static_analysis | security_scan | iac_validate | migration_check | custom
+    command: TBD
+    result: TBD   # pass | fail | error | skipped
+    evidence: evidence/TBD
+    criteria: [AC-001]

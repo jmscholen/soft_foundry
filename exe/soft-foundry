@@ -1,6 +1,11 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+if RUBY_VERSION < "3.2"
+  warn "soft-foundry: requires Ruby >= 3.2 (running #{RUBY_VERSION}). If you use a version manager (asdf, rbenv, rvm), switch to 3.2+ or reinstall soft-foundry under a 3.2+ Ruby."
+  exit 1
+end
+
 require "soft_foundry"
 
 exit SoftFoundry::CLI.new(ARGV).run

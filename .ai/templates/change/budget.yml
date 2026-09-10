@@ -1,0 +1,5 @@
+# Spend ledger for this change. Entries are recorded by whoever executes a
+# phase; estimated_usd may be null when cost is unknown. Compared against
+# .ai/policies/budget.yml by `soft-foundry budget status`.
+change: ${CHANGE}
+entries: []

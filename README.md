@@ -41,6 +41,7 @@ Provider credentials are detected from the environment:
 - OpenAI: `OPENAI_API_KEY`
 - Anthropic: `ANTHROPIC_API_KEY`
 - xAI / Grok: `XAI_API_KEY`
+- OpenRouter: `OPENROUTER_API_KEY` — a single key proxying many providers' models through one OpenAI-compatible endpoint, often at lower cost than a provider's own API
 
 The accessible model inventory is written to `.soft-foundry/runtime.yml`, which is machine-local and must remain gitignored. Credentials are never written to repository configuration.
 
@@ -64,6 +65,21 @@ soft-foundry gate all --change <slug>
 A gate passes only when the phase's required files exist with no `TBD` placeholders, the handoff is valid, nothing is blocking, the predecessor phase is complete, and commit-bound evidence is not stale. Evidence is stale when any file in the `APP`, `TESTS`, or `INFRA` path groups changed after the recorded commit. See `.ai/schemas.md`.
 
 `soft-foundry check` lints the control plane itself. `soft-foundry ci` runs the lint plus every change record's gates, and `soft-foundry hooks install` wires it into a pre-commit hook. The GitHub Actions workflow runs the same two commands.
+
+## Budget
+
+Model API usage can get expensive, especially across a long-running change with multiple phases. `.ai/policies/budget.yml` declares spend limits (`max_usd_per_change`, overridable by a change's declared `risk` level) and a threshold above which continuing is a financial commitment requiring human approval, per `.ai/policies/human-boundaries.yml`.
+
+This is policy and a ledger, not live metering: nothing in Soft Foundry today intercepts a real model API call, so nothing can enforce a cap automatically mid-call. Whoever executes a phase — a human or an agent — records what it cost:
+
+```bash
+soft-foundry budget record --change <slug> --phase 05-implementation \
+  --provider openrouter --model "some/model" \
+  --tokens-in 12000 --tokens-out 3000 --usd 0.08
+soft-foundry budget status --change <slug>
+```
+
+`budget status` sums the ledger, compares it against the policy cap for the change's declared risk, and exits non-zero when the recorded spend is over cap. `--usd` is optional per entry; entries without a cost are counted but excluded from the total, and `budget status` reports how many are missing.
 
 ## Coding shells
 

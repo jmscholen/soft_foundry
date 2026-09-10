@@ -12,6 +12,7 @@ require_relative "hooks"
 require_relative "errors"
 require_relative "installer"
 require_relative "provider"
+require_relative "budget"
 
 module SoftFoundry
   class CLI
@@ -37,6 +38,7 @@ module SoftFoundry
       when "doctor" then doctor
       when "check" then check
       when "change" then change
+      when "budget" then budget
       when "gate" then gate
       when "ci" then ci
       when "hooks" then hooks
@@ -235,6 +237,57 @@ module SoftFoundry
       results.any?(&:failed?) ? 2 : 0
     end
 
+    def budget
+      sub = @argv.shift
+      case sub
+      when "status" then budget_status
+      when "record" then budget_record
+      else
+        @err.puts "Usage: soft-foundry budget <status|record> [options]"
+        1
+      end
+    end
+
+    def budget_status
+      slug = option("--change") || current_slug
+      record = load_record(slug)
+      b = Budget.new(record)
+      meta = record.metadata
+      risk = meta["risk"]
+      risk = nil if risk.nil? || risk == "TBD"
+      policy = Budget.policy(plane, risk: risk)
+      t = b.totals
+      @out.puts "change: #{slug}  risk: #{risk || 'unset'}"
+      @out.puts "tokens in/out: #{t.tokens_in}/#{t.tokens_out}"
+      if t.estimated_usd
+        @out.puts format("estimated spend: $%.2f", t.estimated_usd)
+      else
+        @out.puts "estimated spend: unknown (no priced entries recorded)"
+      end
+      @out.puts "entries missing cost: #{t.entries_missing_cost}" if t.entries_missing_cost.positive?
+      @out.puts format("cap (max_usd_per_change): $%.2f", policy.max_usd_per_change) if policy.max_usd_per_change
+      @out.puts format("requires human approval above: $%.2f (see .ai/policies/human-boundaries.yml)", policy.require_human_approval_above_usd) if policy.require_human_approval_above_usd
+      if b.over_cap?(policy)
+        @out.puts "OVER CAP: this change's declared budget is a financial commitment under human-boundaries.yml; stop and get approval before continuing."
+        return 2
+      end
+      0
+    end
+
+    def budget_record
+      slug = option("--change") || current_slug
+      phase = option("--phase") or raise ArgumentError, "Usage: soft-foundry budget record --phase PHASE --provider NAME --model NAME --tokens-in N --tokens-out N [--usd X] [--change SLUG]"
+      provider = option("--provider") or raise ArgumentError, "--provider is required"
+      model = option("--model") or raise ArgumentError, "--model is required"
+      tokens_in = Integer(option("--tokens-in") || raise(ArgumentError, "--tokens-in is required"))
+      tokens_out = Integer(option("--tokens-out") || raise(ArgumentError, "--tokens-out is required"))
+      usd = option("--usd")
+      record = load_record(slug)
+      Budget.new(record).record!(phase:, provider:, model:, tokens_in:, tokens_out:, estimated_usd: usd&.to_f)
+      @out.puts "recorded: #{phase} #{provider}/#{model} #{tokens_in}in/#{tokens_out}out#{usd ? format(' $%.2f', usd.to_f) : ''}"
+      0
+    end
+
     def gate
       target = @argv.shift or raise ArgumentError, "Usage: soft-foundry gate <phase|all> [--change SLUG]"
       slug = option("--change") || current_slug
@@ -248,8 +301,13 @@ module SoftFoundry
     def ci
       code = check
       list_changes.each do |slug|
+        record = load_record(slug)
+        if record.metadata["status"] == "closed"
+          @out.puts "\nchange #{slug} (closed, skipped)"
+          next
+        end
         @out.puts "\nchange #{slug}"
-        results = Gate.new(load_record(slug), git: git).evaluate_all
+        results = Gate.new(record, git: git).evaluate_all
         results.reject(&:skipped?).each { |r| print_result(r) }
         code = 2 if results.any?(&:failed?)
       end
@@ -317,6 +375,11 @@ module SoftFoundry
           soft-foundry change list                list change records
           soft-foundry gate <phase|all> [--change SLUG]
                                                   evaluate a phase's completion gate
+          soft-foundry budget status [--change SLUG]
+                                                  compare recorded spend against .ai/policies/budget.yml
+          soft-foundry budget record --phase P --provider NAME --model NAME
+                                     --tokens-in N --tokens-out N [--usd X] [--change SLUG]
+                                                  record a phase's spend into the change's ledger
           soft-foundry ci                         check + gate every change record (used by CI and pre-commit)
           soft-foundry hooks install              install the pre-commit hook
           soft-foundry models                     show locally accessible models

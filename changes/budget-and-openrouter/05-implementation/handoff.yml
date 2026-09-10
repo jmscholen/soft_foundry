@@ -1,0 +1,33 @@
+---
+phase: 05-implementation
+skill: implementation
+status: complete
+commit_sha: d74797a5889b2a284002c9af5f2d7afe623c1d65
+started_at: '2026-09-10T13:47:38Z'
+completed_at: '2026-09-10T13:48:13Z'
+resolved_model:
+  profile: coding_high
+  provider: anthropic
+  model: claude-sonnet-5
+outputs:
+- log.md
+- lib/soft_foundry/budget.rb
+- lib/soft_foundry/providers.rb
+- lib/soft_foundry/cli.rb
+- lib/soft_foundry/change_record.rb
+- exe/soft-foundry
+- ".ai/policies/budget.yml"
+- ".ai/policies/human-boundaries.yml"
+- ".ai/templates/change/budget.yml"
+- README.md
+- test/
+blocking: []
+findings:
+- id: IMPL-001
+  severity: info
+  summary: Fixed init-command residual risk VER-004 (raw SyntaxError on below-floor
+    Ruby) as a side effect
+next: verify
+notes: Performed directly by the interactive session under a deliberately lighter-weight
+  process; see 00-intake/assumptions.md. No separate planning/threat-model/attack/review/judgment
+  phases ran for this change.

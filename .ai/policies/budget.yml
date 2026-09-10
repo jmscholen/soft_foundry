@@ -1,0 +1,32 @@
+version: 1
+
+# Declared spend and time limits for phase execution. This is policy, not
+# live metering: nothing in this codebase intercepts real model API calls
+# today, so limits are honored by whoever executes a phase - a human or an
+# agent - recording actual usage into changes/<slug>/budget.yml and
+# stopping before exceeding a cap, not after. A phase runner that made real
+# completion calls could enforce this mechanically; see .ai/README.md.
+#
+# Exceeding require_human_approval_above_usd is a financial commitment
+# under .ai/policies/human-boundaries.yml and requires explicit approval
+# before continuing, the same as any other financial commitment.
+
+defaults:
+  max_usd_per_phase: 5.00
+  max_usd_per_change: 50.00
+  require_human_approval_above_usd: 20.00
+
+# A change's declared risk (changes/<slug>/metadata.yml `risk:`) selects the
+# override, if any; defaults apply when risk is unset or unknown.
+overrides_by_risk:
+  low:
+    max_usd_per_change: 10.00
+  medium:
+    max_usd_per_change: 50.00
+  high:
+    max_usd_per_change: 150.00
+    require_human_approval_above_usd: 50.00
+
+enforcement:
+  mode: declared              # declared | metered
+  on_exceed: stop_and_escalate

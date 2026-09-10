@@ -7,6 +7,7 @@ require_human_approval:
   - financial commitments or transfers
   - security testing against production or third-party systems without explicit authorization
   - changes that intentionally weaken required controls
+  - exceeding a change's declared budget cap in .ai/policies/budget.yml (a financial commitment)
 never_autonomous:
   - bypassing access controls
   - fabricating evidence

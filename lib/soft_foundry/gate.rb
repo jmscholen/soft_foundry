@@ -89,7 +89,8 @@ module SoftFoundry
 
     # Honors `after` overrides and skips optional phases that never ran.
     def predecessor_check(phase)
-      prev = @plane.effective_predecessor(phase) { |p| @record.phase_status(p) }
+      skipped = Array(@record.metadata["skipped_phases"]).filter_map { |e| e["phase"] if e["rationale"].to_s.strip != "" }
+      prev = @plane.effective_predecessor(phase, skip: ->(p) { skipped.include?(p.id) }) { |p| @record.phase_status(p) }
       return Check.new("predecessor complete", :pass, "first phase") unless prev
       prev_status = @record.phase_status(prev)
       prev_status == "complete" ? Check.new("predecessor complete", :pass, prev.output) : Check.new("predecessor complete", :fail, "#{prev.output} is #{prev_status || 'missing'}")

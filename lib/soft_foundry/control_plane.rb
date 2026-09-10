@@ -52,11 +52,14 @@ module SoftFoundry
     end
 
     # The phase whose completion gates `phase`: its predecessor, stepping back
-    # in lifecycle order over optional phases that never ran. `status_of` maps
-    # a phase to its recorded handoff status.
-    def effective_predecessor(phase, &status_of)
+    # in lifecycle order over any phase that is both pending and skippable.
+    # A phase is skippable when it is globally `optional:` or when `skip`
+    # says so (typically: this change's own recorded skipped_phases, each
+    # requiring a non-empty rationale). `status_of` maps a phase to its
+    # recorded handoff status.
+    def effective_predecessor(phase, skip: ->(_p) { false }, &status_of)
       prev = predecessor(phase)
-      prev = previous_in_lifecycle(prev) while prev&.optional && status_of.call(prev) == "pending"
+      prev = previous_in_lifecycle(prev) while prev && (prev.optional || skip.call(prev)) && status_of.call(prev) == "pending"
       prev
     end
 
