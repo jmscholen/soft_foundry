@@ -1,0 +1,5 @@
+commit_sha: 305e03595df8a7ac0fd1a6cb1be1aa68ff982001
+artifacts:
+  - path: evidence/journey-transcript.log
+    produced_by: "ruby script exercising ControlPlane#score_maturity for EVAL-001/002/003"
+    sha256: 891a0633339784cd28a344a2214d9bc3bc0b77b19c89f908b99579a97b367747

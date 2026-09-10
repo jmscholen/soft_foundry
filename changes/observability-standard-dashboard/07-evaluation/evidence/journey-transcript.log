@@ -1,0 +1,6 @@
+== Scenario A: repo with no IaC (infrastructure.detected_or_not_applicable=NOT_APPLICABLE, standard_dashboard=NOT_APPLICABLE) ==
+{"current_level"=>5, "current_id"=>"governed", "gaps"=>[{"level"=>6, "capability"=>"harness.benchmark_suite", "status"=>"UNKNOWN"}, {"level"=>6, "capability"=>"harness.model_evaluation", "status"=>"UNKNOWN"}, {"level"=>6, "capability"=>"harness.workflow_evaluation", "status"=>"UNKNOWN"}, {"level"=>6, "capability"=>"harness.regression_detection", "status"=>"UNKNOWN"}]}
+== Scenario B: repo with IaC present, no dashboard provisioned (standard_dashboard=MISSING) ==
+{"current_level"=>4, "current_id"=>"verified", "gaps"=>[{"level"=>5, "capability"=>"observability.standard_dashboard", "status"=>"MISSING"}]}
+== Scenario C: repo with IaC present and a provisioned dashboard-as-code resource (standard_dashboard=PASS) ==
+{"current_level"=>5, "current_id"=>"governed", "gaps"=>[{"level"=>6, "capability"=>"harness.benchmark_suite", "status"=>"UNKNOWN"}, {"level"=>6, "capability"=>"harness.model_evaluation", "status"=>"UNKNOWN"}, {"level"=>6, "capability"=>"harness.workflow_evaluation", "status"=>"UNKNOWN"}, {"level"=>6, "capability"=>"harness.regression_detection", "status"=>"UNKNOWN"}]}

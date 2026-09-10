@@ -1,0 +1,7 @@
+# Implementation Decisions
+
+- **New capability, not an extension of an existing one.** `observability.standard_dashboard` is separate from `observability.alerting` and `observability.operational_visibility` so their existing, looser semantics (general alerting existence; an in-app operational page) stay intact for repositories this new, stricter rule shouldn't apply to differently.
+- **Reused the `NOT_APPLICABLE`-is-satisfied mechanism** already established by `infrastructure.detected_or_not_applicable`, rather than adding conditional logic to the scoring engine. `ControlPlane#score_maturity` needed zero code changes — the gate is entirely data-driven through `.ai/maturity.yml`.
+- **A new `capability_guidance.observability.infrastructure_as_code` block**, parallel in shape to the existing `production_service` block, maps each provisioned resource type (compute/request-serving, queue/async worker, database, external integration) to the signal capabilities it owes. This is guidance for whoever performs the assessment (today, an LLM running `repository-discovery`); it is not itself machine-enforced.
+- **Scope boundary respected**: the user explicitly chose "new maturity capability" over "both" (maturity gate + review-time infrastructure rule), so `.ai/rules/infrastructure.md` was deliberately left untouched.
+- **Added regression tests** (`test/maturity_scoring_test.rb`) covering the exact three-state behavior (MISSING/NOT_APPLICABLE/PASS), since the scoring rule is real, tested code, not just documentation an agent reads at assessment time.

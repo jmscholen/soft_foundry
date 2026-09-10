@@ -1,0 +1,20 @@
+commit_sha: 305e03595df8a7ac0fd1a6cb1be1aa68ff982001
+checks:
+  - id: CHECK-001
+    kind: tests
+    command: "ruby -Ilib -Itest -e 'Dir[\"test/*_test.rb\"].each { |f| require \"./#{f}\" }'"
+    result: pass
+    evidence: evidence/tests.log
+    criteria: [standard-dashboard-capability-defined, missing-blocks-level-5, not-applicable-and-pass-reach-level-5]
+  - id: CHECK-002
+    kind: lint
+    command: "soft-foundry check"
+    result: pass
+    evidence: evidence/check.log
+    criteria: [control-plane-consistency]
+  - id: CHECK-003
+    kind: static_analysis
+    command: "ruby -wc on every lib/ file, exe/soft-foundry, and the new test file"
+    result: pass
+    evidence: evidence/syntax-warnings.log
+    criteria: [coding-standard]
