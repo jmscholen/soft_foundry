@@ -1,0 +1,12 @@
+=== ATTACK-004 retest: temp-sibling symlink ===
+-- run init --
+soft-foundry: AGENTS.md.soft-foundry-tmp exists (planted or leftover temporary file); remove it and rerun
+exit=1
+-- after: outside dir --
+total 0
+drwxr-xr-x@ 2 jscholen-iou  wheel    64B Sep  9 22:46 .
+drwxr-xr-x@ 4 jscholen-iou  wheel   128B Sep  9 22:46 ..
+-- after: target .ai/workflow.yml AGENTS.md .ai/manifest.yml existence --
+lrwxr-xr-x@ 1 jscholen-iou  wheel   145B Sep  9 22:46 .ai/manifest.yml.soft-foundry-tmp -> /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack2/a004/outside/created-by-init
+lrwxr-xr-x@ 1 jscholen-iou  wheel   145B Sep  9 22:46 .ai/workflow.yml.soft-foundry-tmp -> /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack2/a004/outside/victim-workflow
+lrwxr-xr-x@ 1 jscholen-iou  wheel   143B Sep  9 22:46 AGENTS.md.soft-foundry-tmp -> /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack2/a004/outside/victim-agents

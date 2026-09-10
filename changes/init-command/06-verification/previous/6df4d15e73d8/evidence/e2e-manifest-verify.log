@@ -1,0 +1,12 @@
+### manifest verification of the e2e target after STEP 10 (state: post --force, all skipped)
+$ ruby verify_manifest.rb /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/e2e-target
+manifest version: 1  soft_foundry_version: 0.2.0
+files under .ai/ on disk (excluding manifest): 166
+manifest entries: 165
+on disk but not in manifest: [".ai/repository.yml"]
+in manifest but not on disk: []
+hash mismatches: 0 []
+malformed entries: 0
+exit=0
+
+### .ai/repository.yml is excluded from the manifest by rule (user-owned once present; REQ-005/AC-001 test asserts refute include)

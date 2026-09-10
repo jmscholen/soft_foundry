@@ -1,0 +1,460 @@
+### journey: EVAL-002 existing AGENTS.md and CLAUDE.md preserved, block appended once
+### ruby: /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby (ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23])
+### soft-foundry source: /Users/jscholen-iou/dev/soft_foundry (HEAD c29509c3cee8e74dfb4266906f47a59ab82a90e6)
+### captured: 2026-09-09T20:39:30Z
+
+$ git add -A
+exit=0
+
+$ git commit -q -m Project files
+exit=0
+
+$ shasum -a 256 AGENTS.md CLAUDE.md
+87a7e38494fb4eef90f91daf2f64cb46716dedcd0db883bc4d27ffbb80f2cb2b  AGENTS.md
+a4b06e8ff9f57252e6848363c79caa0b2bc92a9fa3e851504debfd566f2758e7  CLAUDE.md
+exit=0
+
+### STEP 1: first run
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init --no-onboard
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-002
+created   .gitignore
+updated   AGENTS.md  (block appended)
+updated   CLAUDE.md  (block appended)
+created   .ai/README.md
+created   .ai/harness-evals/README.md
+created   .ai/maturity.yml
+created   .ai/paths.yml
+created   .ai/policies/human-boundaries.yml
+created   .ai/policies/skill-permissions.yml
+created   .ai/profiles/adversarial-high.yml
+created   .ai/profiles/coding-high.yml
+created   .ai/profiles/judgment-high.yml
+created   .ai/profiles/reasoning-high.yml
+created   .ai/profiles/writing-medium.yml
+created   .ai/repository.yml
+created   .ai/rules/README.md
+created   .ai/rules/architecture.md
+created   .ai/rules/database.md
+created   .ai/rules/dependencies.md
+created   .ai/rules/errors.md
+created   .ai/rules/general.md
+created   .ai/rules/git.md
+created   .ai/rules/infrastructure.md
+created   .ai/rules/observability.md
+created   .ai/rules/rails.md
+created   .ai/rules/ruby.md
+created   .ai/rules/security.md
+created   .ai/rules/testing.md
+created   .ai/runtime/models.yml
+created   .ai/schemas.md
+created   .ai/skills/adversarial-testing/SKILL.md
+created   .ai/skills/adversarial-testing/completion.yml
+created   .ai/skills/adversarial-testing/permissions.yml
+created   .ai/skills/adversarial-testing/requirements.yml
+created   .ai/skills/adversarial-testing/skill.yml
+created   .ai/skills/adversarial-testing/template/attack-plan.md
+created   .ai/skills/adversarial-testing/template/cases.yml
+created   .ai/skills/adversarial-testing/template/evidence/manifest.yml
+created   .ai/skills/adversarial-testing/template/results.md
+created   .ai/skills/evaluation/SKILL.md
+created   .ai/skills/evaluation/completion.yml
+created   .ai/skills/evaluation/permissions.yml
+created   .ai/skills/evaluation/requirements.yml
+created   .ai/skills/evaluation/skill.yml
+created   .ai/skills/evaluation/template/evaluation-plan.md
+created   .ai/skills/evaluation/template/evidence/manifest.yml
+created   .ai/skills/evaluation/template/journeys.yml
+created   .ai/skills/evaluation/template/results.md
+created   .ai/skills/faq-indexing/SKILL.md
+created   .ai/skills/faq-indexing/completion.yml
+created   .ai/skills/faq-indexing/permissions.yml
+created   .ai/skills/faq-indexing/requirements.yml
+created   .ai/skills/faq-indexing/skill.yml
+created   .ai/skills/faq-indexing/template/records.yml
+created   .ai/skills/final-judgment/SKILL.md
+created   .ai/skills/final-judgment/completion.yml
+created   .ai/skills/final-judgment/permissions.yml
+created   .ai/skills/final-judgment/requirements.yml
+created   .ai/skills/final-judgment/skill.yml
+created   .ai/skills/final-judgment/template/evidence.yml
+created   .ai/skills/final-judgment/template/final.md
+created   .ai/skills/final-judgment/template/residual-risk.md
+created   .ai/skills/implementation/SKILL.md
+created   .ai/skills/implementation/completion.yml
+created   .ai/skills/implementation/permissions.yml
+created   .ai/skills/implementation/requirements.yml
+created   .ai/skills/implementation/skill.yml
+created   .ai/skills/implementation/template/decisions.md
+created   .ai/skills/implementation/template/deviations.md
+created   .ai/skills/implementation/template/log.md
+created   .ai/skills/intake/SKILL.md
+created   .ai/skills/intake/completion.yml
+created   .ai/skills/intake/permissions.yml
+created   .ai/skills/intake/requirements.yml
+created   .ai/skills/intake/skill.yml
+created   .ai/skills/intake/template/assumptions.md
+created   .ai/skills/intake/template/request.md
+created   .ai/skills/learning/SKILL.md
+created   .ai/skills/learning/completion.yml
+created   .ai/skills/learning/permissions.yml
+created   .ai/skills/learning/requirements.yml
+created   .ai/skills/learning/skill.yml
+created   .ai/skills/learning/template/findings.md
+created   .ai/skills/learning/template/proposed-evals.md
+created   .ai/skills/learning/template/proposed-rules.md
+created   .ai/skills/observability/SKILL.md
+created   .ai/skills/observability/completion.yml
+created   .ai/skills/observability/permissions.yml
+created   .ai/skills/observability/requirements.yml
+created   .ai/skills/observability/skill.yml
+created   .ai/skills/observability/template/alarms.md
+created   .ai/skills/observability/template/dashboard.md
+created   .ai/skills/observability/template/metrics.md
+created   .ai/skills/observability/template/runbook.md
+created   .ai/skills/observability/template/signals.md
+created   .ai/skills/planning/SKILL.md
+created   .ai/skills/planning/completion.yml
+created   .ai/skills/planning/permissions.yml
+created   .ai/skills/planning/requirements.yml
+created   .ai/skills/planning/skill.yml
+created   .ai/skills/planning/template/implementation.md
+created   .ai/skills/planning/template/rollback.md
+created   .ai/skills/planning/template/rollout.md
+created   .ai/skills/planning/template/testing.md
+created   .ai/skills/product-documentation/SKILL.md
+created   .ai/skills/product-documentation/completion.yml
+created   .ai/skills/product-documentation/permissions.yml
+created   .ai/skills/product-documentation/requirements.yml
+created   .ai/skills/product-documentation/skill.yml
+created   .ai/skills/product-documentation/template/faq.md
+created   .ai/skills/product-documentation/template/instructions.md
+created   .ai/skills/product-documentation/template/search-records.yml
+created   .ai/skills/remediation/SKILL.md
+created   .ai/skills/remediation/completion.yml
+created   .ai/skills/remediation/permissions.yml
+created   .ai/skills/remediation/requirements.yml
+created   .ai/skills/remediation/skill.yml
+created   .ai/skills/remediation/template/summary.md
+created   .ai/skills/repository-discovery/SKILL.md
+created   .ai/skills/repository-discovery/completion.yml
+created   .ai/skills/repository-discovery/permissions.yml
+created   .ai/skills/repository-discovery/requirements.yml
+created   .ai/skills/repository-discovery/skill.yml
+created   .ai/skills/repository-discovery/template/affected-components.md
+created   .ai/skills/repository-discovery/template/dependencies.md
+created   .ai/skills/repository-discovery/template/repository-context.md
+created   .ai/skills/repository-discovery/template/unknowns.md
+created   .ai/skills/review/SKILL.md
+created   .ai/skills/review/completion.yml
+created   .ai/skills/review/permissions.yml
+created   .ai/skills/review/requirements.yml
+created   .ai/skills/review/skill.yml
+created   .ai/skills/review/template/accessibility.md
+created   .ai/skills/review/template/architecture.md
+created   .ai/skills/review/template/consolidated.md
+created   .ai/skills/review/template/functional.md
+created   .ai/skills/review/template/infrastructure.md
+created   .ai/skills/review/template/operations.md
+created   .ai/skills/review/template/security.md
+created   .ai/skills/specification/SKILL.md
+created   .ai/skills/specification/completion.yml
+created   .ai/skills/specification/permissions.yml
+created   .ai/skills/specification/requirements.yml
+created   .ai/skills/specification/skill.yml
+created   .ai/skills/specification/template/acceptance-criteria.yml
+created   .ai/skills/specification/template/readiness.md
+created   .ai/skills/specification/template/requirements.yml
+created   .ai/skills/specification/template/specification.md
+created   .ai/skills/threat-modeling/SKILL.md
+created   .ai/skills/threat-modeling/completion.yml
+created   .ai/skills/threat-modeling/permissions.yml
+created   .ai/skills/threat-modeling/requirements.yml
+created   .ai/skills/threat-modeling/skill.yml
+created   .ai/skills/threat-modeling/template/attack-surface.md
+created   .ai/skills/threat-modeling/template/mitigations.md
+created   .ai/skills/threat-modeling/template/threats.yml
+created   .ai/skills/threat-modeling/template/trust-boundaries.md
+created   .ai/skills/verification/SKILL.md
+created   .ai/skills/verification/completion.yml
+created   .ai/skills/verification/permissions.yml
+created   .ai/skills/verification/requirements.yml
+created   .ai/skills/verification/skill.yml
+created   .ai/skills/verification/template/evidence/manifest.yml
+created   .ai/skills/verification/template/results.md
+created   .ai/skills/verification/template/tests.yml
+created   .ai/templates/change/metadata.yml
+created   .ai/templates/handoff.yml
+created   .ai/templates/repository.yml
+created   .ai/workflow.yml
+created   changes/README.md
+created   docs/user/README.md
+check: ok
+summary: created 169, updated 2, skipped 0, conflict 0, forced 0
+exit=0
+
+### STEP 1 post-state
+
+$ cat AGENTS.md
+# Acme Service
+
+Run `make test` before every commit.
+Never touch `db/legacy/`.
+
+<!-- soft-foundry:begin -->
+This file is the only required vendor-facing entry point. Canonical instructions live under `.ai/`.
+
+1. Read `.ai/README.md` and `.ai/workflow.yml` before making changes.
+2. Identify the current Git branch/worktree. The change slug is the branch name without a `change/` prefix; its record is `changes/<slug>/`.
+3. If the record does not exist, create it with `soft-foundry change new <slug>`; never hand-copy templates.
+4. Read `changes/<slug>/metadata.yml` for `current_phase`, then `soft-foundry change status` for gate state.
+5. Classify task and risk using `.ai/policies/` and record them in `metadata.yml`.
+6. Load only the current phase skill: its `skill.yml`, `SKILL.md`, `permissions.yml`, `requirements.yml`, `completion.yml`, and the phase directory's template-derived working files. Path groups such as `${APP}` and `${TESTS}` resolve through `.ai/paths.yml` and `.ai/repository.yml`.
+7. Honor read/write/deny boundaries. A skill must not perform another skill's job to manufacture a passing outcome.
+8. Never weaken requirements, alter another phase's evidence, inspect hidden harness benchmarks when denied, or redefine success because implementation failed.
+9. When a phase is done, fill its `handoff.yml` (status, commit SHA, completed time, resolved model, outputs, findings) and run `soft-foundry gate <phase>`. A failing gate is fixed by redoing the work, never by editing evidence or the handoff.
+10. Any implementation change invalidates downstream commit-bound evidence. Follow `transitions` in `.ai/workflow.yml`: remediation, observability code changes, blocking review findings, and a BLOCKED judgment all return to `verify`.
+11. Never declare the change complete without a final judgment artifact.
+
+If the host platform cannot technically enforce a permission, treat the declared restriction as mandatory policy and record the limitation in the phase handoff's `notes`.
+<!-- soft-foundry:end -->
+exit=0
+
+$ cat CLAUDE.md
+# Notes for Claude
+
+Prefer small diffs.
+
+<!-- soft-foundry:begin -->
+## Soft Foundry
+
+This repository uses Soft Foundry. Before performing engineering work, read and follow `AGENTS.md` and the workflow under `.ai/`. Those files are canonical; do not duplicate or override their engineering policy here.
+<!-- soft-foundry:end -->
+exit=0
+
+$ head -c       79 AGENTS.md | cmp - /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-002-AGENTS.orig && echo 'AGENTS.md original prefix verbatim'
+AGENTS.md original prefix verbatim
+exit=0
+
+$ head -c       39 CLAUDE.md | cmp - /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-002-CLAUDE.orig && echo 'CLAUDE.md original prefix verbatim'
+CLAUDE.md original prefix verbatim
+exit=0
+
+$ grep -c 'soft-foundry:begin' AGENTS.md; grep -c 'soft-foundry:begin' CLAUDE.md
+1
+1
+exit=0
+
+$ git diff --stat
+ AGENTS.md | 18 ++++++++++++++++++
+ CLAUDE.md |  8 +++++++-
+ 2 files changed, 25 insertions(+), 1 deletion(-)
+exit=0
+
+$ git add -A
+exit=0
+
+$ git commit -q -m Adopt Soft Foundry
+exit=0
+
+### STEP 2: second run
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init --no-onboard
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-002
+skipped   .gitignore  (.soft-foundry/ is ignored)
+skipped   AGENTS.md  (block present)
+skipped   CLAUDE.md  (block present)
+skipped   .ai/README.md  (identical)
+skipped   .ai/harness-evals/README.md  (identical)
+skipped   .ai/maturity.yml  (identical)
+skipped   .ai/paths.yml  (identical)
+skipped   .ai/policies/human-boundaries.yml  (identical)
+skipped   .ai/policies/skill-permissions.yml  (identical)
+skipped   .ai/profiles/adversarial-high.yml  (identical)
+skipped   .ai/profiles/coding-high.yml  (identical)
+skipped   .ai/profiles/judgment-high.yml  (identical)
+skipped   .ai/profiles/reasoning-high.yml  (identical)
+skipped   .ai/profiles/writing-medium.yml  (identical)
+skipped   .ai/repository.yml  (repository state is owned by this repository)
+skipped   .ai/rules/README.md  (identical)
+skipped   .ai/rules/architecture.md  (identical)
+skipped   .ai/rules/database.md  (identical)
+skipped   .ai/rules/dependencies.md  (identical)
+skipped   .ai/rules/errors.md  (identical)
+skipped   .ai/rules/general.md  (identical)
+skipped   .ai/rules/git.md  (identical)
+skipped   .ai/rules/infrastructure.md  (identical)
+skipped   .ai/rules/observability.md  (identical)
+skipped   .ai/rules/rails.md  (identical)
+skipped   .ai/rules/ruby.md  (identical)
+skipped   .ai/rules/security.md  (identical)
+skipped   .ai/rules/testing.md  (identical)
+skipped   .ai/runtime/models.yml  (identical)
+skipped   .ai/schemas.md  (identical)
+skipped   .ai/skills/adversarial-testing/SKILL.md  (identical)
+skipped   .ai/skills/adversarial-testing/completion.yml  (identical)
+skipped   .ai/skills/adversarial-testing/permissions.yml  (identical)
+skipped   .ai/skills/adversarial-testing/requirements.yml  (identical)
+skipped   .ai/skills/adversarial-testing/skill.yml  (identical)
+skipped   .ai/skills/adversarial-testing/template/attack-plan.md  (identical)
+skipped   .ai/skills/adversarial-testing/template/cases.yml  (identical)
+skipped   .ai/skills/adversarial-testing/template/evidence/manifest.yml  (identical)
+skipped   .ai/skills/adversarial-testing/template/results.md  (identical)
+skipped   .ai/skills/evaluation/SKILL.md  (identical)
+skipped   .ai/skills/evaluation/completion.yml  (identical)
+skipped   .ai/skills/evaluation/permissions.yml  (identical)
+skipped   .ai/skills/evaluation/requirements.yml  (identical)
+skipped   .ai/skills/evaluation/skill.yml  (identical)
+skipped   .ai/skills/evaluation/template/evaluation-plan.md  (identical)
+skipped   .ai/skills/evaluation/template/evidence/manifest.yml  (identical)
+skipped   .ai/skills/evaluation/template/journeys.yml  (identical)
+skipped   .ai/skills/evaluation/template/results.md  (identical)
+skipped   .ai/skills/faq-indexing/SKILL.md  (identical)
+skipped   .ai/skills/faq-indexing/completion.yml  (identical)
+skipped   .ai/skills/faq-indexing/permissions.yml  (identical)
+skipped   .ai/skills/faq-indexing/requirements.yml  (identical)
+skipped   .ai/skills/faq-indexing/skill.yml  (identical)
+skipped   .ai/skills/faq-indexing/template/records.yml  (identical)
+skipped   .ai/skills/final-judgment/SKILL.md  (identical)
+skipped   .ai/skills/final-judgment/completion.yml  (identical)
+skipped   .ai/skills/final-judgment/permissions.yml  (identical)
+skipped   .ai/skills/final-judgment/requirements.yml  (identical)
+skipped   .ai/skills/final-judgment/skill.yml  (identical)
+skipped   .ai/skills/final-judgment/template/evidence.yml  (identical)
+skipped   .ai/skills/final-judgment/template/final.md  (identical)
+skipped   .ai/skills/final-judgment/template/residual-risk.md  (identical)
+skipped   .ai/skills/implementation/SKILL.md  (identical)
+skipped   .ai/skills/implementation/completion.yml  (identical)
+skipped   .ai/skills/implementation/permissions.yml  (identical)
+skipped   .ai/skills/implementation/requirements.yml  (identical)
+skipped   .ai/skills/implementation/skill.yml  (identical)
+skipped   .ai/skills/implementation/template/decisions.md  (identical)
+skipped   .ai/skills/implementation/template/deviations.md  (identical)
+skipped   .ai/skills/implementation/template/log.md  (identical)
+skipped   .ai/skills/intake/SKILL.md  (identical)
+skipped   .ai/skills/intake/completion.yml  (identical)
+skipped   .ai/skills/intake/permissions.yml  (identical)
+skipped   .ai/skills/intake/requirements.yml  (identical)
+skipped   .ai/skills/intake/skill.yml  (identical)
+skipped   .ai/skills/intake/template/assumptions.md  (identical)
+skipped   .ai/skills/intake/template/request.md  (identical)
+skipped   .ai/skills/learning/SKILL.md  (identical)
+skipped   .ai/skills/learning/completion.yml  (identical)
+skipped   .ai/skills/learning/permissions.yml  (identical)
+skipped   .ai/skills/learning/requirements.yml  (identical)
+skipped   .ai/skills/learning/skill.yml  (identical)
+skipped   .ai/skills/learning/template/findings.md  (identical)
+skipped   .ai/skills/learning/template/proposed-evals.md  (identical)
+skipped   .ai/skills/learning/template/proposed-rules.md  (identical)
+skipped   .ai/skills/observability/SKILL.md  (identical)
+skipped   .ai/skills/observability/completion.yml  (identical)
+skipped   .ai/skills/observability/permissions.yml  (identical)
+skipped   .ai/skills/observability/requirements.yml  (identical)
+skipped   .ai/skills/observability/skill.yml  (identical)
+skipped   .ai/skills/observability/template/alarms.md  (identical)
+skipped   .ai/skills/observability/template/dashboard.md  (identical)
+skipped   .ai/skills/observability/template/metrics.md  (identical)
+skipped   .ai/skills/observability/template/runbook.md  (identical)
+skipped   .ai/skills/observability/template/signals.md  (identical)
+skipped   .ai/skills/planning/SKILL.md  (identical)
+skipped   .ai/skills/planning/completion.yml  (identical)
+skipped   .ai/skills/planning/permissions.yml  (identical)
+skipped   .ai/skills/planning/requirements.yml  (identical)
+skipped   .ai/skills/planning/skill.yml  (identical)
+skipped   .ai/skills/planning/template/implementation.md  (identical)
+skipped   .ai/skills/planning/template/rollback.md  (identical)
+skipped   .ai/skills/planning/template/rollout.md  (identical)
+skipped   .ai/skills/planning/template/testing.md  (identical)
+skipped   .ai/skills/product-documentation/SKILL.md  (identical)
+skipped   .ai/skills/product-documentation/completion.yml  (identical)
+skipped   .ai/skills/product-documentation/permissions.yml  (identical)
+skipped   .ai/skills/product-documentation/requirements.yml  (identical)
+skipped   .ai/skills/product-documentation/skill.yml  (identical)
+skipped   .ai/skills/product-documentation/template/faq.md  (identical)
+skipped   .ai/skills/product-documentation/template/instructions.md  (identical)
+skipped   .ai/skills/product-documentation/template/search-records.yml  (identical)
+skipped   .ai/skills/remediation/SKILL.md  (identical)
+skipped   .ai/skills/remediation/completion.yml  (identical)
+skipped   .ai/skills/remediation/permissions.yml  (identical)
+skipped   .ai/skills/remediation/requirements.yml  (identical)
+skipped   .ai/skills/remediation/skill.yml  (identical)
+skipped   .ai/skills/remediation/template/summary.md  (identical)
+skipped   .ai/skills/repository-discovery/SKILL.md  (identical)
+skipped   .ai/skills/repository-discovery/completion.yml  (identical)
+skipped   .ai/skills/repository-discovery/permissions.yml  (identical)
+skipped   .ai/skills/repository-discovery/requirements.yml  (identical)
+skipped   .ai/skills/repository-discovery/skill.yml  (identical)
+skipped   .ai/skills/repository-discovery/template/affected-components.md  (identical)
+skipped   .ai/skills/repository-discovery/template/dependencies.md  (identical)
+skipped   .ai/skills/repository-discovery/template/repository-context.md  (identical)
+skipped   .ai/skills/repository-discovery/template/unknowns.md  (identical)
+skipped   .ai/skills/review/SKILL.md  (identical)
+skipped   .ai/skills/review/completion.yml  (identical)
+skipped   .ai/skills/review/permissions.yml  (identical)
+skipped   .ai/skills/review/requirements.yml  (identical)
+skipped   .ai/skills/review/skill.yml  (identical)
+skipped   .ai/skills/review/template/accessibility.md  (identical)
+skipped   .ai/skills/review/template/architecture.md  (identical)
+skipped   .ai/skills/review/template/consolidated.md  (identical)
+skipped   .ai/skills/review/template/functional.md  (identical)
+skipped   .ai/skills/review/template/infrastructure.md  (identical)
+skipped   .ai/skills/review/template/operations.md  (identical)
+skipped   .ai/skills/review/template/security.md  (identical)
+skipped   .ai/skills/specification/SKILL.md  (identical)
+skipped   .ai/skills/specification/completion.yml  (identical)
+skipped   .ai/skills/specification/permissions.yml  (identical)
+skipped   .ai/skills/specification/requirements.yml  (identical)
+skipped   .ai/skills/specification/skill.yml  (identical)
+skipped   .ai/skills/specification/template/acceptance-criteria.yml  (identical)
+skipped   .ai/skills/specification/template/readiness.md  (identical)
+skipped   .ai/skills/specification/template/requirements.yml  (identical)
+skipped   .ai/skills/specification/template/specification.md  (identical)
+skipped   .ai/skills/threat-modeling/SKILL.md  (identical)
+skipped   .ai/skills/threat-modeling/completion.yml  (identical)
+skipped   .ai/skills/threat-modeling/permissions.yml  (identical)
+skipped   .ai/skills/threat-modeling/requirements.yml  (identical)
+skipped   .ai/skills/threat-modeling/skill.yml  (identical)
+skipped   .ai/skills/threat-modeling/template/attack-surface.md  (identical)
+skipped   .ai/skills/threat-modeling/template/mitigations.md  (identical)
+skipped   .ai/skills/threat-modeling/template/threats.yml  (identical)
+skipped   .ai/skills/threat-modeling/template/trust-boundaries.md  (identical)
+skipped   .ai/skills/verification/SKILL.md  (identical)
+skipped   .ai/skills/verification/completion.yml  (identical)
+skipped   .ai/skills/verification/permissions.yml  (identical)
+skipped   .ai/skills/verification/requirements.yml  (identical)
+skipped   .ai/skills/verification/skill.yml  (identical)
+skipped   .ai/skills/verification/template/evidence/manifest.yml  (identical)
+skipped   .ai/skills/verification/template/results.md  (identical)
+skipped   .ai/skills/verification/template/tests.yml  (identical)
+skipped   .ai/templates/change/metadata.yml  (identical)
+skipped   .ai/templates/handoff.yml  (identical)
+skipped   .ai/templates/repository.yml  (identical)
+skipped   .ai/workflow.yml  (identical)
+skipped   changes/README.md  (user-owned scaffold)
+skipped   docs/user/README.md  (user-owned scaffold)
+check: ok
+summary: created 0, updated 0, skipped 171, conflict 0, forced 0
+exit=0
+
+$ grep -c 'soft-foundry:begin' AGENTS.md; grep -c 'soft-foundry:begin' CLAUDE.md
+1
+1
+exit=0
+
+$ git status --porcelain
+exit=0
+
+### ASSERTIONS
+ASSERT PASS: AC-004 first run exit 0
+ASSERT PASS: AC-004 AGENTS.md original text preserved verbatim as prefix
+ASSERT PASS: AC-004 AGENTS.md reported updated (block appended)
+ASSERT PASS: AC-004 AGENTS.md has exactly one begin marker
+ASSERT PASS: AC-005 CLAUDE.md original content preserved verbatim as prefix
+ASSERT PASS: AC-005 CLAUDE.md reported updated (block appended)
+ASSERT PASS: AC-005 CLAUDE.md has exactly one begin marker
+ASSERT PASS: AC-004/AC-005 second run exit 0
+ASSERT PASS: AC-004 second run reports AGENTS.md skipped
+ASSERT PASS: AC-005 second run reports CLAUDE.md skipped
+ASSERT PASS: AC-004/AC-005 second run appends nothing (git clean)
+
+### assertions: 11 passed, 0 failed

@@ -1,10 +1,104 @@
-# Each criterion must be testable and map to at least one requirement.
-# Criteria are locked once specification completes; changing them requires a
-# recorded requirement change, never a downstream edit.
+# Locked at specification completion. Later phases bind verified_by; they do not edit criteria.
 criteria:
   - id: AC-001
+    requirements: [REQ-001, REQ-002, REQ-004, REQ-016]
+    given: a clean Git repository with an application file and no Soft Foundry files
+    when: soft-foundry init runs
+    then: .ai/ matches the packaged canonical set with the two exceptions, .ai/manifest.yml lists every installed .ai/ file with a matching SHA-256, changes/README.md exists, .gitignore contains .soft-foundry/, AGENTS.md and CLAUDE.md exist with the marker, the application file is byte-identical, check passes, and exit code is 0
+    verified_by: []
+  - id: AC-002
     requirements: [REQ-001]
-    given: TBD
-    when: TBD
-    then: TBD
-    verified_by: []   # test names, EVAL IDs, or ATTACK IDs, filled by later phases
+    given: a directory that is not inside a Git work tree
+    when: soft-foundry init runs without --allow-non-git
+    then: nothing is written, the message names the missing repository, and exit code is 1
+    verified_by: []
+  - id: AC-003
+    requirements: [REQ-005]
+    given: a repository where init already ran and nothing changed since
+    when: soft-foundry init runs again
+    then: every managed file is reported skipped, no file's content or modification time changed, git status is clean, and exit code is 0
+    verified_by: []
+  - id: AC-004
+    requirements: [REQ-007]
+    given: a repository with an existing AGENTS.md containing project-specific text and no marker
+    when: soft-foundry init runs
+    then: the original text is preserved verbatim, the marker block is appended once, the file is reported updated, and a second run reports it skipped
+    verified_by: []
+  - id: AC-005
+    requirements: [REQ-007]
+    given: a repository with an existing CLAUDE.md without the marker
+    when: soft-foundry init runs
+    then: the original content is preserved, only the pointer block is appended, and a second run appends nothing
+    verified_by: []
+  - id: AC-006
+    requirements: [REQ-006, REQ-012]
+    given: an initialized repository where the maintainer edited .ai/rules/general.md
+    when: soft-foundry init runs after a canonical change to that file
+    then: the file is reported conflict and left untouched, other files update normally, and exit code is 3
+    verified_by: []
+  - id: AC-007
+    requirements: [REQ-006]
+    given: the conflict in AC-006
+    when: soft-foundry init --force runs
+    then: the file is reported forced, its content is canonical, the manifest hash is updated, and exit code is 0
+    verified_by: []
+  - id: AC-008
+    requirements: [REQ-006]
+    given: a repository with a pre-existing .ai/ tree and no manifest
+    when: soft-foundry init runs
+    then: files identical to canonical are skipped, differing files are conflicts, the manifest lists only files init wrote or verified identical, and exit code is 3 when any conflict exists
+    verified_by: []
+  - id: AC-009
+    requirements: [REQ-002]
+    given: a repository whose .gitignore already contains .soft-foundry/
+    when: soft-foundry init runs
+    then: .gitignore is unchanged and reported skipped
+    verified_by: []
+  - id: AC-010
+    requirements: [REQ-003]
+    given: a fresh install
+    when: the installed .ai/repository.yml and .ai/harness-evals/ are inspected
+    then: repository.yml has assessed false with empty capabilities, and harness-evals contains only README.md
+    verified_by: []
+  - id: AC-011
+    requirements: [REQ-008]
+    given: a repository with an existing docs/ directory that has no docs/user/
+    when: soft-foundry init runs
+    then: docs/user/README.md is not created and is reported skipped with a reason
+    verified_by: []
+  - id: AC-012
+    requirements: [REQ-009]
+    given: a clean repository
+    when: soft-foundry init --dry-run runs
+    then: the report matches what a real run would produce, no file is written, and no manifest exists
+    verified_by: []
+  - id: AC-013
+    requirements: [REQ-010, REQ-011, REQ-012]
+    given: an installed gem whose packaged .ai/workflow.yml is missing
+    when: soft-foundry init runs
+    then: nothing is written to the target, the message states the fault is in Soft Foundry, names the missing file, points to the upstream repository, and exit code is 4
+    verified_by: []
+  - id: AC-014
+    requirements: [REQ-013]
+    given: a target where .ai is a symlink pointing outside the repository
+    when: soft-foundry init runs
+    then: no file outside the target root is written and the run fails with exit code 1
+    verified_by: []
+  - id: AC-015
+    requirements: [REQ-009, REQ-017]
+    given: a clean repository with no provider credentials in the environment
+    when: soft-foundry init runs
+    then: installation succeeds, onboarding reports every provider not configured, .soft-foundry/runtime.yml exists, and exit code is 0
+    verified_by: []
+  - id: AC-016
+    requirements: [REQ-014]
+    given: any init run
+    when: the output is stripped of non-ASCII characters
+    then: every file's status is still identifiable by its status word
+    verified_by: []
+  - id: AC-017
+    requirements: [REQ-015]
+    given: the built gem
+    when: its specification is inspected
+    then: required_ruby_version is >= 3.2 and the file list includes changes/README.md, docs/user/README.md, and .ai/templates/repository.yml
+    verified_by: []

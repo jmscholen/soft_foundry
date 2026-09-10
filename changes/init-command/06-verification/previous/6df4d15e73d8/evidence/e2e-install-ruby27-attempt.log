@@ -1,0 +1,255 @@
+NOTE: this attempt ran in a scratch directory with no .tool-versions; asdf resolved 'ruby' to 2.7.8 (see backtrace paths). Retained as evidence of behaviour below the declared Ruby floor. The valid run is e2e-install.log.
+### target: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/e2e-target
+
+$ git init -q
+exit=0
+
+$ git config user.email verify@example.invalid
+exit=0
+
+$ git config user.name Verification
+exit=0
+
+$ shasum -a 256 app.rb
+8598a6865b7bf38b0a837253ddc21f8e583cada31aa068ed7094b3a5405e446a  app.rb
+exit=0
+
+$ git add app.rb
+exit=0
+
+$ git commit -q -m Add application file
+exit=0
+
+### STEP 1: first init --no-onboard
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init --no-onboard
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry.rb:4:in `require_relative': /Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:63: syntax error, unexpected '=' (SyntaxError)
+    def flag(name) = !!@argv.delete(name)
+                   ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:135: syntax error, unexpected '=', expecting ';' or '\\n'
+    def plane = @plane ||= ControlPlane.new(...
+              ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:136: syntax error, unexpected '=', expecting ';' or '\\n'
+    def git = @git ||= Git.new(@root)
+            ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:308: syntax error, unexpected end-of-input, expecting `end'
+	from /Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry.rb:4:in `<top (required)>'
+	from /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/lib/ruby/2.7.0/rubygems/core_ext/kernel_require.rb:83:in `require'
+	from /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/lib/ruby/2.7.0/rubygems/core_ext/kernel_require.rb:83:in `require'
+	from /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry:4:in `<main>'
+exit=1
+
+### app.rb after first init
+
+$ shasum -a 256 app.rb
+8598a6865b7bf38b0a837253ddc21f8e583cada31aa068ed7094b3a5405e446a  app.rb
+exit=0
+
+### git status --porcelain after first init (before commit)
+
+$ git status --porcelain
+exit=0
+
+$ git add -A
+exit=0
+
+$ git commit -q -m Install Soft Foundry control plane
+On branch main
+nothing to commit, working tree clean
+exit=1
+
+### git status --porcelain after committing first run
+
+$ git status --porcelain
+exit=0
+
+### STEP 2: second init --no-onboard
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init --no-onboard
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry.rb:4:in `require_relative': /Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:63: syntax error, unexpected '=' (SyntaxError)
+    def flag(name) = !!@argv.delete(name)
+                   ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:135: syntax error, unexpected '=', expecting ';' or '\\n'
+    def plane = @plane ||= ControlPlane.new(...
+              ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:136: syntax error, unexpected '=', expecting ';' or '\\n'
+    def git = @git ||= Git.new(@root)
+            ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:308: syntax error, unexpected end-of-input, expecting `end'
+	from /Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry.rb:4:in `<top (required)>'
+	from /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/lib/ruby/2.7.0/rubygems/core_ext/kernel_require.rb:83:in `require'
+	from /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/lib/ruby/2.7.0/rubygems/core_ext/kernel_require.rb:83:in `require'
+	from /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry:4:in `<main>'
+exit=1
+
+### git status --porcelain after second init
+
+$ git status --porcelain
+exit=0
+
+### STEP 3: soft-foundry check inside target
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry check
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry.rb:4:in `require_relative': /Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:63: syntax error, unexpected '=' (SyntaxError)
+    def flag(name) = !!@argv.delete(name)
+                   ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:135: syntax error, unexpected '=', expecting ';' or '\\n'
+    def plane = @plane ||= ControlPlane.new(...
+              ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:136: syntax error, unexpected '=', expecting ';' or '\\n'
+    def git = @git ||= Git.new(@root)
+            ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:308: syntax error, unexpected end-of-input, expecting `end'
+	from /Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry.rb:4:in `<top (required)>'
+	from /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/lib/ruby/2.7.0/rubygems/core_ext/kernel_require.rb:83:in `require'
+	from /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/lib/ruby/2.7.0/rubygems/core_ext/kernel_require.rb:83:in `require'
+	from /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry:4:in `<main>'
+exit=1
+
+### STEP 4: doctor inside target
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry doctor
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry.rb:4:in `require_relative': /Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:63: syntax error, unexpected '=' (SyntaxError)
+    def flag(name) = !!@argv.delete(name)
+                   ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:135: syntax error, unexpected '=', expecting ';' or '\\n'
+    def plane = @plane ||= ControlPlane.new(...
+              ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:136: syntax error, unexpected '=', expecting ';' or '\\n'
+    def git = @git ||= Git.new(@root)
+            ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:308: syntax error, unexpected end-of-input, expecting `end'
+	from /Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry.rb:4:in `<top (required)>'
+	from /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/lib/ruby/2.7.0/rubygems/core_ext/kernel_require.rb:83:in `require'
+	from /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/lib/ruby/2.7.0/rubygems/core_ext/kernel_require.rb:83:in `require'
+	from /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry:4:in `<main>'
+exit=1
+
+### STEP 5: manifest, repository.yml, harness-evals, gitignore, pointer files
+
+$ head -5 .ai/manifest.yml
+head: .ai/manifest.yml: No such file or directory
+exit=1
+
+$ grep -c sha256\|: [0-9a-f]\{64\} .ai/manifest.yml
+grep: .ai/manifest.yml: No such file or directory
+exit=2
+
+$ cat .ai/repository.yml
+cat: .ai/repository.yml: No such file or directory
+exit=1
+
+$ ls -A .ai/harness-evals
+ls: .ai/harness-evals: No such file or directory
+exit=1
+
+$ cat .gitignore
+cat: .gitignore: No such file or directory
+exit=1
+
+$ git check-ignore -v .soft-foundry/runtime.yml
+exit=1
+
+$ head -3 AGENTS.md
+head: AGENTS.md: No such file or directory
+exit=1
+
+$ cat CLAUDE.md
+cat: CLAUDE.md: No such file or directory
+exit=1
+
+$ ls docs docs/user
+ls: docs: No such file or directory
+ls: docs/user: No such file or directory
+exit=1
+
+$ ls changes
+ls: changes: No such file or directory
+exit=1
+
+### STEP 6: maintainer edits .ai/rules/general.md and commits
+/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/e2e.sh:44: no such file or directory: .ai/rules/general.md
+
+$ git commit -q -am Local edit to general.md
+On branch main
+nothing to commit, working tree clean
+exit=1
+
+$ git status --porcelain
+exit=0
+
+### STEP 7: init after edit (expect conflict, exit 3)
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init --no-onboard
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry.rb:4:in `require_relative': /Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:63: syntax error, unexpected '=' (SyntaxError)
+    def flag(name) = !!@argv.delete(name)
+                   ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:135: syntax error, unexpected '=', expecting ';' or '\\n'
+    def plane = @plane ||= ControlPlane.new(...
+              ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:136: syntax error, unexpected '=', expecting ';' or '\\n'
+    def git = @git ||= Git.new(@root)
+            ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:308: syntax error, unexpected end-of-input, expecting `end'
+	from /Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry.rb:4:in `<top (required)>'
+	from /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/lib/ruby/2.7.0/rubygems/core_ext/kernel_require.rb:83:in `require'
+	from /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/lib/ruby/2.7.0/rubygems/core_ext/kernel_require.rb:83:in `require'
+	from /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry:4:in `<main>'
+exit=1
+
+$ git status --porcelain
+exit=0
+
+### STEP 8: init --force (expect forced, exit 0)
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init --force --no-onboard
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry.rb:4:in `require_relative': /Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:63: syntax error, unexpected '=' (SyntaxError)
+    def flag(name) = !!@argv.delete(name)
+                   ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:135: syntax error, unexpected '=', expecting ';' or '\\n'
+    def plane = @plane ||= ControlPlane.new(...
+              ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:136: syntax error, unexpected '=', expecting ';' or '\\n'
+    def git = @git ||= Git.new(@root)
+            ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:308: syntax error, unexpected end-of-input, expecting `end'
+	from /Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry.rb:4:in `<top (required)>'
+	from /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/lib/ruby/2.7.0/rubygems/core_ext/kernel_require.rb:83:in `require'
+	from /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/lib/ruby/2.7.0/rubygems/core_ext/kernel_require.rb:83:in `require'
+	from /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry:4:in `<main>'
+exit=1
+
+$ git status --porcelain
+exit=0
+
+$ git diff --stat
+exit=0
+
+### STEP 9: general.md hash in manifest vs on disk after force
+
+$ shasum -a 256 .ai/rules/general.md
+shasum: .ai/rules/general.md: No such file or directory
+exit=1
+
+$ grep rules/general.md .ai/manifest.yml
+grep: .ai/manifest.yml: No such file or directory
+exit=2
+
+### STEP 10: init once more after force (expect all skipped)
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init --no-onboard
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry.rb:4:in `require_relative': /Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:63: syntax error, unexpected '=' (SyntaxError)
+    def flag(name) = !!@argv.delete(name)
+                   ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:135: syntax error, unexpected '=', expecting ';' or '\\n'
+    def plane = @plane ||= ControlPlane.new(...
+              ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:136: syntax error, unexpected '=', expecting ';' or '\\n'
+    def git = @git ||= Git.new(@root)
+            ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:308: syntax error, unexpected end-of-input, expecting `end'
+	from /Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry.rb:4:in `<top (required)>'
+	from /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/lib/ruby/2.7.0/rubygems/core_ext/kernel_require.rb:83:in `require'
+	from /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/lib/ruby/2.7.0/rubygems/core_ext/kernel_require.rb:83:in `require'
+	from /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry:4:in `<main>'
+exit=1

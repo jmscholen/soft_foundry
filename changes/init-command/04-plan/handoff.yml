@@ -1,16 +1,37 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 04-plan
 skill: planning
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: e7916589eb61f788254eca7a4d881057ec0600e7
+started_at: '2026-09-09T15:56:54Z'
+completed_at: '2026-09-09T15:56:54Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- implementation.md
+- testing.md
+- rollout.md
+- rollback.md
+blocking: []
+findings:
+- id: PLAN-001
+  severity: major
+  summary: Ten threat-model specification gaps adopted as design constraints DC-1..DC-10;
+    none contradict locked criteria
+- id: PLAN-002
+  severity: major
+  summary: Workflow has no requirement-amendment transition; learning should propose
+    one (gaps were absorbed by planning instead)
+- id: PLAN-003
+  severity: info
+  summary: 'Implementation sequence: errors/gemspec/template, manifest, source, installer
+    plan, apply, pointer files, CLI, doctor/check, docs; steps 1-5 are invisible until
+    7'
+- id: PLAN-004
+  severity: minor
+  summary: Windows line-ending drift is a documented limitation, not solved here
 next: implement
-notes: ""
+notes: 'Compatibility mode: performed by an interactive coding agent under planning
+  permissions.'

@@ -1,16 +1,32 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 02-specification
 skill: specification
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: cc348f93f3d265af3f92f7fa7d0b09cbbf8a520a
+started_at: '2026-09-09T15:42:57Z'
+completed_at: '2026-09-09T15:42:57Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- specification.md
+- requirements.yml
+- acceptance-criteria.yml
+- readiness.md
+blocking: []
+findings:
+- id: SPEC-001
+  severity: info
+  summary: 17 requirements, 17 acceptance criteria; criteria are now locked
+- id: SPEC-002
+  severity: major
+  summary: Threat model should attack the manifest trust decision, --force, and root
+    confinement (REQ-004, REQ-006, REQ-013) first
+- id: SPEC-003
+  severity: info
+  summary: REQ-011 depends on classification only; the full reporting flow is change
+    upstream-failure-reporting
 next: threat_model
-notes: ""
+notes: 'Compatibility mode: performed by an interactive coding agent. Acceptance criteria
+  locked at this commit.'

@@ -1,11 +1,153 @@
+# Threats for change init-command. Categories follow the threat-modeling template.
+# likelihood/impact: low | medium | high. attack_case_required binds to 08-attack/cases.yml.
 threats:
   - id: THREAT-001
-    requirements: [REQ-001]
-    category: authorization   # authentication | authorization | isolation | injection | xss | csrf | ssrf | file | secrets | replay | concurrency | resource_exhaustion | dependency | infrastructure
-    attacker: TBD
-    goal: TBD
-    vector: TBD
-    impact: TBD
-    likelihood: TBD
+    requirements: [REQ-013, REQ-007, REQ-002]
+    category: file
+    attacker: contributor with push or PR access to the target repository, or a local user sharing the filesystem
+    goal: write or append to files outside the target root (or to an unexpected path inside it) with the maintainer's filesystem rights
+    vector: plant a symlink at .ai, at a subdirectory such as .ai/rules, at a managed file such as .ai/workflow.yml, or at AGENTS.md, CLAUDE.md, or .gitignore; the current AgentFiles and Onboarding code writes and appends through symlinks, and AC-014 covers only the top-level .ai symlink
+    impact: high; arbitrary file overwrite or append outside the repository (shell rc files, ssh config, cron), or silent destruction of an in-repo link target
+    likelihood: medium
     mitigation: MIT-001
+    attack_case_required: true
+  - id: THREAT-002
+    requirements: [REQ-013, REQ-002, REQ-011]
+    category: file
+    attacker: supply-chain attacker who can ship a tampered gem or modify a writable gem directory
+    goal: make the installer write outside the target root or read outside the package
+    vector: a packaged entry whose relative name contains .. or an absolute component, or a packaged symlink that a glob over the package follows; destination computed as File.join(root, relative) escapes the root
+    impact: high; arbitrary file write as the maintainer
+    likelihood: low
+    mitigation: MIT-002
+    attack_case_required: true
+  - id: THREAT-003
+    requirements: [REQ-013, REQ-002, REQ-004]
+    category: dependency
+    attacker: supply-chain attacker (compromised RubyGems account, typo-squatted gem, tampered local gem directory)
+    goal: install an attacker-authored control plane and bootstrap so that every later agent in the repository follows attacker instructions
+    vector: replace canonical .ai/**, AGENTS.md bootstrap text, or rules with prompt-injection content; init copies it faithfully and reports created
+    impact: high; persistent hijack of autonomous engineering agents and CI in the target repository
+    likelihood: low
+    mitigation: MIT-003
+    attack_case_required: false
+  - id: THREAT-004
+    requirements: [REQ-004, REQ-006]
+    category: authorization
+    attacker: contributor who can merge a change to .ai/manifest.yml in the target repository
+    goal: revert the repository's hand-hardened control-plane files (for example a stricter .ai/rules/security.md) to canonical content without a conflict being reported
+    vector: edit the manifest so the user-modified file is listed with the SHA-256 of its current content; the next init sees a manifest match plus differing canonical content and reports updated, overwriting it
+    impact: medium; silent loss of repository-specific hardening; committed content is recoverable through git, uncommitted content is not
+    likelihood: low
+    mitigation: MIT-004
+    attack_case_required: true
+  - id: THREAT-005
+    requirements: [REQ-004, REQ-013, REQ-006]
+    category: file
+    attacker: contributor who can edit .ai/manifest.yml
+    goal: make the installer write to, overwrite, or delete files it should never manage
+    vector: manifest entries naming paths outside .ai/ (AGENTS.md, ../../.env, /etc/hosts), protected paths such as .ai/policies/**, or non-canonical files; an installer that derives its managed set from the manifest, or that removes files no longer canonical, acts on them
+    impact: high if honored; user or system files overwritten or deleted under --force or during cleanup
+    likelihood: low
+    mitigation: MIT-005
+    attack_case_required: true
+  - id: THREAT-006
+    requirements: [REQ-006, REQ-007, REQ-013]
+    category: authorization
+    attacker: an autonomous agent or hurried maintainer passing --force to clear conflicts
+    goal: overwrite content that --force was never meant to cover
+    vector: --force applied to pointer files, .ai/repository.yml, changes/README.md, docs/user/README.md, manifest-only entries, symlinked conflict files, or files with uncommitted modifications
+    impact: high; loss of a discovery assessment, repository-specific agent instructions, or unrecoverable uncommitted edits; a symlinked conflict becomes an out-of-root write
+    likelihood: medium
+    mitigation: MIT-006
+    attack_case_required: true
+  - id: THREAT-007
+    requirements: [REQ-010, REQ-013, REQ-005]
+    category: concurrency
+    attacker: a concurrent local process (second init, another agent, IDE, git checkout) or a hostile local user
+    goal: change a planned destination between the plan stage and the write stage so the installer overwrites content it never hashed or follows a symlink it never saw; or corrupt the manifest with two concurrent runs
+    vector: race between plan and write; replace a regular file with a symlink or with new user content after it was classified updated
+    impact: medium; overwrite of user content or out-of-root write; manifest that does not describe on-disk content
+    likelihood: low
+    mitigation: MIT-007
+    attack_case_required: false
+  - id: THREAT-008
+    requirements: [REQ-001, REQ-013]
+    category: authorization
+    attacker: an agent or maintainer with the wrong --root, or an environment (direnv, hook, CI wrapper) exporting GIT_WORK_TREE or GIT_DIR
+    goal: install the control plane into the wrong location, including $HOME, /, a subdirectory, or another repository
+    vector: --root ~ where $HOME is a dotfiles repository; --root pointing inside a different repository; GIT_WORK_TREE redirecting git rev-parse --show-toplevel; --allow-non-git with an arbitrary path; a --root value beginning with a dash being consumed as an option
+    impact: high; AGENTS.md and CLAUDE.md in $HOME alter agent behavior for every project on the machine; .gitignore and .ai/ pollute an unrelated repository
+    likelihood: medium
+    mitigation: MIT-008
+    attack_case_required: true
+  - id: THREAT-009
+    requirements: [REQ-007, REQ-002]
+    category: injection
+    attacker: contributor with PR access to the target repository
+    goal: (a) prevent the Soft Foundry bootstrap from ever being installed while init reports success, or (b) have agents follow adversarial instructions placed in AGENTS.md or CLAUDE.md
+    vector: (a) commit only the marker comment line inside a code fence or comment so substring matching (the current AgentFiles behavior) reports skipped; (b) prompt-injection prose already present in the pointer file, which init preserves by requirement and appends after
+    impact: medium; (a) agents never learn about .ai/ and the lifecycle is silently bypassed; (b) agents act on attacker prose; init can only make its own block verbatim and detectable and report honestly
+    likelihood: medium
+    mitigation: MIT-009
+    attack_case_required: true
+  - id: THREAT-010
+    requirements: [REQ-003, REQ-016]
+    category: authorization
+    attacker: contributor who can commit .ai/repository.yml in the target repository
+    goal: neutralize gate staleness and permission checks for every later phase
+    vector: pre-seed repository.yml with paths overrides that empty APP, TESTS, INFRA, or HARNESS_EVALS; init skips the file as user-owned by rule, ControlPlane#path_groups merges the overrides, Gate#staleness_check sees no code paths and Check accepts any deny_read against an empty eval group
+    impact: medium; stale evidence passes gates, harness evals become readable, and init reported success
+    likelihood: low
+    mitigation: MIT-010
+    attack_case_required: true
+  - id: THREAT-011
+    requirements: [REQ-002, REQ-013, REQ-017]
+    category: secrets
+    attacker: contributor editing .gitignore, or a maintainer running git add -f
+    goal: get machine-local .soft-foundry/ state committed, and learn whether anything in it is sensitive
+    vector: a later !.soft-foundry/ negation, a nested .gitignore, or a symlinked .gitignore; the current line-search idempotency check reports the entry present although git no longer ignores the directory
+    impact: low to medium; runtime.yml carries provider names, model ids, and provider error strings but no keys, so exposure is configuration and local state rather than credentials, provided runtime.yml stays secret-free
+    likelihood: medium
+    mitigation: MIT-011
+    attack_case_required: true
+  - id: THREAT-012
+    requirements: [REQ-011, REQ-013, REQ-012]
+    category: secrets
+    attacker: passive; the maintainer following the upstream-reporting guidance, or anyone reading CI logs
+    goal: obtain API keys, absolute paths, usernames, hostnames, or private repository file names from init output
+    vector: a Soft Foundry-side diagnostic that dumps ENV, request headers, an inspect of a Provider, a backtrace with absolute gem and home paths, or the target's private paths; the guidance then tells the maintainer to paste it into a public issue; misclassifying a target-side condition as Soft Foundry-side widens the audience
+    impact: high if a key is included; medium for path and hostname disclosure
+    likelihood: medium
+    mitigation: MIT-012
+    attack_case_required: true
+  - id: THREAT-013
+    requirements: [REQ-010, REQ-004, REQ-005, REQ-007]
+    category: file
+    attacker: environment (disk full, EIO, killed process) or a local user interrupting the run
+    goal: leave the repository in a state the next init misreads as healthy or cannot repair
+    vector: truncated managed file after ENOSPC; half-appended marker block in AGENTS.md whose marker line survived (skipped forever); manifest written despite a failed file
+    impact: medium; a permanently broken bootstrap block that init reports skipped, or truncated control-plane files reported as conflict with no guidance
+    likelihood: low
+    mitigation: MIT-013
+    attack_case_required: true
+  - id: THREAT-014
+    requirements: [REQ-004, REQ-016, REQ-013]
+    category: resource_exhaustion
+    attacker: contributor committing hostile files to the target repository
+    goal: hang or exhaust memory in init, and through init in the pre-commit hook and CI
+    vector: a FIFO named CLAUDE.md or AGENTS.md (File.read blocks forever); multi-gigabyte files read into memory for hashing or marker detection; a YAML alias bomb in .ai/manifest.yml or .ai/repository.yml parsed with aliases enabled; a symlink loop or millions of entries under .ai/
+    impact: medium; denial of service of installation, check, and CI; possible misclassification as a Soft Foundry-side failure
+    likelihood: low
+    mitigation: MIT-014
+    attack_case_required: true
+  - id: THREAT-015
+    requirements: [REQ-017, REQ-012, REQ-014]
+    category: injection
+    attacker: compromised provider endpoint or network intermediary
+    goal: forge or hide report lines, or plant control sequences in runtime.yml
+    vector: model ids or error strings containing newlines, ANSI escape sequences, or text shaped like a report line; printed verbatim by onboarding after the install report
+    impact: low to medium; a reviewer or agent reading the output is misled about what init did
+    likelihood: low
+    mitigation: MIT-015
     attack_case_required: true

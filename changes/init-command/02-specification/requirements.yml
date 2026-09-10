@@ -1,8 +1,86 @@
-# Implementation-independent requirements. IDs are stable and referenced by
-# acceptance criteria, tests, evaluation journeys, and attack cases.
 requirements:
   - id: REQ-001
-    category: functional   # functional | accessibility | security | data | failure | performance | operations | infrastructure | observability
-    statement: TBD
-    rationale: TBD
+    category: functional
+    statement: init resolves the target root as the Git top-level directory of the current directory, or --root PATH, and refuses non-Git targets unless --allow-non-git is passed.
+    rationale: Writing into an arbitrary directory risks destroying content the maintainer cannot recover with git.
+    source: 00-intake/request.md
+  - id: REQ-002
+    category: functional
+    statement: init installs the packaged canonical .ai/ tree, changes/README.md, the .soft-foundry/ gitignore entry, and marker blocks in AGENTS.md and CLAUDE.md.
+    rationale: These are the files the lifecycle needs to run in a target repository.
+    source: 00-intake/request.md
+  - id: REQ-003
+    category: functional
+    statement: init installs .ai/repository.yml from the unassessed template and installs only README.md from .ai/harness-evals/.
+    rationale: The Soft Foundry repository's own assessment and eval material must not leak into targets.
+    source: 01-discovery/handoff.yml (DISC-002)
+  - id: REQ-004
+    category: data
+    statement: init records the SHA-256 of every file it writes under .ai/ in .ai/manifest.yml together with the Soft Foundry version, and writes the manifest last.
+    rationale: Ownership must be decidable on later runs and on other machines; a partial install must not claim ownership.
+    source: 01-discovery/unknowns.md
+  - id: REQ-005
+    category: functional
+    statement: every managed file receives exactly one status from created, updated, skipped, conflict, forced, as defined in specification.md, and identical content is never rewritten.
+    rationale: Idempotency and honest reporting.
+    source: 00-intake/request.md
+  - id: REQ-006
+    category: functional
+    statement: a file that differs from canonical content and is not proven Soft Foundry-owned by the manifest is a conflict and is left untouched unless --force is passed.
+    rationale: User-owned content must never be overwritten without explicit consent.
+    source: 00-intake/request.md
+  - id: REQ-007
+    category: functional
+    statement: AGENTS.md and CLAUDE.md are never replaced; they are created when absent, appended with a marker block when present without it, and skipped when the marker exists.
+    rationale: Repository-specific agent instructions must survive installation.
+    source: 01-discovery/handoff.yml (DISC-004)
+  - id: REQ-008
+    category: functional
+    statement: docs/user/README.md is created only when docs/ is absent or docs/user/ exists; otherwise it is skipped with a reason.
+    rationale: Do not impose a documentation layout on repositories that have one.
+    source: 00-intake/assumptions.md
+  - id: REQ-009
+    category: functional
+    statement: --dry-run prints the complete report and writes nothing; --no-onboard skips provider discovery; init otherwise runs onboarding after installation.
+    rationale: Maintainers need to preview effects, and init composes rather than replaces onboarding.
+    source: 00-intake/assumptions.md
+  - id: REQ-010
+    category: failure
+    statement: init plans every file before writing any; a planning failure writes nothing; a write failure reports every file already written.
+    rationale: Recoverability of partial installs.
+    source: specification.md
+  - id: REQ-011
+    category: failure
+    statement: failures are classified as target-side or Soft Foundry-side; Soft Foundry-side failures name the component, state the fault is upstream, print the diagnostic, and point to the upstream repository for a fork and pull request or issue, exiting 4.
+    rationale: Maintainers should not debug Soft Foundry bugs as if they were their own; the factory improves through contributed fixes.
+    source: user request 2026-09-09; change upstream-failure-reporting
+  - id: REQ-012
+    category: operations
+    statement: exit codes are 0 success, 1 usage or environment error, 3 conflicts remain, 4 Soft Foundry-side failure; the report lists one status word per file plus counts and the control-plane check result.
+    rationale: Scriptable, screen-reader-readable operational surface.
+    source: specification.md
+  - id: REQ-013
+    category: security
+    statement: every write is confined to the target root, canonical files come only from the installed gem, and no credentials or machine-local state are written to the repository.
+    rationale: Installation runs with the maintainer's full filesystem rights and must not be a vector.
+    source: .ai/rules/security.md
+  - id: REQ-014
+    category: accessibility
+    statement: init is non-interactive and its output conveys every outcome with a word, readable without color or Unicode symbols.
+    rationale: Agents, CI logs, and assistive technology consume the output.
+    source: .ai/skills/specification/SKILL.md
+  - id: REQ-015
+    category: operations
+    statement: the gem declares Ruby 3.2 as its minimum and packages changes/README.md, docs/user/README.md, and .ai/templates/repository.yml.
+    rationale: The code uses Ruby 3.2 features and the installer needs its inputs packaged.
+    source: 01-discovery/handoff.yml (DISC-001, DISC-002)
+  - id: REQ-016
+    category: observability
+    statement: soft-foundry doctor reports whether .ai/manifest.yml is present, and soft-foundry check passes on a freshly initialized repository.
+    rationale: Install state must be visible and deterministically verifiable.
+    source: specification.md
+  - id: REQ-017
+    category: functional
+    statement: provider discovery for OpenAI, Anthropic, and xAI/Grok continues to work unchanged, and provider errors never fail init.
+    rationale: Intake constraint.
     source: 00-intake/request.md

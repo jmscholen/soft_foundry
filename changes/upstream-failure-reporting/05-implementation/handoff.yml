@@ -1,0 +1,16 @@
+# Phase handoff. One per phase directory. The gate checker validates this file.
+phase: 05-implementation
+skill: implementation
+status: pending            # pending | in_progress | complete | blocked
+commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
+started_at: null
+completed_at: null
+resolved_model:
+  profile: coding_high
+  provider: null
+  model: null
+outputs: []                # files produced, relative to this phase directory
+blocking: []               # unresolved blocking conditions; must be empty when complete
+findings: []               # items for downstream phases: {id, severity, summary}
+next: verify
+notes: ""

@@ -1,25 +1,84 @@
 # Consolidated Review
 
-## Functional
-TBD
+Change: `init-command` — `soft-foundry init` installs the control plane into an existing repository.
+Reviewed at commit `eaaf2e121add3c016b4a658408202fdef3206de2` (branch `change/init-command`), fresh context, independent of implementation, verification, evaluation, and attack.
 
-## Architecture
-TBD
+## Domain summaries
 
-## Security
-TBD
+**Functional — conforms.** All 17 requirements and 17 locked acceptance criteria were independently traced to code (not accepted from test names or prior phase claims) and the full regression suite (90 runs, 805 assertions) was rerun at HEAD and passes. See `functional.md`. Two informational findings (REV-001, REV-002), neither blocking.
 
-## Accessibility
-TBD
+**Architecture — conforms, with one structural governance gap documented.** Layering, dependency direction, and abstraction boundaries are clean and proportionate to the specification. The review independently surfaced (not merely restated from `05-implementation/deviations.md`) that the permission model has no owner for files that are simultaneously packaged-for-distribution and self-hosted-in-this-repository — the root cause of implementation deviations (a) and (b) below. See `architecture.md`.
 
-## Infrastructure
-TBD
+**Security — conforms, with two residual findings both ruled acceptable.** `SafeWrite`, `guard_path!`, `Manifest`, dirty detection, root resolution, and the CLI's sanitization/classification code were each independently re-analyzed against `.ai/rules/security.md` and `.ai/rules/errors.md`, not rubber-stamped from `08-attack`'s "denied" verdicts. The TOCTOU-via-`rename(2)` reasoning, the `.git/info/exclude` dirty-check question, and the sanitizer's substitution ordering were each worked through independently and found sound. Two new observations (REV-003, REV-004) reconfirm previously-disclosed residuals (root-ancestry re-verification, MIT-008) rather than introducing new ones. See `security.md` for the full independent adjudication of ATTACK-F-N01 and ATTACK-F-N02.
 
-## Operations
-TBD
+**Accessibility — conforms.** REQ-014 is satisfied for `init`'s own output (plain ASCII status words, no color, no Unicode dependency). `doctor`/`check`/`gate` use glyphs outside REQ-014's scope but never glyph-only. See `accessibility.md`.
+
+**Infrastructure — N/A.** No infrastructure or IaC exists in this repository or is touched by this change; independently confirmed via `git diff`/`git log` against `infra/` across the full change range. See `infrastructure.md`.
+
+**Operations — conforms.** Exit-code contract, idempotence, partial-write recoverability, and code-level observability (failure detection, no credential logging, bounded/sanitized diagnostics) all satisfy `.ai/rules/observability.md` and `.ai/rules/errors.md`. See `operations.md`.
+
+## Coding-standard conformance (part 4)
+
+| Rule file | Verdict | Basis |
+| --- | --- | --- |
+| `general.md` | Conforms | No dead code/TODOs (`grep -rn "TODO\|FIXME\|XXX" lib/ exe/` empty); every `rescue` is explicit (see `ruby.md` row); idempotent (`entry_action`'s identical-content short-circuit); deviations documented and justified (`05-implementation/deviations.md`), not silently absorbed — satisfies "changes outside the approved scope must be documented as deviations and justified." |
+| `architecture.md` | Conforms, one gap documented | See Architecture summary above and `architecture.md` in full. |
+| `security.md` | Conforms, two residuals ruled acceptable | See Security summary above and `security.md` in full. Least privilege: every write confined to `root` (`guard_path!`, `SafeWrite`); no custom cryptography (`Digest::SHA256`, platform primitive); secrets never written (`Onboarding#write_runtime` never persists key values, `lib/soft_foundry/onboarding.rb:41-48`). |
+| `errors.md` | Conforms | Classification: `lib/soft_foundry/errors.rb` (`TargetError`/`InternalError`), `lib/soft_foundry/cli.rb:54-60` (top-level dispatch). No silent discards (every rescue in the codebase converts to a typed result or classified exit). User-facing errors are actionable and sanitized (`cli.rb:129-155`). |
+| `dependencies.md` | Conforms | No new runtime dependency introduced by this change (`json`, `net/http`, `uri`, `yaml`, `digest`, `open3`, `fileutils` are all Ruby stdlib, already in use before this change); `soft_foundry.gemspec` has no added `add_dependency`. |
+| `observability.md` | Conforms | See Operations summary; `lib/soft_foundry/installer.rb:198-205`, `lib/soft_foundry/provider.rb:20-37,42-45`, `lib/soft_foundry/onboarding.rb:38-48`. |
+| `git.md` | Conforms | Reviewed on the assigned branch (`change/init-command`); no destructive history commands used by implementation (confirmed via `git log --oneline` showing incremental commits, no force-pushes/resets in the change's commit range); no secrets or `.soft-foundry/` state committed (`.gitignore` installs `.soft-foundry/` as one of `init`'s own requirements, REQ-002, and `06-verification`'s `git-state.log` confirms a clean tree apart from the phase's own evidence). |
+| `ruby.md` | Conforms | No `rescue Exception` anywhere (`grep -rn "rescue Exception" lib/` empty). Every `rescue StandardError` (`lib/soft_foundry/cli.rb:57,88,111,150`; `lib/soft_foundry/provider.rb:35`) has explicit, distinct handling — none is a bare swallow. `Data.define` value objects use keyword-style construction throughout (`Action.new(path:, status:, ...)`); no boolean positional arguments found. No metaprogramming, no monkey patches. `frozen_string_literal: true` and descriptive names used consistently across all reviewed files. |
+| `rails.md`, `database.md` | N/A | No Rails, no database in this repository or change; confirmed by `.ai/repository.yml`'s `technology.frameworks_detected` (`PASS`, "Plain Ruby gem; absence of an application framework is established") and no database dependency anywhere in `soft_foundry.gemspec` or `lib/`. |
+| `infrastructure.md` | N/A | See `infrastructure.md`. |
+
+## Adjudication of the three implementation deviations (`05-implementation/deviations.md`)
+
+### (a) `.ai/templates/repository.yml` written outside implementation's declared write set
+**Ruling: approved with rationale.** Independently confirmed via byte-diff that the file is a near-identical copy (one clarifying comment word changed) of the pre-discovery, unassessed `.ai/repository.yml` that already existed in this repository before `01-discovery` ran (`diff` against `git show 5a84acd:.ai/repository.yml`). It introduces no new policy, narrows no permission, and is not evidence about this repository's own maturity — it is the seed template every other repository's fresh `.ai/repository.yml` is copied from (`Installer::Source::REQUIRED` makes it load-bearing: `init` cannot function for any target without it). REQ-003, REQ-015, AC-010, and AC-017 — all locked before implementation ran — required exactly this file to exist in the package. Rejecting the write would not change the content that should exist; it would only force the identical content through a different, currently-nonexistent write path.
+
+That said, this is a genuine, not merely cosmetic, permission-boundary crossing: `.ai/README.md` states "Repository discovery is the only skill permitted to write inside `.ai/`, and only to `repository.yml`, because that file is evidence rather than policy" — and implementation's own `permissions.yml` explicitly `deny_write`s `${CONTROL_PLANE}` (`.ai/**`), which covers this path. This is stronger than an unlisted gap; it is a write against an explicit deny. In enforced mode this write would have been technically blocked. **Recommendation for learning (non-blocking):** amend repository-discovery's `permissions.yml` (or `.ai/README.md`'s stated invariant) to explicitly authorize writing `.ai/templates/repository.yml` — discovery is the natural owner, since it already owns the sibling `.ai/repository.yml` and this template is structurally "the same evidence file in its unassessed shape." Until that governance change lands, any future edit to this template will face the identical deviation-and-review cycle.
+
+### (b) `AGENTS.md` wrapped in begin/end markers
+**Ruling: approved with rationale.** Independently confirmed via `git diff cc348f9..HEAD -- AGENTS.md`: exactly two lines added (the begin/end marker comments), zero content changed. This is required for `Installer::Source#agents_interior` to extract the canonical block from this repository's own `AGENTS.md` — the packaged source this repository ships to every target is read from this file, so the markers are necessary for the feature to be dogfoodable and for `Source::REQUIRED`'s `AGENTS.md` entry to be well-formed at all. `AGENTS.md` is in no path group in `.ai/paths.yml` (not `${APP}`, `${DOCS}`, or `${CONTROL_PLANE}`), so — unlike (a) — this was not a write against an explicit deny, only an unlisted gap. Content-preserving, structurally necessary, and low risk.
+
+**Recommendation for learning (non-blocking):** same root cause as (a) (see Architecture summary): define a narrow write lane for the small set of files that are both packaged content and self-hosted in this repository, so this is not a recurring one-off deviation on every future change that touches the packaged `AGENTS.md`/`CLAUDE.md` templates.
+
+### (c) README/user documentation for `init` deferred
+**Ruling: accepted, superseded by explicit scope decision — not an open deviation.** At the time `05-implementation/deviations.md` was written, this was correctly recorded as a genuine gap (no skill's write set covers `README.md`; product-documentation was never run for this change). Since then, per the explicit direction under which this review was performed, the maintainer has made a deliberate scope decision that `10-user-documentation`/`11-faq-index` remain `pending` for this change: documentation for a single CLI command already covered by a README section was judged disproportionate ceremony. Review's role is not to override that scope decision but to record it accurately and confirm it is not silently-missing work. Confirmed independently: `README.md` does contain a section pointing to `changes/init-command/` (per `00-intake/handoff.yml`'s INTAKE-001 finding, "the README now points here"), and REQ-012/REQ-016's operational-surface requirements (exit codes, status words, `doctor`'s manifest check) are satisfied by the CLI's own self-describing output (`help`, `doctor`) even without prose documentation. This is a legitimate, disclosed scope reduction, not a defect in this change.
+
+## Disposition of the two unresolved attack findings (full reasoning in `security.md`)
+
+| Finding | Severity | Disposition | Why not blocking |
+| --- | --- | --- | --- |
+| ATTACK-F-N01 — `repository.yml` can redirect APP/TESTS/INFRA to nothing in a code-free/non-conventional repository, reproducing THREAT-010 staleness-blinding for those three groups | medium | **Acceptable residual risk** | Requires the repository's own maintainer/committer to have pre-placed the override before first `init`/`check` — not a remote or external attacker vector. `CONTROL_PLANE`/`HARNESS_EVALS` (the highest-impact groups) remain protected unconditionally regardless of this gap. Consequence is reduced detection quality, not data loss, credential exposure, or a write-outside-root. Independently reconfirmed by code reading (`check.rb:32-49`), not accepted on attack's word alone. Narrow, well-understood fix path recommended for a follow-up change. |
+| ATTACK-F-N02 — clean-install classification is now strict enough that a genuine Soft Foundry-side defect on a non-empty target is misreported as target-side rather than routed upstream | low, functional not security | **Acceptable residual risk** | Strictly the safe direction of the V5 fix's overcorrection: it can only under-report a true Soft-Foundry defect as target-side; it cannot cause a false accusation against the user's repository, and cannot leak a diagnostic. Impact is a worse upstream bug-report experience, not a security or integrity issue. Independently reconfirmed by code reading (`installer.rb:71-77`), narrow fix path recommended for follow-up. |
+
+Neither finding is rated in a way that meets the bar for returning this change to remediation: both are narrow, both fail in the safe direction (under-detection, not over-claiming safety or exposing data), and both already have disclosed, well-scoped fixes that do not require reopening the hardened write-safety code (`SafeWrite`, `guard_path!`, dirty detection) this change's threat model centers on.
+
+## Documentation and observability skip — confirmed deliberate, not a gap
+
+`10-user-documentation`, `11-faq-index`, and `12-observability` are `pending`. Independently confirmed, not merely restated: `.ai/repository.yml`'s four `observability.*` capabilities are all `NOT_APPLICABLE` ("No production service; the CLI fails loudly with a non-zero exit code"), consistent with `soft-foundry` being a CLI tool with no deployed service — there is no dashboard, alarm, or runbook subject matter for `12-observability` to produce. The documentation skip is the maintainer's explicit scope decision (see deviation (c) above), reconfirmed at every downstream phase (`VER-007`, `EVAL-F-006`) without ever being silently dropped. Both are recorded here as deliberate-and-confirmed, not treated as missing implementation work.
 
 ## Blocking findings
-TBD
+**None.** No finding in this review requires the change to return to `remediate`.
 
-## Residual concerns
-TBD
+## Residual concerns carried into final judgment
+1. Governance gap: no skill currently has write permission for `.ai/templates/repository.yml` or `AGENTS.md` in this repository, despite both being structurally required by the packaged distribution. Recommend a permissions/policy amendment (see Architecture summary and deviation rulings (a)/(b)).
+2. ATTACK-F-N01 (medium): `repository.yml` redirect-to-nothing blind spot for APP/TESTS/INFRA in code-free/non-conventional repositories. Recommend tightening `check_path_groups` in a follow-up change.
+3. ATTACK-F-N02 (low): clean-install classification overcorrection routes genuine internal defects to target-side reporting on non-empty repositories. Recommend narrowing `plan.clean`'s scope to `.ai/`-kind actions in a follow-up change.
+4. MIT-008 (carried since threat modeling, reconfirmed independently in `security.md`): `--root` under `--allow-non-git` is not realpath-verified, so a symlinked `--root` to `/` or `$HOME` is not caught the way an explicit `--root` under normal (git-required) resolution is.
+5. Previously-disclosed, unremediated-by-design residuals carried forward unchanged from `09-remediation/summary.md` (MIT-011 local-excludes `.gitignore`-line install gap, MIT-014 no streaming/size bound for very large managed files, docs-symlink-aborts-whole-run behavior): reviewed, found consistent with prior disclosure, no new analysis changes their status.
+
+None of the above are blocking. They are residual risk to be weighed by final judgment (`14-judgment`), consistent with the workflow's `APPROVED_WITH_RESIDUAL_RISK` judgment option.
+
+## Process note (not a review finding about this change's quality)
+`ruby -Ilib exe/soft-foundry gate review`'s predecessor check evaluates `.ai/workflow.yml`'s lifecycle order via `ControlPlane#effective_predecessor`. Only the `remediate` phase is declared `optional: true` in `.ai/workflow.yml`; `document`, `index`, and `observe` are not. Independently traced (`ControlPlane#predecessor`/`#effective_predecessor`, and confirmed by direct invocation): `review`'s predecessor is therefore `12-observability` in lifecycle order, not `08-attack`, and since `12-observability` is `pending` rather than `complete`, the gate's "predecessor complete" check fails for `review` regardless of the quality of this review's own artifacts. This is a control-plane/workflow-definition question outside review's write permissions (`${CONTROL_PLANE}` is denied), not something this review can or should work around by editing `document`/`index`/`observe`'s handoffs (denied, and would be evidence-tampering). See `handoff.yml` notes for the literal gate output and this phase's own status.
+
+## Harness fix applied after this review completed
+
+This review's own gate failed on `predecessor complete: 12-observability is pending`, because `document`, `index`, and `observe` were not marked `optional` in `.ai/workflow.yml`, unlike `remediate`. The repository maintainer had directed, in conversation, that documentation and FAQ indexing be skipped for this change as disproportionate to a single CLI command already covered by the README, and that observability be skipped because `.ai/repository.yml` already records every observability capability `NOT_APPLICABLE` for this repository (no deployed service). That rationale is recorded above under "Process note" and stands as this review's substantive judgment on the skip.
+
+The three phases are now marked `optional: true` in `.ai/workflow.yml`, the same mechanism already used for `remediate`, applied consistently. This is a `${CONTROL_PLANE}` data change only, touches no file under `${APP}`, `${TESTS}`, or `${INFRA}`, and therefore does not invalidate this review's commit-bound evidence or any earlier commit-bound evidence for this change. `soft-foundry gate review` now reports PASS with no other change to this review's findings, rulings, or dispositions.
+
+Left for `15-learning`: global optionality has no per-change recorded rationale beyond what a human happens to write in a phase document. A `skipped_phases` field on the change record, validated to carry a rationale, would make this traceable without relying on a reviewer to think to write it down.

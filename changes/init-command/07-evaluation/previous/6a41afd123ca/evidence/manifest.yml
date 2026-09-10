@@ -1,0 +1,127 @@
+commit_sha: 6a41afd123ca1ea6f72b1ac6b686e2b2c419b10e
+# sha256 computed with: shasum -a 256 <file>; paths relative to changes/init-command/07-evaluation/
+artifacts:
+  - path: evidence/EVAL-001-first-install-idempotent.log
+    journey: EVAL-001
+    kind: transcript
+    sha256: b773442afdd8b2ff9dc6339b0238601c01a8f22ed52b568aa13a2c4768a4fc4e
+  - path: evidence/EVAL-002-pointer-files-preserved.log
+    journey: EVAL-002
+    kind: transcript
+    sha256: b7062203ef9e1a0a11e32e069ec33a80e9abaeb7aafb012e7dcb917e88250d67
+  - path: evidence/EVAL-003-dry-run-then-real.log
+    journey: EVAL-003
+    kind: transcript
+    sha256: 2b7c90dca88b28fde6faf6a9382c69254a9f72223b04ab95ecebc8c5780a0374
+  - path: evidence/EVAL-004-conflict-then-force.log
+    journey: EVAL-004
+    kind: transcript
+    sha256: 03278c0891cfc099ef849e8a1c60d0ef2acee43a0241ca9280fe712b5fc0dccb
+  - path: evidence/EVAL-005-uncommitted-edit.log
+    journey: EVAL-005
+    kind: transcript
+    sha256: b987bdbf5826c10bfb2a1a93e91ae78b69d9b185824b8814309bb27dc0acff5a
+  - path: evidence/EVAL-006-non-git.log
+    journey: EVAL-006
+    kind: transcript
+    sha256: 3c704cef1f8ce353d6631e51f288de85353d9a6b04bd4804689caecd89da930c
+  - path: evidence/EVAL-007-docs-without-user.log
+    journey: EVAL-007
+    kind: transcript
+    sha256: 85a69740442191c23060f95fdb92372ff00f5249b7799d002f3a1410d2c949f3
+  - path: evidence/EVAL-008-gitignore.log
+    journey: EVAL-008
+    kind: transcript
+    sha256: 555959d5666cf25fca59dd784e88ad64934eaac7f4941ff3dc1464aa126efa3d
+  - path: evidence/EVAL-009-root-option.log
+    journey: EVAL-009
+    kind: transcript
+    sha256: 5dcfaf650e3adfb769c14c270994db1cd76a11cf2b27398a657b39e665b7dacd
+  - path: evidence/EVAL-010-no-provider-keys.log
+    journey: EVAL-010
+    kind: transcript
+    sha256: d10c477f38844d29ca6c1f0f53cefabdb9350fb6f6be51f1e5ecef5b800d3e36
+  - path: evidence/EVAL-011-ascii-status-words.log
+    journey: EVAL-011
+    kind: transcript
+    sha256: a7f5c0e5cdfb0a1a3b4dc7601452254693d22a5097298558f326385b52cf2dac
+  - path: evidence/EVAL-012-internal-failure.log
+    journey: EVAL-012
+    kind: transcript
+    sha256: febbd4f4c26c743e3f8f822d5fa4c1544e49127d07b0182ea2fd86bf345fd4a0
+  - path: evidence/EVAL-013-hand-copied-ai.log
+    journey: EVAL-013
+    kind: transcript
+    sha256: 77bef434f41878cc40444921573200c2763fcd05c1b93029e5844de896dac6e1
+  - path: evidence/EVAL-014-cli-surface.log
+    journey: EVAL-014
+    kind: transcript
+    sha256: 7e5b84b8677988362a38987285da44ec3c370c638adc70401a5af94bdecb4fa4
+  - path: evidence/EVAL-015-symlinked-ai.log
+    journey: EVAL-015
+    kind: transcript
+    sha256: 752891cdefba48fcad9d556965ace8008d66d5871cd20dd207fecd4fe4ca34eb
+  - path: evidence/scripts/eval-001.sh
+    journey: EVAL-001
+    kind: script
+    sha256: 510f71d329b887de85171e963b935c5489a151d17c57f010f4ca1629e6d08670
+  - path: evidence/scripts/eval-002.sh
+    journey: EVAL-002
+    kind: script
+    sha256: f08a326e59152da9b2fde65fe0563318ee66ad3010df06d2792fe0ba046ce1b2
+  - path: evidence/scripts/eval-003.sh
+    journey: EVAL-003
+    kind: script
+    sha256: 5e5838160e35a922fe450a3dae11609386aa2c4e808b1d3857e1906737e1451a
+  - path: evidence/scripts/eval-004.sh
+    journey: EVAL-004
+    kind: script
+    sha256: 15601a3444eeb5444deaaace9af08c8814fb668deea5e080f44c56fc142a67c2
+  - path: evidence/scripts/eval-005.sh
+    journey: EVAL-005
+    kind: script
+    sha256: 0ca3cfdcfcbffe8a53cfbbe576e464e7dacd87ec027591d3fd0efaee7db247c6
+  - path: evidence/scripts/eval-006.sh
+    journey: EVAL-006
+    kind: script
+    sha256: df2f49bdff6ac2542bbc8421b486b08f33889016c708b9a27db1873f8b292401
+  - path: evidence/scripts/eval-007.sh
+    journey: EVAL-007
+    kind: script
+    sha256: ed9102df8fdf6c91d9f5c75b5e7791e6f8a7bc4aab1f8dc79539d240568c2199
+  - path: evidence/scripts/eval-008.sh
+    journey: EVAL-008
+    kind: script
+    sha256: 38511e5d3b3493f3c06a98cf9812acced6417e057460ff05389d8abc161308ca
+  - path: evidence/scripts/eval-009.sh
+    journey: EVAL-009
+    kind: script
+    sha256: 38f701b64900e57e850155eb15d8cd66736d642a0db84aaa9bea5359789e0ace
+  - path: evidence/scripts/eval-010.sh
+    journey: EVAL-010
+    kind: script
+    sha256: f743288367382d3e1ef61fd9fc4f65eaed9ae3631ba11f65ec7216021fae0a24
+  - path: evidence/scripts/eval-011.sh
+    journey: EVAL-011
+    kind: script
+    sha256: 6e9e880ed5e4210b341dc35d123a60e104d0025e2487706334c5b7a5c3ed9110
+  - path: evidence/scripts/eval-012.sh
+    journey: EVAL-012
+    kind: script
+    sha256: 743dca6032a213b1517f5c8ffaa42bb3eeec1d00af062636bd31c8f8b6ebab74
+  - path: evidence/scripts/eval-013.sh
+    journey: EVAL-013
+    kind: script
+    sha256: 54c49460027641e1363b732dc0f02dd3e6d0dd18366582c5b90048051e87babf
+  - path: evidence/scripts/eval-014.sh
+    journey: EVAL-014
+    kind: script
+    sha256: fb633f890d61c04d4ec113e4a93f5fa766de7454a46f91f675f65ae6f8a13776
+  - path: evidence/scripts/eval-015.sh
+    journey: EVAL-015
+    kind: script
+    sha256: 25ce98048f1e7509290e4e7f381a27d360a8fa1b2d25c31f9201f3c976abb74a
+  - path: evidence/scripts/lib.sh
+    journey: all
+    kind: script
+    sha256: 03b6f2443322438b0ab2238b5710afe3ad31084991aaea1bdea5b2464395c8c9

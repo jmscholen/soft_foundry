@@ -1,0 +1,75 @@
+✓ control plane: 16 phases, 16 skills, no errors
+
+change init-command
+00-intake  complete  PASS
+  ✓ handoff identity
+  ✓ required files present: request.md, assumptions.md, handoff.yml
+  ✓ no placeholders
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: 5a84acd982ce590b310682de02172d34f5138cab
+  ✓ completed_at recorded: 2026-09-09T15:27:16Z
+  ✓ predecessor complete: first phase
+01-discovery  complete  PASS
+  ✓ handoff identity
+  ✓ required files present: repository-context.md, affected-components.md, dependencies.md, unknowns.md, handoff.yml
+  ✓ no placeholders
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: cc348f93f3d265af3f92f7fa7d0b09cbbf8a520a
+  ✓ completed_at recorded: 2026-09-09T15:35:27Z
+  ✓ predecessor complete: 00-intake
+02-specification  complete  PASS
+  ✓ handoff identity
+  ✓ required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+  ✓ no placeholders
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: cc348f93f3d265af3f92f7fa7d0b09cbbf8a520a
+  ✓ completed_at recorded: 2026-09-09T15:42:57Z
+  ✓ predecessor complete: 01-discovery
+03-threat-model  complete  PASS
+  ✓ handoff identity
+  ✓ required files present: attack-surface.md, trust-boundaries.md, threats.yml, mitigations.md, handoff.yml
+  ✓ no placeholders
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: 43d62f3ff0b1c085e689615440b9702c63f161e3
+  ✓ completed_at recorded: 2026-09-09T15:54:10Z
+  ✓ predecessor complete: 02-specification
+04-plan  complete  PASS
+  ✓ handoff identity
+  ✓ required files present: implementation.md, testing.md, rollout.md, rollback.md, handoff.yml
+  ✓ no placeholders
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: e7916589eb61f788254eca7a4d881057ec0600e7
+  ✓ completed_at recorded: 2026-09-09T15:56:54Z
+  ✓ predecessor complete: 03-threat-model
+05-implementation  complete  PASS
+  ✓ handoff identity
+  ✓ required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✓ no placeholders
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: 017e14984035cd00d7320db31daf87ab44a3a98f
+  ✓ completed_at recorded: 2026-09-09T16:05:36Z
+  ✓ predecessor complete: 04-plan
+08-attack  blocked  PASS
+  ✓ handoff identity
+  ! blocking recorded: ATTACK-004 violated (critical): a committed symlink at <managed path>.soft-foundry-tmp makes init write canonical content, the generated AGENTS.md, and the manifest outside the target root and leaves the managed paths as symlinks, while reporting exit 0 and check: ok; ATTACK-005 violated (major): .soft-foundry symlinks and hardlinks redirect the lock file and runtime.yml outside the root through init and onboard; the symlink itself is not ignored by the .soft-foundry/ pattern; ATTACK-021 violated (major): uncommitted edits under a git-ignored managed path, and any uncommitted edit under --allow-non-git inside a git repo, are overwritten (forced or updated) although the report states uncommitted edits are never overwritten; the loss is unrecoverable; ATTACK-013 violated (major): repository.yml overrides that redirect APP/TESTS/INFRA/HARNESS_EVALS to a non-existent tree pass init and check, disable gate staleness detection, and remove .ai/harness-evals/** from every deny_read; ATTACK-015 violated (major): eight target-side conditions exit 4 as 'a defect in Soft Foundry' with upstream-reporting guidance (one after a complete install while claiming nothing was changed), and the diagnostic carries the target's absolute path when cwd differs from --root; ATTACK-006 violated (minor): init hangs on a FIFO at .ai/manifest.yml (binread before type check) and at .gitignore (inside git status); ATTACK-019 violated (minor): runtime.yml keeps raw, untruncated provider strings and soft-foundry models prints them raw (ESC sequences, report-shaped lines)
+09-remediation  complete  PASS
+  ✓ handoff identity
+  ✓ required files present: summary.md, handoff.yml
+  ✓ no placeholders
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: 1fb8aa73a4ddae7cfb1a02f313b687286ee83581
+  ✓ completed_at recorded: 2026-09-09T21:35:10Z
+  ✓ predecessor complete: 05-implementation
+
+change upstream-failure-reporting
+00-intake  complete  PASS
+  ✓ handoff identity
+  ✓ required files present: request.md, assumptions.md, handoff.yml
+  ✓ no placeholders
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: cc348f93f3d265af3f92f7fa7d0b09cbbf8a520a
+  ✓ completed_at recorded: 2026-09-09T15:43:34Z
+  ✓ predecessor complete: first phase
+
+✓ ci passed
+EXIT: 0

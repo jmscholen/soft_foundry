@@ -1,0 +1,36 @@
+$ rsync -a --exclude=.git repo/ scratch/gem-copy/
+$ cd scratch/gem-copy && gem build soft_foundry.gemspec --output scratch/soft_foundry.gem
+WARNING:  licenses is empty, but is recommended.  Use a license identifier from
+http://spdx.org/licenses or 'Nonstandard' for a nonstandard license.
+WARNING:  no homepage specified
+WARNING:  See https://guides.rubygems.org/specification-reference/ for help
+  Successfully built RubyGem
+  Name: soft_foundry
+  Version: 0.2.0
+  File: soft_foundry.gem
+BUILD EXIT: 0
+
+$ gem specification scratch/soft_foundry.gem required_ruby_version
+--- !ruby/object:Gem::Requirement
+requirements:
+- - ">="
+  - !ruby/object:Gem::Version
+    version: '3.2'
+
+
+$ tar -xOf soft_foundry.gem data.tar.gz | tar -tz | wc -l
+     190
+
+Key entries present:
+2:.ai/harness-evals/README.md
+165:.ai/templates/repository.yml
+169:changes/README.md
+170:docs/user/README.md
+188:lib/soft_foundry/safe_write.rb
+
+test/ and changes/init-command not packaged:
+0
+0
+
+No .gem left in repository root:
+(none found, as expected)

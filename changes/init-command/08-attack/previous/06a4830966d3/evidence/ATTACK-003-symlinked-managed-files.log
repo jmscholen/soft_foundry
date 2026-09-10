@@ -1,0 +1,140 @@
+
+##### ATTACK-003 THREAT-001: symlinks at .ai/workflow.yml, AGENTS.md, CLAUDE.md, .gitignore, changes/README.md, docs/user/README.md pointing at outside victim files
+
+##### case ai-workflow
+soft-foundry: .ai/workflow.yml is a symlink; init does not write through symlinks
+[exit 1]
+victim after: VICTIM ORIGINAL CONTENT
+victim sha: 368b4fd7290c3332
+$ ls -la /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a003/outside-ai-workflow
+total 8
+drwxr-xr-x@ 3 jscholen-iou  wheel   96 Sep  9 17:04 .
+drwxr-xr-x@ 4 jscholen-iou  wheel  128 Sep  9 17:04 ..
+-rw-r--r--@ 1 jscholen-iou  wheel   24 Sep  9 17:04 victim
+[exit 0]
+target tree (files written?):
+./lib/app.rb
+
+##### case ai-workflow with --force
+soft-foundry: .ai/workflow.yml is a symlink; init does not write through symlinks
+[exit 1]
+victim after force: VICTIM ORIGINAL CONTENT
+
+##### case agents
+soft-foundry: AGENTS.md is a symlink; init does not write through symlinks
+[exit 1]
+victim after: VICTIM ORIGINAL CONTENT
+victim sha: 368b4fd7290c3332
+$ ls -la /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a003/outside-agents
+total 8
+drwxr-xr-x@ 3 jscholen-iou  wheel   96 Sep  9 17:04 .
+drwxr-xr-x@ 6 jscholen-iou  wheel  192 Sep  9 17:04 ..
+-rw-r--r--@ 1 jscholen-iou  wheel   24 Sep  9 17:04 victim
+[exit 0]
+target tree (files written?):
+./lib/app.rb
+
+##### case agents with --force
+soft-foundry: AGENTS.md is a symlink; init does not write through symlinks
+[exit 1]
+victim after force: VICTIM ORIGINAL CONTENT
+
+##### case claude
+soft-foundry: CLAUDE.md is a symlink; init does not write through symlinks
+[exit 1]
+victim after: VICTIM ORIGINAL CONTENT
+victim sha: 368b4fd7290c3332
+$ ls -la /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a003/outside-claude
+total 8
+drwxr-xr-x@ 3 jscholen-iou  wheel   96 Sep  9 17:04 .
+drwxr-xr-x@ 8 jscholen-iou  wheel  256 Sep  9 17:04 ..
+-rw-r--r--@ 1 jscholen-iou  wheel   24 Sep  9 17:04 victim
+[exit 0]
+target tree (files written?):
+./lib/app.rb
+
+##### case claude with --force
+soft-foundry: CLAUDE.md is a symlink; init does not write through symlinks
+[exit 1]
+victim after force: VICTIM ORIGINAL CONTENT
+warning: unable to access '.gitignore': Too many levels of symbolic links
+
+##### case gitignore
+soft-foundry: .gitignore is a symlink; init does not write through symlinks
+[exit 1]
+victim after: VICTIM ORIGINAL CONTENT
+victim sha: 368b4fd7290c3332
+$ ls -la /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a003/outside-gitignore
+total 8
+drwxr-xr-x@  3 jscholen-iou  wheel   96 Sep  9 17:04 .
+drwxr-xr-x@ 10 jscholen-iou  wheel  320 Sep  9 17:04 ..
+-rw-r--r--@  1 jscholen-iou  wheel   24 Sep  9 17:04 victim
+[exit 0]
+target tree (files written?):
+warning: unable to access '.gitignore': Too many levels of symbolic links
+./lib/app.rb
+
+##### case gitignore with --force
+soft-foundry: .gitignore is a symlink; init does not write through symlinks
+[exit 1]
+victim after force: VICTIM ORIGINAL CONTENT
+
+##### case changes-readme
+soft-foundry: changes/README.md is a symlink; init does not write through symlinks
+[exit 1]
+victim after: VICTIM ORIGINAL CONTENT
+victim sha: 368b4fd7290c3332
+$ ls -la /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a003/outside-changes-readme
+total 8
+drwxr-xr-x@  3 jscholen-iou  wheel   96 Sep  9 17:04 .
+drwxr-xr-x@ 12 jscholen-iou  wheel  384 Sep  9 17:04 ..
+-rw-r--r--@  1 jscholen-iou  wheel   24 Sep  9 17:04 victim
+[exit 0]
+target tree (files written?):
+./lib/app.rb
+
+##### case changes-readme with --force
+soft-foundry: changes/README.md is a symlink; init does not write through symlinks
+[exit 1]
+victim after force: VICTIM ORIGINAL CONTENT
+
+##### case docs-readme
+soft-foundry: docs/user/README.md is a symlink; init does not write through symlinks
+[exit 1]
+victim after: VICTIM ORIGINAL CONTENT
+victim sha: 368b4fd7290c3332
+$ ls -la /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a003/outside-docs-readme
+total 8
+drwxr-xr-x@  3 jscholen-iou  wheel   96 Sep  9 17:04 .
+drwxr-xr-x@ 14 jscholen-iou  wheel  448 Sep  9 17:04 ..
+-rw-r--r--@  1 jscholen-iou  wheel   24 Sep  9 17:04 victim
+[exit 0]
+target tree (files written?):
+./lib/app.rb
+
+##### case docs-readme with --force
+soft-foundry: docs/user/README.md is a symlink; init does not write through symlinks
+[exit 1]
+victim after force: VICTIM ORIGINAL CONTENT
+
+##### ATTACK-003g: dangling symlink AGENTS.md -> outside/nonexistent (creation through link)
+soft-foundry: AGENTS.md is a symlink; init does not write through symlinks
+[exit 1]
+$ ls -la /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a003/outside-dangling
+total 0
+drwxr-xr-x@  2 jscholen-iou  wheel   64 Sep  9 17:04 .
+drwxr-xr-x@ 16 jscholen-iou  wheel  512 Sep  9 17:04 ..
+[exit 0]
+
+##### ATTACK-003h: docs -> outside directory symlink while docs/user absent (would be skipped anyway)
+soft-foundry: docs is a symlink; init does not write through symlinks
+[exit 1]
+$ ls -la /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a003/outside-docs/site
+total 0
+drwxr-xr-x@ 2 jscholen-iou  wheel  64 Sep  9 17:04 .
+drwxr-xr-x@ 3 jscholen-iou  wheel  96 Sep  9 17:04 ..
+[exit 0]
+$ ls /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a003/docslink
+docs
+lib
+[exit 0]

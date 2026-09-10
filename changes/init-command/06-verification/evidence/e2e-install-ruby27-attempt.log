@@ -1,0 +1,36 @@
+$ /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/bin/ruby -v
+ruby 2.7.8p225 (2023-03-30 revision 1f4d455848) [arm64-darwin23]
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/bin/ruby -Ilib exe/soft-foundry version
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry.rb:4:in `require_relative': /Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:64: syntax error, unexpected '=' (SyntaxError)
+    def flag(name) = !!@argv.delete(name)
+                   ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:157: syntax error, unexpected '=', expecting ';' or '\\n'
+    def plane = @plane ||= ControlPlane.new(...
+              ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:158: syntax error, unexpected '=', expecting ';' or '\\n'
+    def git = @git ||= Git.new(@root)
+            ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:330: syntax error, unexpected end-of-input, expecting `end'
+	from /Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry.rb:4:in `<top (required)>'
+	from /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/lib/ruby/2.7.0/rubygems/core_ext/kernel_require.rb:83:in `require'
+	from /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/lib/ruby/2.7.0/rubygems/core_ext/kernel_require.rb:83:in `require'
+	from exe/soft-foundry:4:in `<main>'
+EXIT: 1
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/bin/ruby -Ilib exe/soft-foundry init --dry-run --no-onboard
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry.rb:4:in `require_relative': /Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:64: syntax error, unexpected '=' (SyntaxError)
+    def flag(name) = !!@argv.delete(name)
+                   ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:157: syntax error, unexpected '=', expecting ';' or '\\n'
+    def plane = @plane ||= ControlPlane.new(...
+              ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:158: syntax error, unexpected '=', expecting ';' or '\\n'
+    def git = @git ||= Git.new(@root)
+            ^
+/Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry/cli.rb:330: syntax error, unexpected end-of-input, expecting `end'
+	from /Users/jscholen-iou/dev/soft_foundry/lib/soft_foundry.rb:4:in `<top (required)>'
+	from /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/lib/ruby/2.7.0/rubygems/core_ext/kernel_require.rb:83:in `require'
+	from /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/lib/ruby/2.7.0/rubygems/core_ext/kernel_require.rb:83:in `require'
+	from exe/soft-foundry:4:in `<main>'
+EXIT: 1

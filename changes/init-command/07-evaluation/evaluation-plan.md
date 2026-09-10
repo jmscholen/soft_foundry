@@ -1,16 +1,45 @@
 # Evaluation Plan
 
+Commit SHA: a7b9df1bd6ac5c50346515d04a9a4a3853b86c6d (branch `change/init-command`)
+
+This is the fourth run of the evaluation phase, executed fresh (no memory of prior implementation, verification, or remediation work) after the second remediation, which fixed the seven attack findings V1..V7 recorded in `08-attack/results.md` (`09-remediation/summary.md`, "Remediation (second run: attack findings)"). The first run at `6a41afd123ca` was blocked on EVAL-014; the second at `c29509c3cee8` passed after the first remediation; the third at `a733f84086d0` passed after a harness-loop-semantics fix unrelated to `init`. All three are archived unmodified under `previous/6a41afd123ca/`, `previous/c29509c3cee8/`, and `previous/a733f84086d0/`. `git diff --stat a733f84086d0..a7b9df1 -- lib exe test soft_foundry.gemspec .ai` shows the remediation touched `lib/soft_foundry/{safe_write.rb (new),installer.rb,git.rb,onboarding.rb,manifest.rb,control_plane.rb,check.rb,cli.rb,provider.rb,agent_files.rb}` plus their tests, so this run does not assume prior outcomes hold; every journey was re-executed and observed fresh at HEAD. Verification (`06-verification/results.md`) already passed a fourth time at commit `147fca6362dd7da21b41fcd280ad3f3d247686da`; between `147fca6` and this run's HEAD `a7b9df1` only `changes/init-command/metadata.yml` changed (`current_phase` bookkeeping), so the code under test is identical to what verification exercised.
+
+At the start of this run the top-level `evaluation-plan.md`, `journeys.yml`, `results.md`, and `evidence/` (18 files) still held the stale, byte-identical content of the archived third run (`a733f84086d0`), left over from before the handoff reset; only `handoff.yml` had already been reset to `status: pending`. All of those files, plus every evidence log and script, were regenerated from scratch for HEAD `a7b9df1` in this run. `previous/` (three directories) was read only for its scripts and structure as a starting point and for the third run's exact wording, never for its command output, and was not modified.
+
 ## Intent being proven
-TBD
+`soft-foundry init` installs the Soft Foundry control plane into an existing Git repository safely on the first run, idempotently on every later run, and without destroying user-owned content, and the V1..V7 hardening added by the second remediation does not regress any of that for a legitimate maintainer: uncommitted edits and git-ignored build artifacts are still told apart correctly, a non-empty `repository.yml` path-group override for an unprotected group still works, `.soft-foundry/` still works as a plain directory, and pointer-file block detection still recognizes a byte-identical file reproduced by a fresh `git clone`, not just the original working tree.
+
+Verification already proved the deterministic gates and the eight remediation-specific attack-regression checks (a)-(h) at this commit. This phase does not repeat those; it runs the command the way each persona would, from a cold scratch repository every time, and judges the terminal report, the exit code, and the state of the target afterwards.
+
+## Environment
+- Soft Foundry source: `/Users/jscholen-iou/dev/soft_foundry` at HEAD `a7b9df1bd6ac5c50346515d04a9a4a3853b86c6d`, run as `ruby -I<repo>/lib <repo>/exe/soft-foundry`; the CLI reads the packaged canonical set from its own tree.
+- Ruby: `which ruby` from the repository root resolves the asdf shim to 3.3.1; every journey instead invokes the concrete installed binary `/Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby` directly (`ruby -v` confirms the same version) so that a scratch directory without the repository's `.tool-versions` cannot make asdf resolve a different Ruby mid-journey.
+- Targets: fresh scratch Git repositories under the session scratchpad (`.../scratchpad/eval4/<journey>`), one per journey, each with a committed application file.
+- The host environment carries real `OPENAI_API_KEY` and `ANTHROPIC_API_KEY`; every journey except EVAL-010 passes `--no-onboard`, and EVAL-010 unsets all three provider variables before running onboarding, so no journey makes a network call.
+- EVAL-004 and EVAL-012 run `rsync` copies of the repository under the scratchpad (a "next version" copy with two canonical `.ai/rules/*.md` files changed, and a "broken package" copy with `.ai/workflow.yml` deleted); the repository itself was never modified.
+- EVAL-019 additionally uses a local `git clone` of a scratch repository to reproduce a byte-identical working tree, the way a second maintainer or CI runner would.
 
 ## Personas
-TBD
+| Persona | Who | What they care about |
+| --- | --- | --- |
+| (a) First-time maintainer | Owns a repository with no Soft Foundry files; runs `soft-foundry init` once and commits | One command, a clean `check`, nothing of theirs touched, a report they can act on, a second run that is a no-op |
+| (b) Upgrading maintainer | Repository already has `AGENTS.md`, `CLAUDE.md`, `.gitignore`, `docs/`, sometimes local edits to `.ai/rules/*`, sometimes a non-conventional source layout or a build-artifact directory | Their prose preserved verbatim, the block appended once, their edits never overwritten without `--force`, uncommitted work never lost, ignored build artifacts left alone, a reasonable `repository.yml` override respected, told how to resolve a conflict |
+| (c) Engineering agent | Runs `init` non-interactively in compatibility mode and branches on the exit code and status words | Stable exit codes 0/1/3/4, `--dry-run` that matches the real run including the conflict guidance, ASCII output that `awk`/`grep` can parse, a printed resolved root before writes |
+| (d) Pre-manifest maintainer | Hand-copied `.ai/` from an earlier release without `.ai/manifest.yml` | Identical files adopted silently, edited files surfaced as conflicts with their paths listed, `repository.yml` assessment kept |
+| (e) Teammate / CI runner | Clones a repository that already has Soft Foundry installed and committed | A fresh, byte-identical clone behaves exactly like the original working tree: `init` is a clean no-op, pointer-file blocks are recognized, nothing is a false conflict |
 
 ## Journeys
-For each journey record: EVAL ID, requirement IDs, starting state, steps, assertions, evidence, result.
+Every journey is a shell script under `evidence/scripts/` (helpers in `lib.sh`); the transcript it produces is the evidence file, recording the command, combined stdout and stderr, exit code, post-state (`git status --porcelain`, `ls`, file contents, hashes) and an `ASSERT PASS`/`ASSERT FAIL` line per assertion. A journey passes only when every assertion passes. EVAL-001..016 re-execute the sixteen journeys from the third run with the same scripts (copied verbatim from `previous/a733f84086d0/evidence/scripts/`, only the scratch-directory constant changed) and the same expected outcomes; nothing was assumed identical, every outcome was observed fresh against HEAD `a7b9df1`. EVAL-017..019 are new legitimate-use journeys, added at this run's instruction to prove the V1..V7 hardening does not get in the way of normal use, from a maintainer's perspective rather than an attacker's (the adversarial-testing phase covers the attacker's perspective separately and ran concurrently with this phase).
+
+See `journeys.yml` for the full per-journey criteria, steps, and assertions, and `results.md` for the outcome table.
+
+## New journeys added this run (legitimate-use companions to V1..V7)
+- **EVAL-017** — a normal git-ignored build artifact (`tmp/cache`, not under `.ai/`) stays completely inert to `init`: it is never listed as a managed action, never appears in a `conflicts:` line, and does not stop the V3 fix (ignored paths now count as dirty) from correctly reporting a conflict only for the `.ai/` file a maintainer actually, uncommittedly, edited.
+- **EVAL-018** — a maintainer with a non-conventional layout (`src/`, `spec/`, `infra/`) gives `.ai/repository.yml` a reasonable, non-empty override for the unprotected `APP`/`TESTS`/`INFRA` groups. `soft-foundry check` stays clean and `init` stays idempotent; a control step in the same journey confirms the V4 fix still rejects an override of a protected group (`HARNESS_EVALS`) in the same file, so the hardening and the legitimate use coexist correctly.
+- **EVAL-019** — after `init` creates and a maintainer commits `AGENTS.md`/`CLAUDE.md`, a fresh `git clone` (not the original working tree) reproduces them byte-identical, and `init` in the clone still recognizes the pointer-file block as present (`skipped (block present)`), never as a false `conflict`, confirming the `agent_files.rb` block-detection normalization holds for the ordinary second-clone case, not only in the working tree where it was first written.
 
 ## UI walkthrough evidence
-Capture screenshots or equivalent browser evidence at meaningful state transitions.
+`soft-foundry init` and related commands are a CLI with no GUI; there is no browser or UI surface to walk through. Evidence is the command transcripts under `evidence/`.
 
 ## Accessibility interaction
-Include keyboard-only and error/focus behavior when applicable.
+Not applicable to a CLI in the browser-accessibility sense. The CLI-accessibility analogue exercised here is AC-016: every status word survives stripping all non-ASCII bytes and remains parseable by a plain-text tool (`awk`/`grep`), verified in EVAL-011 for `created`/`updated`/`skipped`/`conflict`/`forced` and the `conflicts:`/`next:` guidance lines, with parsed counts cross-checked against the printed `summary:` line.

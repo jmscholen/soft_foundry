@@ -1,0 +1,10 @@
+=== clean flag: fresh repo, NO pre-existing .gitignore ===
+true
+
+=== clean flag: fresh repo, WITH pre-existing ordinary .gitignore (*.log) ===
+false
+updated .gitignore
+
+=== clean flag: fresh repo, WITH pre-existing AGENTS.md (no marker, has content) ===
+false
+updated AGENTS.md

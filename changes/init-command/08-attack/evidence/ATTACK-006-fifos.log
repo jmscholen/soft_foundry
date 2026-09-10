@@ -1,0 +1,43 @@
+=== FIFO at CLAUDE.md (not committed; local filesystem presence only) ===
+soft-foundry: CLAUDE.md is not a regular file
+exit=1
+
+=== FIFO at AGENTS.md (not committed; local filesystem presence only) ===
+soft-foundry: AGENTS.md is not a regular file
+exit=1
+
+=== FIFO at .ai/workflow.yml (not committed; local filesystem presence only) ===
+soft-foundry: .ai/workflow.yml is not a regular file
+exit=1
+
+=== FIFO at .gitignore (not committed; local filesystem presence only) ===
+soft-foundry: .gitignore is not a regular file
+exit=1
+
+=== FIFO at .ai/repository.yml (not committed; local filesystem presence only) ===
+soft-foundry: .ai/repository.yml is not a regular file
+exit=1
+
+=== FIFO at .ai/manifest.yml (not committed; local filesystem presence only) ===
+soft-foundry: .ai/manifest.yml is not a regular file
+exit=1
+
+=== FIFO at changes/README.md (not committed; local filesystem presence only) ===
+soft-foundry: changes/README.md is not a regular file
+exit=1
+
+=== FIFO at .soft-foundry/init.lock (not committed; local filesystem presence only) ===
+soft-foundry: .soft-foundry/init.lock is not a regular file
+exit=1
+
+=== doctor and check with manifest FIFO ===
+✓ git repository
+✗ AGENTS.md
+✗ .ai/README.md
+✗ .ai/workflow.yml
+✗ .ai/paths.yml
+✗ control plane check
+✓ .ai/manifest.yml
+✗ pre-commit hook
+✗ local runtime
+doctor_exit=2

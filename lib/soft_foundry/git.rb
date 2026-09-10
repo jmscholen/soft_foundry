@@ -25,6 +25,18 @@ module SoftFoundry
       ok ? out.strip : nil
     end
 
+    def toplevel
+      out, ok = run("rev-parse", "--show-toplevel")
+      ok ? out.strip : nil
+    rescue Errno::ENOENT
+      nil
+    end
+
+    def ignored?(path)
+      _, ok = run("check-ignore", "-q", path)
+      ok
+    end
+
     def commit?(sha)
       _, ok = run("cat-file", "-e", "#{sha}^{commit}")
       ok
@@ -37,16 +49,20 @@ module SoftFoundry
       (committed + dirty_paths).uniq.sort
     end
 
+    # Modified, staged, untracked, and ignored paths. Ignored directories are
+    # reported with a trailing slash and cover everything beneath them.
     def dirty_paths
-      out, ok = run("status", "--porcelain", "--untracked-files=all")
+      out, ok = run("status", "--porcelain", "--untracked-files=all", "--ignored=matching")
       return [] unless ok
       out.lines(chomp: true).map { |line| line[3..].to_s.split(" -> ").last }
     end
 
     private
 
+    # GIT_DIR and GIT_WORK_TREE are cleared so the target directory alone
+    # decides which repository is inspected.
     def run(*args)
-      out, _err, status = Open3.capture3("git", "-C", @root, *args)
+      out, _err, status = Open3.capture3({ "GIT_DIR" => nil, "GIT_WORK_TREE" => nil }, "git", "-C", @root, *args)
       [out, status.success?]
     end
   end

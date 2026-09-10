@@ -1,0 +1,18 @@
+=== ATTACK-019: forged provider response (newline, ESC, 5000-char id) ===
+cat: illegal option -- A
+usage: cat [-belnstuv] [file ...]
+
+-- runtime.yml raw bytes (od) for control chars / length --
+0000000    -   -   -  \n   v   e   r   s   i   o   n   :       1  \n   p
+0000220            e   r   r   o   r   :  \n           x   a   i   :  \n
+0000300    :       [   ]  \n                   e   r   r   o   r   :  \n
+     208 /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack2/a019/.soft-foundry/runtime.yml
+count=0
+
+-- soft-foundry models output (raw bytes check) --
+cat: illegal option -- A
+usage: cat [-belnstuv] [file ...]
+0
+no raw ESC bytes
+no forged report-shaped line at column 0
+V7 confirmed fixed

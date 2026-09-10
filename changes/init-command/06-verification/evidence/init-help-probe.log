@@ -1,0 +1,30 @@
+$ ruby -Ilib exe/soft-foundry init --help
+soft-foundry: unknown option(s): --help
+EXIT: 1
+
+$ ruby -Ilib exe/soft-foundry init -h
+soft-foundry: unknown option(s): -h
+EXIT: 1
+
+$ ruby -Ilib exe/soft-foundry help
+Soft Foundry 0.2.0
+
+Usage:
+  soft-foundry init [options]             install the control plane into this repository, then onboard
+      --dry-run  --force  --no-onboard  --root PATH  --allow-non-git
+  soft-foundry onboard                    discover providers and repair agent adapters
+  soft-foundry doctor                     validate repository bootstrap
+  soft-foundry check                      lint the .ai/ control plane
+  soft-foundry change new <slug>          create changes/<slug>/ from phase templates
+  soft-foundry change status [slug]       show phase status and gate results
+  soft-foundry change list                list change records
+  soft-foundry gate <phase|all> [--change SLUG]
+                                          evaluate a phase's completion gate
+  soft-foundry ci                         check + gate every change record (used by CI and pre-commit)
+  soft-foundry hooks install              install the pre-commit hook
+  soft-foundry models                     show locally accessible models
+  soft-foundry shell claude|codex|grok    launch a coding shell in this repository
+  soft-foundry version
+
+`AGENTS.md` and `.ai/` are canonical. Vendor files such as `CLAUDE.md` only point to them.
+EXIT: 1

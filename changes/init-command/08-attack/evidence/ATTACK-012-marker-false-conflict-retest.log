@@ -1,0 +1,5 @@
+=== ATTACK-012 retest: false-conflict fix for byte-0 / CRLF / no-trailing-newline blocks ===
+byte0.md: status=skipped reason=block present
+crlf.md: status=skipped reason=block present
+notrail.md: status=skipped reason=block present
+bare-marker-in-fence: status=conflict reason=marker present without the canonical block

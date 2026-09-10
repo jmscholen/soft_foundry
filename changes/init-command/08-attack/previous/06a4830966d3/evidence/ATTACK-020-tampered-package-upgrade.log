@@ -1,0 +1,43 @@
+
+##### ATTACK-020 THREAT-003 (residual): install from a tampered packaged copy whose .ai/README.md and AGENTS.md interior carry attacker text, then run the untampered package
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a020/t
+check: ok
+summary: created 171, updated 0, skipped 0, conflict 0, forced 0
+[exit 0]
+manifest version line: soft_foundry_version: 0.2.0; attacker text in .ai/README.md: 1; in AGENTS.md: 1
+
+##### 20b: untampered package, plain init
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a020/t
+conflict  AGENTS.md  (marker present without the canonical block)
+updated   .ai/README.md  (owned by manifest)
+check: ok
+summary: created 0, updated 1, skipped 169, conflict 1, forced 0
+conflicts: AGENTS.md
+next: compare with `git diff`, keep your version, or commit it and rerun with --force to take the canonical version (uncommitted edits are never overwritten)
+[exit 3]
+attacker text in .ai/README.md now: 0; AGENTS.md begin markers: 1; attacker text in AGENTS.md now: 1
+
+##### 20c: --dry-run from the tampered copy shows the plan before anything is written
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a020/t2
+mode: dry run, nothing written
+created   AGENTS.md
+created   .ai/README.md
+created   .ai/harness-evals/README.md
+created   .ai/rules/README.md
+created   .ai/runtime/models.yml
+created   .ai/skills/remediation/template/summary.md
+created   .ai/skills/threat-modeling/SKILL.md
+created   .ai/skills/threat-modeling/completion.yml
+created   .ai/skills/threat-modeling/permissions.yml
+created   .ai/skills/threat-modeling/requirements.yml
+created   .ai/skills/threat-modeling/skill.yml
+created   .ai/skills/threat-modeling/template/attack-surface.md
+created   .ai/skills/threat-modeling/template/mitigations.md
+created   .ai/skills/threat-modeling/template/threats.yml
+created   .ai/skills/threat-modeling/template/trust-boundaries.md
+created   changes/README.md
+created   docs/user/README.md
+summary: created 171, updated 0, skipped 0, conflict 0, forced 0
+[exit 0]
+.git
+lib

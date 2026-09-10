@@ -1,0 +1,57 @@
+$ ruby -wc lib/soft_foundry.rb
+Syntax OK
+EXIT: 0
+$ ruby -wc lib/soft_foundry/agent_files.rb
+Syntax OK
+EXIT: 0
+$ ruby -wc lib/soft_foundry/change_record.rb
+Syntax OK
+EXIT: 0
+$ ruby -wc lib/soft_foundry/check.rb
+Syntax OK
+EXIT: 0
+$ ruby -wc lib/soft_foundry/cli.rb
+Syntax OK
+EXIT: 0
+$ ruby -wc lib/soft_foundry/control_plane.rb
+Syntax OK
+EXIT: 0
+$ ruby -wc lib/soft_foundry/errors.rb
+Syntax OK
+EXIT: 0
+$ ruby -wc lib/soft_foundry/gate.rb
+Syntax OK
+EXIT: 0
+$ ruby -wc lib/soft_foundry/git.rb
+Syntax OK
+EXIT: 0
+$ ruby -wc lib/soft_foundry/hooks.rb
+Syntax OK
+EXIT: 0
+$ ruby -wc lib/soft_foundry/installer.rb
+Syntax OK
+EXIT: 0
+$ ruby -wc lib/soft_foundry/installer/source.rb
+Syntax OK
+EXIT: 0
+$ ruby -wc lib/soft_foundry/manifest.rb
+Syntax OK
+EXIT: 0
+$ ruby -wc lib/soft_foundry/onboarding.rb
+Syntax OK
+EXIT: 0
+$ ruby -wc lib/soft_foundry/provider.rb
+Syntax OK
+EXIT: 0
+$ ruby -wc lib/soft_foundry/providers.rb
+Syntax OK
+EXIT: 0
+$ ruby -wc lib/soft_foundry/safe_write.rb
+Syntax OK
+EXIT: 0
+$ ruby -wc lib/soft_foundry/shell.rb
+Syntax OK
+EXIT: 0
+$ ruby -wc lib/soft_foundry/version.rb
+Syntax OK
+EXIT: 0

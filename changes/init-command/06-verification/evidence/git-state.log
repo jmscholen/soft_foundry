@@ -1,0 +1,11 @@
+$ git rev-parse HEAD
+147fca6362dd7da21b41fcd280ad3f3d247686da
+
+$ git status --porcelain
+ M changes/init-command/06-verification/evidence/ci.log
+ M changes/init-command/06-verification/evidence/gem-build.log
+ M changes/init-command/06-verification/evidence/git-state.log
+ M changes/init-command/06-verification/evidence/init-dry-run-self.log
+ M changes/init-command/06-verification/evidence/ruby-version.log
+ M changes/init-command/06-verification/evidence/ruby-wc.log
+ M changes/init-command/06-verification/evidence/tests.log

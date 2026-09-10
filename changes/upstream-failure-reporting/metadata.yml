@@ -1,0 +1,20 @@
+---
+change:
+  id: upstream-failure-reporting
+  title: Guide maintainers to fork and contribute a fix when a Soft Foundry command
+    or workflow fails because of Soft Foundry
+git:
+  worktree: "/Users/jscholen-iou/dev/soft_foundry"
+  branch: change/upstream-failure-reporting
+type: feature
+risk: low
+status: in_progress
+current_phase: discover
+created_at: 2026-09-09 15:43:34.000000000 Z
+surfaces:
+  application: true
+  database: false
+  infrastructure: false
+  security: false
+  accessibility: false
+  observability: false

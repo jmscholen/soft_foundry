@@ -1,0 +1,25 @@
+=== 15f clean: .soft-foundry not writable (chmod 000, after first clean install) ===
+exit=1
+--stdout tail--
+skipped   .ai/workflow.yml  (identical)
+skipped   changes/README.md  (user-owned scaffold)
+skipped   docs/user/README.md  (user-owned scaffold)
+--stderr--
+soft-foundry: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack2/a015f2/.soft-foundry is not writable
+
+=== 15h clean: runtime.yml is a directory (fresh, init w/ onboarding, keys unset) ===
+exit=1
+--stdout tail--
+created   .ai/templates/repository.yml
+created   .ai/workflow.yml
+created   changes/README.md
+created   docs/user/README.md
+check: ok
+--stderr--
+soft-foundry: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack2/a015h2/.soft-foundry/runtime.yml exists but is not a regular file
+--was .ai fully installed despite failure? --
+-rw-r--r--@ 1 jscholen-iou  wheel   2.2K Sep  9 22:53 .ai/workflow.yml
+
+=== 15i clean: manifest.yml is a directory ===
+exit=1
+soft-foundry: .ai/manifest.yml is not a regular file

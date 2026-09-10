@@ -1,0 +1,10 @@
+✓ git repository
+✓ AGENTS.md
+✓ .ai/README.md
+✓ .ai/workflow.yml
+✓ .ai/paths.yml
+✓ control plane check
+✗ .ai/manifest.yml
+✓ pre-commit hook
+✗ local runtime
+EXIT: 2

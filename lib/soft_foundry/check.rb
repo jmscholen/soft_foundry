@@ -31,14 +31,32 @@ module SoftFoundry
 
     def check_path_groups
       missing = ControlPlane::REQUIRED_GROUPS - @plane.path_groups.keys
-      missing.map { |g| Finding.new(:error, "paths.yml lacks required group #{g}") }
+      findings = missing.map { |g| Finding.new(:error, "paths.yml lacks required group #{g}") }
+      (ControlPlane::REQUIRED_GROUPS - missing).each do |g|
+        findings << Finding.new(:error, "path group #{g} resolves to no patterns (check repository.yml overrides)") if @plane.path_groups[g].empty?
+      end
+      @plane.override_path_groups.each do |g, globs|
+        if ControlPlane::PROTECTED_GROUPS.include?(g)
+          findings << Finding.new(:error, "repository.yml overrides protected path group #{g}; the default is kept and the override must be removed")
+          next
+        end
+        next unless ControlPlane::REQUIRED_GROUPS.include?(g)
+        defaults = @plane.default_path_groups.fetch(g, [])
+        if @plane.files_matching(globs).empty? && !@plane.files_matching(defaults).empty?
+          findings << Finding.new(:error, "repository.yml override for #{g} matches no files while the default patterns do; staleness and permissions would be blind")
+        end
+      end
+      findings
     rescue Errno::ENOENT
       [Finding.new(:error, ".ai/paths.yml is missing")]
     end
 
     def check_transitions
       ids = @plane.phases.map(&:id)
-      @plane.transitions.flat_map do |from, edges|
+      after_problems = @plane.phases.filter_map do |p|
+        Finding.new(:error, "lifecycle: '#{p.id}' has after: '#{p.after}' which is not a lifecycle phase") if p.after && !ids.include?(p.after)
+      end
+      after_problems + @plane.transitions.flat_map do |from, edges|
         problems = []
         problems << Finding.new(:error, "transitions: '#{from}' is not a lifecycle phase") unless ids.include?(from)
         Hash(edges).each_value { |to| problems << Finding.new(:error, "transitions: '#{from}' targets unknown phase '#{to}'") unless ids.include?(to) }

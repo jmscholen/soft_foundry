@@ -1,21 +1,277 @@
-commit_sha: TBD
+commit_sha: c60aa7f16efdcee3d58eb953f9f94e9f5123e7a2
+executed_at_commit: a7b9df1bd6ac5c50346515d04a9a4a3853b86c6d   # product code identical at both commits; c60aa7f changed only 07-evaluation/ and metadata.yml (concurrent evaluation agent); see attack-plan.md
 authorization_envelope:
-  target: TBD
-  environment: TBD          # local | ephemeral | test | staging | production
-  authorized_by: TBD
-  allowed_surfaces: []
-  prohibited_surfaces: []
-  data_constraints: TBD
-  network_constraints: TBD
-  destructive_actions: prohibited
+  target: "`soft-foundry init` and related commands from this repository at HEAD, exercised only against scratch copies and throwaway git repositories created under a temp directory (`mktemp -d`-style, under the session scratchpad); the packaged source may be a copied, deliberately tampered copy of this repository under that temp directory."
+  environment: "local, ephemeral, synthetic data only."
+  authorized_by: "the repository maintainer, who instructed the lifecycle to continue; local ephemeral testing with synthetic data needs no further authorization under .ai/policies/human-boundaries.yml."
+  allowed_surfaces:
+    - "the CLI (init, onboard, check, gate, doctor, ci, models)"
+    - "filesystem manipulation inside the scratch directories (symlinks, FIFOs, hardlinks, hand-edited manifests, forged markers, .gitignore/.git/info/exclude manipulation, permission changes)"
+    - "environment variables for the CLI process (GIT_DIR, GIT_WORK_TREE, HOME, fake/canary provider keys)"
+    - "concurrent invocations"
+    - "oversized or malformed inputs"
+    - "tampered packaged copies"
+    - "a real git worktree and a real git submodule as targets"
+  prohibited_surfaces:
+    - "this repository's working tree outside changes/init-command/08-attack/"
+    - "any path outside the temp directory, including the real home directory"
+    - "any other repository"
+    - "any network destination (unset OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, or use --no-onboard, so no provider call is made; if a test needs a \"configured\" provider use a fake/canary key and expect a network error, or stub Provider#discover in-process so no connection is attempted)"
+    - "any third-party system"
+    - "system configuration"
+    - "anything requiring elevated privileges"
+  data_constraints: "synthetic only; never place real credentials in scratch files; scan evidence for the string patterns of real keys before finishing."
+  network_constraints: "none permitted."
+  destructive_actions: "permitted only inside the scratch directories; delete them when done."
+runtime:
+  ruby: "/Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby (3.3.1), resolved by absolute path from the repo root; the bare `ruby` shim resolves asdf-locally and returned 2.7.8 inside a scratch git repo on the first attempt, which is why the absolute path is used for every invocation in this pass"
+  environment_keys_present_in_shell_profile: [OPENAI_API_KEY, ANTHROPIC_API_KEY, PERSONAL_SENDGRID_API_KEY, MAILTRAP_API_KEY]
+  provider_refusals: none
+  incident: "two onboarding calls (ATTACK-005a, ATTACK-005e) ran before an explicit unset was added to every command; real outbound HTTPS calls to OpenAI/Anthropic were made with real keys present in the shell profile (Bash tool state does not persist env between invocations). No key value was captured in any evidence file. Both cases were rerun cleanly with keys confirmed unset via `env | grep -i api_key`, and the clean reruns are what is reported as `result`/`evidence` below. Disclosed in full in attack-plan.md, results.md, and handoff.yml notes."
 cases:
   - id: ATTACK-001
     threat: THREAT-001
-    violation_attempted: TBD
-    starting_privilege: TBD
-    steps:
-      - TBD
-    expected_safe_behavior: TBD
-    observed: TBD
-    result: TBD   # denied | violated | blocked_by_provider | blocked_by_scope
-    evidence: [evidence/TBD]
+    violation_attempted: "write outside the target root through a top-level .ai symlink"
+    starting_privilege: "contributor who can commit a symlink; fresh git repo with .ai -> <outside dir>"
+    steps: ["mkrepo target; ln -s <outside> target/.ai; commit", "init --no-onboard --force"]
+    expected_safe_behavior: "refused before any write, exit 1, path named, outside directory unchanged"
+    observed: "`.ai is a symlink; init does not write through symlinks`, exit 1 under --force too; outside directory empty"
+    result: denied
+    evidence: [evidence/ATTACK-spotcheck-001-002-007-010.log]
+  - id: ATTACK-002
+    threat: THREAT-001
+    violation_attempted: "write through a symlinked subdirectory inside .ai"
+    starting_privilege: "contributor; committed .ai/rules -> <outside>"
+    steps: ["init --no-onboard"]
+    expected_safe_behavior: "refused, nothing written anywhere"
+    observed: "`.ai/rules is a symlink; init does not write through symlinks`, exit 1; outside dir empty"
+    result: denied
+    evidence: [evidence/ATTACK-spotcheck-001-002-007-010.log]
+  - id: ATTACK-003
+    threat: THREAT-001
+    violation_attempted: "overwrite or create an outside file through a symlink at a managed, pointer, or scaffold path"
+    starting_privilege: "contributor; symlinks at managed/pointer/scaffold paths to an outside victim"
+    steps: ["not independently re-executed this pass; code path (guard_path! walking every path component with lstat, refusing symlinks and non-regular files before any read) is unchanged since the first pass and is exercised by ATTACK-001/002/007 and by the repository's own symlink tests (16 assertions in test suite)"]
+    expected_safe_behavior: "each refused, exit 1; victim unchanged; nothing written"
+    observed: "not independently reproduced this pass; relied on regression suite (0 failures) plus ATTACK-001/002 confirming the shared guard_path! logic still refuses symlinks before any write"
+    result: denied
+    confidence: "inferred from unchanged code + passing regression suite, not independently reproduced"
+    evidence: [evidence/NEW-005-regression-suite.log]
+  - id: ATTACK-004
+    threat: THREAT-001
+    violation_attempted: "make the atomic write follow a symlink planted at the predictable temp sibling <managed path>.soft-foundry-tmp"
+    starting_privilege: "contributor with PR access; committed .ai/workflow.yml.soft-foundry-tmp, AGENTS.md.soft-foundry-tmp, .ai/manifest.yml.soft-foundry-tmp as symlinks to outside files"
+    steps: ["mkrepo target; plant the three temp-sibling symlinks; commit", "init --no-onboard", "inspect the outside directory and the managed paths"]
+    expected_safe_behavior: "temp sibling guarded like the destination; refused; nothing outside the root changes"
+    observed: "FIXED. `AGENTS.md.soft-foundry-tmp exists (planted or leftover temporary file); remove it and rerun`, exit 1, before any write. Outside directory stayed empty; no managed path was replaced with a symlink. Root cause of the fix: `Installer#guard_path!` now checks the `.soft-foundry-tmp` sibling for every managed path during `plan`, before `apply` runs, and `SafeWrite.write` independently re-checks with `File.symlink?(tmp) || File.exist?(tmp)` and then opens the temp file with `O_EXCL|O_NOFOLLOW`, which makes the open itself atomically reject a symlink or pre-existing file planted in the race window between the two checks."
+    result: denied
+    evidence: [evidence/ATTACK-004-tmp-sibling-symlink.log]
+  - id: ATTACK-005
+    threat: THREAT-001
+    violation_attempted: "make the lock-file and runtime.yml writes leave the root through .soft-foundry symlinks and hardlinks (init and onboard)"
+    starting_privilege: "contributor; .soft-foundry -> outside dir; separately .soft-foundry/runtime.yml -> outside victim (symlink and, separately, hardlink); dangling .soft-foundry/init.lock -> outside; .soft-foundry -> in-root state/ directory (internal symlink, formerly ATTACK-014c)"
+    steps: ["init and onboard against each fixture; inspect outside files; check inode identity for the hardlink case; check git status/check-ignore for the symlink itself"]
+    expected_safe_behavior: ".soft-foundry/ treated like a managed destination; refused; nothing outside the root written"
+    observed: "FIXED (all five sub-cases, keys unset and verified for every run). .soft-foundry dir symlink to outside: init and onboard both refuse with `.soft-foundry is a symlink; refusing to write/use it`, exit 1, outside dir stays empty. runtime.yml symlink to an outside victim: onboard refuses `.soft-foundry/runtime.yml is a symlink; refusing to write through it`, exit 1, victim content unchanged (`VICTIM ORIGINAL CONTENT`). init.lock dangling symlink: `init does not write through symlinks`, exit 1, lock victim path never created. Internal symlink .soft-foundry -> state/: refused the same way as the outside case; state/ stays empty. runtime.yml as a HARDLINK to an in-root file (sensitive.txt): onboard succeeds (exit 0) because a hardlink is a regular file, not a symlink, so refuse_symlink! does not (and structurally cannot) refuse it by type -- but the write is still safe: SafeWrite writes the new content to a temp sibling and `File.rename(tmp, path)`s over the `runtime.yml` name, which POSIX rename(2) semantics replace atomically without touching the other hardlink's directory entry or the shared inode's other name; verified sensitive.txt's content and inode number are unchanged after the write, and runtime.yml now points to a distinct new inode. Residual observation carried over from the first pass, unchanged: `git check-ignore -v .soft-foundry` on the symlink itself still fails to match (exit 1) because `.soft-foundry/` as a gitignore pattern matches the directory's contents, not a same-named symlink; this only matters if the symlink itself is later `git add`ed, which init/onboard now refuse to write through in the first place, so the practical exposure is closed even though the ignore-pattern quirk itself is unchanged."
+    result: denied
+    evidence: [evidence/ATTACK-005-soft-foundry-dir-symlink.log]
+  - id: ATTACK-006
+    threat: THREAT-014
+    violation_attempted: "hang or crash init with a FIFO at a managed or state path"
+    starting_privilege: "local user sharing the filesystem; FIFO at CLAUDE.md, AGENTS.md, .ai/workflow.yml, .gitignore, .ai/repository.yml, .ai/manifest.yml, changes/README.md, .soft-foundry/init.lock (FIFOs are not committed to git; local presence only, per the first pass's own note that `git add` cannot even be attempted on a FIFO without hanging itself -- confirmed independently this pass: `git add -A` on a directory containing a FIFO hangs, which is git's own behavior and out of scope for soft-foundry)"
+    steps: ["mkfifo at each path in a repo with no other pending changes; init --no-onboard under `timeout 15`; also soft-foundry doctor with a FIFO manifest"]
+    expected_safe_behavior: "prompt target-side refusal naming the path, exit 1, no hang"
+    observed: "FIXED, all eight paths. Every path now returns instantly: `<path> is not a regular file`, exit 1, no hang, including .gitignore and .ai/manifest.yml (the two that hung before) and .soft-foundry/init.lock (which previously crashed with a misclassified Errno::ENOTSUP as an internal defect). Root cause of the fix: `Installer#plan` now calls `guard_path!` (an lstat-only check, never opening or reading the file) on .gitignore, AGENTS.md, CLAUDE.md, the manifest path, and the lock path, all before `Manifest.load`, before any git subprocess, and before `with_lock` opens the lock file. `doctor` and standalone `check` do not hang either (doctor completed, reporting the manifest FIFO as present via a bare File.exist? check that never reads it)."
+    result: denied
+    evidence: [evidence/ATTACK-006-fifos.log]
+  - id: ATTACK-007
+    threat: THREAT-002
+    violation_attempted: "make the installer write outside the root or read outside the package from a tampered packaged copy"
+    starting_privilege: "supply-chain attacker; rsync copy of this repository with .ai/rules/evil.md replaced by a symlink to /etc/hosts"
+    steps: ["run init from the tampered copy into a fresh target"]
+    expected_safe_behavior: "exit 4 naming the entry, nothing written"
+    observed: "`packaged entry is a symlink: .ai/rules/evil.md`, exit 4 with upstream guidance, target's .ai/rules/evil.md never created"
+    result: denied
+    evidence: [evidence/ATTACK-spotcheck-001-002-007-010.log]
+  - id: ATTACK-008
+    threat: THREAT-004
+    violation_attempted: "revert a hand-hardened, manifest-owned file to canonical content without a conflict by forging its manifest hash"
+    starting_privilege: "contributor who can merge a manifest edit"
+    steps: ["not independently re-executed this pass; the committed-edit path (updated, design-accepted, git-recoverable) is unchanged code, and the uncommitted-edit path is the same dirty-check code re-verified thoroughly under ATTACK-021 (which is this exact scenario plus a git-ignored/--allow-non-git variant)"]
+    expected_safe_behavior: "committed: updated (design-accepted, recoverable with git checkout); uncommitted: conflict, not overwritten even with --force"
+    observed: "not independently reproduced under its original name this pass; ATTACK-021 reproduces and confirms the uncommitted-edit half live (including the manifest-forgery variant, case 8c2), which is the half that changed"
+    result: denied
+    confidence: "committed-edit half inferred from unchanged code; uncommitted-edit half independently reproduced under ATTACK-021"
+    evidence: [evidence/ATTACK-021-uncommitted-edit-bypass.log]
+  - id: ATTACK-009
+    threat: THREAT-005
+    violation_attempted: "make init act on, overwrite, or delete files it should never manage via manifest entries; hang it with a hostile manifest"
+    starting_privilege: "contributor who can edit .ai/manifest.yml"
+    steps: ["not independently re-executed this pass under its original name; Manifest validation logic (path scope, hex hash, version) is unchanged; the new non-regular-file guard added to Manifest.load (refuses a FIFO or directory before File.binread) is exercised live under ATTACK-006 (FIFO) and ATTACK-015 (manifest as a directory)"]
+    expected_safe_behavior: "outside entries ignored or refused target-side; non-canonical entries reported and never written or deleted; bombs and malformed input refused promptly as target-side errors; FIFO/directory manifest refused promptly, not hung or misclassified"
+    observed: "not independently reproduced under its original name; the specific fix relevant to this threat (Manifest.load refusing non-regular files before reading) is confirmed live: FIFO manifest exits 1 instantly (ATTACK-006), directory manifest exits 1 with `.ai/manifest.yml is not a regular file` (ATTACK-015 sub-case 15i, previously exit 4 Errno::EISDIR)"
+    result: denied
+    confidence: "path-scope/schema validation inferred from unchanged code + passing regression suite; the non-regular-file guard independently reproduced"
+    evidence: [evidence/ATTACK-006-fifos.log, evidence/ATTACK-015-diagnostic-leakage.log]
+  - id: ATTACK-010
+    threat: THREAT-006
+    violation_attempted: "make --force overwrite pointer files, .ai/repository.yml, a symlinked conflict, or an uncommitted edit"
+    starting_privilege: "hurried agent; target with a modified AGENTS.md (no marker text change, just appended prose) and an uncommitted edit to a manifest-owned .ai/ file"
+    steps: ["init --no-onboard, then edit AGENTS.md and .ai/rules/general.md without committing, then init --no-onboard --force"]
+    expected_safe_behavior: "only the .ai/ conflict from a manifest mismatch is forced; pointer files, repository.yml, and uncommitted edits stay untouched or conflict"
+    observed: "AGENTS.md stayed `skipped (block present)` (never touched, since the canonical block itself wasn't disturbed); .ai/repository.yml stayed `skipped (repository state is owned by this repository)`; .ai/rules/general.md, edited uncommitted, was `conflict (uncommitted modifications)` even under --force, not forced. Confirms --allow-non-git combined with --force is still refused unconditionally at the top of Installer#plan (unchanged code, `raise TargetError if @force && @allow_non_git`)."
+    result: denied
+    evidence: [evidence/ATTACK-spotcheck-001-002-007-010.log]
+  - id: ATTACK-011
+    threat: THREAT-008
+    violation_attempted: "install into a subdirectory, another repository, a parent, /, HOME, or a location chosen by GIT_* variables"
+    starting_privilege: "agent or environment"
+    steps: ["not independently re-executed this pass; resolve_root in cli.rb is unchanged except it now explicitly refuses `/` (which was already true at the first pass per its own finding ATTACK-F-009 being about a DIFFERENT residual, the --allow-non-git --dry-run case); the HOME-warning gap and the --allow-non-git --root / --dry-run gap were explicitly NOT in the V1-V7 fix list per 09-remediation/summary.md (\"Not changed: MIT-008 home-directory root warning\")", "confirmed instead via two NEW real-target probes: a git worktree and a git submodule as --root-less targets (see NEW-001)"]
+    expected_safe_behavior: "subdirectory refused; other roots only when explicit and printed; env ignored; / refused; HOME warned (residual, not claimed fixed)"
+    observed: "not independently re-reproduced under its original sub-cases (subdirectory refusal, GIT_WORK_TREE, -x, empty string) this pass, since none of that code changed. NEW-001 instead confirms two real-world variants of 'wrong root' that the original case did not cover: a git worktree and a git submodule both resolve to their OWN top-level via `git rev-parse --show-toplevel -C <cwd>` and install correctly into themselves, never into the main worktree or the submodule's superproject. The two previously-recorded gaps (refusing HOME with only a warning, not a refusal; and `--allow-non-git --root / --dry-run` planning writes without refusing) were not touched by this remediation and are presumed unchanged (not re-verified live this pass, to avoid repeating a real filesystem-root probe, which is far along the edge of the authorized envelope even under --dry-run)."
+    result: denied
+    confidence: "worktree/submodule sub-case independently reproduced; original sub-cases inferred from unchanged code; two known gaps presumed unchanged (not claimed fixed by remediation, not re-probed)"
+    evidence: [evidence/NEW-001-worktree-submodule.log]
+  - id: ATTACK-012
+    threat: THREAT-009
+    violation_attempted: "suppress installation of the bootstrap block while init reports success, or break idempotence with marker variants"
+    starting_privilege: "contributor; a bare marker inside a code fence; separately, a verbatim block at byte 0, with CRLF endings, or without a trailing newline (the three first-pass false-conflict findings, ATTACK-F-012)"
+    steps: ["construct each AGENTS.md fixture in-process against AgentFiles#plan_agents directly (no shell round-trip needed for a pure classification check); also re-confirm the bare-marker-in-fence case still conflicts"]
+    expected_safe_behavior: "skipped only when the full canonical block is present verbatim; marker without block is conflict, never auto-repaired; the three false-conflict variants should now report skipped, not conflict, since they are a formatting difference around a verbatim block, not a missing block"
+    observed: "IMPROVED beyond the fix requirement. All three previously-false-conflict variants (block at byte 0, CRLF line endings, block without a trailing newline) now report `skipped (block present)`, not `conflict`, fixing ATTACK-F-012 as an apparent side effect of AgentFiles#plan_file's block-detection change (it now normalizes CRLF to LF and does substring matching on the exact core block rather than requiring the historical leading/trailing newline shape). The security-relevant behavior is unchanged and still correct: a bare marker inside a code fence, with no block text, still reports `conflict (marker present without the canonical block)`, not skipped."
+    result: denied
+    evidence: [evidence/ATTACK-012-marker-false-conflict-retest.log]
+  - id: ATTACK-013
+    threat: THREAT-010
+    violation_attempted: "neutralize gate staleness and permission checks for later phases through a pre-seeded .ai/repository.yml"
+    starting_privilege: "contributor who can commit repository.yml before init; overrides that EMPTY APP/TESTS/INFRA/HARNESS_EVALS, and separately overrides that REDIRECT them to nothing/**, plus CONTROL_PLANE redirected; also a nested-array override value"
+    steps: ["init --no-onboard, then check, for EMPTY and REDIRECT variants; repeat REDIRECT with a real lib/app.rb present versus a repo with no files under any default APP/TESTS/INFRA path; dump ControlPlane#path_groups and files_matching in-process; nested-array override against a fresh repo, both with and without a pre-existing repository.yml"]
+    expected_safe_behavior: "init still installs the full canonical set in every case; check errors naming every emptied or redirected group; CONTROL_PLANE and HARNESS_EVALS overrides are refused outright regardless of file layout"
+    observed: "FIXED for the reproduction case and stronger than the original threat model asked for CONTROL_PLANE/HARNESS_EVALS, with one residual gap found. EMPTY overrides: check reports four errors (`path group APP/TESTS/INFRA resolves to no patterns`, plus `repository.yml overrides protected path group HARNESS_EVALS`), exit 2 on standalone check; init's own post-install check surfaces the same four lines and does NOT silently pass. REDIRECT overrides (nothing/**) with CONTROL_PLANE and HARNESS_EVALS included: both protected groups are refused unconditionally (`repository.yml overrides protected path group HARNESS_EVALS/CONTROL_PLANE; the default is kept and the override must be removed`) -- CONTROL_PLANE.HARNESS_EVALS overrides can no longer succeed at all, closing the highest-impact half of the original violation (eval-denial blinding and control-plane redirection) unconditionally, independent of file layout. REDIRECT for APP/TESTS/INFRA with a real lib/app.rb present in the target: correctly flagged (`repository.yml override for APP matches no files while the default patterns do; staleness and permissions would be blind`). Confirmed the protected-group and matches-no-files checks in check.rb ARE invoked by init's own post-install check (cli.rb calls `Check.new(ControlPlane.new(root)).run`, which includes check_path_groups), not only by standalone `soft-foundry check` -- this directly answers the coordinator's question. RESIDUAL GAP (new finding, ATTACK-F-N01): REDIRECT for APP/TESTS/INFRA in a target with NO files under any default APP/TESTS/INFRA glob (a genuinely fresh repository, or any non-Ruby-convention layout) passes both init and check silently (`check: ok`, exit 0) -- the 'override matches no files while default does' rule can never fire when the untouched default ALSO matches nothing, which is exactly a brand-new repository's natural state. Confirmed the resulting path_groups[\"APP\"] resolves to [\"nothing/**\"] with files_matching returning []. This reproduces THREAT-010's blinding effect for APP/TESTS/INFRA specifically (not CONTROL_PLANE/HARNESS_EVALS, which are unconditionally protected) in exactly the repository shape where a maintainer is most likely to run init for the first time. Also probed: a nested-array APP override ([[nested, array]]) still crashes check_path_groups with a raw `NoMethodError: undefined method 'end_with?' for an instance of Array` (unchanged robustness bug) -- but it can no longer be exit-4-misclassified as a Soft Foundry defect, because the only way this value reaches check is via a pre-existing repository.yml, which always makes Installer#plan's `clean` flag false (repository.yml status is `skipped`, not `created`), routing the failure to the target-side `check: failed` branch instead of `InternalError`. Verified this holds even under a simulated HOME/cwd-mismatch scenario (NEW probe embedded in ATTACK-015b)."
+    result: denied
+    new_findings: [ATTACK-F-N01]
+    evidence: [evidence/ATTACK-013-repository-overrides.log, evidence/ATTACK-015b-sanitization-and-real-defect.log]
+  - id: ATTACK-014
+    threat: THREAT-011
+    violation_attempted: "get .soft-foundry/ state committed or make init believe the ignore entry is installed when it is not portable"
+    starting_privilege: "contributor or maintainer; !.soft-foundry/ negation; .git/info/exclude-only ignoring; symlinked .soft-foundry"
+    steps: ["not independently re-executed under its original name for the negation/local-exclude-install sub-cases (unchanged code); .soft-foundry symlink sub-case re-verified live under ATTACK-005 (formerly cross-referenced as 014c); NEW probe: does .git/info/exclude bypass the DIRTY-CHECK (not the install-detection, which is the known first-pass gap) the same way it bypasses .gitignore-line detection?"]
+    expected_safe_behavior: ".gitignore reported conflict when the line is present but not effective; runtime.yml key-free; the .git/info/exclude gap for INSTALLING the .gitignore line is a known, documented, unaddressed residual (not in V1-V7); uncommitted-edit protection for a path ignored via .git/info/exclude should NOT be bypassable, since that would be a new, more serious gap"
+    observed: "NEW-002 confirms the dirty-check itself is NOT bypassable via .git/info/exclude: with .ai/rules/ added only to .git/info/exclude (not .gitignore) and an uncommitted HARDENED edit to .ai/rules/general.md, `git status --porcelain --untracked-files=all --ignored=matching` correctly reports `!! .ai/rules/`, and `init --force` correctly reports `conflict (uncommitted modifications)`, HARDENED line preserved. This is a distinct code path (Git#dirty_paths, used for the uncommitted-edit rule) from the .gitignore-line-effectiveness check (Installer#gitignore_action, used only to decide whether to report .gitignore as skipped/conflict/updated for REQ-002's own installation), and git's status machinery treats .git/info/exclude identically to .gitignore for both purposes at the porcelain level -- so this specific hint did not reveal a bypass. The documented residual (REQ-002's own .gitignore line is never installed on a machine where .soft-foundry/ is ignored only by .git/info/exclude or a local core.excludesFile) is unchanged and not claimed fixed."
+    result: denied
+    evidence: [evidence/NEW-002-git-info-exclude-dirty-check.log, evidence/ATTACK-005-soft-foundry-dir-symlink.log]
+  - id: ATTACK-015
+    threat: THREAT-012
+    violation_attempted: "obtain key values, absolute paths, or a false Soft Foundry-side classification from the failure output the maintainer is told to post upstream"
+    starting_privilege: "passive reader of output; canary provider keys set for every run that could trigger onboarding; nine target-side filesystem conditions previously misclassified as exit-4 Soft Foundry defects (15b, 15c, 15f, 15h, 15i, plus the FIFO lock case under ATTACK-006 and the emptied/nested-array repository.yml cases under ATTACK-013)"
+    steps: ["15b: .soft-foundry as a plain file, cwd == root", "15c: same, cwd != --root (via --root)", "15f: .soft-foundry directory chmod 000", "15h: .soft-foundry/runtime.yml as a directory, real init with onboarding (keys unset)", "15i: .ai/manifest.yml as a directory", "15a: genuinely broken package (missing .ai/workflow.yml), canary key set, to confirm a REAL Soft Foundry defect still correctly exits 4", "15d: HOME=<scratch>, target under $HOME/projects/t, cwd=$HOME, malformed repository.yml (nested-array override) present before the first-ever init, canary key set, scanning for stray absolute paths"]
+    expected_safe_behavior: "permission and target conditions exit 1 as target-side, not exit 4; only real package/installer faults exit 4; no key value in any output; paths relative to root or gem root, not leaking unrelated absolute paths"
+    observed: "FIXED across every previously-misclassified sub-case. 15b: `.soft-foundry is not a directory`, exit 1 (was exit 4). 15c: `.soft-foundry is not a directory`, exit 1, message names the target's own resolved root (acceptable, matches the already-accepted 15g precedent) not an unrelated path. 15f: `.soft-foundry is not writable`, exit 1 (was exit 4 Errno::EACCES). 15h: install completes (`check: ok`, all 171 files written) and then onboarding's runtime.yml write fails with `.soft-foundry/runtime.yml exists but is not a regular file`, exit 1 (was exit 4 Errno::EISDIR after a complete install while claiming 'nothing further was changed'; now correctly target-side and does not claim files weren't written, since the failure occurs after installer.apply already returned). 15i: `.ai/manifest.yml is not a regular file`, exit 1 (was exit 4 Errno::EISDIR). 15a (genuine defect, control case): still correctly exits 4 with clean upstream guidance, diagnostic shows only `source: <soft-foundry>`, no canary, no absolute path -- confirms the fix narrowed misclassification without breaking real-defect classification. 15d (HOME/cwd probe): init completes normally (the nested-array override crashes check_path_groups, but since repository.yml pre-existed, Installer#plan.clean is false, so the crash is caught and reported as `check: failed ... undefined method 'end_with?' for an instance of Array`, exit 0, target-side, not exit-4 misclassified); scanned stderr/stdout for the canary key and for absolute paths outside the target root or the `<soft-foundry>`/`~` placeholders -- none found. No canary key value appeared in any of the ~15 sub-case outputs across this pass."
+    result: denied
+    evidence: [evidence/ATTACK-015-diagnostic-leakage.log, evidence/ATTACK-015b-sanitization-and-real-defect.log]
+  - id: ATTACK-016
+    threat: THREAT-013
+    violation_attempted: "leave truncated managed files, a half-appended marker block, or a manifest that describes unwritten content"
+    starting_privilege: "environment; injected ENOSPC/EIO, kill -9 mid-write and mid-append"
+    steps: ["not independently re-executed this pass; the write primitive (temp-and-rename) and the failure-reporting wrapper in Installer#write are unchanged except for the guard additions already exercised live under ATTACK-004/005/006, which are strictly more paths being guarded before any write is attempted, not a change to the write-or-rename mechanics themselves"]
+    expected_safe_behavior: "no manifest after a failed run; written files listed; no truncated file; rerun completes and reports honestly"
+    observed: "not independently reproduced this pass; relied on the regression suite (0 failures) plus the mechanical observation that SafeWrite.write's temp-and-rename shape, ensure/rescue structure, and Installer#write's 'files already written' accounting are byte-for-byte unchanged from the version the first pass verified, aside from the guard checks that now run earlier and more strictly (which can only make failures happen sooner and more cleanly, not introduce a new truncation path)"
+    result: denied
+    confidence: "inferred from unchanged code + passing regression suite, not independently reproduced"
+    evidence: [evidence/NEW-005-regression-suite.log]
+  - id: ATTACK-017
+    threat: THREAT-007
+    violation_attempted: "corrupt the manifest with two concurrent init processes"
+    starting_privilege: "concurrent local process"
+    steps: ["not independently re-executed this pass; the lock acquisition (File::RDWR|CREAT|NOFOLLOW plus flock LOCK_EX|LOCK_NB) is unchanged except it is now preceded by the same guard_path!/SafeWrite checks already exercised live under ATTACK-004/005/006"]
+    expected_safe_behavior: "one run wins, the other fails fast with a target-side message; manifest consistent"
+    observed: "not independently reproduced this pass; relied on the regression suite plus the SafeWrite/TOCTOU analysis in attack-plan.md, which establishes that the write path's atomicity guarantees (temp-and-rename, O_EXCL for the temp file, flock for the run-level lock) are unchanged and, if anything, strengthened by the added guards running earlier in the same code paths"
+    result: denied
+    confidence: "inferred from unchanged code + TOCTOU analysis, not independently reproduced"
+    evidence: [evidence/NEW-005-regression-suite.log]
+  - id: ATTACK-018
+    threat: THREAT-014
+    violation_attempted: "exhaust memory or time with oversized canonical, managed, pointer, and .gitignore files"
+    starting_privilege: "supply chain and contributor; 512 MiB / 256 MiB files"
+    steps: ["not independently re-executed this pass; MIT-014's streaming-hash and size-cap gaps were explicitly NOT in the V1-V7 fix list (09-remediation/summary.md: 'Not changed: ... MIT-014 memory bound for very large files'), and no code touched by the remediation (SHA256 hashing calls, File.binread call sites for managed files) changed size behavior"]
+    expected_safe_behavior: "streaming hashes, pointer files above 8 MiB refused; memory bounded by the largest single file (design target, known not yet met)"
+    observed: "not re-reproduced this pass (would consume significant time/disk for a known, already-recorded, explicitly-not-in-scope gap); presumed unchanged from the first pass's finding (no hang or crash, but no streaming/cap either, so peak RSS still scales with the largest file) since none of the file-reading code paths for managed content were touched by the remediation"
+    result: denied
+    confidence: "presumed unchanged; not re-reproduced this pass; same gaps as first pass, not claimed fixed"
+    evidence: []
+  - id: ATTACK-019
+    threat: THREAT-015
+    violation_attempted: "forge or hide report lines and plant control sequences through provider responses, including via the models command as a second consumer"
+    starting_privilege: "compromised provider, simulated by stubbing Provider#discover directly (no network call is made or attempted; ids/errors containing a newline plus a forged report-shaped line, ANSI escape sequences, and a 5000+-character string)"
+    steps: ["stub Provider#discover to return crafted Result objects (bypassing Net::HTTP entirely, so no real or even blocked network attempt occurs); run Onboarding#run(providers_only: true); inspect stdout, runtime.yml (od -c for raw ESC bytes), and then soft-foundry models reading that runtime.yml"]
+    expected_safe_behavior: "non-printables stripped and values truncated in output AND in runtime.yml; no report-shaped line at column 0 anywhere, including in the models command"
+    observed: "FIXED, including the specific violated surface (models). The newline+forged-line id was rewritten to `gpt-4?forced     .ai/policies/skill-permissions.yml` (single line, `?` in place of the newline, so it cannot forge a second report row). ESC sequences became literal `?` bytes (`?[2K?[1Anormal-id`). The 5000+-character error string plus a trailing forged `conflicts: none` escape sequence was truncated to 200 chars + `...` (203 total) -- the forged text, appended after the 5000 x-characters, never survives truncation at all. `od -c` on runtime.yml found zero ESC (033) bytes. `soft-foundry models`, reading that already-sanitized runtime.yml and re-sanitizing defensively, produced output with zero ESC bytes and no line beginning `conflicts:` or a status word at column 0. Root cause of the fix: Provider.sanitize (strip to printable ASCII + truncate to 200 chars) is now applied inside Provider#discover itself, to both the models array and the error string, before a Result is even constructed, so Onboarding#write_runtime persists already-clean values to runtime.yml, and the CLI's `models` command additionally re-sanitizes on read as defense in depth."
+    result: denied
+    evidence: [evidence/ATTACK-019-provider-injection-stub.log]
+  - id: ATTACK-020
+    threat: THREAT-003
+    violation_attempted: "make attacker text from a tampered package persist unnoticed past the next legitimate init"
+    starting_privilege: "supply chain; packaged copy with attacker text"
+    steps: ["not independently re-executed this pass; the tampered-package detection relies on Source#entry_for's symlink/traversal refusal (re-verified live under ATTACK-007) and the manifest-owned updated/conflict classification (re-verified live under ATTACK-021 and ATTACK-010), neither of which changed in a way that weakens this residual"]
+    expected_safe_behavior: "tampered files reported updated or conflict, never skipped; manifest records the version; residual risk (init cannot authenticate the gem) remains design-accepted"
+    observed: "not independently reproduced under its original name this pass; the two mechanisms it depends on were independently re-verified (ATTACK-007, ATTACK-010/021)"
+    result: denied
+    confidence: "inferred from independently-reverified dependent mechanisms, not independently reproduced end-to-end"
+    evidence: [evidence/ATTACK-spotcheck-001-002-007-010.log, evidence/ATTACK-021-uncommitted-edit-bypass.log]
+  - id: ATTACK-021
+    threat: THREAT-004
+    related_threats: [THREAT-006]
+    violation_attempted: "overwrite an uncommitted, unrecoverable edit despite the report's promise that uncommitted edits are never overwritten"
+    starting_privilege: "contributor who can edit .gitignore or the manifest, plus a maintainer running init; .gitignore or .git/info/exclude containing .ai/rules/ (so git status without --ignored never lists edits there); separately --allow-non-git passed inside a git repository"
+    steps: ["8c: .ai/rules/ in .gitignore; init; uncommitted HARDENED edit; init (no force); init --force", "8c2: same ignore rule; forge the manifest hash for the edited file; init from the (same) package, no --force", "8d: git repo, uncommitted edit, no ignore rule at all, --allow-non-git passed explicitly"]
+    expected_safe_behavior: "an uncommitted modification is always conflict, even under --force; --allow-non-git inside a git work tree must not disable the check"
+    observed: "FIXED, all three sub-cases. 8c: without --force, `conflict (uncommitted modifications)`, HARDENED line kept; WITH --force, still `conflict (uncommitted modifications)`, NOT forced (previously this was the critical failure: forced, line destroyed, unrecoverable). 8c2 (forged manifest hash, no --force): `conflict (uncommitted modifications)`, HARDENED line kept (previously: `updated (owned by manifest)`, edit destroyed). 8d (--allow-non-git inside a real git repo, uncommitted edit, no ignore rule involved): `conflict (uncommitted modifications)`, HARDENED line kept (previously: `updated`, edit destroyed). Root cause of the fix: `Git#dirty_paths` now runs `git status --porcelain --untracked-files=all --ignored=matching` (adding --ignored=matching, so git-ignored paths are included, not omitted as before), and `Installer#plan` now computes `dirty = @git.repository? ? @git.dirty_paths : []` unconditionally -- the dirty check now runs whenever a git repository genuinely exists at the root, regardless of whether --allow-non-git was passed, closing both halves of the original violation."
+    result: denied
+    evidence: [evidence/ATTACK-021-uncommitted-edit-bypass.log]
+  - id: NEW-001
+    threat: THREAT-008
+    violation_attempted: "install into the wrong worktree/superproject, or fail to resolve a nested git structure correctly, when the target is a real git worktree or git submodule (MIT-008's noted unaddressed residual area)"
+    starting_privilege: "maintainer running init with cwd inside a linked worktree, or inside a submodule, with no --root given"
+    steps: ["git worktree add a second worktree from a branch; cd into it; init --no-onboard", "git submodule add a second repo into a superproject; cd into the submodule; init --no-onboard", "for each, check .git entry type, git rev-parse --show-toplevel, and where .ai/ actually landed"]
+    expected_safe_behavior: "resolves to the worktree's or submodule's own top-level (not the main worktree or the superproject); installs only there"
+    observed: "Both resolve correctly. Worktree: `.git` is a plain file (gitdir pointer), `git rev-parse --show-toplevel` returns the worktree's own path, init writes .ai/ only into the worktree, the main worktree (wtmain) has no .ai/ at all afterward. Submodule: `.git` is `gitdir: ../.git/modules/sub`, init writes .ai/ only into the submodule directory, the superproject has no .ai/ at all afterward. No cross-contamination in either direction."
+    result: denied
+    evidence: [evidence/NEW-001-worktree-submodule.log]
+  - id: NEW-002
+    threat: THREAT-004
+    violation_attempted: "bypass the uncommitted-edit dirty-check protection via .git/info/exclude instead of .gitignore, since the coordinator flagged this as a plausible asymmetry with --ignored=matching"
+    starting_privilege: "maintainer/contributor with a local .git/info/exclude entry, no .gitignore entry"
+    steps: [".ai/rules/ added only to .git/info/exclude; uncommitted HARDENED edit to .ai/rules/general.md; git status --ignored=matching directly; init --force"]
+    expected_safe_behavior: "the uncommitted edit is still treated as protected (conflict), matching .gitignore behavior"
+    observed: "Not a bypass. `git status --porcelain --untracked-files=all --ignored=matching` reports `!! .ai/rules/` identically whether the ignore rule lives in .gitignore or .git/info/exclude (git's ignore-pattern resolution treats both sources uniformly at the porcelain-status level). `init --force` correctly reports `conflict (uncommitted modifications)`, HARDENED line preserved."
+    result: denied
+    evidence: [evidence/NEW-002-git-info-exclude-dirty-check.log]
+  - id: NEW-003
+    threat: THREAT-014
+    violation_attempted: "degrade dirty_paths's performance or correctness on a large ignored tree via --ignored=matching, which (unlike --ignored=traditional) reports every ignored file individually rather than collapsing ignored directories"
+    starting_privilege: "a repository with a large ignored dependency-style tree (20,000 files under node_modules/, ignored)"
+    steps: ["create 20,000 files under an ignored node_modules/; add an uncommitted edit to a managed, unrelated .ai/ file; time `git status --porcelain --untracked-files=all --ignored=matching` directly and time `init --force`"]
+    expected_safe_behavior: "no meaningful slowdown; correct conflict result"
+    observed: "0.01s for the raw git status call (git's ignored-directory collapsing in this git version keeps --ignored=matching cheap even at 20,000 ignored files); init --force still correctly reported `conflict (uncommitted modifications)` for the unrelated edit"
+    result: denied
+    evidence: [evidence/NEW-003-large-ignored-tree-performance.log]
+  - id: NEW-004
+    threat: THREAT-012
+    violation_attempted: "find an edge case in Installer#plan's `clean` flag (the classification that lets a post-install check failure be blamed on Soft Foundry, exit 4) now that it requires .ai/repository.yml status == created and no pre-existing/extra .ai/ files"
+    starting_privilege: "none (observational); ordinary first-time installs into repositories that already have a .gitignore or AGENTS.md, which is the overwhelmingly common real case, not an attacker-controlled one"
+    steps: ["compute Installer#plan.clean in-process for: a bare fresh repo (no pre-existing files at all); a fresh repo with a pre-existing ordinary .gitignore (*.log); a fresh repo with a pre-existing ordinary AGENTS.md (no marker, has prose)"]
+    expected_safe_behavior: "n/a -- this is a design-tradeoff finding, not a security violation; reported for completeness"
+    observed: "`clean` is true only for the bare fresh repo. It is false whenever .gitignore or AGENTS.md pre-exists and therefore gets an `updated` action (the near-universal case for a repository adopting Soft Foundry after already having some content), because Installer#plan.clean's `actions.none? { conflict/updated/forced }` check counts adapter_actions (.gitignore, AGENTS.md, CLAUDE.md) as well as .ai/ actions, not just .ai/ actions. This means the auto-detected 'blame Soft Foundry' exit-4 path is effectively unreachable outside a literally empty target directory: any genuine Soft Foundry-side defect discovered by the post-install check on an ordinary repository will now be reported as an ordinary `check: failed, resolve the conflicts above and rerun` (looking like a target-side/user problem, exit 0) rather than exit 4 with upstream-fork guidance, even when every .ai/ file installed perfectly and none is in conflict. This is not a security weakening (it strictly reduces false Soft-Foundry-blame, which was the actual violation being fixed) but is a functional regression against REQ-011's intent that genuine Soft-Foundry-side failures be classified and surfaced as such; see ATTACK-F-N02."
+    result: denied
+    new_findings: [ATTACK-F-N02]
+    evidence: [evidence/NEW-004-clean-install-classification.log]
+not_executed:
+  - case: "real (non-dry-run) init --root / --allow-non-git, and a real install into the maintainer's actual home directory"
+    result: blocked_by_scope
+    reason: "prohibited surfaces (system location, real home directory); the first pass's read-only --dry-run probe and HOME=<scratch> simulation were not re-run live this pass since the underlying resolve_root code did not change (see ATTACK-011); not claimed fixed"
+  - case: "THREAT-007 plan-to-write swap via a test seam inside Installer#write_actions"
+    result: blocked_by_scope
+    reason: "needs a seam inside the write stage, which would mean modifying code; unchanged from the first pass's own scope decision"
+  - case: "512/256 MiB oversized-file reproduction (ATTACK-018 sub-cases)"
+    result: not_reexecuted
+    reason: "time/disk cost for a gap explicitly out of scope for this remediation (see 09-remediation/summary.md); presumed unchanged, not claimed fixed"

@@ -1,0 +1,89 @@
+=== ATTACK-005a: .soft-foundry dir symlink to outside ===
+-- run init (no keys => onboarding no network) --
+soft-foundry: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack2/a005a/target/.soft-foundry is a symlink; refusing to write through it
+exit=1
+-- outside dir after --
+total 0
+drwxr-xr-x@ 2 jscholen-iou  wheel    64B Sep  9 22:46 .
+drwxr-xr-x@ 4 jscholen-iou  wheel   128B Sep  9 22:46 ..
+-- run onboard directly too --
+soft-foundry: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack2/a005a/target/.soft-foundry is a symlink; refusing to use it
+created   .gitignore
+created   AGENTS.md
+created   CLAUDE.md
+exit_onboard=1
+total 0
+drwxr-xr-x@ 2 jscholen-iou  wheel    64B Sep  9 22:46 .
+drwxr-xr-x@ 4 jscholen-iou  wheel   128B Sep  9 22:46 ..
+
+=== ATTACK-005b: runtime.yml symlink to outside victim ===
+-- run onboard --
+soft-foundry: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack2/a005b/target/.soft-foundry/runtime.yml is a symlink; refusing to write through it
+created   .gitignore
+created   AGENTS.md
+created   CLAUDE.md
+exit=1
+-- victim content after --
+VICTIM ORIGINAL CONTENT
+
+=== ATTACK-005c: init.lock dangling symlink ===
+soft-foundry: .soft-foundry/init.lock is a symlink; init does not write through symlinks
+exit=1
+ls: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack2/a005c/lockvictim: No such file or directory
+
+=== ATTACK-005d: .soft-foundry symlink; check git check-ignore on the symlink itself ===
+check-ignore exit=1
+?? .gitignore
+?? AGENTS.md
+?? CLAUDE.md
+
+=== ATTACK-005e: runtime.yml hardlink to a file inside root ===
+-- run onboard --
+created   .gitignore
+created   AGENTS.md
+created   CLAUDE.md
+
+LLM provider discovery
+openai     135 models
+anthropic  11 models
+xai        not configured (set XAI_API_KEY)
+
+Local model inventory written to .soft-foundry/runtime.yml (gitignored).
+exit=0
+-- sensitive.txt after --
+SENSITIVE
+
+=== ATTACK-005f (ATTACK-014c): .soft-foundry -> state internal symlink, in-root ===
+soft-foundry: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack2/a005f/target/.soft-foundry is a symlink; refusing to write through it
+exit=1
+total 0
+drwxr-xr-x@ 2 jscholen-iou  wheel    64B Sep  9 22:46 .
+drwxr-xr-x@ 5 jscholen-iou  wheel   160B Sep  9 22:46 ..
+
+=== RECHECK (keys unset) ATTACK-005a: .soft-foundry dir symlink to outside, init then onboard ===
+soft-foundry: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack2/a005a2/target/.soft-foundry is a symlink; refusing to write through it
+exit=1
+soft-foundry: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack2/a005a2/target/.soft-foundry is a symlink; refusing to use it
+created   .gitignore
+created   AGENTS.md
+created   CLAUDE.md
+exit_onboard=1
+total 0
+drwxr-xr-x@ 2 jscholen-iou  wheel    64B Sep  9 22:48 .
+drwxr-xr-x@ 4 jscholen-iou  wheel   128B Sep  9 22:48 ..
+
+=== RECHECK (keys unset) ATTACK-005e: runtime.yml hardlink to in-root file ===
+created   .gitignore
+created   AGENTS.md
+created   CLAUDE.md
+
+LLM provider discovery
+openai     not configured (set OPENAI_API_KEY)
+anthropic  not configured (set ANTHROPIC_API_KEY)
+xai        not configured (set XAI_API_KEY)
+
+Local model inventory written to .soft-foundry/runtime.yml (gitignored).
+exit=0
+SENSITIVE
+note: file .soft-foundry/runtime.yml type after:
+.soft-foundry/runtime.yml: ASCII text

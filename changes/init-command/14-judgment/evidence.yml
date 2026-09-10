@@ -1,19 +1,119 @@
-commit_judged: TBD
+commit_judged: 6bd80f6c419e0a877366a37447f85dc71dd86a30
+
 phases:
+  - phase: 00-intake
+    commit_sha: 5a84acd982ce590b310682de02172d34f5138cab
+    current: true
+    result: complete
+  - phase: 01-discovery
+    commit_sha: cc348f93f3d265af3f92f7fa7d0b09cbbf8a520a
+    current: true
+    result: complete
+  - phase: 02-specification
+    commit_sha: cc348f93f3d265af3f92f7fa7d0b09cbbf8a520a
+    current: true
+    result: complete
+  - phase: 03-threat-model
+    commit_sha: 43d62f3ff0b1c085e689615440b9702c63f161e3
+    current: true
+    result: complete
+  - phase: 04-plan
+    commit_sha: e7916589eb61f788254eca7a4d881057ec0600e7
+    current: true
+    result: complete
+  - phase: 05-implementation
+    commit_sha: 017e14984035cd00d7320db31daf87ab44a3a98f
+    current: true
+    result: complete
   - phase: 06-verification
-    commit_sha: TBD
-    current: TBD   # true when commit_sha matches the judged commit for all code paths
-    result: TBD
+    commit_sha: 147fca6362dd7da21b41fcd280ad3f3d247686da
+    current: true   # `git diff --stat 147fca6..6bd80f6 -- lib exe test soft_foundry.gemspec` is empty
+    result: complete
+    note: "Fourth and final run. Three earlier runs (6df4d15e73d8, ca3cf40bcd29, 52971d8f2fbc) archived under 06-verification/previous/, none deleted."
   - phase: 07-evaluation
-    commit_sha: TBD
-    current: TBD
-    result: TBD
+    commit_sha: a7b9df1bd6ac5c50346515d04a9a4a3853b86c6d
+    current: true   # `git diff --stat a7b9df1..6bd80f6 -- lib exe test soft_foundry.gemspec` is empty
+    result: complete
+    note: "Fourth and final run. Three earlier runs (6a41afd123ca blocked, c29509c3cee8, a733f84086d0) archived under 07-evaluation/previous/, none deleted."
   - phase: 08-attack
-    commit_sha: TBD
-    current: TBD
-    result: TBD
+    commit_sha: c60aa7f16efdcee3d58eb953f9f94e9f5123e7a2
+    current: true   # `git diff --stat c60aa7f..6bd80f6 -- lib exe test soft_foundry.gemspec` is empty
+    result: complete
+    note: "Second and final pass, zero blocking violations. First pass (06a4830966d3, blocked, 7 violations V1-V7) archived under 08-attack/previous/, none deleted."
+  - phase: 09-remediation
+    commit_sha: 1fb8aa73a4ddae7cfb1a02f313b687286ee83581
+    current: true
+    result: complete
+    note: "Second and final remediation run (attack findings V1-V7). First remediation run (evaluation findings, 420acdc5f35d) archived under 09-remediation/previous/420acdc5f35d/, none deleted."
+  - phase: 10-user-documentation
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Marked optional: true in .ai/workflow.yml by deliberate, disclosed maintainer scope decision; not missing evidence. See 13-review/consolidated.md."
+  - phase: 11-faq-index
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Marked optional: true in .ai/workflow.yml by deliberate, disclosed maintainer scope decision; not missing evidence. See 13-review/consolidated.md."
+  - phase: 12-observability
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Marked optional: true in .ai/workflow.yml. .ai/repository.yml's four observability.* capabilities are NOT_APPLICABLE (no deployed service); not missing evidence. See 13-review/operations.md."
   - phase: 13-review
-    commit_sha: TBD
-    current: TBD
-    result: TBD
-unresolved_findings: []
+    commit_sha: eaaf2e121add3c016b4a658408202fdef3206de2
+    current: true   # `git diff --stat eaaf2e1..6bd80f6 -- lib exe test soft_foundry.gemspec` is empty; the only diff in that range is .ai/workflow.yml (CONTROL_PLANE, not APP/TESTS/INFRA), review's own prose describing that fix, and metadata.yml
+    result: complete
+    note: "No blocking findings. commit_sha reflects the code state under review (last commit touching lib/exe/test before review ran); review's own prose files were committed together with the harness fix in 6bd80f6, disclosed in consolidated.md's 'Harness fix applied after this review completed' section."
+
+unresolved_findings:
+  - id: ATTACK-F-N01
+    severity: medium
+    phase: 08-attack
+    disposition: acceptable_residual_risk
+    summary: "repository.yml can redirect APP/TESTS/INFRA to a non-existent path undetected in a code-free/non-conventional repository; CONTROL_PLANE/HARNESS_EVALS remain unconditionally protected. Ruled acceptable by review (REV-005); carried to residual-risk.md."
+  - id: ATTACK-F-N02
+    severity: low
+    phase: 08-attack
+    disposition: acceptable_residual_risk
+    summary: "clean-install classification overcorrection routes a genuine internal defect on a non-empty target to target-side reporting instead of upstream; fails only in the safe direction. Ruled acceptable by review (REV-006); carried to residual-risk.md."
+  - id: MIT-008
+    severity: medium
+    phase: 03-threat-model
+    disposition: acceptable_residual_risk
+    summary: "--root under --allow-non-git is not realpath-verified against / or $HOME. Disclosed since threat modeling, deliberately deferred by remediation (REM-005), reconfirmed unaddressed by verification, attack (ATTACK-F-009), and review (REV-004). Carried to residual-risk.md."
+  - id: MIT-014
+    severity: low
+    phase: 03-threat-model
+    disposition: acceptable_residual_risk
+    summary: "No streaming/size bound on packaged-file or manifest reads. Disclosed since threat modeling, deliberately deferred by remediation, reconfirmed by attack (ATTACK-F-010). Carried to residual-risk.md."
+  - id: VER-001
+    severity: minor
+    phase: 06-verification
+    disposition: acceptable_residual_risk
+    summary: "Thin automated-test coverage for the `updated` status upgrade path; only AGENTS.md/CLAUDE.md exercised end-to-end. Carried to residual-risk.md."
+  - id: EVAL-F-002
+    severity: minor
+    phase: 07-evaluation
+    disposition: acceptable_residual_risk
+    summary: "No init --help/-h or per-command help. Deliberately not remediated (REM-002/REM-005); scope left to a follow-up change. Carried to residual-risk.md."
+  - id: EVAL-F-003
+    severity: minor
+    phase: 07-evaluation
+    disposition: acceptable_residual_risk
+    summary: "Conflict next: guidance is generic, single-sentence, not path/case-specific. Carried to residual-risk.md."
+  - id: VER-004
+    severity: minor
+    phase: 06-verification
+    disposition: acceptable_residual_risk
+    summary: "Source/bundler use under Ruby 2.7 fails with a raw SyntaxError instead of a version-guard message; gem install path correctly enforces required_ruby_version >= 3.2. Carried to residual-risk.md."
+  - id: VER-007
+    severity: major
+    phase: 06-verification
+    disposition: accepted_scope_decision
+    summary: "No user-facing prose documentation for init beyond a README pointer. Accepted by review as deviation (c), superseded by explicit maintainer scope decision (10-user-documentation/11-faq-index marked optional). Carried to residual-risk.md as a user-facing consequence, not as an open defect."
+  - id: GOVERNANCE-01
+    severity: info
+    phase: 13-review
+    disposition: acceptable_residual_risk
+    summary: "No skill currently holds write permission for .ai/templates/repository.yml or AGENTS.md's markers, both structurally required for this change. Both writes approved with rationale by review as documented deviations (a)/(b). Recommended to 15-learning. Carried to residual-risk.md."

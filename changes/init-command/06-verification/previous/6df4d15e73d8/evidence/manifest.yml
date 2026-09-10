@@ -1,0 +1,38 @@
+commit_sha: 6df4d15e73d8d8bf53555e73addbf42ca7b3494f
+artifacts:
+  - path: evidence/check.log
+    produced_by: "ruby -Ilib exe/soft-foundry check"
+    sha256: 8bf41f5c023db3f6bdb4237b0e45339c97fc820ca702c8cbbc8887423d22a23a
+  - path: evidence/ci.log
+    produced_by: "ruby -Ilib exe/soft-foundry ci"
+    sha256: c6304249127534a727e44bd1506066c6750a6f7537f56ca440912edab7b269d7
+  - path: evidence/doctor.log
+    produced_by: "ruby -Ilib exe/soft-foundry doctor"
+    sha256: ecbc893e80d2056058dcf802ebafe2e41a8620999eaaeed15eb065567db350ad
+  - path: evidence/e2e-install-ruby27-attempt.log
+    produced_by: "first end-to-end attempt where asdf resolved ruby to 2.7.8 in the scratch directory (environment error, retained)"
+    sha256: 64e1f9d9fa6000e990d1bc595a357c8e410f038b433966a97662143ff67a512c
+  - path: evidence/e2e-install.log
+    produced_by: "scratch git repository: init --no-onboard x2, check, doctor, edited rule commit, init (conflict), init --force, init (Ruby 3.3.1)"
+    sha256: d3b8c20932204e8933412a498058b82f1eeca1b027110f86714e74df3f20f2c2
+  - path: evidence/e2e-manifest-verify.log
+    produced_by: "ruby verify_manifest.rb <e2e target>: YAML-load manifest, compare to .ai/ tree, recompute SHA-256"
+    sha256: 3b98714db465fcad903c6e1906bdce54220c2512de2d3e53714329133c9cf348
+  - path: evidence/gem-build.log
+    produced_by: "gem build soft_foundry.gemspec --output <scratch> in an rsync copy; tar -xOf <gem> data.tar.gz | tar -tz; metadata.gz required_ruby_version"
+    sha256: f01207b1202802bea0d4daa0ca7ade3b61d97f2fc41934640b963cb583120640
+  - path: evidence/git-state.log
+    produced_by: "git rev-parse HEAD; git branch --show-current; git status --porcelain"
+    sha256: 079b4e99851321329ca856f3dc3508a4c5094215b51756fea5d15a57a3ea7dfd
+  - path: evidence/init-dry-run-self.log
+    produced_by: "ruby -Ilib exe/soft-foundry init --dry-run --no-onboard (on this repository)"
+    sha256: ad8bed2973aa3d816dc776c9237ec1001050b5f8878af96632b42d37e81013f2
+  - path: evidence/ruby-version.log
+    produced_by: "ruby -v"
+    sha256: a5a8055efe1a3ad730322fdea00556d1188dad8a3e6181c9002c5102549b015d
+  - path: evidence/ruby-wc.log
+    produced_by: "ruby -wc on every file under lib/"
+    sha256: 8754c5cc795e0d6c31234874be95fbde9574b7fd1995379fa1338ab088b3c307
+  - path: evidence/tests.log
+    produced_by: "bundle exec rake test"
+    sha256: 073c804d383651caf07f288d125831936159ac8a69e14da8f44e9f71e0872163

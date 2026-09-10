@@ -1,0 +1,107 @@
+### journey: EVAL-014 agent-facing CLI surface: help text, unknown options, version
+### ruby: /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby (ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23])
+### soft-foundry source: /Users/jscholen-iou/dev/soft_foundry (HEAD c29509c3cee8e74dfb4266906f47a59ab82a90e6)
+### captured: 2026-09-09T20:39:43Z
+
+$ git add -A
+exit=0
+
+$ git commit -q -m Project files
+exit=0
+
+### STEP 1: top-level help
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry
+Soft Foundry 0.2.0
+
+Usage:
+  soft-foundry init [options]             install the control plane into this repository, then onboard
+      --dry-run  --force  --no-onboard  --root PATH  --allow-non-git
+  soft-foundry onboard                    discover providers and repair agent adapters
+  soft-foundry doctor                     validate repository bootstrap
+  soft-foundry check                      lint the .ai/ control plane
+  soft-foundry change new <slug>          create changes/<slug>/ from phase templates
+  soft-foundry change status [slug]       show phase status and gate results
+  soft-foundry change list                list change records
+  soft-foundry gate <phase|all> [--change SLUG]
+                                          evaluate a phase's completion gate
+  soft-foundry ci                         check + gate every change record (used by CI and pre-commit)
+  soft-foundry hooks install              install the pre-commit hook
+  soft-foundry models                     show locally accessible models
+  soft-foundry shell claude|codex|grok    launch a coding shell in this repository
+  soft-foundry version
+
+`AGENTS.md` and `.ai/` are canonical. Vendor files such as `CLAUDE.md` only point to them.
+exit=0
+
+### STEP 2: init --help (not a documented option)
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init --help
+soft-foundry: unknown option(s): --help
+exit=1
+
+### STEP 3: init with a misspelled option
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init --dry_run --no-onboard
+soft-foundry: unknown option(s): --dry_run
+exit=1
+
+$ git status --porcelain --untracked-files=all
+exit=0
+
+### STEP 4: version
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry version
+0.2.0
+exit=0
+
+### STEP 5: --root given without a value
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init --root
+soft-foundry: --root requires a value
+exit=1
+
+$ git status --porcelain --untracked-files=all
+exit=0
+
+### STEP 6: init -h and the help word (informational probes, no expectation beyond nothing written)
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init -h
+soft-foundry: unknown option(s): -h
+exit=1
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry help
+Soft Foundry 0.2.0
+
+Usage:
+  soft-foundry init [options]             install the control plane into this repository, then onboard
+      --dry-run  --force  --no-onboard  --root PATH  --allow-non-git
+  soft-foundry onboard                    discover providers and repair agent adapters
+  soft-foundry doctor                     validate repository bootstrap
+  soft-foundry check                      lint the .ai/ control plane
+  soft-foundry change new <slug>          create changes/<slug>/ from phase templates
+  soft-foundry change status [slug]       show phase status and gate results
+  soft-foundry change list                list change records
+  soft-foundry gate <phase|all> [--change SLUG]
+                                          evaluate a phase's completion gate
+  soft-foundry ci                         check + gate every change record (used by CI and pre-commit)
+  soft-foundry hooks install              install the pre-commit hook
+  soft-foundry models                     show locally accessible models
+  soft-foundry shell claude|codex|grok    launch a coding shell in this repository
+  soft-foundry version
+
+`AGENTS.md` and `.ai/` are canonical. Vendor files such as `CLAUDE.md` only point to them.
+exit=1
+
+### ASSERTIONS
+ASSERT PASS: help lists init with all five options, exit 0
+ASSERT PASS: unknown option refused with exit 1 and nothing written
+ASSERT PASS: init --help does not install anything
+ASSERT PASS: version prints a version, exit 0
+ASSERT PASS: --root without value refused with exit 1
+ASSERT PASS: REM --root without value: single-line message naming the option
+ASSERT PASS: REM --root without value: no defect/upstream guidance and no diagnostic block
+ASSERT PASS: REM --root without value: nothing written
+ASSERT PASS: informational probes write nothing
+
+### assertions: 9 passed, 0 failed

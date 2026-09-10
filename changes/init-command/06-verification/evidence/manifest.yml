@@ -1,5 +1,43 @@
-commit_sha: TBD
+commit_sha: 147fca6362dd7da21b41fcd280ad3f3d247686da
+# Top-level evidence of this fourth run only. The three archived runs keep their own
+# manifests under previous/6df4d15e73d8/, previous/ca3cf40bcd29/, and previous/52971d8f2fbc/.
 artifacts:
-  - path: TBD
-    produced_by: TBD
-    sha256: TBD
+  - path: evidence/check.log
+    produced_by: "ruby -Ilib exe/soft-foundry check"
+    sha256: 0ba616e37368ad533490b41bdea0aa9d6990dd8a310bf783b31b400b3add1f37
+  - path: evidence/ci.log
+    produced_by: "ruby -Ilib exe/soft-foundry ci"
+    sha256: 2f4a7cc5b781dece8adac6c5a09caaf450fed58ae61cb3b0b9b2314206c40d1a
+  - path: evidence/doctor.log
+    produced_by: "ruby -Ilib exe/soft-foundry doctor"
+    sha256: 7475a3d1a690cf5b927bd7647fddd199b2c9653cc5ae7053f230df7e8f746c41
+  - path: evidence/e2e-install-ruby27-attempt.log
+    produced_by: "deliberate probe with /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/bin/ruby (below the declared >= 3.2 floor): version, init --dry-run --no-onboard (environment error, carried as VER-004)"
+    sha256: 97f4b70772f98fb0cd17e7d7ac79410d88cfdd44d56d021213d30cbb9ae0698d
+  - path: evidence/e2e-install.log
+    produced_by: "scratch git repository, repo-root absolute ruby 3.3.1: init --no-onboard twice, check in target, committed edit to .ai/rules/general.md then init (conflict, exit 3) then init --force (exit 0), init --root with no value (exit 1), onboard with OPENAI_API_KEY/ANTHROPIC_API_KEY/XAI_API_KEY unset (exit 0)"
+    sha256: 9d47276fd0d8480cca5b1e6a81094d04183a9b5ed49afb80cf808d62a850cbcb
+  - path: evidence/gem-build.log
+    produced_by: "gem build soft_foundry.gemspec --output <scratch> in an rsync copy (no .git); tar -xOf <gem> data.tar.gz | tar -tz; gem specification <gem> required_ruby_version; check for a .gem left in the repository"
+    sha256: b0938be631e800d3a2022613875d3d959a3b30333c9e7a689adab2f07d98e76a
+  - path: evidence/git-state.log
+    produced_by: "git rev-parse HEAD; git status --porcelain (captured at phase start, before any evidence was written)"
+    sha256: e768c41f302f440fe2d0454fd349826ef43ff26bd2e66ad83e37a5c37f6de304
+  - path: evidence/init-dry-run-self.log
+    produced_by: "ruby -Ilib exe/soft-foundry init --dry-run --no-onboard on this repository"
+    sha256: aa21b21c2ef32d963e67a5e8419bb33190584f7b3788c877b55df0dc59cf4bed
+  - path: evidence/init-help-probe.log
+    produced_by: "ruby -Ilib exe/soft-foundry init --help; init -h; help (EVAL-F-002 / REM-002 / VER-009 carry-forward probe, not a required gate)"
+    sha256: b7930afa4f0fbbb0d911154d641f1f1dd5def9a8d0fbf95df45264aade202b18
+  - path: evidence/remediation-checks.log
+    produced_by: "remediation-specific checks (a)-(h) from V1..V7, each in its own scratch git repository: temp-sibling symlink, .soft-foundry directory symlink, runtime.yml symlink, gitignored+uncommitted rule edit under --force, protected HARNESS_EVALS override, regular file at .soft-foundry, FIFO at .ai/manifest.yml under timeout 10, cross-directory init --root --allow-non-git against a deliberately broken packaged copy"
+    sha256: 884a275c23dfda5d0454db607f3e729c03b61263a536afe306c98248fc4c6366
+  - path: evidence/ruby-version.log
+    produced_by: "which ruby; ruby -v; ruby -e 'puts RbConfig.ruby'"
+    sha256: 91eac117d8e1d8d37065b87e706d418cd90f6be7904ec4296d296c6f98424a61
+  - path: evidence/ruby-wc.log
+    produced_by: "ruby -wc on every file under lib/, including lib/soft_foundry/safe_write.rb"
+    sha256: 3511f3d8b3cf07e9f2eb311c85f4cc98bb573975bee0b1a73dec449631811e73
+  - path: evidence/tests.log
+    produced_by: "bundle exec rake test"
+    sha256: dd7cffc22b94f3c0a6a60ad123faf49c7be915cbc4157626629169130cc13a68

@@ -1,0 +1,27 @@
+---
+phase: 00-intake
+skill: intake
+status: complete
+commit_sha: cc348f93f3d265af3f92f7fa7d0b09cbbf8a520a
+started_at: '2026-09-09T15:43:34Z'
+completed_at: '2026-09-09T15:43:34Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- request.md
+- assumptions.md
+blocking: []
+findings:
+- id: INTAKE-001
+  severity: info
+  summary: Depends on init-command REQ-011 for the failure-classification hook; sequence
+    this change after it
+- id: INTAKE-002
+  severity: major
+  summary: Any gh invocation is an outward-facing action under the human-boundary
+    policy and must be confirmation-gated
+next: discover
+notes: 'Compatibility mode: performed by an interactive coding agent from a one-sentence
+  maintainer request; see assumptions.md.'

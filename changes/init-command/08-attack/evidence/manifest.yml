@@ -1,5 +1,50 @@
-commit_sha: TBD
+commit_sha: c60aa7f16efdcee3d58eb953f9f94e9f5123e7a2
+executed_at_commit: a7b9df1bd6ac5c50346515d04a9a4a3853b86c6d
+hash_algorithm: sha256 (shasum -a 256)
 artifacts:
-  - path: TBD
-    case: ATTACK-001
-    sha256: TBD
+  - path: evidence/ATTACK-004-tmp-sibling-symlink.log
+    case: ATTACK-004
+    sha256: a29b8a58a3817a44acd1d2d4218eb9b21585aae03bc0e23d233b4845042279a6
+  - path: evidence/ATTACK-005-soft-foundry-dir-symlink.log
+    case: ATTACK-005, ATTACK-014
+    sha256: 1eea42f202a7b3513173b5aa406cfd5e65ed9d7e6d6e0bc63058e4aad16ce126
+  - path: evidence/ATTACK-006-fifos.log
+    case: ATTACK-006, ATTACK-009
+    sha256: 506fd9c4578d5219cdf5bf9569adacef64442e3f0397b42c329e88ad79018e23
+  - path: evidence/ATTACK-012-marker-false-conflict-retest.log
+    case: ATTACK-012
+    sha256: b9d361b9959f361bb2ccdfe13924e3599d62994a48513101ccdd46f9614ea900
+  - path: evidence/ATTACK-013-repository-overrides.log
+    case: ATTACK-013
+    sha256: 6764c9d3167b1a0a43c1c61e1d7706f78521b3f803f880224627f775855bb577
+  - path: evidence/ATTACK-015-diagnostic-leakage.log
+    case: ATTACK-015
+    sha256: 4c290b2ff6a2338d208d46bec4f84cc514c9c95a9aafe54149729baf230716f6
+  - path: evidence/ATTACK-015b-sanitization-and-real-defect.log
+    case: ATTACK-015, ATTACK-013
+    sha256: da99a7dc6f0332b2fd568f278abc520cecd2e08e197440849a30fcad7391f82d
+  - path: evidence/ATTACK-019-provider-injection-stub.log
+    case: ATTACK-019
+    sha256: b2b48a5d219c7407d0d2d43cf75601f853b17027f03b7e4100bb0e1cf17db15a
+  - path: evidence/ATTACK-021-uncommitted-edit-bypass.log
+    case: ATTACK-021, ATTACK-008
+    sha256: 606a903df4eb705230ff72b8cbca1246ebeff65e881fb6816c170a2f24e1e768
+  - path: evidence/ATTACK-spotcheck-001-002-007-010.log
+    case: ATTACK-001, ATTACK-002, ATTACK-007, ATTACK-010, ATTACK-020
+    sha256: e9ac104ea925b66ace97a6f1c129338391feab87ab03469ea388282819a58a35
+  - path: evidence/NEW-001-worktree-submodule.log
+    case: NEW-001, ATTACK-011
+    sha256: 03b15b2161f8e346d996c6773a62338a966a9a25c41ab64c4484c8c540b1729f
+  - path: evidence/NEW-002-git-info-exclude-dirty-check.log
+    case: NEW-002, ATTACK-014
+    sha256: 3496d8efe491cda2369fbcc6d86f0927701e0e8bde1e28ad518e5ec6a33c8ee0
+  - path: evidence/NEW-003-large-ignored-tree-performance.log
+    case: NEW-003
+    sha256: ece8896e17a15a50593818da81eb57e652f042138dfe2ae536389dd6dc4a3ef9
+  - path: evidence/NEW-004-clean-install-classification.log
+    case: NEW-004
+    sha256: 4cd38d982b548b6e70a03bf04e478d28c630a22685cb71f54a9cfc6dd84f3152
+  - path: evidence/NEW-005-regression-suite.log
+    case: ATTACK-003, ATTACK-008, ATTACK-016, ATTACK-017, ATTACK-020 (full regression suite, used as supporting evidence for cases not independently reproduced this pass)
+    sha256: b75bbec097cf1d0f7a08f8af1622d54547f0207487cdabcd280deb5ee6be8b1b
+key_scan: "every artifact above scanned for real-key-shaped strings (sk-[A-Za-z0-9_-]{15,}, sk-ant-..., xai-..., SG....) before this manifest was written; none found"

@@ -25,6 +25,45 @@ module FoundryFixture
     end
   end
 
+  # A throwaway git repository with only an application file: an init target.
+  def with_target_repo(git: true)
+    Dir.mktmpdir("soft-foundry-target") do |dir|
+      FileUtils.mkdir_p(File.join(dir, "lib"))
+      File.write(File.join(dir, "lib", "app.rb"), "puts 1\n")
+      if git
+        sh(dir, "git", "init", "-q", "-b", "main")
+        sh(dir, "git", "config", "user.email", "test@example.com")
+        sh(dir, "git", "config", "user.name", "Test")
+        sh(dir, "git", "add", ".")
+        sh(dir, "git", "commit", "-q", "-m", "initial")
+      end
+      yield File.realpath(dir)
+    end
+  end
+
+  def source = SoftFoundry::Installer::Source.new(REPO_ROOT)
+
+  def init(dir, *args, env: {}, src: source)
+    out = StringIO.new
+    err = StringIO.new
+    code = nil
+    with_env(env) { code = SoftFoundry::CLI.new(["init", "--no-onboard", *args], out: out, err: err, root: dir, source: src).run }
+    [code, out.string + err.string]
+  end
+
+  def with_env(env)
+    saved = env.to_h { |k, _| [k, ENV[k]] }
+    env.each { |k, v| v.nil? ? ENV.delete(k) : ENV[k] = v }
+    yield
+  ensure
+    saved.each { |k, v| v.nil? ? ENV.delete(k) : ENV[k] = v }
+  end
+
+  def commit_all(dir, msg = "wip")
+    sh(dir, "git", "add", "-A")
+    sh(dir, "git", "commit", "-q", "-m", msg)
+  end
+
   def sh(dir, *cmd)
     out, err, status = Open3.capture3(*cmd, chdir: dir)
     raise "#{cmd.join(' ')} failed: #{err}" unless status.success?

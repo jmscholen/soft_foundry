@@ -1,8 +1,89 @@
-commit_sha: TBD
+commit_sha: 147fca6362dd7da21b41fcd280ad3f3d247686da
+ruby: ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23]
+rerun_of: 52971d8f2fbcad692403709c8f9368c51b5c2eaa  # archived under previous/52971d8f2fbc/; earlier runs 6df4d15e73d8 and ca3cf40bcd29 are under previous/6df4d15e73d8/ and previous/ca3cf40bcd29/
+rerun_reason: second remediation (09-remediation, commit 1fb8aa73a4ddae7cfb1a02f313b687286ee83581) repaired attack findings V1..V7 from 08-attack/results.md; this rerun verifies the fix at HEAD 147fca6, which differs from 1fb8aa7 only in changes/init-command/09-remediation/handoff.yml and changes/init-command/metadata.yml (git diff --stat 1fb8aa7..147fca6)
 checks:
   - id: CHECK-001
-    kind: tests   # tests | lint | static_analysis | security_scan | iac_validate | migration_check | custom
-    command: TBD
-    result: TBD   # pass | fail | error | skipped
-    evidence: evidence/TBD
+    kind: custom
+    command: git rev-parse HEAD && git status --porcelain
+    result: pass
+    evidence: evidence/git-state.log
+    criteria: []
+    notes: HEAD 147fca6 on change/init-command. Seven pre-existing partial evidence edits from a stopped-early prior attempt at this run were present and reported in results.md, then overwritten; no other pre-existing modifications.
+  - id: CHECK-002
+    kind: tests
+    command: bundle exec rake test
+    result: pass
+    evidence: evidence/tests.log
+    criteria: [AC-001, AC-002, AC-003, AC-004, AC-005, AC-006, AC-007, AC-008, AC-009, AC-010, AC-011, AC-012, AC-013, AC-014, AC-015, AC-016, AC-017]
+    notes: 90 runs, 805 assertions, 0 failures, 0 errors, 0 skips, as expected. Bundler was available; the fallback runner was not needed.
+  - id: CHECK-003
+    kind: lint
+    command: for f in $(find lib -name '*.rb' | sort); do ruby -wc $f; done
+    result: pass
+    evidence: evidence/ruby-wc.log
+    criteria: []
+    notes: 19 files (including lib/soft_foundry/safe_write.rb), 19 x Syntax OK, zero warnings, every exit 0.
+  - id: CHECK-004
+    kind: custom
+    command: ruby -Ilib exe/soft-foundry check
+    result: pass
+    evidence: evidence/check.log
     criteria: [AC-001]
+    notes: Exit 0; 16 phases, 16 skills, no errors.
+  - id: CHECK-005
+    kind: custom
+    command: ruby -Ilib exe/soft-foundry ci
+    result: pass
+    evidence: evidence/ci.log
+    criteria: []
+    notes: "Exit 0. init-command 00-05 PASS at their recorded SHAs; 08-attack reported blocked PASS (handoff identity and structure valid, blocking findings V1..V7 recorded verbatim); 09-remediation PASS with predecessor complete: 05-implementation; 06-verification/07-evaluation pending (skipped); upstream-failure-reporting 00-intake PASS."
+  - id: CHECK-006
+    kind: custom
+    command: ruby -Ilib exe/soft-foundry doctor
+    result: pass
+    evidence: evidence/doctor.log
+    criteria: []
+    notes: Exit 2, expected on this repository. .ai/manifest.yml absent (self-install not performed by implementation) and local runtime absent; pre-commit hook present.
+  - id: CHECK-007
+    kind: custom
+    command: ruby -Ilib exe/soft-foundry init --dry-run --no-onboard
+    result: pass
+    evidence: evidence/init-dry-run-self.log
+    criteria: [AC-012]
+    notes: "Exit 0; mode: dry run, nothing written; 170 skipped, CLAUDE.md the only created; neither .ai/manifest.yml nor CLAUDE.md exists afterwards; nothing outside this phase directory changed."
+  - id: CHECK-008
+    kind: custom
+    command: gem build soft_foundry.gemspec --output <scratch>/soft_foundry.gem (in an rsync copy of the repository, no .git); tar -xOf <gem> data.tar.gz | tar -tz; gem specification <gem> required_ruby_version
+    result: pass
+    evidence: evidence/gem-build.log
+    criteria: [AC-017]
+    notes: Built soft_foundry 0.2.0 with 190 files. lib/soft_foundry/safe_write.rb, changes/README.md, docs/user/README.md, .ai/templates/repository.yml present; .ai/harness-evals/README.md is the only harness-evals entry; test/ and changes/init-command not packaged (0 matches each); required_ruby_version >= 3.2 confirmed. No .gem left in the repository. RubyGems warned about missing license and homepage (VER-005).
+  - id: CHECK-009
+    kind: custom
+    command: "scratch git repository, repo-root absolute ruby 3.3.1: app.rb; init --no-onboard (twice); check; edit and commit .ai/rules/general.md; init (conflict); init --force; init --root (no value); onboard with OPENAI_API_KEY/ANTHROPIC_API_KEY/XAI_API_KEY unset"
+    result: pass
+    evidence: evidence/e2e-install.log
+    criteria: [AC-001, AC-003, AC-006, AC-007, AC-015, AC-016]
+    notes: "Exit codes 0 / 0 / 0 / 3 / 0 / 1 / 0. First init: 171 created, app.rb SHA-256 unchanged. Second init: 171 skipped. check: exit 0. Conflict run: conflict .ai/rules/general.md (differs from manifest hash), conflicts: line, next: line naming --force, exit 3. --force run: forced line, exit 0. --root with no value: single line soft-foundry: --root requires a value, exit 1. onboard with keys unset: three not configured lines, exit 0, .soft-foundry/runtime.yml written with configured: false."
+  - id: CHECK-010
+    kind: custom
+    command: "each in its own scratch git repository, repo-root absolute ruby 3.3.1: (a) committed symlink at .ai/workflow.yml.soft-foundry-tmp -> outside victim, init; (b) .soft-foundry -> outside empty dir, init; (c) clean install then .soft-foundry/runtime.yml -> outside victim, onboard with keys unset; (d) clean install+commit, gitignore .ai/rules/, git rm --cached, commit, uncommitted hand edit, init --force; (e) .ai/repository.yml override HARNESS_EVALS: [nothing/**], check; (f) regular file at .soft-foundry, init; (g) FIFO at .ai/manifest.yml, init under timeout 10; (h) init --root <target> --allow-non-git from a different cwd against a broken packaged copy missing .ai/workflow.yml"
+    result: pass
+    evidence: evidence/remediation-checks.log
+    criteria: [AC-001, AC-006, AC-013, AC-014]
+    notes: "V1..V7 regression, all 8 sub-checks pass. (a) exit 1 naming the temp sibling, victim byte-identical, nothing written. (b) exit 1, outside directory still empty. (c) exit 1, victim byte-identical. (d) conflict .ai/rules/general.md (uncommitted modifications), file unchanged after --force, exit 3. (e) protected-group error naming HARNESS_EVALS, exit 2. (f) exit 1 (not 4), no defect-in-Soft-Foundry text. (g) exit 1 in ~1s, no hang. (h) exit 4, indented diagnostic lines contain no occurrence of the target's absolute path."
+  - id: CHECK-011
+    kind: custom
+    command: ruby -Ilib exe/soft-foundry init --help; ruby -Ilib exe/soft-foundry init -h; ruby -Ilib exe/soft-foundry help
+    result: fail
+    evidence: evidence/init-help-probe.log
+    criteria: []
+    notes: "Not a required gate; VER-009 carry-forward probe (EVAL-F-002 / REM-002). init --help and init -h exit 1 with soft-foundry: unknown option(s): --help / -h; soft-foundry help exits 1 after printing the global usage."
+  - id: CHECK-012
+    kind: custom
+    command: /Users/jscholen-iou/.asdf/installs/ruby/2.7.8/bin/ruby -Ilib exe/soft-foundry version; same binary, init --dry-run --no-onboard
+    result: error
+    evidence: evidence/e2e-install-ruby27-attempt.log
+    criteria: []
+    notes: VER-004 carry-forward probe, below the declared Ruby floor, reproduced deliberately at this commit. SyntaxError on endless method definitions at lib/soft_foundry/cli.rb lines 64, 157, 158; exit 1; no version guidance. gem install would refuse via required_ruby_version.

@@ -5,7 +5,7 @@ require "yaml"
 module SoftFoundry
   # Reads the `.ai/` directory: workflow, skills, path groups, profiles.
   class ControlPlane
-    Phase = Data.define(:id, :skill, :output)
+    Phase = Data.define(:id, :skill, :output, :optional, :after)
     Skill = Data.define(:name, :dir, :definition, :permissions, :requirements, :completion) do
       def template_dir = File.join(dir, "template")
       def profile = definition["model"]
@@ -32,7 +32,9 @@ module SoftFoundry
     end
 
     def phases
-      @phases ||= Array(workflow["lifecycle"]).map { |entry| Phase.new(id: entry["id"], skill: entry["skill"], output: entry["output"]) }
+      @phases ||= Array(workflow["lifecycle"]).map do |entry|
+        Phase.new(id: entry["id"], skill: entry["skill"], output: entry["output"], optional: entry["optional"] == true, after: entry["after"])
+      end
     end
 
     def phase(key)
@@ -40,8 +42,22 @@ module SoftFoundry
     end
 
     def predecessor(phase)
+      return phase(phase.after) if phase.after
+      previous_in_lifecycle(phase)
+    end
+
+    def previous_in_lifecycle(phase)
       index = phases.index(phase)
       index&.positive? ? phases[index - 1] : nil
+    end
+
+    # The phase whose completion gates `phase`: its predecessor, stepping back
+    # in lifecycle order over optional phases that never ran. `status_of` maps
+    # a phase to its recorded handoff status.
+    def effective_predecessor(phase, &status_of)
+      prev = predecessor(phase)
+      prev = previous_in_lifecycle(prev) while prev&.optional && status_of.call(prev) == "pending"
+      prev
     end
 
     def successor(phase)
@@ -81,14 +97,32 @@ module SoftFoundry
       File.exist?(policy) ? Array(load_yaml(policy)["protected"]) : []
     end
 
-    # Path groups from paths.yml, overridden group by group from repository.yml.
-    def path_groups
-      @path_groups ||= begin
-        base = load_yaml(File.join(dir, "paths.yml")).fetch("groups", {})
+    # Groups that repository.yml may never override: they protect policy and
+    # harness material regardless of the repository's layout.
+    PROTECTED_GROUPS = %w[CONTROL_PLANE HARNESS_EVALS].freeze
+
+    def default_path_groups
+      @default_path_groups ||= load_yaml(File.join(dir, "paths.yml")).fetch("groups", {}).transform_values { |v| Array(v) }
+    end
+
+    def override_path_groups
+      @override_path_groups ||= begin
         repo = File.join(dir, "repository.yml")
-        overrides = File.exist?(repo) ? load_yaml(repo).fetch("paths", nil) || {} : {}
-        base.merge(overrides).transform_values { |v| Array(v) }
+        raw = File.exist?(repo) ? load_yaml(repo).fetch("paths", nil) || {} : {}
+        raw.is_a?(Hash) ? raw.transform_values { |v| Array(v) } : {}
       end
+    end
+
+    # Path groups from paths.yml, overridden group by group from repository.yml,
+    # except protected groups, which keep their defaults.
+    def path_groups
+      @path_groups ||= default_path_groups.merge(override_path_groups.reject { |g, _| PROTECTED_GROUPS.include?(g) })
+    end
+
+    # Files in this repository matched by a group's patterns.
+    def files_matching(globs)
+      globs.flat_map { |g| Dir.glob(g.end_with?("/**") ? "#{g}/*" : g, File::FNM_DOTMATCH, base: root) }
+           .select { |rel| File.file?(File.join(root, rel)) }.uniq
     end
 
     def code_globs

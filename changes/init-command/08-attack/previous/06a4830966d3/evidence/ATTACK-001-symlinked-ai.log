@@ -1,0 +1,41 @@
+
+##### ATTACK-001 THREAT-001: .ai is a symlink to a directory outside the root
+$ ls -la /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a001/target
+total 0
+drwxr-xr-x@  5 jscholen-iou  wheel  160 Sep  9 17:04 .
+drwxr-xr-x@  4 jscholen-iou  wheel  128 Sep  9 17:04 ..
+lrwxr-xr-x@  1 jscholen-iou  wheel  135 Sep  9 17:04 .ai -> /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a001/outside
+drwxr-xr-x@ 12 jscholen-iou  wheel  384 Sep  9 17:04 .git
+drwxr-xr-x@  3 jscholen-iou  wheel   96 Sep  9 17:04 lib
+[exit 0]
+soft-foundry: .ai is a symlink; init does not write through symlinks
+[exit 1]
+
+##### outside directory afterwards (expect empty)
+$ ls -la /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a001/outside
+total 0
+drwxr-xr-x@ 2 jscholen-iou  wheel   64 Sep  9 17:04 .
+drwxr-xr-x@ 4 jscholen-iou  wheel  128 Sep  9 17:04 ..
+[exit 0]
+
+##### target afterwards
+$ ls -la /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a001/target
+total 0
+drwxr-xr-x@  5 jscholen-iou  wheel  160 Sep  9 17:04 .
+drwxr-xr-x@  4 jscholen-iou  wheel  128 Sep  9 17:04 ..
+lrwxr-xr-x@  1 jscholen-iou  wheel  135 Sep  9 17:04 .ai -> /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a001/outside
+drwxr-xr-x@ 12 jscholen-iou  wheel  384 Sep  9 17:04 .git
+drwxr-xr-x@  3 jscholen-iou  wheel   96 Sep  9 17:04 lib
+[exit 0]
+$ git status --porcelain
+?? .ai
+[exit 0]
+
+##### --force variant
+soft-foundry: .ai is a symlink; init does not write through symlinks
+[exit 1]
+$ ls -la /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/attack.SnpLLh/a001/outside
+total 0
+drwxr-xr-x@ 2 jscholen-iou  wheel   64 Sep  9 17:04 .
+drwxr-xr-x@ 4 jscholen-iou  wheel  128 Sep  9 17:04 ..
+[exit 0]

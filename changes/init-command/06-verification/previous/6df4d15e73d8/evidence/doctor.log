@@ -1,0 +1,11 @@
+$ ruby -Ilib exe/soft-foundry doctor
+✓ git repository
+✓ AGENTS.md
+✓ .ai/README.md
+✓ .ai/workflow.yml
+✓ .ai/paths.yml
+✓ control plane check
+✗ .ai/manifest.yml
+✓ pre-commit hook
+✗ local runtime
+exit=2

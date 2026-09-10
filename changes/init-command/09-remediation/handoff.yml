@@ -1,16 +1,43 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
-phase: 09-remediation
+---
+phase: '09-remediation'
 skill: remediation
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 1fb8aa73a4ddae7cfb1a02f313b687286ee83581
+started_at: '2026-09-09T21:35:10Z'
+completed_at: '2026-09-09T21:35:10Z'
 resolved_model:
   profile: coding_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- summary.md
+- lib/soft_foundry/safe_write.rb
+- lib/soft_foundry/installer.rb
+- lib/soft_foundry/git.rb
+- lib/soft_foundry/onboarding.rb
+- lib/soft_foundry/manifest.rb
+- lib/soft_foundry/control_plane.rb
+- lib/soft_foundry/check.rb
+- lib/soft_foundry/cli.rb
+- lib/soft_foundry/provider.rb
+- lib/soft_foundry/agent_files.rb
+- test/
+- previous/420acdc5f35d/
+blocking: []
+findings:
+- id: REM-004
+  severity: info
+  summary: ATTACK V1..V7 repaired at 1fb8aa73a4dd; verify, evaluate, attack must rerun
+- id: REM-005
+  severity: minor
+  summary: 'Residual not addressed: home-directory root warning, memory bound for
+    very large files, local git excludes, docs symlink refusal'
+- id: REM-006
+  severity: major
+  summary: 'Harness: repository.yml overrides are user state that can weaken gate
+    semantics; protected groups now enforced, learning should consider signing or
+    reviewing overrides'
 next: verify
-notes: ""
+notes: 'Compatibility mode: second remediation run by an interactive coding agent
+  under remediation permissions. Attack transcripts and expected outcomes untouched;
+  first run archived under previous/420acdc5f35d/.'
