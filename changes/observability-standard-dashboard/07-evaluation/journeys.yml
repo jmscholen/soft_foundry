@@ -1,0 +1,26 @@
+commit_sha: 305e03595df8a7ac0fd1a6cb1be1aa68ff982001
+journeys:
+  - id: EVAL-001
+    criteria: [no-iac-exempts-standard-dashboard]
+    persona: repository maintainer, no infrastructure-as-code in the repo
+    starting_state: a fully level-4-satisfied capability set with infrastructure.detected_or_not_applicable=NOT_APPLICABLE
+    steps: ["set observability.standard_dashboard=NOT_APPLICABLE", "run ControlPlane#score_maturity"]
+    assertions: ["current_level is 5", "no gap named observability.standard_dashboard"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-002
+    criteria: [iac-present-without-dashboard-blocks-level-5]
+    persona: repository maintainer, Terraform/OpenTofu/Pulumi present, no dashboard-as-code resource
+    starting_state: a fully level-4-satisfied capability set with infrastructure.detected_or_not_applicable=PASS
+    steps: ["set observability.standard_dashboard=MISSING", "run ControlPlane#score_maturity"]
+    assertions: ["current_level is 4", "gaps include observability.standard_dashboard at level 5"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-003
+    criteria: [iac-present-with-dashboard-reaches-level-5]
+    persona: repository maintainer, IaC present and a dashboard-as-code resource provisioned covering the golden-signal/RED/USE baseline
+    starting_state: a fully level-4-satisfied capability set with infrastructure.detected_or_not_applicable=PASS
+    steps: ["set observability.standard_dashboard=PASS", "run ControlPlane#score_maturity"]
+    assertions: ["current_level is 5", "current_id is governed"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass

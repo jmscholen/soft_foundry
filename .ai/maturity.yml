@@ -85,6 +85,7 @@ levels:
       - observability.health_signal
       - observability.operational_visibility
       - observability.alerting
+      - observability.standard_dashboard
       - judgment.final_gate
 
   6:
@@ -127,11 +128,30 @@ capability_guidance:
           - observability.database_health_signal
         external_integrations:
           - observability.integration_failure_signal
+    infrastructure_as_code:
+      # When infrastructure.detected_or_not_applicable finds Terraform, OpenTofu,
+      # Pulumi, CloudFormation, or an equivalent declarative system, every
+      # conditional capability whose resource type is actually provisioned
+      # becomes required, not merely contextual, and rolls up into
+      # observability.standard_dashboard (see .ai/rules/observability.md for
+      # the golden-signal/RED/USE baseline each provisioned resource type owes).
+      required_when_provisioned:
+        compute_or_request_serving:
+          - observability.error_rate_signal
+          - observability.latency_signal
+        queue_or_async_worker:
+          - observability.job_failure_signal
+          - observability.backlog_signal
+        database:
+          - observability.database_health_signal
+        external_integration:
+          - observability.integration_failure_signal
 
 assessment_rules:
   - Missing repository evidence must be UNKNOWN unless absence itself is conclusively established.
   - A capability implemented outside the repository may be EXTERNAL only when evidence identifies the external system or ownership boundary.
   - NOT_APPLICABLE requires an explicit applicability rationale.
-  - A dashboard is not intrinsically required if another operational surface satisfies operational_visibility with equivalent evidence.
+  - A dashboard is not intrinsically required for observability.operational_visibility if another operational surface satisfies it with equivalent evidence; this exemption does not extend to observability.standard_dashboard, which specifically requires a provisioned, APM-equivalent monitoring dashboard.
   - New production failure modes introduced by a change require a corresponding detection mechanism before the change is complete.
   - Infrastructure-as-code discovery must inspect Terraform, OpenTofu, Pulumi, and repository-specific deployment definitions when present.
+  - observability.standard_dashboard is NOT_APPLICABLE only when infrastructure.detected_or_not_applicable establishes no infrastructure-as-code is present in or owned by the repository. Whenever IaC is present, it must reach PASS (a dashboard-as-code resource provisioned in this repository's IaC, covering the golden-signal/RED/USE baseline for each provisioned resource type per capability_guidance.observability.infrastructure_as_code) or EXTERNAL (the dashboard is provisioned and owned by an identified external system/team) — never NOT_APPLICABLE or a default MISSING.

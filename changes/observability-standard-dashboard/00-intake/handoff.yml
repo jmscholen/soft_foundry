@@ -1,0 +1,18 @@
+# Phase handoff. One per phase directory. The gate checker validates this file.
+phase: 00-intake
+skill: intake
+status: complete
+commit_sha: 305e03595df8a7ac0fd1a6cb1be1aa68ff982001
+started_at: '2026-09-10T17:00:00Z'
+completed_at: '2026-09-10T18:18:57Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-sonnet-5
+outputs:
+- request.md
+- assumptions.md
+blocking: []
+findings: []
+next: discover
+notes: Performed directly by the interactive session, not a fresh-context agent; see assumptions.md.

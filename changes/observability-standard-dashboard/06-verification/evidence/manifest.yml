@@ -1,0 +1,11 @@
+commit_sha: 305e03595df8a7ac0fd1a6cb1be1aa68ff982001
+artifacts:
+  - path: evidence/tests.log
+    produced_by: "ruby -Ilib -Itest -e 'Dir[\"test/*_test.rb\"].each { |f| require \"./#{f}\" }'"
+    sha256: 4d0963c6c9974e9d7970665fc2a0124ad4e5f0a206512cc94e726a1e585fdc11
+  - path: evidence/check.log
+    produced_by: "soft-foundry check"
+    sha256: 7fb203be27b9e9d051d76dd14fb551dac1b63b675b2af8aca6d63b06065ea0ce
+  - path: evidence/syntax-warnings.log
+    produced_by: "ruby -wc on every lib/, exe/soft-foundry, and the new test file"
+    sha256: f90d14b7b4420c97f6253cc8baa17cf540a02ebd82a4bc2d42d0e85943d2b987

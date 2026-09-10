@@ -1,0 +1,50 @@
+change:
+  id: observability-standard-dashboard
+  title: Require a standard APM-equivalent dashboard when IaC is present
+git:
+  worktree: /Users/jscholen-iou/dev/soft_foundry
+  branch: change/observability-standard-dashboard
+type: feature
+risk: low
+status: ready_for_pr
+current_phase: done
+created_at: 2026-09-10T18:18:57Z
+surfaces:
+  application: true
+  database: false
+  infrastructure: false
+  security: false
+  accessibility: false
+  observability: true
+
+# Phases the harness would otherwise require, deliberately not run for
+# this change, each with a non-empty rationale. An entry with an empty
+# rationale does not count as a skip - the phase stays required.
+skipped_phases:
+- phase: discover
+  rationale: Repository already discovered for prior changes at an identical layout;
+    no new technology introduced by this change itself.
+- phase: specify
+  rationale: Intake captures the requirement at sufficient granularity for a
+    two-file policy addition plus one regression test. See 00-intake/assumptions.md.
+- phase: threat_model
+  rationale: Pure control-plane documentation/policy content plus a read-only
+    scoring regression test; no new write surface, no new runtime code path,
+    no new attack surface.
+- phase: plan
+  rationale: 05-implementation/log.md is the plan record for a change this size.
+- phase: attack
+  rationale: No new attack surface; the only executable change is a test
+    exercising an existing, already-hardened scoring method with static inputs.
+- phase: remediate
+  rationale: No downstream phase flagged a failure requiring remediation.
+- phase: review
+  rationale: No independent fresh-context reviewer was run, given this change's
+    scope; the pull request itself is the review point before merge.
+- phase: judge
+  rationale: An isolated, fresh-context judgment is the skill's explicit design;
+    self-judgment would not satisfy that. The maintainer's own merge decision is
+    the real judgment point.
+- phase: learn
+  rationale: Lessons are recorded directly in 05-implementation/log.md rather
+    than as separate formal learning artifacts, given the change's scope.
