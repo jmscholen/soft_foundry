@@ -1,7 +1,7 @@
 ### journey: EVAL-015 .ai symlink to a directory outside the repository is refused, nothing written outside
 ### ruby: /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby (ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23])
-### soft-foundry source: /Users/jscholen-iou/dev/soft_foundry (HEAD a733f84086d099ae48a209725d3ae037806c96dc)
-### captured: 2026-09-09T20:56:21Z
+### soft-foundry source: /Users/jscholen-iou/dev/soft_foundry (HEAD a7b9df1bd6ac5c50346515d04a9a4a3853b86c6d)
+### captured: 2026-09-10T02:47:32Z
 
 $ git add -A
 exit=0
@@ -9,8 +9,8 @@ exit=0
 $ git commit -q -m Project files with symlinked .ai
 exit=0
 
-$ ls -la .ai; ls -A /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-015-outside | wc -l
-lrwxr-xr-x@ 1 jscholen-iou  wheel  130 Sep  9 16:56 .ai -> /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-015-outside
+$ ls -la .ai; ls -A /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/eval-015-outside | wc -l
+lrwxr-xr-x@ 1 jscholen-iou  wheel  131 Sep  9 22:47 .ai -> /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/eval-015-outside
        0
 exit=0
 
@@ -22,9 +22,9 @@ exit=1
 
 ### STEP 1 post-state
 
-$ ls -A /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-015-outside | wc -l; ls -la .ai; git status --porcelain --untracked-files=all
+$ ls -A /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/eval-015-outside | wc -l; ls -la .ai; git status --porcelain --untracked-files=all
        0
-lrwxr-xr-x@ 1 jscholen-iou  wheel  130 Sep  9 16:56 .ai -> /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-015-outside
+lrwxr-xr-x@ 1 jscholen-iou  wheel  131 Sep  9 22:47 .ai -> /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/eval-015-outside
 exit=0
 
 ### ASSERTIONS

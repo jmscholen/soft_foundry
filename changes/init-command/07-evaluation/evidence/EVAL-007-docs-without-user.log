@@ -1,7 +1,7 @@
 ### journey: EVAL-007 docs/ present without docs/user/: scaffold skipped with a reason
 ### ruby: /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby (ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23])
-### soft-foundry source: /Users/jscholen-iou/dev/soft_foundry (HEAD a733f84086d099ae48a209725d3ae037806c96dc)
-### captured: 2026-09-09T20:56:14Z
+### soft-foundry source: /Users/jscholen-iou/dev/soft_foundry (HEAD a7b9df1bd6ac5c50346515d04a9a4a3853b86c6d)
+### captured: 2026-09-10T02:47:22Z
 
 $ git add -A
 exit=0
@@ -12,7 +12,7 @@ exit=0
 ### STEP 1: init
 
 $ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init --no-onboard
-root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-007
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/eval-007
 created   .gitignore
 created   AGENTS.md
 created   CLAUDE.md
@@ -202,7 +202,7 @@ $ git commit -q -m Project files
 exit=0
 
 $ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init --no-onboard
-root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-007-control
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/eval-007-control
 created   .gitignore
 created   AGENTS.md
 created   CLAUDE.md

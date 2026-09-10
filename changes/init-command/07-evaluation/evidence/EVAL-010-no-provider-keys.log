@@ -1,7 +1,7 @@
 ### journey: EVAL-010 init with onboarding and no provider keys in the environment
 ### ruby: /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby (ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23])
-### soft-foundry source: /Users/jscholen-iou/dev/soft_foundry (HEAD a733f84086d099ae48a209725d3ae037806c96dc)
-### captured: 2026-09-09T20:56:17Z
+### soft-foundry source: /Users/jscholen-iou/dev/soft_foundry (HEAD a7b9df1bd6ac5c50346515d04a9a4a3853b86c6d)
+### captured: 2026-09-10T02:47:28Z
 
 $ git add -A
 exit=0
@@ -12,7 +12,7 @@ exit=0
 ### STEP 1: init (onboarding enabled) with OPENAI_API_KEY ANTHROPIC_API_KEY XAI_API_KEY unset
 
 $ env -u OPENAI_API_KEY -u ANTHROPIC_API_KEY -u XAI_API_KEY /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init
-root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-010
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/eval-010
 created   .gitignore
 created   AGENTS.md
 created   CLAUDE.md
@@ -394,6 +394,43 @@ $ git check-ignore -v .soft-foundry/runtime.yml
 .gitignore:1:.soft-foundry/	.soft-foundry/runtime.yml
 exit=0
 
+### STEP 2 (legitimate-use): .soft-foundry/ is a plain directory (not a symlink), and re-running onboard against it works as always
+
+$ test -d .soft-foundry && test ! -L .soft-foundry && echo '.soft-foundry is a plain directory'
+.soft-foundry is a plain directory
+exit=0
+
+$ env -u OPENAI_API_KEY -u ANTHROPIC_API_KEY -u XAI_API_KEY /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry onboard
+skipped   .gitignore  (.soft-foundry/ is ignored)
+skipped   AGENTS.md  (block present)
+skipped   CLAUDE.md  (block present)
+
+LLM provider discovery
+openai     not configured (set OPENAI_API_KEY)
+anthropic  not configured (set ANTHROPIC_API_KEY)
+xai        not configured (set XAI_API_KEY)
+
+Local model inventory written to .soft-foundry/runtime.yml (gitignored).
+exit=0
+
+$ cat .soft-foundry/runtime.yml
+---
+version: 1
+providers:
+  openai:
+    configured: false
+    models: []
+    error:
+  anthropic:
+    configured: false
+    models: []
+    error:
+  xai:
+    configured: false
+    models: []
+    error:
+exit=0
+
 ### ASSERTIONS
 ASSERT PASS: AC-015 exit 0
 ASSERT PASS: AC-015 installation succeeded (check: ok, manifest present)
@@ -404,5 +441,7 @@ ASSERT PASS: AC-015 runtime.yml exists
 ASSERT PASS: AC-015 runtime.yml records configured: false for all three providers
 ASSERT PASS: runtime.yml is gitignored (git status shows nothing under .soft-foundry)
 ASSERT PASS: summary line printed after onboarding
+ASSERT PASS: legitimate-use: .soft-foundry/ is a plain directory, not a symlink
+ASSERT PASS: legitimate-use: re-running onboard against the plain .soft-foundry/ directory works as always
 
-### assertions: 9 passed, 0 failed
+### assertions: 11 passed, 0 failed

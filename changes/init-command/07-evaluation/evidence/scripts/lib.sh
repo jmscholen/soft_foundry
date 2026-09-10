@@ -3,7 +3,7 @@ set -u
 REPO=/Users/jscholen-iou/dev/soft_foundry
 RUBY=/Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby
 SF="$RUBY -I$REPO/lib $REPO/exe/soft-foundry"
-SCRATCH=/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval
+SCRATCH=/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4
 EVID=$REPO/changes/init-command/07-evaluation/evidence
 LOG=""
 

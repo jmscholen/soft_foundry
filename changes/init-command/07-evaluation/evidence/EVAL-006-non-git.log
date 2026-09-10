@@ -1,12 +1,12 @@
 ### journey: EVAL-006 non-git target refused unless --allow-non-git
 ### ruby: /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby (ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23])
-### soft-foundry source: /Users/jscholen-iou/dev/soft_foundry (HEAD a733f84086d099ae48a209725d3ae037806c96dc)
-### captured: 2026-09-09T20:56:14Z
+### soft-foundry source: /Users/jscholen-iou/dev/soft_foundry (HEAD a7b9df1bd6ac5c50346515d04a9a4a3853b86c6d)
+### captured: 2026-09-10T02:47:21Z
 
 ### STEP 1: init in a plain directory (no .git anywhere above it)
 
-$ env GIT_CEILING_DIRECTORIES=/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init --no-onboard
-soft-foundry: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-006-plain is not inside a Git work tree; pass --allow-non-git to install anyway
+$ env GIT_CEILING_DIRECTORIES=/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4 /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init --no-onboard
+soft-foundry: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/eval-006-plain is not inside a Git work tree; pass --allow-non-git to install anyway
 exit=1
 
 $ ls -A
@@ -15,8 +15,8 @@ exit=0
 
 ### STEP 2: init --allow-non-git
 
-$ env GIT_CEILING_DIRECTORIES=/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init --allow-non-git --no-onboard
-root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-006-plain
+$ env GIT_CEILING_DIRECTORIES=/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4 /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init --allow-non-git --no-onboard
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/eval-006-plain
 created   .gitignore
 created   AGENTS.md
 created   CLAUDE.md
@@ -211,7 +211,7 @@ exit=0
 
 ### STEP 3: init --allow-non-git --force
 
-$ env GIT_CEILING_DIRECTORIES=/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init --allow-non-git --force --no-onboard
+$ env GIT_CEILING_DIRECTORIES=/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4 /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init --allow-non-git --force --no-onboard
 soft-foundry: --force cannot be combined with --allow-non-git: overwrites would be unrecoverable
 exit=1
 

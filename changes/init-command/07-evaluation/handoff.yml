@@ -1,17 +1,89 @@
 ---
 phase: 07-evaluation
 skill: evaluation
-status: pending
-commit_sha:
-started_at:
-completed_at:
+status: complete
+commit_sha: a7b9df1bd6ac5c50346515d04a9a4a3853b86c6d
+started_at: '2026-09-10T02:30:00Z'
+completed_at: '2026-09-10T02:55:00Z'
 resolved_model:
   profile: reasoning_high
-  provider:
-  model:
-outputs: []
+  provider: anthropic
+  model: claude-sonnet-5
+outputs:
+  - evaluation-plan.md
+  - journeys.yml
+  - results.md
+  - evidence/manifest.yml
+  - evidence/EVAL-001-first-install-idempotent.log
+  - evidence/EVAL-002-pointer-files-preserved.log
+  - evidence/EVAL-003-dry-run-then-real.log
+  - evidence/EVAL-004-conflict-then-force.log
+  - evidence/EVAL-005-uncommitted-edit.log
+  - evidence/EVAL-006-non-git.log
+  - evidence/EVAL-007-docs-without-user.log
+  - evidence/EVAL-008-gitignore.log
+  - evidence/EVAL-009-root-option.log
+  - evidence/EVAL-010-no-provider-keys.log
+  - evidence/EVAL-011-ascii-status-words.log
+  - evidence/EVAL-012-internal-failure.log
+  - evidence/EVAL-013-hand-copied-ai.log
+  - evidence/EVAL-014-cli-surface.log
+  - evidence/EVAL-015-symlinked-ai.log
+  - evidence/EVAL-016-dry-run-conflict-preview.log
+  - evidence/EVAL-017-gitignored-build-artifact.log
+  - evidence/EVAL-018-repository-yml-override.log
+  - evidence/EVAL-019-fresh-clone-block-detection.log
+  - evidence/scripts/lib.sh
+  - evidence/scripts/eval-001.sh
+  - evidence/scripts/eval-002.sh
+  - evidence/scripts/eval-003.sh
+  - evidence/scripts/eval-004.sh
+  - evidence/scripts/eval-005.sh
+  - evidence/scripts/eval-006.sh
+  - evidence/scripts/eval-007.sh
+  - evidence/scripts/eval-008.sh
+  - evidence/scripts/eval-009.sh
+  - evidence/scripts/eval-010.sh
+  - evidence/scripts/eval-011.sh
+  - evidence/scripts/eval-012.sh
+  - evidence/scripts/eval-013.sh
+  - evidence/scripts/eval-014.sh
+  - evidence/scripts/eval-015.sh
+  - evidence/scripts/eval-016.sh
+  - evidence/scripts/eval-017.sh
+  - evidence/scripts/eval-018.sh
+  - evidence/scripts/eval-019.sh
 blocking: []
-findings: []
+findings:
+  - id: EVAL-F-001
+    severity: info
+    summary: "Resolved and reconfirmed at HEAD a7b9df1. init --root with no value exits 1 with the single line 'soft-foundry: --root requires a value' and no defect guidance (EVAL-014)."
+  - id: EVAL-F-002
+    severity: minor
+    summary: Carried. init --help and init -h are refused as unknown option(s) with exit 1; there is no per-command help, and soft-foundry help prints the global usage but exits 1. Deliberately left unremediated per 09-remediation/summary.md (REM-005) and verification (VER-009).
+  - id: EVAL-F-003
+    severity: minor
+    summary: "Carried. The next guidance line is a single generic sentence; on an uncommitted-edit conflict the operative step (commit first) is only implied by the parenthetical, and the line wraps on narrow terminals. conflicts:/next: are otherwise correct on every conflict run, including the two new ones (EVAL-017, EVAL-018 control step), and absent on every clean run."
+  - id: EVAL-F-004
+    severity: minor
+    summary: "Carried. check:ok still immediately precedes an exit-3 summary on conflict runs and can read as success; the conflicts: line below it mitigates this. The git diff hint after updated/forced on non-conflict runs is still absent (verification VER-006)."
+  - id: EVAL-F-005
+    severity: info
+    summary: Resolved and reconfirmed. Onboarding prints 'not configured (set OPENAI_API_KEY)' style lines for all three providers (EVAL-010); runtime.yml carries no key values; a second onboard run against the same plain .soft-foundry/ directory behaves identically.
+  - id: EVAL-F-006
+    severity: info
+    summary: Carried. README.md and docs/user/README.md still contain no user documentation for init (manifest, five statuses, conflicts:/next:, exit codes 0/1/3/4, .soft-foundry/init.lock, repository.yml path overrides). Verification VER-007 (major) already flags this for review.
+  - id: EVAL-F-007
+    severity: info
+    summary: Carried. The updated upgrade path for an owned .ai/ file has end-to-end evidence (EVAL-004); the automated-test half (verification VER-001) remains open.
+  - id: EVAL-F-008
+    severity: info
+    summary: Every behaviour in AC-001..AC-016 matched the specification from the user's side across five personas and nineteen journeys at a7b9df1; the three new legitimate-use journeys found no case where V1..V7 hardening interferes with ordinary use. No journey failed.
+  - id: EVAL-F-009
+    severity: info
+    summary: "New this run. root: is never printed on the Soft Foundry-internal-failure path because Installer::Source.packaged's file-existence check runs, and can raise, before the CLI prints root:; consistent with \"nothing was changed\" but worth a documentation sentence (EVAL-012)."
+  - id: EVAL-F-010
+    severity: info
+    summary: New this run. The V4 remediation's protected-group and emptied-override hardening does not constrain legitimate, non-empty repository.yml overrides of APP/TESTS/INFRA for a non-conventional layout; check and init behave identically to the conventional-layout case (EVAL-018). Positive confirmation, not a gap.
 next: attack
-notes: Invalidated by the second 09-remediation (attack findings); the passing run
-  at a733f84086d0 is archived under previous/a733f84086d0/ and must be rerun.
+notes: 'Compatibility mode: fourth run by a fresh-context agent under evaluation permissions after the attack remediation. Previous runs archived under previous/.'

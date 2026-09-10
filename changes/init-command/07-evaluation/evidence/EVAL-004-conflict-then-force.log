@@ -1,7 +1,7 @@
 ### journey: EVAL-004 committed user edit conflicts on upgrade, --force resolves it; untouched owned files are updated
 ### ruby: /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby (ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23])
-### soft-foundry source: /Users/jscholen-iou/dev/soft_foundry (HEAD a733f84086d099ae48a209725d3ae037806c96dc)
-### captured: 2026-09-09T20:56:11Z
+### soft-foundry source: /Users/jscholen-iou/dev/soft_foundry (HEAD a7b9df1bd6ac5c50346515d04a9a4a3853b86c6d)
+### captured: 2026-09-10T02:47:19Z
 
 $ git add -A
 exit=0
@@ -12,7 +12,7 @@ exit=0
 ### STEP 1: install current version and commit
 
 $ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init --no-onboard
-root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-004
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/eval-004
 created   .gitignore
 created   AGENTS.md
 created   CLAUDE.md
@@ -211,18 +211,18 @@ exit=0
 
 ### STEP 3: build a next-version copy of Soft Foundry whose canonical general.md and ruby.md changed
 
-$ rsync -a --exclude .git --exclude .soft-foundry --exclude 'changes/*/' /Users/jscholen-iou/dev/soft_foundry/ /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/soft-foundry-next/ && echo copied
+$ rsync -a --exclude .git --exclude .soft-foundry --exclude 'changes/*/' /Users/jscholen-iou/dev/soft_foundry/ /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/soft-foundry-next/ && echo copied
 copied
 exit=0
 
-$ printf '\n<!-- canonical revision for upgrade evaluation -->\n' >> /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/soft-foundry-next/.ai/rules/general.md; printf '\n<!-- canonical revision for upgrade evaluation -->\n' >> /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/soft-foundry-next/.ai/rules/ruby.md; echo appended
+$ printf '\n<!-- canonical revision for upgrade evaluation -->\n' >> /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/soft-foundry-next/.ai/rules/general.md; printf '\n<!-- canonical revision for upgrade evaluation -->\n' >> /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/soft-foundry-next/.ai/rules/ruby.md; echo appended
 appended
 exit=0
 
 ### STEP 4: upgrade run (next version) without --force
 
-$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/soft-foundry-next/lib /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/soft-foundry-next/exe/soft-foundry init --no-onboard
-root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-004
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/soft-foundry-next/lib /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/soft-foundry-next/exe/soft-foundry init --no-onboard
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/eval-004
 skipped   .gitignore  (.soft-foundry/ is ignored)
 skipped   AGENTS.md  (block present)
 skipped   CLAUDE.md  (block present)
@@ -433,8 +433,8 @@ exit=0
 
 ### STEP 5: upgrade run with --force
 
-$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/soft-foundry-next/lib /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/soft-foundry-next/exe/soft-foundry init --force --no-onboard
-root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-004
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/soft-foundry-next/lib /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/soft-foundry-next/exe/soft-foundry init --force --no-onboard
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/eval-004
 skipped   .gitignore  (.soft-foundry/ is ignored)
 skipped   AGENTS.md  (block present)
 skipped   CLAUDE.md  (block present)
@@ -628,7 +628,7 @@ exit=0
 $ grep -A1 'rules/general.md:' .ai/manifest.yml | head -2 || grep 'rules/general.md' .ai/manifest.yml
 exit=0
 
-$ cmp .ai/rules/general.md /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/soft-foundry-next/.ai/rules/general.md && echo 'general.md is canonical (next version)'
+$ cmp .ai/rules/general.md /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/soft-foundry-next/.ai/rules/general.md && echo 'general.md is canonical (next version)'
 general.md is canonical (next version)
 exit=0
 
@@ -645,8 +645,8 @@ exit=0
 
 ### STEP 6: rerun after force is clean
 
-$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/soft-foundry-next/lib /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/soft-foundry-next/exe/soft-foundry init --no-onboard
-root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-004
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/soft-foundry-next/lib /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/soft-foundry-next/exe/soft-foundry init --no-onboard
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/eval-004
 skipped   .gitignore  (.soft-foundry/ is ignored)
 skipped   AGENTS.md  (block present)
 skipped   CLAUDE.md  (block present)

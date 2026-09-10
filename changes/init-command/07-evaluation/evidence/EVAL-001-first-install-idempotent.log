@@ -1,7 +1,7 @@
 ### journey: EVAL-001 first install, commit, re-run
 ### ruby: /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby (ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23])
-### soft-foundry source: /Users/jscholen-iou/dev/soft_foundry (HEAD a733f84086d099ae48a209725d3ae037806c96dc)
-### captured: 2026-09-09T20:56:07Z
+### soft-foundry source: /Users/jscholen-iou/dev/soft_foundry (HEAD a7b9df1bd6ac5c50346515d04a9a4a3853b86c6d)
+### captured: 2026-09-10T02:47:15Z
 
 $ git add app.rb
 exit=0
@@ -16,7 +16,7 @@ exit=0
 ### STEP 1: first run
 
 $ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init --no-onboard
-root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-001
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/eval-001
 created   .gitignore
 created   AGENTS.md
 created   CLAUDE.md
@@ -312,7 +312,7 @@ exit=0
 
 ### STEP 1 canonical comparison: every installed .ai/ file (except repository.yml) is byte-identical to the packaged source; repository.yml equals the template
 
-$ cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-001 && for f in $(find .ai -type f | sort); do case $f in .ai/manifest.yml) continue;; .ai/repository.yml) cmp -s $f /Users/jscholen-iou/dev/soft_foundry/.ai/templates/repository.yml || echo DIFF $f;; *) cmp -s $f /Users/jscholen-iou/dev/soft_foundry/$f || echo DIFF $f;; esac; done; echo compared
+$ cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/eval-001 && for f in $(find .ai -type f | sort); do case $f in .ai/manifest.yml) continue;; .ai/repository.yml) cmp -s $f /Users/jscholen-iou/dev/soft_foundry/.ai/templates/repository.yml || echo DIFF $f;; *) cmp -s $f /Users/jscholen-iou/dev/soft_foundry/$f || echo DIFF $f;; esac; done; echo compared
 compared
 exit=0
 
@@ -343,14 +343,14 @@ exit=0
 $ git status --porcelain
 exit=0
 
-$ find .ai AGENTS.md CLAUDE.md .gitignore changes docs -type f -exec stat -f '%m %N' {} + | sort > /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-001-mtimes-before.txt; wc -l /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-001-mtimes-before.txt
-     172 /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-001-mtimes-before.txt
+$ find .ai AGENTS.md CLAUDE.md .gitignore changes docs -type f -exec stat -f '%m %N' {} + | sort > /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/eval-001-mtimes-before.txt; wc -l /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/eval-001-mtimes-before.txt
+     172 /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/eval-001-mtimes-before.txt
 exit=0
 
 ### STEP 3: second run
 
 $ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry init --no-onboard
-root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-001
+root: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/eval-001
 skipped   .gitignore  (.soft-foundry/ is ignored)
 skipped   AGENTS.md  (block present)
 skipped   CLAUDE.md  (block present)
@@ -526,7 +526,7 @@ check: ok
 summary: created 0, updated 0, skipped 171, conflict 0, forced 0
 exit=0
 
-$ find .ai AGENTS.md CLAUDE.md .gitignore changes docs -type f -exec stat -f '%m %N' {} + | sort > /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-001-mtimes-after.txt; diff /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-001-mtimes-before.txt /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval/eval-001-mtimes-after.txt && echo 'mtimes identical'
+$ find .ai AGENTS.md CLAUDE.md .gitignore changes docs -type f -exec stat -f '%m %N' {} + | sort > /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/eval-001-mtimes-after.txt; diff /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/eval-001-mtimes-before.txt /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/87281b62-7130-41d8-9d9a-ab1e96399132/scratchpad/eval4/eval-001-mtimes-after.txt && echo 'mtimes identical'
 mtimes identical
 exit=0
 
