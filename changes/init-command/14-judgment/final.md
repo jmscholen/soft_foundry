@@ -1,31 +1,38 @@
 # Final Judgment
 
 ## Outcome
-TBD: APPROVED | APPROVED_WITH_RESIDUAL_RISK | BLOCKED | REJECTED
+**APPROVED_WITH_RESIDUAL_RISK**
 
 ## Commit judged
-TBD
+`6bd80f6c419e0a877366a37447f85dc71dd86a30` (branch `change/init-command`, HEAD at judgment time).
+
+This commit's only diff from the review commit (`eaaf2e121add3c016b4a658408202fdef3206de2`) is `.ai/workflow.yml` (marking `document`/`index`/`observe` `optional: true`, the same mechanism already used for `remediate`) plus the review phase's own prose documenting that fix and `changes/init-command/metadata.yml`. `git diff --stat eaaf2e1..6bd80f6 -- lib exe test soft_foundry.gemspec` is empty. No `APP`/`TESTS`/`INFRA` file changed after any commit-bound phase's recorded `commit_sha`; see `evidence.yml` for the per-phase currency check.
 
 ## Requirements status
-TBD
+All 17 requirements (REQ-001..REQ-017) and all 17 locked acceptance criteria (`02-specification/acceptance-criteria.yml`) are implemented and independently traced to code by three separate phases (verification, evaluation, review) rather than accepted on any single phase's word. `13-review/functional.md` re-traced every requirement to a specific code path and reran the full regression suite (90 runs / 805 assertions, 0 failures) independently at HEAD. Conforms — no open requirement.
 
 ## Verification
-TBD
+**Disposition: passed, current.** Four runs total (`6df4d15e73d8` → `ca3cf40bcd29` → `52971d8f2fbc` → final `147fca6362dd`, each superseded run archived under `06-verification/previous/`). The final run confirms all eight V1-V7-mapped attack fixes are byte-identical-verified against the attack remediation commit and reconfirmed live, and carries forward known residuals (VER-001 thin `updated`-status coverage, VER-004 Ruby 2.7 raw `SyntaxError`, VER-006 missing git-diff hint, VER-007 documentation deviations, VER-009 no `--help`) rather than silently dropping them.
 
 ## Evaluation
-TBD
+**Disposition: passed, current.** Four runs total (`6a41afd123ca` blocked → `c29509c3cee8` → `a733f84086d0` → final `a7b9df1bd6ac`, each superseded run archived under `07-evaluation/previous/`). The final run adds 15 new adversarial-adjacent-but-legitimate-use journeys (EVAL-005..019) on top of the original 4, confirming the attack remediation's hardening does not break ordinary use; no journey failed. Carries forward EVAL-F-002 (no `--help`), EVAL-F-003/004 (generic conflict guidance), EVAL-F-006 (no user docs) as disclosed, non-blocking.
 
 ## Attack
-TBD
+**Disposition: passed, current, zero blocking violations.** Two passes: the first (`06a4830966d3`, archived) found seven violations (V1-V7, one critical: an out-of-root write via a temp-sibling symlink) and blocked; remediation (`1fb8aa73a4dd`) fixed all seven; the second pass (final, `c60aa7f16efd`) independently reproduced all seven fixes live and found zero further blocking violations. Two new, non-blocking findings surfaced by probing the remediation's own new code: ATTACK-F-N01 (medium, `repository.yml` can blind APP/TESTS/INFRA staleness detection in a code-free/non-conventional repository; `CONTROL_PLANE`/`HARNESS_EVALS` remain unconditionally protected) and ATTACK-F-N02 (low, functional not security; an overcorrection that under-reports a genuine internal defect as target-side on a non-empty repository — fails in the safe direction only). Both independently reconfirmed by code reading in `13-review/security.md`, both ruled acceptable residual risk.
 
 ## Documentation
-TBD
+`10-user-documentation` and `11-faq-index` are `pending`, marked `optional: true` in `.ai/workflow.yml`. This is a deliberate, disclosed maintainer scope decision (documentation for a single CLI command already covered by a README section was judged disproportionate ceremony), reconfirmed independently at every downstream phase (VER-007, EVAL-F-006, `13-review/consolidated.md`'s deviation-(c) ruling and its own "Documentation and observability skip" section) rather than silently dropped. Accounted for, not missing evidence. The absence of prose user documentation for `init`'s flags, exit codes, and report vocabulary is carried as residual risk below.
 
 ## Observability
-TBD
+`12-observability` is `pending`, marked `optional: true`. `.ai/repository.yml`'s four `observability.*` capabilities are independently confirmed `NOT_APPLICABLE` (no deployed service; `soft-foundry` is a locally-invoked CLI that fails loudly with a non-zero exit code). `13-review/operations.md` independently reviewed the code-level observability that does apply (exit-code contract, idempotence, partial-write diagnosability, no credential logging, sanitized diagnostics) and found it conforms. Correctly scoped out, not a gap.
 
 ## Review findings
-TBD
+`13-review` is complete with **no blocking findings**. Eleven findings (REV-001..REV-011), all informational/minor/low/medium, none requiring return to `remediate`. Review independently re-derived (not merely restated) the functional, architectural, security, accessibility, and operational conformance, adjudicated all three implementation deviations as "approved with rationale" or "accepted, superseded by scope decision" (none rejected), and adjudicated both unresolved attack findings as acceptable residual risk. Review also surfaced and got fixed, within its own phase's write boundary discipline, a harness bug (the lifecycle-optionality gate check) without touching `APP`/`TESTS`/`INFRA` or any other phase's evidence — the fix is disclosed in `consolidated.md`'s "Harness fix applied after this review completed" section and does not invalidate any commit-bound evidence (confirmed independently above and in `evidence.yml`).
 
 ## Residual risk
-TBD
+See `residual-risk.md` for the full table. In summary: two disclosed, non-blocking attack findings (ATTACK-F-N01 medium, ATTACK-F-N02 low); one unresolved threat-model mitigation gap (MIT-008, `--root` under `--allow-non-git` not realpath-verified against `/`/`$HOME`); one unresolved streaming/size-bound gap (MIT-014); thin automated-test coverage on the `updated` status upgrade path; no `init --help`/per-command help; generic (non-path-specific-until-summary) conflict guidance text; a raw Ruby `SyntaxError` instead of a version-guard message for source/bundler users below the Ruby 3.2 floor; no user-facing prose documentation beyond a README pointer, by deliberate scope decision; and a structural governance gap (no skill currently owns write permission for `.ai/templates/repository.yml` or the self-hosted `AGENTS.md` markers, both required for this change to be dogfoodable).
+
+## Reasoning
+Every required gate ran to completion and passed at a commit whose evidence is current for the judged commit (6bd80f6): intake, discovery, specification (17/17 locked), threat model (mitigations mapped, one residual accepted as designed), plan, implementation, verification (4 runs), evaluation (4 runs), attack (2 passes, final zero violations), remediation (2 runs, both fully accounted for with before/after evidence archived under `previous/`, nothing deleted), and review (complete, no blocking findings). Documentation and observability are `pending` by an explicit, independently-reconfirmed scope decision rather than missing work, and the workflow now models that skip the same way it already models the remediation loop.
+
+Nothing in the record meets the bar for `BLOCKED` (no unresolved finding threatens correctness, security, or the change's own acceptance criteria) or `REJECTED` (the specification is sound, the implementation satisfies it, and the two adversarial passes drove the critical/major security findings to zero, with only narrow, well-understood, disclosed residuals remaining). `APPROVED` outright is not appropriate either: there are real, identified, non-trivial residual risks — a medium-severity detection-blinding gap (ATTACK-F-N01), a known unresolved root-symlink mitigation gap (MIT-008), and a total absence of user-facing prose documentation for a security-sensitive, filesystem-writing command — that a maintainer merging this change should consciously accept rather than have judgment silently absorb. **APPROVED_WITH_RESIDUAL_RISK** is the outcome that matches the evidence: complete, passing, current, with disclosed and bounded residual risk carried forward explicitly rather than hidden.

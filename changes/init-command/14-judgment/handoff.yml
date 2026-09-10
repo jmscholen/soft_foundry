@@ -1,16 +1,28 @@
 # Phase handoff. One per phase directory. The gate checker validates this file.
 phase: 14-judgment
 skill: final-judgment
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete            # pending | in_progress | complete | blocked
+commit_sha: 6bd80f6c419e0a877366a37447f85dc71dd86a30
+started_at: '2026-09-10T03:15:00Z'
+completed_at: '2026-09-10T03:36:41Z'
 resolved_model:
   profile: judgment_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}
+  provider: anthropic
+  model: claude-sonnet-5
+outputs:
+  - final.md
+  - residual-risk.md
+  - evidence.yml
+blocking: []
+findings:
+  - id: JUDGE-001
+    severity: info
+    summary: "Outcome APPROVED_WITH_RESIDUAL_RISK. All required gates complete and current for the judged commit (6bd80f6): intake, discovery, specification (17/17 locked), threat model, plan, implementation, verification (4 runs, final 147fca6), evaluation (4 runs, final a7b9df1), attack (2 passes, final c60aa7f, zero blocking violations), remediation (2 runs, both fully archived under previous/, nothing deleted), review (complete, no blocking findings). Documentation/FAQ-index/observability are pending by deliberate, disclosed maintainer scope decision, now modeled as optional: true in .ai/workflow.yml -- accounted for, not missing evidence."
+  - id: JUDGE-002
+    severity: info
+    summary: "Evidence currency independently reconfirmed by this judgment (not accepted on prior phases' word alone): git diff --stat against 6bd80f6 restricted to lib/exe/test/soft_foundry.gemspec is empty for every commit-bound phase's recorded commit_sha (147fca6 verification, a7b9df1 evaluation, c60aa7f attack, eaaf2e1 review). The only non-empty diff in the eaaf2e1..6bd80f6 range touches .ai/workflow.yml (CONTROL_PLANE, not APP/TESTS/INFRA), review's own prose describing that harness fix, and changes/init-command/metadata.yml."
+  - id: JUDGE-003
+    severity: info
+    summary: "Nine residual-risk items carried into evidence.yml/residual-risk.md and explicitly weighed rather than silently absorbed: ATTACK-F-N01 (medium), ATTACK-F-N02 (low), MIT-008, MIT-014, thin updated-status test coverage, no init --help, generic conflict guidance, raw Ruby 2.7 SyntaxError, absent user-facing prose documentation (accepted scope decision), plus a structural governance gap over two self-referential packaged files (.ai/templates/repository.yml, AGENTS.md markers)."
 next: learn
-notes: ""
+notes: "Compatibility mode: performed by a fresh-context agent isolated from implementation and remediation, under final-judgment permissions."
