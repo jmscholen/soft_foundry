@@ -37,12 +37,15 @@ lifecycle:
   - id: document
     skill: product-documentation
     output: 10-user-documentation
+    optional: true        # applicability depends on the change: user-facing behavior, a searchable FAQ, or a deployed service with new failure modes
   - id: index
     skill: faq-indexing
     output: 11-faq-index
+    optional: true        # applicability depends on the change: user-facing behavior, a searchable FAQ, or a deployed service with new failure modes
   - id: observe
     skill: observability
     output: 12-observability
+    optional: true        # applicability depends on the change: user-facing behavior, a searchable FAQ, or a deployed service with new failure modes
   - id: review
     skill: review
     output: 13-review

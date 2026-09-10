@@ -1,16 +1,56 @@
 # Phase handoff. One per phase directory. The gate checker validates this file.
 phase: 13-review
 skill: review
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete            # pending | in_progress | complete | blocked
+commit_sha: eaaf2e121add3c016b4a658408202fdef3206de2
+started_at: '2026-09-10T03:25:07Z'
+completed_at: '2026-09-10T03:29:18Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}
+  provider: anthropic
+  model: claude-sonnet-5
+outputs:
+  - functional.md
+  - architecture.md
+  - security.md
+  - accessibility.md
+  - infrastructure.md
+  - operations.md
+  - consolidated.md
+blocking: []
+findings:
+  - id: REV-001
+    severity: info
+    summary: "doctor/check use unicode checkmarks outside init's scope; REQ-014 is scoped to init only and not violated, but noted as a stylistic inconsistency."
+  - id: REV-002
+    severity: info
+    summary: acceptance-criteria.yml's verified_by fields remain empty even though 06-verification externally built the criterion-to-test mapping; a traceability convenience gap outside review's write set.
+  - id: REV-003
+    severity: info
+    summary: "guard_path! does not re-verify root's own ancestry between resolve_root and plan/apply; not exploitable within the documented threat model (requires filesystem access outside the repository)."
+  - id: REV-004
+    severity: minor
+    summary: "Independently reconfirmed MIT-008: CLI#resolve_root's --allow-non-git branch returns candidate without a File.realpath call, so a --root symlinked to / or $HOME is not realpath-verified."
+  - id: REV-005
+    severity: medium
+    summary: "Independently confirmed ATTACK-F-N01 (check.rb:32-49): repository.yml redirect-to-nothing for APP/TESTS/INFRA is undetected when the target has no files under the corresponding default globs. Ruled acceptable residual risk, not blocking; CONTROL_PLANE/HARNESS_EVALS remain unconditionally protected."
+  - id: REV-006
+    severity: low
+    summary: "Independently confirmed ATTACK-F-N02 (installer.rb:71-77): plan.clean requires the entire plan, not just .ai/-kind actions, clean; routes genuine internal defects to target-side reporting on non-empty repositories. Ruled acceptable residual risk, not blocking; fails in the safe direction only."
+  - id: REV-007
+    severity: info
+    summary: "Deviation (a) .ai/templates/repository.yml write: approved with rationale. Byte-diff-confirmed near-identical copy of the pre-discovery unassessed .ai/repository.yml, structurally required by Installer::Source::REQUIRED for REQ-003/REQ-015/AC-010/AC-017. Recommend a governance amendment (repository-discovery's permissions.yml, or .ai/README.md's stated invariant) so future edits to this template do not repeat the deviation-and-review cycle; the write crossed an explicit deny_write on ${CONTROL_PLANE}, not merely an unlisted gap."
+  - id: REV-008
+    severity: info
+    summary: "Deviation (b) AGENTS.md begin/end markers: approved with rationale. git diff-confirmed exactly two lines added, zero content changed; required for Installer::Source#agents_interior to extract the canonical block this repository ships to every target. AGENTS.md is in no path group (unlisted gap, not an explicit deny). Recommend a narrow write lane for self-referential packaged files, same root cause as (a)."
+  - id: REV-009
+    severity: info
+    summary: "Deviation (c) README/user documentation for init: accepted, superseded by explicit scope decision, not an open deviation. 10-user-documentation and 11-faq-index remain pending by deliberate maintainer direction (disproportionate ceremony for a single CLI command already covered by a README section); confirmed README.md already points to the change record."
+  - id: REV-010
+    severity: info
+    summary: "12-observability pending is confirmed deliberate, not a gap: .ai/repository.yml's four observability.* capabilities are independently confirmed NOT_APPLICABLE (no deployed service)."
+  - id: REV-011
+    severity: info
+    summary: "Process note, not a finding about this change's quality: ruby -Ilib exe/soft-foundry gate review fails its 'predecessor complete' check because .ai/workflow.yml marks only remediate as optional: true, not document/index/observe, so review's lifecycle predecessor is 12-observability (pending), not 08-attack as the review task's premise assumed. Independently confirmed via ControlPlane#effective_predecessor and a direct invocation. This is a control-plane/workflow-definition question outside review's write permissions (${CONTROL_PLANE} denied); review cannot make this gate pass without editing another phase's evidence, which is prohibited. See consolidated.md Process note and this handoff's notes for the literal gate output."
 next: judge
-notes: ""
+notes: "Compatibility mode: performed by a fresh-context agent under review permissions. `ruby -Ilib exe/soft-foundry gate review` FAILS on the 'predecessor complete' check (12-observability is pending, not complete) for the structural reason recorded in REV-011 and consolidated.md's Process note -- not because of any defect found in this review's own artifacts (required files present, no placeholders, no blocking conditions, commit_sha valid). This phase's own required-files/placeholder/blocking/commit/completed_at checks all pass when evaluated in isolation. No finding in this review requires returning the change to remediation; see consolidated.md for the full disposition of the three implementation deviations and the two unresolved attack findings."
