@@ -88,6 +88,8 @@ module SoftFoundry
     end
 
     # Honors `after` overrides and skips optional phases that never ran.
+    # Honors `after` overrides, globally optional phases, and a change's own
+    # skipped_phases (each requiring a non-empty rationale).
     def predecessor_check(phase)
       skipped = Array(@record.metadata["skipped_phases"]).filter_map { |e| e["phase"] if e["rationale"].to_s.strip != "" }
       prev = @plane.effective_predecessor(phase, skip: ->(p) { skipped.include?(p.id) }) { |p| @record.phase_status(p) }

@@ -33,7 +33,7 @@ module SoftFoundry
       command = @argv.shift
       case command
       when "init" then init
-      when "onboard" then Onboarding.new(@root, out: @out, source: @source).run && 0
+      when "onboard" then onboard
       when "models" then models
       when "doctor" then doctor
       when "check" then check
@@ -65,12 +65,25 @@ module SoftFoundry
 
     def flag(name) = !!@argv.delete(name)
 
+    MATURITY_MODES = %w[scan deep off].freeze
+
+    def onboard
+      maturity = option("--maturity") || "scan"
+      reassess = flag("--reassess")
+      raise TargetError, "unknown --maturity mode '#{maturity}' (expected #{MATURITY_MODES.join(', ')})" unless MATURITY_MODES.include?(maturity)
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+      Onboarding.new(@root, out: @out, source: @source).run(maturity:, reassess:) && 0
+    end
+
     def init
       dry_run = flag("--dry-run")
       force = flag("--force")
       no_onboard = flag("--no-onboard")
       allow_non_git = flag("--allow-non-git")
       root_given = option("--root")
+      maturity = option("--maturity") || "scan"
+      reassess = flag("--reassess")
+      raise TargetError, "unknown --maturity mode '#{maturity}' (expected #{MATURITY_MODES.join(', ')})" unless MATURITY_MODES.include?(maturity)
       raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
 
       root = resolve_root(root_given, allow_non_git)
@@ -98,7 +111,12 @@ module SoftFoundry
           @out.puts "check: failed, resolve the conflicts above and rerun"
           errors.each { |f| @out.puts "  #{f.message}" }
         end
-        Onboarding.new(root, out: @out).run(providers_only: true) unless no_onboard
+        # Maturity assessment is independent of --no-onboard: --no-onboard
+        # only opts out of provider discovery (a network operation), and
+        # scan mode is offline. --maturity=off is the way to skip it.
+        onboarding = Onboarding.new(root, out: @out)
+        onboarding.assess_maturity(mode: maturity, reassess:) unless maturity == "off"
+        onboarding.run(providers_only: true, maturity: "off") unless no_onboard
       end
 
       @out.puts "summary: #{plan.counts.map { |k, v| "#{k} #{v}" }.join(', ')}"
@@ -367,7 +385,9 @@ module SoftFoundry
         Usage:
           soft-foundry init [options]             install the control plane into this repository, then onboard
               --dry-run  --force  --no-onboard  --root PATH  --allow-non-git
-          soft-foundry onboard                    discover providers and repair agent adapters
+              --maturity scan|deep|off (default scan)  --reassess
+          soft-foundry onboard [options]           discover providers, repair agent adapters, assess maturity
+              --maturity scan|deep|off (default scan)  --reassess
           soft-foundry doctor                     validate repository bootstrap
           soft-foundry check                      lint the .ai/ control plane
           soft-foundry change new <slug>          create changes/<slug>/ from phase templates

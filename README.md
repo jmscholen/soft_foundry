@@ -45,6 +45,21 @@ Provider credentials are detected from the environment:
 
 The accessible model inventory is written to `.soft-foundry/runtime.yml`, which is machine-local and must remain gitignored. Credentials are never written to repository configuration.
 
+## Maturity assessment
+
+`init`/`onboard` evaluate the repository's engineering maturity against `.ai/maturity.yml` and write the result to `.ai/repository.yml`, once. A repository already assessed (`repository.assessed: true`) is skipped on later runs; pass `--reassess` to force a fresh assessment.
+
+```bash
+soft-foundry init --maturity=scan     # default: free, deterministic, offline
+soft-foundry init --maturity=deep     # shells into `claude` for real judgment; costs tokens/subscription usage
+soft-foundry init --maturity=off      # skip entirely
+soft-foundry onboard --maturity=scan --reassess
+```
+
+`scan` detects languages, frameworks, testing, and infrastructure from file presence alone (a `Gemfile` with `rails`, a `package.json` dependency, `*.tf` files, and so on) and scores only the maturity capabilities file presence can honestly answer — roughly levels 1 and 2. Everything it cannot determine is left `UNKNOWN`, never guessed, per `.ai/maturity.yml`'s own assessment rules. Levels 3 and above (specs, verification, adversarial testing, judgment gates) require proof that changes actually went through the lifecycle; no scan of an unstarted repository can manufacture that.
+
+`deep` shells into an installed `claude` CLI to run the real `repository-discovery` skill with actual judgment, reaching whatever level the repository has genuinely earned. It is best-effort: exact non-interactive behavior can vary by installed Claude Code version, so a failure is reported plainly rather than silently ignored, and it never blocks the rest of `init`/`onboard` from completing.
+
 ```bash
 soft-foundry models
 soft-foundry doctor

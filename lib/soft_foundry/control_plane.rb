@@ -95,6 +95,33 @@ module SoftFoundry
       Dir[File.join(dir, "profiles", "*.yml")].map { |f| load_yaml(f)["name"] }.compact
     end
 
+    def maturity_policy
+      @maturity_policy ||= load_yaml(File.join(dir, "maturity.yml"))
+    end
+
+    # Scores a capabilities hash (capability => {"status" => ...}) against
+    # .ai/maturity.yml's levels and scoring rule. Shared by every assessment
+    # mode (deterministic scan, agentic deep-assess, or hand-written) so the
+    # rule lives in exactly one place.
+    def score_maturity(capabilities)
+      policy = maturity_policy
+      satisfied = policy.dig("scoring", "satisfied_statuses") || []
+      levels = policy.fetch("levels", {}).sort_by { |num, _| num.to_i }
+      current = levels.first
+      gaps = []
+      levels.each do |num, level|
+        required = Array(level["requires"])
+        unmet = required.reject { |cap| satisfied.include?(capabilities.dig(cap, "status")) }
+        if unmet.empty?
+          current = [num, level]
+        else
+          gaps = unmet.map { |cap| { "level" => num.to_i, "capability" => cap, "status" => capabilities.dig(cap, "status") || "UNKNOWN" } }
+          break
+        end
+      end
+      { "current_level" => current[0].to_i, "current_id" => current[1]["id"], "gaps" => gaps }
+    end
+
     def protected_patterns
       policy = File.join(dir, "policies", "skill-permissions.yml")
       File.exist?(policy) ? Array(load_yaml(policy)["protected"]) : []
