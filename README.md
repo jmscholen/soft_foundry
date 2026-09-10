@@ -60,6 +60,8 @@ soft-foundry onboard --maturity=scan --reassess
 
 `deep` shells into an installed `claude` CLI to run the real `repository-discovery` skill with actual judgment, reaching whatever level the repository has genuinely earned. It is best-effort: exact non-interactive behavior can vary by installed Claude Code version, so a failure is reported plainly rather than silently ignored, and it never blocks the rest of `init`/`onboard` from completing.
 
+Every assessment — a fresh scan, a fresh deep run, or just showing an already-assessed repository's existing result — prints a summary (current level, what's blocking the next one, a count of other recorded deficiencies) and writes `.ai/maturity-report.md`: a persisted, human-readable rendering of the same capability findings that live in `.ai/repository.yml`, grouped into what blocks the next level versus everything else recorded. It regenerates only when the underlying assessment actually changes, so a repeated run leaves no diff.
+
 ```bash
 soft-foundry models
 soft-foundry doctor

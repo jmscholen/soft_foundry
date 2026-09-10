@@ -1,0 +1,28 @@
+---
+phase: 05-implementation
+skill: implementation
+status: complete
+commit_sha: 2e7e119666902009567813447a6f45f3d200d9d4
+started_at: ''
+completed_at: ''
+resolved_model:
+  profile: coding_high
+  provider: anthropic
+  model: claude-sonnet-5
+outputs:
+- log.md
+- decisions.md
+- deviations.md
+- lib/soft_foundry/maturity_report.rb
+- lib/soft_foundry/onboarding.rb
+- README.md
+- test/
+blocking: []
+findings:
+- id: IMPL-001
+  severity: info
+  summary: ASCII-8BIT vs UTF-8 String#== comparison gap defeated report idempotency;
+    fixed with .b, regression tested
+next: verify
+notes: Performed directly by the interactive session under a deliberately lighter-weight
+  process; see 00-intake/assumptions.md.

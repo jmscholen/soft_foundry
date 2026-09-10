@@ -11,7 +11,7 @@ class CLIInitTest < Minitest::Test
     with_target_repo do |dir|
       code, out = init(dir)
       assert_equal 0, code, out
-      installed = Dir.glob(".ai/**/*", File::FNM_DOTMATCH, base: dir).select { |p| File.file?(File.join(dir, p)) } - [".ai/manifest.yml"]
+      installed = Dir.glob(".ai/**/*", File::FNM_DOTMATCH, base: dir).select { |p| File.file?(File.join(dir, p)) } - [".ai/manifest.yml", ".ai/maturity-report.md"]
       assert_equal source.paths.select { |p| p.start_with?(".ai/") }.sort, installed.sort
       m = manifest(dir)
       installed.each { |p| assert m.owned?(p, File.binread(File.join(dir, p))), "#{p} not in manifest" unless p == ".ai/repository.yml" }
@@ -397,6 +397,49 @@ class CLIClosedChangeCiTest < Minitest::Test
       code, out = cli(dir, "ci")
       assert_equal 0, code, out
       assert_includes out, "old1 (closed, skipped)"
+    end
+  end
+end
+
+class CLIMaturityReportTest < Minitest::Test
+  include FoundryFixture
+
+  def test_scan_writes_a_readable_report_file
+    with_target_repo do |dir|
+      code, out = init(dir)
+      assert_equal 0, code, out
+      assert_includes out, "blocking the next level"
+      assert_includes out, ".ai/maturity-report.md"
+      report = File.read(File.join(dir, ".ai/maturity-report.md"))
+      assert_includes report, "# Maturity Report"
+      assert_includes report, "Level 0"
+    end
+  end
+
+  def test_unchanged_report_is_not_rewritten_on_a_repeated_run
+    # Regression: File.binread (ASCII-8BIT) and the rendered markdown
+    # (UTF-8) compared unequal via `==` despite byte-identical content,
+    # rewriting the file and its mtime on every run even with nothing new
+    # to report.
+    with_target_repo do |dir|
+      init(dir)
+      path = File.join(dir, ".ai/maturity-report.md")
+      before = File.mtime(path)
+      sleep 1
+      init(dir)
+      assert_equal before, File.mtime(path)
+    end
+  end
+
+  def test_already_assessed_run_regenerates_the_report_and_shows_the_summary
+    with_target_repo do |dir|
+      init(dir)
+      FileUtils.rm_f(File.join(dir, ".ai/maturity-report.md"))
+      code, out = init(dir)
+      assert_equal 0, code, out
+      assert_includes out, "already assessed"
+      assert_includes out, "level 0"
+      assert File.exist?(File.join(dir, ".ai/maturity-report.md")), "report should be regenerated even on the skip path"
     end
   end
 end
