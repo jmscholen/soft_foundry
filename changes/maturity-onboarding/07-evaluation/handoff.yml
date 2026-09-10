@@ -2,7 +2,7 @@
 phase: 07-evaluation
 skill: evaluation
 status: complete
-commit_sha: 142baec75fd21d3f0e1bed73d50bf18fddafe719
+commit_sha: b2f729d5a267e290d7bbf7607d84602d61fb244f
 started_at: '2026-09-10T15:34:36Z'
 completed_at: '2026-09-10T15:34:36Z'
 resolved_model:
