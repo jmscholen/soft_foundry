@@ -1,0 +1,50 @@
+---
+change:
+  id: self-update
+  title: Add soft-foundry update for the tool's own installed revision
+git:
+  worktree: "/Users/jscholen-iou/dev/soft_foundry"
+  branch: change/self-update
+type: feature
+risk: low
+status: ready_for_pr
+current_phase: done
+created_at: 2026-09-10 16:06:19.000000000 Z
+surfaces:
+  application: true
+  database: false
+  infrastructure: false
+  security: false
+  accessibility: false
+  observability: false
+skipped_phases:
+- phase: discover
+  rationale: Repository already discovered for prior changes at an identical layout;
+    no new technology introduced by this change itself.
+- phase: specify
+  rationale: Intake captures functional requirements at sufficient granularity for
+    a one-command CLI addition. See 00-intake/assumptions.md.
+- phase: threat_model
+  rationale: Check path is read-only against a public API; install path shells out
+    with a version string sourced from RubyGems' own response via argv, not user/repository
+    input, and only runs on explicit --yes. Same risk class as init-command's already-hardened
+    subprocess work (maturity-onboarding's deep mode).
+- phase: plan
+  rationale: 05-implementation/log.md is the plan record for a change this size.
+- phase: attack
+  rationale: Reasoned through directly rather than adversarially tested, given this
+    change's scope; recorded as a real limitation, not equivalent to attack coverage.
+- phase: remediate
+  rationale: No downstream phase flagged a failure; the one real bug (RubyGems unknown-sentinel
+    handling) was found via a live run and fixed inline, recorded in the implementation
+    log.
+- phase: review
+  rationale: No independent fresh-context reviewer was run, given this change's scope;
+    the pull request itself is the review point before merge.
+- phase: judge
+  rationale: An isolated, fresh-context judgment is the skill's explicit design; self-judgment
+    would not satisfy that. The maintainer's own merge decision is the real judgment
+    point.
+- phase: learn
+  rationale: Lessons are recorded directly in 05-implementation/log.md rather than
+    as separate formal learning artifacts, given the change's scope.

@@ -1,0 +1,34 @@
+commit_sha: 7072fde240846e81bcb4d59e4805fab85f4bf7b8
+journeys:
+  - id: EVAL-001
+    criteria: [update-check]
+    persona: repository maintainer
+    starting_state: soft_foundry 0.3.0 installed
+    steps: ["soft-foundry update"]
+    assertions: ["reports current and latest", "no gem install runs", "exit reflects whether the check itself succeeded"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-002
+    criteria: [update-yes-noop]
+    persona: repository maintainer
+    starting_state: soft_foundry 0.3.0 installed, nothing newer published
+    steps: ["soft-foundry update --yes"]
+    assertions: ["same honest report as without --yes", "installer never invoked"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-003
+    criteria: [update-available-requires-yes]
+    persona: repository maintainer
+    starting_state: injected fetcher reporting a newer version
+    steps: ["soft-foundry update (no --yes)"]
+    assertions: ["reports an update is available", "tells the operator to rerun with --yes", "installer never invoked"]
+    evidence: [test/cli_update_test.rb test_update_available_without_yes_only_reports]
+    result: pass
+  - id: EVAL-004
+    criteria: [update-yes-installs]
+    persona: repository maintainer
+    starting_state: injected fetcher reporting a newer version
+    steps: ["soft-foundry update --yes"]
+    assertions: ["installer invoked with the exact latest version", "success reported"]
+    evidence: [test/cli_update_test.rb test_yes_installs_when_update_available]
+    result: pass

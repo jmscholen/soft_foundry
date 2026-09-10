@@ -1,0 +1,5 @@
+commit_sha: 7072fde240846e81bcb4d59e4805fab85f4bf7b8
+artifacts:
+  - path: evidence/journey-transcript.log
+    journey: EVAL-001..002
+    sha256: b3d515ca5e528a832e626f39407066115b9d51b6b0ab4f221702579934f17588
