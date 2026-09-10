@@ -81,6 +81,15 @@ A gate passes only when the phase's required files exist with no `TBD` placehold
 
 `soft-foundry check` lints the control plane itself. `soft-foundry ci` runs the lint plus every change record's gates, and `soft-foundry hooks install` wires it into a pre-commit hook. The GitHub Actions workflow runs the same two commands.
 
+## Updating
+
+```bash
+soft-foundry update          # checks RubyGems, reports current vs. latest; writes nothing
+soft-foundry update --yes    # installs the newer version if one was found
+```
+
+This tool has no interactive prompts anywhere. `--yes` is the explicit second step that actually installs, the same way `--force` and `--dry-run` work elsewhere in this CLI: the plain command is always safe to run and never touches anything.
+
 ## Budget
 
 Model API usage can get expensive, especially across a long-running change with multiple phases. `.ai/policies/budget.yml` declares spend limits (`max_usd_per_change`, overridable by a change's declared `risk` level) and a threshold above which continuing is a financial commitment requiring human approval, per `.ai/policies/human-boundaries.yml`.

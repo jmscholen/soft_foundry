@@ -13,6 +13,7 @@ require_relative "errors"
 require_relative "installer"
 require_relative "provider"
 require_relative "budget"
+require_relative "updater"
 
 module SoftFoundry
   class CLI
@@ -21,12 +22,13 @@ module SoftFoundry
     EXIT_CONFLICTS = 3
     EXIT_INTERNAL = 4
 
-    def initialize(argv, out: $stdout, err: $stderr, root: Dir.pwd, source: nil)
+    def initialize(argv, out: $stdout, err: $stderr, root: Dir.pwd, source: nil, updater: nil)
       @argv = argv.dup
       @out = out
       @err = err
       @root = File.expand_path(root)
       @source = source
+      @updater = updater
     end
 
     def run
@@ -42,6 +44,7 @@ module SoftFoundry
       when "gate" then gate
       when "ci" then ci
       when "hooks" then hooks
+      when "update" then update
       when "shell"
         shell_name = @argv.shift or raise ArgumentError, "Usage: soft-foundry shell <claude|codex|grok> [args...]"
         Shell.launch(shell_name, @argv)
@@ -339,6 +342,39 @@ module SoftFoundry
       0
     end
 
+    def update
+      yes = flag("--yes")
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+
+      result = (@updater || Updater.new).check
+      if result.error
+        @out.puts "update: could not check for a new version (#{result.error})"
+        return EXIT_TARGET
+      end
+
+      @out.puts "current: #{result.current}"
+      @out.puts "latest:  #{result.latest}"
+      unless result.update_available
+        @out.puts "up to date"
+        return 0
+      end
+
+      unless yes
+        @out.puts "a newer version is available; rerun `soft-foundry update --yes` to install it"
+        return 0
+      end
+
+      @out.puts "installing #{result.latest}..."
+      install = (@updater || Updater.new).install!(result.latest)
+      @out.puts install.message
+      unless install.ok
+        @out.puts "update: install failed"
+        return EXIT_TARGET
+      end
+      @out.puts "updated to #{result.latest}"
+      0
+    end
+
     def print_result(result)
       @out.puts "#{result.phase.output}  #{result.status}  #{result.failed? ? 'FAIL' : (result.skipped? ? 'SKIP' : 'PASS')}"
       result.checks.each do |c|
@@ -402,6 +438,7 @@ module SoftFoundry
                                                   record a phase's spend into the change's ledger
           soft-foundry ci                         check + gate every change record (used by CI and pre-commit)
           soft-foundry hooks install              install the pre-commit hook
+          soft-foundry update [--yes]             check RubyGems for a newer release; --yes installs it
           soft-foundry models                     show locally accessible models
           soft-foundry shell claude|codex|grok    launch a coding shell in this repository
           soft-foundry version

@@ -1,0 +1,19 @@
+---
+phase: 00-intake
+skill: intake
+status: complete
+commit_sha: f823603797d0ad7dd620528f2e5122e46879b7a2
+started_at: '2026-09-10T16:09:22Z'
+completed_at: '2026-09-10T16:09:22Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-sonnet-5
+outputs:
+- request.md
+- assumptions.md
+blocking: []
+findings: []
+next: discover
+notes: Performed directly by the interactive session, not a fresh-context agent; see
+  assumptions.md.
