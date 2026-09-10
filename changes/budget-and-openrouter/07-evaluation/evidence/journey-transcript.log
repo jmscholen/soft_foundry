@@ -1,0 +1,10 @@
+Command sequence (Ruby 3.3.1, /tmp/sf-final-demo, fresh git repo):
+  soft-foundry init --no-onboard          -> 173 created, 0 conflicts, check: ok
+  soft-foundry change new demo            -> 16 phase directories, budget.yml scaffolded
+  soft-foundry budget status --change demo -> tokens 0/0, estimated spend: unknown, cap $50.00
+  soft-foundry budget record ... openrouter/meta-llama/llama-3.1-8b-instruct:free 2000in/500out $0.15  -> recorded
+  soft-foundry budget record ... anthropic/claude-sonnet-5 900000in/100000out $40.00                    -> recorded
+  soft-foundry budget status --change demo -> tokens 902000/100500, estimated spend: $40.15, cap $50.00, exit 0
+  soft-foundry doctor                      -> .ai/manifest.yml check present and passing
+Below-floor Ruby guard (Ruby 2.7.8 binary, this repo's working tree):
+  soft-foundry version -> "soft-foundry: requires Ruby >= 3.2 (running 2.7.8)...", exit 1, no raw SyntaxError

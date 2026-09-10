@@ -151,3 +151,39 @@ class GateRemediationTest < Minitest::Test
     end
   end
 end
+
+class GateSkippedPhasesTest < Minitest::Test
+  include FoundryFixture
+
+  def test_skipped_phase_with_rationale_lets_a_later_phase_resolve_its_predecessor
+    with_fixture_repo do |dir|
+      plane = SoftFoundry::ControlPlane.new(dir)
+      record = SoftFoundry::ChangeRecord.create(dir, "s1", control_plane: plane)
+      sha = head(dir)
+      complete_phase!(record, "intake", sha: sha)
+      m = YAML.safe_load_file(record.dir + "/metadata.yml", permitted_classes: [Time, Date])
+      m["skipped_phases"] = [{"phase" => "discover", "rationale" => "no new technology"}]
+      File.write(record.dir + "/metadata.yml", YAML.dump(m))
+      gate = SoftFoundry::Gate.new(record, git: SoftFoundry::Git.new(dir))
+      complete_phase!(record, "specify", sha: sha)
+      result = gate.evaluate("specify")
+      refute result.failed?, result.checks.map { |c| "#{c.name}: #{c.detail}" }.join("\n")
+      assert_includes result.checks.find { |c| c.name == "predecessor complete" }.detail, "00-intake"
+    end
+  end
+
+  def test_empty_rationale_does_not_count_as_a_skip
+    with_fixture_repo do |dir|
+      plane = SoftFoundry::ControlPlane.new(dir)
+      record = SoftFoundry::ChangeRecord.create(dir, "s2", control_plane: plane)
+      sha = head(dir)
+      complete_phase!(record, "intake", sha: sha)
+      m = YAML.safe_load_file(record.dir + "/metadata.yml", permitted_classes: [Time, Date])
+      m["skipped_phases"] = [{"phase" => "discover", "rationale" => "  "}]
+      File.write(record.dir + "/metadata.yml", YAML.dump(m))
+      gate = SoftFoundry::Gate.new(record, git: SoftFoundry::Git.new(dir))
+      complete_phase!(record, "specify", sha: sha)
+      assert gate.evaluate("specify").failed?, "an empty rationale must not skip discover"
+    end
+  end
+end

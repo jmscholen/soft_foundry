@@ -1,0 +1,25 @@
+---
+phase: 06-verification
+skill: verification
+status: complete
+commit_sha: 2afb194f62e2a7d5a1078f0466efa01a09840095
+started_at: '2026-09-10T13:53:38Z'
+completed_at: '2026-09-10T13:53:38Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-sonnet-5
+outputs:
+- results.md
+- tests.yml
+- evidence/manifest.yml
+- evidence/tests.log
+- evidence/check.log
+- evidence/syntax-warnings.log
+- evidence/e2e-smoke.log
+blocking: []
+findings: []
+next: evaluate
+notes: Performed directly by the interactive session, not a fresh-context agent; see
+  00-intake/assumptions.md. commit_sha bound in a follow-up commit once the real sha
+  exists.

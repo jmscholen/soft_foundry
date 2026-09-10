@@ -1,0 +1,62 @@
+---
+change:
+  id: budget-and-openrouter
+  title: Add a budget policy/ledger and OpenRouter provider support
+git:
+  worktree: "/Users/jscholen-iou/dev/soft_foundry"
+  branch: change/budget-and-openrouter
+type: feature
+risk: low
+status: ready_for_pr
+current_phase: done
+created_at: 2026-09-10 13:44:36.000000000 Z
+surfaces:
+  application: true
+  database: false
+  infrastructure: false
+  security: false
+  accessibility: false
+  observability: false
+skipped_phases:
+- phase: discover
+  rationale: Repository already discovered and assessed for init-command at a nearly
+    identical layout (lib/**, exe/**, test/**); no new technology, database, or infrastructure
+    introduced.
+- phase: specify
+  rationale: Intake captures functional requirements at sufficient granularity for
+    a change this size (two CLI subcommands, one new provider entry, three new data
+    files); formal acceptance-criteria locking is disproportionate. See 00-intake/assumptions.md.
+- phase: threat_model
+  rationale: 'No new write-into-arbitrary-target-repo surface: OpenRouter mirrors
+    three already-scrutinized read-only discovery providers, and the ledger writes
+    only inside the change record''s own directory in the operator''s own already-trusted
+    repo, using SafeWrite (init-command''s hardened primitive), not a fresh unaudited
+    write path.'
+- phase: plan
+  rationale: 05-implementation/log.md is the plan record for a change this small;
+    no migration, rollout, or rollback concerns beyond a normal gem release.
+- phase: attack
+  rationale: No filesystem-escape surface analogous to init's target-repo writes;
+    the one residual risk (a malicious symlink planted at changes/<slug>/budget.yml
+    by an already-merged hostile commit) is mitigated by reusing SafeWrite rather
+    than a fresh, unaudited write path. See 05-implementation/log.md.
+- phase: remediate
+  rationale: No downstream phase flagged a failure; two bugs found while implementing
+    (ci re-gating closed changes, exe/soft-foundry's raw SyntaxError on old Ruby)
+    were fixed inline and recorded in the implementation log rather than looped through
+    a separate remediation phase.
+- phase: review
+  rationale: No independent fresh-context reviewer was run, given the cost concern
+    motivating this change and its low risk; the pull request itself is the review
+    point before merge. This is recorded as a real limitation, not asserted as equivalent
+    to an independent review.
+- phase: judge
+  rationale: An isolated, fresh-context judgment is the skill's explicit design; self-judgment
+    by the same session that implemented the change would not satisfy that, so it
+    is skipped rather than faked. The maintainer's own merge decision on the pull
+    request is the real judgment point.
+- phase: learn
+  rationale: Lessons from this change (the ci/closed-change gate bug, the skipped_phases
+    mechanism itself, SafeWrite reuse) are recorded directly in 05-implementation/log.md
+    and in this conversation rather than as separate formal learning artifacts, given
+    the change's scope.

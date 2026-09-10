@@ -25,3 +25,18 @@ class ProviderTruncationTest < Minitest::Test
     assert_equal 203, SoftFoundry::Provider.sanitize(long).length
   end
 end
+
+class OpenRouterProviderTest < Minitest::Test
+  def test_openrouter_is_in_the_provider_list
+    provider = SoftFoundry::Providers.all.find { |p| p.name == "openrouter" }
+    refute_nil provider
+    assert_equal "OPENROUTER_API_KEY", provider.api_key_env
+    result = provider.discover(env: {})
+    refute result.configured
+  end
+
+  def test_openrouter_uses_default_bearer_auth
+    provider = SoftFoundry::Provider.new(name: "openrouter", api_key_env: "OPENROUTER_API_KEY", models_uri: "https://openrouter.ai/api/v1/models")
+    assert_equal({ "Authorization" => "Bearer xyz" }, provider.send(:authorization_headers, "xyz"))
+  end
+end

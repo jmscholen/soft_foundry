@@ -1,0 +1,32 @@
+commit_sha: 2afb194f62e2a7d5a1078f0466efa01a09840095
+checks:
+  - id: CHECK-001
+    kind: tests
+    command: "ruby -Ilib -Itest -e 'Dir[\"test/*_test.rb\"].each { |f| require \"./#{f}\" }'"
+    result: pass
+    evidence: evidence/tests.log
+    criteria: [budget-ledger, openrouter-provider, skipped-phases, ci-closed-change-skip]
+  - id: CHECK-002
+    kind: lint
+    command: "soft-foundry check"
+    result: pass
+    evidence: evidence/check.log
+    criteria: [control-plane-consistency]
+  - id: CHECK-003
+    kind: static_analysis
+    command: "ruby -wc on every lib/ file"
+    result: pass
+    evidence: evidence/syntax-warnings.log
+    criteria: [coding-standard]
+  - id: CHECK-004
+    kind: custom
+    command: "end-to-end install + budget record/status in a fresh scratch repo"
+    result: pass
+    evidence: evidence/e2e-smoke.log
+    criteria: [budget-ledger, openrouter-packaging]
+  - id: CHECK-005
+    kind: custom
+    command: "soft-foundry version under Ruby 2.7.8"
+    result: pass
+    evidence: evidence/e2e-smoke.log
+    criteria: [version-guard]

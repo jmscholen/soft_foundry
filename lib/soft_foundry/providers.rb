@@ -19,7 +19,10 @@ module SoftFoundry
             { "x-api-key" => key }
           end
         end,
-        Provider.new(name: "xai", api_key_env: "XAI_API_KEY", models_uri: "https://api.x.ai/v1/models")
+        Provider.new(name: "xai", api_key_env: "XAI_API_KEY", models_uri: "https://api.x.ai/v1/models"),
+        # OpenRouter proxies many providers behind one key and one OpenAI-compatible
+        # endpoint; the default Bearer-token auth already matches its API.
+        Provider.new(name: "openrouter", api_key_env: "OPENROUTER_API_KEY", models_uri: "https://openrouter.ai/api/v1/models")
       ]
     end
   end
