@@ -1,5 +1,14 @@
-commit_sha: TBD
+commit_sha: 142baec75fd21d3f0e1bed73d50bf18fddafe719
 artifacts:
-  - path: TBD
-    produced_by: TBD
-    sha256: TBD
+  - path: evidence/tests.log
+    produced_by: CHECK-001
+    sha256: af222d9c16d0dad5ef2ab177a9766e38e8b11d8f44446fc18650c7dc768e11a9
+  - path: evidence/check.log
+    produced_by: CHECK-002
+    sha256: 7fb203be27b9e9d051d76dd14fb551dac1b63b675b2af8aca6d63b06065ea0ce
+  - path: evidence/syntax-warnings.log
+    produced_by: CHECK-003
+    sha256: 1d7eaea51115c084506fce853318f2418e43508d65ee61c2a53cf1dab0657f25
+  - path: evidence/e2e-smoke.log
+    produced_by: CHECK-004
+    sha256: e81e842a3c85276320995cbb498b59b655cd3cd6c7015d44c8f2e9b7931c2d7b
