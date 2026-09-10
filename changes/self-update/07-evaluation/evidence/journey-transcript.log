@@ -1,0 +1,14 @@
+Real invocations against the installed gem (0.3.0) after rebuild, on
+this machine, real network call to https://rubygems.org (not mocked):
+
+  soft-foundry update
+    -> "update: could not check for a new version (soft_foundry is not
+        published to RubyGems yet)", exit 1
+    (This is honest and correct: soft_foundry has never been `gem push`ed.
+     Found live that RubyGems' latest.json returns HTTP 200 with a literal
+     {"version":"unknown"} body for this case, not a 404 as first assumed;
+     fixed to detect and report it distinctly, see 05-implementation/log.md.)
+
+  soft-foundry update --yes
+    -> same message, same exit 1; the installer was never invoked (no
+       version to install), confirmed no gem install subprocess ran.
