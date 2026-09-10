@@ -7,6 +7,7 @@ require_relative "installer"
 require_relative "control_plane"
 require_relative "maturity_scan"
 require_relative "maturity_deep_assess"
+require_relative "maturity_report"
 require_relative "errors"
 require_relative "safe_write"
 
@@ -43,18 +44,25 @@ module SoftFoundry
       repo_path = File.join(@root, ".ai", "repository.yml")
       already = File.exist?(repo_path) && (YAML.safe_load_file(repo_path, permitted_classes: [Time, Date])["repository"] || {})["assessed"]
       if already && !reassess
-        level = (YAML.safe_load_file(repo_path, permitted_classes: [Time, Date])["maturity"] || {})["current_id"]
-        @out.puts "maturity: already assessed (#{level || 'unknown level'}); skipping. Use --reassess to force."
+        @out.puts "maturity: already assessed (--reassess to force a fresh run); showing the existing report"
+        print_maturity_report(repo_path)
         return
       end
 
       case mode
       when "scan"
-        result = MaturityScan.new(@root, control_plane: plane).run!
-        @out.puts "maturity: scanned - level #{result['current_level']} (#{result['current_id']}), #{result['gaps'].size} gap(s) to the next level. Run with --maturity=deep for a judgment-based assessment."
+        MaturityScan.new(@root, control_plane: plane).run!
+        @out.puts "maturity: scanned"
+        print_maturity_report(repo_path)
+        @out.puts "  (run with --maturity=deep for a judgment-based assessment)"
       when "deep"
         result = MaturityDeepAssess.new(@root).run!
-        @out.puts "maturity: #{result.ok ? result.message : "deep assessment failed: #{result.message}"}"
+        if result.ok
+          @out.puts "maturity: deep assessment complete"
+          print_maturity_report(repo_path)
+        else
+          @out.puts "maturity: deep assessment failed: #{result.message}"
+        end
       else
         raise ArgumentError, "unknown --maturity mode '#{mode}' (expected scan, deep, or off)"
       end
@@ -63,6 +71,19 @@ module SoftFoundry
     end
 
     private
+
+    def print_maturity_report(repo_path)
+      report = MaturityReport.from_file(repo_path)
+      markdown = report.to_markdown
+      out_path = File.join(@root, ".ai", "maturity-report.md")
+      # Idempotent like every other managed file: only write when content
+      # actually changed, so an unchanged assessment leaves no diff and no
+      # mtime churn on a repeated run.
+      SafeWrite.write(out_path, markdown) unless File.file?(out_path) && File.binread(out_path).b == markdown.b
+      report.summary_lines.each { |l| @out.puts l }
+    rescue StandardError => e
+      @out.puts "maturity: could not generate the report (#{e.message})"
+    end
 
     def repair_adapters
       installer = Installer.new(@root, source: @source || Installer::Source.packaged)

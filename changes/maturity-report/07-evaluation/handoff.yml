@@ -1,0 +1,22 @@
+---
+phase: 07-evaluation
+skill: evaluation
+status: complete
+commit_sha: 9f994c0170ab66e81b2957d5d16b79f487a4f4d5
+started_at: '2026-09-10T16:39:00Z'
+completed_at: '2026-09-10T16:39:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-sonnet-5
+outputs:
+- evaluation-plan.md
+- journeys.yml
+- results.md
+- evidence/manifest.yml
+- evidence/journey-transcript.log
+blocking: []
+findings: []
+next: attack
+notes: Performed directly by the interactive session; see 00-intake/assumptions.md.
+  commit_sha bound in a follow-up commit once the real sha exists.

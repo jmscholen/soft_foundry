@@ -1,0 +1,26 @@
+commit_sha: 9f994c0170ab66e81b2957d5d16b79f487a4f4d5
+checks:
+  - id: CHECK-001
+    kind: tests
+    command: "ruby -Ilib -Itest -e 'Dir[\"test/*_test.rb\"].each { |f| require \"./#{f}\" }'"
+    result: pass
+    evidence: evidence/tests.log
+    criteria: [report-rendering, terminal-summary, idempotent-report-write]
+  - id: CHECK-002
+    kind: lint
+    command: "soft-foundry check"
+    result: pass
+    evidence: evidence/check.log
+    criteria: [control-plane-consistency]
+  - id: CHECK-003
+    kind: static_analysis
+    command: "ruby -wc on every lib/ file"
+    result: pass
+    evidence: evidence/syntax-warnings.log
+    criteria: [coding-standard]
+  - id: CHECK-004
+    kind: custom
+    command: "end-to-end scan then already-assessed-skip, mtime confirmed unchanged"
+    result: pass
+    evidence: evidence/e2e-smoke.log
+    criteria: [skip-path-shows-report, report-idempotency]

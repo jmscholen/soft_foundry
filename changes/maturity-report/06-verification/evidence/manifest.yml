@@ -1,0 +1,14 @@
+commit_sha: 9f994c0170ab66e81b2957d5d16b79f487a4f4d5
+artifacts:
+  - path: evidence/tests.log
+    produced_by: CHECK-001
+    sha256: 9f34a44ac6fe547c0250c990bf3412a0d92841455f2e7d0ddf4202ae8df4f0e8
+  - path: evidence/check.log
+    produced_by: CHECK-002
+    sha256: 7fb203be27b9e9d051d76dd14fb551dac1b63b675b2af8aca6d63b06065ea0ce
+  - path: evidence/syntax-warnings.log
+    produced_by: CHECK-003
+    sha256: f90d14b7b4420c97f6253cc8baa17cf540a02ebd82a4bc2d42d0e85943d2b987
+  - path: evidence/e2e-smoke.log
+    produced_by: CHECK-004
+    sha256: 0297320cbfdb7cee22e5dfceac191419f26fa5acfecfc0d8ccd312e1cb8232af
