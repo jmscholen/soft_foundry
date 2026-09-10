@@ -1,16 +1,24 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 06-verification
 skill: verification
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 9f994c0170ab66e81b2957d5d16b79f487a4f4d5
+started_at: '2026-09-10T16:39:00Z'
+completed_at: '2026-09-10T16:39:00Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}
+  provider: anthropic
+  model: claude-sonnet-5
+outputs:
+- results.md
+- tests.yml
+- evidence/manifest.yml
+- evidence/tests.log
+- evidence/check.log
+- evidence/syntax-warnings.log
+- evidence/e2e-smoke.log
+blocking: []
+findings: []
 next: evaluate
-notes: ""
+notes: Performed directly by the interactive session; see 00-intake/assumptions.md.
+  commit_sha bound in a follow-up commit once the real sha exists.

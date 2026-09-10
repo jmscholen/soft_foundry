@@ -1,0 +1,20 @@
+Real invocations, Ruby 3.3.1, /tmp scratch git repo with a Gemfile
+naming rails, lib/app.rb, no README/Rakefile/test dir:
+
+  soft-foundry init --no-onboard   (first run, fresh scan)
+    -> "maturity: scanned", "level 0 (unknown) - 7/9 capabilities satisfied",
+       "blocking the next level: - repository.execution_path_known (UNKNOWN)",
+       "1 other recorded deficiency ... see the report", "full report: .ai/maturity-report.md"
+    -> .ai/maturity-report.md written: "# Maturity Report" header, a
+       "## Blocking the next level" section with the UNKNOWN capability's
+       actual rationale text, a "## Other recorded deficiencies" section
+       with testing.strategy_detected's rationale.
+
+  soft-foundry init --no-onboard   (second run, already-assessed skip path)
+    -> "maturity: already assessed (--reassess to force a fresh run); showing
+       the existing report", followed by the SAME summary as the first run
+    -> .ai/maturity-report.md content byte-identical to the first run; its
+       mtime is UNCHANGED (confirmed via File.mtime comparison, not just a
+       content diff - this is the regression the ASCII-8BIT/UTF-8 bug
+       produced: content diff alone would have looked clean while mtime
+       still churned on every run).

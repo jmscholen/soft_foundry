@@ -1,12 +1,18 @@
-commit_sha: TBD
+commit_sha: 9f994c0170ab66e81b2957d5d16b79f487a4f4d5
 journeys:
   - id: EVAL-001
-    criteria: [AC-001]
-    persona: TBD
-    starting_state: TBD
-    steps:
-      - TBD
-    assertions:
-      - TBD
-    evidence: [evidence/TBD]
-    result: TBD   # pass | fail | blocked
+    criteria: [report-on-fresh-assessment]
+    persona: repository maintainer, first onboarding
+    starting_state: fresh scratch git repo
+    steps: ["soft-foundry init --no-onboard"]
+    assertions: ["terminal shows level, blocking gaps, deficiency count, report path", ".ai/maturity-report.md exists with real rationale text"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-002
+    criteria: [report-on-skip-path, report-idempotency]
+    persona: repository maintainer, re-running onboarding
+    starting_state: repo from EVAL-001, already assessed
+    steps: ["soft-foundry init --no-onboard"]
+    assertions: ["skip message shown", "same summary still prints (the case that motivated this change)", "report file byte-identical and mtime unchanged"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
