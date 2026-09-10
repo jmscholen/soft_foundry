@@ -1,16 +1,28 @@
 # Phase handoff. One per phase directory. The gate checker validates this file.
 phase: 15-learning
 skill: learning
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete            # pending | in_progress | complete | blocked
+commit_sha: 09c51a91e43abf4c03184a6e0723cd96c6eb8f3b           # HEAD of the worktree when this phase's outputs were produced
+started_at: '2026-09-10T03:43:00Z'
+completed_at: '2026-09-10T04:05:00Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
+  provider: anthropic
+  model: claude-sonnet-5
+outputs:
+  - findings.md
+  - proposed-rules.md
+  - proposed-evals.md
 blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}
+findings:
+  - id: LEARN-001
+    severity: info
+    summary: "Two mid-change harness fixes to the gate's predecessor/optionality logic (35ceb57, 52971d8) forced repeated evidence archival for a change record that shares its repository with the harness itself; a third harness fix (6bd80f6, control-plane-data-only) did not, because it touched no APP/TESTS/INFRA path. Generalized as: whether a mid-change harness fix forces re-verification is entirely a function of which path group it lands in."
+  - id: LEARN-002
+    severity: info
+    summary: "V1 (critical filesystem-escape via an unguarded temp-write sibling) survived threat modeling, implementation, four verification runs, and one evaluation run, and was found only by the dedicated attack phase. Raised as an open question for governance, not resolved here: should verification/review also be required to probe for this narrow, mechanical bug class rather than relying solely on attack. See proposed-evals.md eval 1."
+  - id: LEARN-003
+    severity: info
+    summary: "The V5 misclassification fix (broadening Installer#plan.clean to the entire plan) is safe in the direction of the original bug but creates a new, common-case correctness defect (ATTACK-F-N02 / NEW-004): a 'safe-direction' fix to a security-classification bug is not automatically low-risk if it silently widens scope past the property it was meant to gate. Generalized in findings.md as the 'clean-install classification trap.'"
 next: done
-notes: ""
+notes: "Compatibility mode: performed by an interactive agent under learning permissions, closing the init-command lifecycle. .ai/workflow.yml has no lifecycle entry after `learn` and no `transitions` entry for it, so `next: done` (there is no further phase to proceed to; per .ai/README.md's schema, this closes the change record). Did not read .ai/harness-evals/** per this skill's deny_read; proposed-evals.md was written from the description of harness-eval intent given in this phase's own task briefing (evals test whether the harness/agents obey permissions, preserve evidence, resist self-grading, and complete responsibilities) rather than from the existing eval suite's file contents or format, so its table format may not match the existing suite's schema and should be reconciled by whoever adopts these proposals. changes/init-command/metadata.yml already shows an uncommitted status/current_phase update to judged/learn from the judgment phase; this phase did not touch it, consistent with this skill's deny_write on ${CONTROL_PLANE} not covering changes/**, but metadata.yml is outside this phase's declared write set (changes/${CHANGE}/15-learning/**) so it was left as found."
