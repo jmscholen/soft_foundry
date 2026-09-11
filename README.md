@@ -83,6 +83,24 @@ A gate passes only when the phase's required files exist with no `TBD` placehold
 
 `soft-foundry check` lints the control plane itself. `soft-foundry ci` runs the lint plus every change record's gates, and `soft-foundry hooks install` wires it into a pre-commit hook. The GitHub Actions workflow runs the same two commands.
 
+### Closing a change record
+
+A merged change's record has to be marked `closed`, or `soft-foundry ci` fails once that record has actually reached judgment: an un-closed record stays "live" to the gate checker, so a later edit to a path group its evidence covers will read as making that evidence stale.
+
+```bash
+soft-foundry change close <slug>                    # refuses unless the judged commit is merged
+soft-foundry change close <slug> --force             # close anyway (e.g. a REJECTED change)
+```
+
+If judgment left an acceptance criterion `undischarged` pending a real-world event (production observation, etc.), `close` also refuses until a human confirms it — not a repository-derived fact, so not something an agent gets to assert on its own:
+
+```bash
+soft-foundry change request-discharge <slug> --pr <N>          # posts a PR comment naming what's outstanding
+# a human replies on the PR: CONFIRMED: AC-060, AC-061
+soft-foundry change close <slug> --pr <N>                       # reads that comment, discharges, then closes
+soft-foundry change close <slug> --confirm AC-060 --confirm AC-061   # or confirm directly, no PR comment needed
+```
+
 ## Updating
 
 ```bash

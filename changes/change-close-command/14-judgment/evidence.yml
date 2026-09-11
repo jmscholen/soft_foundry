@@ -1,0 +1,19 @@
+commit_judged: TBD
+phases:
+  - phase: 06-verification
+    commit_sha: TBD
+    current: TBD   # true when commit_sha matches the judged commit for all code paths
+    result: TBD
+  - phase: 07-evaluation
+    commit_sha: TBD
+    current: TBD
+    result: TBD
+  - phase: 08-attack
+    commit_sha: TBD
+    current: TBD
+    result: TBD
+  - phase: 13-review
+    commit_sha: TBD
+    current: TBD
+    result: TBD
+unresolved_findings: []

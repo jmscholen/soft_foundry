@@ -1,0 +1,133 @@
+$ git checkout -qb change/demo
+$ soft-foundry change new demo --title Demo change
+created changes/demo with 16 phase directories
+branch: change/demo
+(exit 0)
+
+# complete every required phase through judgment, with one undischarged acceptance criterion (AC-060)
+$ git add -A && git commit -q -m 'complete demo through judgment'
+$ git checkout -q main
+$ git merge -q --no-ff change/demo -m 'merge demo'
+
+== a maintainer runs ci after merging, forgetting to close the record ==
+$ soft-foundry ci
+✓ control plane: 16 phases, 16 skills, no errors
+
+change demo
+00-intake  complete  FAIL
+  ✓ handoff identity
+  ✓ required files present: request.md, assumptions.md, handoff.yml
+  ✗ no placeholders: TBD remains in: request.md, assumptions.md
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: cfbc890cc6c67001863429a7189022b348d564e2
+  ✓ completed_at recorded: 2026-09-11T00:00:00Z
+  ✓ predecessor complete: first phase
+01-discovery  complete  FAIL
+  ✓ handoff identity
+  ✓ required files present: repository-context.md, affected-components.md, dependencies.md, unknowns.md, handoff.yml
+  ✗ no placeholders: TBD remains in: repository-context.md, affected-components.md, dependencies.md, unknowns.md
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: cfbc890cc6c67001863429a7189022b348d564e2
+  ✓ completed_at recorded: 2026-09-11T00:00:00Z
+  ✓ predecessor complete: 00-intake
+02-specification  complete  FAIL
+  ✓ handoff identity
+  ✓ required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+  ✗ no placeholders: TBD remains in: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: cfbc890cc6c67001863429a7189022b348d564e2
+  ✓ completed_at recorded: 2026-09-11T00:00:00Z
+  ✓ predecessor complete: 01-discovery
+03-threat-model  complete  FAIL
+  ✓ handoff identity
+  ✓ required files present: attack-surface.md, trust-boundaries.md, threats.yml, mitigations.md, handoff.yml
+  ✗ no placeholders: TBD remains in: attack-surface.md, trust-boundaries.md, threats.yml, mitigations.md
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: cfbc890cc6c67001863429a7189022b348d564e2
+  ✓ completed_at recorded: 2026-09-11T00:00:00Z
+  ✓ predecessor complete: 02-specification
+04-plan  complete  FAIL
+  ✓ handoff identity
+  ✓ required files present: implementation.md, testing.md, rollout.md, rollback.md, handoff.yml
+  ✗ no placeholders: TBD remains in: implementation.md, testing.md, rollout.md, rollback.md
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: cfbc890cc6c67001863429a7189022b348d564e2
+  ✓ completed_at recorded: 2026-09-11T00:00:00Z
+  ✓ predecessor complete: 03-threat-model
+05-implementation  complete  FAIL
+  ✓ handoff identity
+  ✓ required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✗ no placeholders: TBD remains in: log.md, decisions.md, deviations.md
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: cfbc890cc6c67001863429a7189022b348d564e2
+  ✓ completed_at recorded: 2026-09-11T00:00:00Z
+  ✓ predecessor complete: 04-plan
+06-verification  complete  FAIL
+  ✓ handoff identity
+  ✓ required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✗ no placeholders: TBD remains in: results.md, tests.yml, evidence/manifest.yml
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: cfbc890cc6c67001863429a7189022b348d564e2
+  ✓ completed_at recorded: 2026-09-11T00:00:00Z
+  ✓ predecessor complete: 05-implementation
+  ✓ evidence current: no code changes since cfbc890cc6c6
+07-evaluation  complete  FAIL
+  ✓ handoff identity
+  ✓ required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✗ no placeholders: TBD remains in: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: cfbc890cc6c67001863429a7189022b348d564e2
+  ✓ completed_at recorded: 2026-09-11T00:00:00Z
+  ✓ predecessor complete: 06-verification
+  ✓ evidence current: no code changes since cfbc890cc6c6
+08-attack  complete  FAIL
+  ✓ handoff identity
+  ✓ required files present: attack-plan.md, cases.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✗ no placeholders: TBD remains in: attack-plan.md, cases.yml, results.md, evidence/manifest.yml
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: cfbc890cc6c67001863429a7189022b348d564e2
+  ✓ completed_at recorded: 2026-09-11T00:00:00Z
+  ✓ predecessor complete: 07-evaluation
+  ✓ evidence current: no code changes since cfbc890cc6c6
+13-review  complete  FAIL
+  ✓ handoff identity
+  ✓ required files present: functional.md, architecture.md, security.md, accessibility.md, infrastructure.md, operations.md, consolidated.md, handoff.yml
+  ✗ no placeholders: TBD remains in: functional.md, architecture.md, security.md, accessibility.md, infrastructure.md, operations.md, consolidated.md
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: cfbc890cc6c67001863429a7189022b348d564e2
+  ✓ completed_at recorded: 2026-09-11T00:00:00Z
+  ✓ predecessor complete: 08-attack
+  ✓ evidence current: no code changes since cfbc890cc6c6
+14-judgment  complete  FAIL
+  ✓ handoff identity
+  ✓ required files present: final.md, residual-risk.md, evidence.yml, handoff.yml
+  ✗ no placeholders: TBD remains in: final.md, residual-risk.md
+  ✓ no blocking conditions
+  ✓ commit_sha recorded: cfbc890cc6c67001863429a7189022b348d564e2
+  ✓ completed_at recorded: 2026-09-11T00:00:00Z
+  ✓ predecessor complete: 13-review
+  ✓ evidence current: no code changes since cfbc890cc6c6
+  ✗ merged into main but status is 'intake', not 'closed' — run `soft-foundry change close demo`
+
+✗ ci failed
+(exit 2)
+
+== they try to close it ==
+$ soft-foundry change close demo
+demo: cannot close - undischarged and unconfirmed: AC-060
+confirm with --confirm ID (repeatable) once a human has verified it, or --pr NUMBER if a human already replied "CONFIRMED: <id>" there
+(exit 1)
+
+== so they confirm the one thing judgment left undischarged ==
+$ soft-foundry change close demo --confirm AC-060
+demo: closed (discharged: AC-060)
+(exit 0)
+
+== ci is clean again ==
+$ soft-foundry ci
+✓ control plane: 16 phases, 16 skills, no errors
+
+change demo (closed, skipped)
+
+✓ ci passed
+(exit 0)

@@ -14,6 +14,7 @@ require_relative "installer"
 require_relative "provider"
 require_relative "budget"
 require_relative "updater"
+require_relative "pr_discharge"
 
 module SoftFoundry
   class CLI
@@ -22,13 +23,14 @@ module SoftFoundry
     EXIT_CONFLICTS = 3
     EXIT_INTERNAL = 4
 
-    def initialize(argv, out: $stdout, err: $stderr, root: Dir.pwd, source: nil, updater: nil)
+    def initialize(argv, out: $stdout, err: $stderr, root: Dir.pwd, source: nil, updater: nil, pr_discharge: nil)
       @argv = argv.dup
       @out = out
       @err = err
       @root = File.expand_path(root)
       @source = source
       @updater = updater
+      @pr_discharge = pr_discharge
     end
 
     def run
@@ -187,6 +189,13 @@ module SoftFoundry
       @argv.delete_at(index) or raise TargetError, "#{name} requires a value"
     end
 
+    # Every occurrence of a repeatable option, e.g. multiple --confirm ID.
+    def options(name)
+      values = []
+      values << option(name) while @argv.include?(name)
+      values
+    end
+
     def models
       path = File.join(@root, ".soft-foundry", "runtime.yml")
       raise "No local runtime inventory. Run `soft-foundry onboard` first." unless File.exist?(path)
@@ -243,10 +252,76 @@ module SoftFoundry
       when "list"
         list_changes.each { |slug| @out.puts slug }
         0
+      when "close"
+        change_close(@argv.shift)
+      when "request-discharge"
+        change_request_discharge(@argv.shift)
       else
-        @err.puts "Usage: soft-foundry change <new|status|list>"
+        @err.puts "Usage: soft-foundry change <new|status|list|close|request-discharge>"
         1
       end
+    end
+
+    # The mechanical half (branch merged, no undischarged condition left
+    # unconfirmed) of closing a change record's lifecycle. See
+    # .ai/skills/final-judgment/template/evidence.yml for `undischarged`.
+    def change_close(slug)
+      slug or raise ArgumentError, "Usage: soft-foundry change close <slug> [--pr NUMBER] [--confirm ID]... [--force]"
+      pr = option("--pr")
+      confirmed = options("--confirm")
+      force = flag("--force")
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+
+      record = load_record(slug)
+      if record.metadata["status"] == "closed"
+        @out.puts "#{slug}: already closed"
+        return 0
+      end
+
+      unless force
+        branch = git.repository? ? git.default_branch : nil
+        sha = record.commit_sha_at_judgment
+        if sha.nil?
+          @err.puts "#{slug}: has not reached judgment yet, so there is nothing to confirm as merged; pass --force to close anyway"
+          return EXIT_TARGET
+        end
+        unless branch && git.ancestor?(sha, branch)
+          @err.puts "#{slug}: judged commit #{sha} is not reachable from #{branch || 'the default branch'} yet; pass --force to close anyway"
+          return EXIT_TARGET
+        end
+      end
+
+      undischarged = record.undischarged_acceptance
+      confirmed += (@pr_discharge || PrDischarge.new(@root)).confirmed_ids(pr) if pr
+      missing = undischarged.reject { |item| confirmed.include?(item["id"]) }
+      unless missing.empty?
+        @err.puts "#{slug}: cannot close - undischarged and unconfirmed: #{missing.map { |m| m['id'] }.join(', ')}"
+        @err.puts "confirm with --confirm ID (repeatable) once a human has verified it, or --pr NUMBER if a human already replied \"CONFIRMED: <id>\" there"
+        return EXIT_TARGET
+      end
+
+      unless undischarged.empty?
+        record.discharge!(undischarged, confirmed_by: pr ? "PR ##{pr} comment" : "explicit --confirm")
+      end
+      record.close!
+      @out.puts "#{slug}: closed#{undischarged.empty? ? '' : " (discharged: #{undischarged.map { |i| i['id'] }.join(', ')})"}"
+      0
+    end
+
+    def change_request_discharge(slug)
+      slug or raise ArgumentError, "Usage: soft-foundry change request-discharge <slug> --pr NUMBER"
+      pr = option("--pr") or raise ArgumentError, "--pr is required"
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+
+      record = load_record(slug)
+      items = record.undischarged_acceptance
+      if items.empty?
+        @out.puts "#{slug}: nothing undischarged"
+        return 0
+      end
+      (@pr_discharge || PrDischarge.new(@root)).request(pr, items)
+      @out.puts "#{slug}: posted a discharge request to PR ##{pr} for #{items.map { |i| i['id'] }.join(', ')}"
+      0
     end
 
     def status(slug)
@@ -321,6 +396,7 @@ module SoftFoundry
 
     def ci
       code = check
+      default_branch = git.repository? ? git.default_branch : nil
       list_changes.each do |slug|
         record = load_record(slug)
         if record.metadata["status"] == "closed"
@@ -331,6 +407,11 @@ module SoftFoundry
         results = Gate.new(record, git: git).evaluate_all
         results.reject(&:skipped?).each { |r| print_result(r) }
         code = 2 if results.any?(&:failed?)
+        sha = record.commit_sha_at_judgment
+        if default_branch && sha && git.ancestor?(sha, default_branch)
+          @out.puts "  ✗ merged into #{default_branch} but status is '#{record.metadata['status']}', not 'closed' — run `soft-foundry change close #{slug}`"
+          code = 2
+        end
       end
       @out.puts(code.zero? ? "\n✓ ci passed" : "\n✗ ci failed")
       code
@@ -429,6 +510,13 @@ module SoftFoundry
           soft-foundry change new <slug>          create changes/<slug>/ from phase templates
           soft-foundry change status [slug]       show phase status and gate results
           soft-foundry change list                list change records
+          soft-foundry change close <slug> [--pr N] [--confirm ID]... [--force]
+                                                  mark a merged change's lifecycle closed; refuses if
+                                                  unmerged, or if an undischarged item lacks a --confirm ID
+                                                  or a PR comment reading "CONFIRMED: <id>"
+          soft-foundry change request-discharge <slug> --pr N
+                                                  post a PR comment asking a human to confirm each
+                                                  undischarged acceptance criterion
           soft-foundry gate <phase|all> [--change SLUG]
                                                   evaluate a phase's completion gate
           soft-foundry budget status [--change SLUG]
