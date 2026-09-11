@@ -1,0 +1,5 @@
+commit_sha: 9f6ecfc5ac2672a976475a56eca0f8a09ff68c19
+artifacts:
+  - path: evidence/journey-transcript.log
+    produced_by: "a scripted end-to-end run of soft-foundry ci / change close against a fresh scratch repo carrying this repository's real .ai/ control plane"
+    sha256: 9fb7cd456df67afc3e6bdd07d5469845e607caf103a4a4bce05a19895afb4157

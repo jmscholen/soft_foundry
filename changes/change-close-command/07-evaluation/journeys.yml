@@ -1,0 +1,33 @@
+commit_sha: 9f6ecfc5ac2672a976475a56eca0f8a09ff68c19
+journeys:
+  - id: EVAL-001
+    criteria: [ci-catches-a-merged-but-unclosed-record]
+    persona: maintainer who merged a change and forgot to close its record
+    starting_state: fresh scratch repo carrying this repo's real .ai/; a change record completed through judgment (one undischarged AC) and merged into main
+    steps: ["soft-foundry ci"]
+    assertions: ["exits non-zero", "names the record and the exact fix command"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-002
+    criteria: [close-refuses-an-unconfirmed-undischarged-item]
+    persona: same maintainer, trying to close without checking anything
+    starting_state: same repo, immediately after EVAL-001
+    steps: ["soft-foundry change close demo"]
+    assertions: ["exits non-zero", "names the specific undischarged id (AC-060)"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-003
+    criteria: [close-succeeds-once-confirmed]
+    persona: same maintainer, having actually checked AC-060
+    starting_state: same repo, immediately after EVAL-002
+    steps: ["soft-foundry change close demo --confirm AC-060"]
+    assertions: ["exits 0", "record shows discharged: AC-060", "status flips to closed"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-004
+    criteria: [ci-is-clean-after-closing]
+    starting_state: same repo, immediately after EVAL-003
+    steps: ["soft-foundry ci"]
+    assertions: ["exits 0", "record shows (closed, skipped)"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass

@@ -1,0 +1,26 @@
+commit_sha: 9f6ecfc5ac2672a976475a56eca0f8a09ff68c19
+checks:
+  - id: CHECK-001
+    kind: tests
+    command: "ruby -Ilib -Itest -e 'Dir[\"test/*_test.rb\"].each { |f| require \"./#{f}\" }'"
+    result: pass
+    evidence: evidence/tests.log
+    criteria: [default-branch-detection, ancestor-detection, judgment-gated-merge-check, discharge-lifecycle, cli-close-and-request-discharge]
+  - id: CHECK-002
+    kind: lint
+    command: "soft-foundry check"
+    result: pass
+    evidence: evidence/check.log
+    criteria: [control-plane-consistency]
+  - id: CHECK-003
+    kind: static_analysis
+    command: "ruby -wc on every lib/ file, exe/soft-foundry, and the new/changed test files"
+    result: pass
+    evidence: evidence/syntax-warnings.log
+    criteria: [coding-standard]
+  - id: CHECK-004
+    kind: custom
+    command: "soft-foundry ci against this repository's own real change-record history"
+    result: pass
+    evidence: evidence/ci-against-self.log
+    criteria: [no-false-positive-on-abandoned-changes, this-change-record-itself-passes]
