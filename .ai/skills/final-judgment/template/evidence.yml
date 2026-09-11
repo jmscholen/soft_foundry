@@ -17,3 +17,14 @@ phases:
     current: TBD
     result: TBD
 unresolved_findings: []
+# Acceptance criteria or judgment conditions left unsatisfied pending a
+# real-world event (production observation, etc.) rather than more
+# repository evidence, e.g.:
+#   - id: AC-060
+#     description: each fix observed corrected on production
+# `soft-foundry change close` refuses to close this change while any id
+# here lacks a human confirmation - via --confirm ID, or a PR comment
+# reading "CONFIRMED: <id>" (see `soft-foundry change request-discharge`)
+# - and then moves it into `discharged` with the confirmation source.
+undischarged: []
+discharged: []

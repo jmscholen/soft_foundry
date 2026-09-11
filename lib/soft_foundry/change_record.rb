@@ -40,6 +40,64 @@ module SoftFoundry
       handoff(phase)&.fetch("status", nil)
     end
 
+    # The commit_sha of the most-recently-completed phase, or nil if none
+    # has run.
+    def last_commit_sha
+      sha = nil
+      control_plane.phases.each do |phase|
+        h = handoff(phase)
+        sha = h["commit_sha"] if h && h["status"] == "complete" && h["commit_sha"]
+      end
+      sha
+    end
+
+    # The commit that represents this change's *finished* work, or nil if
+    # it never reached judgment. Deliberately not last_commit_sha: an
+    # early phase's commit_sha is just wherever the branch happened to
+    # fork from, which is almost always already an ancestor of the
+    # default branch - checking that would call every early, abandoned
+    # change "merged." Only once judgment (or learning) has completed
+    # does "this commit is an ancestor of main" actually mean "this
+    # change's work merged," which is what `ci` and `change close` need.
+    def commit_sha_at_judgment
+      %w[learn judge].each do |id|
+        phase = control_plane.phase(id)
+        h = phase && handoff(phase)
+        return h["commit_sha"] if h && h["status"] == "complete" && h["commit_sha"]
+      end
+      nil
+    end
+
+    def judgment_evidence_path = File.join(phase_dir(control_plane.phase("judge")), "evidence.yml")
+    def judgment_evidence = File.exist?(judgment_evidence_path) ? load(judgment_evidence_path) : {}
+
+    # Acceptance criteria or judgment conditions left unsatisfied pending a
+    # real-world event (production observation, etc.) rather than more
+    # repository evidence. See the final-judgment evidence.yml template.
+    def undischarged_acceptance = Array(judgment_evidence["undischarged"])
+
+    # Moves `items` from undischarged to discharged, recording who/what
+    # confirmed them. Never called with an item a human hasn't confirmed -
+    # see CLI `change close`.
+    def discharge!(items, confirmed_by:)
+      data = judgment_evidence
+      ids = items.map { |i| i["id"] }
+      data["undischarged"] = Array(data["undischarged"]).reject { |i| ids.include?(i["id"]) }
+      data["discharged"] = Array(data["discharged"]) + items.map { |i| i.merge("discharged_by" => confirmed_by) }
+      File.write(judgment_evidence_path, YAML.dump(data))
+    end
+
+    # The mechanical half of closing a change's lifecycle: record the PR has
+    # merged. Never call this if undischarged_acceptance is non-empty and
+    # unconfirmed - see CLI `change close`.
+    def close!
+      path = File.join(dir, "metadata.yml")
+      data = metadata
+      data["status"] = "closed"
+      data["current_phase"] = "done"
+      File.write(path, YAML.dump(data))
+    end
+
     private
 
     def scaffold(title:, branch:, worktree:, now:)
