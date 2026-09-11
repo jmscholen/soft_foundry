@@ -51,21 +51,35 @@ module SoftFoundry
       sha
     end
 
+    # True when every phase is either complete, or pending for a
+    # legitimate reason (globally optional, or explicitly named in this
+    # change's own skipped_phases with a non-empty rationale) - i.e.
+    # nothing required is just sitting unaddressed. Mirrors the same
+    # skip-aware logic Gate's predecessor_check already uses, because
+    # this repo's own real changes (self-update, maturity-report,
+    # observability-standard-dashboard, this one) routinely skip
+    # discover/specify/threat_model/plan/attack/review/judge/learn with
+    # rationale rather than completing them - "reached judgment" would
+    # wrongly refuse to close every one of them.
+    def reached_lifecycle_end?
+      skipped = Array(metadata["skipped_phases"]).filter_map { |e| e["phase"] if e["rationale"].to_s.strip != "" }
+      control_plane.phases.all? do |phase|
+        status = phase_status(phase)
+        status == "complete" || (status == "pending" && (phase.optional || skipped.include?(phase.id)))
+      end
+    end
+
     # The commit that represents this change's *finished* work, or nil if
-    # it never reached judgment. Deliberately not last_commit_sha: an
-    # early phase's commit_sha is just wherever the branch happened to
-    # fork from, which is almost always already an ancestor of the
-    # default branch - checking that would call every early, abandoned
-    # change "merged." Only once judgment (or learning) has completed
+    # it hasn't reached the end of its (possibly shortened) lifecycle yet.
+    # Deliberately not just last_commit_sha unconditioned: an early
+    # phase's commit_sha is just wherever the branch happened to fork
+    # from, which is almost always already an ancestor of the default
+    # branch - checking that unconditionally would call every early,
+    # abandoned change "merged." Only once reached_lifecycle_end? is true
     # does "this commit is an ancestor of main" actually mean "this
     # change's work merged," which is what `ci` and `change close` need.
-    def commit_sha_at_judgment
-      %w[learn judge].each do |id|
-        phase = control_plane.phase(id)
-        h = phase && handoff(phase)
-        return h["commit_sha"] if h && h["status"] == "complete" && h["commit_sha"]
-      end
-      nil
+    def finished_commit_sha
+      reached_lifecycle_end? ? last_commit_sha : nil
     end
 
     def judgment_evidence_path = File.join(phase_dir(control_plane.phase("judge")), "evidence.yml")
