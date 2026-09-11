@@ -5,13 +5,14 @@ require_relative "test_helper"
 class CLIChangeCloseTest < Minitest::Test
   include FoundryFixture
 
-  # Creates a change record on its own branch, completes intake and
-  # judgment with the given evidence (a change isn't "done" until it's
-  # been judged - completing only intake would leave commit_sha_at_judgment
-  # nil, and reaching for last_commit_sha there would just be checking
-  # whether the branch's fork point predates main, which it always does),
-  # and (optionally) merges the branch into main - the shape every test in
-  # this file starts from.
+  # Creates a change record on its own branch, completes every required
+  # phase through judgment with the given evidence (a change isn't
+  # "finished" until it reaches the end of its lifecycle - completing
+  # only intake would leave finished_commit_sha nil, and reaching for
+  # last_commit_sha there would just be checking whether the branch's
+  # fork point predates main, which it always does), and (optionally)
+  # merges the branch into main - the shape every test in this file
+  # starts from.
   def with_merged_change(slug, evidence: nil, merge: true)
     with_fixture_repo do |dir|
       sh(dir, "git", "checkout", "-qb", "change/#{slug}")
@@ -19,13 +20,13 @@ class CLIChangeCloseTest < Minitest::Test
       record = SoftFoundry::ChangeRecord.new(dir, slug, control_plane: SoftFoundry::ControlPlane.new(dir))
       commit_all(dir, "record #{slug}")
       sha = head(dir)
-      # Every required (non-optional) phase up to and including judgment,
-      # so predecessor checks in the gate chain are satisfied too.
-      %w[intake discover specify threat_model plan implement verify evaluate attack review judge].each do |id|
+      # Every required (non-optional) phase, end to end, so predecessor
+      # checks in the gate chain and reached_lifecycle_end? are satisfied.
+      %w[intake discover specify threat_model plan implement verify evaluate attack review judge learn].each do |id|
         complete_phase!(record, id, sha: sha)
       end
       File.write(record.judgment_evidence_path, YAML.dump(evidence)) if evidence
-      commit_all(dir, "complete #{slug} through judgment")
+      commit_all(dir, "complete #{slug} end to end")
       if merge
         sh(dir, "git", "checkout", "-q", "main")
         sh(dir, "git", "merge", "-q", "--no-ff", "change/#{slug}", "-m", "merge #{slug}")
@@ -35,10 +36,12 @@ class CLIChangeCloseTest < Minitest::Test
   end
 
   # An early, abandoned change whose only completed phase is intake never
-  # reached judgment - its intake commit is trivially an ancestor of main
-  # (branches fork from main), which must not read as "this change's work
-  # merged." Regression for a real false positive this check produced
-  # against soft_foundry's own changes/upstream-failure-reporting.
+  # reached the end of its lifecycle (nothing beyond intake is complete,
+  # optional, or explicitly skipped-with-rationale) - its intake commit
+  # is trivially an ancestor of main (branches fork from main), which
+  # must not read as "this change's work merged." Regression for a real
+  # false positive this check produced against soft_foundry's own
+  # changes/upstream-failure-reporting.
   def test_ci_does_not_flag_an_early_abandoned_change_as_merged
     with_fixture_repo do |dir|
       sh(dir, "git", "checkout", "-qb", "change/stalled")
@@ -50,10 +53,45 @@ class CLIChangeCloseTest < Minitest::Test
       sh(dir, "git", "checkout", "-q", "main")
       sh(dir, "git", "merge", "-q", "--no-ff", "change/stalled", "-m", "merge stalled up to intake")
 
-      assert_nil record.commit_sha_at_judgment
+      refute record.reached_lifecycle_end?
+      assert_nil record.finished_commit_sha
       code, out = cli(dir, "ci")
       assert_equal 0, code, out
       refute_includes out, "merged into main"
+    end
+  end
+
+  # This repo's own real, lightweight changes (self-update, maturity-report,
+  # observability-standard-dashboard, change-close-command itself) routinely
+  # skip discover/specify/threat_model/plan/attack/review/judge/learn with a
+  # recorded rationale rather than completing them - the maintainer's own
+  # merge decision stands in for judgment. finished_commit_sha must treat
+  # that as "reached the end of its lifecycle" too, using the last phase
+  # that actually did complete (here, evaluate). Regression: an earlier
+  # build of this check required the literal judge/learn phase to be
+  # complete, which refused to close every change of this exact shape -
+  # including, on first real use, change-close-command's own record.
+  def test_close_succeeds_for_a_lightweight_change_that_skips_to_the_maintainers_merge
+    with_fixture_repo do |dir|
+      sh(dir, "git", "checkout", "-qb", "change/lite1")
+      cli(dir, "change", "new", "lite1", "--title", "x")
+      record = SoftFoundry::ChangeRecord.new(dir, "lite1", control_plane: SoftFoundry::ControlPlane.new(dir))
+      commit_all(dir, "record lite1")
+      sha = head(dir)
+      %w[intake implement verify evaluate].each { |id| complete_phase!(record, id, sha: sha) }
+      skipped = %w[discover specify threat_model plan attack review judge learn].map { |p| {"phase" => p, "rationale" => "maintainer's merge is the judgment point"} }
+      m = YAML.safe_load_file(record.dir + "/metadata.yml", permitted_classes: [Time, Date])
+      m["skipped_phases"] = skipped
+      File.write(record.dir + "/metadata.yml", YAML.dump(m))
+      commit_all(dir, "complete lite1 through evaluation, skip the rest")
+
+      sh(dir, "git", "checkout", "-q", "main")
+      sh(dir, "git", "merge", "-q", "--no-ff", "change/lite1", "-m", "merge lite1")
+
+      assert record.reached_lifecycle_end?
+      code, out = cli(dir, "change", "close", "lite1")
+      assert_equal 0, code, out
+      assert_equal "closed", record.metadata["status"]
     end
   end
 

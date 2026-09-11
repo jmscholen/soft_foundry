@@ -280,13 +280,13 @@ module SoftFoundry
 
       unless force
         branch = git.repository? ? git.default_branch : nil
-        sha = record.commit_sha_at_judgment
+        sha = record.finished_commit_sha
         if sha.nil?
-          @err.puts "#{slug}: has not reached judgment yet, so there is nothing to confirm as merged; pass --force to close anyway"
+          @err.puts "#{slug}: has not reached the end of its lifecycle yet (a required phase is still pending and not skipped-with-rationale), so there is nothing to confirm as merged; pass --force to close anyway"
           return EXIT_TARGET
         end
         unless branch && git.ancestor?(sha, branch)
-          @err.puts "#{slug}: judged commit #{sha} is not reachable from #{branch || 'the default branch'} yet; pass --force to close anyway"
+          @err.puts "#{slug}: finished commit #{sha} is not reachable from #{branch || 'the default branch'} yet; pass --force to close anyway"
           return EXIT_TARGET
         end
       end
@@ -407,7 +407,7 @@ module SoftFoundry
         results = Gate.new(record, git: git).evaluate_all
         results.reject(&:skipped?).each { |r| print_result(r) }
         code = 2 if results.any?(&:failed?)
-        sha = record.commit_sha_at_judgment
+        sha = record.finished_commit_sha
         if default_branch && sha && git.ancestor?(sha, default_branch)
           @out.puts "  ✗ merged into #{default_branch} but status is '#{record.metadata['status']}', not 'closed' — run `soft-foundry change close #{slug}`"
           code = 2
