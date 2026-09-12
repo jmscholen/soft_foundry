@@ -54,6 +54,10 @@ module SoftFoundry
         # The shell is where model spend actually happens, so say how it is
         # paid for before handing the terminal over.
         billing_notice(shell: shell_name) if Shell::COMMANDS.key?(shell_name)
+        # Shell.launch exec()s, which discards anything still sitting in a
+        # buffered stdout, so the notice has to be pushed out first.
+        @out.flush
+        @err.flush
         (@shell || Shell.method(:launch)).call(shell_name, @argv)
         0
       when "version", "--version", "-v"

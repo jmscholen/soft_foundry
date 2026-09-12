@@ -203,6 +203,26 @@ class CLIBudgetBillingTest < Minitest::Test
     end
   end
 
+  # Found by the end-to-end evaluation: with a real, buffered stdout the
+  # notice was written but exec() replaced the process before it flushed.
+  def test_shell_notice_is_flushed_before_the_launcher_replaces_the_process
+    with_fixture_repo do |dir|
+      out = Class.new(StringIO) do
+        attr_reader :flushed_with
+        def flush
+          @flushed_with = string.dup
+          super
+        end
+      end.new
+      seen_at_launch = nil
+      fake = ->(_name, _args) { seen_at_launch = out.flushed_with }
+      code = nil
+      with_env(subscription_env) { code = SoftFoundry::CLI.new(%w[shell claude], out: out, err: StringIO.new, root: dir, shell: fake).run }
+      assert_equal 0, code
+      assert_includes seen_at_launch.to_s, "billing: subscription", "the notice must be flushed before launch, not after"
+    end
+  end
+
   def test_init_and_onboard_print_the_notice
     with_target_repo do |dir|
       code, out = init(dir, env: api_env)
