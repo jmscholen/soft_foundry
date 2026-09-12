@@ -1,0 +1,5 @@
+commit_sha: f47178af37dc4e7c9542cb4fe10b29c292029e5b
+artifacts:
+  - path: evidence/journey-transcript.log
+    produced_by: "a scripted end-to-end run of soft-foundry shell/change new/budget record/status/threshold against a fresh scratch repo carrying this repository's real .ai/ control plane, with a fake claude on PATH"
+    sha256: d9c1ce66ea4969d1d629732929542776f951b7f73dc9883a972645fd7c4bcbed

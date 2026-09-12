@@ -1,0 +1,131 @@
+
+### EVAL-001 subscription: shell claude with no key says no budget applies, then launches
+$ soft-foundry shell claude --resume
+billing: subscription (no ANTHROPIC_API_KEY in the environment, so claude bills to its own login); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+[fake claude launched with: --resume]
+exit=0
+
+### EVAL-001 subscription: an OpenAI key in the environment does not make claude metered
+$ OPENAI_API_KEY=k soft-foundry shell claude
+billing: subscription (no ANTHROPIC_API_KEY in the environment, so claude bills to its own login); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+[fake claude launched with: ]
+exit=0
+
+### EVAL-001 subscription: change new says no budget applies
+$ soft-foundry change new demo --title 'Demo: a title with a colon'
+created changes/demo with 16 phase directories
+branch: change/demo
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit=0
+
+### EVAL-005 the colon title round-trips through metadata.yml
+$ soft-foundry change status
+demo: Demo: a title with a colon  [status: intake, phase: intake, risk: TBD]
+exit=0
+
+### EVAL-001 subscription: a huge recorded spend is shown but never judged against a cap
+$ soft-foundry budget record ... --usd 999 && soft-foundry budget status
+recorded: 05-implementation anthropic/m 1in/1out $999.00
+exit=0
+change: demo  risk: unset
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment)
+tokens in/out: 1/1
+estimated spend: $999.00
+budget: not applicable on a subscription; the ledger above is kept for reference only (set SOFT_FOUNDRY_BILLING=api if usage here is actually metered)
+exit=0
+
+### EVAL-002 API key: shell claude announces the budget before launching
+$ ANTHROPIC_API_KEY=sk-test soft-foundry shell claude
+billing: API key (ANTHROPIC_API_KEY set, so usage is metered per token); the budget policy in .ai/policies/budget.yml applies
+budget:  cap $50.00 per change (risk: unset); human approval required above $20.00
+budget:  warns every $10.00 of recorded spend (next warning at $10.00)
+budget:  no change record for this branch yet; spend is tracked per change with `soft-foundry budget record`
+[fake claude launched with: ]
+exit=0
+
+### EVAL-002 API key: change new announces cap, approval line, interval
+$ soft-foundry change new metered --title 'Metered demo'
+created changes/metered with 16 phase directories
+branch: change/metered
+billing: API key (ANTHROPIC_API_KEY set, so usage is metered per token); the budget policy in .ai/policies/budget.yml applies
+budget:  cap $50.00 per change (risk: unset); human approval required above $20.00
+budget:  warns every $10.00 of recorded spend (next warning at $10.00)
+budget:  metered recorded so far: $0.00
+exit=0
+
+### EVAL-003 periodic warning: 4.00 then 5.50 (9.50 total) stays quiet
+$ budget record --usd 4 ; budget record --usd 5.50
+recorded: 05-implementation anthropic/m 1in/1out $4.00
+exit=0
+recorded: 05-implementation anthropic/m 1in/1out $5.50
+exit=0
+
+### EVAL-003 periodic warning: 0.85 more (10.35) crosses $10 and warns
+$ budget record --usd 0.85
+recorded: 05-implementation anthropic/m 1in/1out $0.85
+WARNING: recorded spend for metered has passed $10.00 (now $10.35 of the $150.00 cap); `soft-foundry budget threshold <usd|off>` adjusts how often this warns
+exit=0
+
+### EVAL-003 budget status shows the next warning boundary
+$ soft-foundry budget status
+change: metered  risk: high
+billing: api (ANTHROPIC_API_KEY set, so usage is metered per token)
+tokens in/out: 3/3
+estimated spend: $10.35
+cap (max_usd_per_change): $150.00
+requires human approval above: $50.00 (see .ai/policies/human-boundaries.yml)
+warns every $10.00 of recorded spend (next warning at $20.00)
+exit=0
+
+### EVAL-004 adjustable: threshold shows policy default, then set to 25
+$ budget threshold ; budget threshold 25
+warns every $10.00 of recorded spend (next warning at $10.00)
+source: .ai/policies/budget.yml
+exit=0
+warns every $25.00 of recorded spend (next warning at $25.00)
+source: .soft-foundry/budget.yml (machine-local, gitignored)
+exit=0
+
+### EVAL-004 adjustable: 12.00 more (22.35) no longer warns at 20; 3.00 more (25.35) warns at 25
+$ budget record --usd 12 ; budget record --usd 3
+recorded: 05-implementation anthropic/m 1in/1out $12.00
+exit=0
+recorded: 05-implementation anthropic/m 1in/1out $3.00
+WARNING: recorded spend for metered has passed $25.00 (now $25.35 of the $150.00 cap); `soft-foundry budget threshold <usd|off>` adjusts how often this warns
+exit=0
+
+### EVAL-004 adjustable: off silences the interval; the approval line at $50 still speaks
+$ budget threshold off ; budget record --usd 30
+periodic warnings: off (`soft-foundry budget threshold <usd>` turns them on)
+source: .soft-foundry/budget.yml (machine-local, gitignored)
+exit=0
+recorded: 05-implementation anthropic/m 1in/1out $30.00
+HUMAN APPROVAL REQUIRED: recorded spend $55.35 is above $50.00; continuing is a financial commitment under .ai/policies/human-boundaries.yml
+exit=0
+
+### EVAL-004 adjustable: default restores policy; the override file is gitignored
+$ budget threshold default ; git status --short
+warns every $10.00 of recorded spend (next warning at $10.00)
+source: .ai/policies/budget.yml
+exit=0
+0
+(.soft-foundry/ not shown by git status)
+
+### EVAL-002 over cap on record exits 2
+$ budget record --usd 100
+recorded: 05-implementation anthropic/m 1in/1out $100.00
+WARNING: recorded spend for metered has passed $150.00 (now $155.35 of the $150.00 cap); `soft-foundry budget threshold <usd|off>` adjusts how often this warns
+OVER CAP: this change's declared budget is a financial commitment under human-boundaries.yml; stop and get approval before continuing.
+exit=2
+
+### EVAL-006 override: SOFT_FOUNDRY_BILLING=subscription wins over the key
+$ SOFT_FOUNDRY_BILLING=subscription soft-foundry budget status
+change: metered  risk: high
+billing: subscription (SOFT_FOUNDRY_BILLING=subscription)
+tokens in/out: 7/7
+estimated spend: $155.35
+budget: not applicable on a subscription; the ledger above is kept for reference only (set SOFT_FOUNDRY_BILLING=api if usage here is actually metered)
+exit=0

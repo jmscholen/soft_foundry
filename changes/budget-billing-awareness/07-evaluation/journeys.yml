@@ -1,0 +1,46 @@
+commit_sha: f47178af37dc4e7c9542cb4fe10b29c292029e5b
+journeys:
+  - id: EVAL-001
+    criteria: [subscription-means-no-budget]
+    persona: maintainer on a Claude subscription, no API key exported
+    starting_state: fresh scratch repo carrying this repo's real .ai/; fake claude on PATH
+    steps: ["soft-foundry shell claude --resume", "OPENAI_API_KEY=k soft-foundry shell claude", "soft-foundry change new demo", "soft-foundry budget record --usd 999", "soft-foundry budget status"]
+    assertions: ["shell notice says subscription and no budget applies, then the fake claude launches with its args", "an OpenAI key does not make claude metered", "change new says no budget applies", "status shows $999.00 but says not applicable, exit 0, no OVER CAP"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-002
+    criteria: [api-key-applies-policy]
+    persona: same maintainer with ANTHROPIC_API_KEY exported
+    starting_state: same repo, new branch change/metered
+    steps: ["soft-foundry shell claude", "soft-foundry change new metered", "later: soft-foundry budget record --usd 100"]
+    assertions: ["shell notice names the key, the cap, the approval line, the interval, and launches", "change new prints cap/approval/interval/spend-so-far", "the entry that goes over cap is recorded, prints OVER CAP, exits 2"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-003
+    criteria: [periodic-warning-on-interval-crossing]
+    starting_state: change/metered at risk high, $0 recorded
+    steps: ["record 4.00", "record 5.50", "record 0.85", "budget status"]
+    assertions: ["quiet at 4.00 and 9.50", "one WARNING at 10.35 naming $10.00 and the $150.00 cap", "status shows next warning at $20.00"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-004
+    criteria: [threshold-adjustable-per-machine]
+    starting_state: change/metered at $10.35 recorded
+    steps: ["budget threshold", "budget threshold 25", "record 12.00", "record 3.00", "budget threshold off", "record 30.00", "budget threshold default", "git status --short"]
+    assertions: ["shows $10.00 from policy", "shows $25.00 from .soft-foundry/budget.yml", "no warning at 22.35, one at 25.35 naming $25.00", "off: no interval warning but HUMAN APPROVAL REQUIRED at 55.35 over $50.00", "default restores $10.00 from policy", "git status shows nothing under .soft-foundry/"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-005
+    criteria: [colon-title-round-trips]
+    starting_state: change/demo created with title "Demo: a title with a colon"
+    steps: ["soft-foundry change status"]
+    assertions: ["status line prints the full title; no YAML error"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-006
+    criteria: [override-wins]
+    starting_state: change/metered, ANTHROPIC_API_KEY exported
+    steps: ["SOFT_FOUNDRY_BILLING=subscription soft-foundry budget status"]
+    assertions: ["billing line reads subscription (SOFT_FOUNDRY_BILLING=subscription)", "not applicable, exit 0 despite the ledger being over cap"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
