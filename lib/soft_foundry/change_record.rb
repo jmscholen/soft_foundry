@@ -149,9 +149,26 @@ module SoftFoundry
       end
     end
 
+    # Every template is YAML, so a substituted value is emitted as a YAML
+    # scalar: plain when that round-trips, quoted otherwise (a title with
+    # ": " in it, for instance, would otherwise yield an unreadable file).
     def write_template(src, dst, vars)
-      body = File.read(src).gsub(/\$\{([A-Z_]+)\}/) { vars.fetch(Regexp.last_match(1)) { "${#{Regexp.last_match(1)}}" } }
+      body = File.read(src).gsub(/\$\{([A-Z_]+)\}/) do
+        name = Regexp.last_match(1)
+        vars.key?(name) ? yaml_scalar(vars[name]) : "${#{name}}"
+      end
       File.write(dst, body)
+    end
+
+    def yaml_scalar(value)
+      return "" if value.nil?
+      text = value.to_s
+      loaded = YAML.safe_load(text, permitted_classes: [Time, Date])
+      plain = (loaded == text || loaded.is_a?(Time) || loaded.is_a?(Date)) && !text.include?("\n") && !text.start_with?("#")
+      return text if plain
+      YAML.dump(text).sub(/\A--- ?/, "").chomp
+    rescue Psych::Exception
+      YAML.dump(text).sub(/\A--- ?/, "").chomp
     end
 
     def load(path)

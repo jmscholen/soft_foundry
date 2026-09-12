@@ -10,11 +10,24 @@ version: 1
 # Exceeding require_human_approval_above_usd is a financial commitment
 # under .ai/policies/human-boundaries.yml and requires explicit approval
 # before continuing, the same as any other financial commitment.
+#
+# This policy applies only when usage is metered: a provider API key (or
+# an equivalent such as Bedrock/Vertex) in the environment of whoever runs
+# the work. A coding shell logged in to a subscription plan is a flat fee
+# with nothing metered per token, so no budget applies there. Billing mode
+# is a fact about the machine, not the repository, so it is detected from
+# the environment at run time (SOFT_FOUNDRY_BILLING=api|subscription
+# overrides the detection) rather than declared here.
 
 defaults:
   max_usd_per_phase: 5.00
   max_usd_per_change: 50.00
   require_human_approval_above_usd: 20.00
+  # `soft-foundry budget record` prints a warning each time a change's
+  # recorded spend passes another multiple of this. A personal preference,
+  # so `soft-foundry budget threshold <usd|off|default>` overrides it per
+  # machine in the gitignored .soft-foundry/budget.yml.
+  warn_every_usd: 10.00
 
 # A change's declared risk (changes/<slug>/metadata.yml `risk:`) selects the
 # override, if any; defaults apply when risk is unset or unknown.

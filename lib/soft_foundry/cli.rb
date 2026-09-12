@@ -13,6 +13,7 @@ require_relative "errors"
 require_relative "installer"
 require_relative "provider"
 require_relative "budget"
+require_relative "billing"
 require_relative "updater"
 require_relative "pr_discharge"
 
@@ -23,7 +24,7 @@ module SoftFoundry
     EXIT_CONFLICTS = 3
     EXIT_INTERNAL = 4
 
-    def initialize(argv, out: $stdout, err: $stderr, root: Dir.pwd, source: nil, updater: nil, pr_discharge: nil)
+    def initialize(argv, out: $stdout, err: $stderr, root: Dir.pwd, source: nil, updater: nil, pr_discharge: nil, shell: nil)
       @argv = argv.dup
       @out = out
       @err = err
@@ -31,6 +32,7 @@ module SoftFoundry
       @source = source
       @updater = updater
       @pr_discharge = pr_discharge
+      @shell = shell
     end
 
     def run
@@ -49,7 +51,10 @@ module SoftFoundry
       when "update" then update
       when "shell"
         shell_name = @argv.shift or raise ArgumentError, "Usage: soft-foundry shell <claude|codex|grok> [args...]"
-        Shell.launch(shell_name, @argv)
+        # The shell is where model spend actually happens, so say how it is
+        # paid for before handing the terminal over.
+        billing_notice(shell: shell_name) if Shell::COMMANDS.key?(shell_name)
+        (@shell || Shell.method(:launch)).call(shell_name, @argv)
         0
       when "version", "--version", "-v"
         @out.puts SoftFoundry::VERSION
@@ -77,6 +82,7 @@ module SoftFoundry
       reassess = flag("--reassess")
       raise TargetError, "unknown --maturity mode '#{maturity}' (expected #{MATURITY_MODES.join(', ')})" unless MATURITY_MODES.include?(maturity)
       raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+      billing_notice(shell: maturity == "deep" ? "claude" : nil)
       Onboarding.new(@root, out: @out, source: @source).run(maturity:, reassess:) && 0
     end
 
@@ -120,6 +126,7 @@ module SoftFoundry
         # only opts out of provider discovery (a network operation), and
         # scan mode is offline. --maturity=off is the way to skip it.
         onboarding = Onboarding.new(root, out: @out)
+        billing_notice(shell: maturity == "deep" ? "claude" : nil, root: root)
         onboarding.assess_maturity(mode: maturity, reassess:) unless maturity == "off"
         onboarding.run(providers_only: true, maturity: "off") unless no_onboard
       end
@@ -246,6 +253,7 @@ module SoftFoundry
         record = ChangeRecord.create(@root, slug, control_plane: plane, title: title, branch: branch, worktree: @root)
         @out.puts "created #{relative(record.dir)} with #{plane.phases.size} phase directories"
         @out.puts "branch: #{branch || slug}"
+        billing_notice(record: record)
         0
       when "status"
         status(@argv.shift || current_slug)
@@ -338,22 +346,24 @@ module SoftFoundry
       case sub
       when "status" then budget_status
       when "record" then budget_record
+      when "threshold" then budget_threshold
       else
-        @err.puts "Usage: soft-foundry budget <status|record> [options]"
+        @err.puts "Usage: soft-foundry budget <status|record|threshold> [options]"
         1
       end
     end
 
     def budget_status
       slug = option("--change") || current_slug
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
       record = load_record(slug)
       b = Budget.new(record)
-      meta = record.metadata
-      risk = meta["risk"]
-      risk = nil if risk.nil? || risk == "TBD"
+      risk = declared_risk(record)
       policy = Budget.policy(plane, risk: risk)
+      mode = Billing.detect
       t = b.totals
       @out.puts "change: #{slug}  risk: #{risk || 'unset'}"
+      @out.puts "billing: #{mode.mode} (#{mode.reason})"
       @out.puts "tokens in/out: #{t.tokens_in}/#{t.tokens_out}"
       if t.estimated_usd
         @out.puts format("estimated spend: $%.2f", t.estimated_usd)
@@ -361,8 +371,13 @@ module SoftFoundry
         @out.puts "estimated spend: unknown (no priced entries recorded)"
       end
       @out.puts "entries missing cost: #{t.entries_missing_cost}" if t.entries_missing_cost.positive?
+      if mode.subscription?
+        @out.puts "budget: not applicable on a subscription; the ledger above is kept for reference only (set #{Billing::OVERRIDE_ENV}=api if usage here is actually metered)"
+        return 0
+      end
       @out.puts format("cap (max_usd_per_change): $%.2f", policy.max_usd_per_change) if policy.max_usd_per_change
       @out.puts format("requires human approval above: $%.2f (see .ai/policies/human-boundaries.yml)", policy.require_human_approval_above_usd) if policy.require_human_approval_above_usd
+      @out.puts threshold_line(Budget.warn_threshold(@root, policy), t.estimated_usd)
       if b.over_cap?(policy)
         @out.puts "OVER CAP: this change's declared budget is a financial commitment under human-boundaries.yml; stop and get approval before continuing."
         return 2
@@ -378,10 +393,113 @@ module SoftFoundry
       tokens_in = Integer(option("--tokens-in") || raise(ArgumentError, "--tokens-in is required"))
       tokens_out = Integer(option("--tokens-out") || raise(ArgumentError, "--tokens-out is required"))
       usd = option("--usd")
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
       record = load_record(slug)
-      Budget.new(record).record!(phase:, provider:, model:, tokens_in:, tokens_out:, estimated_usd: usd&.to_f)
+      b = Budget.new(record)
+      before = b.totals.estimated_usd
+      b.record!(phase:, provider:, model:, tokens_in:, tokens_out:, estimated_usd: usd&.to_f)
       @out.puts "recorded: #{phase} #{provider}/#{model} #{tokens_in}in/#{tokens_out}out#{usd ? format(' $%.2f', usd.to_f) : ''}"
+
+      # The ledger is the only thing that moves, so this is the one moment a
+      # periodic warning can fire: when this entry pushed the running total
+      # past another interval, the approval line, or the cap.
+      mode = Billing.detect
+      return 0 if mode.subscription?
+      after = b.totals.estimated_usd
+      policy = Budget.policy(plane, risk: declared_risk(record))
+      threshold = Budget.warn_threshold(@root, policy)
+      crossed = threshold.enabled? ? Budget.thresholds_crossed(before, after, threshold.usd) : []
+      unless crossed.empty?
+        cap = policy.max_usd_per_change ? format(" of the $%.2f cap", policy.max_usd_per_change) : ""
+        @out.puts format("WARNING: recorded spend for %s has passed $%.2f (now $%.2f%s); `soft-foundry budget threshold <usd|off>` adjusts how often this warns", slug, crossed.last, after, cap)
+      end
+      approval = policy.require_human_approval_above_usd
+      if approval && after && after > approval && (before.nil? || before <= approval)
+        @out.puts format("HUMAN APPROVAL REQUIRED: recorded spend $%.2f is above $%.2f; continuing is a financial commitment under .ai/policies/human-boundaries.yml", after, approval)
+      end
+      if b.over_cap?(policy)
+        @out.puts "OVER CAP: this change's declared budget is a financial commitment under human-boundaries.yml; stop and get approval before continuing."
+        return 2
+      end
       0
+    end
+
+    # Show or set the machine-local warning interval. `off` silences the
+    # periodic warning, `default` drops the local override so the policy's
+    # value applies again.
+    def budget_threshold
+      value = @argv.shift
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+      policy = Budget.policy(plane)
+      unless value.nil?
+        case value
+        when "off" then Budget.set_warn_threshold!(@root, 0)
+        when "default" then Budget.set_warn_threshold!(@root, nil)
+        else
+          usd = begin
+            Float(value)
+          rescue ArgumentError, TypeError
+            raise TargetError, "expected a dollar amount, `off`, or `default`; got '#{value}'"
+          end
+          raise TargetError, "the warning interval must be positive; use `off` to silence warnings" unless usd.positive?
+          Budget.set_warn_threshold!(@root, usd)
+        end
+      end
+      threshold = Budget.warn_threshold(@root, policy)
+      @out.puts threshold_line(threshold, nil)
+      @out.puts "source: #{threshold.source}#{threshold.source == Budget::LOCAL_SETTINGS ? ' (machine-local, gitignored)' : ''}"
+      0
+    end
+
+    def threshold_line(threshold, spent)
+      return "periodic warnings: off (`soft-foundry budget threshold <usd>` turns them on)" unless threshold.enabled?
+      nxt = Budget.next_threshold(spent, threshold.usd)
+      format("warns every $%.2f of recorded spend (next warning at $%.2f)", threshold.usd, nxt)
+    end
+
+    def declared_risk(record)
+      risk = record.metadata["risk"]
+      risk.nil? || risk == "TBD" ? nil : risk
+    end
+
+    # How model usage is paid for here and, only when it is metered, that
+    # the budget policy applies and where the current change stands. Printed
+    # wherever spend is about to start or a change begins. A subscription is
+    # a flat fee with nothing metered, so nothing budget-shaped applies.
+    def billing_notice(shell: nil, record: nil, root: @root)
+      mode = Billing.detect(shell: shell)
+      plane = root == @root ? self.plane : ControlPlane.new(root)
+      if mode.subscription?
+        @out.puts "billing: subscription (#{mode.reason}); no budget applies"
+        @out.puts "         set #{Billing::OVERRIDE_ENV}=api if usage here is actually metered"
+        return mode
+      end
+      @out.puts "billing: API key (#{mode.reason}); the budget policy in .ai/policies/budget.yml applies"
+      return mode unless plane.present?
+      record ||= begin
+        load_record(current_slug)
+      rescue StandardError
+        nil
+      end
+      risk = record && declared_risk(record)
+      policy = Budget.policy(plane, risk: risk)
+      threshold = Budget.warn_threshold(root, policy)
+      cap = policy.max_usd_per_change ? format("cap $%.2f per change (risk: %s)", policy.max_usd_per_change, risk || "unset") : "no per-change cap"
+      approval = policy.require_human_approval_above_usd ? format("; human approval required above $%.2f", policy.require_human_approval_above_usd) : ""
+      @out.puts "budget:  #{cap}#{approval}"
+      spent = record && Budget.new(record).totals.estimated_usd
+      @out.puts "budget:  #{threshold_line(threshold, spent)}"
+      if record
+        @out.puts format("budget:  %s recorded so far: $%.2f", record.slug, spent || 0.0)
+      else
+        @out.puts "budget:  no change record for this branch yet; spend is tracked per change with `soft-foundry budget record`"
+      end
+      mode
+    rescue Error
+      raise
+    rescue StandardError => e
+      @out.puts "budget:  could not read the budget policy (#{e.message})"
+      mode
     end
 
     def gate
@@ -520,10 +638,14 @@ module SoftFoundry
           soft-foundry gate <phase|all> [--change SLUG]
                                                   evaluate a phase's completion gate
           soft-foundry budget status [--change SLUG]
-                                                  compare recorded spend against .ai/policies/budget.yml
+                                                  show billing mode and compare recorded spend against
+                                                  .ai/policies/budget.yml (no budget on a subscription)
           soft-foundry budget record --phase P --provider NAME --model NAME
                                      --tokens-in N --tokens-out N [--usd X] [--change SLUG]
-                                                  record a phase's spend into the change's ledger
+                                                  record a phase's spend into the change's ledger; warns
+                                                  each time the total passes another warning interval
+          soft-foundry budget threshold [USD|off|default]
+                                                  show or set how often recorded spend warns (machine-local)
           soft-foundry ci                         check + gate every change record (used by CI and pre-commit)
           soft-foundry hooks install              install the pre-commit hook
           soft-foundry update [--yes]             check RubyGems for a newer release; --yes installs it
