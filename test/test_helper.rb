@@ -17,8 +17,7 @@ module FoundryFixture
       File.write(File.join(dir, "lib", "app.rb"), "puts 1\n")
       File.write(File.join(dir, "AGENTS.md"), "# agents\n")
       sh(dir, "git", "init", "-q", "-b", "main")
-      sh(dir, "git", "config", "user.email", "test@example.com")
-      sh(dir, "git", "config", "user.name", "Test")
+      configure_git(dir)
       sh(dir, "git", "add", ".")
       sh(dir, "git", "commit", "-q", "-m", "initial")
       yield dir
@@ -32,13 +31,23 @@ module FoundryFixture
       File.write(File.join(dir, "lib", "app.rb"), "puts 1\n")
       if git
         sh(dir, "git", "init", "-q", "-b", "main")
-        sh(dir, "git", "config", "user.email", "test@example.com")
-        sh(dir, "git", "config", "user.name", "Test")
+        configure_git(dir)
         sh(dir, "git", "add", ".")
         sh(dir, "git", "commit", "-q", "-m", "initial")
       end
       yield File.realpath(dir)
     end
+  end
+
+  # Identity for commits, and no automatic gc: a detached background gc
+  # can still be writing .git/objects/maintenance.lock while mktmpdir is
+  # deleting the directory, which raised ENOENT at random on CI.
+  def configure_git(dir)
+    sh(dir, "git", "config", "user.email", "test@example.com")
+    sh(dir, "git", "config", "user.name", "Test")
+    sh(dir, "git", "config", "gc.auto", "0")
+    sh(dir, "git", "config", "gc.autoDetach", "false")
+    sh(dir, "git", "config", "maintenance.auto", "false")
   end
 
   def source = SoftFoundry::Installer::Source.new(REPO_ROOT)
