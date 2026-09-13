@@ -32,7 +32,7 @@ journeys:
     result: pass
   - id: EVAL-005
     criteria: [colon-title-round-trips]
-    starting_state: change/demo created with title "Demo: a title with a colon"
+    starting_state: 'change/demo created with title "Demo: a title with a colon"'
     steps: ["soft-foundry change status"]
     assertions: ["status line prints the full title; no YAML error"]
     evidence: [evidence/journey-transcript.log]
