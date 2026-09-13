@@ -1,14 +1,16 @@
+---
 change:
   id: budget-billing-awareness
-  title: 'Make the budget mechanism billing-aware: no budget on a subscription, notice plus periodic adjustable warnings on API-key spend'
+  title: 'Make the budget mechanism billing-aware: no budget on a subscription, notice
+    plus periodic adjustable warnings on API-key spend'
 git:
-  worktree: /Users/jscholen-iou/dev/soft_foundry
+  worktree: "/Users/jscholen-iou/dev/soft_foundry"
   branch: change/budget-billing-awareness
 type: feature
 risk: low
-status: ready_for_pr
+status: closed
 current_phase: done
-created_at: 2026-09-12T14:44:00Z
+created_at: 2026-09-12 14:44:00.000000000 Z
 surfaces:
   application: true
   database: false
@@ -16,10 +18,6 @@ surfaces:
   security: false
   accessibility: false
   observability: false
-
-# Phases the harness would otherwise require, deliberately not run for
-# this change, each with a non-empty rationale. An entry with an empty
-# rationale does not count as a skip - the phase stays required.
 skipped_phases:
 - phase: discover
   rationale: Repository already discovered for prior changes at an identical layout;
@@ -31,8 +29,8 @@ skipped_phases:
 - phase: threat_model
   rationale: No new external interaction. Billing detection only reads environment
     variable presence (never their values, which are never printed or written). The
-    one new write is a machine-local, gitignored .soft-foundry/budget.yml carrying a
-    single number, via the same SafeWrite path the runtime inventory already uses.
+    one new write is a machine-local, gitignored .soft-foundry/budget.yml carrying
+    a single number, via the same SafeWrite path the runtime inventory already uses.
 - phase: plan
   rationale: 05-implementation/log.md is the plan record for a change this size.
 - phase: attack
