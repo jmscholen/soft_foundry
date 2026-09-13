@@ -28,3 +28,4 @@ test/billing_test.rb: Syntax OK
 test/budget_test.rb: Syntax OK
 test/cli_budget_test.rb: Syntax OK
 test/change_record_test.rb: Syntax OK
+test/cli_init_test.rb: Syntax OK
