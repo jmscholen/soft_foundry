@@ -24,6 +24,7 @@ lib/soft_foundry/updater.rb: Syntax OK
 lib/soft_foundry/version.rb: Syntax OK
 lib/soft_foundry/installer/source.rb: Syntax OK
 exe/soft-foundry: Syntax OK
+test/test_helper.rb: Syntax OK
 test/billing_test.rb: Syntax OK
 test/budget_test.rb: Syntax OK
 test/cli_budget_test.rb: Syntax OK

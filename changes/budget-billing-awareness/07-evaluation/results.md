@@ -1,6 +1,6 @@
 # Evaluation Results
 
-Commit SHA: c48e867d6c4060bcc039341ab1b2c92626268b6e
+Commit SHA: 7db258e3c55a1dd5a6b3a43d9e9738e119e7302b
 
 ## Journey outcomes
 | Journey | Criteria | Result | Evidence |
@@ -13,7 +13,7 @@ Commit SHA: c48e867d6c4060bcc039341ab1b2c92626268b6e
 | EVAL-006 | override-wins | pass | evidence/journey-transcript.log |
 
 ## Failures
-None at this commit. The first run of this same journey, against commit `e028173`, failed EVAL-001/EVAL-002's shell step: the fake `claude` launched with no notice above it, because `exec` replaced the process before Ruby's buffered stdout flushed (IMP-2 in 05-implementation/log.md). Fixed in `f47178a` and re-run. The transcript here is from a further re-run at `c48e867` after IMP-3, a test-only fix; the journey output is unchanged.
+None at this commit. The first run of this same journey, against commit `e028173`, failed EVAL-001/EVAL-002's shell step: the fake `claude` launched with no notice above it, because `exec` replaced the process before Ruby's buffered stdout flushed (IMP-2 in 05-implementation/log.md). Fixed in `f47178a` and re-run. The transcript here is from a further re-run at `c48e867` after IMP-3 and IMP-4, both test-only fixes; the journey output is unchanged.
 
 ## Accessibility observations
 N/A — non-interactive CLI, plain-text output.

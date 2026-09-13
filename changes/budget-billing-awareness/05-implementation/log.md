@@ -4,6 +4,7 @@
 1. `e028173` — Adds `SoftFoundry::Billing` (per-shell and generic detection over environment-variable presence, `SOFT_FOUNDRY_BILLING` override); extends `Budget` with `warn_every_usd` in the policy, a machine-local override (`.soft-foundry/budget.yml`, read/written through `SafeWrite`), and the interval math (`thresholds_crossed`, `next_threshold`); rewrites the CLI's `budget status`/`budget record` to be billing-aware, adds `budget threshold`, and prints a billing notice at `shell`, `init`/`onboard`, and `change new`; adds `warn_every_usd: 10.00` to `.ai/policies/budget.yml` with comments explaining when the policy applies; rewrites the README's Budget section; bumps the version to 0.6.0. Also fixes `change new` writing an unescaped title into `metadata.yml` (see below). Tests: `test/billing_test.rb`, `test/cli_budget_test.rb`, additions to `test/budget_test.rb` and `test/change_record_test.rb`.
 2. `f47178a` — Flushes stdout/stderr before the shell launcher runs (see IMP-2) with a regression test that observes the flush.
 3. `c48e867` — Pins an API key inside the pre-existing over-cap test (see IMP-3).
+4. `7db258e` — Disables automatic gc in throwaway fixture repos (see IMP-4).
 
 ## Decisions
 | Decision | Alternatives considered | Reason | Consequence |
@@ -20,6 +21,8 @@
 - **IMP-2** — The billing notice before `shell <name>` printed correctly in the unit tests (StringIO) but never appeared in the real CLI: `Shell.launch` uses `exec`, which replaced the process before Ruby's buffered stdout flushed. Found by the end-to-end evaluation transcript (the first run showed the fake `claude` launching with no notice above it). Fixed by flushing `@out`/`@err` before the launcher; the regression test uses an IO that records what had been flushed when the launcher ran, since a StringIO alone cannot see the difference.
 
 - **IMP-3** — The pre-existing `test_status_reports_over_cap_with_exit_2` inherited the host environment. It passed locally only because an Anthropic key happened to be exported on the maintainer's machine; the GitHub runner has no key, billing read as subscription, and the cap correctly did not apply, so the PR's first CI run failed. The test now pins `ANTHROPIC_API_KEY` and clears the override with `with_env`. Verification evidence is regenerated with every provider key unset to match CI.
+
+- **IMP-4** — Pre-existing and unrelated to this change, but it failed this PR's CI at random: `Dir.mktmpdir` raised `Errno::ENOENT` on `.git/objects/maintenance.lock` while deleting a fixture repo, because a `git commit` in the fixture had kicked off a detached background `gc --auto` that was still writing when the directory went away. The fixture helpers now set `gc.auto=0`, `gc.autoDetach=false`, and `maintenance.auto=false` on every throwaway repo.
 
 ## Lessons
 - A test double for stdout hides exactly the class of bug exec()-style handoffs produce. Any code path that ends in `exec` needs an end-to-end check with a real pipe, not only a StringIO.

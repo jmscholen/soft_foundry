@@ -1,7 +1,7 @@
 phase: 05-implementation
 skill: implementation
 status: complete
-commit_sha: c48e867d6c4060bcc039341ab1b2c92626268b6e
+commit_sha: 7db258e3c55a1dd5a6b3a43d9e9738e119e7302b
 started_at: '2026-09-12T14:50:00Z'
 completed_at: '2026-09-12T15:40:00Z'
 resolved_model:
@@ -24,6 +24,7 @@ outputs:
 - test/budget_test.rb
 - test/change_record_test.rb
 - test/cli_init_test.rb
+- test/test_helper.rb
 blocking: []
 findings:
 - id: IMP-1
@@ -35,5 +36,8 @@ findings:
 - id: IMP-3
   severity: low
   summary: "The pre-existing over-cap test inherited the host environment and passed locally only because a key was exported there; it failed on the GitHub runner. Now pins its own key."
+- id: IMP-4
+  severity: low
+  summary: "Pre-existing fixture race: a detached background git gc could still hold .git/objects/maintenance.lock while mktmpdir deleted the fixture, failing CI at random. Fixture repos now disable automatic gc."
 next: verify
 notes: Performed directly by the interactive session under the deliberately lighter-weight process used by prior small changes; see 00-intake/assumptions.md.
