@@ -1,12 +1,58 @@
-commit_sha: TBD
+commit_sha: 2c74a369fe3ab24c4da40242dff5e6624f7fd8ef
 journeys:
   - id: EVAL-001
-    criteria: [AC-001]
-    persona: TBD
-    starting_state: TBD
-    steps:
-      - TBD
-    assertions:
-      - TBD
-    evidence: [evidence/TBD]
-    result: TBD   # pass | fail | blocked
+    criteria: [REQ-A11Y-003, REQ-A11Y-005]
+    persona: developer in a Rails application repository
+    starting_state: scratch repo with this repo's real .ai/ and a repository.yml recording frameworks [rails]; branch change/checkout-form
+    steps: ["soft-foundry change new checkout-form", "grep accessibility: metadata.yml", "count comment lines in metadata.yml", "soft-foundry gate all --change checkout-form"]
+    assertions: ["metadata.yml line 17 reads accessibility: true with a comment naming rails and the standard", "the template's five comment lines survive the edit", "gate prints an advisory block with one accessibility line: the review has not run yet", "gate exit code 0"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-002
+    criteria: [REQ-A11Y-003, REQ-A11Y-005]
+    persona: same developer after a reviewer wrote Conformance N/A
+    starting_state: 13-review complete at HEAD with accessibility.md declaring N/A
+    steps: ["soft-foundry gate review --change checkout-form"]
+    assertions: ["advisory names 13-review/accessibility.md declaring conformance N/A although the change declares an accessibility surface", "exit code 0"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-003
+    criteria: [REQ-A11Y-003]
+    persona: same developer after a conforming review citing WCAG 2.2 3.3.2
+    starting_state: accessibility.md with scope, one finding, and Conformance conforms
+    steps: ["soft-foundry gate review --change checkout-form | grep -c advisory"]
+    assertions: ["no advisory block is printed (count 0; grep -c exits 1 on zero matches, which is the expected outcome)"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-004
+    criteria: [REQ-A11Y-003]
+    persona: maintainer of a library-shaped repository
+    starting_state: scratch repo with this repo's real .ai/ (frameworks []); branch change/tidy
+    steps: ["soft-foundry change new tidy", "grep accessibility: metadata.yml", "soft-foundry gate all --change tidy | grep -c advisory"]
+    assertions: ["flag stays false with the template's explanatory comment intact", "no advisory block for a fresh change (count 0)"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-005
+    criteria: [REQ-A11Y-004, REQ-A11Y-005]
+    persona: same maintainer waiving review and judge with a rationale
+    starting_state: metadata.yml skipped_phases naming review and judge with rationales
+    steps: ["soft-foundry gate all --change tidy", "soft-foundry change status", "commit; soft-foundry ci", "soft-foundry change close tidy --force", "grep status: metadata.yml"]
+    assertions: ["gate, status, and ci each print the same two-line advisory block quoting both rationales", "gate, status, and ci exit 0", "close prints the block one last time, then 'tidy: closed', exit 0", "metadata status is closed"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-006
+    criteria: [REQ-A11Y-001]
+    persona: screen-reader user or CI log reader
+    starting_state: the tidy repository after close
+    steps: ["soft-foundry doctor | strip non-ASCII", "soft-foundry check | strip non-ASCII", "soft-foundry gate all --change tidy | strip non-ASCII", "count ESC bytes and non-glyph non-ASCII characters across doctor/check/gate/status/ci"]
+    assertions: ["every doctor line still reads pass or fail plus the check name", "check still reads pass control plane", "every gate line still reads skip/pass plus the check name", "zero escape sequences; zero non-ASCII characters beyond the four decorative glyphs"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-007
+    criteria: [REQ-A11Y-002, REQ-A11Y-006, REQ-A11Y-007]
+    persona: operator of an installed control plane missing the standard
+    starting_state: .ai/rules/accessibility.md deleted from the tidy repository
+    steps: ["soft-foundry check", "soft-foundry onboard --maturity scan --reassess", "grep accessibility.standard_in_force .ai/repository.yml", "soft-foundry gate all --change tidy"]
+    assertions: ["check prints '! warning .ai/rules/accessibility.md is missing ... (advisory only)' and still passes, exit 0", "the scan records accessibility.standard_in_force UNKNOWN with a rationale naming the file", "gate adds a third advisory line: no accessibility standard is in force"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
