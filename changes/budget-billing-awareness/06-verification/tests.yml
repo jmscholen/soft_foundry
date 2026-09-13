@@ -1,0 +1,26 @@
+commit_sha: 7db258e3c55a1dd5a6b3a43d9e9738e119e7302b
+checks:
+  - id: CHECK-001
+    kind: tests
+    command: "ruby -Ilib -Itest -e 'Dir[\"test/*_test.rb\"].each { |f| require \"./#{f}\" }'"
+    result: pass
+    evidence: evidence/tests.log
+    criteria: [billing-detection-per-shell-and-generic, override-wins, subscription-means-no-budget, api-key-applies-policy, periodic-warning-on-interval-crossing, approval-and-cap-announced-on-record, threshold-show-set-off-default, notice-at-shell-init-change-new, notice-flushed-before-exec, colon-title-round-trips]
+  - id: CHECK-002
+    kind: lint
+    command: "soft-foundry check"
+    result: pass
+    evidence: evidence/check.log
+    criteria: [control-plane-consistency]
+  - id: CHECK-003
+    kind: static_analysis
+    command: "ruby -wc on every lib/ file, exe/soft-foundry, and the new/changed test files"
+    result: pass
+    evidence: evidence/syntax-warnings.log
+    criteria: [coding-standard]
+  - id: CHECK-004
+    kind: custom
+    command: "soft-foundry ci against this repository's own real change-record history"
+    result: pass
+    evidence: evidence/ci-against-self.log
+    criteria: [this-change-record-itself-passes, no-regression-for-closed-records]

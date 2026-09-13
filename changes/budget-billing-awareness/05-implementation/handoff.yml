@@ -1,0 +1,43 @@
+phase: 05-implementation
+skill: implementation
+status: complete
+commit_sha: 7db258e3c55a1dd5a6b3a43d9e9738e119e7302b
+started_at: '2026-09-12T14:50:00Z'
+completed_at: '2026-09-12T15:40:00Z'
+resolved_model:
+  profile: coding_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- log.md
+- decisions.md
+- deviations.md
+- lib/soft_foundry/billing.rb
+- lib/soft_foundry/budget.rb
+- lib/soft_foundry/cli.rb
+- lib/soft_foundry/change_record.rb
+- lib/soft_foundry/version.rb
+- .ai/policies/budget.yml
+- README.md
+- test/billing_test.rb
+- test/cli_budget_test.rb
+- test/budget_test.rb
+- test/change_record_test.rb
+- test/cli_init_test.rb
+- test/test_helper.rb
+blocking: []
+findings:
+- id: IMP-1
+  severity: medium
+  summary: "change new wrote the title unescaped into metadata.yml; a title containing ': ' made the record unreadable to every later command. Fixed in ChangeRecord#write_template with a regression test."
+- id: IMP-2
+  severity: medium
+  summary: "The billing notice before `shell <name>` was lost because exec() replaced the process before a buffered stdout flushed; StringIO-based unit tests could not see it. Found by the evaluation transcript, fixed by flushing before launch, locked in with a flush-observing regression test."
+- id: IMP-3
+  severity: low
+  summary: "The pre-existing over-cap test inherited the host environment and passed locally only because a key was exported there; it failed on the GitHub runner. Now pins its own key."
+- id: IMP-4
+  severity: low
+  summary: "Pre-existing fixture race: a detached background git gc could still hold .git/objects/maintenance.lock while mktmpdir deleted the fixture, failing CI at random. Fixture repos now disable automatic gc."
+next: verify
+notes: Performed directly by the interactive session under the deliberately lighter-weight process used by prior small changes; see 00-intake/assumptions.md.

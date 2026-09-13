@@ -91,3 +91,19 @@ class ChangeRecordTest < Minitest::Test
     end
   end
 end
+
+class ChangeRecordTitleTest < Minitest::Test
+  include FoundryFixture
+
+  def test_a_title_with_a_colon_still_yields_readable_metadata
+    with_fixture_repo do |dir|
+      plane = SoftFoundry::ControlPlane.new(dir)
+      title = "Budget: no cap on a subscription, warnings on API-key spend"
+      record = SoftFoundry::ChangeRecord.create(dir, "colon", control_plane: plane, title: title, branch: "change/colon", worktree: dir)
+      meta = record.metadata
+      assert_equal title, meta.dig("change", "title")
+      assert_equal "change/colon", meta.dig("git", "branch")
+      assert_kind_of Time, meta["created_at"], "timestamps stay plain YAML timestamps"
+    end
+  end
+end

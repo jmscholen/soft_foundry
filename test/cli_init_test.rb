@@ -310,15 +310,19 @@ class CLIBudgetTest < Minitest::Test
     end
   end
 
+  # The cap only applies when usage is metered, so this pins an API key in
+  # the environment rather than inheriting whatever the host has exported.
   def test_status_reports_over_cap_with_exit_2
     with_fixture_repo do |dir|
-      cli(dir, "change", "new", "bud2", "--title", "x")
-      record = SoftFoundry::ChangeRecord.new(dir, "bud2", control_plane: SoftFoundry::ControlPlane.new(dir))
-      d = YAML.safe_load_file(File.join(record.dir, "metadata.yml"), permitted_classes: [Time, Date]); d["risk"] = "low"; File.write(File.join(record.dir, "metadata.yml"), YAML.dump(d))
-      cli(dir, "budget", "record", "--change", "bud2", "--phase", "05-implementation", "--provider", "anthropic", "--model", "m", "--tokens-in", "1", "--tokens-out", "1", "--usd", "20.00")
-      code, out = cli(dir, "budget", "status", "--change", "bud2")
-      assert_equal 2, code, out
-      assert_includes out, "OVER CAP"
+      with_env("ANTHROPIC_API_KEY" => "sk-test", "SOFT_FOUNDRY_BILLING" => nil) do
+        cli(dir, "change", "new", "bud2", "--title", "x")
+        record = SoftFoundry::ChangeRecord.new(dir, "bud2", control_plane: SoftFoundry::ControlPlane.new(dir))
+        d = YAML.safe_load_file(File.join(record.dir, "metadata.yml"), permitted_classes: [Time, Date]); d["risk"] = "low"; File.write(File.join(record.dir, "metadata.yml"), YAML.dump(d))
+        cli(dir, "budget", "record", "--change", "bud2", "--phase", "05-implementation", "--provider", "anthropic", "--model", "m", "--tokens-in", "1", "--tokens-out", "1", "--usd", "20.00")
+        code, out = cli(dir, "budget", "status", "--change", "bud2")
+        assert_equal 2, code, out
+        assert_includes out, "OVER CAP"
+      end
     end
   end
 end

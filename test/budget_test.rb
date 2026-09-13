@@ -52,3 +52,69 @@ class BudgetTest < Minitest::Test
     end
   end
 end
+
+class BudgetThresholdTest < Minitest::Test
+  include FoundryFixture
+
+  def test_policy_carries_the_warning_interval
+    with_fixture_repo do |dir|
+      plane = SoftFoundry::ControlPlane.new(dir)
+      assert_equal 10.00, SoftFoundry::Budget.policy(plane).warn_every_usd
+    end
+  end
+
+  def test_thresholds_crossed_lists_every_boundary_passed
+    b = SoftFoundry::Budget
+    assert_equal [], b.thresholds_crossed(nil, 9.99, 10.0)
+    assert_equal [10.0], b.thresholds_crossed(nil, 10.0, 10.0)
+    assert_equal [10.0], b.thresholds_crossed(9.5, 10.35, 10.0)
+    assert_equal [10.0, 20.0], b.thresholds_crossed(9.5, 21.0, 10.0)
+    assert_equal [], b.thresholds_crossed(10.0, 19.0, 10.0)
+    assert_equal [], b.thresholds_crossed(1.0, 2.0, 0)
+    assert_equal [], b.thresholds_crossed(1.0, nil, 10.0)
+    assert_equal [25.0], b.thresholds_crossed(20.0, 30.0, 25.0)
+  end
+
+  def test_next_threshold
+    b = SoftFoundry::Budget
+    assert_equal 10.0, b.next_threshold(nil, 10.0)
+    assert_equal 20.0, b.next_threshold(10.0, 10.0)
+    assert_equal 20.0, b.next_threshold(13.2, 10.0)
+    assert_nil b.next_threshold(13.2, 0)
+    assert_nil b.next_threshold(13.2, nil)
+  end
+
+  def test_local_override_beats_policy_and_zero_means_off
+    with_fixture_repo do |dir|
+      plane = SoftFoundry::ControlPlane.new(dir)
+      policy = SoftFoundry::Budget.policy(plane)
+      t = SoftFoundry::Budget.warn_threshold(dir, policy)
+      assert_equal 10.0, t.usd
+      assert t.enabled?
+      assert_equal ".ai/policies/budget.yml", t.source
+
+      SoftFoundry::Budget.set_warn_threshold!(dir, 25)
+      t = SoftFoundry::Budget.warn_threshold(dir, policy)
+      assert_equal 25.0, t.usd
+      assert_equal SoftFoundry::Budget::LOCAL_SETTINGS, t.source
+      assert File.file?(File.join(dir, ".soft-foundry", "budget.yml"))
+
+      SoftFoundry::Budget.set_warn_threshold!(dir, 0)
+      refute SoftFoundry::Budget.warn_threshold(dir, policy).enabled?
+
+      SoftFoundry::Budget.set_warn_threshold!(dir, nil)
+      t = SoftFoundry::Budget.warn_threshold(dir, policy)
+      assert_equal 10.0, t.usd
+      assert_equal ".ai/policies/budget.yml", t.source
+    end
+  end
+
+  def test_unreadable_local_settings_fall_back_to_policy
+    with_fixture_repo do |dir|
+      FileUtils.mkdir_p(File.join(dir, ".soft-foundry"))
+      File.write(File.join(dir, ".soft-foundry", "budget.yml"), "warn_every_usd: [oops\n")
+      policy = SoftFoundry::Budget.policy(SoftFoundry::ControlPlane.new(dir))
+      assert_equal 10.0, SoftFoundry::Budget.warn_threshold(dir, policy).usd
+    end
+  end
+end

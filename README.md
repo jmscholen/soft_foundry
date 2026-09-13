@@ -112,7 +112,25 @@ This tool has no interactive prompts anywhere. `--yes` is the explicit second st
 
 ## Budget
 
-Model API usage can get expensive, especially across a long-running change with multiple phases. `.ai/policies/budget.yml` declares spend limits (`max_usd_per_change`, overridable by a change's declared `risk` level) and a threshold above which continuing is a financial commitment requiring human approval, per `.ai/policies/human-boundaries.yml`.
+Model API usage can get expensive, especially across a long-running change with multiple phases. `.ai/policies/budget.yml` declares spend limits (`max_usd_per_change`, overridable by a change's declared `risk` level), a threshold above which continuing is a financial commitment requiring human approval per `.ai/policies/human-boundaries.yml`, and a warning interval (`warn_every_usd`, default $10).
+
+### Subscription or API key
+
+Whether any of that applies depends on how usage is paid for, which is a fact about the machine running the work, not the repository:
+
+- **Subscription.** A coding shell logged in to a Pro/Max/Team-style plan is a flat fee with nothing metered per token, so **no budget applies**. Soft Foundry says so and stays out of the way.
+- **API key.** A provider key in the environment (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `XAI_API_KEY`, `OPENROUTER_API_KEY`; for `claude` also `ANTHROPIC_AUTH_TOKEN`, `CLAUDE_CODE_USE_BEDROCK`, `CLAUDE_CODE_USE_VERTEX`) means usage is metered, so the budget policy applies.
+
+Billing mode is detected from the environment wherever spend is about to start or a change begins: `soft-foundry shell <name>` (looking only at the variables that shell itself reads, so an OpenAI key does not make `claude` "metered"), `init`/`onboard` (including a `--maturity=deep` run, which shells into `claude`), `change new`, and `budget status`. The notice names what was detected and why, and `SOFT_FOUNDRY_BILLING=api` or `SOFT_FOUNDRY_BILLING=subscription` overrides the detection when it is wrong for your setup (a key exported for some other tool, say).
+
+```
+billing: API key (ANTHROPIC_API_KEY set, so usage is metered per token); the budget policy in .ai/policies/budget.yml applies
+budget:  cap $50.00 per change (risk: medium); human approval required above $20.00
+budget:  warns every $10.00 of recorded spend (next warning at $10.00)
+budget:  my-change recorded so far: $0.00
+```
+
+### Ledger and warnings
 
 This is policy and a ledger, not live metering: nothing in Soft Foundry today intercepts a real model API call, so nothing can enforce a cap automatically mid-call. Whoever executes a phase — a human or an agent — records what it cost:
 
@@ -123,7 +141,20 @@ soft-foundry budget record --change <slug> --phase 05-implementation \
 soft-foundry budget status --change <slug>
 ```
 
-`budget status` sums the ledger, compares it against the policy cap for the change's declared risk, and exits non-zero when the recorded spend is over cap. `--usd` is optional per entry; entries without a cost are counted but excluded from the total, and `budget status` reports how many are missing.
+Because the ledger is the only thing that moves, `budget record` is the moment warnings fire. With an API key, each entry that pushes the change's recorded total past another multiple of the warning interval prints a warning naming the amount and the cap; crossing the human-approval line prints that; going over the cap prints `OVER CAP` and exits non-zero. On a subscription, `record` still writes the entry (it is data) but says nothing budget-shaped.
+
+`budget status` sums the ledger, states the billing mode, and with an API key compares the total against the policy cap for the change's declared risk, exiting non-zero when the recorded spend is over cap. On a subscription it shows the ledger for reference and always exits zero. `--usd` is optional per entry; entries without a cost are counted but excluded from the total, and `budget status` reports how many are missing.
+
+The warning interval is a personal preference, so it is adjustable per machine without touching repository policy:
+
+```bash
+soft-foundry budget threshold            # show the interval in effect and where it comes from
+soft-foundry budget threshold 25         # warn every $25 instead
+soft-foundry budget threshold off        # no periodic warnings (cap and approval line still apply)
+soft-foundry budget threshold default    # drop the local override, back to .ai/policies/budget.yml
+```
+
+The override lives in `.soft-foundry/budget.yml`, next to the runtime inventory and equally gitignored.
 
 ## Coding shells
 
