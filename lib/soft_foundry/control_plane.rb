@@ -135,6 +135,16 @@ module SoftFoundry
       @default_path_groups ||= load_yaml(File.join(dir, "paths.yml")).fetch("groups", {}).transform_values { |v| Array(v) }
     end
 
+    # The committed repository capability profile (.ai/repository.yml), or
+    # an empty hash when the repository has not been assessed yet.
+    def repository_profile
+      @repository_profile ||= begin
+        repo = File.join(dir, "repository.yml")
+        data = File.exist?(repo) ? (YAML.safe_load_file(repo, permitted_classes: [Time, Date], aliases: true) || {}) : {}
+        data.is_a?(Hash) ? data : {}
+      end
+    end
+
     def override_path_groups
       @override_path_groups ||= begin
         repo = File.join(dir, "repository.yml")

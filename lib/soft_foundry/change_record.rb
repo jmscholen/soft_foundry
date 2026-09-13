@@ -3,6 +3,7 @@
 require "fileutils"
 require "time"
 require "yaml"
+require_relative "advisory"
 
 module SoftFoundry
   # A durable `changes/<slug>/` record initialized from control-plane templates.
@@ -118,6 +119,7 @@ module SoftFoundry
       FileUtils.mkdir_p(dir)
       write_template(File.join(control_plane.dir, "templates", "change", "metadata.yml"), File.join(dir, "metadata.yml"),
                      "CHANGE" => slug, "TITLE" => title, "BRANCH" => branch, "WORKTREE" => worktree, "CREATED_AT" => now.utc.iso8601)
+      declare_accessibility_surface!
       write_template(File.join(control_plane.dir, "templates", "change", "budget.yml"), File.join(dir, "budget.yml"), "CHANGE" => slug)
       control_plane.phases.each do |phase|
         skill = control_plane.skill(phase.skill)
@@ -128,6 +130,20 @@ module SoftFoundry
                        "PHASE" => phase.output, "SKILL" => skill.name, "PROFILE" => skill.profile.to_s,
                        "NEXT" => next_phase_id(phase))
       end
+    end
+
+    # A repository whose profile records a user-facing framework renders
+    # something a person perceives or operates, so a new change there
+    # starts with the accessibility surface declared; the author can turn
+    # it off with a reason. Done as a text edit so the template's comments
+    # survive (YAML.dump would drop them).
+    def declare_accessibility_surface!
+      frameworks = (Array(control_plane.repository_profile.dig("technology", "frameworks")).map(&:to_s) & Advisory::UI_FRAMEWORKS).sort
+      return if frameworks.empty?
+      path = File.join(dir, "metadata.yml")
+      body = File.read(path)
+      updated = body.sub(/^(\s+accessibility:)\s*false\b.*$/) { "#{Regexp.last_match(1)} true   # set by change new: user-facing framework detected (#{frameworks.join(', ')}); .ai/rules/accessibility.md applies" }
+      File.write(path, updated) unless updated == body
     end
 
     def next_phase_id(phase)

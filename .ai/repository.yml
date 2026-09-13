@@ -129,6 +129,10 @@ capabilities:
   observability.alerting:
     status: NOT_APPLICABLE
     rationale: No production service.
+  accessibility.standard_in_force:
+    status: PASS
+    evidence: [.ai/rules/accessibility.md, .ai/skills/review/completion.yml, lib/soft_foundry/advisory.rb]
+    rationale: WCAG 2.2 AA for UI plus CLI/log output rules; review must fill accessibility.md and gate/status/ci/close print go-live advisories against it.
   judgment.final_gate:
     status: PARTIAL
     evidence: [.ai/skills/final-judgment, lib/soft_foundry/gate.rb]

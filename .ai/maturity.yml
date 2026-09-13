@@ -86,6 +86,7 @@ levels:
       - observability.operational_visibility
       - observability.alerting
       - observability.standard_dashboard
+      - accessibility.standard_in_force
       - judgment.final_gate
 
   6:
@@ -148,6 +149,7 @@ capability_guidance:
           - observability.integration_failure_signal
 
 assessment_rules:
+  - accessibility.standard_in_force is PASS when .ai/rules/accessibility.md (or a stricter repository-named standard) exists and the review skill requires an accessibility review that cites it. Findings against the standard are go-live advisories printed by gate/status/ci/close, never lifecycle gate failures; the capability is about the standard being in force, not about every change conforming.
   - Missing repository evidence must be UNKNOWN unless absence itself is conclusively established.
   - A capability implemented outside the repository may be EXTERNAL only when evidence identifies the external system or ownership boundary.
   - NOT_APPLICABLE requires an explicit applicability rationale.

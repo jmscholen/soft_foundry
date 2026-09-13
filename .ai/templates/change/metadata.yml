@@ -14,7 +14,7 @@ surfaces:
   database: false
   infrastructure: false
   security: false
-  accessibility: false
+  accessibility: false    # true when a person perceives or operates the result (UI, CLI output, documents); loads .ai/rules/accessibility.md and enables the go-live accessibility advisories. Set automatically by `change new` when the repository profile records a user-facing framework.
   observability: false
 
 # Phases the harness would otherwise require, deliberately not run for

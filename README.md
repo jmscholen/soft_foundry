@@ -101,6 +101,20 @@ soft-foundry change close <slug> --pr <N>                       # reads that com
 soft-foundry change close <slug> --confirm AC-060 --confirm AC-061   # or confirm directly, no PR comment needed
 ```
 
+### Go-live advisories and accessibility
+
+A gate decides whether a phase's evidence is complete. Some things a gate cannot honestly decide still matter before a change ships: whether an independent review actually ran, whether anyone looked at the change through a screen reader, whether a person confirmed a criterion. Those are printed as advisories after the gate results by `gate`, `change status`, `ci`, and one last time by `change close`. They never change the exit code:
+
+```
+advisory: 2 issues to address before my-change goes live (informational, does not block the gate)
+  ! warn review: independent review was skipped (the pull request is the review point); accessibility, security, and coding-standard conformance were not independently checked
+  ! warn accessibility: 13-review/accessibility.md declares conformance N/A although the change declares an accessibility surface
+```
+
+The accessibility standard lives in `.ai/rules/accessibility.md`: WCAG 2.2 Level AA for any user interface, plus rules for command-line output, documents, and the evidence each lifecycle phase owes. A change declares that it has something a person perceives or operates with `surfaces.accessibility: true` in its `metadata.yml`; `change new` sets it automatically when `.ai/repository.yml` records a user-facing framework such as Rails or React. With the surface declared, the specification must carry an accessibility requirement, evaluation must record accessibility observations, and the review's `accessibility.md` must reach a conformance statement other than N/A, or the advisory says which one is missing. Level 5 of the maturity model requires the standard to be in force.
+
+Every line `soft-foundry` prints carries its outcome as a word (`pass`, `fail`, `warn`, `skip`, `created`, `conflict`) so the output means the same thing in a screen reader, a CI log, or a terminal that cannot render the glyph next to it.
+
 ## Updating
 
 ```bash

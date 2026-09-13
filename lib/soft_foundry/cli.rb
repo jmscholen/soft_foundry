@@ -16,6 +16,7 @@ require_relative "budget"
 require_relative "billing"
 require_relative "updater"
 require_relative "pr_discharge"
+require_relative "advisory"
 
 module SoftFoundry
   class CLI
@@ -235,15 +236,15 @@ module SoftFoundry
         "pre-commit hook" => File.exist?(File.join(@root, ".git/hooks/pre-commit")) && File.read(File.join(@root, ".git/hooks/pre-commit")).include?(Hooks::MARKER),
         "local runtime" => File.exist?(File.join(@root, ".soft-foundry/runtime.yml"))
       }
-      checks.each { |name, ok| @out.puts "#{ok ? '✓' : '✗'} #{name}" }
+      checks.each { |name, ok| @out.puts "#{ok ? '✓ pass' : '✗ fail'} #{name}" }
       checks.values.all? ? 0 : 2
     end
 
     def check
       findings = Check.new(plane).run
-      findings.each { |f| @out.puts "#{f.level == :error ? '✗' : '!'} #{f.message}" }
+      findings.each { |f| @out.puts "#{f.level == :error ? '✗ error' : '! warning'} #{f.message}" }
       errors = findings.count { |f| f.level == :error }
-      @out.puts(errors.zero? ? "✓ control plane: #{plane.phases.size} phases, #{plane.skill_names.size} skills, no errors" : "✗ control plane: #{errors} error(s)")
+      @out.puts(errors.zero? ? "✓ pass control plane: #{plane.phases.size} phases, #{plane.skill_names.size} skills, no errors" : "✗ fail control plane: #{errors} error(s)")
       errors.zero? ? 0 : 2
     end
 
@@ -315,6 +316,9 @@ module SoftFoundry
       unless undischarged.empty?
         record.discharge!(undischarged, confirmed_by: pr ? "PR ##{pr} comment" : "explicit --confirm")
       end
+      # Closing is the go-live moment, so anything still owed is said here
+      # one last time; it is advice for the person shipping, not a refusal.
+      print_advisories(record)
       record.close!
       @out.puts "#{slug}: closed#{undischarged.empty? ? '' : " (discharged: #{undischarged.map { |i| i['id'] }.join(', ')})"}"
       0
@@ -342,6 +346,7 @@ module SoftFoundry
       @out.puts "#{slug}: #{meta.dig('change', 'title')}  [status: #{meta['status']}, phase: #{meta['current_phase']}, risk: #{meta['risk']}]"
       results = Gate.new(record, git: git).evaluate_all
       results.each { |r| @out.puts format("  %-22s %-12s %s", r.phase.output, r.status, summarize(r)) }
+      print_advisories(record)
       results.any?(&:failed?) ? 2 : 0
     end
 
@@ -513,6 +518,7 @@ module SoftFoundry
       gate = Gate.new(record, git: git)
       results = target == "all" ? gate.evaluate_all : [gate.evaluate(target)]
       results.each { |r| print_result(r) }
+      print_advisories(record)
       results.any?(&:failed?) ? 2 : 0
     end
 
@@ -529,9 +535,10 @@ module SoftFoundry
         results = Gate.new(record, git: git).evaluate_all
         results.reject(&:skipped?).each { |r| print_result(r) }
         code = 2 if results.any?(&:failed?)
+        print_advisories(record)
         sha = record.finished_commit_sha
         if default_branch && sha && git.ancestor?(sha, default_branch)
-          @out.puts "  ✗ merged into #{default_branch} but status is '#{record.metadata['status']}', not 'closed' — run `soft-foundry change close #{slug}`"
+          @out.puts "  ✗ fail merged into #{default_branch} but status is '#{record.metadata['status']}', not 'closed' — run `soft-foundry change close #{slug}`"
           code = 2
         end
       end
@@ -581,9 +588,20 @@ module SoftFoundry
     def print_result(result)
       @out.puts "#{result.phase.output}  #{result.status}  #{result.failed? ? 'FAIL' : (result.skipped? ? 'SKIP' : 'PASS')}"
       result.checks.each do |c|
-        mark = { pass: "✓", fail: "✗", warn: "!", skip: "-" }.fetch(c.outcome)
+        mark = { pass: "✓ pass", fail: "✗ fail", warn: "! warn", skip: "- skip" }.fetch(c.outcome)
         @out.puts "  #{mark} #{c.name}#{c.detail.to_s.empty? ? '' : ": #{c.detail}"}"
       end
+    end
+
+    # Go-live advisories: what a person should address before this change
+    # ships. Printed with a status word per line and never affects the exit
+    # code; see .ai/rules/accessibility.md and Advisory.
+    def print_advisories(record)
+      notices = Advisory.new(record).notices
+      return if notices.empty?
+      word = notices.size == 1 ? "issue" : "issues"
+      @out.puts "advisory: #{notices.size} #{word} to address before #{record.slug} goes live (informational, does not block the gate)"
+      notices.each { |n| @out.puts "  ! warn #{n.area}: #{n.message}" }
     end
 
     def summarize(result)
