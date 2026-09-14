@@ -1,0 +1,26 @@
+commit_sha: 2c74a369fe3ab24c4da40242dff5e6624f7fd8ef
+checks:
+  - id: CHECK-001
+    kind: tests
+    command: "ruby -Ilib -Itest -e 'Dir[\"test/*_test.rb\"].each { |f| require \"./#{f}\" }' with every provider key unset"
+    result: pass
+    evidence: evidence/tests.log
+    criteria: [REQ-A11Y-001, REQ-A11Y-003, REQ-A11Y-004, REQ-A11Y-005, REQ-A11Y-006, REQ-A11Y-007]
+  - id: CHECK-002
+    kind: lint
+    command: "soft-foundry check"
+    result: pass
+    evidence: evidence/check.log
+    criteria: [REQ-A11Y-002, control-plane-consistency]
+  - id: CHECK-003
+    kind: static_analysis
+    command: "ruby -wc on every lib/soft_foundry/*.rb, lib/soft_foundry/installer/*.rb, exe/soft-foundry, and the new/changed test files"
+    result: pass
+    evidence: evidence/syntax-warnings.log
+    criteria: [coding-standard]
+  - id: CHECK-004
+    kind: custom
+    command: "soft-foundry ci against this repository's own real change-record history"
+    result: pass
+    evidence: evidence/ci-against-self.log
+    criteria: [REQ-A11Y-005, no-regression-for-closed-records, this-change-record-itself-passes]

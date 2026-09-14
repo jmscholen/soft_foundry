@@ -7,11 +7,11 @@ This file is the only required vendor-facing entry point. Canonical instructions
 2. Identify the current Git branch/worktree. The change slug is the branch name without a `change/` prefix; its record is `changes/<slug>/`.
 3. If the record does not exist, create it with `soft-foundry change new <slug>`; never hand-copy templates.
 4. Read `changes/<slug>/metadata.yml` for `current_phase`, then `soft-foundry change status` for gate state.
-5. Classify task and risk using `.ai/policies/` and record them in `metadata.yml`.
+5. Classify task and risk using `.ai/policies/` and record them in `metadata.yml`. Set `surfaces.accessibility: true` when a person will perceive or operate the result (UI, CLI output, a document); `.ai/rules/accessibility.md` then applies.
 6. Load only the current phase skill: its `skill.yml`, `SKILL.md`, `permissions.yml`, `requirements.yml`, `completion.yml`, and the phase directory's template-derived working files. Path groups such as `${APP}` and `${TESTS}` resolve through `.ai/paths.yml` and `.ai/repository.yml`.
 7. Honor read/write/deny boundaries. A skill must not perform another skill's job to manufacture a passing outcome.
 8. Never weaken requirements, alter another phase's evidence, inspect hidden harness benchmarks when denied, or redefine success because implementation failed.
-9. When a phase is done, fill its `handoff.yml` (status, commit SHA, completed time, resolved model, outputs, findings) and run `soft-foundry gate <phase>`. A failing gate is fixed by redoing the work, never by editing evidence or the handoff.
+9. When a phase is done, fill its `handoff.yml` (status, commit SHA, completed time, resolved model, outputs, findings) and run `soft-foundry gate <phase>`. A failing gate is fixed by redoing the work, never by editing evidence or the handoff. An `advisory:` block after the gate output does not fail the gate; it lists what a human must address before the change goes live, and stays in the record until it is.
 10. Any implementation change invalidates downstream commit-bound evidence. Follow `transitions` in `.ai/workflow.yml`: remediation, observability code changes, blocking review findings, and a BLOCKED judgment all return to `verify`.
 11. Never declare the change complete without a final judgment artifact.
 

@@ -13,4 +13,4 @@ For each journey record: EVAL ID, requirement IDs, starting state, steps, assert
 Capture screenshots or equivalent browser evidence at meaningful state transitions.
 
 ## Accessibility interaction
-Include keyboard-only and error/focus behavior when applicable.
+Applicable whenever `surfaces.accessibility` is true (see `.ai/rules/accessibility.md`): keyboard-only operation, focus order and visible focus, error identification, and screen-reader readable output or names. Record what was exercised and the result; N/A must say why nothing a person perceives or operates changed.

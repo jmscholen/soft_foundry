@@ -58,6 +58,16 @@ class MaturityScanTest < Minitest::Test
     end
   end
 
+  def test_accessibility_standard_is_a_file_fact
+    with_fixture_repo do |dir|
+      assert_equal "PASS", scan(dir).capabilities["accessibility.standard_in_force"].status
+      File.delete(File.join(dir, ".ai/rules/accessibility.md"))
+      cap = scan(dir).capabilities["accessibility.standard_in_force"]
+      assert_equal "UNKNOWN", cap.status
+      assert_includes cap.rationale, "accessibility.md"
+    end
+  end
+
   def test_run_writes_repository_yml_with_computed_maturity
     with_fixture_repo do |dir|
       File.write(File.join(dir, "AGENTS.md"), "x"); File.write(File.join(dir, "README.md"), "x" * 300)

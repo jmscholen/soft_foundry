@@ -1,0 +1,177 @@
+=== EVAL-001: change new in a repository whose profile records a user-facing framework (rails) declares the accessibility surface; gate reports what is owed, exit 0
+
+$ git checkout -qb change/checkout-form
+[exit 0]
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change new checkout-form --title "Redesign the checkout form"
+created changes/checkout-form with 16 phase directories
+branch: change/checkout-form
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+[exit 0]
+
+$ grep -n accessibility: changes/checkout-form/metadata.yml
+17:  accessibility: true   # set by change new: user-facing framework detected (rails); .ai/rules/accessibility.md applies
+[exit 0]
+
+$ grep -c ^# changes/checkout-form/metadata.yml
+5
+[exit 0]
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate all --change checkout-form | grep -A5 "^advisory:"
+advisory: 1 issue to address before checkout-form goes live (informational, does not block the gate)
+  ! warn accessibility: the accessibility review (13-review/accessibility.md) has not run yet
+[exit 0]
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate all --change checkout-form > /dev/null; echo "gate exit code: $?"
+gate exit code: 0
+[exit 0]
+
+=== EVAL-002: the same change after its review declares Conformance N/A; advisory names it, still exit 0
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate review --change checkout-form | grep -A3 "^advisory:"
+advisory: 1 issue to address before checkout-form goes live (informational, does not block the gate)
+  ! warn accessibility: 13-review/accessibility.md declares conformance N/A although the change declares an accessibility surface
+[exit 0]
+
+=== EVAL-003: a conforming accessibility review silences the accessibility advisory
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate review --change checkout-form | grep -c "^advisory:"
+0
+[exit 1]
+
+=== EVAL-004: library-shaped repository (this repo's own profile, frameworks: []) leaves the flag false and prints no advisory for a fresh change
+
+$ git checkout -qb change/tidy
+[exit 0]
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change new tidy --title Tidy
+created changes/tidy with 16 phase directories
+branch: change/tidy
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+[exit 0]
+
+$ grep -n accessibility: changes/tidy/metadata.yml
+17:  accessibility: false    # true when a person perceives or operates the result (UI, CLI output, documents); loads .ai/rules/accessibility.md and enables the go-live accessibility advisories. Set automatically by `change new` when the repository profile records a user-facing framework.
+[exit 0]
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate all --change tidy | grep -c "^advisory:"
+0
+[exit 1]
+
+=== EVAL-005: waiving review and judge through skipped_phases is advised with the rationale on gate, change status, ci, and close; every exit code stays 0
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate all --change tidy | grep -A3 "^advisory:"
+advisory: 2 issues to address before tidy goes live (informational, does not block the gate)
+  ! warn review: independent review was skipped (the pull request is the review point); accessibility, security, and coding-standard conformance were not independently checked
+  ! warn judgment: final judgment was skipped (maintainer merge is the judgment); no APPROVED/BLOCKED/REJECTED verdict exists for this change
+[exit 0]
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate all --change tidy > /dev/null; echo "gate exit code: $?"
+gate exit code: 0
+[exit 0]
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change status | tail -4
+  15-learning            pending      
+advisory: 2 issues to address before tidy goes live (informational, does not block the gate)
+  ! warn review: independent review was skipped (the pull request is the review point); accessibility, security, and coding-standard conformance were not independently checked
+  ! warn judgment: final judgment was skipped (maintainer merge is the judgment); no APPROVED/BLOCKED/REJECTED verdict exists for this change
+[exit 0]
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change status > /dev/null; echo "status exit code: $?"
+status exit code: 0
+[exit 0]
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry ci | grep -B1 -A3 "^advisory:"
+change tidy
+advisory: 2 issues to address before tidy goes live (informational, does not block the gate)
+  ! warn review: independent review was skipped (the pull request is the review point); accessibility, security, and coding-standard conformance were not independently checked
+  ! warn judgment: final judgment was skipped (maintainer merge is the judgment); no APPROVED/BLOCKED/REJECTED verdict exists for this change
+
+[exit 0]
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry ci > /dev/null; echo "ci exit code: $?"
+ci exit code: 0
+[exit 0]
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change close tidy --force
+advisory: 2 issues to address before tidy goes live (informational, does not block the gate)
+  ! warn review: independent review was skipped (the pull request is the review point); accessibility, security, and coding-standard conformance were not independently checked
+  ! warn judgment: final judgment was skipped (maintainer merge is the judgment); no APPROVED/BLOCKED/REJECTED verdict exists for this change
+tidy: closed
+[exit 0]
+
+$ grep -n ^status: changes/tidy/metadata.yml
+10:status: closed
+[exit 0]
+
+=== EVAL-006: every outcome line carries a word; stripping non-ASCII leaves the meaning (doctor, check, gate)
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry doctor | strip_ascii
+ pass git repository
+ pass AGENTS.md
+ pass .ai/README.md
+ pass .ai/workflow.yml
+ pass .ai/paths.yml
+ pass control plane check
+ fail .ai/manifest.yml
+ fail pre-commit hook
+ fail local runtime
+[exit 0]
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry check | strip_ascii
+ pass control plane: 16 phases, 16 skills, no errors
+[exit 0]
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate all --change tidy | head -12 | strip_ascii
+00-intake  pending  SKIP
+  - skip phase pending: not started
+01-discovery  pending  SKIP
+  - skip phase pending: not started
+02-specification  pending  SKIP
+  - skip phase pending: not started
+03-threat-model  pending  SKIP
+  - skip phase pending: not started
+04-plan  pending  SKIP
+  - skip phase pending: not started
+05-implementation  pending  SKIP
+  - skip phase pending: not started
+[exit 0]
+-- non-ASCII bytes other than the four glyphs, and any ESC byte, across doctor/check/gate/status/ci output:
+ESC lines: 0
+other non-ASCII lines: 0
+
+=== EVAL-007: an installed plane without the standard: check warns (exit 0), the scan scores the capability UNKNOWN, gate advises
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry check
+! warning .ai/rules/accessibility.md is missing; accessibility reviews have no standard to cite (advisory only)
+✓ pass control plane: 16 phases, 16 skills, no errors
+[exit 0]
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry onboard --maturity scan --reassess | tail -8
+
+LLM provider discovery
+openai     not configured (set OPENAI_API_KEY)
+anthropic  not configured (set ANTHROPIC_API_KEY)
+xai        not configured (set XAI_API_KEY)
+openrouter not configured (set OPENROUTER_API_KEY)
+
+Local model inventory written to .soft-foundry/runtime.yml (gitignored).
+[exit 0]
+
+$ grep -A3 accessibility.standard_in_force .ai/repository.yml
+  accessibility.standard_in_force:
+    status: UNKNOWN
+    evidence: []
+    rationale: no .ai/rules/accessibility.md; review has no accessibility standard
+[exit 0]
+
+$ ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate all --change tidy | grep -A3 "^advisory:"
+advisory: 3 issues to address before tidy goes live (informational, does not block the gate)
+  ! warn review: independent review was skipped (the pull request is the review point); accessibility, security, and coding-standard conformance were not independently checked
+  ! warn judgment: final judgment was skipped (maintainer merge is the judgment); no APPROVED/BLOCKED/REJECTED verdict exists for this change
+  ! warn accessibility: no accessibility standard is in force (.ai/rules/accessibility.md is missing), so review has nothing to cite
+[exit 0]
+
+=== done: /tmp/sf-a11y-eval.RiiwZY

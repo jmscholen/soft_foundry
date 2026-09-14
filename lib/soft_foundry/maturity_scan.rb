@@ -82,7 +82,8 @@ module SoftFoundry
         "technology.languages_detected" => tech["languages"].empty? ? unknown("no recognized language manifest found") : detected(tech["languages"].map { |l| "detected: #{l}" }),
         "technology.frameworks_detected" => framework_finding(tech),
         "infrastructure.detected_or_not_applicable" => infra["detected"].empty? ? not_applicable("no IaC, container, or deployment manifest found") : detected(infra["detected"]),
-        "testing.strategy_detected" => tech["testing"].empty? ? unknown("no recognized test directory or framework found") : detected(tech["testing"])
+        "testing.strategy_detected" => tech["testing"].empty? ? unknown("no recognized test directory or framework found") : detected(tech["testing"]),
+        "accessibility.standard_in_force" => accessibility_finding
       }
     end
 
@@ -126,6 +127,15 @@ module SoftFoundry
       return detected(frameworks.map { |f| "detected: #{f}" }) unless frameworks.empty?
       return not_applicable("bin/lib/exe layout with a gemspec suggests a library, not an application") if gem_library_shape?
       unknown("no recognized application framework found; may be a library, script collection, or an unrecognized framework")
+    end
+
+    # Level 5 asks for an accessibility standard the review phase can cite.
+    # Its presence is a file fact; whether reviews actually cite it is not,
+    # so a present file scores PASS and an absent one UNKNOWN (a standard
+    # may live somewhere the scan does not look).
+    def accessibility_finding
+      return detected([".ai/rules/accessibility.md"]) if file?(".ai/rules/accessibility.md")
+      unknown("no .ai/rules/accessibility.md; review has no accessibility standard to cite")
     end
 
     def gem_library_shape?

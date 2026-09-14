@@ -1,0 +1,35 @@
+✓ pass control plane: 16 phases, 16 skills, no errors
+
+change accessibility-advisory
+advisory: 3 issues to address before accessibility-advisory goes live (informational, does not block the gate)
+  ! warn judgment: final judgment was skipped (An isolated, fresh-context judgment is the skill's explicit design; self-judgment would not satisfy that. The maintainer's own merge decision is the real judgment point. The new advisory reports this skip on every gate run, which is the intended behavior.); no APPROVED/BLOCKED/REJECTED verdict exists for this change
+  ! warn accessibility: no accessibility requirements were recorded: the specification phase was skipped, so there is nothing for review to check conformance against
+  ! warn accessibility: the accessibility review (13-review/accessibility.md) has not run yet
+
+change budget-and-openrouter (closed, skipped)
+
+change budget-billing-awareness (closed, skipped)
+
+change change-close-command (closed, skipped)
+
+change init-command (closed, skipped)
+
+change maturity-onboarding (closed, skipped)
+
+change maturity-report (closed, skipped)
+
+change observability-standard-dashboard (closed, skipped)
+
+change self-update (closed, skipped)
+
+change upstream-failure-reporting
+00-intake  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: cc348f93f3d265af3f92f7fa7d0b09cbbf8a520a
+  ✓ pass completed_at recorded: 2026-09-09T15:43:34Z
+  ✓ pass predecessor complete: first phase
+
+✓ ci passed

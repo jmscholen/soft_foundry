@@ -16,6 +16,7 @@ module SoftFoundry
       return [Finding.new(:error, ".ai/workflow.yml not found")] unless @plane.present?
 
       findings.concat(check_templates)
+      findings.concat(check_accessibility_standard)
       findings.concat(check_path_groups)
       findings.concat(check_transitions)
       @plane.phases.each { |phase| findings.concat(check_phase(phase)) }
@@ -27,6 +28,13 @@ module SoftFoundry
     def check_templates
       %w[templates/handoff.yml templates/change/metadata.yml].reject { |f| File.exist?(File.join(@plane.dir, f)) }
                                                               .map { |f| Finding.new(:error, ".ai/#{f} is missing") }
+    end
+
+    # A warning, not an error: the plane still works without the standard,
+    # but every accessibility review in it would have nothing to cite.
+    def check_accessibility_standard
+      return [] if File.exist?(File.join(@plane.dir, "rules", "accessibility.md"))
+      [Finding.new(:warning, ".ai/rules/accessibility.md is missing; accessibility reviews have no standard to cite (advisory only)")]
     end
 
     def check_path_groups
