@@ -1,37 +1,46 @@
+---
 change:
   id: accessibility-advisory
-  title: Accessibility standard, go-live advisories, and status words on every CLI outcome
+  title: Accessibility standard, go-live advisories, and status words on every CLI
+    outcome
 git:
-  worktree: /Users/jscholen-iou/dev/soft_foundry
+  worktree: "/Users/jscholen-iou/dev/soft_foundry"
   branch: change/accessibility-advisory
 type: feature
 risk: low
-status: intake             # intake | in_progress | awaiting_human | judged | closed
-current_phase: intake
-created_at: 2026-09-13T17:38:09Z
+status: closed
+current_phase: done
+created_at: 2026-09-13 17:38:09.000000000 Z
 surfaces:
   application: true
   database: false
   infrastructure: false
   security: false
-  accessibility: true    # this change is CLI output and reviewer-facing documents; .ai/rules/accessibility.md applies
+  accessibility: true
   observability: false
-
-# Phases the harness would otherwise require, deliberately not run for
-# this change, each with a non-empty rationale. An entry with an empty
-# rationale does not count as a skip - the phase stays required.
 skipped_phases:
-  - phase: discover
-    rationale: Repository already discovered for prior changes at an identical layout; no new technology introduced by this change itself.
-  - phase: specify
-    rationale: Intake captures the requirements (a named accessibility standard, advisories that report but never block, a status word on every CLI outcome, a live surfaces.accessibility flag, a level-5 maturity capability) with stable IDs in 00-intake/request.md at sufficient granularity for a change this size.
-  - phase: threat_model
-    rationale: No new external interaction, credential, or write outside the change record and metadata.yml. The advisory only reads files the gate already reads; change new edits one line of a file it just wrote.
-  - phase: plan
-    rationale: 05-implementation/log.md is the plan record for a change this size.
-  - phase: attack
-    rationale: Reasoned through directly rather than adversarially tested, given this change's scope; recorded as a real limitation, not equivalent to attack coverage.
-  - phase: judge
-    rationale: An isolated, fresh-context judgment is the skill's explicit design; self-judgment would not satisfy that. The maintainer's own merge decision is the real judgment point. The new advisory reports this skip on every gate run, which is the intended behavior.
-  - phase: learn
-    rationale: Lessons are recorded directly in 05-implementation/log.md rather than as separate formal learning artifacts, given the change's scope.
+- phase: discover
+  rationale: Repository already discovered for prior changes at an identical layout;
+    no new technology introduced by this change itself.
+- phase: specify
+  rationale: Intake captures the requirements (a named accessibility standard, advisories
+    that report but never block, a status word on every CLI outcome, a live surfaces.accessibility
+    flag, a level-5 maturity capability) with stable IDs in 00-intake/request.md at
+    sufficient granularity for a change this size.
+- phase: threat_model
+  rationale: No new external interaction, credential, or write outside the change
+    record and metadata.yml. The advisory only reads files the gate already reads;
+    change new edits one line of a file it just wrote.
+- phase: plan
+  rationale: 05-implementation/log.md is the plan record for a change this size.
+- phase: attack
+  rationale: Reasoned through directly rather than adversarially tested, given this
+    change's scope; recorded as a real limitation, not equivalent to attack coverage.
+- phase: judge
+  rationale: An isolated, fresh-context judgment is the skill's explicit design; self-judgment
+    would not satisfy that. The maintainer's own merge decision is the real judgment
+    point. The new advisory reports this skip on every gate run, which is the intended
+    behavior.
+- phase: learn
+  rationale: Lessons are recorded directly in 05-implementation/log.md rather than
+    as separate formal learning artifacts, given the change's scope.
