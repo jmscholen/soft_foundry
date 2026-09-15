@@ -1,7 +1,7 @@
 phase: 00-intake
 skill: intake
 status: complete
-commit_sha: d4c12f8fd63f5b59f2ac7d24599ef767174944ab
+commit_sha: 3ef6f0044a5d4902644c4c5fe48f1658a35cc93a
 started_at: '2026-09-15T14:00:00Z'
 completed_at: '2026-09-15T14:05:00Z'
 resolved_model:
