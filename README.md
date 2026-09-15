@@ -113,6 +113,18 @@ advisory: 2 issues to address before my-change goes live (informational, does no
 
 The accessibility standard lives in `.ai/rules/accessibility.md`: WCAG 2.2 Level AA for any user interface, plus rules for command-line output, documents, and the evidence each lifecycle phase owes. A change declares that it has something a person perceives or operates with `surfaces.accessibility: true` in its `metadata.yml`; `change new` sets it automatically when `.ai/repository.yml` records a user-facing framework such as Rails or React. With the surface declared, the specification must carry an accessibility requirement, evaluation must record accessibility observations, and the review's `accessibility.md` must reach a conformance statement other than N/A, or the advisory says which one is missing. Level 5 of the maturity model requires the standard to be in force.
 
+### Privacy and security policy conformance
+
+The lifecycle already checks code against engineering security rules. A separate question is whether the change still matches what the governed application has told its users in its own privacy policy, security policy, and terms. `.ai/rules/policy-conformance.md` is that standard. Repository discovery records the documents the application publishes under `policies:` in `.ai/repository.yml`, and a document that does not exist is recorded `MISSING` rather than assumed. A change that alters what the application collects, shares, retains, protects, or promises declares `surfaces.policy: true` in its `metadata.yml`; `change new` sets it automatically when the profile records a published policy document. With the surface declared, the specification must carry a `category: policy` requirement naming the clause, and the review's `policy-conformance.md` must name the documents checked and reach a conformance statement other than N/A, or the advisory says which one is missing:
+
+```
+advisory: 2 issues to address before my-change goes live (informational, does not block the gate)
+  ! warn policy: 02-specification/requirements.yml has no requirement with category: policy although the change declares a policy surface
+  ! warn policy: 13-review/policy-conformance.md lists policy text changes owed; publishing them is a legal commitment awaiting a person: park the change with status: awaiting_human and record the decision under human_decisions in metadata.yml
+```
+
+When the review finds that the policy text itself must change for the code to be honest, that is a legal commitment under `.ai/policies/human-boundaries.yml`: the change is parked with `status: awaiting_human` until a person decides, and the decision is recorded under `human_decisions` in `metadata.yml`. Level 5 of the maturity model requires the standard to be in force.
+
 Every line `soft-foundry` prints carries its outcome as a word (`pass`, `fail`, `warn`, `skip`, `created`, `conflict`) so the output means the same thing in a screen reader, a CI log, or a terminal that cannot render the glyph next to it.
 
 ## Updating

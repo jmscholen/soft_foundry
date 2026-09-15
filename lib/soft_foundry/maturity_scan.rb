@@ -45,6 +45,18 @@ module SoftFoundry
       "python" => ["tests/**/*.py", "test_*.py", "pytest.ini"]
     }.freeze
 
+    # Where applications usually publish their privacy policy, security
+    # policy (including RFC 9116's .well-known/security.txt), and terms,
+    # and what the files are called. Matched case-insensitively on the
+    # basename, one directory level each, so a scan stays cheap.
+    POLICY_DIRS = %w[. docs docs/legal docs/policies legal policies public .github .well-known
+                     app/views/pages app/views/legal app/views/static content pages src/pages site].freeze
+    POLICY_DOCUMENTS = {
+      "privacy" => /\Aprivacy([-_ ]?(policy|notice|statement))?\.[a-z.]+\z/i,
+      "security" => /\Asecurity([-_ ]?policy)?\.[a-z.]+\z/i,
+      "terms" => /\Aterms([-_ ]?(of[-_ ]?(service|use)|and[-_ ]?conditions))?\.[a-z.]+\z/i
+    }.freeze
+
     attr_reader :root, :plane
 
     def initialize(root, control_plane:)
@@ -70,6 +82,30 @@ module SoftFoundry
       }
     end
 
+    # Published policy documents by name, each a sorted list of repository-
+    # relative paths (empty when none was found where the scan looks).
+    def policy_documents
+      POLICY_DOCUMENTS.to_h do |name, pattern|
+        found = POLICY_DIRS.flat_map { |d| Dir.glob(d == "." ? "*" : "#{d}/*", File::FNM_DOTMATCH, base: root) }
+                           .select { |rel| File.file?(File.join(root, rel)) && File.basename(rel).match?(pattern) }
+        [name, found.uniq.sort]
+      end
+    end
+
+    # The policies: block of .ai/repository.yml. A document the scan finds is
+    # PASS with its path; one it does not find is UNKNOWN, because the
+    # application may publish it somewhere the scan does not look (a CMS,
+    # a marketing site) and only discovery can establish MISSING.
+    def policies
+      policy_documents.to_h do |name, found|
+        if found.empty?
+          [name, { "status" => "UNKNOWN", "rationale" => "no #{name} document found where the scan looks (#{POLICY_DIRS.join(', ')}); discovery must record whether the application publishes one (MISSING) or none applies" }]
+        else
+          [name, { "status" => "PASS", "evidence" => found }]
+        end
+      end
+    end
+
     def capabilities
       tech = technology
       infra = infrastructure
@@ -83,7 +119,8 @@ module SoftFoundry
         "technology.frameworks_detected" => framework_finding(tech),
         "infrastructure.detected_or_not_applicable" => infra["detected"].empty? ? not_applicable("no IaC, container, or deployment manifest found") : detected(infra["detected"]),
         "testing.strategy_detected" => tech["testing"].empty? ? unknown("no recognized test directory or framework found") : detected(tech["testing"]),
-        "accessibility.standard_in_force" => accessibility_finding
+        "accessibility.standard_in_force" => accessibility_finding,
+        "policy_conformance.standard_in_force" => policy_standard_finding
       }
     end
 
@@ -96,6 +133,7 @@ module SoftFoundry
         "repository" => { "assessed" => true, "assessed_at" => now.utc.iso8601, "commit_sha" => commit, "assessed_by" => "soft-foundry (maturity scan)" },
         "technology" => technology,
         "infrastructure" => infrastructure,
+        "policies" => policies,
         "capabilities" => capabilities.transform_values { |f| { "status" => f.status, "evidence" => f.evidence, "rationale" => f.rationale }.compact },
         "maturity" => nil
       }
@@ -136,6 +174,13 @@ module SoftFoundry
     def accessibility_finding
       return detected([".ai/rules/accessibility.md"]) if file?(".ai/rules/accessibility.md")
       unknown("no .ai/rules/accessibility.md; review has no accessibility standard to cite")
+    end
+
+    # Level 5 likewise asks for a standard the review phase can check the
+    # application's published privacy and security promises against.
+    def policy_standard_finding
+      return detected([".ai/rules/policy-conformance.md"]) if file?(".ai/rules/policy-conformance.md")
+      unknown("no .ai/rules/policy-conformance.md; review has no privacy and security policy conformance standard to cite")
     end
 
     def gem_library_shape?

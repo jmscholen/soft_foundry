@@ -1,1 +1,1 @@
-required_files: [functional.md, architecture.md, security.md, accessibility.md, infrastructure.md, operations.md, consolidated.md, handoff.yml]
+required_files: [functional.md, architecture.md, security.md, accessibility.md, policy-conformance.md, infrastructure.md, operations.md, consolidated.md, handoff.yml]

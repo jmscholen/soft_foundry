@@ -119,7 +119,7 @@ module SoftFoundry
       FileUtils.mkdir_p(dir)
       write_template(File.join(control_plane.dir, "templates", "change", "metadata.yml"), File.join(dir, "metadata.yml"),
                      "CHANGE" => slug, "TITLE" => title, "BRANCH" => branch, "WORKTREE" => worktree, "CREATED_AT" => now.utc.iso8601)
-      declare_accessibility_surface!
+      declare_surfaces!
       write_template(File.join(control_plane.dir, "templates", "change", "budget.yml"), File.join(dir, "budget.yml"), "CHANGE" => slug)
       control_plane.phases.each do |phase|
         skill = control_plane.skill(phase.skill)
@@ -133,16 +133,24 @@ module SoftFoundry
     end
 
     # A repository whose profile records a user-facing framework renders
-    # something a person perceives or operates, so a new change there
-    # starts with the accessibility surface declared; the author can turn
-    # it off with a reason. Done as a text edit so the template's comments
-    # survive (YAML.dump would drop them).
-    def declare_accessibility_surface!
-      frameworks = (Array(control_plane.repository_profile.dig("technology", "frameworks")).map(&:to_s) & Advisory::UI_FRAMEWORKS).sort
-      return if frameworks.empty?
+    # something a person perceives or operates, and one whose profile
+    # records a published privacy, security, or terms document has made
+    # promises a change can break; a new change there starts with the
+    # matching surface declared, and the author turns it off with a
+    # reason. Done as a text edit so the template's comments survive
+    # (YAML.dump would drop them).
+    def declare_surfaces!
       path = File.join(dir, "metadata.yml")
       body = File.read(path)
-      updated = body.sub(/^(\s+accessibility:)\s*false\b.*$/) { "#{Regexp.last_match(1)} true   # set by change new: user-facing framework detected (#{frameworks.join(', ')}); .ai/rules/accessibility.md applies" }
+      updated = body
+      frameworks = Advisory.ui_frameworks(control_plane)
+      unless frameworks.empty?
+        updated = updated.sub(/^(\s+accessibility:)\s*false\b.*$/) { "#{Regexp.last_match(1)} true   # set by change new: user-facing framework detected (#{frameworks.join(', ')}); .ai/rules/accessibility.md applies" }
+      end
+      documents = Advisory.policy_documents(control_plane)
+      unless documents.empty?
+        updated = updated.sub(/^(\s+policy:)\s*false\b.*$/) { "#{Regexp.last_match(1)} true   # set by change new: published policy document recorded (#{documents.join(', ')}); .ai/rules/policy-conformance.md applies" }
+      end
       File.write(path, updated) unless updated == body
     end
 

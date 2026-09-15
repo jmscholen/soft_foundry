@@ -52,7 +52,8 @@ class MaturityScoringTest < Minitest::Test
     governance.risk_classification governance.skill_permissions governance.human_boundaries
     governance.separation_of_duties security.threat_modeling security.adversarial_validation
     observability.failure_detection observability.health_signal observability.operational_visibility
-    observability.alerting observability.standard_dashboard accessibility.standard_in_force judgment.final_gate
+    observability.alerting observability.standard_dashboard accessibility.standard_in_force
+    policy_conformance.standard_in_force judgment.final_gate
   ].freeze
 
   def passing_capabilities_through_level_5(overrides = {})
@@ -82,6 +83,14 @@ class MaturityScoringTest < Minitest::Test
     result = plane.score_maturity(caps)
     assert_equal 4, result["current_level"]
     assert(result["gaps"].any? { |g| g["capability"] == "accessibility.standard_in_force" })
+  end
+
+  def test_missing_policy_conformance_standard_blocks_level_5
+    plane = SoftFoundry::ControlPlane.new(REPO_ROOT)
+    caps = passing_capabilities_through_level_5("policy_conformance.standard_in_force" => "UNKNOWN")
+    result = plane.score_maturity(caps)
+    assert_equal 4, result["current_level"]
+    assert(result["gaps"].any? { |g| g["capability"] == "policy_conformance.standard_in_force" })
   end
 
   def test_standard_dashboard_pass_reaches_level_5
