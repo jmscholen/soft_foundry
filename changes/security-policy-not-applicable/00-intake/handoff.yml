@@ -1,0 +1,17 @@
+phase: 00-intake
+skill: intake
+status: complete
+commit_sha: 3ef6f0044a5d4902644c4c5fe48f1658a35cc93a
+started_at: '2026-09-15T14:00:00Z'
+completed_at: '2026-09-15T14:05:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- request.md
+- assumptions.md
+blocking: []
+findings: []
+next: discover
+notes: Performed directly by the interactive session. The profile edit itself is in this same commit series; every other phase is skipped with rationale in metadata.yml, and the pull request is the review and judgment point.

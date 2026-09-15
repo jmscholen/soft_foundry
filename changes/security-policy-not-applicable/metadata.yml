@@ -1,0 +1,58 @@
+change:
+  id: security-policy-not-applicable
+  title: Record the maintainer's decision that this repository needs no security policy
+git:
+  worktree: /Users/jscholen-iou/dev/soft_foundry
+  branch: change/security-policy-not-applicable
+type: docs                  # feature | fix | refactor | docs | infrastructure | security | chore
+risk: low                  # low | medium | high
+status: intake             # intake | in_progress | awaiting_human | judged | closed
+current_phase: intake
+created_at: 2026-09-15T17:35:17Z
+surfaces:
+  application: false
+  database: false
+  infrastructure: false
+  security: false
+  accessibility: false    # true when a person perceives or operates the result (UI, CLI output, documents); loads .ai/rules/accessibility.md and enables the go-live accessibility advisories. Set automatically by `change new` when the repository profile records a user-facing framework.
+  observability: false
+  policy: false           # true when the change alters what the application collects, shares, retains, protects, or promises in its privacy policy, security policy, or terms; loads .ai/rules/policy-conformance.md and enables the go-live policy advisories. Set automatically by `change new` when the repository profile records a published policy document.
+
+# Human-boundary decisions this change required (.ai/policies/human-boundaries.yml),
+# each recorded once a person made it. While a decision the review says is owed
+# has no entry here, the change is parked with status: awaiting_human.
+human_decisions: []
+# - boundary: legal commitment
+#   subject: privacy policy, clause 4 (third-party analytics recipient)
+#   decided_by: TBD
+#   decided_at: TBD
+#   decision: approved | declined
+
+# Phases the harness would otherwise require, deliberately not run for
+# this change, each with a non-empty rationale. An entry with an empty
+# rationale does not count as a skip - the phase stays required.
+skipped_phases:
+  - phase: discover
+    rationale: The change is itself a discovery fact about this repository; nothing else to discover.
+  - phase: specify
+    rationale: One profile line; the requirement is stated in 00-intake/request.md.
+  - phase: threat_model
+    rationale: No code, no data flow, no external interaction.
+  - phase: plan
+    rationale: One profile line.
+  - phase: implement
+    rationale: No application code; the edit is to .ai/repository.yml, which is evidence, not code, and is recorded in 00-intake.
+  - phase: verify
+    rationale: No code changed; soft-foundry check and ci pass unchanged.
+  - phase: evaluate
+    rationale: Nothing a person operates changed.
+  - phase: attack
+    rationale: No attack surface.
+  - phase: review
+    rationale: The pull request is the review point for a one-line maintainer decision.
+  - phase: judge
+    rationale: The maintainer's decision is the judgment; recorded verbatim in 00-intake/request.md.
+  - phase: learn
+    rationale: The lesson is recorded in 00-intake/assumptions.md.
+# - phase: threat_model
+#   rationale: TBD
