@@ -228,6 +228,157 @@ class AdvisoryCLITest < Minitest::Test
   end
 end
 
+# The governed application's published privacy policy, security policy, and
+# terms are promises a change can break (.ai/rules/policy-conformance.md).
+# Like accessibility, every finding is a go-live advisory, never a gate.
+class PolicyAdvisoryTest < Minitest::Test
+  include FoundryFixture
+
+  PRIVACY_ONLY = { "privacy" => { "status" => "PASS", "evidence" => ["PRIVACY.md"] } }.freeze
+
+  # A record in a repository whose profile records the given policies:
+  # block. The fixture's own profile (a copy of this repo's) records no
+  # document as PASS, so a fresh change there declares no policy surface.
+  def with_record(policies: nil)
+    with_fixture_repo do |dir|
+      File.write(File.join(dir, ".ai/repository.yml"), YAML.dump("version" => 1, "policies" => policies)) if policies
+      plane = SoftFoundry::ControlPlane.new(dir)
+      record = SoftFoundry::ChangeRecord.create(dir, "c1", control_plane: plane)
+      yield dir, plane, record
+    end
+  end
+
+  def set_metadata(record)
+    data = record.metadata
+    yield data
+    File.write(File.join(record.dir, "metadata.yml"), YAML.dump(data))
+  end
+
+  def declare_surface(record, value = true) = set_metadata(record) { |m| m["surfaces"]["policy"] = value }
+  def skip_phase(record, id, why = "scope") = set_metadata(record) { |m| (m["skipped_phases"] ||= []) << { "phase" => id, "rationale" => why } }
+  def policy_notices(record) = SoftFoundry::Advisory.new(record).notices.select { |n| n.area == "policy" }
+  def messages(record) = policy_notices(record).map(&:message)
+
+  def write_review(record, plane, owed: "None.", conformance: "conforms")
+    complete_phase!(record, "review", sha: head(record.root))
+    path = File.join(record.phase_dir(plane.phase("review")), "policy-conformance.md")
+    File.write(path, "# Policy Review\n\n## Documents checked\nPRIVACY.md (2026-09-01)\n\n## Scope reviewed\nnew analytics event\n\n## Findings\nnone\n\n## Policy text changes required\n#{owed}\n\n## Conformance\n#{conformance}\n")
+  end
+
+  def test_a_fresh_change_in_a_repository_without_published_policies_is_quiet
+    with_record { |_dir, _plane, record| assert_empty policy_notices(record) }
+  end
+
+  def test_change_new_declares_the_surface_when_the_profile_records_a_published_policy
+    with_record(policies: PRIVACY_ONLY) do |_dir, _plane, record|
+      assert_equal true, record.metadata.dig("surfaces", "policy")
+      body = File.read(File.join(record.dir, "metadata.yml"))
+      assert_includes body, "set by change new: published policy document recorded (privacy); .ai/rules/policy-conformance.md applies"
+      assert_includes body, "# Human-boundary decisions this change required", "the template's other comments survive the edit"
+      assert_includes body, "  accessibility: false", "the accessibility line is untouched in a non-UI repository"
+    end
+  end
+
+  def test_a_recorded_but_absent_document_does_not_declare_the_surface
+    with_record(policies: { "privacy" => { "status" => "MISSING" }, "security" => { "status" => "UNKNOWN" } }) do |_dir, _plane, record|
+      assert_equal false, record.metadata.dig("surfaces", "policy")
+      assert_empty policy_notices(record)
+    end
+  end
+
+  def test_undeclared_surface_in_a_repository_with_published_policies_is_advised
+    with_record(policies: PRIVACY_ONLY) do |_dir, _plane, record|
+      declare_surface(record, false)
+      assert_equal 1, policy_notices(record).size
+      assert_includes messages(record).first, "published policy documents (privacy)"
+      assert_includes messages(record).first, "surfaces.policy: false"
+    end
+  end
+
+  def test_declared_surface_with_pending_review_is_advised
+    with_record(policies: PRIVACY_ONLY) do |_dir, _plane, record|
+      assert_equal ["the policy-conformance review (13-review/policy-conformance.md) has not run yet"], messages(record)
+    end
+  end
+
+  def test_declared_surface_with_no_document_to_check_against_is_advised
+    with_record do |_dir, _plane, record|
+      declare_surface(record)
+      assert(messages(record).any? { |m| m.include?("records no published privacy, security, or terms document") })
+      assert(messages(record).any? { |m| m.include?("has not run yet") })
+    end
+  end
+
+  def test_declared_surface_with_skipped_review_names_the_gap
+    with_record(policies: PRIVACY_ONLY) do |_dir, _plane, record|
+      skip_phase(record, "review")
+      assert_includes messages(record).first, "no policy-conformance review exists"
+    end
+  end
+
+  def test_declared_surface_without_a_policy_requirement_is_advised
+    with_record(policies: PRIVACY_ONLY) do |dir, plane, record|
+      complete_phase!(record, "specify", sha: head(dir)) # template requirement is category: functional
+      assert(messages(record).any? { |m| m.include?("category: policy") })
+      path = File.join(record.phase_dir(plane.phase("specify")), "requirements.yml")
+      File.write(path, YAML.dump("requirements" => [{ "id" => "REQ-001", "category" => "policy", "statement" => "x" }]))
+      refute(messages(record).any? { |m| m.include?("category: policy") })
+    end
+  end
+
+  def test_declared_surface_with_skipped_specification_is_advised
+    with_record(policies: PRIVACY_ONLY) do |_dir, _plane, record|
+      skip_phase(record, "specify")
+      assert(messages(record).any? { |m| m.include?("no policy requirements were recorded") })
+    end
+  end
+
+  def test_review_with_placeholders_or_na_is_advised_and_a_conforming_one_is_quiet
+    with_record(policies: PRIVACY_ONLY) do |dir, plane, record|
+      complete_phase!(record, "review", sha: head(dir), fill: false)
+      assert_includes messages(record).first, "TBD"
+      write_review(record, plane, conformance: "N/A because reasons")
+      assert_includes messages(record).first, "declares conformance N/A"
+      write_review(record, plane)
+      assert_empty policy_notices(record)
+    end
+  end
+
+  def test_policy_text_changes_owed_are_a_legal_commitment_until_a_person_decides
+    with_record(policies: PRIVACY_ONLY) do |_dir, plane, record|
+      write_review(record, plane, owed: "- Clause 4: add the analytics vendor as a recipient.")
+      assert_equal 1, policy_notices(record).size
+      assert_includes messages(record).first, "legal commitment"
+      assert_includes messages(record).first, "status: awaiting_human"
+
+      set_metadata(record) { |m| m["status"] = "awaiting_human" }
+      assert_includes messages(record).first, "parked awaiting a person's decision"
+
+      set_metadata(record) { |m| m["human_decisions"] = [{ "boundary" => "legal commitment", "subject" => "clause 4", "decided_by" => "TBD" }] }
+      assert_includes messages(record).first, "parked", "a placeholder decision is not a decision"
+
+      set_metadata(record) { |m| m["human_decisions"] = [{ "boundary" => "legal commitment", "subject" => "clause 4", "decided_by" => "a person", "decided_at" => "2026-09-15", "decision" => "approved" }] }
+      assert_empty policy_notices(record)
+    end
+  end
+
+  def test_missing_standard_is_advised
+    with_record do |dir, _plane, record|
+      File.delete(File.join(dir, ".ai/rules/policy-conformance.md"))
+      assert(messages(record).any? { |m| m.include?(".ai/rules/policy-conformance.md is missing") })
+    end
+  end
+
+  def test_gate_prints_policy_advisories_and_still_exits_zero
+    with_record(policies: PRIVACY_ONLY) do |dir, _plane, _record|
+      code, out = cli(dir, "gate", "all", "--change", "c1")
+      assert_equal 0, code
+      assert_match(/^advisory: 1 issue to address before c1 goes live/, out)
+      assert_match(/^  ! warn policy: the policy-conformance review/, out)
+    end
+  end
+end
+
 # Every outcome soft-foundry prints carries a word, so the meaning survives
 # a terminal or screen reader that cannot render the glyph next to it
 # (.ai/rules/accessibility.md, command-line rules).
@@ -253,6 +404,10 @@ class StatusWordTest < Minitest::Test
       File.delete(File.join(dir, ".ai/rules/accessibility.md"))
       _code, out = cli(dir, "check")
       assert_match(/^! warning \.ai\/rules\/accessibility\.md is missing/, out)
+      File.delete(File.join(dir, ".ai/rules/policy-conformance.md"))
+      code, out = cli(dir, "check")
+      assert_equal 0, code, "standards missing are warnings, not errors"
+      assert_match(/^! warning \.ai\/rules\/policy-conformance\.md is missing/, out)
       File.delete(File.join(dir, ".ai/skills/planning/template/rollback.md"))
       code, out = cli(dir, "check")
       assert_equal 2, code

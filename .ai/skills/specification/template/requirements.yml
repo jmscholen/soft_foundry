@@ -2,7 +2,7 @@
 # acceptance criteria, tests, evaluation journeys, and attack cases.
 requirements:
   - id: REQ-001
-    category: functional   # functional | accessibility | security | data | failure | performance | operations | infrastructure | observability
+    category: functional   # functional | accessibility | security | policy | data | failure | performance | operations | infrastructure | observability
     statement: TBD
     rationale: TBD
     source: 00-intake/request.md

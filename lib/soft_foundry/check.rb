@@ -17,6 +17,7 @@ module SoftFoundry
 
       findings.concat(check_templates)
       findings.concat(check_accessibility_standard)
+      findings.concat(check_policy_standard)
       findings.concat(check_path_groups)
       findings.concat(check_transitions)
       @plane.phases.each { |phase| findings.concat(check_phase(phase)) }
@@ -35,6 +36,13 @@ module SoftFoundry
     def check_accessibility_standard
       return [] if File.exist?(File.join(@plane.dir, "rules", "accessibility.md"))
       [Finding.new(:warning, ".ai/rules/accessibility.md is missing; accessibility reviews have no standard to cite (advisory only)")]
+    end
+
+    # Same shape: the governed application's published promises can only be
+    # reviewed against a standard that says how.
+    def check_policy_standard
+      return [] if File.exist?(File.join(@plane.dir, "rules", "policy-conformance.md"))
+      [Finding.new(:warning, ".ai/rules/policy-conformance.md is missing; privacy and security policy conformance reviews have no standard to cite (advisory only)")]
     end
 
     def check_path_groups

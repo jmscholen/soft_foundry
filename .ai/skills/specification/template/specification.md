@@ -21,6 +21,9 @@ TBD
 ## Security requirements
 TBD
 
+## Privacy and security policy conformance
+TBD: what this change collects, shares, retains, protects, or promises differently, classified per `.ai/rules/policy-conformance.md`, and the published document and clause that covers each item; or why nothing the policies cover changes.
+
 ## Performance and resource limits
 TBD
 

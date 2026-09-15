@@ -1,0 +1,66 @@
+commit_sha: 05f44e9a6dd62a01ffc926e903aa8c6898f36ec2
+journeys:
+  - id: EVAL-001
+    criteria: [REQ-POL-002, REQ-POL-003, REQ-POL-006]
+    persona: developer in a Rails application publishing PRIVACY.md and .github/SECURITY.md
+    starting_state: "scratch repo with this repo's real .ai/, a Gemfile naming rails, PRIVACY.md, .github/SECURITY.md; branch change/analytics-event"
+    steps: ["soft-foundry onboard --maturity scan --reassess", "read the policies block of .ai/repository.yml", "soft-foundry change new analytics-event", "grep policy: and accessibility: in metadata.yml", "count comment lines in metadata.yml", "soft-foundry gate all --change analytics-event"]
+    assertions: ["the scan records privacy PASS (PRIVACY.md), security PASS (.github/SECURITY.md), terms UNKNOWN with a rationale naming where it looked", "metadata.yml line 19 reads policy: true with a comment naming privacy, security, and the standard; line 17 reads accessibility: true from the rails detection", "the template's thirteen comment lines survive both edits", "gate prints an advisory block with one policy line (the review has not run yet) beside the accessibility one", "gate exit code 0"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-002
+    criteria: [REQ-POL-003]
+    persona: same developer after completing intake and a specification with only a functional requirement
+    starting_state: 00-intake and 02-specification complete at HEAD, requirements.yml holding the template's functional requirement
+    steps: ["soft-foundry gate all --change analytics-event | grep 'warn policy'", "replace requirements.yml with one category: policy requirement naming the PRIVACY.md clause", "soft-foundry gate all --change analytics-event | grep -c 'category: policy'"]
+    assertions: ["advisory names 02-specification/requirements.yml with no category: policy requirement", "after the policy requirement is added the count is 0 (grep -c exits 1 on zero matches, the expected outcome)"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-003
+    criteria: [REQ-POL-003, REQ-POL-004]
+    persona: same developer after a reviewer wrote Conformance N/A, then a conforming review
+    starting_state: 13-review complete at HEAD with policy-conformance.md declaring N/A
+    steps: ["soft-foundry gate review --change analytics-event | grep 'warn policy'", "rewrite policy-conformance.md with documents checked, one info finding citing a PRIVACY.md clause, Policy text changes required None, Conformance Conforms", "soft-foundry gate review --change analytics-event | grep -c 'warn policy'"]
+    assertions: ["advisory names 13-review/policy-conformance.md declaring conformance N/A although the change declares a policy surface", "the conforming review produces no policy advisory (count 0)"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-004
+    criteria: [REQ-POL-005, REQ-POL-006]
+    persona: same developer, then the product owner
+    starting_state: policy-conformance.md listing one owed PRIVACY.md clause (name the vendor as a recipient) and Conformance does not conform until published
+    steps: ["soft-foundry gate review --change analytics-event | grep 'warn policy'", "set status: awaiting_human in metadata.yml", "soft-foundry change status analytics-event", "record a human_decisions entry (boundary legal commitment, decided_by the product owner, decision approved)", "soft-foundry gate review --change analytics-event | grep -c 'warn policy'", "soft-foundry gate review exit code"]
+    assertions: ["advisory says the review lists policy text changes owed, that publishing them is a legal commitment awaiting a person, and to park the change with status: awaiting_human", "with the status set, change status shows [status: awaiting_human] in its header and the advisory wording changes to parked awaiting a person's decision", "with the decision recorded the policy advisory disappears (count 0)", "the exit code 2 on the last gate call is the gate's own predecessor check (08-attack is pending while 13-review is marked complete), confirmed by rerunning the command and reading the failed check; it is not the advisory, which changed no exit code in any journey"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-005
+    criteria: [REQ-POL-003]
+    persona: same developer turning the flag off
+    starting_state: metadata.yml with surfaces.policy false in a repository whose profile records privacy and security PASS
+    steps: ["soft-foundry gate all --change analytics-event | grep 'warn policy'"]
+    assertions: ["advisory says the profile records published policy documents (privacy, security) but the change declares surfaces.policy: false, and asks the author to confirm or set the flag"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-006
+    criteria: [REQ-POL-002, REQ-POL-003, REQ-POL-007]
+    persona: maintainer of a library-shaped repository
+    starting_state: "scratch repo with this repo's real .ai/ including its own repository.yml (privacy NOT_APPLICABLE, security MISSING, terms NOT_APPLICABLE); branch change/tidy"
+    steps: ["read the policies statuses", "soft-foundry change new tidy", "grep policy: in metadata.yml", "soft-foundry gate all --change tidy | grep -c 'warn policy'", "set surfaces.policy true by hand", "soft-foundry gate all --change tidy | grep 'warn policy'"]
+    assertions: ["change new leaves the flag false with the template's explanatory comment intact, because no document is recorded PASS", "no policy advisory for the fresh change (count 0)", "with the flag set by hand, the advisory says the profile records no published document to check against and that the review has not run"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-007
+    criteria: [REQ-POL-001, REQ-POL-007, REQ-POL-008]
+    persona: operator of an installed control plane missing the standard
+    starting_state: .ai/rules/policy-conformance.md deleted from the tidy repository
+    steps: ["soft-foundry check", "soft-foundry onboard --maturity scan --reassess", "grep policy_conformance.standard_in_force .ai/repository.yml", "soft-foundry gate all --change tidy"]
+    assertions: ["check prints '! warning .ai/rules/policy-conformance.md is missing ... (advisory only)' and still passes, exit 0", "the scan records policy_conformance.standard_in_force UNKNOWN", "gate adds the advisory line: no privacy and security policy conformance standard is in force"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-008
+    criteria: [REQ-POL-006]
+    persona: screen-reader user or CI log reader
+    starting_state: the analytics-event repository after EVAL-005
+    steps: ["soft-foundry gate all --change analytics-event | strip every non-ASCII byte | grep 'warn policy'", "count ESC bytes in the same output"]
+    assertions: ["the policy advisory line still reads warn policy: followed by the full message", "zero escape sequences"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass

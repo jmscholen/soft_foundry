@@ -23,6 +23,10 @@ Created from `.ai/templates/handoff.yml`. Field semantics:
 
 `surfaces.accessibility: true` means a person perceives or operates the result (UI, CLI output, a document). `change new` sets it when `.ai/repository.yml` records a user-facing framework. It selects `.ai/rules/accessibility.md` for implementation and review, and enables the accessibility go-live advisories.
 
+`surfaces.policy: true` means the change alters what the application collects, shares, retains, protects, or promises in its published privacy policy, security policy, or terms. `change new` sets it when `.ai/repository.yml` records a published policy document under `policies:`. It selects `.ai/rules/policy-conformance.md` for implementation and review, and enables the policy go-live advisories.
+
+`human_decisions` lists the human-boundary decisions (`.ai/policies/human-boundaries.yml`) the change required, each with `boundary`, `subject`, `decided_by`, `decided_at`, and `decision`. While a decision the review says is owed has no entry, the change is parked with `status: awaiting_human`; the phase handoff records what was asked.
+
 ## Gate semantics
 
 `soft-foundry gate <phase>` evaluates a phase's handoff against `completion.yml`:
@@ -41,6 +45,10 @@ A stale or failed gate must be resolved by rerunning the phase, never by editing
 - the review or judge phase waived through `skipped_phases`, with the rationale given;
 - a change that declares `surfaces.accessibility: true` but has no `category: accessibility` requirement, no accessibility observations in evaluation, or an accessibility review that is pending, skipped, still TBD, or N/A;
 - a change that declares `surfaces.accessibility: false` in a repository whose profile records a user-facing framework;
-- a repository with no `.ai/rules/accessibility.md` in force.
+- a repository with no `.ai/rules/accessibility.md` in force;
+- a change that declares `surfaces.policy: true` but has no `category: policy` requirement, or a policy-conformance review that is pending, skipped, still TBD, or N/A, or a repository profile that records no published policy document to check against;
+- a policy-conformance review that lists policy text changes owed with no matching `human_decisions` entry (a legal commitment awaiting a person);
+- a change that declares `surfaces.policy: false` in a repository whose profile records a published policy document;
+- a repository with no `.ai/rules/policy-conformance.md` in force.
 
-Every advisory line starts with `! warn` and the area (`accessibility`, `review`, `judgment`) so it can be searched for in a log.
+Every advisory line starts with `! warn` and the area (`accessibility`, `policy`, `review`, `judgment`) so it can be searched for in a log.

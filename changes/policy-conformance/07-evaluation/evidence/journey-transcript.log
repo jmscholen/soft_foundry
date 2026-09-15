@@ -1,0 +1,184 @@
+=== EVAL-001: a Rails application publishing PRIVACY.md and .github/SECURITY.md; the scan records them, change new declares the policy surface, gate reports what is owed, exit 0
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry onboard --maturity scan --reassess | grep -v '^\s*$' | head -20
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+created   .gitignore
+updated   AGENTS.md  (block appended)
+created   CLAUDE.md
+maturity: scanned
+maturity: level 0 (unknown) — 9/11 capabilities satisfied
+  blocking the next level:
+    - repository.execution_path_known (UNKNOWN)
+  1 other recorded deficiency not yet blocking a level, see the report
+  full report: .ai/maturity-report.md
+  (run with --maturity=deep for a judgment-based assessment)
+LLM provider discovery
+openai     not configured (set OPENAI_API_KEY)
+anthropic  not configured (set ANTHROPIC_API_KEY)
+xai        not configured (set XAI_API_KEY)
+openrouter not configured (set OPENROUTER_API_KEY)
+Local model inventory written to .soft-foundry/runtime.yml (gitignored).
+[exit 0]
+
+$ sed -n '/^policies:/,/^capabilities:/p' .ai/repository.yml
+policies:
+  privacy:
+    status: PASS
+    evidence:
+    - PRIVACY.md
+  security:
+    status: PASS
+    evidence:
+    - ".github/SECURITY.md"
+  terms:
+    status: UNKNOWN
+    rationale: no terms document found where the scan looks (., docs, docs/legal,
+      docs/policies, legal, policies, public, .github, .well-known, app/views/pages,
+      app/views/legal, app/views/static, content, pages, src/pages, site); discovery
+      must record whether the application publishes one (MISSING) or none applies
+capabilities:
+[exit 0]
+
+$ git checkout -qb change/analytics-event
+[exit 0]
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change new analytics-event --title 'Send page views to an analytics vendor'
+created changes/analytics-event with 16 phase directories
+branch: change/analytics-event
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+[exit 0]
+
+$ grep -n 'policy:\|accessibility:' changes/analytics-event/metadata.yml
+17:  accessibility: true   # set by change new: user-facing framework detected (rails); .ai/rules/accessibility.md applies
+19:  policy: true   # set by change new: published policy document recorded (privacy, security); .ai/rules/policy-conformance.md applies
+[exit 0]
+
+$ grep -c '^#' changes/analytics-event/metadata.yml
+13
+[exit 0]
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate all --change analytics-event | grep -A6 '^advisory:'
+advisory: 2 issues to address before analytics-event goes live (informational, does not block the gate)
+  ! warn accessibility: the accessibility review (13-review/accessibility.md) has not run yet
+  ! warn policy: the policy-conformance review (13-review/policy-conformance.md) has not run yet
+[exit 0]
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate all --change analytics-event > /dev/null; echo "gate exit code: $?"
+gate exit code: 0
+[exit 0]
+
+=== EVAL-002: a completed specification without a category: policy requirement is advised; adding one clears it
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate all --change analytics-event | grep 'warn policy'
+  ! warn policy: 02-specification/requirements.yml has no requirement with category: policy although the change declares a policy surface
+  ! warn policy: the policy-conformance review (13-review/policy-conformance.md) has not run yet
+[exit 0]
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate all --change analytics-event | grep -c 'category: policy'
+0
+[exit 1]
+
+=== EVAL-003: a policy-conformance review declaring N/A is advised; a conforming one with no policy text owed is quiet
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate review --change analytics-event | grep 'warn policy'
+  ! warn policy: 13-review/policy-conformance.md declares conformance N/A although the change declares a policy surface
+[exit 0]
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate review --change analytics-event | grep -c 'warn policy'
+0
+[exit 1]
+
+=== EVAL-004: a review that lists policy text changes owed is a legal commitment: advised until a person's decision is recorded under human_decisions
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate review --change analytics-event | grep 'warn policy'
+  ! warn policy: 13-review/policy-conformance.md lists policy text changes owed; publishing them is a legal commitment awaiting a person: park the change with status: awaiting_human and record the decision under human_decisions in metadata.yml
+[exit 0]
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -ryaml -e 'p="changes/analytics-event/metadata.yml"; d=YAML.safe_load_file(p, permitted_classes: [Time]); d["status"]="awaiting_human"; File.write(p, YAML.dump(d))'
+[exit 0]
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change status analytics-event | sed -n '1p;/^advisory:/,$p' | grep -v accessibility
+analytics-event: Send page views to an analytics vendor  [status: awaiting_human, phase: intake, risk: TBD]
+advisory: 3 issues to address before analytics-event goes live (informational, does not block the gate)
+  ! warn policy: parked awaiting a person's decision on the policy text changes listed in 13-review/policy-conformance.md (a legal commitment); record it under human_decisions in metadata.yml once made
+[exit 0]
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -ryaml -e 'p="changes/analytics-event/metadata.yml"; d=YAML.safe_load_file(p, permitted_classes: [Time]); d["human_decisions"]=[{"boundary"=>"legal commitment","subject"=>"PRIVACY.md: analytics vendor as recipient","decided_by"=>"the product owner","decided_at"=>"2026-09-15","decision"=>"approved"}]; File.write(p, YAML.dump(d))'
+[exit 0]
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate review --change analytics-event | grep -c 'warn policy'
+0
+[exit 1]
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate review --change analytics-event > /dev/null; echo "gate exit code: $?"
+gate exit code: 2
+[exit 0]
+
+=== EVAL-005: the author turns the flag off in a repository with published policies; the advisory asks them to confirm
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -ryaml -e 'p="changes/analytics-event/metadata.yml"; d=YAML.safe_load_file(p, permitted_classes: [Time]); d["surfaces"]["policy"]=false; File.write(p, YAML.dump(d))'
+[exit 0]
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate all --change analytics-event | grep 'warn policy'
+  ! warn policy: repository profile records published policy documents (privacy, security) but this change declares surfaces.policy: false; confirm it alters nothing the application collects, shares, retains, protects, or promises, or set the flag so the policy-conformance checks apply
+[exit 0]
+
+=== EVAL-006: a library-shaped repository (this repository's own profile: privacy and terms NOT_APPLICABLE, security MISSING) leaves the flag false and is quiet; setting it by hand says there is no document to check against
+$ sed -n '/^policies:/,/^capabilities:/p' .ai/repository.yml | grep -n 'status'
+3:    status: NOT_APPLICABLE
+6:    status: MISSING
+10:    status: NOT_APPLICABLE
+[exit 0]
+
+$ git checkout -qb change/tidy
+[exit 0]
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change new tidy --title 'Tidy' | head -1
+created changes/tidy with 16 phase directories
+[exit 0]
+
+$ grep -n '  policy:' changes/tidy/metadata.yml
+19:  policy: false           # true when the change alters what the application collects, shares, retains, protects, or promises in its privacy policy, security policy, or terms; loads .ai/rules/policy-conformance.md and enables the go-live policy advisories. Set automatically by `change new` when the repository profile records a published policy document.
+[exit 0]
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate all --change tidy | grep -c 'warn policy'
+0
+[exit 1]
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -ryaml -e 'p="changes/tidy/metadata.yml"; d=YAML.safe_load_file(p, permitted_classes: [Time]); d["surfaces"]["policy"]=true; File.write(p, YAML.dump(d))'
+[exit 0]
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate all --change tidy | grep 'warn policy'
+  ! warn policy: .ai/repository.yml records no published privacy, security, or terms document under policies: although the change declares a policy surface; discovery must record what the application publishes (MISSING is a valid, visible answer) and review must say what it checked against
+  ! warn policy: the policy-conformance review (13-review/policy-conformance.md) has not run yet
+[exit 0]
+
+=== EVAL-007: an installed control plane missing the standard: check warns and still passes, the scan records the capability UNKNOWN, gate says no standard is in force
+$ rm .ai/rules/policy-conformance.md
+[exit 0]
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry check
+! warning .ai/rules/policy-conformance.md is missing; privacy and security policy conformance reviews have no standard to cite (advisory only)
+✓ pass control plane: 16 phases, 16 skills, no errors
+[exit 0]
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry check > /dev/null; echo "check exit code: $?"
+check exit code: 0
+[exit 0]
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry onboard --maturity scan --reassess > /dev/null; grep -A2 'policy_conformance.standard_in_force' .ai/repository.yml
+  policy_conformance.standard_in_force:
+    status: UNKNOWN
+    evidence: []
+[exit 0]
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate all --change tidy | grep 'standard is in force'
+  ! warn policy: no privacy and security policy conformance standard is in force (.ai/rules/policy-conformance.md is missing), so review has nothing to cite
+[exit 0]
+
+=== EVAL-008: screen-reader and CI-log readability: with every non-ASCII byte stripped, every policy advisory line still reads warn policy: and names what to do; no escape sequences
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate all --change analytics-event | LC_ALL=C tr -d '\200-\377' | grep 'warn policy'
+  ! warn policy: repository profile records published policy documents (privacy, security) but this change declares surfaces.policy: false; confirm it alters nothing the application collects, shares, retains, protects, or promises, or set the flag so the policy-conformance checks apply
+[exit 0]
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate all --change analytics-event | LC_ALL=C tr -cd '\033' | wc -c
+       0
+[exit 0]
+

@@ -21,6 +21,18 @@ infrastructure:
     tools: []
   deployment_targets: []
 
+# Published policy documents the application's users can see, located by
+# discovery per .ai/rules/policy-conformance.md. Status is PASS (found),
+# MISSING (absence established), UNKNOWN (not determined), or
+# NOT_APPLICABLE (with a rationale). Evidence is a repository path or URL.
+policies:
+  privacy:
+    status: UNKNOWN
+  security:
+    status: UNKNOWN
+  terms:
+    status: UNKNOWN
+
 capabilities: {}
 
 # Capability entry example:

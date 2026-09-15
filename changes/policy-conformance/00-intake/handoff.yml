@@ -1,0 +1,17 @@
+phase: 00-intake
+skill: intake
+status: complete
+commit_sha: 05f44e9a6dd62a01ffc926e903aa8c6898f36ec2
+started_at: '2026-09-15T11:35:00Z'
+completed_at: '2026-09-15T11:50:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- request.md
+- assumptions.md
+blocking: []
+findings: []
+next: discover
+notes: Performed directly by the interactive session, not a fresh-context agent; see assumptions.md. The requirement IDs REQ-POL-001..008 in request.md stand in for the skipped specification phase.

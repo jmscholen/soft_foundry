@@ -4,6 +4,7 @@ require_human_approval:
   - irreversible data deletion
   - credential or secret disclosure
   - legal commitments
+  - publishing or changing the application's privacy policy, security policy, or terms (a legal commitment; recorded under human_decisions in the change's metadata.yml)
   - financial commitments or transfers
   - security testing against production or third-party systems without explicit authorization
   - changes that intentionally weaken required controls

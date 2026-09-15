@@ -68,6 +68,41 @@ class MaturityScanTest < Minitest::Test
     end
   end
 
+  def test_policy_documents_are_found_where_applications_publish_them
+    with_fixture_repo do |dir|
+      File.write(File.join(dir, "PRIVACY.md"), "x")
+      FileUtils.mkdir_p(File.join(dir, ".github")); File.write(File.join(dir, ".github/SECURITY.md"), "x")
+      FileUtils.mkdir_p(File.join(dir, ".well-known")); File.write(File.join(dir, ".well-known/security.txt"), "x")
+      FileUtils.mkdir_p(File.join(dir, "docs/legal")); File.write(File.join(dir, "docs/legal/Terms-of-Service.html"), "x")
+      File.write(File.join(dir, "docs/legal/privacy-policy.md"), "x")
+      File.write(File.join(dir, "docs/legal/security-review-notes.md"), "not a policy")
+      policies = scan(dir).policies
+      assert_equal({ "status" => "PASS", "evidence" => ["PRIVACY.md", "docs/legal/privacy-policy.md"] }, policies["privacy"])
+      assert_equal [".github/SECURITY.md", ".well-known/security.txt"], policies["security"]["evidence"]
+      assert_equal ["docs/legal/Terms-of-Service.html"], policies["terms"]["evidence"]
+    end
+  end
+
+  def test_absent_policy_documents_are_unknown_not_missing
+    with_fixture_repo do |dir|
+      policies = scan(dir).policies
+      %w[privacy security terms].each do |name|
+        assert_equal "UNKNOWN", policies[name]["status"], name
+        assert_includes policies[name]["rationale"], "discovery must record"
+      end
+    end
+  end
+
+  def test_policy_conformance_standard_is_a_file_fact
+    with_fixture_repo do |dir|
+      assert_equal "PASS", scan(dir).capabilities["policy_conformance.standard_in_force"].status
+      File.delete(File.join(dir, ".ai/rules/policy-conformance.md"))
+      cap = scan(dir).capabilities["policy_conformance.standard_in_force"]
+      assert_equal "UNKNOWN", cap.status
+      assert_includes cap.rationale, "policy-conformance.md"
+    end
+  end
+
   def test_run_writes_repository_yml_with_computed_maturity
     with_fixture_repo do |dir|
       File.write(File.join(dir, "AGENTS.md"), "x"); File.write(File.join(dir, "README.md"), "x" * 300)
@@ -78,6 +113,7 @@ class MaturityScanTest < Minitest::Test
       assert data.dig("repository", "assessed")
       assert data["repository"]["commit_sha"]
       assert_equal result, data["maturity"]
+      assert_equal "UNKNOWN", data.dig("policies", "privacy", "status"), "the scan records what it could not find as UNKNOWN"
     end
   end
 

@@ -1,0 +1,38 @@
+phase: 13-review
+skill: review
+status: complete
+commit_sha: 05f44e9a6dd62a01ffc926e903aa8c6898f36ec2
+started_at: '2026-09-15T12:50:00Z'
+completed_at: '2026-09-15T13:10:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- functional.md
+- architecture.md
+- security.md
+- accessibility.md
+- policy-conformance.md
+- infrastructure.md
+- operations.md
+- consolidated.md
+blocking: []
+findings:
+- id: REV-001
+  severity: minor
+  summary: A change that legitimately alters nothing the policies cover cannot record that confirmation, so the undeclared-surface notice never clears; same trait as accessibility's. Follow-up.
+- id: REV-018
+  severity: minor
+  summary: This repository publishes no SECURITY.md or vulnerability disclosure route; recorded MISSING in .ai/repository.yml. Follow-up to add one.
+- id: REV-023
+  severity: minor
+  summary: onboard --maturity scan --reassess rewrites .ai/repository.yml and flattens a hand-written policies block to UNKNOWN; pre-existing for capabilities, now one more block. Follow-up.
+- id: REV-025
+  severity: minor
+  summary: README still documents --maturity=scan; the CLI accepts only --maturity scan. Open since the accessibility-advisory review.
+- id: REV-024
+  severity: info
+  summary: This record's own gate output carries advisories for the skipped specification and judgment phases, which is the feature working as designed.
+next: judge
+notes: Compatibility mode, performed by the interactive session that also implemented the change rather than a fresh-context reviewer; recorded here so the separation-of-duties limitation is explicit. Review was run for this change (rather than skipped as most prior repository-native changes did) because the change is about review. The review phase's lifecycle predecessor resolves to 07-evaluation because attack is skipped with rationale and remediate/document/index/observe are optional.
