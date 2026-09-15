@@ -34,9 +34,8 @@ policies:
     status: NOT_APPLICABLE
     rationale: Library gem with no users' data; the only outbound calls are provider model listings and the RubyGems version check, documented in README.md, and nothing about a person is stored or transmitted.
   security:
-    status: MISSING
-    findings: [no_security_policy_or_vulnerability_disclosure_document]
-    rationale: A gem published on RubyGems with a public repository has no SECURITY.md stating how to report a vulnerability; absence established by searching the repository root, .github, and docs.
+    status: NOT_APPLICABLE
+    rationale: "Maintainer decision (2026-09-15, changes/security-policy-not-applicable): Soft Foundry is a developer tool, not a service that collects or processes user information, so no published security policy is owed. No SECURITY.md exists; vulnerability reports go through the public GitHub repository's issues."
   terms:
     status: NOT_APPLICABLE
     rationale: No service is offered; the gem is distributed under its RubyGems listing.
