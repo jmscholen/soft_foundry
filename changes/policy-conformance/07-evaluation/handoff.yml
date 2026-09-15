@@ -1,16 +1,23 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
 phase: 07-evaluation
 skill: evaluation
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 05f44e9a6dd62a01ffc926e903aa8c6898f36ec2
+started_at: '2026-09-15T12:30:00Z'
+completed_at: '2026-09-15T12:50:00Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- evaluation-plan.md
+- journeys.yml
+- results.md
+- evidence/manifest.yml
+- evidence/journey-transcript.log
+blocking: []
+findings:
+- id: EVAL-F-001
+  severity: info
+  summary: The scan's terms lookup returned UNKNOWN for the Rails scratch app because it publishes none; correct behaviour, noted so review can confirm the scan never writes MISSING.
 next: attack
-notes: ""
+notes: Performed directly by the interactive session, not a fresh-context agent; see 00-intake/assumptions.md.
