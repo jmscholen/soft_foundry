@@ -1,16 +1,38 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
 phase: 13-review
 skill: review
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: a1adf76bb635318bfdfc4d2db7e61bfc9d4e21e3
+started_at: '2026-09-16T20:00:00Z'
+completed_at: '2026-09-16T20:15:00Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- functional.md
+- architecture.md
+- security.md
+- accessibility.md
+- policy-conformance.md
+- infrastructure.md
+- operations.md
+- consolidated.md
+blocking: []
+findings:
+- id: REV-001
+  severity: minor
+  summary: vet!, reopen!, and the pre-existing close! rewrite metadata.yml with YAML.dump and drop the template's comments. Follow-up.
+- id: REV-002
+  severity: minor
+  summary: A record with no track key reads as the repository default; pin track gated on the two open legacy records before ever flipping tracks.default. Follow-up.
+- id: REV-018
+  severity: minor
+  summary: The exploring track line, the risk-forces vet refusal, and the environment advisory are single lines of about 170 characters. Follow-up.
+- id: REV-028
+  severity: minor
+  summary: README still documents --maturity=scan; the CLI accepts only --maturity scan. Open since the accessibility-advisory review.
+- id: REV-027
+  severity: info
+  summary: This record's own gate output carries advisories for the skipped specification and judgment phases, which is the feature working as designed.
 next: judge
-notes: ""
+notes: Compatibility mode, performed by the interactive session that also implemented the change rather than a fresh-context reviewer; recorded here so the separation-of-duties limitation is explicit. Review was run for this change because it alters what the lifecycle requires of every future change. The review phase's lifecycle predecessor resolves to 07-evaluation because attack is skipped with rationale and remediate/document/index/observe are optional.

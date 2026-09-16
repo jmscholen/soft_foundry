@@ -3,18 +3,19 @@
 Standard: `.ai/rules/policy-conformance.md`. Cite the policy document and clause, or a rule from that file, in every finding.
 
 ## Documents checked
-TBD: the privacy policy, security policy, and terms recorded under `policies:` in `.ai/repository.yml`, each with the path or URL and the version or date examined; or a statement that the application publishes none and that this is itself a go-live gap.
+This repository's `policies:` block in `.ai/repository.yml`: privacy NOT_APPLICABLE (library gem, no users' data), security NOT_APPLICABLE (maintainer decision 2026-09-15, `changes/security-policy-not-applicable`), terms NOT_APPLICABLE (no service). There is no published text to check a clause against.
 
 ## Scope reviewed
-TBD
+`surfaces.policy` is false for this change, so the question is whether that is right: does the change alter anything Soft Foundry itself collects, shares, retains, protects, or promises? Examined: the one new data element written to a committed record (`vetted.by`, a person's name from `--by` or git `user.name`), `reopenings.reason` (free text a person supplies), the journal template's fields, and the new read of git config.
 
 ## Findings
 | ID | Severity | Location | Finding | Policy clause or rule |
 | --- | --- | --- | --- | --- |
-| REV-TBD | blocking / major / minor | TBD | TBD | TBD |
+| REV-020 | info | `vetted.by` in `metadata.yml` | A person's name enters the committed repository. Classified: it is the same identity git records as the author of the next commit, supplied by the person or read from their own git config, and it exists so a reader knows who accepted the feature. Nothing is transmitted anywhere. | Rule: classify every new data element |
+| REV-021 | info | `.ai/skills/exploration/template/iterations.yml` | The journal's suggested fields (`asked`, `outcome`) invite quoting a person's words into the record. Guidance for governed applications, not data Soft Foundry collects; the standard's classification rule applies to the governed change when it fills the journal. | Rule: data minimisation |
 
 ## Policy text changes required
-TBD: None, or one line per clause that must be published before this change goes live. Publishing a change to a privacy policy, security policy, or terms is a legal commitment under `.ai/policies/human-boundaries.yml`: park the change with `status: awaiting_human` in `metadata.yml` and record the person's decision under `human_decisions` there.
+None. This repository publishes no privacy policy, security policy, or terms, so there is no text to change.
 
 ## Conformance
-TBD: conforms / conforms with advisories / does not conform / N/A. N/A is valid only when `surfaces.policy` is false and this section says what was examined to conclude the change alters nothing the application collects, shares, retains, protects, or promises.
+N/A, with the statement above of what was examined: the change alters nothing Soft Foundry collects, shares, retains, protects, or promises beyond a name already present in git history, and `surfaces.policy: false` is correct.
