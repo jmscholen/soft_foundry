@@ -91,3 +91,38 @@ judgments:
   - APPROVED_WITH_RESIDUAL_RISK
   - BLOCKED
   - REJECTED
+
+# Lifecycle tracks. Both share the lifecycle above and the same gate. A
+# track decides which phases a change must complete before implementation,
+# when the specification locks, and whether an exploring stage exists.
+#
+#   gated      The stage-gate lifecycle as written above: every phase in
+#              order, the specification locked when its phase completes,
+#              evidence bound from the first commit.
+#   iterative  An exploring stage first: the change is iterated with a
+#              person and deployed only to the development environment,
+#              with each round appended to changes/<slug>/exploration/
+#              iterations.yml and the specification kept as a living
+#              draft. `soft-foundry change vet` is the person's recorded
+#              acceptance; it locks the specification at that commit and
+#              the hardening phases (implement onward) then apply exactly
+#              as on the gated track. `change reopen` returns to exploring
+#              and resets every phase from implement onward to pending.
+#
+# While a change is exploring, no phase from implement onward may be
+# complete: the exploring stage produces a journal, never evidence.
+tracks:
+  default: gated
+  gated:
+    description: Stage-gate lifecycle in order; specification locks when its phase completes.
+  iterative:
+    description: Exploring stage with a person in a development environment, then vet, then the same hardening phases.
+    exploring: true
+    skill: exploration          # loaded instead of a phase skill while status is exploring
+    output: exploration         # changes/<slug>/exploration/, scaffolded from the skill's templates
+    vet_requires: [intake, specify]   # must be complete, with passing gates, before `change vet`
+    optional: [discover, threat_model, plan]   # not required before implementation on this track; a change may still run them
+  # A change's declared risk can force a track regardless of what
+  # `change new --track` asked for; the gate reports the conflict.
+  forced_by_risk:
+    high: gated

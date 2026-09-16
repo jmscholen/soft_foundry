@@ -1,0 +1,41 @@
+# Change Intake
+
+## User intent
+The maintainer asked to review the gating system "to favor an iterative approach with the user and the agent during development of a feature. Given that the agent will deploy to a development environment, we don't want to go through an entire gating process until the feature is fully vetted between the user and the agent." Asked whether the process was atypical of agile, the assessment was that it is a stage-gate (V-model-shaped) lifecycle applied per change, and that the assurance ceremony is worth keeping but is applied from the first commit rather than from the point where a person has accepted the feature. Asked whether two options could coexist, one traditional and one iterative, the answer was yes with a track selector; the maintainer said "ok, lets do that."
+
+What the review found before this change: every real change in this repository skipped discover, specify, threat_model, plan, attack, judge, and learn with near-identical rationale and backfilled its record after the fact; the specification is locked at the wrong moment for a feature shaped by trying it; one edit after verification marks five phases stale (the git log shows two "re-verify and rebind" commits on one change); no development environment exists in the model; and risk did not select phases, a gap the repository profile already recorded.
+
+## Desired outcome
+Stable requirement IDs, since the specification phase is skipped for this change (see `metadata.yml`):
+
+- **REQ-TRK-001.** `.ai/workflow.yml` declares lifecycle tracks that share the same phases and the same gate: `gated` (every phase in order; the specification locks when its phase completes) and `iterative` (an exploring stage first, then `change vet`, then the phases from implementation onward). `tracks.default` names the repository default, `gated` here. `tracks.forced_by_risk` maps a declared risk to a track (`high: gated`). A control plane that declares no tracks behaves as a single implicit `gated` track, so installed control planes written before this change keep working unchanged.
+- **REQ-TRK-002.** `soft-foundry change new <slug> --track <name>` writes `track:` into `metadata.yml`, defaulting to the repository default and refusing an unknown name. On a track with an exploring stage the record starts at `status: exploring`, with `changes/<slug>/exploration/iterations.yml` scaffolded from the stage skill's template. On the gated track the record starts at `status: intake` with no exploration directory.
+- **REQ-TRK-003.** While a change is `exploring`, the gate fails any phase from `implement` onward that is marked `complete` (a `not exploring` check naming `change vet`), and `ci` passes for an exploring change with nothing complete. The exploring stage produces a journal, never evidence.
+- **REQ-TRK-004.** `soft-foundry change vet <slug> [--by NAME]` is the person's recorded acceptance. It refuses, naming every reason, until: the change is exploring on a track with an exploring stage; risk is classified and does not force another track; the journal has at least one iteration; and each `vet_requires` phase (intake and specify) is complete, passes its gate, and has no uncommitted changes. It then writes `vetted: {at, by, commit}` (commit = HEAD, by = `--by`, else git `user.name`), sets `status: in_progress` and `current_phase: implement`, and prints the advisories. `by` defaults to the repository's git identity.
+- **REQ-TRK-005.** After vet, the specification phase's gate carries a `specification locked` check that fails when anything under `02-specification/` changed since the vetted commit, committed or not, pointing to `change reopen`. The gated track has no such check (its locking stays policy, as before).
+- **REQ-TRK-006.** A track's `optional` phases (discover, threat_model, plan on `iterative`) are not required before implementation: the gate's predecessor check steps over them when pending, and they count as legitimately pending for `reached_lifecycle_end?`, so an iterative change can be closed without a `skipped_phases` rationale for each.
+- **REQ-TRK-007.** `soft-foundry change reopen <slug> --reason TEXT` sends a vetted change back to `exploring`: every phase from `implement` onward that had started is reset to `pending` (`commit_sha` and `completed_at` cleared, a note appended, every file kept), `vetted` is cleared, and an entry (`at`, `from_commit`, `reason`) is appended to `reopenings`. It refuses on a track without an exploring stage and on a closed record, and is a no-op on an already exploring change. `ci` passes again afterwards.
+- **REQ-TRK-008.** A declared `risk` that `forced_by_risk` maps to a different track fails the first phase's `track permitted` gate check and makes `change vet` refuse. The same check fails a track that is not defined and an `exploring` status on a track without an exploring stage.
+- **REQ-TRK-009.** `.ai/skills/exploration/` is a stage skill with the full contract (`skill.yml`, `SKILL.md`, `permissions.yml`, `requirements.yml`, `completion.yml`, `template/iterations.yml`). `soft-foundry check` lints the tracks block (default defined, forced tracks defined, phases known, exploring track names a skill and output) and fails when the stage skill's write set overlaps any commit-bound phase's directory.
+- **REQ-TRK-010.** `.ai/templates/repository.yml` and this repository's profile carry an `environments:` block with `development` (`status`, `data`, `how`). `.ai/policies/human-boundaries.yml` names deploying to any environment other than development as requiring a person. A change on a track with an exploring stage in a repository whose profile records no development environment (status other than PASS or NOT_APPLICABLE) gets a `! warn environment:` advisory that never changes an exit code.
+- **REQ-TRK-011.** `change status` shows a track line (exploring with iteration count and last deployment, vetted by whom at which commit, or plain). `AGENTS.md`, `README.md`, `.ai/README.md`, `.ai/schemas.md`, and `.ai/maturity.yml` document the tracks, the exploring rule, vet, reopen, and the lock; the repository profile's `risk_classification` and `acceptance_criteria_locking` findings are updated to what is now true. Version 0.9.0.
+- **REQ-TRK-012.** The gated track and every existing record behave exactly as before: all prior tests pass unchanged, records without a `track:` key are read as the default, and `ci` against this repository's real history passes.
+
+## Constraints
+- Nothing about commit binding, staleness, separation of duties, or the final-judgment requirement weakens in the hardening stage. The exploring stage is only ever before those phases apply.
+- `gated` stays this repository's default; `iterative` is opt-in per change until it has been dogfooded once.
+- Every new CLI line carries its outcome as a word (`pass`, `fail`, `warn`) per `.ai/rules/accessibility.md`.
+- The `.ai/` directory is packaged and installed into other repositories, so the new skill, templates, and policy line ship with the gem automatically and nothing machine-local is written.
+- A refused `vet` or `reopen` changes nothing in the record.
+
+## Non-goals
+- Risk selecting phases within a track (beyond forcing the track); still a follow-up under the roadmap's risk-tiered lifecycle item.
+- Promoting a change between tracks by command; editing `track:` by hand while the phases are consistent with it is the path today.
+- A deploy command. The stage skill deploys with the repository's own means and journals it; Soft Foundry records where, not how.
+- Enforcing the stage skill's permissions at runtime; declared and linted, like every other skill's.
+
+## Task classification
+Feature: a `tracks:` block in the workflow, a stage skill with templates, `track`/`vetted`/`reopenings` in change metadata, two CLI subcommands and one option, three new gate checks and a track-aware predecessor, a tracks lint in `check`, an `environments:` profile block, a human-boundary line, an advisory, documentation, tests.
+
+## Initial risk
+low. Every new write is to the change record and is initiated by a person through the CLI (`vet`, `reopen`) or by `change new`; no new external interaction, credential, or network access; the only new read outside the record and `.ai/` is git's `user.name`. Existing tests and change records pass unchanged.

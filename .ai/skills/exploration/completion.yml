@@ -1,0 +1,3 @@
+# Checked by `soft-foundry change vet`, not by a phase gate: the journal
+# must exist with at least one iteration before a change can be vetted.
+required_files: [iterations.yml]

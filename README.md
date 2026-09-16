@@ -83,6 +83,25 @@ A gate passes only when the phase's required files exist with no `TBD` placehold
 
 `soft-foundry check` lints the control plane itself. `soft-foundry ci` runs the lint plus every change record's gates, and `soft-foundry hooks install` wires it into a pre-commit hook. The GitHub Actions workflow runs the same two commands.
 
+### Lifecycle tracks: gated or iterative
+
+The lifecycle above is a stage-gate process: intent, specification, threat model, and plan before code, evidence bound from the first commit. That is the right shape for assurance and the wrong shape for shaping a feature with a person by trying it. `.ai/workflow.yml` therefore declares two tracks that share the same phases and the same gate:
+
+- **`gated`** runs every phase in lifecycle order. The specification locks when its phase completes. This is the repository default here.
+- **`iterative`** starts with an **exploring** stage. The agent iterates with the person, deploys only to the development environment recorded in `.ai/repository.yml`, keeps `02-specification/` as a living draft, and appends each round to `changes/<slug>/exploration/iterations.yml`. Nothing from that stage is evidence, and the gate refuses to let any phase from implementation onward be complete while the change is exploring. When the person accepts the feature, `change vet` records who and at which commit; the specification is locked there, and the phases from implementation onward apply exactly as on the gated track. Discover, threat model, and plan are not required before implementation on this track (a change may still run them).
+
+```bash
+soft-foundry change new <slug> --track iterative   # status: exploring
+# ... iterate, deploy to development, journal each round ...
+soft-foundry change vet <slug>                     # the person's acceptance; locks 02-specification at HEAD
+soft-foundry gate implement                        # hardening phases from here on, as on the gated track
+soft-foundry change reopen <slug> --reason "..."   # back to exploring; phases from implementation onward reset to pending, files kept
+```
+
+`change vet` refuses until risk is classified, the journal has at least one entry, and intake and the specification are complete, committed, and pass their gates. After vet, a change to `02-specification/` fails the specification gate with a pointer to `change reopen`: a fix goes through remediation as usual, a reshaping goes back to the person. A change whose declared risk is `high` is always on the gated track (`tracks.forced_by_risk`); the gate reports the conflict on the intake phase and `change vet` refuses.
+
+The exploring stage's skill is `.ai/skills/exploration/`. `check` verifies that it can write no commit-bound phase's directory, so the invariant that exploring produces a journal and never evidence is linted, not just stated. Deploying anywhere other than the development environment is a human boundary on either track.
+
 ### Closing a change record
 
 A merged change's record has to be marked `closed`, or `soft-foundry ci` fails once that record has actually reached judgment: an un-closed record stays "live" to the gate checker, so a later edit to a path group its evidence covers will read as making that evidence stale.

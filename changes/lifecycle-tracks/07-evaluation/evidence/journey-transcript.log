@@ -1,0 +1,311 @@
+ruby: ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23]
+soft-foundry: 0.9.0
+implementation commit under evaluation: a1adf76bb635318bfdfc4d2db7e61bfc9d4e21e3
+
+############ EVAL-001 new --track iterative starts exploring; unknown track refused; ci passes while exploring
+$ (cd /tmp/sf-eval.DAcxOU && git checkout -qb change/it1)
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change new it1 --title "Try a thing" --track iterative)
+created changes/it1 with 16 phase directories
+branch: change/it1
+track: iterative (exploring; 0 iterations recorded; run `soft-foundry change vet` when the person has accepted the feature)
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change new nope --track casual)
+unknown track 'casual'; .ai/workflow.yml defines: gated, iterative
+[exit 1]
+
+$ (cd /tmp/sf-eval.DAcxOU && grep -nE '^(track|status|current_phase):' changes/it1/metadata.yml)
+9:track: iterative            # gated | iterative (.ai/workflow.yml tracks:); set by `change new --track`
+10:status: exploring          # intake | exploring | in_progress | awaiting_human | judged | closed
+11:current_phase: implement
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && ls changes/it1/exploration)
+iterations.yml
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && git add -A && git commit -qm scaffold && git rev-parse --short HEAD)
+aed1cbb
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change status | head -3)
+it1: Try a thing  [status: exploring, phase: implement, risk: TBD]
+  track: iterative (exploring; 0 iterations recorded; run `soft-foundry change vet` when the person has accepted the feature)
+  00-intake              pending      
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry ci | tail -1)
+✓ ci passed
+[exit 0]
+
+############ EVAL-002 no hardening phase may be complete while exploring
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/6c4ef0a9-4350-43f6-945d-112fb2f912cd/scratchpad/mark.rb changes/it1 06-verification $(git rev-parse HEAD))
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate verify | grep -E 'FAIL|not exploring')
+06-verification  complete  FAIL
+  ✗ fail not exploring: cannot be complete while the change is exploring; run `soft-foundry change vet` when the person has accepted the feature, then rerun this phase
+[exit 2]
+
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry ci | tail -1)
+✗ ci failed
+[exit 2]
+
+$ (cd /tmp/sf-eval.DAcxOU && git checkout -q -- changes/it1/06-verification && git status --short | wc -l)
+       0
+[exit 0]
+
+############ EVAL-003 change vet refuses until the exploring stage has happened, then records the person and commit
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change vet it1)
+it1: cannot vet
+  ✗ fail risk is not classified in metadata.yml; classify it first (a high risk change must move to the gated track)
+  ✗ fail changes/it1/exploration/iterations.yml records no iteration; the exploring stage has to have happened before it can be vetted
+  ✗ fail 00-intake is pending; it must be complete with no TBD before vetting
+  ✗ fail 02-specification is pending; it must be complete with no TBD before vetting
+[exit 1]
+
+$ (cd /tmp/sf-eval.DAcxOU && sed -i '' 's/^risk: TBD.*/risk: low/' changes/it1/metadata.yml)
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/6c4ef0a9-4350-43f6-945d-112fb2f912cd/scratchpad/mark.rb changes/it1 00-intake $(git rev-parse HEAD))
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/6c4ef0a9-4350-43f6-945d-112fb2f912cd/scratchpad/mark.rb changes/it1 02-specification $(git rev-parse HEAD))
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && printf 'iterations:\n- at: 2026-09-16T00:00:00Z\n  asked: make the button say Save\n  changed: relabelled\n  commit: %s\n  deployed:\n    environment: development\n  outcome: accepted\n' $(git rev-parse HEAD) > changes/it1/exploration/iterations.yml)
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change vet it1 | head -3)
+it1: cannot vet
+  ✗ fail 00-intake has uncommitted changes (changes/it1/00-intake/assumptions.md, changes/it1/00-intake/handoff.yml, changes/it1/00-intake/request.md); commit it so the vet can lock it at a commit
+  ✗ fail 02-specification has uncommitted changes (changes/it1/02-specification/acceptance-criteria.yml, changes/it1/02-specification/handoff.yml, changes/it1/02-specification/readiness.md); commit it so the vet can lock it at a commit
+[exit 1]
+
+$ (cd /tmp/sf-eval.DAcxOU && git add -A && git commit -qm explored && git rev-parse --short HEAD)
+f2cdd49
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change status | head -2)
+it1: Try a thing  [status: exploring, phase: implement, risk: low]
+  track: iterative (exploring; 1 iteration recorded, last deployed to development; run `soft-foundry change vet` when the person has accepted the feature)
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change vet it1 --by "A Person")
+it1: vetted by A Person at f2cdd49d9b2d
+  02-specification is locked at that commit; phases from 05-implementation onward now apply as on the gated track
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && grep -nA3 '^vetted:' changes/it1/metadata.yml; grep -n '^status:' changes/it1/metadata.yml)
+23:vetted:
+24-  at: '2026-09-16T19:53:16Z'
+25-  by: A Person
+26-  commit: f2cdd49d9b2d7c486e3073b9e67915dbbbe0d20c
+11:status: in_progress
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && git add -A && git commit -qm vetted && git rev-parse --short HEAD)
+472049c
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change status | head -2)
+it1: Try a thing  [status: in_progress, phase: implement, risk: low]
+  track: iterative (vetted by A Person at f2cdd49d9b2d on 2026-09-16T19:53:16Z; specification locked)
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change vet it1)
+it1: is not exploring (status: in_progress); `change reopen` sends a vetted change back to exploring
+[exit 1]
+
+############ EVAL-004 implement's gate passes with discover, threat_model, and plan pending on the iterative track
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/6c4ef0a9-4350-43f6-945d-112fb2f912cd/scratchpad/mark.rb changes/it1 05-implementation $(git rev-parse HEAD))
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate implement | grep -E 'PASS|FAIL|predecessor')
+05-implementation  complete  PASS
+  ✓ pass predecessor complete: 02-specification
+[exit 0]
+
+############ EVAL-005 the specification is locked at the vetted commit
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate specify | grep -E 'PASS|FAIL|specification locked')
+02-specification  complete  PASS
+  ✓ pass specification locked: unchanged since vet at f2cdd49d9b2d
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && echo 'criteria: []' > changes/it1/02-specification/acceptance-criteria.yml)
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate specify | grep -E 'PASS|FAIL|specification locked')
+02-specification  complete  FAIL
+  ✗ fail specification locked: changed since vet at f2cdd49d9b2d: changes/it1/02-specification/acceptance-criteria.yml; run `soft-foundry change reopen` to reshape the feature
+[exit 2]
+
+$ (cd /tmp/sf-eval.DAcxOU && git add -A && git commit -qm 'rewrite criteria' && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate specify | grep -E 'PASS|FAIL|specification locked')
+02-specification  complete  FAIL
+  ✗ fail specification locked: changed since vet at f2cdd49d9b2d: changes/it1/02-specification/acceptance-criteria.yml; run `soft-foundry change reopen` to reshape the feature
+[exit 2]
+
+$ (cd /tmp/sf-eval.DAcxOU && git revert --no-edit HEAD >/dev/null && git log --oneline -1)
+6e5044b Revert "rewrite criteria"
+[exit 0]
+
+############ EVAL-006 change reopen returns to exploring, resets hardening phases with files kept, and ci passes again
+$ (cd /tmp/sf-eval.DAcxOU && echo 'real work' >> changes/it1/05-implementation/log.md)
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change reopen it1 --reason "the person wants a different shape")
+it1: reopened for exploring (the person wants a different shape)
+  no hardening phase had started
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && grep -nE '^(status|vetted|reopenings):' changes/it1/metadata.yml; grep -nA3 '^reopenings:' changes/it1/metadata.yml | tail -3)
+11:status: exploring
+23:vetted:
+24:reopenings:
+25-- at: '2026-09-16T19:53:18Z'
+26-  from_commit: f2cdd49d9b2d7c486e3073b9e67915dbbbe0d20c
+27-  reason: the person wants a different shape
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && grep -nE '^(status|commit_sha|notes):' changes/it1/05-implementation/handoff.yml; grep -c 'real work' changes/it1/05-implementation/log.md)
+4:status: pending            # pending | in_progress | complete | blocked
+5:commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
+16:notes: ""
+1
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry ci | tail -1)
+✓ ci passed
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change reopen it1 --reason "again")
+it1: already exploring
+[exit 0]
+
+############ EVAL-007 risk high forces the gated track
+$ (cd /tmp/sf-eval.DAcxOU && sed -i '' 's/^risk: low/risk: high/' changes/it1/metadata.yml)
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate intake | grep -E 'PASS|FAIL|track permitted')
+00-intake  complete  FAIL
+  ✗ fail track permitted: risk high forces the gated track (.ai/workflow.yml tracks.forced_by_risk) but the change is on iterative
+[exit 2]
+
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change vet it1)
+it1: cannot vet
+  ✗ fail risk high forces the gated track; set track: gated and status: intake in metadata.yml and run the phases in order
+  ✗ fail 00-intake gate fails: track permitted (risk high forces the gated track (.ai/workflow.yml tracks.forced_by_risk) but the change is on iterative)
+[exit 1]
+
+$ (cd /tmp/sf-eval.DAcxOU && sed -i '' 's/^risk: high/risk: low/' changes/it1/metadata.yml)
+[exit 0]
+
+############ EVAL-008 the gated track is unchanged: default, no exploring, no vet or reopen, no specification lock check
+$ (cd /tmp/sf-eval.DAcxOU && git checkout -qb change/g1)
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change new g1 | head -3)
+created changes/g1 with 16 phase directories
+branch: change/g1
+track: gated
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && grep -nE '^(track|status|current_phase):' changes/g1/metadata.yml; test -e changes/g1/exploration && echo 'exploration dir present' || echo 'no exploration dir')
+9:track: gated            # gated | iterative (.ai/workflow.yml tracks:); set by `change new --track`
+10:status: intake          # intake | exploring | in_progress | awaiting_human | judged | closed
+11:current_phase: intake
+no exploration dir
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change vet g1)
+g1: track 'gated' has no exploring stage, so there is nothing to vet; the phases apply in order
+[exit 1]
+
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change reopen g1 --reason x)
+g1: track 'gated' has no exploring stage to reopen into
+[exit 1]
+
+$ (cd /tmp/sf-eval.DAcxOU && for p in 00-intake 01-discovery 02-specification; do /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/6c4ef0a9-4350-43f6-945d-112fb2f912cd/scratchpad/mark.rb changes/g1 $p $(git rev-parse HEAD); done; /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate specify)
+02-specification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 6e5044bcd2f1af87f2e3f8bc43f71d7b720a7d51
+  ✓ pass completed_at recorded: 2026-09-16T00:00:00Z
+  ✓ pass predecessor complete: 01-discovery
+[exit 0]
+
+############ EVAL-009 check lints the tracks block and forbids the exploration skill from writing evidence
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry check)
+✓ pass control plane: 16 phases, 17 skills, no errors
+[exit 0]
+
+$ (cd /tmp/sf-eval.DAcxOU && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -e 'require "yaml"; p=YAML.load_file(".ai/skills/exploration/permissions.yml"); p["write"] << "changes/${CHANGE}/06-verification/**"; File.write(".ai/skills/exploration/permissions.yml", YAML.dump(p))' && grep -n 06-verification .ai/skills/exploration/permissions.yml && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry check)
+23:- changes/${CHANGE}/06-verification/**
+31:- changes/${CHANGE}/06-verification/**
+✗ error skill exploration: write 'changes/CHANGE/06-verification/**' overlaps commit-bound evidence 'changes/CHANGE/06-verification/**'; the exploring stage produces no evidence
+✗ fail control plane: 1 error(s)
+[exit 2]
+
+$ (cd /tmp/sf-eval.DAcxOU && git checkout -q -- .ai/skills/exploration/permissions.yml && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -e 'require "yaml"; w=YAML.load_file(".ai/workflow.yml"); w["tracks"]["default"]="casual"; File.write(".ai/workflow.yml", YAML.dump(w))' && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry check)
+✗ error tracks: default 'casual' is not a defined track
+✗ fail control plane: 1 error(s)
+[exit 2]
+
+$ (cd /tmp/sf-eval.DAcxOU && git checkout -q -- .ai/workflow.yml && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry check)
+✓ pass control plane: 16 phases, 17 skills, no errors
+[exit 0]
+
+############ EVAL-010 an iterative change in a repository with no recorded development environment is advised, never failed
+$ (cd /tmp/sf-eval.jkWVtv && git checkout -qb change/it2)
+[exit 0]
+
+$ (cd /tmp/sf-eval.jkWVtv && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -e 'require "yaml"; r=YAML.load_file(".ai/repository.yml"); r.delete("environments"); File.write(".ai/repository.yml", YAML.dump(r))' && grep -c environments .ai/repository.yml)
+0
+[exit 1]
+
+$ (cd /tmp/sf-eval.jkWVtv && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change new it2 --track iterative | head -3)
+created changes/it2 with 16 phase directories
+branch: change/it2
+track: iterative (exploring; 0 iterations recorded; run `soft-foundry change vet` when the person has accepted the feature)
+[exit 0]
+
+$ (cd /tmp/sf-eval.jkWVtv && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate all --change it2 | grep -E 'advisory|warn environment')
+advisory: 1 issue to address before it2 goes live (informational, does not block the gate)
+  ! warn environment: the iterative track deploys the exploring stage to the development environment, but .ai/repository.yml records none under environments:; discovery must record where the feature is put in front of a person (NOT_APPLICABLE with a rationale is a valid answer)
+[exit 0]
+
+$ (cd /tmp/sf-eval.jkWVtv && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate all --change it2 >/dev/null; echo gate-exit=$?)
+gate-exit=0
+[exit 0]
+
+$ (cd /tmp/sf-eval.jkWVtv && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change new g2 --track gated | head -3 && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate all --change g2 | grep -c 'warn environment')
+created changes/g2 with 16 phase directories
+branch: change/it2
+track: gated
+0
+[exit 1]
+
+############ EVAL-011 screen-reader and log readers: every new line carries its outcome as a word
+$ (cd /tmp/sf-eval.tziMrV && git checkout -qb change/it3)
+[exit 0]
+
+$ (cd /tmp/sf-eval.tziMrV && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change new it3 --track iterative >/dev/null && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/6c4ef0a9-4350-43f6-945d-112fb2f912cd/scratchpad/mark.rb changes/it3 06-verification $(git rev-parse HEAD) && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate verify | LC_ALL=C tr -d '\200-\377' | grep -E 'fail not exploring|fail predecessor')
+   fail not exploring: cannot be complete while the change is exploring; run `soft-foundry change vet` when the person has accepted the feature, then rerun this phase
+   fail predecessor complete: 05-implementation is pending
+[exit 2]
+
+$ (cd /tmp/sf-eval.tziMrV && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate verify | LC_ALL=C grep -c $'\033')
+0
+[exit 1]
+
+$ (cd /tmp/sf-eval.tziMrV && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change status | LC_ALL=C tr -d '\200-\377' | head -2)
+it3: it3  [status: exploring, phase: implement, risk: TBD]
+  track: iterative (exploring; 0 iterations recorded; run `soft-foundry change vet` when the person has accepted the feature)
+[exit 2]
+

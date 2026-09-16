@@ -25,6 +25,12 @@ module SoftFoundry
       ok ? out.strip : nil
     end
 
+    # The committer identity configured for this repository, or nil.
+    def user_name
+      out, ok = run("config", "user.name")
+      ok && !out.strip.empty? ? out.strip : nil
+    end
+
     def toplevel
       out, ok = run("rev-parse", "--show-toplevel")
       ok ? out.strip : nil

@@ -252,12 +252,18 @@ module SoftFoundry
       sub = @argv.shift
       case sub
       when "new"
-        slug = @argv.shift or raise ArgumentError, "Usage: soft-foundry change new <slug> [--title TITLE] [--branch BRANCH]"
+        slug = @argv.shift or raise ArgumentError, "Usage: soft-foundry change new <slug> [--title TITLE] [--branch BRANCH] [--track TRACK]"
         title = option("--title")
         branch = option("--branch") || (git.repository? ? git.branch : nil)
-        record = ChangeRecord.create(@root, slug, control_plane: plane, title: title, branch: branch, worktree: @root)
+        track = option("--track") || plane.default_track
+        unless plane.track(track)
+          @err.puts "unknown track '#{track}'; .ai/workflow.yml defines: #{plane.track_names.join(', ')}"
+          return EXIT_TARGET
+        end
+        record = ChangeRecord.create(@root, slug, control_plane: plane, title: title, branch: branch, worktree: @root, track: track)
         @out.puts "created #{relative(record.dir)} with #{plane.phases.size} phase directories"
         @out.puts "branch: #{branch || slug}"
+        @out.puts track_line(record)
         billing_notice(record: record)
         0
       when "status"
@@ -269,10 +275,113 @@ module SoftFoundry
         change_close(@argv.shift)
       when "request-discharge"
         change_request_discharge(@argv.shift)
+      when "vet"
+        change_vet(@argv.shift)
+      when "reopen"
+        change_reopen(@argv.shift)
       else
-        @err.puts "Usage: soft-foundry change <new|status|list|close|request-discharge>"
+        @err.puts "Usage: soft-foundry change <new|status|list|vet|reopen|close|request-discharge>"
         1
       end
+    end
+
+    # The person's acceptance of an explored feature. Everything refused
+    # here is something the person is told how to fix; the record itself
+    # only changes once all of it holds.
+    def change_vet(slug)
+      slug or raise ArgumentError, "Usage: soft-foundry change vet <slug> [--by NAME]"
+      by = option("--by") || (git.repository? && git.user_name) || ENV["USER"] || "unknown"
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+
+      record = load_record(slug)
+      definition = record.track_definition
+      unless definition&.exploring?
+        @err.puts "#{slug}: track '#{record.track}' has no exploring stage, so there is nothing to vet; the phases apply in order"
+        return EXIT_TARGET
+      end
+      unless record.exploring?
+        @err.puts "#{slug}: is not exploring (status: #{record.metadata['status']}); `change reopen` sends a vetted change back to exploring"
+        return EXIT_TARGET
+      end
+
+      problems = []
+      risk = record.metadata["risk"].to_s
+      if risk.empty? || risk.match?(Gate::PLACEHOLDER)
+        problems << "risk is not classified in metadata.yml; classify it first (a high risk change must move to the gated track)"
+      elsif (forced = plane.track_forced_by_risk(risk)) && forced != record.track
+        problems << "risk #{risk} forces the #{forced} track; set track: #{forced} and status: intake in metadata.yml and run the phases in order"
+      end
+      problems << "#{relative(record.iterations_path)} records no iteration; the exploring stage has to have happened before it can be vetted" if record.iterations.empty?
+      gate = Gate.new(record, git: git)
+      definition.vet_requires.each do |id|
+        phase = plane.phase(id) or next problems << "track #{record.track} requires unknown phase '#{id}'"
+        phase_status = record.phase_status(phase)
+        if phase_status != "complete"
+          problems << "#{phase.output} is #{phase_status || 'missing'}; it must be complete with no TBD before vetting"
+          next
+        end
+        result = gate.evaluate(phase)
+        problems << "#{phase.output} gate fails: #{result.checks.select { |c| c.outcome == :fail }.map { |c| "#{c.name} (#{c.detail})" }.join('; ')}" if result.failed?
+        if git.repository?
+          dirty = git.dirty_paths.select { |p| p.start_with?("changes/#{slug}/#{phase.output}/") }
+          problems << "#{phase.output} has uncommitted changes (#{dirty.first(3).join(', ')}); commit it so the vet can lock it at a commit" unless dirty.empty?
+        end
+      end
+      unless problems.empty?
+        @err.puts "#{slug}: cannot vet"
+        problems.each { |p| @err.puts "  ✗ fail #{p}" }
+        return EXIT_TARGET
+      end
+
+      sha = git.repository? ? git.head_sha : nil
+      record.vet!(by: by, commit: sha)
+      @out.puts "#{slug}: vetted by #{by} at #{sha ? sha[0, 12] : 'no commit (not a git repository)'}"
+      @out.puts "  02-specification is locked at that commit; phases from 05-implementation onward now apply as on the gated track"
+      print_advisories(record)
+      0
+    end
+
+    # Back to exploring: the person wants the feature reshaped, not fixed.
+    def change_reopen(slug)
+      slug or raise ArgumentError, "Usage: soft-foundry change reopen <slug> --reason TEXT"
+      reason = option("--reason")
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+      raise ArgumentError, "--reason is required: say why the feature is going back to exploring" if reason.to_s.strip.empty?
+
+      record = load_record(slug)
+      unless record.track_definition&.exploring?
+        @err.puts "#{slug}: track '#{record.track}' has no exploring stage to reopen into"
+        return EXIT_TARGET
+      end
+      if record.exploring?
+        @out.puts "#{slug}: already exploring"
+        return 0
+      end
+      if record.metadata["status"].to_s == "closed"
+        @err.puts "#{slug}: is closed; a merged change is reshaped by a new change, not by reopening this record"
+        return EXIT_TARGET
+      end
+      reset = record.reopen!(reason: reason)
+      @out.puts "#{slug}: reopened for exploring (#{reason})"
+      @out.puts(reset.empty? ? "  no hardening phase had started" : "  reset to pending, outputs kept: #{reset.join(', ')}")
+      0
+    end
+
+    def track_line(record)
+      definition = record.track_definition
+      return "track: #{record.track} (not defined in .ai/workflow.yml)" unless definition
+      line = "track: #{record.track}"
+      if record.exploring?
+        n = record.iterations.size
+        last = record.iterations.last
+        deployed = last && last["deployed"].is_a?(Hash) && last["deployed"]["environment"]
+        line += " (exploring; #{n} #{n == 1 ? 'iteration' : 'iterations'} recorded#{deployed ? ", last deployed to #{deployed}" : ''}; run `soft-foundry change vet` when the person has accepted the feature)"
+      elsif (v = record.vetted)
+        line += " (vetted by #{v['by']} at #{v['commit'].to_s[0, 12]} on #{v['at']}; specification locked)"
+      elsif definition.exploring?
+        line += " (exploring stage not entered)"
+      end
+      line
     end
 
     # The mechanical half (branch merged, no undischarged condition left
@@ -344,6 +453,7 @@ module SoftFoundry
       record = load_record(slug)
       meta = record.metadata
       @out.puts "#{slug}: #{meta.dig('change', 'title')}  [status: #{meta['status']}, phase: #{meta['current_phase']}, risk: #{meta['risk']}]"
+      @out.puts "  #{track_line(record)}"
       results = Gate.new(record, git: git).evaluate_all
       results.each { |r| @out.puts format("  %-22s %-12s %s", r.phase.output, r.status, summarize(r)) }
       print_advisories(record)
@@ -647,9 +757,18 @@ module SoftFoundry
               --maturity scan|deep|off (default scan)  --reassess
           soft-foundry doctor                     validate repository bootstrap
           soft-foundry check                      lint the .ai/ control plane
-          soft-foundry change new <slug>          create changes/<slug>/ from phase templates
-          soft-foundry change status [slug]       show phase status and gate results
+          soft-foundry change new <slug> [--track gated|iterative]
+                                                  create changes/<slug>/ from phase templates; the track
+                                                  defaults to .ai/workflow.yml tracks.default
+          soft-foundry change status [slug]       show track, phase status, and gate results
           soft-foundry change list                list change records
+          soft-foundry change vet <slug> [--by NAME]
+                                                  iterative track: record the person's acceptance of the
+                                                  explored feature, lock the specification at HEAD, and
+                                                  make the phases from implementation onward apply
+          soft-foundry change reopen <slug> --reason TEXT
+                                                  iterative track: send a vetted change back to exploring,
+                                                  resetting every phase from implementation onward
           soft-foundry change close <slug> [--pr N] [--confirm ID]... [--force]
                                                   mark a merged change's lifecycle closed; refuses if
                                                   unmerged, or if an undischarged item lacks a --confirm ID
