@@ -72,6 +72,55 @@ module SoftFoundry
     def rules = workflow.fetch("rules", {})
     def judgments = Array(workflow["judgments"])
 
+    # A lifecycle track (.ai/workflow.yml tracks:). `exploring` tracks carry
+    # a stage before the lifecycle's hardening phases, worked by `skill`
+    # into `changes/<slug>/<output>/`; `vet_requires` names the phases that
+    # must be complete before `change vet`; `optional` names phases the
+    # track does not require before implementation.
+    Track = Data.define(:name, :description, :exploring, :skill, :output, :vet_requires, :optional) do
+      def exploring? = exploring
+    end
+
+    TRACK_KEYS = %w[default forced_by_risk].freeze
+
+    # A control plane that declares no tracks has a single implicit `gated`
+    # track, so control planes written before tracks existed keep working.
+    def tracks
+      @tracks ||= begin
+        defined = tracks_raw.reject { |k, _| TRACK_KEYS.include?(k) }.select { |_, v| v.is_a?(Hash) }
+        defined = { "gated" => {} } if defined.empty?
+        defined.to_h do |name, t|
+          [name, Track.new(name: name, description: t["description"].to_s, exploring: t["exploring"] == true,
+                           skill: t["skill"], output: t["output"], vet_requires: Array(t["vet_requires"]).map(&:to_s),
+                           optional: Array(t["optional"]).map(&:to_s))]
+        end
+      end
+    end
+
+    def track(name) = tracks[name.to_s]
+    def track_names = tracks.keys
+    def default_track = (tracks_raw["default"] || "gated").to_s
+
+    # The track a declared risk forces, or nil when risk leaves the choice open.
+    def track_forced_by_risk(risk)
+      forced = tracks_raw["forced_by_risk"]
+      forced.is_a?(Hash) ? forced[risk.to_s]&.to_s : nil
+    end
+
+    def tracks_raw
+      raw = workflow["tracks"]
+      raw.is_a?(Hash) ? raw : {}
+    end
+
+    # Phases from `implement` onward: the ones an exploring change may not
+    # complete, because they produce or depend on evidence about code that
+    # is still being shaped.
+    def hardening_phase?(phase)
+      start = phases.index(self.phase("implement"))
+      index = phases.index(phase)
+      !start.nil? && !index.nil? && index >= start
+    end
+
     def skill(name)
       (@skills ||= {})[name] ||= begin
         skill_dir = File.join(dir, "skills", name)

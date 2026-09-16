@@ -39,6 +39,7 @@ module SoftFoundry
       return Result.new(phase:, status:, checks: [Check.new("phase pending", :skip, "not started")]) if status == "pending"
 
       checks << identity_check(phase, skill, handoff)
+      checks << track_check if @plane.phases.first == phase
       blocking = Array(handoff["blocking"])
 
       case status
@@ -47,6 +48,7 @@ module SoftFoundry
       when "blocked"
         checks << (blocking.empty? ? Check.new("blocking recorded", :fail, "status is blocked but `blocking` is empty") : Check.new("blocking recorded", :warn, blocking.join("; ")))
       when "complete"
+        checks << exploring_check if @record.exploring? && @plane.hardening_phase?(phase)
         checks << required_files_check(phase, skill)
         checks << placeholder_check(phase, skill)
         checks << (blocking.empty? ? Check.new("no blocking conditions", :pass, "") : Check.new("no blocking conditions", :fail, "complete with unresolved: #{blocking.join('; ')}"))
@@ -54,11 +56,51 @@ module SoftFoundry
         checks << Check.new("completed_at recorded", handoff["completed_at"] ? :pass : :fail, handoff["completed_at"].to_s)
         checks << predecessor_check(phase)
         checks << staleness_check(handoff) if skill.commit_bound?
+        checks << specification_lock_check(phase) if phase.id == "specify" && @record.vetted
       end
       Result.new(phase:, status:, checks:)
     end
 
     private
+
+    # The change's track must exist, must have an exploring stage if the
+    # change is exploring, and must be the one its declared risk forces.
+    # Reported once, on the first phase, so `status`/`ci` show it whenever
+    # any work has started.
+    def track_check
+      name = @record.track
+      definition = @record.track_definition
+      return Check.new("track permitted", :fail, "track '#{name}' is not defined in .ai/workflow.yml (#{@plane.track_names.join(', ')})") unless definition
+      if @record.exploring? && !definition.exploring?
+        return Check.new("track permitted", :fail, "status is exploring but track '#{name}' has no exploring stage")
+      end
+      risk = @record.metadata["risk"].to_s
+      forced = @plane.track_forced_by_risk(risk)
+      if forced && forced != name
+        return Check.new("track permitted", :fail, "risk #{risk} forces the #{forced} track (.ai/workflow.yml tracks.forced_by_risk) but the change is on #{name}")
+      end
+      Check.new("track permitted", :pass, name)
+    end
+
+    # The exploring stage produces a journal, never evidence: nothing from
+    # implement onward may be complete until the person has vetted.
+    def exploring_check
+      Check.new("not exploring", :fail, "cannot be complete while the change is exploring; run `soft-foundry change vet` when the person has accepted the feature, then rerun this phase")
+    end
+
+    # After `change vet`, the specification is what the hardening phases
+    # are checked against, so it may not change; reshaping the feature
+    # goes through `change reopen`. Deterministic acceptance-criteria
+    # locking for the iterative track.
+    def specification_lock_check(phase)
+      sha = @record.vetted["commit"].to_s
+      return Check.new("specification locked", :skip, "no git repository") unless @git.repository?
+      return Check.new("specification locked", :fail, "vetted commit '#{sha}' is not a commit in this repository") unless sha.match?(SHA) && @git.commit?(sha)
+      prefix = "changes/#{@record.slug}/#{phase.output}/"
+      changed = @git.changed_since(sha).select { |p| p.start_with?(prefix) }
+      return Check.new("specification locked", :pass, "unchanged since vet at #{sha[0, 12]}") if changed.empty?
+      Check.new("specification locked", :fail, "changed since vet at #{sha[0, 12]}: #{changed.first(5).join(', ')}#{changed.size > 5 ? ' …' : ''}; run `soft-foundry change reopen` to reshape the feature")
+    end
 
     def identity_check(phase, skill, handoff)
       problems = []
@@ -87,12 +129,11 @@ module SoftFoundry
       Check.new("commit_sha recorded", :pass, sha)
     end
 
-    # Honors `after` overrides and skips optional phases that never ran.
-    # Honors `after` overrides, globally optional phases, and a change's own
-    # skipped_phases (each requiring a non-empty rationale).
+    # Honors `after` overrides, globally optional phases, a change's own
+    # skipped_phases (each requiring a non-empty rationale), and phases the
+    # change's track does not require.
     def predecessor_check(phase)
-      skipped = Array(@record.metadata["skipped_phases"]).filter_map { |e| e["phase"] if e["rationale"].to_s.strip != "" }
-      prev = @plane.effective_predecessor(phase, skip: ->(p) { skipped.include?(p.id) }) { |p| @record.phase_status(p) }
+      prev = @plane.effective_predecessor(phase, skip: ->(p) { @record.skippable?(p) }) { |p| @record.phase_status(p) }
       return Check.new("predecessor complete", :pass, "first phase") unless prev
       prev_status = @record.phase_status(prev)
       prev_status == "complete" ? Check.new("predecessor complete", :pass, prev.output) : Check.new("predecessor complete", :fail, "#{prev.output} is #{prev_status || 'missing'}")

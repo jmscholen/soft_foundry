@@ -1,0 +1,12 @@
+# Exploration journal: one entry per round with the person, appended in
+# order. Not evidence; a record of how the feature was shaped before it
+# was vetted. `soft-foundry change vet` requires at least one entry.
+iterations: []
+# - at: 2026-09-16T00:00:00Z
+#   asked: what the person asked for this round
+#   changed: what changed in response
+#   commit: sha
+#   deployed:
+#     environment: development     # the only environment this stage may deploy to
+#     ref: URL or identifier of the deployment, if any
+#   outcome: what the person said after trying it

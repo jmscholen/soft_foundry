@@ -9,6 +9,7 @@ require_human_approval:
   - security testing against production or third-party systems without explicit authorization
   - changes that intentionally weaken required controls
   - exceeding a change's declared budget cap in .ai/policies/budget.yml (a financial commitment)
+  - deploying to any environment other than the development environment recorded under environments in .ai/repository.yml (staging and production deploys are a person's call, on either lifecycle track)
 never_autonomous:
   - bypassing access controls
   - fabricating evidence

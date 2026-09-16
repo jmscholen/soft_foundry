@@ -12,10 +12,12 @@ module SoftFoundry
 
     attr_reader :root, :slug, :control_plane
 
-    def self.create(root, slug, control_plane:, title: nil, branch: nil, worktree: nil, now: Time.now)
+    def self.create(root, slug, control_plane:, title: nil, branch: nil, worktree: nil, track: nil, now: Time.now)
       record = new(root, slug, control_plane: control_plane)
       raise "change record already exists: #{record.dir}" if record.exists?
-      record.send(:scaffold, title: title || slug, branch: branch || slug, worktree: worktree || root, now: now)
+      track ||= control_plane.default_track
+      raise ArgumentError, "unknown track '#{track}'; .ai/workflow.yml defines: #{control_plane.track_names.join(', ')}" unless control_plane.track(track)
+      record.send(:scaffold, title: title || slug, branch: branch || slug, worktree: worktree || root, track: track, now: now)
       record
     end
 
@@ -41,6 +43,45 @@ module SoftFoundry
       handoff(phase)&.fetch("status", nil)
     end
 
+    # The lifecycle track this change is on (.ai/workflow.yml tracks:). A
+    # record written before tracks existed has none and is on the default.
+    def track = (metadata["track"] || control_plane.default_track).to_s
+    def track_definition = control_plane.track(track)
+    def exploring? = metadata["status"].to_s == "exploring"
+
+    # The person's recorded acceptance on an exploring track, or nil.
+    def vetted
+      v = metadata["vetted"]
+      v.is_a?(Hash) ? v : nil
+    end
+
+    def exploration_dir
+      output = track_definition&.output
+      output && File.join(dir, output)
+    end
+
+    def iterations_path = exploration_dir && File.join(exploration_dir, "iterations.yml")
+
+    # Entries in the exploring stage's journal, oldest first; empty when
+    # the track has no exploring stage or nothing has been recorded.
+    def iterations
+      path = iterations_path
+      return [] unless path && File.file?(path)
+      Array(load(path)["iterations"]).select { |i| i.is_a?(Hash) }
+    end
+
+    # Phases this change's skipped_phases waive, each with a non-empty
+    # rationale (an entry with an empty rationale does not count).
+    def skipped_with_rationale
+      Array(metadata["skipped_phases"]).filter_map { |e| e["phase"] if e.is_a?(Hash) && e["rationale"].to_s.strip != "" }
+    end
+
+    # A phase that may legitimately stay pending for this change: globally
+    # optional, waived with rationale, or not required by the track.
+    def skippable?(phase)
+      phase.optional || skipped_with_rationale.include?(phase.id) || Array(track_definition&.optional).include?(phase.id)
+    end
+
     # The commit_sha of the most-recently-completed phase, or nil if none
     # has run.
     def last_commit_sha
@@ -63,10 +104,9 @@ module SoftFoundry
     # rationale rather than completing them - "reached judgment" would
     # wrongly refuse to close every one of them.
     def reached_lifecycle_end?
-      skipped = Array(metadata["skipped_phases"]).filter_map { |e| e["phase"] if e["rationale"].to_s.strip != "" }
       control_plane.phases.all? do |phase|
         status = phase_status(phase)
-        status == "complete" || (status == "pending" && (phase.optional || skipped.include?(phase.id)))
+        status == "complete" || (status == "pending" && skippable?(phase))
       end
     end
 
@@ -113,13 +153,62 @@ module SoftFoundry
       File.write(path, YAML.dump(data))
     end
 
+    # The person's acceptance of an explored feature: leaves exploring,
+    # records who and at which commit, and from that commit the
+    # specification is locked (Gate checks it) and the phases from
+    # implement onward apply as on the gated track. The preconditions
+    # (exploring, journal non-empty, vet_requires phases complete and
+    # passing, specification committed) are the CLI's to check, since
+    # they are what a person is told when refused.
+    def vet!(by:, commit:, now: Time.now)
+      path = File.join(dir, "metadata.yml")
+      data = metadata
+      data["status"] = "in_progress"
+      data["current_phase"] = "implement"
+      data["vetted"] = { "at" => now.utc.iso8601, "by" => by.to_s, "commit" => commit.to_s }
+      File.write(path, YAML.dump(data))
+    end
+
+    # Sends a vetted change back to exploring. Every phase from implement
+    # onward is reset to pending (its files stay in place, so nothing
+    # observed is deleted), the vet is cleared, and the reopening is kept
+    # in the record. Returns the phase output directories that were reset.
+    def reopen!(reason:, now: Time.now)
+      reset = control_plane.phases.select { |p| control_plane.hardening_phase?(p) && phase_status(p) != "pending" }
+      stamp = now.utc.iso8601
+      reset.each do |phase|
+        h = handoff(phase)
+        h["status"] = "pending"
+        h["commit_sha"] = nil
+        h["completed_at"] = nil
+        h["notes"] = [h["notes"].to_s, "reopened #{stamp}: outputs kept for reference; rerun this phase after the next vet (#{reason})"].reject(&:empty?).join("\n")
+        File.write(handoff_path(phase), YAML.dump(h))
+      end
+      path = File.join(dir, "metadata.yml")
+      data = metadata
+      data["reopenings"] = Array(data["reopenings"]) + [{ "at" => stamp, "from_commit" => vetted&.fetch("commit", nil), "reason" => reason.to_s }]
+      data["vetted"] = nil
+      data["status"] = "exploring"
+      data["current_phase"] = "implement"
+      File.write(path, YAML.dump(data))
+      reset.map(&:output)
+    end
+
     private
 
-    def scaffold(title:, branch:, worktree:, now:)
+    def scaffold(title:, branch:, worktree:, track:, now:)
       FileUtils.mkdir_p(dir)
+      definition = control_plane.track(track)
       write_template(File.join(control_plane.dir, "templates", "change", "metadata.yml"), File.join(dir, "metadata.yml"),
-                     "CHANGE" => slug, "TITLE" => title, "BRANCH" => branch, "WORKTREE" => worktree, "CREATED_AT" => now.utc.iso8601)
+                     "CHANGE" => slug, "TITLE" => title, "BRANCH" => branch, "WORKTREE" => worktree, "CREATED_AT" => now.utc.iso8601,
+                     "TRACK" => track, "STATUS" => definition.exploring? ? "exploring" : "intake",
+                     "CURRENT_PHASE" => definition.exploring? ? "implement" : "intake")
       declare_surfaces!
+      if definition.exploring?
+        target = File.join(dir, definition.output)
+        FileUtils.mkdir_p(target)
+        copy_templates(control_plane.skill(definition.skill).template_dir, target)
+      end
       write_template(File.join(control_plane.dir, "templates", "change", "budget.yml"), File.join(dir, "budget.yml"), "CHANGE" => slug)
       control_plane.phases.each do |phase|
         skill = control_plane.skill(phase.skill)

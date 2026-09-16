@@ -21,6 +21,17 @@ infrastructure:
     tools: []
   deployment_targets: []
 
+# Environments the application can be deployed to, located by discovery.
+# The exploring stage of the iterative track (.ai/workflow.yml tracks:)
+# deploys only to `development`; deploying anywhere else is a person's
+# decision under .ai/policies/human-boundaries.yml. `data` is synthetic
+# or real; `how` is the command or process that deploys there.
+environments:
+  development:
+    status: UNKNOWN          # PASS (exists, `how` recorded), MISSING, UNKNOWN, or NOT_APPLICABLE with a rationale
+    data: synthetic
+    how: null
+
 # Published policy documents the application's users can see, located by
 # discovery per .ai/rules/policy-conformance.md. Status is PASS (found),
 # MISSING (absence established), UNKNOWN (not determined), or

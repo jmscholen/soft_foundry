@@ -15,9 +15,9 @@ Canonical source templates under `.ai/skills/*/template/` and `.ai/templates/` a
 
 | Path | Purpose |
 | --- | --- |
-| `workflow.yml` | Lifecycle phases, non-linear `transitions`, global rules, permitted judgments. |
+| `workflow.yml` | Lifecycle phases, non-linear `transitions`, global rules, permitted judgments, and the lifecycle `tracks` (`gated`: every phase in order; `iterative`: an exploring stage with a person first, then `change vet`, then the same hardening phases). |
 | `paths.yml` | Named path groups (`APP`, `TESTS`, `INFRA`, `DOCS`, `CONTROL_PLANE`, `HARNESS_EVALS`) that skill permissions reference as `${GROUP}`. `repository.yml` may override a group with the repository's real layout. |
-| `skills/<name>/` | One declarative skill per phase: contract files plus `template/` holding every file its completion gate requires. |
+| `skills/<name>/` | One declarative skill per phase: contract files plus `template/` holding every file its completion gate requires. `skills/exploration/` is a stage skill, not a phase: it is loaded while a change on the iterative track is `exploring`, and `check` verifies it can write no commit-bound evidence. |
 | `templates/` | Shared templates: the phase `handoff.yml` and the change `metadata.yml`. |
 | `profiles/` | Capability profiles skills request; provider/model resolution is a runtime concern. |
 | `rules/` | Coding and infrastructure standards loaded by implementation and checked by review. |
