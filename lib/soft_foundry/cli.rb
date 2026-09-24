@@ -708,7 +708,7 @@ module SoftFoundry
         if instincts.empty?
           @out.puts "no instincts recorded#{min ? " at or above #{format('%.2f', threshold)}" : ''}; the learning phase writes them to 15-learning/instincts.yml"
         else
-          instincts.each { |i| @out.puts format("%.2f %s %s (when %s, %s)", i.confidence, i.change, i.id, i.trigger, i.action) }
+          instincts.each { |i| @out.puts format("%.2f %s %s (%s; %s)", i.confidence, i.change, i.id, i.trigger, i.action) }
         end
         0
       when "promote"
