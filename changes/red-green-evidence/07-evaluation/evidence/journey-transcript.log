@@ -1,0 +1,87 @@
+ruby: ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23]
+soft-foundry: 0.12.0
+implementation commit under evaluation: 7306119ba99bd292ef70dd509fd68697a651b81c
+
+############ EVAL-001 a feature done test-first: RED commit, GREEN commit, verification names red_commit; the gate passes with the trail
+$ (cd /tmp/sf-redgreen.HTNFXM && git checkout -qb change/c1)
+[exit 0]
+
+$ (cd /tmp/sf-redgreen.HTNFXM && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change new c1 | head -1 && sed -i '' 's/^type: TBD.*/type: feature/; s/^status: intake.*/status: in_progress/' changes/c1/metadata.yml && git add -A && git commit -qm record)
+created changes/c1 with 16 phase directories
+[exit 0]
+
+$ (cd /tmp/sf-redgreen.HTNFXM && echo '# expects puts 2' > test/feature_test.rb && git add -A && git commit -qm 'RED: feature test' && git rev-parse --short HEAD)
+eab0d9a
+[exit 0]
+
+$ (cd /tmp/sf-redgreen.HTNFXM && echo 'puts 2' > lib/app.rb && git add -A && git commit -qm 'GREEN: feature' && git rev-parse --short HEAD)
+010c229
+[exit 0]
+
+$ (cd /tmp/sf-redgreen.HTNFXM && verify $(git rev-parse HEAD~1) $(git rev-parse HEAD) '    red_commit: '$(git rev-parse HEAD~1)'\n    test_path: test/feature_test.rb\n' && tail -3 changes/c1/06-verification/tests.yml)
+    criteria: [AC-001]
+    red_commit: eab0d9a396066c7edd48b886ec5875cb1c507992
+    test_path: test/feature_test.rb
+[exit 0]
+
+$ (cd /tmp/sf-redgreen.HTNFXM && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate verify | grep -E 'PASS|FAIL|red evidence|warn verification')
+06-verification  complete  PASS
+  ✓ pass red evidence: CHECK-001: eab0d9a39606 -> 010c229bec24 (test/feature_test.rb)
+[exit 0]
+
+############ EVAL-002 the same claim with the wrong commit: the verified commit itself, a commit from another branch, a missing test file
+$ (cd /tmp/sf-redgreen.HTNFXM && verify x $(git rev-parse HEAD) '    red_commit: '$(git rev-parse HEAD)'\n    test_path: test/feature_test.rb\n' && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate verify | grep -E 'FAIL|red evidence')
+06-verification  complete  FAIL
+  ✗ fail red evidence: CHECK-001: red_commit 010c229bec24 is the verified commit itself; the test must precede the implementation
+[exit 2]
+
+$ (cd /tmp/sf-redgreen.HTNFXM && git checkout -qb elsewhere && echo '# other' > test/other_test.rb && git add -A && git commit -qm other && OTHER=$(git rev-parse HEAD) && git checkout -q change/c1 && verify x $(git rev-parse HEAD) '    red_commit: '$OTHER'\n    test_path: test/other_test.rb\n' && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate verify | grep -E 'FAIL|red evidence')
+06-verification  complete  FAIL
+  ✗ fail red evidence: CHECK-001: red_commit d0afbc60fe45 is not an ancestor of the verified commit 010c229bec24
+[exit 2]
+
+$ (cd /tmp/sf-redgreen.HTNFXM && verify x $(git rev-parse HEAD) '    red_commit: '$(git rev-parse HEAD~1)'\n    test_path: test/nope_test.rb\n' && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate verify | grep -E 'FAIL|red evidence')
+06-verification  complete  FAIL
+  ✗ fail red evidence: CHECK-001: test_path test/nope_test.rb does not exist at red_commit eab0d9a39606
+[exit 2]
+
+############ EVAL-003 a RED commit followed by no code change is not GREEN
+$ (cd /tmp/sf-redgreen.HTNFXM && verify x $(git rev-parse HEAD) '    red_commit: '$(git rev-parse HEAD)'\n' >/dev/null; git checkout -q -- changes; echo '# t' > test/late_test.rb && git add -A && git commit -qm 'RED: late' && echo 'docs' > README.md && git add -A && git commit -qm 'docs only' && verify x $(git rev-parse HEAD) '    red_commit: '$(git rev-parse HEAD~1)'\n    test_path: test/late_test.rb\n' && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate verify | grep -E 'FAIL|red evidence')
+06-verification  complete  FAIL
+  ✗ fail red evidence: CHECK-001: no APP or INFRA change between red_commit 02c8e9056734 and e1505f086fb6; nothing was implemented after the test
+[exit 2]
+
+############ EVAL-004 a feature verified with no red_commit is advised, never failed; a docs change is not
+$ (cd /tmp/sf-redgreen.HTNFXM && verify x $(git rev-parse HEAD) '' && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate verify | grep -E 'PASS|FAIL|red evidence|warn verification'; /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate verify >/dev/null; echo gate-exit=$?)
+06-verification  complete  PASS
+  - skip red evidence: no check records a red_commit
+  ! warn verification: no check in 06-verification/tests.yml records a red_commit, so the failing-test-first evidence .ai/rules/testing.md asks for is not demonstrable for this feature
+gate-exit=0
+[exit 0]
+
+$ (cd /tmp/sf-redgreen.HTNFXM && sed -i '' 's/^type: feature/type: docs/' changes/c1/metadata.yml && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate verify | grep -cE 'warn verification'; sed -i '' 's/^type: docs/type: feature/' changes/c1/metadata.yml)
+0
+[exit 0]
+
+############ EVAL-005 this repository's own record: the RED commit for this very change
+$ (cd /Users/jscholen-iou/dev/soft_foundry && git -C /Users/jscholen-iou/dev/soft_foundry log --oneline -3 | cat)
+7306119 GREEN: bind RED and GREEN checkpoint commits to verification evidence
+5d898e0 RED: gate checks red_commit and test_path on verification checks; advisory for features without RED evidence
+302dc71 Scaffold red-green-evidence
+[exit 0]
+
+$ (cd /Users/jscholen-iou/dev/soft_foundry && git -C /Users/jscholen-iou/dev/soft_foundry show --stat 5d898e0 | grep -E 'red_green_test|changed')
+ test/red_green_test.rb | 153 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 153 insertions(+)
+[exit 0]
+
+############ EVAL-006 screen-reader and log readers: the check and the advisory carry their outcome as words
+$ (cd /tmp/sf-redgreen.HTNFXM && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate verify 2>&1 | LC_ALL=C tr -d '\200-\377' | grep -E 'red evidence|warn verification')
+  - skip red evidence: no check records a red_commit
+  ! warn verification: no check in 06-verification/tests.yml records a red_commit, so the failing-test-first evidence .ai/rules/testing.md asks for is not demonstrable for this feature
+[exit 0]
+
+$ (cd /tmp/sf-redgreen.HTNFXM && verify x $(git rev-parse HEAD) '    red_commit: '$(git rev-parse HEAD~1)'\n    test_path: test/late_test.rb\n' && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate verify 2>&1 | LC_ALL=C tr -d '\200-\377' | grep -E 'red evidence')
+   fail red evidence: CHECK-001: no APP or INFRA change between red_commit 02c8e9056734 and e1505f086fb6; nothing was implemented after the test
+[exit 2]
+

@@ -1,21 +1,39 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
 phase: 13-review
 skill: review
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 7306119ba99bd292ef70dd509fd68697a651b81c
+started_at: '2026-09-24T05:05:00Z'
+completed_at: '2026-09-24T05:20:00Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- functional.md
+- architecture.md
+- security.md
+- accessibility.md
+- policy-conformance.md
+- infrastructure.md
+- operations.md
+- consolidated.md
+blocking: []
+findings:
+- id: REV-001
+  severity: minor
+  summary: The red-equals-green test compares hashes by prefix; resolve both to full hashes. Follow-up.
+- id: REV-007
+  severity: minor
+  summary: red_evidence_check is long; a small value object would shorten the loop. Follow-up.
+- id: REV-014
+  severity: minor
+  summary: The verification advisory is one line of about 180 characters. Follow-up.
+- id: REV-020
+  severity: minor
+  summary: Nothing reminds an agent to make a RED commit at implementation time; the advisory arrives at verification. Follow-up.
+- id: REV-019
+  severity: info
+  summary: runtime-guard and phase-runner now carry the verification advisory; this record is the first with a passing red evidence check.
 next: judge
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: Compatibility mode, performed by the interactive session that also implemented the change rather than a fresh-context reviewer; recorded here so the separation-of-duties limitation is explicit and reported by the advisory. The review phase's lifecycle predecessor resolves to 07-evaluation because attack is skipped with rationale and remediate/document/index/observe are optional.
+executed_by:

@@ -1,8 +1,34 @@
-commit_sha: TBD
+commit_sha: 7306119ba99bd292ef70dd509fd68697a651b81c
 checks:
   - id: CHECK-001
-    kind: tests   # tests | lint | static_analysis | security_scan | iac_validate | migration_check | custom
-    command: TBD
-    result: TBD   # pass | fail | error | skipped
-    evidence: evidence/TBD
-    criteria: [AC-001]
+    kind: tests
+    command: "ruby -Ilib -Itest requiring every test/*_test.rb, with every provider key, SOFT_FOUNDRY_BILLING, and SOFT_FOUNDRY_GUARD unset"
+    result: pass
+    evidence: evidence/tests.log
+    criteria: [REQ-RG-001, REQ-RG-002, REQ-RG-004, REQ-RG-007]
+    red_commit: 5d898e08f1f6d3174b63e8d065ed0f698977beb1
+    test_path: test/red_green_test.rb
+  - id: CHECK-002
+    kind: custom
+    command: "test/red_green_test.rb run with the worktree checked out at 5d898e0, the RED commit"
+    result: fail
+    evidence: evidence/red-at-5d898e0.log
+    criteria: [REQ-RG-007]
+  - id: CHECK-003
+    kind: lint
+    command: "soft-foundry check"
+    result: pass
+    evidence: evidence/check.log
+    criteria: [REQ-RG-005, control-plane-consistency]
+  - id: CHECK-004
+    kind: static_analysis
+    command: "ruby -wc on every lib/soft_foundry/*.rb, lib/soft_foundry/installer/*.rb, lib/soft_foundry.rb, exe/soft-foundry, and test/red_green_test.rb"
+    result: pass
+    evidence: evidence/syntax-warnings.log
+    criteria: [coding-standard]
+  - id: CHECK-005
+    kind: custom
+    command: "soft-foundry ci against this repository's own real change-record history, on a branch stacked on change/phase-runner"
+    result: pass
+    evidence: evidence/ci-against-self.log
+    criteria: [REQ-RG-004, REQ-RG-006, no-regression-for-closed-records, this-change-record-itself-passes]

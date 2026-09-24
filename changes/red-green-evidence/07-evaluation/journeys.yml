@@ -1,12 +1,50 @@
-commit_sha: TBD
+commit_sha: 7306119ba99bd292ef70dd509fd68697a651b81c
 journeys:
   - id: EVAL-001
-    criteria: [AC-001]
-    persona: TBD
-    starting_state: TBD
-    steps:
-      - TBD
-    assertions:
-      - TBD
-    evidence: [evidence/TBD]
-    result: TBD   # pass | fail | blocked
+    criteria: [REQ-RG-001, REQ-RG-002, REQ-RG-007]
+    persona: developer who committed the failing test, then the implementation
+    starting_state: "scratch repo with this repo's real .ai/; branch change/c1; a feature record"
+    steps: ["commit test/feature_test.rb alone (RED)", "commit lib/app.rb (GREEN)", "complete intake..verify at GREEN with one check naming red_commit RED and test_path", "soft-foundry gate verify"]
+    assertions: ["the gate passes with ✓ pass red evidence: CHECK-001: <red> -> <green> (test/feature_test.rb) and no verification advisory"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-002
+    criteria: [REQ-RG-002]
+    persona: same developer naming the wrong commit
+    starting_state: as EVAL-001
+    steps: ["red_commit = the verified commit", "red_commit = a commit on another branch (test/other_test.rb)", "red_commit = RED with test_path test/nope_test.rb"]
+    assertions: ["fail red evidence: ... is the verified commit itself; the test must precede the implementation; exit 2", "fail red evidence: ... is not an ancestor of the verified commit ...; exit 2", "fail red evidence: ... test_path test/nope_test.rb does not exist at red_commit ...; exit 2"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-003
+    criteria: [REQ-RG-002]
+    persona: developer whose RED was followed only by a docs commit
+    starting_state: as EVAL-001
+    steps: ["commit test/late_test.rb (RED)", "commit README.md only", "verify at that commit naming the RED", "soft-foundry gate verify"]
+    assertions: ["fail red evidence: ... no APP or INFRA change between red_commit ... and ...; nothing was implemented after the test; exit 2"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-004
+    criteria: [REQ-RG-004]
+    persona: developer with tests written after the fact; then a docs change
+    starting_state: as EVAL-003
+    steps: ["verify with a check that names no red_commit; soft-foundry gate verify; record the exit", "set type: docs; count warn verification lines; restore"]
+    assertions: ["06-verification complete PASS with - skip red evidence: no check records a red_commit and ! warn verification: no check in 06-verification/tests.yml records a red_commit ...; gate exit 0", "with type docs the count is 0"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-005
+    criteria: [REQ-RG-007]
+    persona: maintainer reading this change's own history
+    starting_state: this repository on change/red-green-evidence
+    steps: ["git log --oneline -3", "git show --stat 5d898e0"]
+    assertions: ["the history reads GREEN on top of RED on top of the scaffold", "5d898e0 changed exactly one file, test/red_green_test.rb, 153 insertions"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-006
+    criteria: [REQ-RG-002, REQ-RG-004]
+    persona: screen-reader user or CI log reader
+    starting_state: as EVAL-004, then EVAL-003
+    steps: ["gate verify with every non-ASCII byte stripped | grep red evidence|warn verification", "the EVAL-003 claim again, stripped"]
+    assertions: ["the lines still read skip red evidence: ..., warn verification: ..., and fail red evidence: ... with their reasons"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
