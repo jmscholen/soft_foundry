@@ -12,14 +12,16 @@ module SoftFoundry
   # the active skill's permissions at runtime.
   class Hooks
     MARKER = "# soft-foundry:pre-commit"
+    # A checkout of Soft Foundry itself runs its own code, not whatever
+    # older gem happens to be on PATH; every other repository uses the gem.
     SCRIPT = <<~SH
       #!/bin/sh
       #{MARKER}
       # Validates the .ai/ control plane and every change record before commit.
-      if command -v soft-foundry >/dev/null 2>&1; then
-        exec soft-foundry ci
-      elif [ -x exe/soft-foundry ]; then
+      if [ -x exe/soft-foundry ] && [ -f lib/soft_foundry.rb ]; then
         exec ruby -Ilib exe/soft-foundry ci
+      elif command -v soft-foundry >/dev/null 2>&1; then
+        exec soft-foundry ci
       else
         echo "soft-foundry not found; skipping control-plane checks" >&2
       fi
@@ -46,26 +48,39 @@ module SoftFoundry
     # meaning, if not in formatting.
     GUARD_ID = "soft-foundry:guard"
     GUARD_MATCHER = "Edit|Write|MultiEdit|NotebookEdit|Read|Bash"
-    GUARD_COMMAND = "# #{GUARD_ID}\nif command -v soft-foundry >/dev/null 2>&1; then soft-foundry guard; elif [ -x exe/soft-foundry ]; then ruby -Ilib exe/soft-foundry guard; fi"
+    GUARD_COMMAND = "# #{GUARD_ID}\nif [ -x exe/soft-foundry ] && [ -f lib/soft_foundry.rb ]; then ruby -Ilib exe/soft-foundry guard; elif command -v soft-foundry >/dev/null 2>&1; then soft-foundry guard; fi"
 
     def self.claude_settings_path(root, local: false)
       File.join(root, ".claude", local ? "settings.local.json" : "settings.json")
     end
 
-    def self.install_claude(root, local: false)
-      path = claude_settings_path(root, local: local)
+    # Codex reads project hooks from .codex/hooks.json in the same shape
+    # (hooks.PreToolUse[].matcher / hooks[].command, the payload on stdin,
+    # exit 2 to refuse). Its shell tool is `Bash`; file edits arrive as
+    # `apply_patch` (also matched by the Edit and Write aliases) with the
+    # patch text in the command. Codex runs a project hook only after the
+    # person has reviewed and trusted it with /hooks inside Codex.
+    CODEX_GUARD_MATCHER = "Bash|apply_patch|Edit|Write"
+
+    def self.codex_hooks_path(root) = File.join(root, ".codex", "hooks.json")
+
+    def self.install_claude(root, local: false) = install_into(claude_settings_path(root, local: local), GUARD_MATCHER)
+    def self.uninstall_claude(root, local: false) = uninstall_from(claude_settings_path(root, local: local))
+    def self.install_codex(root) = install_into(codex_hooks_path(root), CODEX_GUARD_MATCHER)
+    def self.uninstall_codex(root) = uninstall_from(codex_hooks_path(root))
+
+    def self.install_into(path, matcher)
       settings = read_settings(path)
       hooks = (settings["hooks"] ||= {})
       raise TargetError, "#{path}: hooks is not an object" unless hooks.is_a?(Hash)
       entries = Array(hooks["PreToolUse"]).reject { |e| guard_entry?(e) }
-      entries << { "matcher" => GUARD_MATCHER, "hooks" => [{ "type" => "command", "command" => GUARD_COMMAND }] }
+      entries << { "matcher" => matcher, "hooks" => [{ "type" => "command", "command" => GUARD_COMMAND }] }
       hooks["PreToolUse"] = entries
       write_settings(path, settings)
       path
     end
 
-    def self.uninstall_claude(root, local: false)
-      path = claude_settings_path(root, local: local)
+    def self.uninstall_from(path)
       return nil unless File.file?(path)
       settings = read_settings(path)
       hooks = settings["hooks"]
@@ -79,17 +94,19 @@ module SoftFoundry
       path
     end
 
-    # Whether the guard is installed for this repository, and where.
+    # Whether the guard is installed for Claude Code in this repository, and where.
     def self.claude_installed?(root)
-      [false, true].filter_map do |local|
-        path = claude_settings_path(root, local: local)
-        next unless File.file?(path)
-        settings = read_settings(path)
-        entries = settings.dig("hooks", "PreToolUse")
-        path if entries.is_a?(Array) && entries.any? { |e| guard_entry?(e) }
-      rescue TargetError
-        nil
-      end.first
+      [false, true].filter_map { |local| installed_at(claude_settings_path(root, local: local)) }.first
+    end
+
+    def self.codex_installed?(root) = installed_at(codex_hooks_path(root))
+
+    def self.installed_at(path)
+      return nil unless File.file?(path)
+      entries = read_settings(path).dig("hooks", "PreToolUse")
+      path if entries.is_a?(Array) && entries.any? { |e| guard_entry?(e) }
+    rescue TargetError
+      nil
     end
 
     def self.guard_entry?(entry)

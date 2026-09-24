@@ -6,3 +6,10 @@ checks:
     result: TBD   # pass | fail | error | skipped
     evidence: evidence/TBD
     criteria: [AC-001]
+    # Optional, per check: the commit at which this test existed and failed
+    # (RED) and the test file. The gate verifies red_commit is a commit that
+    # precedes commit_sha, holds test_path, and that APP or INFRA code changed
+    # after it. A feature, fix, or refactor with no red_commit on any check is
+    # advised as having no failing-test-first evidence.
+    # red_commit: TBD
+    # test_path: TBD

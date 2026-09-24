@@ -1,0 +1,15 @@
+version: 1
+
+# Exemptions from the content scan (`soft-foundry check`, the gate's
+# "content clean" check, `soft-foundry scan`). Each entry names the path
+# globs it covers, optionally the kinds it exempts (secret, override,
+# fetch_exec; invisible text is never exempt) and a substring the line
+# must contain, and a reason a reviewer can weigh. A line inside a file
+# may instead carry the marker `soft-foundry:scan-allow`. This file is
+# policy: protected from every skill's write set and changed only
+# through a change record.
+allow:
+  - paths: ["changes/init-command/07-evaluation/**"]
+    kinds: [secret]
+    match: "sk-canary"
+    reason: EVAL-012 sets OPENAI_API_KEY and ANTHROPIC_API_KEY to a deliberately fake canary value (sk-canary...) to prove that an internal-failure report never echoes a credential; the strings are the canary, not a key, and the evidence is closed and commit-bound so cannot carry the in-line marker.

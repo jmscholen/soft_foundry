@@ -1,64 +1,54 @@
+---
 change:
   id: runtime-guard
-  title: Runtime enforcement of skill permissions through a Claude Code PreToolUse guard
+  title: Runtime enforcement of skill permissions through a Claude Code PreToolUse
+    guard
 git:
-  worktree: /Users/jscholen-iou/dev/soft_foundry
+  worktree: "/Users/jscholen-iou/dev/soft_foundry"
   branch: change/runtime-guard
 type: feature
 risk: low
-track: gated            # gated | iterative (.ai/workflow.yml tracks:); set by `change new --track`
-status: in_progress
-current_phase: review
-created_at: 2026-09-24T02:23:43Z
+track: gated
+status: closed
+current_phase: done
+created_at: 2026-09-24 02:23:43.000000000 Z
 surfaces:
   application: true
   database: false
   infrastructure: false
   security: true
-  accessibility: true     # CLI output and documents a person reads; true when a person perceives or operates the result (UI, CLI output, documents); loads .ai/rules/accessibility.md and enables the go-live accessibility advisories. Set automatically by `change new` when the repository profile records a user-facing framework.
+  accessibility: true
   observability: false
-  policy: false           # true when the change alters what the application collects, shares, retains, protects, or promises in its privacy policy, security policy, or terms; loads .ai/rules/policy-conformance.md and enables the go-live policy advisories. Set automatically by `change new` when the repository profile records a published policy document.
-
-# Human-boundary decisions this change required (.ai/policies/human-boundaries.yml),
-# each recorded once a person made it. While a decision the review says is owed
-# has no entry here, the change is parked with status: awaiting_human.
+  policy: false
 human_decisions: []
-# - boundary: legal commitment
-#   subject: privacy policy, clause 4 (third-party analytics recipient)
-#   decided_by: TBD
-#   decided_at: TBD
-#   decision: approved | declined
-
-# Iterative track only. `soft-foundry change vet` records the person's
-# acceptance of the explored feature and the commit the specification
-# locked at; from then on the phases from implement onward apply as on the
-# gated track. `change reopen` clears it, resets those phases to pending,
-# and appends the reopening here so the history stays in the record.
-vetted: null
-# vetted:
-#   at: 2026-09-16T00:00:00Z
-#   by: name
-#   commit: sha
+vetted:
 reopenings: []
-# - at: 2026-09-16T00:00:00Z
-#   from_commit: sha the change had been vetted at
-#   reason: why the person sent it back to exploring
-
-# Phases the harness would otherwise require, deliberately not run for
-# this change, each with a non-empty rationale. An entry with an empty
-# rationale does not count as a skip - the phase stays required.
 skipped_phases:
 - phase: discover
-  rationale: Repository already discovered for prior changes at an identical layout; this change adds no technology.
+  rationale: Repository already discovered for prior changes at an identical layout;
+    this change adds no technology.
 - phase: specify
-  rationale: Intake captures the requirements with stable IDs REQ-GRD-001..010 in 00-intake/request.md at sufficient granularity for a change this size (gated track, by the repository's established process for repository-native changes).
+  rationale: Intake captures the requirements with stable IDs REQ-GRD-001..010 in
+    00-intake/request.md at sufficient granularity for a change this size (gated track,
+    by the repository's established process for repository-native changes).
 - phase: threat_model
-  rationale: Reasoned through in 00-intake/assumptions.md rather than as a separate phase. The guard reads a JSON payload from a coding shell and answers with an exit code; its only writes are an append-only machine-local log and, on install, a JSON settings file rewritten through SafeWrite. Fail-closed behaviour in block mode and the Bash heuristic's limits are stated in the policy file and the README.
+  rationale: Reasoned through in 00-intake/assumptions.md rather than as a separate
+    phase. The guard reads a JSON payload from a coding shell and answers with an
+    exit code; its only writes are an append-only machine-local log and, on install,
+    a JSON settings file rewritten through SafeWrite. Fail-closed behaviour in block
+    mode and the Bash heuristic's limits are stated in the policy file and the README.
 - phase: plan
   rationale: 05-implementation/log.md is the plan record for a change this size.
 - phase: attack
-  rationale: Reasoned through directly (bypass by symlinked settings file, malformed payload, paths outside the root, quoted paths in Bash) and covered by tests and the evaluation transcript rather than adversarially tested; recorded as a real limitation, not equivalent to attack coverage. The Bash heuristic is documented as deny-only for exactly this reason.
+  rationale: Reasoned through directly (bypass by symlinked settings file, malformed
+    payload, paths outside the root, quoted paths in Bash) and covered by tests and
+    the evaluation transcript rather than adversarially tested; recorded as a real
+    limitation, not equivalent to attack coverage. The Bash heuristic is documented
+    as deny-only for exactly this reason.
 - phase: judge
-  rationale: An isolated, fresh-context judgment is the skill's explicit design; self-judgment would not satisfy that. The maintainer's own merge decision is the real judgment point, and the advisory reports this skip on every gate run, as intended.
+  rationale: An isolated, fresh-context judgment is the skill's explicit design; self-judgment
+    would not satisfy that. The maintainer's own merge decision is the real judgment
+    point, and the advisory reports this skip on every gate run, as intended.
 - phase: learn
-  rationale: Lessons are recorded directly in 05-implementation/log.md rather than as separate formal learning artifacts, given the change's scope.
+  rationale: Lessons are recorded directly in 05-implementation/log.md rather than
+    as separate formal learning artifacts, given the change's scope.

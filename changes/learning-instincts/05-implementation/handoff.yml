@@ -1,0 +1,19 @@
+phase: 05-implementation
+skill: implementation
+status: complete
+commit_sha: a5648d0b5b6933a361a34d30daf9fb77cb740014
+started_at: '2026-09-24T05:35:00Z'
+completed_at: '2026-09-24T06:00:00Z'
+resolved_model:
+  profile: coding_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- log.md
+- decisions.md
+- deviations.md
+blocking: []
+findings: []
+next: verify
+notes: Performed directly by the interactive session, not a fresh-context agent; see 00-intake/assumptions.md. Tests committed first at a5c0d59d28cf665afbad3c018425ed90017eb463 (RED); implementation at 55bce29 and a one-line output fix at a5648d0b5b6933a361a34d30daf9fb77cb740014 (GREEN). Writing .ai/policies/learning.yml is outside every skill's write set; this is a maintainer change through its own record.
+executed_by:

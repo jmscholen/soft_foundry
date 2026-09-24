@@ -1,0 +1,50 @@
+commit_sha: a5648d0b5b6933a361a34d30daf9fb77cb740014
+journeys:
+  - id: EVAL-001
+    criteria: [REQ-LRN-001, REQ-LRN-002]
+    persona: learning agent writing instincts
+    starting_state: "scratch repo with this repo's real .ai/; branch change/c1; every phase through learning marked complete"
+    steps: ["ls changes/c1/15-learning", "write two valid instincts; soft-foundry gate learn", "write one malformed instinct (id 'Not Kebab', empty action, confidence 7, no evidence); soft-foundry gate learn", "restore the valid file and commit"]
+    assertions: ["change new scaffolds instincts.yml beside the three learning files", "15-learning complete PASS with ✓ pass instincts valid: 2 instincts: commit-the-failing-test-first, prefer-checkout-exe-in-hooks", "15-learning complete FAIL with ✗ fail instincts valid naming the id, the empty action, the out-of-range confidence, and the empty evidence; exit 2"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-002
+    criteria: [REQ-LRN-003]
+    persona: maintainer surveying what the repository has learned
+    starting_state: c1 with two instincts (0.90, 0.60) committed; branch change/c2 with one instinct (0.75) committed
+    steps: ["soft-foundry learn list", "soft-foundry learn list --min-confidence 0.8"]
+    assertions: ["three lines, 0.90 c1 ..., 0.75 c2 ..., 0.60 c1 ..., each as <confidence> <change> <id> (<trigger>; <action>) with no doubled 'when'", "with the threshold only the 0.90 line"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-003
+    criteria: [REQ-LRN-005]
+    persona: maintainer on main
+    starting_state: main, no change record
+    steps: ["soft-foundry learn promote; record the exit", "count sections in .ai/rules/learned.md"]
+    assertions: ["✗ fail learn promote: no change record for branch 'main'; ... a promotion is a change to .ai/rules and goes through a change record; exit 1", "learned.md still has 0 sections"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-004
+    criteria: [REQ-LRN-004, REQ-LRN-005, REQ-LRN-006]
+    persona: maintainer promoting through a new change
+    starting_state: branch change/promote-1 from change/c2 with its own record committed
+    steps: ["soft-foundry learn promote --dry-run; count sections", "soft-foundry learn promote", "cat .ai/rules/learned.md", "soft-foundry learn promote again", "soft-foundry learn promote --min-confidence 0.7; list headings", "git status of learned.md"]
+    assertions: ["dry run prints would promote commit-the-failing-test-first (0.90, from c1) and two skip lines with the confidences and the 0.80 threshold; the file is unchanged", "promote prints ✓ pass promoted ... and wrote .ai/rules/learned.md through change promote-1", "learned.md holds the header and one section with When, Do, and Confidence 0.90 (from change c1, domain testing; evidence: REV-020)", "a second run prints - skip commit-the-failing-test-first: already in .ai/rules/learned.md", "with 0.70 the 0.75 instinct is promoted and the file has two headings", "learned.md is modified in the worktree, ready to commit with the record"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-005
+    criteria: [REQ-LRN-007]
+    persona: implementing agent
+    starting_state: same repo
+    steps: ["grep learned.md in the implementation and exploration skill.yml files"]
+    assertions: ["both list .ai/rules/learned.md under rules.baseline"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-006
+    criteria: [REQ-LRN-004, REQ-LRN-005]
+    persona: screen-reader user or CI log reader
+    starting_state: as EVAL-004, then main
+    steps: ["learn promote with every non-ASCII byte stripped", "learn promote on main with every non-ASCII byte stripped"]
+    assertions: ["the lines still read skip <id>: already in ... / confidence 0.60 is below 0.80", "the refusal still reads fail learn promote: no change record for branch 'main' ..."]
+    evidence: [evidence/journey-transcript.log]
+    result: pass

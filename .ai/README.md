@@ -21,11 +21,11 @@ Canonical source templates under `.ai/skills/*/template/` and `.ai/templates/` a
 | `templates/` | Shared templates: the phase `handoff.yml` and the change `metadata.yml`. |
 | `profiles/` | Capability profiles skills request; provider/model resolution is a runtime concern. |
 | `rules/` | Coding and infrastructure standards loaded by implementation and checked by review. |
-| `policies/` | Permission principles, protected paths, anti-fudging rules, human boundaries, and `enforcement.yml` (whether the runtime guard warns or blocks). Protected from every skill's write set. |
+| `policies/` | Permission principles, protected paths, anti-fudging rules, human boundaries, `enforcement.yml` (whether the runtime guard warns or blocks), `learning.yml` (the instinct promotion threshold), and `content-scan.yml` (reasoned exemptions from the content scan). Protected from every skill's write set. |
 | `maturity.yml`, `repository.yml` | Maturity policy and the evidence-backed repository profile. |
 | `harness-evals/` | Evaluations of the harness itself; denied to execution skills. |
 
-`soft-foundry check` verifies this structure: every phase has a skill, every required file has a template, every permission references a known path group, no skill can write protected policy, and every skill denies reading harness evals. `soft-foundry gate` applies each skill's `completion.yml` to a change record.
+`soft-foundry check` verifies this structure: every phase has a skill, every required file has a template, every permission references a known path group, no skill can write protected policy, and every skill denies reading harness evals. It also scans every file here and the pointer files for invisible Unicode, secret-shaped strings, instruction-override phrases, and fetch-and-execute commands, because these files are read as instructions. `soft-foundry gate` applies each skill's `completion.yml` to a change record.
 
 Repository discovery is the only skill permitted to write inside `.ai/`, and only to `repository.yml`, because that file is evidence rather than policy.
 

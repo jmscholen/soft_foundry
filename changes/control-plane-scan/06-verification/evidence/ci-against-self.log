@@ -1,0 +1,277 @@
+✓ pass control plane: 16 phases, 17 skills, no errors
+
+change accessibility-advisory (closed, skipped)
+
+change budget-and-openrouter (closed, skipped)
+
+change budget-billing-awareness (closed, skipped)
+
+change change-close-command (closed, skipped)
+
+change control-plane-scan
+
+change init-command (closed, skipped)
+
+change learning-instincts
+00-intake  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: a5648d0b5b6933a361a34d30daf9fb77cb740014
+  ✓ pass completed_at recorded: 2026-09-24T05:35:00Z
+  ✓ pass predecessor complete: first phase
+  ✓ pass content clean
+05-implementation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: a5648d0b5b6933a361a34d30daf9fb77cb740014
+  ✓ pass completed_at recorded: 2026-09-24T06:00:00Z
+  ✓ pass predecessor complete: 00-intake
+  ✓ pass content clean
+06-verification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: a5648d0b5b6933a361a34d30daf9fb77cb740014
+  ✓ pass completed_at recorded: 2026-09-24T06:05:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since a5648d0b5b69 on branch change/learning-instincts
+  ✓ pass red evidence: CHECK-001: a5c0d59d28cf -> a5648d0b5b69 (test/learning_instincts_test.rb)
+  ✓ pass content clean
+07-evaluation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: a5648d0b5b6933a361a34d30daf9fb77cb740014
+  ✓ pass completed_at recorded: 2026-09-24T06:15:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✓ pass evidence current: no code changes since a5648d0b5b69 on branch change/learning-instincts
+  ✓ pass content clean
+13-review  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: functional.md, architecture.md, security.md, accessibility.md, policy-conformance.md, infrastructure.md, operations.md, consolidated.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: a5648d0b5b6933a361a34d30daf9fb77cb740014
+  ✓ pass completed_at recorded: 2026-09-24T06:30:00Z
+  ✓ pass predecessor complete: 07-evaluation
+  ✓ pass evidence current: no code changes since a5648d0b5b69 on branch change/learning-instincts
+  ✓ pass content clean
+15-learning  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: findings.md, proposed-rules.md, proposed-evals.md, instincts.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: a5648d0b5b6933a361a34d30daf9fb77cb740014
+  ✓ pass completed_at recorded: 2026-09-24T06:40:00Z
+  ✓ pass predecessor complete: 13-review
+  ✓ pass instincts valid: 6 instincts: commit-the-failing-test-first, check-the-commit-landed-before-binding-evidence, regenerate-evidence-never-annotate, measure-staleness-on-the-record-branch, prefer-checkout-exe-in-hooks, branch-from-the-record-branch-when-stacking
+  ✓ pass content clean
+advisory: 3 issues to address before learning-instincts goes live (informational, does not block the gate)
+  ! warn judgment: final judgment was skipped (An isolated, fresh-context judgment is the skill's explicit design; self-judgment would not satisfy that. The maintainer's own merge decision is the real judgment point, and the advisory reports this skip on every gate run, as intended.); no APPROVED/BLOCKED/REJECTED verdict exists for this change
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn accessibility: no accessibility requirements were recorded: the specification phase was skipped, so there is nothing for review to check conformance against
+
+change lifecycle-tracks (closed, skipped)
+
+change maturity-onboarding (closed, skipped)
+
+change maturity-report (closed, skipped)
+
+change observability-standard-dashboard (closed, skipped)
+
+change phase-runner
+00-intake  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 9f855b51a833b6fb43ca9b30ca8314a9550f7c5d
+  ✓ pass completed_at recorded: 2026-09-24T03:05:00Z
+  ✓ pass predecessor complete: first phase
+  ✓ pass content clean
+05-implementation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 9f855b51a833b6fb43ca9b30ca8314a9550f7c5d
+  ✓ pass completed_at recorded: 2026-09-24T03:40:00Z
+  ✓ pass predecessor complete: 00-intake
+  ✓ pass content clean
+06-verification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 9f855b51a833b6fb43ca9b30ca8314a9550f7c5d
+  ✓ pass completed_at recorded: 2026-09-24T03:45:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since 9f855b51a833 on branch change/phase-runner
+  - skip red evidence: no check records a red_commit
+  ✓ pass content clean
+07-evaluation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 9f855b51a833b6fb43ca9b30ca8314a9550f7c5d
+  ✓ pass completed_at recorded: 2026-09-24T03:55:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✓ pass evidence current: no code changes since 9f855b51a833 on branch change/phase-runner
+  ✓ pass content clean
+13-review  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: functional.md, architecture.md, security.md, accessibility.md, policy-conformance.md, infrastructure.md, operations.md, consolidated.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 9f855b51a833b6fb43ca9b30ca8314a9550f7c5d
+  ✓ pass completed_at recorded: 2026-09-24T04:10:00Z
+  ✓ pass predecessor complete: 07-evaluation
+  ✓ pass evidence current: no code changes since 9f855b51a833 on branch change/phase-runner
+  ✓ pass content clean
+advisory: 4 issues to address before phase-runner goes live (informational, does not block the gate)
+  ! warn judgment: final judgment was skipped (An isolated, fresh-context judgment is the skill's explicit design; self-judgment would not satisfy that. The maintainer's own merge decision is the real judgment point, and the advisory reports this skip on every gate run, as intended.); no APPROVED/BLOCKED/REJECTED verdict exists for this change
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn verification: no check in 06-verification/tests.yml records a red_commit, so the failing-test-first evidence .ai/rules/testing.md asks for is not demonstrable for this feature
+  ! warn accessibility: no accessibility requirements were recorded: the specification phase was skipped, so there is nothing for review to check conformance against
+
+change policy-conformance (closed, skipped)
+
+change red-green-evidence
+00-intake  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7306119ba99bd292ef70dd509fd68697a651b81c
+  ✓ pass completed_at recorded: 2026-09-24T04:25:00Z
+  ✓ pass predecessor complete: first phase
+  ✓ pass content clean
+05-implementation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7306119ba99bd292ef70dd509fd68697a651b81c
+  ✓ pass completed_at recorded: 2026-09-24T04:50:00Z
+  ✓ pass predecessor complete: 00-intake
+  ✓ pass content clean
+06-verification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7306119ba99bd292ef70dd509fd68697a651b81c
+  ✓ pass completed_at recorded: 2026-09-24T04:55:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since 7306119ba99b on branch change/red-green-evidence
+  ✓ pass red evidence: CHECK-001: 5d898e08f1f6 -> 7306119ba99b (test/red_green_test.rb)
+  ✓ pass content clean
+07-evaluation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7306119ba99bd292ef70dd509fd68697a651b81c
+  ✓ pass completed_at recorded: 2026-09-24T05:05:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✓ pass evidence current: no code changes since 7306119ba99b on branch change/red-green-evidence
+  ✓ pass content clean
+13-review  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: functional.md, architecture.md, security.md, accessibility.md, policy-conformance.md, infrastructure.md, operations.md, consolidated.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7306119ba99bd292ef70dd509fd68697a651b81c
+  ✓ pass completed_at recorded: 2026-09-24T05:20:00Z
+  ✓ pass predecessor complete: 07-evaluation
+  ✓ pass evidence current: no code changes since 7306119ba99b on branch change/red-green-evidence
+  ✓ pass content clean
+advisory: 3 issues to address before red-green-evidence goes live (informational, does not block the gate)
+  ! warn judgment: final judgment was skipped (An isolated, fresh-context judgment is the skill's explicit design; self-judgment would not satisfy that. The maintainer's own merge decision is the real judgment point, and the advisory reports this skip on every gate run, as intended.); no APPROVED/BLOCKED/REJECTED verdict exists for this change
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn accessibility: no accessibility requirements were recorded: the specification phase was skipped, so there is nothing for review to check conformance against
+
+change runtime-guard
+00-intake  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e5c48dcf9009b91a3032d77b15beb9f9fe6a9275
+  ✓ pass completed_at recorded: 2026-09-24T01:45:00Z
+  ✓ pass predecessor complete: first phase
+  ✓ pass content clean
+05-implementation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e5c48dcf9009b91a3032d77b15beb9f9fe6a9275
+  ✓ pass completed_at recorded: 2026-09-24T02:20:00Z
+  ✓ pass predecessor complete: 00-intake
+  ✓ pass content clean
+06-verification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e5c48dcf9009b91a3032d77b15beb9f9fe6a9275
+  ✓ pass completed_at recorded: 2026-09-24T02:25:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since e5c48dcf9009 on branch change/runtime-guard
+  - skip red evidence: no check records a red_commit
+  ✓ pass content clean
+07-evaluation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e5c48dcf9009b91a3032d77b15beb9f9fe6a9275
+  ✓ pass completed_at recorded: 2026-09-24T02:40:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✓ pass evidence current: no code changes since e5c48dcf9009 on branch change/runtime-guard
+  ✓ pass content clean
+13-review  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: functional.md, architecture.md, security.md, accessibility.md, policy-conformance.md, infrastructure.md, operations.md, consolidated.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e5c48dcf9009b91a3032d77b15beb9f9fe6a9275
+  ✓ pass completed_at recorded: 2026-09-24T02:55:00Z
+  ✓ pass predecessor complete: 07-evaluation
+  ✓ pass evidence current: no code changes since e5c48dcf9009 on branch change/runtime-guard
+  ✓ pass content clean
+advisory: 4 issues to address before runtime-guard goes live (informational, does not block the gate)
+  ! warn judgment: final judgment was skipped (An isolated, fresh-context judgment is the skill's explicit design; self-judgment would not satisfy that. The maintainer's own merge decision is the real judgment point, and the advisory reports this skip on every gate run, as intended.); no APPROVED/BLOCKED/REJECTED verdict exists for this change
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn verification: no check in 06-verification/tests.yml records a red_commit, so the failing-test-first evidence .ai/rules/testing.md asks for is not demonstrable for this feature
+  ! warn accessibility: no accessibility requirements were recorded: the specification phase was skipped, so there is nothing for review to check conformance against
+
+change security-policy-not-applicable (closed, skipped)
+
+change self-update (closed, skipped)
+
+change upstream-failure-reporting
+00-intake  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: cc348f93f3d265af3f92f7fa7d0b09cbbf8a520a
+  ✓ pass completed_at recorded: 2026-09-09T15:43:34Z
+  ✓ pass predecessor complete: first phase
+  ✓ pass content clean
+
+✓ ci passed

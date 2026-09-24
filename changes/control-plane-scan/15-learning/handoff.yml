@@ -1,0 +1,20 @@
+phase: 15-learning
+skill: learning
+status: complete
+commit_sha: 54ecc50a2f6410961901537cbcb8b89085085254
+started_at: '2026-09-24T07:55:00Z'
+completed_at: '2026-09-24T08:00:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- findings.md
+- proposed-rules.md
+- proposed-evals.md
+- instincts.yml
+blocking: []
+findings: []
+next: done
+notes: Performed directly by the interactive session, not a fresh-context agent; see 00-intake/assumptions.md. Predecessor resolves to 13-review because judge is skipped with rationale. Three instincts; two at or above the threshold await the next promotion.
+executed_by:

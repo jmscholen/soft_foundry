@@ -1,0 +1,134 @@
+ruby: ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23]
+soft-foundry: 0.13.0
+implementation commit under evaluation: a5648d0b5b6933a361a34d30daf9fb77cb740014
+
+############ EVAL-001 a change's learning phase writes instincts; the gate validates them
+$ (cd /tmp/sf-learn.UtlsyK && git checkout -qb change/c1)
+[exit 0]
+
+$ (cd /tmp/sf-learn.UtlsyK && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change new c1 | head -1 && git add -A && git commit -qm record && ls changes/c1/15-learning)
+created changes/c1 with 16 phase directories
+findings.md
+handoff.yml
+instincts.yml
+proposed-evals.md
+proposed-rules.md
+[exit 0]
+
+$ (cd /tmp/sf-learn.UtlsyK && complete_all c1 && printf 'instincts:\n- id: commit-the-failing-test-first\n  trigger: when starting a feature or fix\n  action: commit the failing test alone before any implementation and name that commit as red_commit\n  confidence: 0.9\n  domain: testing\n  evidence:\n  - finding: REV-020\n- id: prefer-checkout-exe-in-hooks\n  trigger: when a hook runs a tool that is also the repository under development\n  action: prefer the checkout executable over one on PATH\n  confidence: 0.6\n  domain: git\n  evidence:\n  - phase: 05-implementation\n' > changes/c1/15-learning/instincts.yml && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate learn | grep -E 'PASS|FAIL|instincts valid')
+15-learning  complete  PASS
+  ✓ pass instincts valid: 2 instincts: commit-the-failing-test-first, prefer-checkout-exe-in-hooks
+[exit 0]
+
+$ (cd /tmp/sf-learn.UtlsyK && printf 'instincts:\n- id: Not Kebab\n  trigger: x\n  action: \n  confidence: 7\n  evidence: []\n' > changes/c1/15-learning/instincts.yml && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate learn | grep -E 'PASS|FAIL|instincts valid')
+15-learning  complete  FAIL
+  ✗ fail instincts valid: id 'Not Kebab' is not kebab-case; Not Kebab: action is empty; Not Kebab: confidence '7' is not a number between 0 and 1; Not Kebab: evidence is empty
+[exit 2]
+
+$ (cd /tmp/sf-learn.UtlsyK && git checkout -q -- changes/c1/15-learning/instincts.yml 2>/dev/null; printf 'instincts:\n- id: commit-the-failing-test-first\n  trigger: when starting a feature or fix\n  action: commit the failing test alone before any implementation and name that commit as red_commit\n  confidence: 0.9\n  domain: testing\n  evidence:\n  - finding: REV-020\n- id: prefer-checkout-exe-in-hooks\n  trigger: when a hook runs a tool that is also the repository under development\n  action: prefer the checkout executable over one on PATH\n  confidence: 0.6\n  domain: git\n  evidence:\n  - phase: 05-implementation\n' > changes/c1/15-learning/instincts.yml && git add -A && git commit -qm 'c1 learned' && echo committed)
+committed
+[exit 0]
+
+############ EVAL-002 learn list across records, highest confidence first, with a threshold
+$ (cd /tmp/sf-learn.UtlsyK && git checkout -qb change/c2 && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change new c2 | head -1 && printf 'instincts:\n- id: read-the-guard-log\n  trigger: when deciding whether to move the guard from warn to block\n  action: read .soft-foundry/guard.log for what warn mode would have refused\n  confidence: 0.75\n  domain: operations\n  evidence:\n  - finding: REV-024\n' > changes/c2/15-learning/instincts.yml && git add -A && git commit -qm 'c2 learned' && echo committed)
+created changes/c2 with 16 phase directories
+committed
+[exit 0]
+
+$ (cd /tmp/sf-learn.UtlsyK && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry learn list)
+0.90 c1 commit-the-failing-test-first (when starting a feature or fix; commit the failing test alone before any implementation and name that commit as red_commit)
+0.75 c2 read-the-guard-log (when deciding whether to move the guard from warn to block; read .soft-foundry/guard.log for what warn mode would have refused)
+0.60 c1 prefer-checkout-exe-in-hooks (when a hook runs a tool that is also the repository under development; prefer the checkout executable over one on PATH)
+[exit 0]
+
+$ (cd /tmp/sf-learn.UtlsyK && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry learn list --min-confidence 0.8)
+0.90 c1 commit-the-failing-test-first (when starting a feature or fix; commit the failing test alone before any implementation and name that commit as red_commit)
+[exit 0]
+
+############ EVAL-003 promote refuses outside a change record
+$ (cd /tmp/sf-learn.UtlsyK && git checkout -q main && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry learn promote; echo promote-exit=$?)
+✗ fail learn promote: no change record for branch 'main'; run `soft-foundry change new <slug>` or pass --change SLUG; a promotion is a change to .ai/rules and goes through a change record
+promote-exit=1
+[exit 0]
+
+$ (cd /tmp/sf-learn.UtlsyK && grep -c '^## ' .ai/rules/learned.md; echo sections)
+0
+sections
+[exit 0]
+
+############ EVAL-004 promote through a change record: threshold, provenance, idempotence, dry run
+$ (cd /tmp/sf-learn.UtlsyK && git checkout -q change/c2 && git checkout -qb change/promote-1 && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change new promote-1 | head -1 && git add -A && git commit -qm record && echo committed)
+created changes/promote-1 with 16 phase directories
+committed
+[exit 0]
+
+$ (cd /tmp/sf-learn.UtlsyK && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry learn promote --dry-run)
+would promote commit-the-failing-test-first (0.90, from c1)
+- skip read-the-guard-log: confidence 0.75 is below 0.80
+- skip prefer-checkout-exe-in-hooks: confidence 0.60 is below 0.80
+[exit 0]
+
+$ (cd /tmp/sf-learn.UtlsyK && grep -c '^## ' .ai/rules/learned.md; echo sections)
+0
+sections
+[exit 0]
+
+$ (cd /tmp/sf-learn.UtlsyK && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry learn promote)
+✓ pass promoted commit-the-failing-test-first (0.90, from c1)
+- skip read-the-guard-log: confidence 0.75 is below 0.80
+- skip prefer-checkout-exe-in-hooks: confidence 0.60 is below 0.80
+wrote .ai/rules/learned.md through change promote-1; commit it with this change's record
+[exit 0]
+
+$ (cd /tmp/sf-learn.UtlsyK && cat .ai/rules/learned.md)
+# Learned Rules
+
+Instincts promoted from change records by `soft-foundry learn promote`: each
+entry names the change that learned it, its confidence when promoted, and the
+evidence in that record. Implementation and exploration load this file with
+the baseline rules. Edit it only through a change record, the way it was
+written.
+
+## commit-the-failing-test-first
+
+- **When:** when starting a feature or fix
+- **Do:** commit the failing test alone before any implementation and name that commit as red_commit
+- **Confidence:** 0.90 (from change c1, domain testing; evidence: REV-020)
+[exit 0]
+
+$ (cd /tmp/sf-learn.UtlsyK && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry learn promote)
+- skip commit-the-failing-test-first: already in .ai/rules/learned.md
+- skip read-the-guard-log: confidence 0.75 is below 0.80
+- skip prefer-checkout-exe-in-hooks: confidence 0.60 is below 0.80
+[exit 0]
+
+$ (cd /tmp/sf-learn.UtlsyK && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry learn promote --min-confidence 0.7 && grep '^## ' .ai/rules/learned.md)
+- skip commit-the-failing-test-first: already in .ai/rules/learned.md
+✓ pass promoted read-the-guard-log (0.75, from c2)
+- skip prefer-checkout-exe-in-hooks: confidence 0.60 is below 0.70
+wrote .ai/rules/learned.md through change promote-1; commit it with this change's record
+## commit-the-failing-test-first
+## read-the-guard-log
+[exit 0]
+
+$ (cd /tmp/sf-learn.UtlsyK && git status --short .ai/rules/learned.md)
+ M .ai/rules/learned.md
+[exit 0]
+
+############ EVAL-005 the promoted rules are a baseline rule for implementation and exploration
+$ (cd /tmp/sf-learn.UtlsyK && grep -n learned.md .ai/skills/implementation/skill.yml .ai/skills/exploration/skill.yml)
+.ai/skills/implementation/skill.yml:13:    - .ai/rules/learned.md
+.ai/skills/exploration/skill.yml:13:    - .ai/rules/learned.md
+[exit 0]
+
+############ EVAL-006 screen-reader and log readers: every line carries its outcome as a word
+$ (cd /tmp/sf-learn.UtlsyK && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry learn promote 2>&1 | LC_ALL=C tr -d '\200-\377')
+- skip commit-the-failing-test-first: already in .ai/rules/learned.md
+- skip read-the-guard-log: already in .ai/rules/learned.md
+- skip prefer-checkout-exe-in-hooks: confidence 0.60 is below 0.80
+[exit 0]
+
+$ (cd /tmp/sf-learn.UtlsyK && git checkout -q main 2>/dev/null; /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry learn promote 2>&1 | LC_ALL=C tr -d '\200-\377'; git checkout -q change/promote-1)
+ fail learn promote: no change record for branch 'main'; run `soft-foundry change new <slug>` or pass --change SLUG; a promotion is a change to .ai/rules and goes through a change record
+[exit 0]
+

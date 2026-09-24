@@ -1,0 +1,50 @@
+commit_sha: 9f855b51a833b6fb43ca9b30ca8314a9550f7c5d
+journeys:
+  - id: EVAL-001
+    criteria: [REQ-RUN-001, REQ-RUN-005, REQ-RUN-006]
+    persona: maintainer with a change through evaluation
+    starting_state: "scratch repo with this repo's real .ai/; branch change/c1; intake through attack complete at HEAD, current_phase evaluate"
+    steps: ["soft-foundry phase run review --dry-run", "soft-foundry hooks install --claude; phase run review --dry-run | head -2", "phase run review --dry-run --shell codex -- --full-auto | head -1"]
+    assertions: ["dry run prints ! warn guard: ... not installed here ..., then would run review of c1 with: claude -p <prompt>, then the prompt naming the change, phase, skill, the five contract files, and the five instructions; exit 0", "with the hook installed the warning is gone", "the codex form is codex exec --full-auto <prompt>"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-002
+    criteria: [REQ-RUN-002]
+    persona: maintainer asking for phases the gate would refuse
+    starting_state: as EVAL-001
+    steps: ["phase run verify", "phase run learn", "phase run polish", "on a new iterative change: phase run implement"]
+    assertions: ["06-verification is already complete ...; exit 1", "15-learning cannot start: its predecessor 14-judgment is pending; exit 1", "unknown phase 'polish'; lifecycle phases: ...; exit 1", "change it1 is exploring; the exploring stage is worked with the person, not by a runner (run change vet first)"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-003
+    criteria: [REQ-RUN-001, REQ-RUN-003, REQ-RUN-004, REQ-RUN-007]
+    persona: the fresh session completing review
+    starting_state: as EVAL-001 with the fake claude on PATH
+    steps: ["soft-foundry phase run review", "grep status/current_phase in metadata.yml", "print executed_by from 13-review/handoff.yml", "soft-foundry gate review | grep PASS|FAIL|warn review"]
+    assertions: ["the runner prints the billing notice, running review of c1 in a fresh claude session (review skill), the fake shell's two lines (args before prompt: -p; working 13-review of changes/c1), claude exited 0, and 13-review complete PASS with all eight checks; exit 0", "current_phase is review", "executed_by holds runner, shell claude, fresh_context true, start and finish times, exit_status 0, previous_phase evaluate", "gate review passes with no fresh-context advisory"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-004
+    criteria: [REQ-RUN-003, REQ-RUN-004]
+    persona: the fresh session failing on judgment
+    starting_state: as EVAL-003; FAKE_EXIT=3
+    steps: ["FAKE_EXIT=3 soft-foundry phase run judge", "grep status/started_at in 14-judgment/handoff.yml; print fresh_context and exit_status"]
+    assertions: ["claude exited 3, 14-judgment in_progress with the phase-in-progress warning, exit 1", "status in_progress, started_at set, fresh_context true, exit_status 3: the attempt is in the record"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-005
+    criteria: [REQ-RUN-007]
+    persona: maintainer who completed a review in the implementing session
+    starting_state: "fresh scratch repo; branch change/c2; intake through review marked complete by hand"
+    steps: ["soft-foundry gate review | grep PASS|FAIL|advisory|warn", "grep executed_by in 13-review/handoff.yml"]
+    assertions: ["13-review complete PASS, then advisory: 1 issue ... and ! warn review: independent review (13-review) was completed without soft-foundry phase run, so no fresh-context session is recorded; separation of duties rests on the handoff's notes", "the handoff carries executed_by: (null) from the template"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-006
+    criteria: [REQ-RUN-006, REQ-RUN-007]
+    persona: screen-reader user or CI log reader
+    starting_state: as EVAL-005, then EVAL-001's repository
+    steps: ["gate review with every non-ASCII byte stripped | grep warn review", "phase run judge --dry-run with every non-ASCII byte stripped | head -2"]
+    assertions: ["the advisory still reads warn review: independent review (13-review) was completed without ...", "the dry run still reads warn guard: ... and would run judge of c1 with: claude -p <prompt>"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass

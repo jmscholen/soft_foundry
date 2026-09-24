@@ -7,3 +7,4 @@
 - Exercise authorization boundaries, invalid input, error paths, retries, persistence, and concurrency where material.
 - Prefer realistic integration coverage for behavior that spans components.
 - Test fixtures/factories should communicate intent and avoid irrelevant setup.
+- For a feature, fix, or refactor, write the test first and commit it before the implementation: one commit in which the test exists and fails (RED), then the commit that makes it pass (GREEN). Verification names the RED commit as `red_commit` (with `test_path`) on the check that covers it, and the gate verifies the shape of that claim against git. A change verified with no RED commit is advised as lacking failing-test-first evidence.

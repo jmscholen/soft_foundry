@@ -1,0 +1,10 @@
+version: 1
+
+# Instincts written by a change's learning phase (15-learning/instincts.yml)
+# are promoted into .ai/rules/learned.md by `soft-foundry learn promote`
+# when their confidence is at or above this threshold. Promotion is a
+# change to the rules and happens only through a change record on a
+# change branch (the governance path for a proposed rule), never by the
+# agent that learned the lesson applying it to the rules it works under.
+promote:
+  min_confidence: 0.8

@@ -79,7 +79,7 @@ soft-foundry gate verify              # evaluate one phase's completion gate
 soft-foundry gate all --change <slug>
 ```
 
-A gate passes only when the phase's required files exist with no `TBD` placeholders, the handoff is valid, nothing is blocking, the predecessor phase is complete, and commit-bound evidence is not stale. Evidence is stale when any file in the `APP`, `TESTS`, or `INFRA` path groups changed after the recorded commit. See `.ai/schemas.md`.
+A gate passes only when the phase's required files exist with no `TBD` placeholders, the handoff is valid, nothing is blocking, the predecessor phase is complete, and commit-bound evidence is not stale. Evidence is stale when any file in the `APP`, `TESTS`, or `INFRA` path groups changed after the recorded commit, measured on the record's own branch while that branch exists (so a change stacked on another change's branch does not stale the earlier record) and on the worktree otherwise. See `.ai/schemas.md`.
 
 `soft-foundry check` lints the control plane itself. `soft-foundry ci` runs the lint plus every change record's gates, and `soft-foundry hooks install` wires it into a pre-commit hook. The GitHub Actions workflow runs the same two commands.
 
@@ -90,9 +90,12 @@ Every skill's `permissions.yml` declares what it may read and write, and `check`
 ```bash
 soft-foundry hooks install --claude            # writes the hook into .claude/settings.json (shared)
 soft-foundry hooks install --claude --local    # or .claude/settings.local.json (this machine only)
-soft-foundry hooks uninstall --claude          # removes only Soft Foundry's entry
-soft-foundry doctor                            # reports whether the hook is installed and the mode in effect
+soft-foundry hooks install --codex             # writes the same hook into .codex/hooks.json; then trust it with /hooks inside Codex
+soft-foundry hooks uninstall --claude          # removes only Soft Foundry's entry (likewise --codex)
+soft-foundry doctor                            # reports which hosts have the hook and the mode in effect
 ```
+
+The guard itself is host-neutral: it reads a JSON tool call on stdin and exits 2 to refuse. Claude Code and Codex share the hook file shape and the `PreToolUse` event. Codex names its shell tool `Bash` too, may send `command` as an array, and reports file edits as `apply_patch` (or under the `Edit`/`Write` aliases) with the patch text in `command`; the guard reads every path the patch adds, updates, deletes, or moves to and checks each against the write sets. Codex runs a project hook only after a person reviews and trusts it with `/hooks`. Grok has no hook mechanism, so under Grok the permissions are policy only, and `phase run --shell grok` says so.
 
 The mode is declared in `.ai/policies/enforcement.yml` (`warn` by default: report the violation, let the call through, log it to the machine-local `.soft-foundry/guard.log`; `block`: refuse it; `off`). A machine can override it in `.soft-foundry/enforcement.yml` or with `SOFT_FOUNDRY_GUARD=warn|block|off`, which wins over both. Outside a change branch, or once a change is closed, nothing is guarded.
 
@@ -101,6 +104,74 @@ What is checked: Edit, Write, MultiEdit, and NotebookEdit against the write and 
 ```
 ✗ fail guard: Edit .ai/rules/ruby.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
 ```
+
+### Scanning the control plane as an attack surface
+
+`.ai/`, `AGENTS.md`, `CLAUDE.md`, and every change record are inputs an agent reads, and anyone who can open a pull request may have written them. `soft-foundry check` now reads them the way an attacker would want them read, and the gate's `content clean` check does the same for a completed phase's files:
+
+| Kind | What it is | Level |
+| --- | --- | --- |
+| `invisible` | zero-width, bidirectional, and tag characters a person cannot see | error everywhere, never exempt |
+| `secret` | AWS, OpenAI-style, GitHub, Slack, and Google key shapes, private key blocks | error everywhere |
+| `override` | "ignore previous instructions", "you are now", "hide this from the user" and the like | error under `.ai/policies/`, warning elsewhere |
+| `fetch_exec` | `curl ... \| sh`, `sh -c "$(wget ...)"`, PowerShell download-and-invoke | error under `.ai/policies/`, warning elsewhere |
+
+A rule or threat model that quotes an attack as an example adds `soft-foundry:scan-allow` to that line; a documented example key can do the same. Evidence that cannot be edited (a closed record's logs) is exempted instead by an entry in `.ai/policies/content-scan.yml` naming the paths, optionally the kinds and a substring, and a reason that `check` requires. Invisible text is never exempt. `soft-foundry scan [paths...]` runs the same scan over the control plane and every record, or the paths given, on demand:
+
+```
+✗ error changes/c1/00-intake/request.md:1 secret: AWS access key id shaped string
+! warning .ai/rules/learned.md:4 override: instruction-override phrase (a rule quoting an attack may add the allow marker)
+✗ fail scan: 1 error, 1 warning in 214 files
+```
+
+The first run over this repository found a canary key in a closed record's evaluation evidence, placed there on purpose to prove an internal-failure report never echoes a credential; it is the first entry in the allowlist.
+
+### Instincts: what a change learned
+
+The learning phase now writes `15-learning/instincts.yml`: each instinct is a trigger an agent will recognise, one imperative action, a confidence from 0 to 1, and the finding or phase in the record that is its evidence. The learning gate's `instincts valid` check requires kebab-case unique ids, a trigger and an action, a confidence in range, and evidence; an empty list is a valid answer.
+
+```bash
+soft-foundry learn list                      # every record's instincts, highest confidence first
+soft-foundry learn list --min-confidence 0.9
+soft-foundry learn promote                   # copy those at or above the threshold into .ai/rules/learned.md
+soft-foundry learn promote --dry-run
+```
+
+Promotion is the governance path for a proposed rule: it writes `.ai/rules/learned.md` (each entry with the change that learned it, its confidence, and its evidence) and refuses outside a change record on a change branch, so a lesson reaches the rules through a later change's record, never by the change that learned it applying it to the rules it works under. The threshold lives in `.ai/policies/learning.yml` (`0.8` by default; `--min-confidence` overrides it for one run). Implementation and exploration load `learned.md` with the baseline rules. Promotion is idempotent: an instinct already in the file is skipped by id.
+
+### RED and GREEN evidence
+
+`.ai/rules/testing.md` asks that a feature, fix, or refactor commit its failing test before the code that makes it pass. Verification can now bind that to git: a check in `06-verification/tests.yml` names the commit at which the test existed and failed as `red_commit`, and the test file as `test_path`:
+
+```yaml
+checks:
+  - id: CHECK-001
+    kind: tests
+    command: bundle exec rake test
+    result: pass
+    evidence: evidence/tests.log
+    criteria: [REQ-001]
+    red_commit: 5d898e0c3f1a...     # the test existed and failed here
+    test_path: test/feature_test.rb
+```
+
+The verification gate's `red evidence` check verifies the shape of that claim: the commit exists, precedes the verified commit, holds the test file, and `APP` or `INFRA` code changed after it. It does not re-run the test at the RED commit; the claim is the agent's, bound to a commit anyone can check out. Checks without `red_commit` are not checked, and a feature, fix, or refactor whose verification has none draws an advisory saying the failing-test-first evidence is not demonstrable.
+
+### Fresh-context phases: `phase run`
+
+Review and judgment exist to look at the work from outside it. Until now every record in this repository has said "performed by the interactive session, not a fresh-context agent" in its handoff notes. `soft-foundry phase run` makes the separation a process boundary:
+
+```bash
+soft-foundry phase run review                    # a fresh `claude -p` session with only the review skill in its prompt
+soft-foundry phase run judge --shell codex       # or `codex exec`
+soft-foundry phase run judge --shell grok        # or `grok -p` (no hook mechanism: permissions are policy only, and the runner says so)
+soft-foundry phase run review --dry-run          # print the command and the prompt, launch nothing
+soft-foundry phase run review -- --model opus    # pass extra arguments to the shell
+```
+
+The runner refuses what the gate would refuse afterwards (an exploring change, a phase already complete, a pending predecessor), so no session is spent on it. It moves `current_phase` to the phase so the guard applies the right skill, writes `executed_by` into the phase's handoff (runner, shell, `fresh_context: true`, start and finish times, exit status) before and after the session, and runs the phase's gate when the session returns. The agent fills the rest of the handoff itself; the prompt tells it not to touch `executed_by`, not to alter any other phase's evidence, and to record `blocked` rather than pretend.
+
+A completed review or judgment whose handoff carries no `executed_by` from the runner gets an advisory: it was performed by whatever session was already open, and separation of duties rests on the handoff's notes. If the guard hook is not installed, `phase run` says so before launching, since the session's tool calls would then be checked by nothing.
 
 ### Lifecycle tracks: gated or iterative
 

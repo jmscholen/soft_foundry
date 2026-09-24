@@ -1,0 +1,20 @@
+phase: 15-learning
+skill: learning
+status: complete
+commit_sha: a5648d0b5b6933a361a34d30daf9fb77cb740014
+started_at: '2026-09-24T06:30:00Z'
+completed_at: '2026-09-24T06:40:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- findings.md
+- proposed-rules.md
+- proposed-evals.md
+- instincts.yml
+blocking: []
+findings: []
+next: done
+notes: Performed directly by the interactive session, not a fresh-context agent; see 00-intake/assumptions.md. The first learning phase completed in this repository; its predecessor resolves to 13-review because judge is skipped with rationale. The six instincts are proposals; a later change promotes them with soft-foundry learn promote.
+executed_by:

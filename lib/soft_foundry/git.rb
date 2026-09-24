@@ -64,11 +64,36 @@ module SoftFoundry
       ok
     end
 
+    # True when `path` exists in the tree of commit `sha`.
+    def file_at?(sha, path)
+      _, ok = run("cat-file", "-e", "#{sha}:#{path}")
+      ok
+    end
+
     # Paths changed in commits after `sha`, plus uncommitted and untracked paths.
     def changed_since(sha)
       committed, ok = run("diff", "--name-only", sha, "HEAD")
       committed = ok ? committed.lines(chomp: true) : []
       (committed + dirty_paths).uniq.sort
+    end
+
+    # Paths changed in commits between `sha` and `tip` (a commit or ref);
+    # committed changes only, since another branch's worktree is not ours.
+    def changed_between(sha, tip)
+      out, ok = run("diff", "--name-only", sha, tip)
+      ok ? out.lines(chomp: true).uniq.sort : []
+    end
+
+    # The commit a branch points at: local first, then origin's copy, so a
+    # CI checkout that fetched every branch still finds it. Nil if neither.
+    def branch_tip(name)
+      return nil if name.to_s.strip.empty? || name.to_s == "HEAD"
+      ["refs/heads/#{name}", "refs/remotes/origin/#{name}"].each do |ref|
+        next unless ref?(ref)
+        out, ok = run("rev-parse", ref)
+        return out.strip if ok
+      end
+      nil
     end
 
     # Modified, staged, untracked, and ignored paths. Ignored directories are

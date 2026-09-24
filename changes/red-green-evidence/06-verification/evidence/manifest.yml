@@ -1,0 +1,21 @@
+---
+commit_sha: 7306119ba99bd292ef70dd509fd68697a651b81c
+artifacts:
+- path: evidence/tests.log
+  produced_by: ruby -Ilib -Itest requiring every test/*_test.rb, with every provider
+    key, SOFT_FOUNDRY_BILLING, and SOFT_FOUNDRY_GUARD unset
+  sha256: bda66407f19c6fc08b0aadc67970eb0bb1357bfacece2507c6ea8a9ca4986b55
+- path: evidence/check.log
+  produced_by: soft-foundry check
+  sha256: 2be6498003ac7633f001dde7fb6c82d20d270c7515d869ca3f7276b8c1f3730e
+- path: evidence/syntax-warnings.log
+  produced_by: ruby -wc on every lib/, exe/soft-foundry, and the new test file
+  sha256: 1c20069901952ae2d0fe31612e84f12b381e84cb26abc68954209a7cb25ad550
+- path: evidence/ci-against-self.log
+  produced_by: soft-foundry ci run against this repository's own real change-record
+    history (stacked on change/phase-runner)
+  sha256: cdc791527258701cef4fb085b6c54d421972e524d4cc63a808719f85c7f6e621
+- path: evidence/red-at-5d898e0.log
+  produced_by: 'test/red_green_test.rb run with the worktree checked out at the RED
+    commit 5d898e0 (9 runs, 8 errors: the gate had no red evidence check yet)'
+  sha256: 144e144a1d7ac6b179891ab16f21a1812c07802813afaa99ed9e51f901230b5f

@@ -18,6 +18,9 @@ require_relative "updater"
 require_relative "pr_discharge"
 require_relative "advisory"
 require_relative "guard"
+require_relative "phase_runner"
+require_relative "learning"
+require_relative "content_scan"
 
 module SoftFoundry
   class CLI
@@ -26,7 +29,7 @@ module SoftFoundry
     EXIT_CONFLICTS = 3
     EXIT_INTERNAL = 4
 
-    def initialize(argv, out: $stdout, err: $stderr, input: $stdin, root: Dir.pwd, source: nil, updater: nil, pr_discharge: nil, shell: nil)
+    def initialize(argv, out: $stdout, err: $stderr, input: $stdin, root: Dir.pwd, source: nil, updater: nil, pr_discharge: nil, shell: nil, runner: nil)
       @argv = argv.dup
       @out = out
       @err = err
@@ -36,6 +39,7 @@ module SoftFoundry
       @updater = updater
       @pr_discharge = pr_discharge
       @shell = shell
+      @runner = runner
     end
 
     def run
@@ -52,6 +56,9 @@ module SoftFoundry
       when "ci" then ci
       when "hooks" then hooks
       when "guard" then guard
+      when "phase" then phase
+      when "learn" then learn
+      when "scan" then scan
       when "update" then update
       when "shell"
         shell_name = @argv.shift or raise ArgumentError, "Usage: soft-foundry shell <claude|codex|grok> [args...]"
@@ -237,11 +244,12 @@ module SoftFoundry
         "control plane check" => plane.present? && Check.new(plane).run.none? { |f| f.level == :error },
         ".ai/manifest.yml" => File.exist?(File.join(@root, Manifest::PATH)),
         "pre-commit hook" => File.exist?(File.join(@root, ".git/hooks/pre-commit")) && File.read(File.join(@root, ".git/hooks/pre-commit")).include?(Hooks::MARKER),
-        "claude guard hook" => !Hooks.claude_installed?(@root).nil?,
+        "guard hook" => !Hooks.claude_installed?(@root).nil? || !Hooks.codex_installed?(@root).nil?,
         "local runtime" => File.exist?(File.join(@root, ".soft-foundry/runtime.yml"))
       }
       mode, source = Guard.mode(@root)
-      detail = { "claude guard hook" => " (mode: #{mode}, #{source})#{checks['claude guard hook'] ? '' : '; install with `soft-foundry hooks install --claude`'}" }
+      hosts = "claude: #{Hooks.claude_installed?(@root) ? 'installed' : 'not installed'}, codex: #{Hooks.codex_installed?(@root) ? 'installed' : 'not installed'}"
+      detail = { "guard hook" => " (#{hosts}; mode: #{mode}, #{source})#{checks['guard hook'] ? '' : '; install with `soft-foundry hooks install --claude` or `--codex`'}" }
       checks.each { |name, ok| @out.puts "#{ok ? '✓ pass' : '✗ fail'} #{name}#{detail[name]}" }
       checks.values.all? ? 0 : 2
     end
@@ -665,27 +673,185 @@ module SoftFoundry
     def hooks
       sub = @argv.shift
       claude = flag("--claude")
+      codex = flag("--codex")
       local = flag("--local")
       raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+      raise TargetError, "--local applies to --claude only; Codex reads project hooks from .codex/hooks.json" if local && codex
       case sub
       when "install"
-        if claude
-          path = Hooks.install_claude(@root, local: local)
+        if claude || codex
           mode, source = Guard.mode(@root)
-          @out.puts "installed guard hook in #{relative(path)} (PreToolUse: #{Hooks::GUARD_MATCHER})"
+          if claude
+            path = Hooks.install_claude(@root, local: local)
+            @out.puts "installed guard hook in #{relative(path)} (PreToolUse: #{Hooks::GUARD_MATCHER})"
+          end
+          if codex
+            path = Hooks.install_codex(@root)
+            @out.puts "installed guard hook in #{relative(path)} (PreToolUse: #{Hooks::CODEX_GUARD_MATCHER})"
+            @out.puts "codex runs a project hook only after you review and trust it: open codex in this repository and run /hooks"
+          end
           @out.puts "guard mode: #{mode} (#{source})"
         else
           @out.puts "installed #{relative(Hooks.install(@root))}"
         end
         0
       when "uninstall"
-        raise ArgumentError, "Usage: soft-foundry hooks uninstall --claude [--local]" unless claude
-        path = Hooks.uninstall_claude(@root, local: local)
-        @out.puts(path ? "removed guard hook from #{relative(path)}" : "no guard hook installed in #{relative(Hooks.claude_settings_path(@root, local: local))}")
+        raise ArgumentError, "Usage: soft-foundry hooks uninstall --claude [--local] | --codex" unless claude || codex
+        if claude
+          path = Hooks.uninstall_claude(@root, local: local)
+          @out.puts(path ? "removed guard hook from #{relative(path)}" : "no guard hook installed in #{relative(Hooks.claude_settings_path(@root, local: local))}")
+        end
+        if codex
+          path = Hooks.uninstall_codex(@root)
+          @out.puts(path ? "removed guard hook from #{relative(path)}" : "no guard hook installed in #{relative(Hooks.codex_hooks_path(@root))}")
+        end
         0
       else
-        raise ArgumentError, "Usage: soft-foundry hooks install [--claude [--local]] | hooks uninstall --claude [--local]"
+        raise ArgumentError, "Usage: soft-foundry hooks install [--claude [--local]] [--codex] | hooks uninstall --claude [--local] | --codex"
       end
+    end
+
+    # `scan [paths...]`: the content scan over the control plane and every
+    # change record (or the given paths), on demand. Exit 2 on errors.
+    def scan
+      paths = @argv.dup
+      @argv = []
+      if paths.empty?
+        paths = ContentScan.control_plane_paths(@root)
+        list_changes.each { |slug| paths += ContentScan.record_paths(@root, slug) }
+      else
+        paths = paths.flat_map do |p|
+          rel = File.expand_path(p, @root).delete_prefix("#{@root}/")
+          File.directory?(File.join(@root, rel)) ? Dir.glob("#{rel}/**/*", File::FNM_DOTMATCH, base: @root).select { |r| File.file?(File.join(@root, r)) } : [rel]
+        end
+      end
+      findings = ContentScan.scan_paths(@root, paths)
+      findings.each { |f| @out.puts "#{f.level == :error ? '✗ error' : '! warning'} #{f.path}:#{f.line} #{f.kind}: #{f.detail}" }
+      errors = findings.count { |f| f.level == :error }
+      warnings = findings.size - errors
+      if findings.empty?
+        @out.puts "✓ pass scan: #{paths.size} files, no findings"
+        0
+      else
+        @out.puts "#{errors.zero? ? '! warn' : '✗ fail'} scan: #{errors} #{errors == 1 ? 'error' : 'errors'}, #{warnings} #{warnings == 1 ? 'warning' : 'warnings'} in #{paths.size} files"
+        errors.zero? ? 0 : 2
+      end
+    end
+
+    # `learn list` shows instincts across every record; `learn promote`
+    # copies those above the threshold into .ai/rules/learned.md through
+    # the change record on the current branch.
+    def learn
+      sub = @argv.shift
+      min = option("--min-confidence")
+      dry_run = flag("--dry-run")
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+      threshold = min ? Float(min) : Learning.min_confidence(@root)
+      case sub
+      when "list"
+        instincts = Learning.all(@root, plane).select { |i| i.confidence >= (min ? threshold : 0.0) }
+        if instincts.empty?
+          @out.puts "no instincts recorded#{min ? " at or above #{format('%.2f', threshold)}" : ''}; the learning phase writes them to 15-learning/instincts.yml"
+        else
+          instincts.each { |i| @out.puts format("%.2f %s %s (%s; %s)", i.confidence, i.change, i.id, i.trigger, i.action) }
+        end
+        0
+      when "promote"
+        slug = begin
+          current_slug
+        rescue RuntimeError => e
+          @err.puts "✗ fail learn promote: #{e.message}; a promotion is a change to .ai/rules and goes through a change record"
+          return EXIT_TARGET
+        end
+        record = load_record(slug)
+        if record.metadata["status"].to_s == "closed"
+          @err.puts "✗ fail learn promote: change #{slug} is closed; open a new change for the promotion"
+          return EXIT_TARGET
+        end
+        already = Learning.promoted_ids(@root)
+        chosen = []
+        Learning.all(@root, plane).each do |i|
+          if already.include?(i.id) || chosen.any? { |c| c.id == i.id }
+            @out.puts "- skip #{i.id}: already in #{Learning::RULES}"
+          elsif i.confidence < threshold
+            @out.puts "- skip #{i.id}: confidence #{format('%.2f', i.confidence)} is below #{format('%.2f', threshold)}"
+          elsif dry_run
+            @out.puts "would promote #{i.id} (#{format('%.2f', i.confidence)}, from #{i.change})"
+          else
+            chosen << i
+            @out.puts "✓ pass promoted #{i.id} (#{format('%.2f', i.confidence)}, from #{i.change})"
+          end
+        end
+        unless chosen.empty? || dry_run
+          Learning.promote!(@root, chosen)
+          @out.puts "wrote #{Learning::RULES} through change #{slug}; commit it with this change's record"
+        end
+        0
+      else
+        raise ArgumentError, "Usage: soft-foundry learn <list|promote> [--min-confidence X] [--dry-run]"
+      end
+    end
+
+    # `phase run <phase>`: one lifecycle phase in a fresh coding-shell
+    # session, stamped with how it ran, gated when it returns.
+    def phase
+      sub = @argv.shift
+      raise ArgumentError, "Usage: soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex] [--dry-run] [-- shell args...]" unless sub == "run"
+      target = @argv.shift or raise ArgumentError, "Usage: soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex] [--dry-run] [-- shell args...]"
+      slug = option("--change") || current_slug
+      shell_name = option("--shell") || "claude"
+      dry_run = flag("--dry-run")
+      extra = []
+      if (i = @argv.index("--"))
+        extra = @argv[(i + 1)..]
+        @argv = @argv[0...i]
+      end
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+
+      record = load_record(slug)
+      phase = plane.phase(target) or raise TargetError, "unknown phase '#{target}'; lifecycle phases: #{plane.phases.map(&:id).join(', ')}"
+      runner = PhaseRunner.new(@root, plane: plane, git: git, record: record)
+      if (why = runner.refusal(phase))
+        @err.puts "#{slug}: cannot run #{phase.id}: #{why}"
+        return EXIT_TARGET
+      end
+      launch = runner.launch(phase, shell: shell_name, extra: extra)
+
+      skill_name = plane.skill(phase.skill).name
+      if !PhaseRunner::HOOKED_SHELLS.include?(shell_name)
+        @err.puts "! warn guard: #{shell_name} has no hook mechanism, so the #{skill_name} skill's permissions are policy only for this session"
+      elsif (shell_name == "claude" && Hooks.claude_installed?(@root).nil?) || (shell_name == "codex" && Hooks.codex_installed?(@root).nil?)
+        @err.puts "! warn guard: the guard hook is not installed for #{shell_name}, so the session's tool calls will not be checked against the #{skill_name} skill's permissions (`soft-foundry hooks install --#{shell_name}`)"
+      end
+      if dry_run
+        @out.puts "would run #{phase.id} of #{slug} with: #{launch.executable} #{launch.args.map { |a| a == launch.prompt ? '<prompt>' : Shellwords.escape(a) }.join(' ')}"
+        @out.puts "--- prompt ---"
+        @out.puts launch.prompt
+        return 0
+      end
+
+      billing_notice(shell: shell_name)
+      runner.begin!(phase, launch)
+      @out.puts "running #{phase.id} of #{slug} in a fresh #{shell_name} session (#{plane.skill(phase.skill).name} skill); executed_by recorded in #{relative(record.handoff_path(phase))}"
+      @out.flush
+      @err.flush
+      status = (@runner || method(:spawn_shell)).call(launch)
+      runner.finish!(phase, status)
+      @out.puts "#{shell_name} exited #{status}"
+      result = Gate.new(record, git: git).evaluate(phase)
+      print_result(result)
+      print_advisories(record)
+      return EXIT_TARGET unless status.zero?
+      result.failed? ? 2 : 0
+    end
+
+    # Runs the coding shell as a child with inherited stdio, in the
+    # repository root, and returns its exit status.
+    def spawn_shell(launch)
+      executable = Shell.resolve(launch.executable)
+      pid = Process.spawn(executable, *launch.args, chdir: @root)
+      Process.wait(pid)
+      $?.exitstatus || 1
     end
 
     # The PreToolUse guard. Reads the hook payload from stdin, decides, and
@@ -836,6 +1002,20 @@ module SoftFoundry
                                                   undischarged acceptance criterion
           soft-foundry gate <phase|all> [--change SLUG]
                                                   evaluate a phase's completion gate
+          soft-foundry scan [path...]             scan .ai/, AGENTS.md, CLAUDE.md, and every change record (or
+                                                  the given paths) for invisible Unicode, secret-shaped strings,
+                                                  instruction-override phrases, and fetch-and-execute commands
+          soft-foundry learn list [--min-confidence X]
+                                                  instincts recorded by every change's learning phase,
+                                                  highest confidence first
+          soft-foundry learn promote [--min-confidence X] [--dry-run]
+                                                  copy instincts at or above the threshold (.ai/policies/learning.yml,
+                                                  default 0.80) into .ai/rules/learned.md through the change
+                                                  record on the current branch
+          soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex|grok] [--dry-run] [-- args...]
+                                                  run one phase in a fresh coding-shell session with only its
+                                                  skill in the prompt; stamps executed_by in the handoff and
+                                                  gates the phase when the session returns
           soft-foundry budget status [--change SLUG]
                                                   show billing mode and compare recorded spend against
                                                   .ai/policies/budget.yml (no budget on a subscription)
@@ -847,11 +1027,12 @@ module SoftFoundry
                                                   show or set how often recorded spend warns (machine-local)
           soft-foundry ci                         check + gate every change record (used by CI and pre-commit)
           soft-foundry hooks install              install the pre-commit hook
-          soft-foundry hooks install --claude [--local]
+          soft-foundry hooks install --claude [--local] | --codex
                                                   install the PreToolUse guard into .claude/settings.json
-                                                  (or settings.local.json) so a coding shell's tool calls
-                                                  are checked against the active skill's permissions.yml
-          soft-foundry hooks uninstall --claude [--local]
+                                                  (or settings.local.json) or .codex/hooks.json so a coding
+                                                  shell's tool calls are checked against the active skill's
+                                                  permissions.yml (codex: then trust it with /hooks)
+          soft-foundry hooks uninstall --claude [--local] | --codex
                                                   remove only Soft Foundry's guard entry
           soft-foundry guard                      the hook itself: reads a tool call from stdin, exits 2 to
                                                   refuse it in block mode; mode from .ai/policies/enforcement.yml,

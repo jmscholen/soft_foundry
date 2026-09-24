@@ -1,0 +1,45 @@
+phase: 13-review
+skill: review
+status: complete
+commit_sha: 9f855b51a833b6fb43ca9b30ca8314a9550f7c5d
+started_at: '2026-09-24T03:55:00Z'
+completed_at: '2026-09-24T04:10:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- functional.md
+- architecture.md
+- security.md
+- accessibility.md
+- policy-conformance.md
+- infrastructure.md
+- operations.md
+- consolidated.md
+blocking: []
+findings:
+- id: REV-001
+  severity: minor
+  summary: The claude -p and codex exec invocations were exercised with fake shells only; the next change should run a real phase run review.
+- id: REV-002
+  severity: minor
+  summary: A session that exits 0 without completing the phase yields runner exit 0 because the gate does not fail in_progress. Follow-up.
+- id: REV-012
+  severity: minor
+  summary: executed_by.fresh_context is trusted the way vetted is; an agent could write it. Stated scope.
+- id: REV-016
+  severity: minor
+  summary: The fresh-context advisory is one line of about 170 characters. Follow-up.
+- id: REV-020
+  severity: info
+  summary: The branch-aware staleness rule relies on CI's fetch-depth 0; the workflow should say so.
+- id: REV-024
+  severity: minor
+  summary: Previously installed pre-commit hooks stay PATH-first until reinstalled; doctor does not notice. Follow-up.
+- id: REV-023
+  severity: info
+  summary: Both open records now carry the fresh-context review advisory, which is the feature working on itself.
+next: judge
+notes: Compatibility mode, performed by the interactive session that also implemented the change rather than a fresh-context reviewer; recorded here so the separation-of-duties limitation is explicit, and now also reported by the advisory this change adds. The review phase's lifecycle predecessor resolves to 07-evaluation because attack is skipped with rationale and remediate/document/index/observe are optional.
+executed_by:

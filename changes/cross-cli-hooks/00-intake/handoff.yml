@@ -1,0 +1,18 @@
+phase: 00-intake
+skill: intake
+status: complete
+commit_sha: a7e9fd26063487f120cca2d762fa8eeb261f81b0
+started_at: '2026-09-24T12:20:00Z'
+completed_at: '2026-09-24T12:30:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- request.md
+- assumptions.md
+blocking: []
+findings: []
+next: discover
+notes: Performed directly by the interactive session, not a fresh-context agent; see assumptions.md. The requirement IDs REQ-XCLI-001..007 in request.md stand in for the skipped specification phase.
+executed_by:

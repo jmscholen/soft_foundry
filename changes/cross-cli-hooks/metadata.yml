@@ -1,0 +1,51 @@
+---
+change:
+  id: cross-cli-hooks
+  title: Guard hook for Codex, apply_patch awareness, and Grok in the phase runner
+git:
+  worktree: "/Users/jscholen-iou/dev/soft_foundry"
+  branch: change/cross-cli-hooks
+type: feature
+risk: low
+track: gated
+status: closed
+current_phase: done
+created_at: 2026-09-24 16:18:30.000000000 Z
+surfaces:
+  application: true
+  database: false
+  infrastructure: false
+  security: true
+  accessibility: true
+  observability: false
+  policy: false
+human_decisions: []
+vetted:
+reopenings: []
+skipped_phases:
+- phase: discover
+  rationale: Repository already discovered for prior changes at an identical layout;
+    this change adds no technology. The discovery-shaped facts it needed (Codex's
+    hook contract and tool names, Grok's headless flag and absence of hooks) were
+    read from the installed CLIs and Codex's published hook documentation and are
+    recorded in 00-intake/assumptions.md.
+- phase: specify
+  rationale: Intake captures the requirements with stable IDs REQ-XCLI-001..007 in
+    00-intake/request.md at sufficient granularity for a change this size (gated track,
+    by the repository's established process for repository-native changes).
+- phase: threat_model
+  rationale: Reasoned through in 00-intake/assumptions.md. The guard gains one parser
+    (apply_patch headers) whose failure mode is a pass-through, never a false refusal
+    outside the parsed paths; the Codex hook file is written through SafeWrite like
+    Claude's; a project hook runs in Codex only after a person trusts it.
+- phase: plan
+  rationale: 05-implementation/log.md is the plan record for a change this size.
+- phase: attack
+  rationale: Reasoned through directly (a patch with a path outside the repository,
+    a move target in a denied group, an array command hiding a path, a hook file that
+    is a symlink) and covered by tests and the evaluation transcript rather than adversarially
+    tested; recorded as a real limitation.
+- phase: judge
+  rationale: An isolated, fresh-context judgment is the skill's explicit design; self-judgment
+    would not satisfy that. The maintainer's own merge decision is the real judgment
+    point, and the advisory reports this skip on every gate run, as intended.

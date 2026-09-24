@@ -10,6 +10,7 @@ rules:
     - .ai/rules/dependencies.md
     - .ai/rules/observability.md
     - .ai/rules/git.md
+    - .ai/rules/learned.md
   discovered:
     language: true
     framework: true

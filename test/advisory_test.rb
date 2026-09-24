@@ -26,6 +26,16 @@ class AdvisoryTest < Minitest::Test
   def notices(record) = SoftFoundry::Advisory.new(record).notices
   def areas(record) = notices(record).map(&:area)
 
+  # Marks a phase as executed by `soft-foundry phase run` in a fresh
+  # session, the way the runner stamps it, so the accessibility tests
+  # below see only the notices they are about.
+  def fresh_context!(record, phase_id)
+    phase = record.control_plane.phase(phase_id)
+    h = record.handoff(phase)
+    h["executed_by"] = { "runner" => "soft-foundry phase run", "shell" => "claude", "fresh_context" => true }
+    File.write(record.handoff_path(phase), YAML.dump(h))
+  end
+
   def test_a_plain_change_in_a_non_ui_repository_has_no_advisories
     with_record { |_dir, _plane, record| assert_empty notices(record) }
   end
@@ -69,6 +79,7 @@ class AdvisoryTest < Minitest::Test
     with_record do |dir, plane, record|
       declare_surface(record)
       complete_phase!(record, "review", sha: head(dir))
+      fresh_context!(record, "review")
       path = File.join(record.phase_dir(plane.phase("review")), "accessibility.md")
       File.write(path, "# Accessibility Review\n\n## Scope reviewed\nnothing\n\n## Findings\nnone\n\n## Conformance\nN/A because reasons\n")
       assert_equal ["accessibility"], areas(record)
@@ -80,6 +91,7 @@ class AdvisoryTest < Minitest::Test
     with_record do |dir, _plane, record|
       declare_surface(record)
       complete_phase!(record, "review", sha: head(dir), fill: false)
+      fresh_context!(record, "review")
       assert_includes notices(record).first.message, "TBD"
     end
   end
@@ -88,6 +100,7 @@ class AdvisoryTest < Minitest::Test
     with_record do |dir, plane, record|
       declare_surface(record)
       complete_phase!(record, "review", sha: head(dir))
+      fresh_context!(record, "review")
       path = File.join(record.phase_dir(plane.phase("review")), "accessibility.md")
       File.write(path, "# Accessibility Review\n\n## Scope reviewed\nCLI output\n\n## Findings\nnone\n\n## Conformance\nconforms\n")
       assert_empty notices(record)

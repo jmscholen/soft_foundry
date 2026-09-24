@@ -106,7 +106,38 @@ module SoftFoundry
       if (why = skip_rationale("judge"))
         notices << Notice.new("judgment", "final judgment was skipped (#{why}); no APPROVED/BLOCKED/REJECTED verdict exists for this change")
       end
+      notices.concat(fresh_context_notices)
+      notices.concat(red_evidence_notices)
       notices
+    end
+
+    # A feature, fix, or refactor verified with no check that names a
+    # red_commit has no failing-test-first evidence at all. Reported, never
+    # a gate failure: the standard asks for it, and this says it is absent.
+    RED_EVIDENCE_TYPES = %w[feature fix refactor].freeze
+
+    def red_evidence_notices
+      phase = @plane.phase("verify")
+      return [] unless phase && @record.phase_status(phase) == "complete"
+      return [] unless RED_EVIDENCE_TYPES.include?(@record.metadata["type"].to_s)
+      path = File.join(@record.phase_dir(phase), "tests.yml")
+      checks = Array(load(path)["checks"]).select { |c| c.is_a?(Hash) }
+      return [] if checks.any? { |c| c.key?("red_commit") }
+      [Notice.new("verification", "no check in 06-verification/tests.yml records a red_commit, so the failing-test-first evidence .ai/rules/testing.md asks for is not demonstrable for this #{@record.metadata['type']}")]
+    end
+
+    # Review and judgment exist to look at the work from outside it. A
+    # completed review or judgment whose handoff carries no executed_by
+    # from `phase run` was performed by whatever session was already
+    # open, most likely the one that implemented the change; say so.
+    def fresh_context_notices
+      [["review", "review", "independent review"], ["judge", "judgment", "final judgment"]].filter_map do |id, area, label|
+        phase = @plane.phase(id)
+        next unless phase && @record.phase_status(phase) == "complete"
+        executed = @record.handoff(phase)["executed_by"]
+        next if executed.is_a?(Hash) && executed["fresh_context"] == true
+        Notice.new(area, "#{label} (#{phase.output}) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes")
+      end
     end
 
     # An exploring track deploys each round to the development environment;

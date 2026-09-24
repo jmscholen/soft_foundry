@@ -1,0 +1,23 @@
+phase: 06-verification
+skill: verification
+status: complete
+commit_sha: 9f855b51a833b6fb43ca9b30ca8314a9550f7c5d
+started_at: '2026-09-24T03:40:00Z'
+completed_at: '2026-09-24T03:45:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- results.md
+- tests.yml
+- evidence/manifest.yml
+- evidence/tests.log
+- evidence/check.log
+- evidence/syntax-warnings.log
+- evidence/ci-against-self.log
+blocking: []
+findings: []
+next: evaluate
+notes: Performed directly by the interactive session, not a fresh-context agent; see 00-intake/assumptions.md.
+executed_by:

@@ -1,0 +1,17 @@
+# Instincts from the cross-cli-hooks change.
+instincts:
+- id: read-the-host-contract-before-writing-an-adapter
+  trigger: when asked to make a hook, runner, or installer work for another agent CLI
+  action: read that CLI's published contract and its installed help first; the adapter you need may be a parser, not a field rename
+  confidence: 0.85
+  domain: integration
+  evidence:
+  - path: changes/cross-cli-hooks/00-intake/assumptions.md
+  - path: changes/cross-cli-hooks/05-implementation/deviations.md
+- id: say-policy-only-at-launch-when-no-hook-exists
+  trigger: when launching a session in a host that has no hook mechanism
+  action: print one warning at launch that the skill's permissions are policy only for this session, rather than assuming or hiding it
+  confidence: 0.8
+  domain: governance
+  evidence:
+  - path: changes/cross-cli-hooks/07-evaluation/results.md

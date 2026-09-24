@@ -1,0 +1,53 @@
+# Instincts from the five-addition series (runtime-guard, phase-runner,
+# red-green-evidence, learning-instincts): what those records taught, as
+# triggers an agent will recognise. Evidence names the record and the
+# finding, phase, or file in it.
+instincts:
+- id: commit-the-failing-test-first
+  trigger: when starting a feature, fix, or refactor
+  action: commit the failing test alone before any implementation, then name that commit as red_commit on the verification check that runs it
+  confidence: 0.9
+  domain: testing
+  evidence:
+  - finding: red-green-evidence REV-020
+  - path: changes/red-green-evidence/06-verification/tests.yml
+  - path: changes/learning-instincts/06-verification/tests.yml
+- id: check-the-commit-landed-before-binding-evidence
+  trigger: when about to generate or bind evidence to a commit in a repository with a pre-commit hook
+  action: confirm HEAD moved after git commit before generating anything that names the commit
+  confidence: 0.85
+  domain: git
+  evidence:
+  - path: changes/phase-runner/05-implementation/log.md
+  - path: changes/phase-runner/05-implementation/deviations.md
+- id: regenerate-evidence-never-annotate
+  trigger: when a transcript or evidence file shows the wrong thing because of a harness or script error
+  action: fix the harness and regenerate the evidence in full rather than annotating what the wrong run showed
+  confidence: 0.85
+  domain: verification
+  evidence:
+  - path: changes/lifecycle-tracks/07-evaluation/results.md
+  - path: changes/red-green-evidence/07-evaluation/results.md
+  - path: changes/learning-instincts/07-evaluation/results.md
+- id: measure-staleness-on-the-record-branch
+  trigger: when an open record from another branch reads as stale on a branch stacked on it
+  action: do not rebind the earlier record to the later commit; the record's own branch is the measure, and the tool now does this
+  confidence: 0.8
+  domain: governance
+  evidence:
+  - path: changes/phase-runner/05-implementation/deviations.md
+  - path: test/stacked_branch_test.rb
+- id: prefer-checkout-exe-in-hooks
+  trigger: when a hook runs a tool that is also the repository under development
+  action: prefer the checkout's own executable over one installed on PATH
+  confidence: 0.7
+  domain: git
+  evidence:
+  - path: changes/phase-runner/05-implementation/deviations.md
+- id: branch-from-the-record-branch-when-stacking
+  trigger: when creating a branch that must see another branch's change records
+  action: branch from that branch, not from main; a branch from main has no records to read
+  confidence: 0.6
+  domain: git
+  evidence:
+  - path: changes/learning-instincts/07-evaluation/results.md

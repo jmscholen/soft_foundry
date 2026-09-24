@@ -1,0 +1,26 @@
+# Instincts from the control-plane-scan change.
+instincts:
+- id: sanitize-transcripts-before-they-become-evidence
+  trigger: when an evaluation journey deliberately writes an attack, a secret shape, or an invisible character and its output is captured as evidence
+  action: have the harness render invisible characters as code points and mask secret shapes before the output reaches the transcript, so the evidence describes the attack without containing it
+  confidence: 0.85
+  domain: verification
+  evidence:
+  - path: changes/control-plane-scan/07-evaluation/results.md
+  - finding: control-plane-scan REV-005
+- id: exempt-closed-evidence-in-policy-not-by-editing-it
+  trigger: when a scan flags something in a closed record's commit-bound evidence that is legitimately there
+  action: add a narrow allowlist entry with the paths, the kind, a substring, and a reason in policy; never edit the evidence
+  confidence: 0.85
+  domain: governance
+  evidence:
+  - path: .ai/policies/content-scan.yml
+  - path: changes/control-plane-scan/00-intake/assumptions.md
+- id: reset-what-a-test-assumes-empty
+  trigger: when a fixture copies a real file that accumulates over time (a ledger, a rules file, a log)
+  action: reset it in the fixture to its empty form rather than asserting on the real file's contents
+  confidence: 0.75
+  domain: testing
+  evidence:
+  - path: test/learning_instincts_test.rb
+  - path: changes/control-plane-scan/05-implementation/log.md

@@ -109,8 +109,9 @@ capabilities:
     evidence: [lib/soft_foundry/gate.rb, .ai/schemas.md]
   evidence.failed_results_retained:
     status: PARTIAL
-    evidence: [.ai/policies/skill-permissions.yml]
-    findings: [policy_only_no_enforcement]
+    evidence: [.ai/policies/skill-permissions.yml, lib/soft_foundry/gate.rb, .ai/rules/testing.md]
+    findings: [red_commit_evidence_enforced_by_the_gate_other_failed_results_policy_only]
+    rationale: A failing test's commit is retained as red_commit on the verification check and the gate verifies it precedes the verified commit and holds the test; retention of every other failed result (a failed scan, a failed journey) remains the anti-fudging policy, unenforced.
   governance.risk_classification:
     status: PARTIAL
     evidence: [.ai/templates/change/metadata.yml, .ai/workflow.yml, lib/soft_foundry/gate.rb]
@@ -125,9 +126,9 @@ capabilities:
     evidence: [.ai/policies/human-boundaries.yml]
     findings: [no_awaiting_human_mechanism]
   governance.separation_of_duties:
-    status: PARTIAL
-    evidence: [.ai/skills]
-    findings: [not_enforced_at_runtime]
+    status: PASS
+    evidence: [.ai/skills, lib/soft_foundry/guard.rb, lib/soft_foundry/phase_runner.rb, lib/soft_foundry/advisory.rb]
+    rationale: Implementation is denied every evidence directory by permissions the guard enforces at runtime; `soft-foundry phase run` executes review and judgment in a fresh session with only that skill in the prompt and records executed_by; a review or judgment completed without it is advised on every gate run.
   security.threat_modeling:
     status: PARTIAL
     evidence: [.ai/skills/threat-modeling]
@@ -170,16 +171,20 @@ capabilities:
   harness.regression_detection:
     status: MISSING
   learning.finding_capture:
-    status: PARTIAL
-    evidence: [.ai/skills/learning]
-    findings: [no_learning_phase_has_run_yet]
+    status: PASS
+    evidence: [.ai/skills/learning/template/instincts.yml, lib/soft_foundry/gate.rb, changes/learning-instincts/15-learning/instincts.yml]
+    rationale: The learning phase writes instincts (trigger, action, confidence, evidence) that the gate validates; changes/learning-instincts is the first record whose learning phase completed with them.
   learning.feedback_loop:
-    status: MISSING
-    findings: [no_governance_path_for_proposed_rule_changes]
+    status: PASS
+    evidence: [lib/soft_foundry/learning.rb, .ai/policies/learning.yml, .ai/rules/learned.md]
+    rationale: "`soft-foundry learn promote` is the governance path: it copies instincts at or above the policy threshold into .ai/rules/learned.md with provenance and refuses outside a change record on a change branch."
   learning.regression_creation:
     status: MISSING
+    findings: [no_mechanism_turns_a_finding_into_a_regression_test]
   learning.standards_feedback:
-    status: MISSING
+    status: PASS
+    evidence: [.ai/rules/learned.md, .ai/skills/implementation/skill.yml, .ai/skills/exploration/skill.yml]
+    rationale: Promoted instincts are loaded by implementation and exploration as a baseline rule file.
   learning.workflow_feedback:
     status: MISSING
 

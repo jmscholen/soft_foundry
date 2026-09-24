@@ -2,6 +2,7 @@
 
 require "yaml"
 require_relative "guard"
+require_relative "content_scan"
 
 module SoftFoundry
   # Lints the `.ai/` control plane itself: every phase has a skill, every skill
@@ -25,6 +26,7 @@ module SoftFoundry
       findings.concat(check_transitions)
       findings.concat(check_tracks)
       findings.concat(check_enforcement)
+      findings.concat(check_content)
       @plane.phases.each { |phase| findings.concat(check_phase(phase)) }
       findings
     end
@@ -82,6 +84,15 @@ module SoftFoundry
         problems << Finding.new(:error, "transitions: '#{from}' is not a lifecycle phase") unless ids.include?(from)
         Hash(edges).each_value { |to| problems << Finding.new(:error, "transitions: '#{from}' targets unknown phase '#{to}'") unless ids.include?(to) }
         problems
+      end
+    end
+
+    # The control plane and the pointer files are read as instructions by
+    # every agent; scan them as an attacker would want them read.
+    def check_content
+      problems = ContentScan.allowlist_problems(@plane.root).map { |p| Finding.new(:error, p) }
+      problems + ContentScan.scan_paths(@plane.root, ContentScan.control_plane_paths(@plane.root)).map do |f|
+        Finding.new(f.level, "#{f.path}:#{f.line} #{f.kind}: #{f.detail}")
       end
     end
 

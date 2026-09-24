@@ -1,0 +1,26 @@
+---
+commit_sha: 54ecc50a2f6410961901537cbcb8b89085085254
+artifacts:
+- path: evidence/tests.log
+  produced_by: ruby -Ilib -Itest requiring every test/*_test.rb, with every provider
+    key, SOFT_FOUNDRY_BILLING, and SOFT_FOUNDRY_GUARD unset
+  sha256: 1f4726f257e7695439b6713313e9f363918ffeb628d74a012b9436dc9ab98986
+- path: evidence/red-at-71d987f.log
+  produced_by: test/content_scan_test.rb run with the worktree checked out at the
+    RED commit 71d987f
+  sha256: '02277912eab695d97b888be2b3758601dff8a1a4e30c3505b5cea77f975d37a2'
+- path: evidence/check.log
+  produced_by: soft-foundry check (structure plus the content scan of .ai/, AGENTS.md,
+    CLAUDE.md)
+  sha256: 2be6498003ac7633f001dde7fb6c82d20d270c7515d869ca3f7276b8c1f3730e
+- path: evidence/syntax-warnings.log
+  produced_by: ruby -wc on every lib/, exe/soft-foundry, and the changed test files
+  sha256: 0ce00e9a817507aca9a00dda0c2ac98878888cf1118fc32a867eb68eae82745b
+- path: evidence/ci-against-self.log
+  produced_by: soft-foundry ci run against this repository's own real change-record
+    history (stacked on change/learning-instincts)
+  sha256: aad374cf4c63915cc55093a6efe16aa0cb7cbe93f5570c224e2583e6ad3c9bd9
+- path: evidence/scan-against-self.log
+  produced_by: soft-foundry scan over the control plane and every change record of
+    this repository, this one included
+  sha256: 0bc714710d4b61f353627442fd2d0a71e0043c9d8c7b17e6143840838c345c63
