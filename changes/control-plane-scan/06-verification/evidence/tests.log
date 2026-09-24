@@ -1,0 +1,21 @@
+Run options: --seed 35775
+
+# Running:
+
+...F.....FF........................................................................................................................................................................................................................................................................................................................
+
+Finished in 92.349178s, 3.4976 runs/s, 21.4295 assertions/s.
+
+  1) Failure:
+LearningInstinctsTest#test_promote_refuses_outside_a_change_record [test/learning_instincts_test.rb:115]:
+Expected true to not be truthy.
+
+  2) Failure:
+LearningInstinctsTest#test_promote_dry_run_writes_nothing [test/learning_instincts_test.rb:156]:
+Expected "- skip commit-the-failing-test-first: already in .ai/rules/learned.md\n- skip prefer-checkout-exe-in-hooks: confidence 0.60 is below 0.80\n" to include "would promote commit-the-failing-test-first".
+
+  3) Failure:
+LearningInstinctsTest#test_promote_writes_learned_rules_with_provenance_above_the_threshold_and_is_idempotent [test/learning_instincts_test.rb:126]:
+Expected "- skip commit-the-failing-test-first: already in .ai/rules/learned.md\n- skip prefer-checkout-exe-in-hooks: confidence 0.60 is below 0.80\n" to include "✓ pass promoted commit-the-failing-test-first (0.90, from c1)".
+
+323 runs, 1979 assertions, 3 failures, 0 errors, 0 skips

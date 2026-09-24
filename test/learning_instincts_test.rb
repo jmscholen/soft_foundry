@@ -26,6 +26,10 @@ class LearningInstinctsTest < Minitest::Test
   # learning, so the learning gate is what is under test.
   def with_learned_change(slug = "c1", instincts: INSTINCTS)
     with_fixture_repo do |dir|
+      # The fixture copies this repository's .ai/, whose learned.md
+      # accumulates real promotions; these tests need an empty ledger.
+      File.write(File.join(dir, ".ai/rules/learned.md"), SoftFoundry::Learning::HEADER)
+      sh(dir, "git", "commit", "-qam", "empty learned rules")
       plane = SoftFoundry::ControlPlane.new(dir)
       sh(dir, "git", "checkout", "-qb", "change/#{slug}")
       cli(dir, "change", "new", slug)
