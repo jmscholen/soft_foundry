@@ -1,12 +1,58 @@
-commit_sha: TBD
+commit_sha: 54ecc50a2f6410961901537cbcb8b89085085254
 journeys:
   - id: EVAL-001
-    criteria: [AC-001]
-    persona: TBD
-    starting_state: TBD
-    steps:
-      - TBD
-    assertions:
-      - TBD
-    evidence: [evidence/TBD]
-    result: TBD   # pass | fail | blocked
+    criteria: [REQ-SCN-004, REQ-SCN-006]
+    persona: maintainer with a clean control plane
+    starting_state: "scratch repo with this repo's real .ai/ (learned.md included)"
+    steps: ["soft-foundry check", "soft-foundry scan | tail -1"]
+    assertions: ["check passes with no findings", "scan prints ✓ pass scan: N files, no findings"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-002
+    criteria: [REQ-SCN-001, REQ-SCN-002, REQ-SCN-004]
+    persona: attacker's pull request
+    starting_state: as EVAL-001
+    steps: ["append an override phrase to .ai/rules/general.md; check", "append a curl | sh line to .ai/policies/budget.yml; check", "write a zero-width space into AGENTS.md; check", "restore; check"]  # soft-foundry:scan-allow
+    assertions: ["! warning .ai/rules/general.md:20 override: ... and check still passes (exit 0)", "✗ error .ai/policies/budget.yml:47 fetch_exec: ... in a policy file; check fails (exit 2)", "✗ error AGENTS.md:3 invisible: U+200B zero width space; 2 errors", "restored, check passes"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-003
+    criteria: [REQ-SCN-003]
+    persona: rule author quoting an attack; maintainer writing an unreasoned exemption
+    starting_state: as EVAL-001
+    steps: ["append a quoted attack with the soft-foundry:scan-allow marker to .ai/rules/security.md; check", "write content-scan.yml with an entry that has paths but no reason; check", "restore; check"]
+    assertions: ["check passes with no finding for the marked line", "✗ error .ai/policies/content-scan.yml: allow[0] has no reason; exit 2", "restored, check passes"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-004
+    criteria: [REQ-SCN-002, REQ-SCN-003, REQ-SCN-005]
+    persona: agent whose evidence holds a canary, a quoted attack, and an invisible character
+    starting_state: branch change/c1 with intake complete
+    steps: ["gate intake", "write a canary key into 00-intake/evidence/run.log; gate intake", "add an allowlist entry for that path, kind secret, match sk-canary, with a reason; gate intake", "append a quoted attack to request.md; gate intake; record exit", "append a zero-width space to assumptions.md; gate intake; record exit"]
+    assertions: ["✓ pass content clean", "✗ fail content clean: run.log:1 secret (OpenAI-style key shaped string)", "✓ pass content clean with the reasoned exemption", "! warn content clean: request.md:21 override (...); gate exit 0", "✗ fail content clean: assumptions.md:11 invisible (U+200B zero width space); gate exit 2"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-005
+    criteria: [REQ-SCN-006]
+    persona: maintainer running scan on demand
+    starting_state: as EVAL-004
+    steps: ["soft-foundry scan; record exit", "soft-foundry scan changes/c1/00-intake/request.md; record exit"]
+    assertions: ["one ✗ error (invisible) and one ! warning (override), then ✗ fail scan: 1 error, 1 warning in N files; exit 2", "over one path: the warning only, ! warn scan: 0 errors, 1 warning in 1 files; exit 0"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-006
+    criteria: [REQ-SCN-008]
+    persona: this repository
+    starting_state: this repository on change/control-plane-scan
+    steps: ["soft-foundry scan | tail -3", "count learned.md sections; soft-foundry scan .ai/rules/learned.md"]
+    assertions: ["the repository-wide scan reports only warnings (quoted attacks in init-command's threat model and attack log and in this record's transcript); the exact tail at that moment is in the transcript, generated before this record's later files were written", "learned.md holds 4 promoted sections and scans clean"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-007
+    criteria: [REQ-SCN-004, REQ-SCN-006]
+    persona: screen-reader user or CI log reader
+    starting_state: as EVAL-005
+    steps: ["scan with every non-ASCII byte stripped", "gate intake with every non-ASCII byte stripped | grep content clean"]
+    assertions: ["the lines still read error <path>:<line> invisible: ..., warning ... override: ..., fail scan: 1 error, 1 warning ...", "fail content clean: assumptions.md:11 invisible (U+200B zero width space)"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass

@@ -4,18 +4,18 @@ change:
 git:
   worktree: /Users/jscholen-iou/dev/soft_foundry
   branch: change/control-plane-scan
-type: TBD                  # feature | fix | refactor | docs | infrastructure | security | chore
-risk: TBD                  # low | medium | high; a high risk change is always on the gated track (.ai/workflow.yml tracks.forced_by_risk)
+type: security
+risk: low
 track: gated            # gated | iterative (.ai/workflow.yml tracks:); set by `change new --track`
-status: intake          # intake | exploring | in_progress | awaiting_human | judged | closed
-current_phase: intake
+status: in_progress
+current_phase: learn
 created_at: 2026-09-24T03:34:28Z
 surfaces:
-  application: false
+  application: true
   database: false
   infrastructure: false
-  security: false
-  accessibility: false    # true when a person perceives or operates the result (UI, CLI output, documents); loads .ai/rules/accessibility.md and enables the go-live accessibility advisories. Set automatically by `change new` when the repository profile records a user-facing framework.
+  security: true
+  accessibility: true     # CLI output and documents a person reads; true when a person perceives or operates the result (UI, CLI output, documents); loads .ai/rules/accessibility.md and enables the go-live accessibility advisories. Set automatically by `change new` when the repository profile records a user-facing framework.
   observability: false
   policy: false           # true when the change alters what the application collects, shares, retains, protects, or promises in its privacy policy, security policy, or terms; loads .ai/rules/policy-conformance.md and enables the go-live policy advisories. Set automatically by `change new` when the repository profile records a published policy document.
 
@@ -47,6 +47,16 @@ reopenings: []
 # Phases the harness would otherwise require, deliberately not run for
 # this change, each with a non-empty rationale. An entry with an empty
 # rationale does not count as a skip - the phase stays required.
-skipped_phases: []
-# - phase: threat_model
-#   rationale: TBD
+skipped_phases:
+- phase: discover
+  rationale: Repository already discovered for prior changes at an identical layout; this change adds no technology.
+- phase: specify
+  rationale: Intake captures the requirements with stable IDs REQ-SCN-001..008 in 00-intake/request.md at sufficient granularity for a change this size (gated track, by the repository's established process for repository-native changes).
+- phase: threat_model
+  rationale: Reasoned through in 00-intake/assumptions.md. The scan reads files and never writes; its own bypasses (an attack phrased outside the pattern list, a secret in a shape the list does not know, an exemption added to the policy file) are stated as its limits, and the policy file is protected from every skill's write set.
+- phase: plan
+  rationale: 05-implementation/log.md is the plan record for a change this size.
+- phase: attack
+  rationale: Reasoned through directly (each kind in each location, the allow marker on invisible text, an allowlist entry without a reason, a canary in closed evidence, this record's own transcript carrying a zero-width character) and covered by tests and the evaluation transcript rather than adversarially tested; recorded as a real limitation.
+- phase: judge
+  rationale: An isolated, fresh-context judgment is the skill's explicit design; self-judgment would not satisfy that. The maintainer's own merge decision is the real judgment point, and the advisory reports this skip on every gate run, as intended.

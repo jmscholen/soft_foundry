@@ -64,3 +64,5 @@ Syntax OK
 Syntax OK
 == test/content_scan_test.rb
 Syntax OK
+== test/learning_instincts_test.rb
+Syntax OK
