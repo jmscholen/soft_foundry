@@ -69,6 +69,45 @@ class ContentScanTest < Minitest::Test
     assert_empty scan("ignore the previous version of this file when reading\n"), "a phrase that is not an override"
   end
 
+  # --- allowlist -----------------------------------------------------------------
+
+  def test_the_policy_allowlist_exempts_by_path_kind_and_match_but_never_invisible_text
+    with_fixture_repo do |dir|
+      cli(dir, "change", "new", "c1")
+      log = File.join(dir, "changes/c1/07-evaluation/evidence/run.log")
+      FileUtils.mkdir_p(File.dirname(log))
+      File.write(log, "OPENAI_API_KEY=sk-canaryAAAAAAAAAAAAAAAAAAAAAAAAAA\nother AKIAIOSFODNN7EXAMPLE\nzero#{ZW}width\n")
+      rel = "changes/c1/07-evaluation/evidence/run.log"
+      kinds = SoftFoundry::ContentScan.scan_paths(dir, [rel]).map(&:kind)
+      assert_equal %w[secret secret invisible], kinds
+
+      File.write(File.join(dir, ".ai/policies/content-scan.yml"), YAML.dump("version" => 1, "allow" => [
+        { "paths" => ["changes/c1/07-evaluation/**"], "kinds" => ["secret"], "match" => "sk-canary", "reason" => "a canary" }
+      ]))
+      kinds = SoftFoundry::ContentScan.scan_paths(dir, [rel]).map(&:kind)
+      assert_equal %w[secret invisible], kinds, "only the canary line is exempt; the AWS-shaped line and the invisible text stay"
+
+      File.write(File.join(dir, ".ai/policies/content-scan.yml"), YAML.dump("version" => 1, "allow" => [
+        { "paths" => ["changes/c1/**"], "reason" => "everything in c1" }
+      ]))
+      kinds = SoftFoundry::ContentScan.scan_paths(dir, [rel]).map(&:kind)
+      assert_equal %w[invisible], kinds, "a path-only entry exempts every allowable kind but never invisible text"
+    end
+  end
+
+  def test_check_validates_the_allowlist_shape
+    with_fixture_repo do |dir|
+      File.write(File.join(dir, ".ai/policies/content-scan.yml"), YAML.dump("version" => 1, "allow" => [
+        { "paths" => ["changes/**"] },
+        { "kinds" => ["invisible"], "reason" => "no" }
+      ]))
+      messages = SoftFoundry::Check.new(SoftFoundry::ControlPlane.new(dir)).run.select { |f| f.level == :error }.map(&:message)
+      assert messages.any? { |m| m.include?("allow[0] has no reason") }, messages.inspect
+      assert messages.any? { |m| m.include?("allow[1] names no paths") }, messages.inspect
+      assert messages.any? { |m| m.include?("allow[1] kinds invisible are not allowable") }, messages.inspect
+    end
+  end
+
   # --- check ---------------------------------------------------------------------
 
   def test_check_scans_the_control_plane_and_agent_files

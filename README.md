@@ -102,6 +102,27 @@ What is checked: Edit, Write, MultiEdit, and NotebookEdit against the write and 
 ✗ fail guard: Edit .ai/rules/ruby.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
 ```
 
+### Scanning the control plane as an attack surface
+
+`.ai/`, `AGENTS.md`, `CLAUDE.md`, and every change record are inputs an agent reads, and anyone who can open a pull request may have written them. `soft-foundry check` now reads them the way an attacker would want them read, and the gate's `content clean` check does the same for a completed phase's files:
+
+| Kind | What it is | Level |
+| --- | --- | --- |
+| `invisible` | zero-width, bidirectional, and tag characters a person cannot see | error everywhere, never exempt |
+| `secret` | AWS, OpenAI-style, GitHub, Slack, and Google key shapes, private key blocks | error everywhere |
+| `override` | "ignore previous instructions", "you are now", "hide this from the user" and the like | error under `.ai/policies/`, warning elsewhere |
+| `fetch_exec` | `curl ... \| sh`, `sh -c "$(wget ...)"`, PowerShell download-and-invoke | error under `.ai/policies/`, warning elsewhere |
+
+A rule or threat model that quotes an attack as an example adds `soft-foundry:scan-allow` to that line; a documented example key can do the same. Evidence that cannot be edited (a closed record's logs) is exempted instead by an entry in `.ai/policies/content-scan.yml` naming the paths, optionally the kinds and a substring, and a reason that `check` requires. Invisible text is never exempt. `soft-foundry scan [paths...]` runs the same scan over the control plane and every record, or the paths given, on demand:
+
+```
+✗ error changes/c1/00-intake/request.md:1 secret: AWS access key id shaped string
+! warning .ai/rules/learned.md:4 override: instruction-override phrase (a rule quoting an attack may add the allow marker)
+✗ fail scan: 1 error, 1 warning in 214 files
+```
+
+The first run over this repository found a canary key in a closed record's evaluation evidence, placed there on purpose to prove an internal-failure report never echoes a credential; it is the first entry in the allowlist.
+
 ### Instincts: what a change learned
 
 The learning phase now writes `15-learning/instincts.yml`: each instinct is a trigger an agent will recognise, one imperative action, a confidence from 0 to 1, and the finding or phase in the record that is its evidence. The learning gate's `instincts valid` check requires kebab-case unique ids, a trigger and an action, a confidence in range, and evidence; an empty list is a valid answer.

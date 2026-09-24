@@ -20,6 +20,7 @@ require_relative "advisory"
 require_relative "guard"
 require_relative "phase_runner"
 require_relative "learning"
+require_relative "content_scan"
 
 module SoftFoundry
   class CLI
@@ -57,6 +58,7 @@ module SoftFoundry
       when "guard" then guard
       when "phase" then phase
       when "learn" then learn
+      when "scan" then scan
       when "update" then update
       when "shell"
         shell_name = @argv.shift or raise ArgumentError, "Usage: soft-foundry shell <claude|codex|grok> [args...]"
@@ -693,6 +695,33 @@ module SoftFoundry
       end
     end
 
+    # `scan [paths...]`: the content scan over the control plane and every
+    # change record (or the given paths), on demand. Exit 2 on errors.
+    def scan
+      paths = @argv.dup
+      @argv = []
+      if paths.empty?
+        paths = ContentScan.control_plane_paths(@root)
+        list_changes.each { |slug| paths += ContentScan.record_paths(@root, slug) }
+      else
+        paths = paths.flat_map do |p|
+          rel = File.expand_path(p, @root).delete_prefix("#{@root}/")
+          File.directory?(File.join(@root, rel)) ? Dir.glob("#{rel}/**/*", File::FNM_DOTMATCH, base: @root).select { |r| File.file?(File.join(@root, r)) } : [rel]
+        end
+      end
+      findings = ContentScan.scan_paths(@root, paths)
+      findings.each { |f| @out.puts "#{f.level == :error ? '✗ error' : '! warning'} #{f.path}:#{f.line} #{f.kind}: #{f.detail}" }
+      errors = findings.count { |f| f.level == :error }
+      warnings = findings.size - errors
+      if findings.empty?
+        @out.puts "✓ pass scan: #{paths.size} files, no findings"
+        0
+      else
+        @out.puts "#{errors.zero? ? '! warn' : '✗ fail'} scan: #{errors} #{errors == 1 ? 'error' : 'errors'}, #{warnings} #{warnings == 1 ? 'warning' : 'warnings'} in #{paths.size} files"
+        errors.zero? ? 0 : 2
+      end
+    end
+
     # `learn list` shows instincts across every record; `learn promote`
     # copies those above the threshold into .ai/rules/learned.md through
     # the change record on the current branch.
@@ -954,6 +983,9 @@ module SoftFoundry
                                                   undischarged acceptance criterion
           soft-foundry gate <phase|all> [--change SLUG]
                                                   evaluate a phase's completion gate
+          soft-foundry scan [path...]             scan .ai/, AGENTS.md, CLAUDE.md, and every change record (or
+                                                  the given paths) for invisible Unicode, secret-shaped strings,
+                                                  instruction-override phrases, and fetch-and-execute commands
           soft-foundry learn list [--min-confidence X]
                                                   instincts recorded by every change's learning phase,
                                                   highest confidence first

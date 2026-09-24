@@ -3,6 +3,7 @@
 require "yaml"
 require "date"
 require_relative "learning"
+require_relative "content_scan"
 
 module SoftFoundry
   # Deterministic completion gate for one lifecycle phase of a change record.
@@ -63,6 +64,7 @@ module SoftFoundry
         checks << specification_lock_check(phase) if phase.id == "specify" && @record.vetted
         checks << red_evidence_check(phase, handoff) if phase.id == "verify"
         checks << instincts_check if phase.id == "learn"
+        checks << content_check(phase)
       end
       Result.new(phase:, status:, checks:)
     end
@@ -92,6 +94,19 @@ module SoftFoundry
     # implement onward may be complete until the person has vetted.
     def exploring_check
       Check.new("not exploring", :fail, "cannot be complete while the change is exploring; run `soft-foundry change vet` when the person has accepted the feature, then rerun this phase")
+    end
+
+    # A completed phase's files are what later phases and people read.
+    # Invisible text and secret-shaped strings fail the phase; an
+    # override phrase or fetch-and-execute command is a warning, since a
+    # record may quote an attack it found.
+    def content_check(phase)
+      findings = ContentScan.scan_paths(@record.root, ContentScan.phase_paths(@record.root, @record, phase))
+      return Check.new("content clean", :pass, "") if findings.empty?
+      describe = ->(f) { "#{File.basename(f.path)}:#{f.line} #{f.kind} (#{f.detail})" }
+      errors = findings.select { |f| f.level == :error }
+      return Check.new("content clean", :fail, errors.first(4).map(&describe).join("; ") + (errors.size > 4 ? " …" : "")) unless errors.empty?
+      Check.new("content clean", :warn, findings.first(4).map(&describe).join("; ") + (findings.size > 4 ? " …" : ""))
     end
 
     # The learning phase's instincts must be well-formed to be promotable:
