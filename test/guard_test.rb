@@ -248,10 +248,10 @@ class GuardTest < Minitest::Test
   def test_doctor_reports_the_guard_hook_and_mode
     with_fixture_repo do |dir|
       _, out = cli(dir, "doctor")
-      assert_includes out, "✗ fail claude guard hook (mode: warn, repository policy (.ai/policies/enforcement.yml)); install with `soft-foundry hooks install --claude`"
+      assert_includes out, "✗ fail guard hook (claude: not installed, codex: not installed; mode: warn, repository policy (.ai/policies/enforcement.yml)); install with `soft-foundry hooks install --claude` or `--codex`"
       cli(dir, "hooks", "install", "--claude")
       _, out = cli(dir, "doctor")
-      assert_includes out, "✓ pass claude guard hook (mode: warn"
+      assert_includes out, "✓ pass guard hook (claude: installed, codex: not installed; mode: warn"
     end
   end
 end
