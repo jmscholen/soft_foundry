@@ -244,11 +244,12 @@ module SoftFoundry
         "control plane check" => plane.present? && Check.new(plane).run.none? { |f| f.level == :error },
         ".ai/manifest.yml" => File.exist?(File.join(@root, Manifest::PATH)),
         "pre-commit hook" => File.exist?(File.join(@root, ".git/hooks/pre-commit")) && File.read(File.join(@root, ".git/hooks/pre-commit")).include?(Hooks::MARKER),
-        "claude guard hook" => !Hooks.claude_installed?(@root).nil?,
+        "guard hook" => !Hooks.claude_installed?(@root).nil? || !Hooks.codex_installed?(@root).nil?,
         "local runtime" => File.exist?(File.join(@root, ".soft-foundry/runtime.yml"))
       }
       mode, source = Guard.mode(@root)
-      detail = { "claude guard hook" => " (mode: #{mode}, #{source})#{checks['claude guard hook'] ? '' : '; install with `soft-foundry hooks install --claude`'}" }
+      hosts = "claude: #{Hooks.claude_installed?(@root) ? 'installed' : 'not installed'}, codex: #{Hooks.codex_installed?(@root) ? 'installed' : 'not installed'}"
+      detail = { "guard hook" => " (#{hosts}; mode: #{mode}, #{source})#{checks['guard hook'] ? '' : '; install with `soft-foundry hooks install --claude` or `--codex`'}" }
       checks.each { |name, ok| @out.puts "#{ok ? '✓ pass' : '✗ fail'} #{name}#{detail[name]}" }
       checks.values.all? ? 0 : 2
     end
@@ -672,26 +673,41 @@ module SoftFoundry
     def hooks
       sub = @argv.shift
       claude = flag("--claude")
+      codex = flag("--codex")
       local = flag("--local")
       raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+      raise TargetError, "--local applies to --claude only; Codex reads project hooks from .codex/hooks.json" if local && codex
       case sub
       when "install"
-        if claude
-          path = Hooks.install_claude(@root, local: local)
+        if claude || codex
           mode, source = Guard.mode(@root)
-          @out.puts "installed guard hook in #{relative(path)} (PreToolUse: #{Hooks::GUARD_MATCHER})"
+          if claude
+            path = Hooks.install_claude(@root, local: local)
+            @out.puts "installed guard hook in #{relative(path)} (PreToolUse: #{Hooks::GUARD_MATCHER})"
+          end
+          if codex
+            path = Hooks.install_codex(@root)
+            @out.puts "installed guard hook in #{relative(path)} (PreToolUse: #{Hooks::CODEX_GUARD_MATCHER})"
+            @out.puts "codex runs a project hook only after you review and trust it: open codex in this repository and run /hooks"
+          end
           @out.puts "guard mode: #{mode} (#{source})"
         else
           @out.puts "installed #{relative(Hooks.install(@root))}"
         end
         0
       when "uninstall"
-        raise ArgumentError, "Usage: soft-foundry hooks uninstall --claude [--local]" unless claude
-        path = Hooks.uninstall_claude(@root, local: local)
-        @out.puts(path ? "removed guard hook from #{relative(path)}" : "no guard hook installed in #{relative(Hooks.claude_settings_path(@root, local: local))}")
+        raise ArgumentError, "Usage: soft-foundry hooks uninstall --claude [--local] | --codex" unless claude || codex
+        if claude
+          path = Hooks.uninstall_claude(@root, local: local)
+          @out.puts(path ? "removed guard hook from #{relative(path)}" : "no guard hook installed in #{relative(Hooks.claude_settings_path(@root, local: local))}")
+        end
+        if codex
+          path = Hooks.uninstall_codex(@root)
+          @out.puts(path ? "removed guard hook from #{relative(path)}" : "no guard hook installed in #{relative(Hooks.codex_hooks_path(@root))}")
+        end
         0
       else
-        raise ArgumentError, "Usage: soft-foundry hooks install [--claude [--local]] | hooks uninstall --claude [--local]"
+        raise ArgumentError, "Usage: soft-foundry hooks install [--claude [--local]] [--codex] | hooks uninstall --claude [--local] | --codex"
       end
     end
 
@@ -801,8 +817,11 @@ module SoftFoundry
       end
       launch = runner.launch(phase, shell: shell_name, extra: extra)
 
-      if shell_name == "claude" && Hooks.claude_installed?(@root).nil?
-        @err.puts "! warn guard: the guard hook is not installed here, so the session's tool calls will not be checked against the #{plane.skill(phase.skill).name} skill's permissions (`soft-foundry hooks install --claude`)"
+      skill_name = plane.skill(phase.skill).name
+      if !PhaseRunner::HOOKED_SHELLS.include?(shell_name)
+        @err.puts "! warn guard: #{shell_name} has no hook mechanism, so the #{skill_name} skill's permissions are policy only for this session"
+      elsif (shell_name == "claude" && Hooks.claude_installed?(@root).nil?) || (shell_name == "codex" && Hooks.codex_installed?(@root).nil?)
+        @err.puts "! warn guard: the guard hook is not installed for #{shell_name}, so the session's tool calls will not be checked against the #{skill_name} skill's permissions (`soft-foundry hooks install --#{shell_name}`)"
       end
       if dry_run
         @out.puts "would run #{phase.id} of #{slug} with: #{launch.executable} #{launch.args.map { |a| a == launch.prompt ? '<prompt>' : Shellwords.escape(a) }.join(' ')}"
@@ -993,7 +1012,7 @@ module SoftFoundry
                                                   copy instincts at or above the threshold (.ai/policies/learning.yml,
                                                   default 0.80) into .ai/rules/learned.md through the change
                                                   record on the current branch
-          soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex] [--dry-run] [-- args...]
+          soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex|grok] [--dry-run] [-- args...]
                                                   run one phase in a fresh coding-shell session with only its
                                                   skill in the prompt; stamps executed_by in the handoff and
                                                   gates the phase when the session returns
@@ -1008,11 +1027,12 @@ module SoftFoundry
                                                   show or set how often recorded spend warns (machine-local)
           soft-foundry ci                         check + gate every change record (used by CI and pre-commit)
           soft-foundry hooks install              install the pre-commit hook
-          soft-foundry hooks install --claude [--local]
+          soft-foundry hooks install --claude [--local] | --codex
                                                   install the PreToolUse guard into .claude/settings.json
-                                                  (or settings.local.json) so a coding shell's tool calls
-                                                  are checked against the active skill's permissions.yml
-          soft-foundry hooks uninstall --claude [--local]
+                                                  (or settings.local.json) or .codex/hooks.json so a coding
+                                                  shell's tool calls are checked against the active skill's
+                                                  permissions.yml (codex: then trust it with /hooks)
+          soft-foundry hooks uninstall --claude [--local] | --codex
                                                   remove only Soft Foundry's guard entry
           soft-foundry guard                      the hook itself: reads a tool call from stdin, exits 2 to
                                                   refuse it in block mode; mode from .ai/policies/enforcement.yml,

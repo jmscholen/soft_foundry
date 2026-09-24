@@ -32,8 +32,10 @@ module SoftFoundry
     ENV_VAR = "SOFT_FOUNDRY_GUARD"
 
     WRITE_TOOLS = %w[Edit Write MultiEdit NotebookEdit].freeze
+    PATCH_TOOLS = %w[apply_patch].freeze # Codex file edits; also reported under Edit/Write with the patch in `command`
     READ_TOOLS = %w[Read].freeze
     SHELL_TOOLS = %w[Bash].freeze
+    PATCH_HEADER = /\A\*\*\* (?:Add File|Update File|Delete File|Move to): (.+?)\s*\z/.freeze
 
     # The mode in effect: the environment, then the machine-local override,
     # then repository policy, then the default. Returns [mode, source].
@@ -89,20 +91,30 @@ module SoftFoundry
 
       sets = permission_sets(skill, record.slug)
       case tool_name
-      when *WRITE_TOOLS
-        path = relative(tool_input["file_path"] || tool_input["notebook_path"])
-        return Decision.new(outcome: :allow, reason: "no file path in the tool call", skill: skill.name, paths: []) unless path
-        return violation(skill, [path], "outside the repository; no skill may write there") if path.start_with?("..") || path.start_with?("/")
-        return violation(skill, [path], "is in #{skill.name}'s deny_write set") if ControlPlane.match_any?(path, sets[:deny_write])
-        return violation(skill, [path], "is not in #{skill.name}'s write set") unless ControlPlane.match_any?(path, sets[:write])
-        Decision.new(outcome: :allow, reason: "in #{skill.name}'s write set", skill: skill.name, paths: [path])
+      when *WRITE_TOOLS, *PATCH_TOOLS
+        # Claude Code names the file; Codex sends an apply_patch (under
+        # its own name or the Edit/Write aliases) whose paths are inside
+        # the patch text carried in `command`.
+        paths = if tool_input["file_path"] || tool_input["notebook_path"]
+                  [relative(tool_input["file_path"] || tool_input["notebook_path"])]
+                else
+                  patch_paths(command_text(tool_input["command"])).map { |p| relative(p) }
+                end.compact
+        return Decision.new(outcome: :allow, reason: "no file path in the tool call", skill: skill.name, paths: []) if paths.empty?
+        outside = paths.select { |p| p.start_with?("..") || p.start_with?("/") }
+        return violation(skill, outside, "outside the repository; no skill may write there") unless outside.empty?
+        denied = paths.select { |p| ControlPlane.match_any?(p, sets[:deny_write]) }
+        return violation(skill, denied, "is in #{skill.name}'s deny_write set") unless denied.empty?
+        unlisted = paths.reject { |p| ControlPlane.match_any?(p, sets[:write]) }
+        return violation(skill, unlisted, "is not in #{skill.name}'s write set") unless unlisted.empty?
+        Decision.new(outcome: :allow, reason: "in #{skill.name}'s write set", skill: skill.name, paths: paths)
       when *READ_TOOLS
         path = relative(tool_input["file_path"])
         return Decision.new(outcome: :allow, reason: "no file path in the tool call", skill: skill.name, paths: []) unless path
         return violation(skill, [path], "is in #{skill.name}'s deny_read set") if ControlPlane.match_any?(path, sets[:deny_read])
         Decision.new(outcome: :allow, reason: "not denied to #{skill.name}", skill: skill.name, paths: [path])
       when *SHELL_TOOLS
-        touched = shell_paths(tool_input["command"].to_s)
+        touched = shell_paths(command_text(tool_input["command"]))
         denied = touched.select { |p| ControlPlane.match_any?(p, sets[:deny_write]) || ControlPlane.match_any?(p, sets[:deny_read]) }
         return violation(skill, denied, "names a path #{skill.name} is denied (Bash is checked against deny sets only)") unless denied.empty?
         Decision.new(outcome: :allow, reason: "names no path denied to #{skill.name}", skill: skill.name, paths: touched)
@@ -142,6 +154,18 @@ module SoftFoundry
       abs = File.expand_path(path.to_s, @root)
       return abs unless abs.start_with?("#{@root}/") || abs == @root
       abs.delete_prefix("#{@root}/")
+    end
+
+    # A command as text. Codex may send `command` as an array of
+    # arguments (["apply_patch", "<patch>"] or ["rm", "-rf", "x"]).
+    def command_text(command)
+      command.is_a?(Array) ? command.map(&:to_s).join(" ") : command.to_s
+    end
+
+    # Every path an apply_patch touches: added, updated, deleted, and the
+    # target of a move. An empty result means the text is not a patch.
+    def patch_paths(text)
+      text.each_line.filter_map { |line| line.strip[PATCH_HEADER, 1] }.uniq
     end
 
     # Tokens of a shell command that name something in the repository:

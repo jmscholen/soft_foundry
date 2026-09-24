@@ -90,9 +90,12 @@ Every skill's `permissions.yml` declares what it may read and write, and `check`
 ```bash
 soft-foundry hooks install --claude            # writes the hook into .claude/settings.json (shared)
 soft-foundry hooks install --claude --local    # or .claude/settings.local.json (this machine only)
-soft-foundry hooks uninstall --claude          # removes only Soft Foundry's entry
-soft-foundry doctor                            # reports whether the hook is installed and the mode in effect
+soft-foundry hooks install --codex             # writes the same hook into .codex/hooks.json; then trust it with /hooks inside Codex
+soft-foundry hooks uninstall --claude          # removes only Soft Foundry's entry (likewise --codex)
+soft-foundry doctor                            # reports which hosts have the hook and the mode in effect
 ```
+
+The guard itself is host-neutral: it reads a JSON tool call on stdin and exits 2 to refuse. Claude Code and Codex share the hook file shape and the `PreToolUse` event. Codex names its shell tool `Bash` too, may send `command` as an array, and reports file edits as `apply_patch` (or under the `Edit`/`Write` aliases) with the patch text in `command`; the guard reads every path the patch adds, updates, deletes, or moves to and checks each against the write sets. Codex runs a project hook only after a person reviews and trusts it with `/hooks`. Grok has no hook mechanism, so under Grok the permissions are policy only, and `phase run --shell grok` says so.
 
 The mode is declared in `.ai/policies/enforcement.yml` (`warn` by default: report the violation, let the call through, log it to the machine-local `.soft-foundry/guard.log`; `block`: refuse it; `off`). A machine can override it in `.soft-foundry/enforcement.yml` or with `SOFT_FOUNDRY_GUARD=warn|block|off`, which wins over both. Outside a change branch, or once a change is closed, nothing is guarded.
 
@@ -161,6 +164,7 @@ Review and judgment exist to look at the work from outside it. Until now every r
 ```bash
 soft-foundry phase run review                    # a fresh `claude -p` session with only the review skill in its prompt
 soft-foundry phase run judge --shell codex       # or `codex exec`
+soft-foundry phase run judge --shell grok        # or `grok -p` (no hook mechanism: permissions are policy only, and the runner says so)
 soft-foundry phase run review --dry-run          # print the command and the prompt, launch nothing
 soft-foundry phase run review -- --model opus    # pass extra arguments to the shell
 ```

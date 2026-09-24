@@ -85,7 +85,7 @@ class PhaseRunnerTest < Minitest::Test
       assert_includes out, "Skill: review (profile reasoning_high)"
       assert_includes out, ".ai/skills/review/SKILL.md"
       assert_includes out, "Do not edit executed_by; the runner writes it"
-      assert_includes out, "! warn guard: the guard hook is not installed here"
+      assert_includes out, "! warn guard: the guard hook is not installed for claude"
       assert_nil record.handoff(record.control_plane.phase("review"))["executed_by"], "a dry run stamps nothing"
       assert_equal "evaluate", record.metadata["current_phase"]
 
