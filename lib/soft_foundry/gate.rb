@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require "yaml"
+require "date"
+
 module SoftFoundry
   # Deterministic completion gate for one lifecycle phase of a change record.
   # Pending phases are skipped; complete phases must satisfy completion.yml,
@@ -57,6 +60,7 @@ module SoftFoundry
         checks << predecessor_check(phase)
         checks << staleness_check(handoff) if skill.commit_bound?
         checks << specification_lock_check(phase) if phase.id == "specify" && @record.vetted
+        checks << red_evidence_check(phase, handoff) if phase.id == "verify"
       end
       Result.new(phase:, status:, checks:)
     end
@@ -86,6 +90,40 @@ module SoftFoundry
     # implement onward may be complete until the person has vetted.
     def exploring_check
       Check.new("not exploring", :fail, "cannot be complete while the change is exploring; run `soft-foundry change vet` when the person has accepted the feature, then rerun this phase")
+    end
+
+    # A verification check may name the commit at which its test existed
+    # and failed (red_commit) and the test file (test_path). The gate
+    # checks the shape of that claim: the commit exists, precedes the
+    # verified commit, holds the test file, and code changed after it.
+    # Whether the test actually failed there is not re-run; the claim is
+    # the agent's, bound to a commit anyone can check out.
+    def red_evidence_check(phase, handoff)
+      path = File.join(@record.phase_dir(phase), "tests.yml")
+      return Check.new("red evidence", :skip, "tests.yml missing") unless File.file?(path)
+      data = YAML.safe_load_file(path, permitted_classes: [Time, Date], aliases: true) || {}
+      checks = Array(data["checks"]).select { |c| c.is_a?(Hash) && c.key?("red_commit") }
+      return Check.new("red evidence", :skip, "no check records a red_commit") if checks.empty?
+      return Check.new("red evidence", :skip, "no git repository") unless @git.repository?
+      green = handoff["commit_sha"].to_s
+      problems = []
+      passes = []
+      checks.each do |c|
+        id = c["id"].to_s
+        red = c["red_commit"].to_s
+        test_path = c["test_path"].to_s
+        next problems << "#{id}: red_commit '#{red}' is not a commit in this repository" unless red.match?(SHA) && @git.commit?(red)
+        next problems << "#{id}: red_commit #{red[0, 12]} is the verified commit itself; the test must precede the implementation" if green.start_with?(red) || red.start_with?(green)
+        next problems << "#{id}: red_commit #{red[0, 12]} is not an ancestor of the verified commit #{green[0, 12]}" unless @git.ancestor?(red, green)
+        next problems << "#{id}: test_path #{test_path} does not exist at red_commit #{red[0, 12]}" if !test_path.empty? && !@git.file_at?(red, test_path)
+        code = @git.changed_between(red, green).select { |p| ControlPlane.match_any?(p, %w[APP INFRA].flat_map { |g| @plane.path_groups.fetch(g, []) }) }
+        next problems << "#{id}: no APP or INFRA change between red_commit #{red[0, 12]} and #{green[0, 12]}; nothing was implemented after the test" if code.empty?
+        passes << "#{id}: #{red[0, 12]} -> #{green[0, 12]}#{test_path.empty? ? '' : " (#{test_path})"}"
+      end
+      return Check.new("red evidence", :fail, problems.join("; ")) unless problems.empty?
+      Check.new("red evidence", :pass, passes.join("; "))
+    rescue Psych::Exception => e
+      Check.new("red evidence", :fail, "tests.yml is not valid YAML: #{e.message}")
     end
 
     # After `change vet`, the specification is what the hardening phases

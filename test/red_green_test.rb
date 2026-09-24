@@ -22,6 +22,7 @@ class RedGreenTest < Minitest::Test
       File.write(meta, File.read(meta).sub(/^type: TBD.*$/, "type: #{type}"))
       commit_all(dir, "record")
 
+      FileUtils.mkdir_p(File.join(dir, "test"))
       File.write(File.join(dir, "test", "feature_test.rb"), "# expects puts 2\n")
       commit_all(dir, "RED: feature test")
       red = head(dir)
@@ -69,6 +70,7 @@ class RedGreenTest < Minitest::Test
 
   def test_red_commit_that_is_not_an_ancestor_fails
     with_red_green do |dir, plane, record, _red, _green|
+      commit_all(dir, "verified on c1") # keep the completed record on c1 while we branch away
       sh(dir, "git", "checkout", "-qb", "elsewhere")
       File.write(File.join(dir, "test", "other_test.rb"), "# other\n")
       commit_all(dir, "unrelated")
@@ -82,7 +84,7 @@ class RedGreenTest < Minitest::Test
   end
 
   def test_test_path_absent_at_the_red_commit_fails
-    with_red_green("test_path" => "test/nope_test.rb") do |dir, _plane, record, _red, _green|
+    with_red_green({ "test_path" => "test/nope_test.rb" }) do |dir, _plane, record, _red, _green|
       check = red_check(dir, record)
       assert_equal :fail, check.outcome
       assert_includes check.detail, "test/nope_test.rb"
@@ -97,10 +99,12 @@ class RedGreenTest < Minitest::Test
       cli(dir, "change", "new", "c1")
       record = SoftFoundry::ChangeRecord.new(dir, "c1", control_plane: plane)
       commit_all(dir, "record")
+      FileUtils.mkdir_p(File.join(dir, "test"))
       File.write(File.join(dir, "test", "feature_test.rb"), "# test\n")
       commit_all(dir, "RED")
       red = head(dir)
-      File.write(File.join(dir, "docs", "note.md"), "docs only\n") rescue (FileUtils.mkdir_p(File.join(dir, "docs")); File.write(File.join(dir, "docs", "note.md"), "docs only\n"))
+      FileUtils.mkdir_p(File.join(dir, "docs"))
+      File.write(File.join(dir, "docs", "note.md"), "docs only\n")
       commit_all(dir, "docs only")
       green = head(dir)
       plane.phases.take(7).each { |p| complete_phase!(record, p.id, sha: green) }
@@ -112,10 +116,10 @@ class RedGreenTest < Minitest::Test
   end
 
   def test_malformed_or_unknown_red_commit_fails
-    with_red_green("red_commit" => "nope") do |dir, _plane, record, _red, _green|
+    with_red_green({ "red_commit" => "nope" }) do |dir, _plane, record, _red, _green|
       assert_equal :fail, red_check(dir, record).outcome
     end
-    with_red_green("red_commit" => "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef") do |dir, _plane, record, _red, _green|
+    with_red_green({ "red_commit" => "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef" }) do |dir, _plane, record, _red, _green|
       check = red_check(dir, record)
       assert_equal :fail, check.outcome
       assert_includes check.detail, "not a commit"

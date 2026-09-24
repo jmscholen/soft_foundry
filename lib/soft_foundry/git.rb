@@ -64,6 +64,12 @@ module SoftFoundry
       ok
     end
 
+    # True when `path` exists in the tree of commit `sha`.
+    def file_at?(sha, path)
+      _, ok = run("cat-file", "-e", "#{sha}:#{path}")
+      ok
+    end
+
     # Paths changed in commits after `sha`, plus uncommitted and untracked paths.
     def changed_since(sha)
       committed, ok = run("diff", "--name-only", sha, "HEAD")

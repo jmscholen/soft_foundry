@@ -109,8 +109,9 @@ capabilities:
     evidence: [lib/soft_foundry/gate.rb, .ai/schemas.md]
   evidence.failed_results_retained:
     status: PARTIAL
-    evidence: [.ai/policies/skill-permissions.yml]
-    findings: [policy_only_no_enforcement]
+    evidence: [.ai/policies/skill-permissions.yml, lib/soft_foundry/gate.rb, .ai/rules/testing.md]
+    findings: [red_commit_evidence_enforced_by_the_gate_other_failed_results_policy_only]
+    rationale: A failing test's commit is retained as red_commit on the verification check and the gate verifies it precedes the verified commit and holds the test; retention of every other failed result (a failed scan, a failed journey) remains the anti-fudging policy, unenforced.
   governance.risk_classification:
     status: PARTIAL
     evidence: [.ai/templates/change/metadata.yml, .ai/workflow.yml, lib/soft_foundry/gate.rb]

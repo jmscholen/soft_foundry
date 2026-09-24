@@ -102,6 +102,24 @@ What is checked: Edit, Write, MultiEdit, and NotebookEdit against the write and 
 ✗ fail guard: Edit .ai/rules/ruby.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
 ```
 
+### RED and GREEN evidence
+
+`.ai/rules/testing.md` asks that a feature, fix, or refactor commit its failing test before the code that makes it pass. Verification can now bind that to git: a check in `06-verification/tests.yml` names the commit at which the test existed and failed as `red_commit`, and the test file as `test_path`:
+
+```yaml
+checks:
+  - id: CHECK-001
+    kind: tests
+    command: bundle exec rake test
+    result: pass
+    evidence: evidence/tests.log
+    criteria: [REQ-001]
+    red_commit: 5d898e0c3f1a...     # the test existed and failed here
+    test_path: test/feature_test.rb
+```
+
+The verification gate's `red evidence` check verifies the shape of that claim: the commit exists, precedes the verified commit, holds the test file, and `APP` or `INFRA` code changed after it. It does not re-run the test at the RED commit; the claim is the agent's, bound to a commit anyone can check out. Checks without `red_commit` are not checked, and a feature, fix, or refactor whose verification has none draws an advisory saying the failing-test-first evidence is not demonstrable.
+
 ### Fresh-context phases: `phase run`
 
 Review and judgment exist to look at the work from outside it. Until now every record in this repository has said "performed by the interactive session, not a fresh-context agent" in its handoff notes. `soft-foundry phase run` makes the separation a process boundary:

@@ -107,7 +107,23 @@ module SoftFoundry
         notices << Notice.new("judgment", "final judgment was skipped (#{why}); no APPROVED/BLOCKED/REJECTED verdict exists for this change")
       end
       notices.concat(fresh_context_notices)
+      notices.concat(red_evidence_notices)
       notices
+    end
+
+    # A feature, fix, or refactor verified with no check that names a
+    # red_commit has no failing-test-first evidence at all. Reported, never
+    # a gate failure: the standard asks for it, and this says it is absent.
+    RED_EVIDENCE_TYPES = %w[feature fix refactor].freeze
+
+    def red_evidence_notices
+      phase = @plane.phase("verify")
+      return [] unless phase && @record.phase_status(phase) == "complete"
+      return [] unless RED_EVIDENCE_TYPES.include?(@record.metadata["type"].to_s)
+      path = File.join(@record.phase_dir(phase), "tests.yml")
+      checks = Array(load(path)["checks"]).select { |c| c.is_a?(Hash) }
+      return [] if checks.any? { |c| c.key?("red_commit") }
+      [Notice.new("verification", "no check in 06-verification/tests.yml records a red_commit, so the failing-test-first evidence .ai/rules/testing.md asks for is not demonstrable for this #{@record.metadata['type']}")]
     end
 
     # Review and judgment exist to look at the work from outside it. A
