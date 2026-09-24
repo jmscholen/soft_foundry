@@ -21,7 +21,7 @@ Canonical source templates under `.ai/skills/*/template/` and `.ai/templates/` a
 | `templates/` | Shared templates: the phase `handoff.yml` and the change `metadata.yml`. |
 | `profiles/` | Capability profiles skills request; provider/model resolution is a runtime concern. |
 | `rules/` | Coding and infrastructure standards loaded by implementation and checked by review. |
-| `policies/` | Permission principles, protected paths, anti-fudging rules, human boundaries. Protected from every skill's write set. |
+| `policies/` | Permission principles, protected paths, anti-fudging rules, human boundaries, and `enforcement.yml` (whether the runtime guard warns or blocks). Protected from every skill's write set. |
 | `maturity.yml`, `repository.yml` | Maturity policy and the evidence-backed repository profile. |
 | `harness-evals/` | Evaluations of the harness itself; denied to execution skills. |
 

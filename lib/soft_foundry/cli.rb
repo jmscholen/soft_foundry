@@ -17,6 +17,7 @@ require_relative "billing"
 require_relative "updater"
 require_relative "pr_discharge"
 require_relative "advisory"
+require_relative "guard"
 
 module SoftFoundry
   class CLI
@@ -25,10 +26,11 @@ module SoftFoundry
     EXIT_CONFLICTS = 3
     EXIT_INTERNAL = 4
 
-    def initialize(argv, out: $stdout, err: $stderr, root: Dir.pwd, source: nil, updater: nil, pr_discharge: nil, shell: nil)
+    def initialize(argv, out: $stdout, err: $stderr, input: $stdin, root: Dir.pwd, source: nil, updater: nil, pr_discharge: nil, shell: nil)
       @argv = argv.dup
       @out = out
       @err = err
+      @input = input
       @root = File.expand_path(root)
       @source = source
       @updater = updater
@@ -49,6 +51,7 @@ module SoftFoundry
       when "gate" then gate
       when "ci" then ci
       when "hooks" then hooks
+      when "guard" then guard
       when "update" then update
       when "shell"
         shell_name = @argv.shift or raise ArgumentError, "Usage: soft-foundry shell <claude|codex|grok> [args...]"
@@ -234,9 +237,12 @@ module SoftFoundry
         "control plane check" => plane.present? && Check.new(plane).run.none? { |f| f.level == :error },
         ".ai/manifest.yml" => File.exist?(File.join(@root, Manifest::PATH)),
         "pre-commit hook" => File.exist?(File.join(@root, ".git/hooks/pre-commit")) && File.read(File.join(@root, ".git/hooks/pre-commit")).include?(Hooks::MARKER),
+        "claude guard hook" => !Hooks.claude_installed?(@root).nil?,
         "local runtime" => File.exist?(File.join(@root, ".soft-foundry/runtime.yml"))
       }
-      checks.each { |name, ok| @out.puts "#{ok ? '✓ pass' : '✗ fail'} #{name}" }
+      mode, source = Guard.mode(@root)
+      detail = { "claude guard hook" => " (mode: #{mode}, #{source})#{checks['claude guard hook'] ? '' : '; install with `soft-foundry hooks install --claude`'}" }
+      checks.each { |name, ok| @out.puts "#{ok ? '✓ pass' : '✗ fail'} #{name}#{detail[name]}" }
       checks.values.all? ? 0 : 2
     end
 
@@ -657,9 +663,61 @@ module SoftFoundry
     end
 
     def hooks
-      raise ArgumentError, "Usage: soft-foundry hooks install" unless @argv.shift == "install"
-      @out.puts "installed #{relative(Hooks.install(@root))}"
-      0
+      sub = @argv.shift
+      claude = flag("--claude")
+      local = flag("--local")
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+      case sub
+      when "install"
+        if claude
+          path = Hooks.install_claude(@root, local: local)
+          mode, source = Guard.mode(@root)
+          @out.puts "installed guard hook in #{relative(path)} (PreToolUse: #{Hooks::GUARD_MATCHER})"
+          @out.puts "guard mode: #{mode} (#{source})"
+        else
+          @out.puts "installed #{relative(Hooks.install(@root))}"
+        end
+        0
+      when "uninstall"
+        raise ArgumentError, "Usage: soft-foundry hooks uninstall --claude [--local]" unless claude
+        path = Hooks.uninstall_claude(@root, local: local)
+        @out.puts(path ? "removed guard hook from #{relative(path)}" : "no guard hook installed in #{relative(Hooks.claude_settings_path(@root, local: local))}")
+        0
+      else
+        raise ArgumentError, "Usage: soft-foundry hooks install [--claude [--local]] | hooks uninstall --claude [--local]"
+      end
+    end
+
+    # The PreToolUse guard. Reads the hook payload from stdin, decides, and
+    # answers the way Claude Code expects: exit 2 with the reason on stderr
+    # to refuse, exit 0 to allow. In warn mode a violation is reported on
+    # stderr and allowed. Every violation is appended to the guard log.
+    def guard
+      mode, = Guard.mode(@root)
+      return 0 if mode == "off"
+      payload = begin
+        JSON.parse(@input.read.to_s)
+      rescue JSON::ParserError
+        nil
+      end
+      unless payload.is_a?(Hash) && payload["tool_name"]
+        @err.puts "#{mode == 'block' ? '✗ fail' : '! warn'} guard: could not read the tool call from stdin#{mode == 'block' ? '; refusing it' : ''}"
+        return mode == "block" ? 2 : 0
+      end
+      tool = payload["tool_name"].to_s
+      input = payload["tool_input"].is_a?(Hash) ? payload["tool_input"] : {}
+      guard = Guard.new(@root, plane: plane, git: git)
+      decision = guard.decide(tool, input)
+      return 0 unless decision.violation?
+      guard.log(decision, mode: mode, tool_name: tool)
+      where = decision.paths.empty? ? tool : "#{tool} #{decision.paths.join(', ')}"
+      if mode == "block"
+        @err.puts "✗ fail guard: #{where} #{decision.reason}; the #{decision.skill} skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)"
+        2
+      else
+        @err.puts "! warn guard: #{where} #{decision.reason}; the #{decision.skill} skill's permissions.yml does not allow it (mode: warn, logged to #{Guard::LOG})"
+        0
+      end
     end
 
     def update
@@ -789,6 +847,15 @@ module SoftFoundry
                                                   show or set how often recorded spend warns (machine-local)
           soft-foundry ci                         check + gate every change record (used by CI and pre-commit)
           soft-foundry hooks install              install the pre-commit hook
+          soft-foundry hooks install --claude [--local]
+                                                  install the PreToolUse guard into .claude/settings.json
+                                                  (or settings.local.json) so a coding shell's tool calls
+                                                  are checked against the active skill's permissions.yml
+          soft-foundry hooks uninstall --claude [--local]
+                                                  remove only Soft Foundry's guard entry
+          soft-foundry guard                      the hook itself: reads a tool call from stdin, exits 2 to
+                                                  refuse it in block mode; mode from .ai/policies/enforcement.yml,
+                                                  .soft-foundry/enforcement.yml, or SOFT_FOUNDRY_GUARD=warn|block|off
           soft-foundry update [--yes]             check RubyGems for a newer release; --yes installs it
           soft-foundry models                     show locally accessible models
           soft-foundry shell claude|codex|grok    launch a coding shell in this repository

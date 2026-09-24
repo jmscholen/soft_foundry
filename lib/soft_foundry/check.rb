@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require "yaml"
+require_relative "guard"
+
 module SoftFoundry
   # Lints the `.ai/` control plane itself: every phase has a skill, every skill
   # has its contract files and templates, permissions reference known path
@@ -21,6 +24,7 @@ module SoftFoundry
       findings.concat(check_path_groups)
       findings.concat(check_transitions)
       findings.concat(check_tracks)
+      findings.concat(check_enforcement)
       @plane.phases.each { |phase| findings.concat(check_phase(phase)) }
       findings
     end
@@ -79,6 +83,19 @@ module SoftFoundry
         Hash(edges).each_value { |to| problems << Finding.new(:error, "transitions: '#{from}' targets unknown phase '#{to}'") unless ids.include?(to) }
         problems
       end
+    end
+
+    # .ai/policies/enforcement.yml is optional (the guard defaults to warn),
+    # but when present its mode must be one the guard understands.
+    def check_enforcement
+      path = File.join(@plane.dir, "policies", "enforcement.yml")
+      return [] unless File.exist?(path)
+      data = YAML.safe_load_file(path) || {}
+      mode = data.dig("guard", "mode")
+      return [] if mode.nil? || Guard::MODES.include?(mode.to_s)
+      [Finding.new(:error, "policies/enforcement.yml: guard.mode '#{mode}' is not one of #{Guard::MODES.join(', ')}")]
+    rescue Psych::Exception => e
+      [Finding.new(:error, "policies/enforcement.yml is not valid YAML: #{e.message}")]
     end
 
     # Tracks (.ai/workflow.yml tracks:): the default and any risk-forced

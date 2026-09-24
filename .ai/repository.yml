@@ -117,9 +117,9 @@ capabilities:
     findings: [risk_forces_the_lifecycle_track_but_does_not_otherwise_select_required_phases]
     rationale: A high risk change is forced onto the gated track (tracks.forced_by_risk) and the gate reports a conflict; within a track, risk does not yet add or remove phases.
   governance.skill_permissions:
-    status: PARTIAL
-    evidence: [.ai/skills, lib/soft_foundry/check.rb]
-    findings: [declared_and_linted_not_enforced_at_runtime]
+    status: PASS
+    evidence: [.ai/skills, lib/soft_foundry/check.rb, lib/soft_foundry/guard.rb, .ai/policies/enforcement.yml]
+    rationale: Every skill declares its read/write sets, check lints them, and `soft-foundry guard` enforces them at runtime as a Claude Code PreToolUse hook (`hooks install --claude`); the mode (warn or block) is repository policy with a machine-local override, and doctor reports whether the hook is installed on this machine. Bash is checked against deny sets only.
   governance.human_boundaries:
     status: PARTIAL
     evidence: [.ai/policies/human-boundaries.yml]

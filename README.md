@@ -83,6 +83,25 @@ A gate passes only when the phase's required files exist with no `TBD` placehold
 
 `soft-foundry check` lints the control plane itself. `soft-foundry ci` runs the lint plus every change record's gates, and `soft-foundry hooks install` wires it into a pre-commit hook. The GitHub Actions workflow runs the same two commands.
 
+### Runtime enforcement: the guard hook
+
+Every skill's `permissions.yml` declares what it may read and write, and `check` lints those declarations. `soft-foundry guard` enforces them while a coding shell is running: it is a Claude Code PreToolUse hook that reads each tool call, resolves the active change from the branch and the active skill from the change's status and `current_phase` (the track's stage skill while exploring), expands the skill's sets through the path groups, and decides.
+
+```bash
+soft-foundry hooks install --claude            # writes the hook into .claude/settings.json (shared)
+soft-foundry hooks install --claude --local    # or .claude/settings.local.json (this machine only)
+soft-foundry hooks uninstall --claude          # removes only Soft Foundry's entry
+soft-foundry doctor                            # reports whether the hook is installed and the mode in effect
+```
+
+The mode is declared in `.ai/policies/enforcement.yml` (`warn` by default: report the violation, let the call through, log it to the machine-local `.soft-foundry/guard.log`; `block`: refuse it; `off`). A machine can override it in `.soft-foundry/enforcement.yml` or with `SOFT_FOUNDRY_GUARD=warn|block|off`, which wins over both. Outside a change branch, or once a change is closed, nothing is guarded.
+
+What is checked: Edit, Write, MultiEdit, and NotebookEdit against the write and deny_write sets; Read against deny_read only; Bash against the deny sets only, because the guard cannot know what a command writes, so it refuses a command that names a denied path and passes everything else. A restriction the guard cannot see is still policy the agent must honor, as `AGENTS.md` says. Every refusal or warning names the tool, the path, the skill, and the mode:
+
+```
+✗ fail guard: Edit .ai/rules/ruby.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+```
+
 ### Lifecycle tracks: gated or iterative
 
 The lifecycle above is a stage-gate process: intent, specification, threat model, and plan before code, evidence bound from the first commit. That is the right shape for assurance and the wrong shape for shaping a feature with a person by trying it. `.ai/workflow.yml` therefore declares two tracks that share the same phases and the same gate:

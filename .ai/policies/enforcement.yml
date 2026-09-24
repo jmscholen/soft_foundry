@@ -1,0 +1,26 @@
+version: 1
+
+# Runtime enforcement of skill permissions. Each skill's permissions.yml
+# declares what it may read and write; `soft-foundry guard` is a
+# PreToolUse hook (`soft-foundry hooks install --claude`) that checks a
+# coding shell's tool calls against the active skill's sets. The active
+# skill is the current phase's, or the track's stage skill while a change
+# is exploring. Outside a change branch nothing is guarded.
+#
+#   warn   report the violation to the shell and let the call through,
+#          logging it to .soft-foundry/guard.log (machine-local)
+#   block  refuse the call (the hook exits 2 with the reason)
+#   off    say nothing
+#
+# The mode is a repository policy here; a machine may override it in
+# .soft-foundry/enforcement.yml (same shape, gitignored) or with the
+# SOFT_FOUNDRY_GUARD environment variable, which wins over both.
+#
+# Edit, Write, MultiEdit, and NotebookEdit are checked against the write
+# and deny_write sets; Read against deny_read only, since read lists are
+# advisory context. Bash is checked against the deny sets only: the guard
+# cannot know what a command writes, so it refuses commands that name a
+# denied path and passes everything else. A deny that the guard cannot
+# see remains policy the agent must honor, as AGENTS.md says.
+guard:
+  mode: warn
