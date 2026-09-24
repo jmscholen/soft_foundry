@@ -1,10 +1,10 @@
 ---
-commit_sha: 55bce298f99c3b0a3102ffc9f2f4e722dc940a75
+commit_sha: a5648d0b5b6933a361a34d30daf9fb77cb740014
 artifacts:
 - path: evidence/tests.log
   produced_by: ruby -Ilib -Itest requiring every test/*_test.rb, with every provider
     key, SOFT_FOUNDRY_BILLING, and SOFT_FOUNDRY_GUARD unset
-  sha256: 8dfd8b10d3906598dcc1c548fc1dfeb331fe2d866d049c2b34f285855f321278
+  sha256: 864d534f09b665eacf81a425fda1f9f36ee66bca06b2f7e3be2d1c28f9f54dd9
 - path: evidence/red-at-a5c0d59.log
   produced_by: test/learning_instincts_test.rb run with the worktree checked out at
     the RED commit a5c0d59

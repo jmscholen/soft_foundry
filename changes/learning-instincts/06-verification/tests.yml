@@ -1,15 +1,34 @@
-commit_sha: TBD
+commit_sha: a5648d0b5b6933a361a34d30daf9fb77cb740014
 checks:
   - id: CHECK-001
-    kind: tests   # tests | lint | static_analysis | security_scan | iac_validate | migration_check | custom
-    command: TBD
-    result: TBD   # pass | fail | error | skipped
-    evidence: evidence/TBD
-    criteria: [AC-001]
-    # Optional, per check: the commit at which this test existed and failed
-    # (RED) and the test file. The gate verifies red_commit is a commit that
-    # precedes commit_sha, holds test_path, and that APP or INFRA code changed
-    # after it. A feature, fix, or refactor with no red_commit on any check is
-    # advised as having no failing-test-first evidence.
-    # red_commit: TBD
-    # test_path: TBD
+    kind: tests
+    command: "ruby -Ilib -Itest requiring every test/*_test.rb, with every provider key, SOFT_FOUNDRY_BILLING, and SOFT_FOUNDRY_GUARD unset"
+    result: pass
+    evidence: evidence/tests.log
+    criteria: [REQ-LRN-001, REQ-LRN-002, REQ-LRN-003, REQ-LRN-004, REQ-LRN-005, REQ-LRN-006, REQ-LRN-007]
+    red_commit: a5c0d59d28cf665afbad3c018425ed90017eb463
+    test_path: test/learning_instincts_test.rb
+  - id: CHECK-002
+    kind: custom
+    command: "test/learning_instincts_test.rb run with the worktree checked out at a5c0d59, the RED commit"
+    result: fail
+    evidence: evidence/red-at-a5c0d59.log
+    criteria: [REQ-LRN-008]
+  - id: CHECK-003
+    kind: lint
+    command: "soft-foundry check"
+    result: pass
+    evidence: evidence/check.log
+    criteria: [REQ-LRN-001, REQ-LRN-007, control-plane-consistency]
+  - id: CHECK-004
+    kind: static_analysis
+    command: "ruby -wc on every lib/soft_foundry/*.rb, lib/soft_foundry/installer/*.rb, lib/soft_foundry.rb, exe/soft-foundry, and test/learning_instincts_test.rb"
+    result: pass
+    evidence: evidence/syntax-warnings.log
+    criteria: [coding-standard]
+  - id: CHECK-005
+    kind: custom
+    command: "soft-foundry ci against this repository's own real change-record history, on a branch stacked on change/red-green-evidence"
+    result: pass
+    evidence: evidence/ci-against-self.log
+    criteria: [REQ-LRN-008, no-regression-for-closed-records, this-change-record-itself-passes]
