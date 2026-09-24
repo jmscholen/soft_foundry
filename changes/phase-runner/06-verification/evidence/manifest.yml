@@ -1,10 +1,10 @@
 ---
-commit_sha: f205ac714f8cd6a8e87482ee2eacd5ed22372ce8
+commit_sha: 9f855b51a833b6fb43ca9b30ca8314a9550f7c5d
 artifacts:
 - path: evidence/tests.log
   produced_by: ruby -Ilib -Itest requiring every test/*_test.rb, with every provider
     key, SOFT_FOUNDRY_BILLING, and SOFT_FOUNDRY_GUARD unset
-  sha256: 2de4629cfa32c15e7d0d0e0812745543428c86f744bc29e25b8257f5fbafc91c
+  sha256: 8d72abdc3b850a90aa9ee90e6b3bad346ef80060ed5e2930fbbc00b1cc0c5c4b
 - path: evidence/check.log
   produced_by: soft-foundry check
   sha256: 2be6498003ac7633f001dde7fb6c82d20d270c7515d869ca3f7276b8c1f3730e

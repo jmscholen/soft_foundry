@@ -1,0 +1,152 @@
+ruby: ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23]
+soft-foundry: 0.11.0
+implementation commit under evaluation: 9f855b51a833b6fb43ca9b30ca8314a9550f7c5d
+fake shells: /private/tmp/sf-fakebin.oWfxIu/claude, /private/tmp/sf-fakebin.oWfxIu/codex
+
+############ EVAL-001 a change through evaluation; dry run shows the command and the prompt, and warns that the guard is not installed
+$ (cd /tmp/sf-runner.X8DolI && git checkout -qb change/c1)
+[exit 0]
+
+$ (cd /tmp/sf-runner.X8DolI && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change new c1 | head -1 && sed -i '' 's/^status: intake.*/status: in_progress/; s/^current_phase: intake.*/current_phase: evaluate/' changes/c1/metadata.yml && git add -A && git commit -qm record)
+created changes/c1 with 16 phase directories
+[exit 0]
+
+$ (cd /tmp/sf-runner.X8DolI && for p in 00-intake 01-discovery 02-specification 03-threat-model 04-plan 05-implementation 06-verification 07-evaluation 08-attack; do /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/6c4ef0a9-4350-43f6-945d-112fb2f912cd/scratchpad/mark.rb changes/c1 $p $(git rev-parse HEAD); done; git add -A && git commit -qm 'phases through attack' && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change status | sed -n 1,3p)
+c1: c1  [status: in_progress, phase: evaluate, risk: TBD]
+  track: gated
+  00-intake              complete     ok
+[exit 0]
+
+$ (cd /tmp/sf-runner.X8DolI && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry phase run review --dry-run)
+! warn guard: the guard hook is not installed here, so the session's tool calls will not be checked against the review skill's permissions (`soft-foundry hooks install --claude`)
+would run review of c1 with: claude -p <prompt>
+--- prompt ---
+You are a fresh-context agent running one lifecycle phase of a Soft Foundry change, and nothing else.
+
+Change: c1 (branch change/c1)
+Phase: review (changes/c1/13-review/)
+Skill: review (profile reasoning_high)
+
+1. Read AGENTS.md and .ai/README.md. Then load only this phase's skill contract: .ai/skills/review/skill.yml, .ai/skills/review/SKILL.md, .ai/skills/review/permissions.yml, .ai/skills/review/requirements.yml, .ai/skills/review/completion.yml.
+2. Do the phase's work as the skill describes, reading the earlier phases under changes/c1/ that the skill's permissions.yml allows. Write only where that file allows; the runtime guard enforces it where installed and it is policy everywhere else.
+3. When the work is done, fill changes/c1/13-review/handoff.yml: status complete, commit_sha (the HEAD the outputs describe), completed_at, resolved_model (provider and model actually used), outputs, findings for later phases, and next. Do not edit executed_by; the runner writes it.
+4. Do not alter any other phase's evidence or handoff, do not weaken requirements to obtain a pass, and do not run `soft-foundry phase run` yourself. If the work cannot be completed, set status blocked with the reason under blocking rather than pretending.
+5. Stop when the handoff is written. `soft-foundry gate review` will be run on your output afterwards.
+[exit 0]
+
+$ (cd /tmp/sf-runner.X8DolI && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry hooks install --claude | head -1 && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry phase run review --dry-run | head -2)
+installed guard hook in .claude/settings.json (PreToolUse: Edit|Write|MultiEdit|NotebookEdit|Read|Bash)
+would run review of c1 with: claude -p <prompt>
+--- prompt ---
+[exit 0]
+
+$ (cd /tmp/sf-runner.X8DolI && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry phase run review --dry-run --shell codex -- --full-auto | head -1)
+would run review of c1 with: codex exec --full-auto <prompt>
+[exit 0]
+
+############ EVAL-002 refusals: a phase already complete, a pending predecessor, an unknown phase, an exploring change
+$ (cd /tmp/sf-runner.X8DolI && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry phase run verify)
+c1: cannot run verify: 06-verification is already complete; rerun it only after the work it rests on has changed (the gate will say when it is stale)
+[exit 1]
+
+$ (cd /tmp/sf-runner.X8DolI && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry phase run learn)
+c1: cannot run learn: 15-learning cannot start: its predecessor 14-judgment is pending
+[exit 1]
+
+$ (cd /tmp/sf-runner.X8DolI && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry phase run polish)
+soft-foundry: unknown phase 'polish'; lifecycle phases: intake, discover, specify, threat_model, plan, implement, verify, evaluate, attack, remediate, document, index, observe, review, judge, learn
+[exit 1]
+
+$ (cd /tmp/sf-runner.X8DolI && git checkout -qb change/it1 && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change new it1 --track iterative | head -1 && git add -A && git commit -qm record && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry phase run implement; git checkout -q change/c1)
+created changes/it1 with 16 phase directories
+it1: cannot run implement: change it1 is exploring; the exploring stage is worked with the person, not by a runner (run `change vet` first)
+[exit 0]
+
+############ EVAL-003 a real run: the fake claude completes review; executed_by is stamped, current_phase moves, the gate passes, no fresh-context advisory
+$ (cd /tmp/sf-runner.X8DolI && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry phase run review)
+! warn guard: the guard hook is not installed here, so the session's tool calls will not be checked against the review skill's permissions (`soft-foundry hooks install --claude`)
+billing: subscription (no ANTHROPIC_API_KEY in the environment, so claude bills to its own login); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+running review of c1 in a fresh claude session (review skill); executed_by recorded in changes/c1/13-review/handoff.yml
+fake claude: args before prompt: -p
+fake claude: working 13-review of changes/c1
+claude exited 0
+13-review  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: functional.md, architecture.md, security.md, accessibility.md, policy-conformance.md, infrastructure.md, operations.md, consolidated.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 28738c66422d08265522ad059dcd40895c98946e
+  ✓ pass completed_at recorded: 2026-09-24T00:00:00Z
+  ✓ pass predecessor complete: 08-attack
+  ✓ pass evidence current: no code changes since 28738c66422d
+[exit 0]
+
+$ (cd /tmp/sf-runner.X8DolI && grep -nE '^(status|current_phase):' changes/c1/metadata.yml)
+11:status: in_progress
+12:current_phase: review
+[exit 0]
+
+$ (cd /tmp/sf-runner.X8DolI && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -ryaml -e 'h=YAML.load_file("changes/c1/13-review/handoff.yml"); puts h["executed_by"].to_yaml')
+---
+runner: soft-foundry phase run
+shell: claude
+fresh_context: true
+started_at: '2026-09-24T02:57:27Z'
+finished_at: '2026-09-24T02:57:27Z'
+exit_status: 0
+previous_phase: evaluate
+[exit 0]
+
+$ (cd /tmp/sf-runner.X8DolI && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate review | grep -E 'PASS|FAIL|warn review')
+13-review  complete  PASS
+[exit 0]
+
+############ EVAL-004 the session fails: the attempt stays in the record, exit 1, gate shows in_progress
+$ (cd /tmp/sf-runner.X8DolI && FAKE_EXIT=3 /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry phase run judge)
+! warn guard: the guard hook is not installed here, so the session's tool calls will not be checked against the final-judgment skill's permissions (`soft-foundry hooks install --claude`)
+billing: subscription (no ANTHROPIC_API_KEY in the environment, so claude bills to its own login); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+running judge of c1 in a fresh claude session (final-judgment skill); executed_by recorded in changes/c1/14-judgment/handoff.yml
+fake claude: args before prompt: -p
+fake claude: working 14-judgment of changes/c1
+claude exited 3
+14-judgment  in_progress  PASS
+  ✓ pass handoff identity
+  ! warn phase in progress: not yet gated
+[exit 1]
+
+$ (cd /tmp/sf-runner.X8DolI && grep -nE '^(status|started_at):' changes/c1/14-judgment/handoff.yml; /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -ryaml -e 'puts YAML.load_file("changes/c1/14-judgment/handoff.yml")["executed_by"].slice("fresh_context","exit_status").inspect')
+4:status: in_progress
+6:started_at: '2026-09-24T02:57:28Z'
+{"fresh_context"=>true, "exit_status"=>3}
+[exit 0]
+
+############ EVAL-005 a review completed by hand, without the runner, is advised on every gate run
+$ (cd /tmp/sf-runner.yAa71o && git checkout -qb change/c2)
+[exit 0]
+
+$ (cd /tmp/sf-runner.yAa71o && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change new c2 | head -1 && sed -i '' 's/^status: intake.*/status: in_progress/' changes/c2/metadata.yml && for p in 00-intake 01-discovery 02-specification 03-threat-model 04-plan 05-implementation 06-verification 07-evaluation 08-attack 13-review; do /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/6c4ef0a9-4350-43f6-945d-112fb2f912cd/scratchpad/mark.rb changes/c2 $p $(git rev-parse HEAD); done; git add -A && git commit -qm record)
+created changes/c2 with 16 phase directories
+[exit 0]
+
+$ (cd /tmp/sf-runner.yAa71o && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate review | grep -E 'PASS|FAIL|advisory|warn')
+13-review  complete  PASS
+advisory: 1 issue to address before c2 goes live (informational, does not block the gate)
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+[exit 0]
+
+$ (cd /tmp/sf-runner.yAa71o && grep -n executed_by changes/c2/13-review/handoff.yml)
+17:executed_by:
+[exit 0]
+
+############ EVAL-006 screen-reader and log readers: the runner's lines and the advisory carry their outcome as words
+$ (cd /tmp/sf-runner.yAa71o && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry gate review 2>&1 | LC_ALL=C tr -d '\200-\377' | grep -E 'warn review')
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+[exit 0]
+
+$ (cd /tmp/sf-runner.X8DolI && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry phase run judge --dry-run 2>&1 | LC_ALL=C tr -d '\200-\377' | head -2)
+! warn guard: the guard hook is not installed here, so the session's tool calls will not be checked against the final-judgment skill's permissions (`soft-foundry hooks install --claude`)
+would run judge of c1 with: claude -p <prompt>
+[exit 0]
+
