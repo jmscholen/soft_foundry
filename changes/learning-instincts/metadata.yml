@@ -1,0 +1,52 @@
+change:
+  id: learning-instincts
+  title: Instincts as the learning phase's output, promoted into rules through a change record
+git:
+  worktree: /Users/jscholen-iou/dev/soft_foundry
+  branch: change/learning-instincts
+type: TBD                  # feature | fix | refactor | docs | infrastructure | security | chore
+risk: TBD                  # low | medium | high; a high risk change is always on the gated track (.ai/workflow.yml tracks.forced_by_risk)
+track: gated            # gated | iterative (.ai/workflow.yml tracks:); set by `change new --track`
+status: intake          # intake | exploring | in_progress | awaiting_human | judged | closed
+current_phase: intake
+created_at: 2026-09-24T03:18:57Z
+surfaces:
+  application: false
+  database: false
+  infrastructure: false
+  security: false
+  accessibility: false    # true when a person perceives or operates the result (UI, CLI output, documents); loads .ai/rules/accessibility.md and enables the go-live accessibility advisories. Set automatically by `change new` when the repository profile records a user-facing framework.
+  observability: false
+  policy: false           # true when the change alters what the application collects, shares, retains, protects, or promises in its privacy policy, security policy, or terms; loads .ai/rules/policy-conformance.md and enables the go-live policy advisories. Set automatically by `change new` when the repository profile records a published policy document.
+
+# Human-boundary decisions this change required (.ai/policies/human-boundaries.yml),
+# each recorded once a person made it. While a decision the review says is owed
+# has no entry here, the change is parked with status: awaiting_human.
+human_decisions: []
+# - boundary: legal commitment
+#   subject: privacy policy, clause 4 (third-party analytics recipient)
+#   decided_by: TBD
+#   decided_at: TBD
+#   decision: approved | declined
+
+# Iterative track only. `soft-foundry change vet` records the person's
+# acceptance of the explored feature and the commit the specification
+# locked at; from then on the phases from implement onward apply as on the
+# gated track. `change reopen` clears it, resets those phases to pending,
+# and appends the reopening here so the history stays in the record.
+vetted: null
+# vetted:
+#   at: 2026-09-16T00:00:00Z
+#   by: name
+#   commit: sha
+reopenings: []
+# - at: 2026-09-16T00:00:00Z
+#   from_commit: sha the change had been vetted at
+#   reason: why the person sent it back to exploring
+
+# Phases the harness would otherwise require, deliberately not run for
+# this change, each with a non-empty rationale. An entry with an empty
+# rationale does not count as a skip - the phase stays required.
+skipped_phases: []
+# - phase: threat_model
+#   rationale: TBD
