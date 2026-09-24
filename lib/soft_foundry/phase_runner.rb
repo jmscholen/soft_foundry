@@ -22,8 +22,13 @@ module SoftFoundry
     # argument; anything after `--` on the command line is appended first.
     SHELLS = {
       "claude" => ->(prompt, extra) { ["-p", *extra, prompt] },
-      "codex" => ->(prompt, extra) { ["exec", *extra, prompt] }
+      "codex" => ->(prompt, extra) { ["exec", *extra, prompt] },
+      "grok" => ->(prompt, extra) { ["-p", *extra, prompt] } # `grok -p` is its single-turn headless form
     }.freeze
+
+    # Shells with a PreToolUse hook the guard can be installed into.
+    # Grok has no hook mechanism, so under it the permissions are policy.
+    HOOKED_SHELLS = %w[claude codex].freeze
 
     def initialize(root, plane:, git:, record:)
       @root = File.expand_path(root)

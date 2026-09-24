@@ -1,0 +1,42 @@
+commit_sha: a7e9fd26063487f120cca2d762fa8eeb261f81b0
+journeys:
+  - id: EVAL-001
+    criteria: [REQ-XCLI-003, REQ-XCLI-004]
+    persona: repository owner
+    starting_state: "scratch repo with this repo's real .ai/, no hooks"
+    steps: ["doctor | grep guard hook", "hooks install --codex", "cat .codex/hooks.json", "doctor", "hooks install --claude --local; doctor", "hooks uninstall --codex; doctor", "hooks install --codex --local"]
+    assertions: ["✗ fail guard hook (claude: not installed, codex: not installed; ...); install with ... --claude or --codex", "install prints the file, the matcher Bash|apply_patch|Edit|Write, the /hooks trust note, and the mode", "hooks.json holds one PreToolUse entry with the marker in its command", "✓ pass guard hook (claude: not installed, codex: installed; ...)", "both installed", "codex removed, claude stays", "--local with --codex is refused with the reason; exit 1"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-002
+    criteria: [REQ-XCLI-001, REQ-XCLI-002]
+    persona: Codex session under the implementation skill, block mode
+    starting_state: branch change/c1 at current_phase implement, committed
+    steps: ["apply_patch updating lib/app.rb", "apply_patch also adding .ai/rules/injected.md", "the same patch as an array command", "the same patch under tool_name Edit", "Bash as an array: bundle exec rake test", "Bash as an array: rm -rf .ai/policies"]
+    assertions: ["allowed, exit 0", "✗ fail guard: apply_patch .ai/rules/injected.md is in implementation's deny_write set ...; exit 2", "the same refusal from the array form", "the same refusal under the Edit alias", "allowed", "✗ fail guard: Bash .ai/policies names a path implementation is denied ...; exit 2"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-003
+    criteria: [REQ-XCLI-005]
+    persona: maintainer running review under grok and codex
+    starting_state: c1 with intake through attack complete
+    steps: ["phase run review --dry-run --shell grok -- --always-approve", "hooks uninstall --codex; phase run review --dry-run --shell codex", "hooks install --codex; the same, counting warn lines"]
+    assertions: ["would run review of c1 with: grok -p --always-approve <prompt> and ! warn guard: grok has no hook mechanism, so the review skill's permissions are policy only for this session", "! warn guard: the guard hook is not installed for codex ... (soft-foundry hooks install --codex)", "0 warn lines once installed (grep -c prints 0 and exits 1, the expected outcome)"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-004
+    criteria: [REQ-XCLI-006, REQ-XCLI-007]
+    persona: this repository
+    starting_state: this repository on change/cross-cli-hooks
+    steps: ["doctor | grep guard hook", "count learned.md sections; scan learned.md, .codex/hooks.json, .claude/settings.json"]
+    assertions: ["✓ pass guard hook (claude: installed, codex: installed; ...)", "6 sections; ✓ pass scan: 3 files, no findings"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-005
+    criteria: [REQ-XCLI-001, REQ-XCLI-005]
+    persona: screen-reader user or CI log reader
+    starting_state: as EVAL-002
+    steps: ["the injected-patch refusal with every non-ASCII byte stripped", "the grok warning stripped"]
+    assertions: ["fail guard: apply_patch .ai/rules/injected.md is in implementation's deny_write set ...", "warn guard: grok has no hook mechanism ..."]
+    evidence: [evidence/journey-transcript.log]
+    result: pass

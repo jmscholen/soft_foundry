@@ -29,3 +29,15 @@ written.
 - **When:** when an open record from another branch reads as stale on a branch stacked on it
 - **Do:** do not rebind the earlier record to the later commit; the record's own branch is the measure, and the tool now does this
 - **Confidence:** 0.80 (from change learning-instincts, domain governance; evidence: changes/phase-runner/05-implementation/deviations.md, test/stacked_branch_test.rb)
+
+## exempt-closed-evidence-in-policy-not-by-editing-it
+
+- **When:** when a scan flags something in a closed record's commit-bound evidence that is legitimately there
+- **Do:** add a narrow allowlist entry with the paths, the kind, a substring, and a reason in policy; never edit the evidence
+- **Confidence:** 0.85 (from change control-plane-scan, domain governance; evidence: .ai/policies/content-scan.yml, changes/control-plane-scan/00-intake/assumptions.md)
+
+## sanitize-transcripts-before-they-become-evidence
+
+- **When:** when an evaluation journey deliberately writes an attack, a secret shape, or an invisible character and its output is captured as evidence
+- **Do:** have the harness render invisible characters as code points and mask secret shapes before the output reaches the transcript, so the evidence describes the attack without containing it
+- **Confidence:** 0.85 (from change control-plane-scan, domain verification; evidence: changes/control-plane-scan/07-evaluation/results.md, control-plane-scan REV-005)

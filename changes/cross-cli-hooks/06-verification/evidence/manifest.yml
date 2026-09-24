@@ -1,0 +1,25 @@
+---
+commit_sha: a7e9fd26063487f120cca2d762fa8eeb261f81b0
+artifacts:
+- path: evidence/tests.log
+  produced_by: ruby -Ilib -Itest requiring every test/*_test.rb, with every provider
+    key, SOFT_FOUNDRY_BILLING, and SOFT_FOUNDRY_GUARD unset
+  sha256: 38cbb17a37a8280c2bd432c0d2510d342c5570866bd1b391727fc2c33766bd53
+- path: evidence/red-at-2357158.log
+  produced_by: test/cross_cli_hooks_test.rb run with the worktree checked out at the
+    RED commit 2357158
+  sha256: 986c40a6bce276c08348889f29c46dd85ad3345d70fff202fe84c6a025499616
+- path: evidence/check.log
+  produced_by: soft-foundry check
+  sha256: 2be6498003ac7633f001dde7fb6c82d20d270c7515d869ca3f7276b8c1f3730e
+- path: evidence/syntax-warnings.log
+  produced_by: ruby -wc on every lib/, exe/soft-foundry, and the changed test files
+  sha256: 3e0a880563d78e1ad156b60a64831834ef9e3e8e180a0e5a1d961c94d9ac021f
+- path: evidence/ci-against-self.log
+  produced_by: soft-foundry ci run against this repository's own real change-record
+    history (stacked on change/control-plane-scan)
+  sha256: 16c97b6a03568722e016d569c1be42e504f0ba0876e049400db5fd1ee3f24d37
+- path: evidence/scan-against-self.log
+  produced_by: soft-foundry scan over the control plane and every change record of
+    this repository
+  sha256: 71d05418ea231d54125be7b04b4d7452a5499f683a2958b1b2c0e1768fff6eea

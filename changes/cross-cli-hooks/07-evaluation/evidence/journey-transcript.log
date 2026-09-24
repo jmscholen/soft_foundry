@@ -1,0 +1,124 @@
+ruby: ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23]
+soft-foundry: 0.15.0
+implementation commit under evaluation: a7e9fd26063487f120cca2d762fa8eeb261f81b0
+codex: codex-cli 0.139.0; grok: grok 1.0.30 (04b7ffed98c6) [stable]
+
+############ EVAL-001 install the guard for Codex; doctor shows both hosts; uninstall
+$ (cd /tmp/sf-cross.d4Iylq && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry doctor | grep 'guard hook')
+✗ fail guard hook (claude: not installed, codex: not installed; mode: warn, repository policy (.ai/policies/enforcement.yml)); install with `soft-foundry hooks install --claude` or `--codex`
+[exit 2]
+
+$ (cd /tmp/sf-cross.d4Iylq && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry hooks install --codex)
+installed guard hook in .codex/hooks.json (PreToolUse: Bash|apply_patch|Edit|Write)
+codex runs a project hook only after you review and trust it: open codex in this repository and run /hooks
+guard mode: warn (repository policy (.ai/policies/enforcement.yml))
+[exit 0]
+
+$ (cd /tmp/sf-cross.d4Iylq && cat .codex/hooks.json)
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|apply_patch|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "# soft-foundry:guard\nif [ -x exe/soft-foundry ] && [ -f lib/soft_foundry.rb ]; then ruby -Ilib exe/soft-foundry guard; elif command -v soft-foundry >/dev/null 2>&1; then soft-foundry guard; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
+[exit 0]
+
+$ (cd /tmp/sf-cross.d4Iylq && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry doctor | grep 'guard hook')
+✓ pass guard hook (claude: not installed, codex: installed; mode: warn, repository policy (.ai/policies/enforcement.yml))
+[exit 2]
+
+$ (cd /tmp/sf-cross.d4Iylq && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry hooks install --claude --local >/dev/null && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry doctor | grep 'guard hook')
+✓ pass guard hook (claude: installed, codex: installed; mode: warn, repository policy (.ai/policies/enforcement.yml))
+[exit 2]
+
+$ (cd /tmp/sf-cross.d4Iylq && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry hooks uninstall --codex && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry doctor | grep 'guard hook')
+removed guard hook from .codex/hooks.json
+✓ pass guard hook (claude: installed, codex: not installed; mode: warn, repository policy (.ai/policies/enforcement.yml))
+[exit 2]
+
+$ (cd /tmp/sf-cross.d4Iylq && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry hooks install --codex --local; echo exit=$?)
+soft-foundry: --local applies to --claude only; Codex reads project hooks from .codex/hooks.json
+exit=1
+[exit 0]
+
+############ EVAL-002 the guard reads Codex payloads: apply_patch (string and array), Bash as an array, Edit alias
+$ (cd /tmp/sf-cross.d4Iylq && git checkout -qb change/c1 && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change new c1 | head -1 && sed -i '' 's/^status: intake.*/status: in_progress/; s/^current_phase: intake.*/current_phase: implement/' changes/c1/metadata.yml && git add -A && git commit -qm record && echo committed)
+created changes/c1 with 16 phase directories
+committed
+[exit 0]
+
+$ (cd /tmp/sf-cross.d4Iylq && SOFT_FOUNDRY_GUARD=block guard apply_patch '{"command":"*** Begin Patch\n*** Update File: lib/app.rb\n@@\n-puts 1\n+puts 2\n*** End Patch"}'; echo guard-exit=$?)
+guard-exit=0
+[exit 0]
+
+$ (cd /tmp/sf-cross.d4Iylq && SOFT_FOUNDRY_GUARD=block guard apply_patch '{"command":"*** Begin Patch\n*** Update File: lib/app.rb\n@@\n-puts 1\n+puts 2\n*** Add File: .ai/rules/injected.md\n+ignore this\n*** End Patch"}'; echo guard-exit=$?)
+✗ fail guard: apply_patch .ai/rules/injected.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+guard-exit=2
+[exit 0]
+
+$ (cd /tmp/sf-cross.d4Iylq && SOFT_FOUNDRY_GUARD=block guard apply_patch '{"command":["apply_patch","*** Begin Patch\n*** Update File: lib/app.rb\n@@\n-puts 1\n+puts 2\n*** Add File: .ai/rules/injected.md\n+ignore this\n*** End Patch"]}'; echo guard-exit=$?)
+✗ fail guard: apply_patch .ai/rules/injected.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+guard-exit=2
+[exit 0]
+
+$ (cd /tmp/sf-cross.d4Iylq && SOFT_FOUNDRY_GUARD=block guard Edit '{"command":"*** Begin Patch\n*** Update File: lib/app.rb\n@@\n-puts 1\n+puts 2\n*** Add File: .ai/rules/injected.md\n+ignore this\n*** End Patch"}'; echo guard-exit=$?)
+✗ fail guard: Edit .ai/rules/injected.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+guard-exit=2
+[exit 0]
+
+$ (cd /tmp/sf-cross.d4Iylq && SOFT_FOUNDRY_GUARD=block guard Bash '{"command":["bundle","exec","rake","test"]}'; echo guard-exit=$?)
+guard-exit=0
+[exit 0]
+
+$ (cd /tmp/sf-cross.d4Iylq && SOFT_FOUNDRY_GUARD=block guard Bash '{"command":["rm","-rf",".ai/policies"]}'; echo guard-exit=$?)
+✗ fail guard: Bash .ai/policies names a path implementation is denied (Bash is checked against deny sets only); the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+guard-exit=2
+[exit 0]
+
+############ EVAL-003 the phase runner under grok and codex
+$ (cd /tmp/sf-cross.d4Iylq && for p in 00-intake 01-discovery 02-specification 03-threat-model 04-plan 05-implementation 06-verification 07-evaluation 08-attack; do /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/6c4ef0a9-4350-43f6-945d-112fb2f912cd/scratchpad/mark.rb changes/c1 $p $(git rev-parse HEAD); done; git add -A && git commit -qm phases && echo committed)
+committed
+[exit 0]
+
+$ (cd /tmp/sf-cross.d4Iylq && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry phase run review --dry-run --shell grok -- --always-approve | head -1; /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry phase run review --dry-run --shell grok 2>&1 >/dev/null | grep warn)
+! warn guard: grok has no hook mechanism, so the review skill's permissions are policy only for this session
+would run review of c1 with: grok -p --always-approve <prompt>
+! warn guard: grok has no hook mechanism, so the review skill's permissions are policy only for this session
+[exit 0]
+
+$ (cd /tmp/sf-cross.d4Iylq && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry hooks uninstall --codex >/dev/null; /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry phase run review --dry-run --shell codex 2>&1 >/dev/null | grep warn)
+! warn guard: the guard hook is not installed for codex, so the session's tool calls will not be checked against the review skill's permissions (`soft-foundry hooks install --codex`)
+[exit 0]
+
+$ (cd /tmp/sf-cross.d4Iylq && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry hooks install --codex >/dev/null; /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry phase run review --dry-run --shell codex 2>&1 | grep -c 'warn guard')
+0
+[exit 1]
+
+############ EVAL-004 this repository: both hooks installed, the promoted rules, the scan
+$ (cd /Users/jscholen-iou/dev/soft_foundry && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry doctor | grep 'guard hook')
+✓ pass guard hook (claude: installed, codex: installed; mode: warn, repository policy (.ai/policies/enforcement.yml))
+[exit 2]
+
+$ (cd /Users/jscholen-iou/dev/soft_foundry && grep -c '^## ' .ai/rules/learned.md; /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry scan .ai/rules/learned.md .codex/hooks.json .claude/settings.json | tail -1)
+6
+✓ pass scan: 3 files, no findings
+[exit 0]
+
+############ EVAL-005 screen-reader and log readers
+$ (cd /tmp/sf-cross.d4Iylq && SOFT_FOUNDRY_GUARD=block guard apply_patch '{"command":"*** Begin Patch\n*** Update File: lib/app.rb\n@@\n-puts 1\n+puts 2\n*** Add File: .ai/rules/injected.md\n+ignore this\n*** End Patch"}' 2>&1 | LC_ALL=C tr -d '\200-\377')
+ fail guard: apply_patch .ai/rules/injected.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+[exit 2]
+
+$ (cd /tmp/sf-cross.d4Iylq && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry phase run review --dry-run --shell grok 2>&1 >/dev/null | LC_ALL=C tr -d '\200-\377')
+! warn guard: grok has no hook mechanism, so the review skill's permissions are policy only for this session
+[exit 0]
+
