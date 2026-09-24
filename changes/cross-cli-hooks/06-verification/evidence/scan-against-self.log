@@ -1,0 +1,6 @@
+! warning changes/control-plane-scan/07-evaluation/evidence/journey-transcript.log:12 override: instruction-override phrase (a rule quoting an attack may add the allow marker)
+! warning changes/control-plane-scan/07-evaluation/evidence/journey-transcript.log:18 fetch_exec: fetches and executes remote code (a rule quoting an attack may add the allow marker)
+! warning changes/control-plane-scan/07-evaluation/evidence/journey-transcript.log:66 override: instruction-override phrase (a rule quoting an attack may add the allow marker)
+! warning changes/init-command/03-threat-model/attack-surface.md:53 fetch_exec: fetches and executes remote code (a rule quoting an attack may add the allow marker)
+! warning changes/init-command/08-attack/previous/06a4830966d3/evidence/ATTACK-012-marker-spoofing.log:71 fetch_exec: fetches and executes remote code (a rule quoting an attack may add the allow marker)
+! warn scan: 0 errors, 5 warnings in 1922 files

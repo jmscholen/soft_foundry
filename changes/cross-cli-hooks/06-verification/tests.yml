@@ -1,15 +1,40 @@
-commit_sha: TBD
+commit_sha: a7e9fd26063487f120cca2d762fa8eeb261f81b0
 checks:
   - id: CHECK-001
-    kind: tests   # tests | lint | static_analysis | security_scan | iac_validate | migration_check | custom
-    command: TBD
-    result: TBD   # pass | fail | error | skipped
-    evidence: evidence/TBD
-    criteria: [AC-001]
-    # Optional, per check: the commit at which this test existed and failed
-    # (RED) and the test file. The gate verifies red_commit is a commit that
-    # precedes commit_sha, holds test_path, and that APP or INFRA code changed
-    # after it. A feature, fix, or refactor with no red_commit on any check is
-    # advised as having no failing-test-first evidence.
-    # red_commit: TBD
-    # test_path: TBD
+    kind: tests
+    command: "ruby -Ilib -Itest requiring every test/*_test.rb, with every provider key, SOFT_FOUNDRY_BILLING, and SOFT_FOUNDRY_GUARD unset"
+    result: pass
+    evidence: evidence/tests.log
+    criteria: [REQ-XCLI-001, REQ-XCLI-002, REQ-XCLI-003, REQ-XCLI-004, REQ-XCLI-005]
+    red_commit: 2357158fb5f1976977451e4f0193fec0c3150c1e
+    test_path: test/cross_cli_hooks_test.rb
+  - id: CHECK-002
+    kind: custom
+    command: "test/cross_cli_hooks_test.rb run with the worktree checked out at 2357158, the RED commit"
+    result: fail
+    evidence: evidence/red-at-2357158.log
+    criteria: [REQ-XCLI-006]
+  - id: CHECK-003
+    kind: lint
+    command: "soft-foundry check"
+    result: pass
+    evidence: evidence/check.log
+    criteria: [REQ-XCLI-006, control-plane-consistency]
+  - id: CHECK-004
+    kind: static_analysis
+    command: "ruby -wc on every lib/soft_foundry/*.rb, lib/soft_foundry/installer/*.rb, lib/soft_foundry.rb, exe/soft-foundry, and the changed test files"
+    result: pass
+    evidence: evidence/syntax-warnings.log
+    criteria: [coding-standard]
+  - id: CHECK-005
+    kind: custom
+    command: "soft-foundry ci against this repository's own real change-record history, on a branch stacked on change/control-plane-scan"
+    result: pass
+    evidence: evidence/ci-against-self.log
+    criteria: [no-regression-for-closed-records, this-change-record-itself-passes]
+  - id: CHECK-006
+    kind: security_scan
+    command: "soft-foundry scan over the control plane and every change record"
+    result: pass
+    evidence: evidence/scan-against-self.log
+    criteria: [REQ-XCLI-006, REQ-XCLI-007]

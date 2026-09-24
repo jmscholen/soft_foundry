@@ -1,15 +1,17 @@
-# Instincts: what this change taught, as reusable one-line triggers with an
-# action, a confidence score, and evidence in this record. `soft-foundry
-# learn list` shows them across every record; `learn promote` copies those
-# at or above the threshold in .ai/policies/learning.yml into
-# .ai/rules/learned.md, and only through a change record on a change
-# branch, never by the change that learned them. An empty list is a valid
-# answer; a malformed entry fails the learning gate.
-instincts: []
-# - id: kebab-case-unique-id
-#   trigger: when ... (the situation an agent will recognise)
-#   action: do ... (one thing, imperative)
-#   confidence: 0.8          # 0.0 to 1.0; promotion threshold is policy
-#   domain: testing          # git | testing | security | review | ...
-#   evidence:
-#     - finding: REV-001     # a finding id, phase, or path in this record
+# Instincts from the cross-cli-hooks change.
+instincts:
+- id: read-the-host-contract-before-writing-an-adapter
+  trigger: when asked to make a hook, runner, or installer work for another agent CLI
+  action: read that CLI's published contract and its installed help first; the adapter you need may be a parser, not a field rename
+  confidence: 0.85
+  domain: integration
+  evidence:
+  - path: changes/cross-cli-hooks/00-intake/assumptions.md
+  - path: changes/cross-cli-hooks/05-implementation/deviations.md
+- id: say-policy-only-at-launch-when-no-hook-exists
+  trigger: when launching a session in a host that has no hook mechanism
+  action: print one warning at launch that the skill's permissions are policy only for this session, rather than assuming or hiding it
+  confidence: 0.8
+  domain: governance
+  evidence:
+  - path: changes/cross-cli-hooks/07-evaluation/results.md

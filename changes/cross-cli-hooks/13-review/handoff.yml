@@ -1,21 +1,39 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
 phase: 13-review
 skill: review
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: a7e9fd26063487f120cca2d762fa8eeb261f81b0
+started_at: '2026-09-24T13:10:00Z'
+completed_at: '2026-09-24T13:25:00Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- functional.md
+- architecture.md
+- security.md
+- accessibility.md
+- policy-conformance.md
+- infrastructure.md
+- operations.md
+- consolidated.md
+blocking: []
+findings:
+- id: REV-001
+  severity: minor
+  summary: An apply_patch with no recognised header form passes through as "no file path"; warn instead. Follow-up.
+- id: REV-010
+  severity: minor
+  summary: A committed Codex hook is inert until a person trusts it with /hooks; doctor cannot see Codex's trust store. Stated scope.
+- id: REV-013
+  severity: minor
+  summary: The combined doctor line is about 130 characters. Follow-up.
+- id: REV-018
+  severity: minor
+  summary: doctor should say the Codex line means written, not trusted. Follow-up.
+- id: REV-003
+  severity: info
+  summary: The Codex contract was verified against documentation and the installed CLI's help, not a live session.
 next: judge
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: Compatibility mode, performed by the interactive session that also implemented the change rather than a fresh-context reviewer; recorded here so the separation-of-duties limitation is explicit and reported by the advisory. The review phase's lifecycle predecessor resolves to 07-evaluation because attack is skipped with rationale and remediate/document/index/observe are optional.
+executed_by:
