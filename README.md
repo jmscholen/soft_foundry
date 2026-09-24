@@ -102,6 +102,19 @@ What is checked: Edit, Write, MultiEdit, and NotebookEdit against the write and 
 ✗ fail guard: Edit .ai/rules/ruby.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
 ```
 
+### Instincts: what a change learned
+
+The learning phase now writes `15-learning/instincts.yml`: each instinct is a trigger an agent will recognise, one imperative action, a confidence from 0 to 1, and the finding or phase in the record that is its evidence. The learning gate's `instincts valid` check requires kebab-case unique ids, a trigger and an action, a confidence in range, and evidence; an empty list is a valid answer.
+
+```bash
+soft-foundry learn list                      # every record's instincts, highest confidence first
+soft-foundry learn list --min-confidence 0.9
+soft-foundry learn promote                   # copy those at or above the threshold into .ai/rules/learned.md
+soft-foundry learn promote --dry-run
+```
+
+Promotion is the governance path for a proposed rule: it writes `.ai/rules/learned.md` (each entry with the change that learned it, its confidence, and its evidence) and refuses outside a change record on a change branch, so a lesson reaches the rules through a later change's record, never by the change that learned it applying it to the rules it works under. The threshold lives in `.ai/policies/learning.yml` (`0.8` by default; `--min-confidence` overrides it for one run). Implementation and exploration load `learned.md` with the baseline rules. Promotion is idempotent: an instinct already in the file is skipped by id.
+
 ### RED and GREEN evidence
 
 `.ai/rules/testing.md` asks that a feature, fix, or refactor commit its failing test before the code that makes it pass. Verification can now bind that to git: a check in `06-verification/tests.yml` names the commit at which the test existed and failed as `red_commit`, and the test file as `test_path`:

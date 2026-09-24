@@ -171,16 +171,20 @@ capabilities:
   harness.regression_detection:
     status: MISSING
   learning.finding_capture:
-    status: PARTIAL
-    evidence: [.ai/skills/learning]
-    findings: [no_learning_phase_has_run_yet]
+    status: PASS
+    evidence: [.ai/skills/learning/template/instincts.yml, lib/soft_foundry/gate.rb, changes/learning-instincts/15-learning/instincts.yml]
+    rationale: The learning phase writes instincts (trigger, action, confidence, evidence) that the gate validates; changes/learning-instincts is the first record whose learning phase completed with them.
   learning.feedback_loop:
-    status: MISSING
-    findings: [no_governance_path_for_proposed_rule_changes]
+    status: PASS
+    evidence: [lib/soft_foundry/learning.rb, .ai/policies/learning.yml, .ai/rules/learned.md]
+    rationale: "`soft-foundry learn promote` is the governance path: it copies instincts at or above the policy threshold into .ai/rules/learned.md with provenance and refuses outside a change record on a change branch."
   learning.regression_creation:
     status: MISSING
+    findings: [no_mechanism_turns_a_finding_into_a_regression_test]
   learning.standards_feedback:
-    status: MISSING
+    status: PASS
+    evidence: [.ai/rules/learned.md, .ai/skills/implementation/skill.yml, .ai/skills/exploration/skill.yml]
+    rationale: Promoted instincts are loaded by implementation and exploration as a baseline rule file.
   learning.workflow_feedback:
     status: MISSING
 

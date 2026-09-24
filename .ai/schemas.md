@@ -41,6 +41,7 @@ Created from `.ai/templates/handoff.yml`. Field semantics:
 - The first phase carries a `track permitted` check: the change's track must be defined, must have an exploring stage if the change is `exploring`, and must be the one its declared `risk` forces.
 - While the change is `exploring`, a `complete` phase from `implement` onward fails its `not exploring` check; `change vet` is the way forward.
 - After `change vet`, the specification phase carries a `specification locked` check that fails when anything under `02-specification/` changed since the vetted commit, including uncommitted edits.
+- The learning phase carries an `instincts valid` check over `15-learning/instincts.yml`: every entry needs a kebab-case unique `id`, a `trigger`, an `action`, a numeric `confidence` in 0..1, and non-empty `evidence`; an empty list passes.
 - The verification phase carries a `red evidence` check over the checks in `06-verification/tests.yml` that name a `red_commit` (optionally with `test_path`): each must be a commit that precedes `commit_sha`, hold the test file, and be followed by an `APP` or `INFRA` change before `commit_sha`. Checks without `red_commit` are skipped; the test is not re-run at the RED commit.
 
 A stale or failed gate must be resolved by rerunning the phase, never by editing the handoff.

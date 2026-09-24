@@ -2,6 +2,7 @@
 
 require "yaml"
 require "date"
+require_relative "learning"
 
 module SoftFoundry
   # Deterministic completion gate for one lifecycle phase of a change record.
@@ -61,6 +62,7 @@ module SoftFoundry
         checks << staleness_check(handoff) if skill.commit_bound?
         checks << specification_lock_check(phase) if phase.id == "specify" && @record.vetted
         checks << red_evidence_check(phase, handoff) if phase.id == "verify"
+        checks << instincts_check if phase.id == "learn"
       end
       Result.new(phase:, status:, checks:)
     end
@@ -90,6 +92,16 @@ module SoftFoundry
     # implement onward may be complete until the person has vetted.
     def exploring_check
       Check.new("not exploring", :fail, "cannot be complete while the change is exploring; run `soft-foundry change vet` when the person has accepted the feature, then rerun this phase")
+    end
+
+    # The learning phase's instincts must be well-formed to be promotable:
+    # kebab-case unique ids, a trigger and an action, a confidence in 0..1,
+    # and evidence in this record. An empty list is a valid answer.
+    def instincts_check
+      instincts, problems = Learning.read(@record)
+      return Check.new("instincts valid", :fail, problems.join("; ")) unless problems.empty?
+      return Check.new("instincts valid", :pass, "no instincts recorded") if instincts.empty?
+      Check.new("instincts valid", :pass, "#{instincts.size} #{instincts.size == 1 ? 'instinct' : 'instincts'}: #{instincts.map(&:id).join(', ')}")
     end
 
     # A verification check may name the commit at which its test existed

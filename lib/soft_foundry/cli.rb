@@ -19,6 +19,7 @@ require_relative "pr_discharge"
 require_relative "advisory"
 require_relative "guard"
 require_relative "phase_runner"
+require_relative "learning"
 
 module SoftFoundry
   class CLI
@@ -55,6 +56,7 @@ module SoftFoundry
       when "hooks" then hooks
       when "guard" then guard
       when "phase" then phase
+      when "learn" then learn
       when "update" then update
       when "shell"
         shell_name = @argv.shift or raise ArgumentError, "Usage: soft-foundry shell <claude|codex|grok> [args...]"
@@ -691,6 +693,60 @@ module SoftFoundry
       end
     end
 
+    # `learn list` shows instincts across every record; `learn promote`
+    # copies those above the threshold into .ai/rules/learned.md through
+    # the change record on the current branch.
+    def learn
+      sub = @argv.shift
+      min = option("--min-confidence")
+      dry_run = flag("--dry-run")
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+      threshold = min ? Float(min) : Learning.min_confidence(@root)
+      case sub
+      when "list"
+        instincts = Learning.all(@root, plane).select { |i| i.confidence >= (min ? threshold : 0.0) }
+        if instincts.empty?
+          @out.puts "no instincts recorded#{min ? " at or above #{format('%.2f', threshold)}" : ''}; the learning phase writes them to 15-learning/instincts.yml"
+        else
+          instincts.each { |i| @out.puts format("%.2f %s %s (when %s, %s)", i.confidence, i.change, i.id, i.trigger, i.action) }
+        end
+        0
+      when "promote"
+        slug = begin
+          current_slug
+        rescue RuntimeError => e
+          @err.puts "✗ fail learn promote: #{e.message}; a promotion is a change to .ai/rules and goes through a change record"
+          return EXIT_TARGET
+        end
+        record = load_record(slug)
+        if record.metadata["status"].to_s == "closed"
+          @err.puts "✗ fail learn promote: change #{slug} is closed; open a new change for the promotion"
+          return EXIT_TARGET
+        end
+        already = Learning.promoted_ids(@root)
+        chosen = []
+        Learning.all(@root, plane).each do |i|
+          if already.include?(i.id) || chosen.any? { |c| c.id == i.id }
+            @out.puts "- skip #{i.id}: already in #{Learning::RULES}"
+          elsif i.confidence < threshold
+            @out.puts "- skip #{i.id}: confidence #{format('%.2f', i.confidence)} is below #{format('%.2f', threshold)}"
+          elsif dry_run
+            @out.puts "would promote #{i.id} (#{format('%.2f', i.confidence)}, from #{i.change})"
+          else
+            chosen << i
+            @out.puts "✓ pass promoted #{i.id} (#{format('%.2f', i.confidence)}, from #{i.change})"
+          end
+        end
+        unless chosen.empty? || dry_run
+          Learning.promote!(@root, chosen)
+          @out.puts "wrote #{Learning::RULES} through change #{slug}; commit it with this change's record"
+        end
+        0
+      else
+        raise ArgumentError, "Usage: soft-foundry learn <list|promote> [--min-confidence X] [--dry-run]"
+      end
+    end
+
     # `phase run <phase>`: one lifecycle phase in a fresh coding-shell
     # session, stamped with how it ran, gated when it returns.
     def phase
@@ -898,6 +954,13 @@ module SoftFoundry
                                                   undischarged acceptance criterion
           soft-foundry gate <phase|all> [--change SLUG]
                                                   evaluate a phase's completion gate
+          soft-foundry learn list [--min-confidence X]
+                                                  instincts recorded by every change's learning phase,
+                                                  highest confidence first
+          soft-foundry learn promote [--min-confidence X] [--dry-run]
+                                                  copy instincts at or above the threshold (.ai/policies/learning.yml,
+                                                  default 0.80) into .ai/rules/learned.md through the change
+                                                  record on the current branch
           soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex] [--dry-run] [-- args...]
                                                   run one phase in a fresh coding-shell session with only its
                                                   skill in the prompt; stamps executed_by in the handoff and
