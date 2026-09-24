@@ -20,6 +20,7 @@ module SoftFoundry
       findings.concat(check_policy_standard)
       findings.concat(check_path_groups)
       findings.concat(check_transitions)
+      findings.concat(check_tracks)
       @plane.phases.each { |phase| findings.concat(check_phase(phase)) }
       findings
     end
@@ -80,18 +81,69 @@ module SoftFoundry
       end
     end
 
+    # Tracks (.ai/workflow.yml tracks:): the default and any risk-forced
+    # track must be defined, every phase a track names must exist, and an
+    # exploring track's skill must be a complete contract that cannot write
+    # commit-bound evidence, because the exploring stage produces none.
+    def check_tracks
+      raw = @plane.workflow["tracks"]
+      return [] if raw.nil?
+      return [Finding.new(:error, "workflow.yml: tracks must be a mapping")] unless raw.is_a?(Hash)
+
+      findings = []
+      ids = @plane.phases.map(&:id)
+      findings << Finding.new(:error, "tracks: default '#{@plane.default_track}' is not a defined track") unless @plane.track(@plane.default_track)
+      Hash(raw["forced_by_risk"]).each do |risk, name|
+        findings << Finding.new(:error, "tracks: forced_by_risk #{risk} names unknown track '#{name}'") unless @plane.track(name)
+      end
+      @plane.tracks.each_value do |track|
+        (track.vet_requires + track.optional).each do |id|
+          findings << Finding.new(:error, "tracks: #{track.name} references unknown phase '#{id}'") unless ids.include?(id)
+        end
+        next unless track.exploring?
+        if track.skill.to_s.empty? || track.output.to_s.empty?
+          findings << Finding.new(:error, "tracks: #{track.name} is exploring but does not name both a skill and an output directory")
+          next
+        end
+        findings.concat(check_skill_contract(track.skill, "track #{track.name}", phase: false))
+        findings.concat(check_exploring_writes(track))
+      end
+      findings
+    end
+
+    def check_exploring_writes(track)
+      return [] unless File.directory?(File.join(@plane.dir, "skills", track.skill))
+      skill = @plane.skill(track.skill)
+      writes = Array(skill.permissions["write"]).flat_map { |p| @plane.expand(p) }
+      @plane.phases.flat_map do |phase|
+        next [] unless File.directory?(File.join(@plane.dir, "skills", phase.skill)) && @plane.skill(phase.skill).commit_bound?
+        evidence = "changes/CHANGE/#{phase.output}/**"
+        writes.select { |w| overlap?(w, evidence) }
+              .map { |w| Finding.new(:error, "skill #{skill.name}: write '#{w}' overlaps commit-bound evidence '#{evidence}'; the exploring stage produces no evidence") }
+      end
+    rescue ArgumentError => e
+      [Finding.new(:error, "skill #{track.skill}: #{e.message}")]
+    end
+
     def check_phase(phase)
-      skill_dir = File.join(@plane.dir, "skills", phase.skill)
-      return [Finding.new(:error, "phase #{phase.id}: skill directory '#{phase.skill}' is missing")] unless File.directory?(skill_dir)
+      check_skill_contract(phase.skill, "phase #{phase.id}", phase: true)
+    end
+
+    # A skill's contract files, profile, templates, and permissions. A phase
+    # skill's completion must require handoff.yml; a stage skill (an
+    # exploring track's) has no handoff, its completion is `change vet`.
+    def check_skill_contract(name, owner, phase:)
+      skill_dir = File.join(@plane.dir, "skills", name)
+      return [Finding.new(:error, "#{owner}: skill directory '#{name}' is missing")] unless File.directory?(skill_dir)
 
       missing = ControlPlane::SKILL_FILES.reject { |f| File.exist?(File.join(skill_dir, f)) }
-      return missing.map { |f| Finding.new(:error, "skill #{phase.skill}: #{f} is missing") } unless missing.empty?
+      return missing.map { |f| Finding.new(:error, "skill #{name}: #{f} is missing") } unless missing.empty?
 
-      skill = @plane.skill(phase.skill)
+      skill = @plane.skill(name)
       findings = []
       findings << Finding.new(:error, "skill #{skill.name}: skill.yml name is '#{skill.definition['name']}'") unless skill.definition["name"] == skill.name
       findings << Finding.new(:error, "skill #{skill.name}: profile '#{skill.profile}' has no .ai/profiles definition") unless @plane.profile_names.include?(skill.profile)
-      findings << Finding.new(:error, "skill #{skill.name}: completion.yml must require handoff.yml") unless skill.required_files.include?("handoff.yml")
+      findings << Finding.new(:error, "skill #{skill.name}: completion.yml must require handoff.yml") if phase && !skill.required_files.include?("handoff.yml")
       (skill.required_files - ["handoff.yml"]).each do |f|
         findings << Finding.new(:error, "skill #{skill.name}: required file '#{f}' has no template") unless File.exist?(File.join(skill.template_dir, f))
       end

@@ -150,6 +150,7 @@ capability_guidance:
           - observability.integration_failure_signal
 
 assessment_rules:
+  - Lifecycle-shaped capabilities (change.*, verification.*, evaluation.*, evidence.*, judgment.*) are satisfied by either lifecycle track in .ai/workflow.yml tracks. The iterative track's exploring stage precedes the lifecycle's hardening phases rather than replacing them; a change is only "through the lifecycle" once vetted and hardened. change.acceptance_criteria_locking is deterministic on the iterative track (the gate's specification-locked check from the vetted commit) and policy-only on the gated track.
   - policy_conformance.standard_in_force is PASS when .ai/rules/policy-conformance.md exists and the review skill requires a policy-conformance review that cites it against the documents recorded under policies: in .ai/repository.yml. Findings against the standard are go-live advisories printed by gate/status/ci/close, never lifecycle gate failures; a published document recorded MISSING is a visible gap of the application, not of this capability.
   - accessibility.standard_in_force is PASS when .ai/rules/accessibility.md (or a stricter repository-named standard) exists and the review skill requires an accessibility review that cites it. Findings against the standard are go-live advisories printed by gate/status/ci/close, never lifecycle gate failures; the capability is about the standard being in force, not about every change conforming.
   - Missing repository evidence must be UNKNOWN unless absence itself is conclusively established.

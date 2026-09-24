@@ -1,0 +1,90 @@
+commit_sha: a1adf76bb635318bfdfc4d2db7e61bfc9d4e21e3
+journeys:
+  - id: EVAL-001
+    criteria: [REQ-TRK-002, REQ-TRK-003, REQ-TRK-011]
+    persona: developer opening a change the product owner wants to try first
+    starting_state: "scratch repo with this repo's real .ai/; branch change/it1"
+    steps: ["soft-foundry change new it1 --title 'Try a thing' --track iterative", "soft-foundry change new nope --track casual", "grep track/status/current_phase in metadata.yml", "ls changes/it1/exploration", "commit", "soft-foundry change status | head -3", "soft-foundry ci | tail -1"]
+    assertions: ["change new prints track: iterative (exploring; 0 iterations recorded; ...) and exits 0", "an unknown track is refused with the defined names and exit 1, and no record is created", "metadata.yml reads track: iterative, status: exploring, current_phase: implement", "exploration/iterations.yml exists", "status shows the same track line under the header", "ci passes with every phase pending"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-002
+    criteria: [REQ-TRK-003]
+    persona: same developer marking verification complete while still exploring
+    starting_state: it1 exploring, committed
+    steps: ["mark 06-verification complete at HEAD", "soft-foundry gate verify | grep FAIL|not exploring", "soft-foundry ci | tail -1", "git checkout the phase directory"]
+    assertions: ["gate prints 06-verification complete FAIL and a fail not exploring line naming change vet; the pipeline exits 2 (the gate's exit under pipefail)", "ci fails", "restoring the directory leaves the tree clean"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-003
+    criteria: [REQ-TRK-004]
+    persona: the developer asking for the vet, then the product owner giving it
+    starting_state: it1 exploring with risk unclassified, intake and specification pending, an empty journal
+    steps: ["soft-foundry change vet it1", "set risk: low; mark 00-intake and 02-specification complete at HEAD; write one journal entry deployed to development", "soft-foundry change vet it1 (uncommitted)", "commit; soft-foundry change status | head -2", "soft-foundry change vet it1 --by 'A Person'", "grep vetted and status in metadata.yml", "commit; soft-foundry change status | head -2", "soft-foundry change vet it1 again"]
+    assertions: ["the first vet is refused with exactly four fail lines: risk not classified, no iteration recorded, 00-intake pending, 02-specification pending; exit 1", "with the phases filled but uncommitted, vet is refused naming the uncommitted paths under 00-intake and 02-specification", "status shows 1 iteration recorded, last deployed to development", "vet prints vetted by A Person at <12-char sha> and the lock line, exit 0; metadata.yml holds vetted: at/by/commit and status: in_progress", "status shows vetted by A Person at <sha> on <time>; specification locked", "a second vet is refused: is not exploring, pointing at change reopen"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-004
+    criteria: [REQ-TRK-006]
+    persona: same developer completing implementation after the vet
+    starting_state: it1 vetted; 01-discovery, 03-threat-model, 04-plan pending
+    steps: ["mark 05-implementation complete at HEAD", "soft-foundry gate implement | grep PASS|FAIL|predecessor"]
+    assertions: ["05-implementation complete PASS with pass predecessor complete: 02-specification, the track-optional phases stepped over"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-005
+    criteria: [REQ-TRK-005]
+    persona: same developer editing the acceptance criteria after the vet
+    starting_state: it1 vetted at commit 2c8ae1e6 (transcript)
+    steps: ["soft-foundry gate specify", "overwrite 02-specification/acceptance-criteria.yml", "soft-foundry gate specify (uncommitted)", "commit; soft-foundry gate specify", "git revert"]
+    assertions: ["before the edit: pass specification locked: unchanged since vet at <sha>", "after the edit, committed or not: 02-specification complete FAIL with fail specification locked naming acceptance-criteria.yml and change reopen; pipeline exit 2", "the revert restores the file"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-006
+    criteria: [REQ-TRK-007]
+    persona: the product owner sending the feature back
+    starting_state: it1 vetted, 05-implementation complete with a line of real work in log.md
+    steps: ["soft-foundry change reopen it1 --reason 'the person wants a different shape'", "grep status/vetted/reopenings in metadata.yml", "grep status/commit_sha/notes in 05-implementation/handoff.yml; count 'real work' in log.md", "soft-foundry ci | tail -1", "soft-foundry change reopen it1 --reason again"]
+    assertions: ["reopen prints reopened for exploring (...) and reset to pending, outputs kept: 05-implementation", "status: exploring, vetted empty, reopenings holds at/from_commit (the vetted commit)/reason", "the handoff is pending with commit_sha cleared and a reopened note; log.md still holds the real work", "ci passes again", "a second reopen says already exploring, exit 0"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-007
+    criteria: [REQ-TRK-008]
+    persona: developer who declared the change high risk
+    starting_state: it1 exploring with intake complete
+    steps: ["set risk: high", "soft-foundry gate intake | grep PASS|FAIL|track permitted", "soft-foundry change vet it1", "set risk: low"]
+    assertions: ["00-intake complete FAIL with fail track permitted: risk high forces the gated track (...) but the change is on iterative", "vet is refused naming the forced track and how to move (set track: gated and status: intake) and repeating the gate failure"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-008
+    criteria: [REQ-TRK-001, REQ-TRK-012]
+    persona: developer on the gated track
+    starting_state: same scratch repo; branch change/g1
+    steps: ["soft-foundry change new g1 | head -3", "grep track/status/current_phase; test for an exploration dir", "soft-foundry change vet g1", "soft-foundry change reopen g1 --reason x", "mark 00-intake, 01-discovery, 02-specification complete; soft-foundry gate specify"]
+    assertions: ["change new without --track prints track: gated", "metadata.yml reads track: gated, status: intake, current_phase: intake; no exploration dir", "vet and reopen are refused: track 'gated' has no exploring stage; exit 1", "gate specify passes with the seven pre-existing checks and no specification locked check"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-009
+    criteria: [REQ-TRK-001, REQ-TRK-009]
+    persona: control-plane maintainer
+    starting_state: same scratch repo
+    steps: ["soft-foundry check", "add changes/${CHANGE}/06-verification/** to the exploration skill's write list; soft-foundry check", "restore; set tracks.default to casual; soft-foundry check", "restore; soft-foundry check"]
+    assertions: ["check passes: 16 phases, 17 skills, no errors", "with the write added, check prints error skill exploration: write 'changes/CHANGE/06-verification/**' overlaps commit-bound evidence ...; the exploring stage produces no evidence, and exits 2", "with an undefined default, check prints error tracks: default 'casual' is not a defined track and exits 2", "restored, check passes again"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-010
+    criteria: [REQ-TRK-010]
+    persona: maintainer of a repository whose profile records no development environment
+    starting_state: "fresh scratch repo with environments: removed from .ai/repository.yml; branch change/it2"
+    steps: ["soft-foundry change new it2 --track iterative", "soft-foundry gate all --change it2 | grep advisory|warn environment", "soft-foundry gate all --change it2; echo exit", "soft-foundry change new g2 --track gated; soft-foundry gate all --change g2 | grep -c 'warn environment'"]
+    assertions: ["gate prints advisory: 1 issue ... and a ! warn environment: line saying the profile records none under environments: and that NOT_APPLICABLE with a rationale is valid", "gate exits 0", "the gated change gets no environment advisory (count 0; grep -c exits 1 on zero matches, the expected outcome)"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-011
+    criteria: [REQ-TRK-011]
+    persona: screen-reader user or CI log reader
+    starting_state: "fresh scratch repo; branch change/it3; it3 exploring with 06-verification marked complete"
+    steps: ["soft-foundry gate verify | strip every non-ASCII byte | grep fail not exploring|fail predecessor", "count ESC bytes in gate verify output", "soft-foundry change status | strip every non-ASCII byte | head -2"]
+    assertions: ["both new lines still read fail not exploring: ... and fail predecessor complete: ... without their glyphs", "zero escape sequences (grep -c prints 0 and exits 1, the expected outcome)", "the header and the track line read as plain words; the pipeline exits 2 because status carries the gate's failure, as it should"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass

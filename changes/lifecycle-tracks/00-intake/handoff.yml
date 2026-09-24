@@ -1,0 +1,17 @@
+phase: 00-intake
+skill: intake
+status: complete
+commit_sha: a1adf76bb635318bfdfc4d2db7e61bfc9d4e21e3
+started_at: '2026-09-16T18:40:00Z'
+completed_at: '2026-09-16T19:40:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- request.md
+- assumptions.md
+blocking: []
+findings: []
+next: discover
+notes: Performed directly by the interactive session, not a fresh-context agent; see assumptions.md. The requirement IDs REQ-TRK-001..012 in request.md stand in for the skipped specification phase. This change is on the gated track (the default) and is the last one expected to skip specification by default.

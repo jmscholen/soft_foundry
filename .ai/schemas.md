@@ -4,6 +4,8 @@
 
 Created from `.ai/templates/change/metadata.yml`. `current_phase` is the lifecycle id of the phase currently being worked. `status: awaiting_human` marks a change parked on a human-boundary decision; the phase handoff records the decision requested.
 
+`track` names the lifecycle track (`tracks:` in `.ai/workflow.yml`; a record without one is on the default). On a track with an exploring stage, `status: exploring` means the change is being iterated with a person: the stage's skill works in `changes/<slug>/<output>/` (its `iterations.yml` journal, one entry per round), the specification is a living draft, and no phase from `implement` onward may be `complete`. `soft-foundry change vet` writes `vetted: {at, by, commit}` and sets `status: in_progress`; from that commit `02-specification/` may not change (the gate's `specification locked` check) and the phases from `implement` onward apply as on the gated track. `soft-foundry change reopen` clears `vetted`, appends to `reopenings` (`at`, `from_commit`, `reason`), resets every phase from `implement` onward to `pending` with its files kept, and returns to `exploring`. A track's `optional` phases may stay `pending` without a `skipped_phases` rationale; `forced_by_risk` makes a declared `risk` select the track regardless of what `change new --track` asked.
+
 ## `changes/<slug>/<phase>/handoff.yml`
 
 Created from `.ai/templates/handoff.yml`. Field semantics:
@@ -33,8 +35,11 @@ Created from `.ai/templates/handoff.yml`. Field semantics:
 
 - `pending` phases are skipped.
 - `in_progress` and `blocked` phases are reported but do not fail the gate.
-- `complete` phases must have every required file present with no `TBD` placeholder remaining, a valid handoff, an empty `blocking` list, a recorded `commit_sha`, and a complete predecessor phase.
+- `complete` phases must have every required file present with no `TBD` placeholder remaining, a valid handoff, an empty `blocking` list, a recorded `commit_sha`, and a complete predecessor phase (stepping back over phases that are globally optional, waived in `skipped_phases` with a rationale, or not required by the change's track).
 - Phases whose skill declares `evidence: commit_bound` are additionally `STALE` when any file in the `APP`, `TESTS`, or `INFRA` path groups changed between `commit_sha` and the current worktree, including uncommitted changes.
+- The first phase carries a `track permitted` check: the change's track must be defined, must have an exploring stage if the change is `exploring`, and must be the one its declared `risk` forces.
+- While the change is `exploring`, a `complete` phase from `implement` onward fails its `not exploring` check; `change vet` is the way forward.
+- After `change vet`, the specification phase carries a `specification locked` check that fails when anything under `02-specification/` changed since the vetted commit, including uncommitted edits.
 
 A stale or failed gate must be resolved by rerunning the phase, never by editing the handoff.
 
@@ -43,6 +48,7 @@ A stale or failed gate must be resolved by rerunning the phase, never by editing
 `soft-foundry gate`, `change status`, `ci`, and `change close` print an `advisory:` block after the gate results when something a person should know about before the change ships is missing. Advisories are informational: they never change the exit code or block a phase. Today they cover:
 
 - the review or judge phase waived through `skipped_phases`, with the rationale given;
+- a change on a track with an exploring stage in a repository whose profile records no `development` environment under `environments:` (`NOT_APPLICABLE` with a rationale is a valid answer);
 - a change that declares `surfaces.accessibility: true` but has no `category: accessibility` requirement, no accessibility observations in evaluation, or an accessibility review that is pending, skipped, still TBD, or N/A;
 - a change that declares `surfaces.accessibility: false` in a repository whose profile records a user-facing framework;
 - a repository with no `.ai/rules/accessibility.md` in force;

@@ -29,6 +29,13 @@ infrastructure:
     tools: []
   deployment_targets: [rubygems]
 
+environments:
+  development:
+    status: PASS
+    data: synthetic
+    how: "bundle exec ruby -Ilib exe/soft-foundry <command> against a throwaway repository (see test/test_helper.rb with_fixture_repo); no deployed service exists"
+    rationale: Library gem; the development environment is a local checkout run against a scratch repository.
+
 policies:
   privacy:
     status: NOT_APPLICABLE
@@ -84,9 +91,9 @@ capabilities:
     evidence: [changes, lib/soft_foundry/change_record.rb]
   change.acceptance_criteria_locking:
     status: PARTIAL
-    evidence: [.ai/skills/evaluation/permissions.yml]
-    findings: [no_deterministic_check_that_criteria_are_unchanged_after_specification_completes]
-    rationale: Downstream skills are denied writes to the specification, but the gate does not detect edits.
+    evidence: [.ai/skills/evaluation/permissions.yml, lib/soft_foundry/gate.rb]
+    findings: [deterministic_only_on_the_iterative_track_from_the_vetted_commit]
+    rationale: On the iterative track the gate fails the specification phase when anything under 02-specification changed since `change vet`; on the gated track downstream skills are denied writes to the specification but the gate does not detect edits.
   verification.automated_tests:
     status: PASS
     evidence: [test, .github/workflows/ci.yml]
@@ -106,8 +113,9 @@ capabilities:
     findings: [policy_only_no_enforcement]
   governance.risk_classification:
     status: PARTIAL
-    evidence: [.ai/templates/change/metadata.yml]
-    findings: [risk_does_not_select_required_phases]
+    evidence: [.ai/templates/change/metadata.yml, .ai/workflow.yml, lib/soft_foundry/gate.rb]
+    findings: [risk_forces_the_lifecycle_track_but_does_not_otherwise_select_required_phases]
+    rationale: A high risk change is forced onto the gated track (tracks.forced_by_risk) and the gate reports a conflict; within a track, risk does not yet add or remove phases.
   governance.skill_permissions:
     status: PARTIAL
     evidence: [.ai/skills, lib/soft_foundry/check.rb]

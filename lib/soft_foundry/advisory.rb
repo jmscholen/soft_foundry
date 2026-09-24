@@ -56,9 +56,16 @@ module SoftFoundry
     def notices
       notices = []
       notices.concat(skipped_phase_notices)
+      notices.concat(environment_notices)
       notices.concat(accessibility_notices)
       notices.concat(policy_notices)
       notices
+    end
+
+    # The development environment recorded in .ai/repository.yml, or nil.
+    def development_environment
+      env = @plane.repository_profile.dig("environments", "development")
+      env.is_a?(Hash) ? env : nil
     end
 
     # The rationale a change gave for skipping a phase, or nil when the
@@ -100,6 +107,19 @@ module SoftFoundry
         notices << Notice.new("judgment", "final judgment was skipped (#{why}); no APPROVED/BLOCKED/REJECTED verdict exists for this change")
       end
       notices
+    end
+
+    # An exploring track deploys each round to the development environment;
+    # a repository whose profile records none gives the stage nowhere to
+    # put the feature in front of a person. Reported, never a gate failure:
+    # a change that cannot deploy (a library, say) still explores by other
+    # means and says so in its journal.
+    def environment_notices
+      return [] unless @record.track_definition&.exploring?
+      env = development_environment
+      status = env && env["status"].to_s
+      return [] if status == "PASS" || status == "NOT_APPLICABLE"
+      [Notice.new("environment", "the #{@record.track} track deploys the exploring stage to the development environment, but .ai/repository.yml records #{env ? "it as #{status.empty? ? 'unset' : status}" : 'none'} under environments:; discovery must record where the feature is put in front of a person (NOT_APPLICABLE with a rationale is a valid answer)")]
     end
 
     def accessibility_notices

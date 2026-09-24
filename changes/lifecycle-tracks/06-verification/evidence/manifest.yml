@@ -1,0 +1,17 @@
+---
+commit_sha: a1adf76bb635318bfdfc4d2db7e61bfc9d4e21e3
+artifacts:
+- path: evidence/tests.log
+  produced_by: ruby -Ilib -Itest requiring every test/*_test.rb, with every provider
+    key and SOFT_FOUNDRY_BILLING unset
+  sha256: caaedd6e442e2b0217850d42f1bcbd3314307642492de6a5cbf33bd90a07ee2b
+- path: evidence/check.log
+  produced_by: soft-foundry check
+  sha256: 2be6498003ac7633f001dde7fb6c82d20d270c7515d869ca3f7276b8c1f3730e
+- path: evidence/syntax-warnings.log
+  produced_by: ruby -wc on every lib/, exe/soft-foundry, and the new test file
+  sha256: '01281763f469e53a1b0fc6f722ca7bd94c90f01a30945eb99408918abdc75e70'
+- path: evidence/ci-against-self.log
+  produced_by: soft-foundry ci run against this repository's own real change-record
+    history
+  sha256: 46559aae5100828756426ff93baf3a8c44e755e6c7e0252b41e8f130125cf4a7

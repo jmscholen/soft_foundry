@@ -5,9 +5,10 @@ git:
   worktree: ${WORKTREE}
   branch: ${BRANCH}
 type: TBD                  # feature | fix | refactor | docs | infrastructure | security | chore
-risk: TBD                  # low | medium | high
-status: intake             # intake | in_progress | awaiting_human | judged | closed
-current_phase: intake
+risk: TBD                  # low | medium | high; a high risk change is always on the gated track (.ai/workflow.yml tracks.forced_by_risk)
+track: ${TRACK}            # gated | iterative (.ai/workflow.yml tracks:); set by `change new --track`
+status: ${STATUS}          # intake | exploring | in_progress | awaiting_human | judged | closed
+current_phase: ${CURRENT_PHASE}
 created_at: ${CREATED_AT}
 surfaces:
   application: false
@@ -27,6 +28,21 @@ human_decisions: []
 #   decided_by: TBD
 #   decided_at: TBD
 #   decision: approved | declined
+
+# Iterative track only. `soft-foundry change vet` records the person's
+# acceptance of the explored feature and the commit the specification
+# locked at; from then on the phases from implement onward apply as on the
+# gated track. `change reopen` clears it, resets those phases to pending,
+# and appends the reopening here so the history stays in the record.
+vetted: null
+# vetted:
+#   at: 2026-09-16T00:00:00Z
+#   by: name
+#   commit: sha
+reopenings: []
+# - at: 2026-09-16T00:00:00Z
+#   from_commit: sha the change had been vetted at
+#   reason: why the person sent it back to exploring
 
 # Phases the harness would otherwise require, deliberately not run for
 # this change, each with a non-empty rationale. An entry with an empty
