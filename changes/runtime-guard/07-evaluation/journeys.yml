@@ -1,12 +1,82 @@
-commit_sha: TBD
+commit_sha: e5c48dcf9009b91a3032d77b15beb9f9fe6a9275
 journeys:
   - id: EVAL-001
-    criteria: [AC-001]
-    persona: TBD
-    starting_state: TBD
-    steps:
-      - TBD
-    assertions:
-      - TBD
-    evidence: [evidence/TBD]
-    result: TBD   # pass | fail | blocked
+    criteria: [REQ-GRD-005, REQ-GRD-006]
+    persona: repository owner with an existing .claude/settings.json holding their own Bash hook and permissions
+    starting_state: "scratch repo with this repo's real .ai/; .claude/settings.json with permissions.allow and one foreign PreToolUse hook"
+    steps: ["soft-foundry doctor | grep guard", "soft-foundry hooks install --claude (twice)", "cat .claude/settings.json", "soft-foundry doctor | grep guard", "soft-foundry hooks uninstall --claude (twice)", "cat .claude/settings.json", "soft-foundry hooks install --claude --local"]
+    assertions: ["doctor prints fail claude guard hook (mode: warn, repository policy ...); install with soft-foundry hooks install --claude", "install prints the file, the matcher, and the mode; a second install adds nothing", "settings.json keeps permissions.allow and the foreign hook and holds exactly one Soft Foundry entry whose command contains soft-foundry guard", "doctor prints pass claude guard hook (mode: warn, ...)", "uninstall removes only the Soft Foundry entry; the file is otherwise as it was; a second uninstall says no guard hook installed", "--local writes settings.local.json beside settings.json"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-002
+    criteria: [REQ-GRD-002]
+    persona: maintainer on main with no change record
+    starting_state: same repo on main
+    steps: ["feed Edit .ai/rules/ruby.md to soft-foundry guard"]
+    assertions: ["silent, exit 0: nothing is guarded outside a change"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-003
+    criteria: [REQ-GRD-001, REQ-GRD-003]
+    persona: implementing agent in warn mode (repository policy)
+    starting_state: branch change/c1 with a record at current_phase implement, committed
+    steps: ["Edit lib/app.rb", "Edit .ai/rules/ruby.md", "Write docs/README.md", "Read .ai/harness-evals/README.md", "cat .soft-foundry/guard.log"]
+    assertions: ["the allowed edit is silent with exit 0", "each violation prints one ! warn guard: line naming the tool, the path, the skill's set, and the mode, and exits 0", "the log holds one line per violation with timestamp, mode, tool, skill, path, and reason"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-004
+    criteria: [REQ-GRD-001, REQ-GRD-003]
+    persona: same agent after the machine-local override sets block
+    starting_state: .soft-foundry/enforcement.yml with guard.mode block
+    steps: ["soft-foundry doctor | grep guard", "Edit lib/app.rb", "Edit .ai/rules/ruby.md", "MultiEdit changes/c1/06-verification/results.md", "Write /etc/hosts"]
+    assertions: ["doctor shows mode: block, machine-local override (.soft-foundry/enforcement.yml)", "the allowed edit is still silent with exit 0", "each violation prints one ✗ fail guard: line and exits 2; the path outside the repository is refused with 'outside the repository; no skill may write there'"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-005
+    criteria: [REQ-GRD-001]
+    persona: same agent running shell commands in block mode
+    starting_state: as EVAL-004
+    steps: ["Bash bundle exec rake test", "Bash git commit -am wip", "Bash rm -rf .ai/policies", "Bash echo x >> changes/c1/13-review/functional.md", "Bash cp lib/app.rb docs/copy.rb"]
+    assertions: ["commands naming no denied path pass silently", "commands naming a denied path are refused with exit 2 and the message says Bash is checked against deny sets only"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-006
+    criteria: [REQ-GRD-002]
+    persona: verifying agent
+    starting_state: current_phase set to verify, block mode
+    steps: ["Edit lib/app.rb", "Write changes/c1/06-verification/results.md"]
+    assertions: ["editing the code under test is refused as verification's deny_write set", "writing verification's own results is allowed"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-007
+    criteria: [REQ-GRD-003, REQ-GRD-004]
+    persona: operator overriding from the environment; a broken payload
+    starting_state: block mode from the local override still in place
+    steps: ["SOFT_FOUNDRY_GUARD=off Edit .ai/rules/ruby.md", "SOFT_FOUNDRY_GUARD=warn Edit .ai/rules/ruby.md", "echo 'not json' | soft-foundry guard", "SOFT_FOUNDRY_GUARD=warn with the same bad payload"]
+    assertions: ["off is silent with exit 0 although policy and the override say otherwise", "warn from the environment reports and exits 0", "in block mode the unreadable payload is refused: ✗ fail guard: could not read the tool call from stdin; refusing it, exit 2", "in warn mode it is reported with exit 0"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-008
+    criteria: [REQ-GRD-002]
+    persona: exploring agent on the iterative track
+    starting_state: local override removed; branch change/it1 with an exploring record; SOFT_FOUNDRY_GUARD=block
+    steps: ["Edit changes/it1/02-specification/specification.md", "Write changes/it1/exploration/iterations.yml", "Write changes/it1/06-verification/results.md"]
+    assertions: ["the draft specification and the journal are allowed", "verification evidence is refused as the exploration skill's deny_write set"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-009
+    criteria: [REQ-GRD-007]
+    persona: control-plane maintainer
+    starting_state: .ai/policies/enforcement.yml with guard.mode maybe
+    steps: ["soft-foundry check; restore the file"]
+    assertions: ["check prints ✗ error policies/enforcement.yml: guard.mode 'maybe' is not one of warn, block, off and fails (the recorded exit 0 is the restoring git checkout's, last in the chain)"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-010
+    criteria: [REQ-GRD-006, REQ-GRD-008]
+    persona: screen-reader user or CI log reader
+    starting_state: as EVAL-008
+    steps: ["a block-mode refusal, a warn-mode warning, and the doctor line, each with every non-ASCII byte stripped"]
+    assertions: ["the lines still read fail guard: ..., warn guard: ..., and pass claude guard hook (mode: warn, ...) with the tool, path, skill, and mode intact"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass

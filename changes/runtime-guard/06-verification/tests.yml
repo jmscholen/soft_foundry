@@ -1,8 +1,26 @@
-commit_sha: TBD
+commit_sha: e5c48dcf9009b91a3032d77b15beb9f9fe6a9275
 checks:
   - id: CHECK-001
-    kind: tests   # tests | lint | static_analysis | security_scan | iac_validate | migration_check | custom
-    command: TBD
-    result: TBD   # pass | fail | error | skipped
-    evidence: evidence/TBD
-    criteria: [AC-001]
+    kind: tests
+    command: "ruby -Ilib -Itest requiring every test/*_test.rb, with every provider key, SOFT_FOUNDRY_BILLING, and SOFT_FOUNDRY_GUARD unset"
+    result: pass
+    evidence: evidence/tests.log
+    criteria: [REQ-GRD-001, REQ-GRD-002, REQ-GRD-003, REQ-GRD-004, REQ-GRD-005, REQ-GRD-006, REQ-GRD-007, REQ-GRD-010]
+  - id: CHECK-002
+    kind: lint
+    command: "soft-foundry check"
+    result: pass
+    evidence: evidence/check.log
+    criteria: [REQ-GRD-007, REQ-GRD-008, control-plane-consistency]
+  - id: CHECK-003
+    kind: static_analysis
+    command: "ruby -wc on every lib/soft_foundry/*.rb, lib/soft_foundry/installer/*.rb, lib/soft_foundry.rb, exe/soft-foundry, and test/guard_test.rb"
+    result: pass
+    evidence: evidence/syntax-warnings.log
+    criteria: [coding-standard]
+  - id: CHECK-004
+    kind: custom
+    command: "soft-foundry ci against this repository's own real change-record history"
+    result: pass
+    evidence: evidence/ci-against-self.log
+    criteria: [REQ-GRD-010, no-regression-for-closed-records, this-change-record-itself-passes]

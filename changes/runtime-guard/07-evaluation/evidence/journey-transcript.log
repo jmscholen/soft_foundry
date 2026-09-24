@@ -1,0 +1,255 @@
+ruby: ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23]
+soft-foundry: 0.10.0
+implementation commit under evaluation: e5c48dcf9009b91a3032d77b15beb9f9fe6a9275
+
+############ EVAL-001 install the guard hook, see it in doctor, uninstall it, keep everything else in settings.json
+$ (cd /tmp/sf-guard.1bRLRy && mkdir -p .claude && printf '{"permissions":{"allow":["Bash(ls)"]},"hooks":{"PreToolUse":[{"matcher":"Bash","hooks":[{"type":"command","command":"echo theirs"}]}]}}' > .claude/settings.json)
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry doctor | grep guard)
+✗ fail claude guard hook (mode: warn, repository policy (.ai/policies/enforcement.yml)); install with `soft-foundry hooks install --claude`
+[exit 2]
+
+$ (cd /tmp/sf-guard.1bRLRy && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry hooks install --claude)
+installed guard hook in .claude/settings.json (PreToolUse: Edit|Write|MultiEdit|NotebookEdit|Read|Bash)
+guard mode: warn (repository policy (.ai/policies/enforcement.yml))
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry hooks install --claude)
+installed guard hook in .claude/settings.json (PreToolUse: Edit|Write|MultiEdit|NotebookEdit|Read|Bash)
+guard mode: warn (repository policy (.ai/policies/enforcement.yml))
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && cat .claude/settings.json)
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo theirs"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit|Read|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "# soft-foundry:guard\nif command -v soft-foundry >/dev/null 2>&1; then soft-foundry guard; elif [ -x exe/soft-foundry ]; then ruby -Ilib exe/soft-foundry guard; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry doctor | grep guard)
+✓ pass claude guard hook (mode: warn, repository policy (.ai/policies/enforcement.yml))
+[exit 2]
+
+$ (cd /tmp/sf-guard.1bRLRy && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry hooks uninstall --claude)
+removed guard hook from .claude/settings.json
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && cat .claude/settings.json)
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo theirs"
+          }
+        ]
+      }
+    ]
+  }
+}
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry hooks uninstall --claude)
+no guard hook installed in .claude/settings.json
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry hooks install --claude --local && ls .claude)
+installed guard hook in .claude/settings.local.json (PreToolUse: Edit|Write|MultiEdit|NotebookEdit|Read|Bash)
+guard mode: warn (repository policy (.ai/policies/enforcement.yml))
+settings.json
+settings.local.json
+[exit 0]
+
+############ EVAL-002 nothing is guarded outside a change branch
+$ (cd /tmp/sf-guard.1bRLRy && guard Edit '{"file_path":".ai/rules/ruby.md"}'; echo guard-exit=$?)
+guard-exit=0
+[exit 0]
+
+############ EVAL-003 warn mode (repository policy): a violation is reported, allowed, and logged
+$ (cd /tmp/sf-guard.1bRLRy && git checkout -qb change/c1)
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change new c1 | head -1 && sed -i '' 's/^status: intake.*/status: in_progress/; s/^current_phase: intake.*/current_phase: implement/' changes/c1/metadata.yml && git add -A && git commit -qm record)
+created changes/c1 with 16 phase directories
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && guard Edit '{"file_path":"lib/app.rb"}'; echo guard-exit=$?)
+guard-exit=0
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && guard Edit '{"file_path":".ai/rules/ruby.md"}'; echo guard-exit=$?)
+! warn guard: Edit .ai/rules/ruby.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: warn, logged to .soft-foundry/guard.log)
+guard-exit=0
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && guard Write '{"file_path":"docs/README.md"}'; echo guard-exit=$?)
+! warn guard: Write docs/README.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: warn, logged to .soft-foundry/guard.log)
+guard-exit=0
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && guard Read '{"file_path":".ai/harness-evals/README.md"}'; echo guard-exit=$?)
+! warn guard: Read .ai/harness-evals/README.md is in implementation's deny_read set; the implementation skill's permissions.yml does not allow it (mode: warn, logged to .soft-foundry/guard.log)
+guard-exit=0
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && cat .soft-foundry/guard.log)
+2026-09-24T02:34:41Z warn Edit skill=implementation paths=.ai/rules/ruby.md is in implementation's deny_write set
+2026-09-24T02:34:41Z warn Write skill=implementation paths=docs/README.md is in implementation's deny_write set
+2026-09-24T02:34:41Z warn Read skill=implementation paths=.ai/harness-evals/README.md is in implementation's deny_read set
+[exit 0]
+
+############ EVAL-004 block mode by machine-local override: the same calls are refused with exit 2
+$ (cd /tmp/sf-guard.1bRLRy && mkdir -p .soft-foundry && printf 'guard:\n  mode: block\n' > .soft-foundry/enforcement.yml && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry doctor | grep guard)
+✓ pass claude guard hook (mode: block, machine-local override (.soft-foundry/enforcement.yml))
+[exit 2]
+
+$ (cd /tmp/sf-guard.1bRLRy && guard Edit '{"file_path":"lib/app.rb"}'; echo guard-exit=$?)
+guard-exit=0
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && guard Edit '{"file_path":".ai/rules/ruby.md"}'; echo guard-exit=$?)
+✗ fail guard: Edit .ai/rules/ruby.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+guard-exit=2
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && guard MultiEdit '{"file_path":"changes/c1/06-verification/results.md"}'; echo guard-exit=$?)
+✗ fail guard: MultiEdit changes/c1/06-verification/results.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+guard-exit=2
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && guard Write '{"file_path":"/etc/hosts"}'; echo guard-exit=$?)
+✗ fail guard: Write /etc/hosts outside the repository; no skill may write there; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+guard-exit=2
+[exit 0]
+
+############ EVAL-005 Bash is checked against deny sets only
+$ (cd /tmp/sf-guard.1bRLRy && guard Bash '{"command":"bundle exec rake test"}'; echo guard-exit=$?)
+guard-exit=0
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && guard Bash '{"command":"git commit -am wip"}'; echo guard-exit=$?)
+guard-exit=0
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && guard Bash '{"command":"rm -rf .ai/policies"}'; echo guard-exit=$?)
+✗ fail guard: Bash .ai/policies names a path implementation is denied (Bash is checked against deny sets only); the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+guard-exit=2
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && guard Bash '{"command":"echo x >> changes/c1/13-review/functional.md"}'; echo guard-exit=$?)
+✗ fail guard: Bash changes/c1/13-review/functional.md names a path implementation is denied (Bash is checked against deny sets only); the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+guard-exit=2
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && guard Bash '{"command":"cp lib/app.rb docs/copy.rb"}'; echo guard-exit=$?)
+✗ fail guard: Bash docs/copy.rb names a path implementation is denied (Bash is checked against deny sets only); the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+guard-exit=2
+[exit 0]
+
+############ EVAL-006 the phase selects the skill: verification may not repair the code under test
+$ (cd /tmp/sf-guard.1bRLRy && sed -i '' 's/^current_phase: implement/current_phase: verify/' changes/c1/metadata.yml)
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && guard Edit '{"file_path":"lib/app.rb"}'; echo guard-exit=$?)
+✗ fail guard: Edit lib/app.rb is in verification's deny_write set; the verification skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+guard-exit=2
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && guard Write '{"file_path":"changes/c1/06-verification/results.md"}'; echo guard-exit=$?)
+guard-exit=0
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && sed -i '' 's/^current_phase: verify/current_phase: implement/' changes/c1/metadata.yml)
+[exit 0]
+
+############ EVAL-007 environment override wins: off silences, warn reports; an unreadable payload fails closed in block mode
+$ (cd /tmp/sf-guard.1bRLRy && SOFT_FOUNDRY_GUARD=off guard Edit '{"file_path":".ai/rules/ruby.md"}'; echo guard-exit=$?)
+guard-exit=0
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && SOFT_FOUNDRY_GUARD=warn guard Edit '{"file_path":".ai/rules/ruby.md"}'; echo guard-exit=$?)
+! warn guard: Edit .ai/rules/ruby.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: warn, logged to .soft-foundry/guard.log)
+guard-exit=0
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && echo 'not json' | /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry guard; echo guard-exit=$?)
+✗ fail guard: could not read the tool call from stdin; refusing it
+guard-exit=2
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && SOFT_FOUNDRY_GUARD=warn sh -c "echo 'not json' | /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry guard"; echo guard-exit=$?)
+! warn guard: could not read the tool call from stdin
+guard-exit=0
+[exit 0]
+
+############ EVAL-008 an exploring change is guarded by the stage skill
+$ (cd /tmp/sf-guard.1bRLRy && rm .soft-foundry/enforcement.yml && git checkout -qb change/it1 && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry change new it1 --track iterative | head -1 && git add -A && git commit -qm record)
+created changes/it1 with 16 phase directories
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && SOFT_FOUNDRY_GUARD=block guard Edit '{"file_path":"changes/it1/02-specification/specification.md"}'; echo guard-exit=$?)
+guard-exit=0
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && SOFT_FOUNDRY_GUARD=block guard Write '{"file_path":"changes/it1/exploration/iterations.yml"}'; echo guard-exit=$?)
+guard-exit=0
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && SOFT_FOUNDRY_GUARD=block guard Write '{"file_path":"changes/it1/06-verification/results.md"}'; echo guard-exit=$?)
+✗ fail guard: Write changes/it1/06-verification/results.md is in exploration's deny_write set; the exploration skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+guard-exit=2
+[exit 0]
+
+############ EVAL-009 check rejects an unknown mode
+$ (cd /tmp/sf-guard.1bRLRy && printf 'version: 1\nguard:\n  mode: maybe\n' > .ai/policies/enforcement.yml && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry check; git checkout -q -- .ai/policies/enforcement.yml)
+✗ error policies/enforcement.yml: guard.mode 'maybe' is not one of warn, block, off
+✗ fail control plane: 1 error(s)
+[exit 0]
+
+############ EVAL-010 screen-reader and log readers: refusals and warnings carry their outcome as a word
+$ (cd /tmp/sf-guard.1bRLRy && SOFT_FOUNDRY_GUARD=block guard Edit '{"file_path":"changes/it1/06-verification/results.md"}' 2>&1 | LC_ALL=C tr -d '\200-\377')
+ fail guard: Edit changes/it1/06-verification/results.md is in exploration's deny_write set; the exploration skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+[exit 2]
+
+$ (cd /tmp/sf-guard.1bRLRy && SOFT_FOUNDRY_GUARD=warn guard Edit '{"file_path":"changes/it1/06-verification/results.md"}' 2>&1 | LC_ALL=C tr -d '\200-\377')
+! warn guard: Edit changes/it1/06-verification/results.md is in exploration's deny_write set; the exploration skill's permissions.yml does not allow it (mode: warn, logged to .soft-foundry/guard.log)
+[exit 0]
+
+$ (cd /tmp/sf-guard.1bRLRy && /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry doctor 2>&1 | LC_ALL=C tr -d '\200-\377' | grep guard)
+ pass claude guard hook (mode: warn, repository policy (.ai/policies/enforcement.yml))
+[exit 2]
+

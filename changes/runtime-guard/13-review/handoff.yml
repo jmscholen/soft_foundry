@@ -1,16 +1,44 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
 phase: 13-review
 skill: review
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: e5c48dcf9009b91a3032d77b15beb9f9fe6a9275
+started_at: '2026-09-24T02:40:00Z'
+completed_at: '2026-09-24T02:55:00Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- functional.md
+- architecture.md
+- security.md
+- accessibility.md
+- policy-conformance.md
+- infrastructure.md
+- operations.md
+- consolidated.md
+blocking: []
+findings:
+- id: REV-001
+  severity: minor
+  summary: The Bash path heuristic misses quoted paths containing spaces and variable-expanded paths; deny-only, so a miss passes through. Follow-up.
+- id: REV-011
+  severity: info
+  summary: Symlinks inside the repository are not resolved before matching, so a symlink under an allowed group could reach a denied one. Follow-up.
+- id: REV-014
+  severity: minor
+  summary: The guard stops mistakes and drift, not a determined agent that can write the machine-local override or the environment; stated scope.
+- id: REV-017
+  severity: minor
+  summary: The block-mode refusal is one line of about 190 characters. Follow-up.
+- id: REV-021
+  severity: info
+  summary: With neither the gem on PATH nor a checkout, the hook command runs nothing while doctor reports it installed. Follow-up.
+- id: REV-024
+  severity: minor
+  summary: No summary over the guard log to inform the warn-to-block decision. Follow-up.
+- id: REV-025
+  severity: info
+  summary: This repository has not yet installed the guard into its own .claude/settings.json.
 next: judge
-notes: ""
+notes: Compatibility mode, performed by the interactive session that also implemented the change rather than a fresh-context reviewer; recorded here so the separation-of-duties limitation is explicit. The review phase's lifecycle predecessor resolves to 07-evaluation because attack is skipped with rationale and remediate/document/index/observe are optional.
