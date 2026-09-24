@@ -139,12 +139,23 @@ module SoftFoundry
       prev_status == "complete" ? Check.new("predecessor complete", :pass, prev.output) : Check.new("predecessor complete", :fail, "#{prev.output} is #{prev_status || 'missing'}")
     end
 
+    # Evidence is stale when code changed after the commit it describes.
+    # "After" is measured on the record's own branch when that branch
+    # exists and is not the one checked out: a change stacked on another
+    # change's branch covers its own code with its own record, and the
+    # earlier record's claim is about the earlier branch. On the record's
+    # branch itself (or when its branch is gone) the worktree is the
+    # measure, uncommitted edits included, exactly as before.
     def staleness_check(handoff)
       sha = handoff["commit_sha"].to_s
       return Check.new("evidence current", :skip, "no git repository") unless @git.repository?
       return Check.new("evidence current", :fail, "cannot compare: commit_sha invalid") unless sha.match?(SHA) && @git.commit?(sha)
-      changed = @git.changed_since(sha).select { |p| ControlPlane.match_any?(p, @plane.code_globs) }
-      changed.empty? ? Check.new("evidence current", :pass, "no code changes since #{sha[0, 12]}") : Check.new("evidence current", :fail, "STALE: code changed since #{sha[0, 12]}: #{changed.first(5).join(', ')}#{changed.size > 5 ? ' …' : ''}")
+      record_branch = @record.metadata.dig("git", "branch").to_s
+      tip = record_branch != @git.branch.to_s ? @git.branch_tip(record_branch) : nil
+      changed = (tip ? @git.changed_between(sha, tip) : @git.changed_since(sha)).select { |p| ControlPlane.match_any?(p, @plane.code_globs) }
+      where = tip ? " on branch #{record_branch}" : ""
+      return Check.new("evidence current", :pass, "no code changes since #{sha[0, 12]}#{where}") if changed.empty?
+      Check.new("evidence current", :fail, "STALE: code changed since #{sha[0, 12]}#{where}: #{changed.first(5).join(', ')}#{changed.size > 5 ? ' …' : ''}")
     end
   end
 end

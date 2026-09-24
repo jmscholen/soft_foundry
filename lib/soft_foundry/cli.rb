@@ -18,6 +18,7 @@ require_relative "updater"
 require_relative "pr_discharge"
 require_relative "advisory"
 require_relative "guard"
+require_relative "phase_runner"
 
 module SoftFoundry
   class CLI
@@ -26,7 +27,7 @@ module SoftFoundry
     EXIT_CONFLICTS = 3
     EXIT_INTERNAL = 4
 
-    def initialize(argv, out: $stdout, err: $stderr, input: $stdin, root: Dir.pwd, source: nil, updater: nil, pr_discharge: nil, shell: nil)
+    def initialize(argv, out: $stdout, err: $stderr, input: $stdin, root: Dir.pwd, source: nil, updater: nil, pr_discharge: nil, shell: nil, runner: nil)
       @argv = argv.dup
       @out = out
       @err = err
@@ -36,6 +37,7 @@ module SoftFoundry
       @updater = updater
       @pr_discharge = pr_discharge
       @shell = shell
+      @runner = runner
     end
 
     def run
@@ -52,6 +54,7 @@ module SoftFoundry
       when "ci" then ci
       when "hooks" then hooks
       when "guard" then guard
+      when "phase" then phase
       when "update" then update
       when "shell"
         shell_name = @argv.shift or raise ArgumentError, "Usage: soft-foundry shell <claude|codex|grok> [args...]"
@@ -688,6 +691,65 @@ module SoftFoundry
       end
     end
 
+    # `phase run <phase>`: one lifecycle phase in a fresh coding-shell
+    # session, stamped with how it ran, gated when it returns.
+    def phase
+      sub = @argv.shift
+      raise ArgumentError, "Usage: soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex] [--dry-run] [-- shell args...]" unless sub == "run"
+      target = @argv.shift or raise ArgumentError, "Usage: soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex] [--dry-run] [-- shell args...]"
+      slug = option("--change") || current_slug
+      shell_name = option("--shell") || "claude"
+      dry_run = flag("--dry-run")
+      extra = []
+      if (i = @argv.index("--"))
+        extra = @argv[(i + 1)..]
+        @argv = @argv[0...i]
+      end
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+
+      record = load_record(slug)
+      phase = plane.phase(target) or raise TargetError, "unknown phase '#{target}'; lifecycle phases: #{plane.phases.map(&:id).join(', ')}"
+      runner = PhaseRunner.new(@root, plane: plane, git: git, record: record)
+      if (why = runner.refusal(phase))
+        @err.puts "#{slug}: cannot run #{phase.id}: #{why}"
+        return EXIT_TARGET
+      end
+      launch = runner.launch(phase, shell: shell_name, extra: extra)
+
+      if shell_name == "claude" && Hooks.claude_installed?(@root).nil?
+        @err.puts "! warn guard: the guard hook is not installed here, so the session's tool calls will not be checked against the #{plane.skill(phase.skill).name} skill's permissions (`soft-foundry hooks install --claude`)"
+      end
+      if dry_run
+        @out.puts "would run #{phase.id} of #{slug} with: #{launch.executable} #{launch.args.map { |a| a == launch.prompt ? '<prompt>' : Shellwords.escape(a) }.join(' ')}"
+        @out.puts "--- prompt ---"
+        @out.puts launch.prompt
+        return 0
+      end
+
+      billing_notice(shell: shell_name)
+      runner.begin!(phase, launch)
+      @out.puts "running #{phase.id} of #{slug} in a fresh #{shell_name} session (#{plane.skill(phase.skill).name} skill); executed_by recorded in #{relative(record.handoff_path(phase))}"
+      @out.flush
+      @err.flush
+      status = (@runner || method(:spawn_shell)).call(launch)
+      runner.finish!(phase, status)
+      @out.puts "#{shell_name} exited #{status}"
+      result = Gate.new(record, git: git).evaluate(phase)
+      print_result(result)
+      print_advisories(record)
+      return EXIT_TARGET unless status.zero?
+      result.failed? ? 2 : 0
+    end
+
+    # Runs the coding shell as a child with inherited stdio, in the
+    # repository root, and returns its exit status.
+    def spawn_shell(launch)
+      executable = Shell.resolve(launch.executable)
+      pid = Process.spawn(executable, *launch.args, chdir: @root)
+      Process.wait(pid)
+      $?.exitstatus || 1
+    end
+
     # The PreToolUse guard. Reads the hook payload from stdin, decides, and
     # answers the way Claude Code expects: exit 2 with the reason on stderr
     # to refuse, exit 0 to allow. In warn mode a violation is reported on
@@ -836,6 +898,10 @@ module SoftFoundry
                                                   undischarged acceptance criterion
           soft-foundry gate <phase|all> [--change SLUG]
                                                   evaluate a phase's completion gate
+          soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex] [--dry-run] [-- args...]
+                                                  run one phase in a fresh coding-shell session with only its
+                                                  skill in the prompt; stamps executed_by in the handoff and
+                                                  gates the phase when the session returns
           soft-foundry budget status [--change SLUG]
                                                   show billing mode and compare recorded spend against
                                                   .ai/policies/budget.yml (no budget on a subscription)

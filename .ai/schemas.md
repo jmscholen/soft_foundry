@@ -22,6 +22,7 @@ Created from `.ai/templates/handoff.yml`. Field semantics:
 | `blocking` | Must be empty when `complete`. Non-empty forces `blocked`. |
 | `findings` | Items handed to downstream phases. Each has `id`, `severity`, `summary`. |
 | `next` | Lifecycle id the workflow proceeds to. |
+| `executed_by` | Written only by `soft-foundry phase run`: `runner`, `shell`, `fresh_context: true`, `started_at`, `finished_at`, `exit_status`, `previous_phase`. `null` when the phase was worked by whatever session was open. A review or judgment completed without it draws an advisory. |
 
 `surfaces.accessibility: true` means a person perceives or operates the result (UI, CLI output, a document). `change new` sets it when `.ai/repository.yml` records a user-facing framework. It selects `.ai/rules/accessibility.md` for implementation and review, and enables the accessibility go-live advisories.
 
@@ -36,7 +37,7 @@ Created from `.ai/templates/handoff.yml`. Field semantics:
 - `pending` phases are skipped.
 - `in_progress` and `blocked` phases are reported but do not fail the gate.
 - `complete` phases must have every required file present with no `TBD` placeholder remaining, a valid handoff, an empty `blocking` list, a recorded `commit_sha`, and a complete predecessor phase (stepping back over phases that are globally optional, waived in `skipped_phases` with a rationale, or not required by the change's track).
-- Phases whose skill declares `evidence: commit_bound` are additionally `STALE` when any file in the `APP`, `TESTS`, or `INFRA` path groups changed between `commit_sha` and the current worktree, including uncommitted changes.
+- Phases whose skill declares `evidence: commit_bound` are additionally `STALE` when any file in the `APP`, `TESTS`, or `INFRA` path groups changed between `commit_sha` and the current worktree, including uncommitted changes. When the record's `git.branch` is not the branch checked out and that branch still exists (locally or at `origin`), the measure is that branch's tip instead: a change stacked on another change's branch covers its own code with its own record, and the earlier record's claim is about the earlier branch. Once the branch is gone, or on the branch itself, the worktree is the measure.
 - The first phase carries a `track permitted` check: the change's track must be defined, must have an exploring stage if the change is `exploring`, and must be the one its declared `risk` forces.
 - While the change is `exploring`, a `complete` phase from `implement` onward fails its `not exploring` check; `change vet` is the way forward.
 - After `change vet`, the specification phase carries a `specification locked` check that fails when anything under `02-specification/` changed since the vetted commit, including uncommitted edits.

@@ -125,9 +125,9 @@ capabilities:
     evidence: [.ai/policies/human-boundaries.yml]
     findings: [no_awaiting_human_mechanism]
   governance.separation_of_duties:
-    status: PARTIAL
-    evidence: [.ai/skills]
-    findings: [not_enforced_at_runtime]
+    status: PASS
+    evidence: [.ai/skills, lib/soft_foundry/guard.rb, lib/soft_foundry/phase_runner.rb, lib/soft_foundry/advisory.rb]
+    rationale: Implementation is denied every evidence directory by permissions the guard enforces at runtime; `soft-foundry phase run` executes review and judgment in a fresh session with only that skill in the prompt and records executed_by; a review or judgment completed without it is advised on every gate run.
   security.threat_modeling:
     status: PARTIAL
     evidence: [.ai/skills/threat-modeling]

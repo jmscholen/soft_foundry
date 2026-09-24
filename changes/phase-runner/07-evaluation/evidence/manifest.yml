@@ -1,5 +1,6 @@
-commit_sha: TBD
+---
+commit_sha: f205ac714f8cd6a8e87482ee2eacd5ed22372ce8
 artifacts:
-  - path: TBD
-    journey: EVAL-001
-    sha256: TBD
+- path: evidence/journey-transcript.log
+  journey: EVAL-001..EVAL-006
+  sha256: ce8174ff909a36d46b9a75c06351ef0570d4ee316f6b9c244227821600e2dfb6

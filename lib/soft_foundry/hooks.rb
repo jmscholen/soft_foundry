@@ -12,14 +12,16 @@ module SoftFoundry
   # the active skill's permissions at runtime.
   class Hooks
     MARKER = "# soft-foundry:pre-commit"
+    # A checkout of Soft Foundry itself runs its own code, not whatever
+    # older gem happens to be on PATH; every other repository uses the gem.
     SCRIPT = <<~SH
       #!/bin/sh
       #{MARKER}
       # Validates the .ai/ control plane and every change record before commit.
-      if command -v soft-foundry >/dev/null 2>&1; then
-        exec soft-foundry ci
-      elif [ -x exe/soft-foundry ]; then
+      if [ -x exe/soft-foundry ] && [ -f lib/soft_foundry.rb ]; then
         exec ruby -Ilib exe/soft-foundry ci
+      elif command -v soft-foundry >/dev/null 2>&1; then
+        exec soft-foundry ci
       else
         echo "soft-foundry not found; skipping control-plane checks" >&2
       fi
@@ -46,7 +48,7 @@ module SoftFoundry
     # meaning, if not in formatting.
     GUARD_ID = "soft-foundry:guard"
     GUARD_MATCHER = "Edit|Write|MultiEdit|NotebookEdit|Read|Bash"
-    GUARD_COMMAND = "# #{GUARD_ID}\nif command -v soft-foundry >/dev/null 2>&1; then soft-foundry guard; elif [ -x exe/soft-foundry ]; then ruby -Ilib exe/soft-foundry guard; fi"
+    GUARD_COMMAND = "# #{GUARD_ID}\nif [ -x exe/soft-foundry ] && [ -f lib/soft_foundry.rb ]; then ruby -Ilib exe/soft-foundry guard; elif command -v soft-foundry >/dev/null 2>&1; then soft-foundry guard; fi"
 
     def self.claude_settings_path(root, local: false)
       File.join(root, ".claude", local ? "settings.local.json" : "settings.json")

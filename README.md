@@ -79,7 +79,7 @@ soft-foundry gate verify              # evaluate one phase's completion gate
 soft-foundry gate all --change <slug>
 ```
 
-A gate passes only when the phase's required files exist with no `TBD` placeholders, the handoff is valid, nothing is blocking, the predecessor phase is complete, and commit-bound evidence is not stale. Evidence is stale when any file in the `APP`, `TESTS`, or `INFRA` path groups changed after the recorded commit. See `.ai/schemas.md`.
+A gate passes only when the phase's required files exist with no `TBD` placeholders, the handoff is valid, nothing is blocking, the predecessor phase is complete, and commit-bound evidence is not stale. Evidence is stale when any file in the `APP`, `TESTS`, or `INFRA` path groups changed after the recorded commit, measured on the record's own branch while that branch exists (so a change stacked on another change's branch does not stale the earlier record) and on the worktree otherwise. See `.ai/schemas.md`.
 
 `soft-foundry check` lints the control plane itself. `soft-foundry ci` runs the lint plus every change record's gates, and `soft-foundry hooks install` wires it into a pre-commit hook. The GitHub Actions workflow runs the same two commands.
 
@@ -101,6 +101,21 @@ What is checked: Edit, Write, MultiEdit, and NotebookEdit against the write and 
 ```
 ✗ fail guard: Edit .ai/rules/ruby.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
 ```
+
+### Fresh-context phases: `phase run`
+
+Review and judgment exist to look at the work from outside it. Until now every record in this repository has said "performed by the interactive session, not a fresh-context agent" in its handoff notes. `soft-foundry phase run` makes the separation a process boundary:
+
+```bash
+soft-foundry phase run review                    # a fresh `claude -p` session with only the review skill in its prompt
+soft-foundry phase run judge --shell codex       # or `codex exec`
+soft-foundry phase run review --dry-run          # print the command and the prompt, launch nothing
+soft-foundry phase run review -- --model opus    # pass extra arguments to the shell
+```
+
+The runner refuses what the gate would refuse afterwards (an exploring change, a phase already complete, a pending predecessor), so no session is spent on it. It moves `current_phase` to the phase so the guard applies the right skill, writes `executed_by` into the phase's handoff (runner, shell, `fresh_context: true`, start and finish times, exit status) before and after the session, and runs the phase's gate when the session returns. The agent fills the rest of the handoff itself; the prompt tells it not to touch `executed_by`, not to alter any other phase's evidence, and to record `blocked` rather than pretend.
+
+A completed review or judgment whose handoff carries no `executed_by` from the runner gets an advisory: it was performed by whatever session was already open, and separation of duties rests on the handoff's notes. If the guard hook is not installed, `phase run` says so before launching, since the session's tool calls would then be checked by nothing.
 
 ### Lifecycle tracks: gated or iterative
 
