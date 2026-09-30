@@ -1,3 +1,7 @@
 .soft-foundry/
 *.gem
 Gemfile.lock
+/bin/
+/soft-foundry
+*.exe
+vendor/
