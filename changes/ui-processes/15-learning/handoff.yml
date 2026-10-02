@@ -1,9 +1,9 @@
 phase: 15-learning
 skill: learning
-status: in_progress
-commit_sha: 0d3a0436374b6af728209f039ed577a40c960d3a
+status: complete
+commit_sha: dd18466001ecc7246f8266643a154bcdc1ff0ff5
 started_at: '2026-10-02T13:33:00Z'
-completed_at: '2026-10-02T13:33:00Z'
+completed_at: '2026-10-02T14:29:00Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -16,5 +16,5 @@ outputs:
 blocking: []
 findings: []
 next: done
-notes: Performed directly by the interactive session, not a fresh-context agent; see 00-intake/assumptions.md.
+notes: Performed directly by the interactive session, not a fresh-context agent; see 00-intake/assumptions.md. Produced again after the remediation in 09-remediation/summary.md.
 executed_by:

@@ -1,8 +1,8 @@
-commit_sha: 0d3a0436374b6af728209f039ed577a40c960d3a
+commit_sha: dd18466001ecc7246f8266643a154bcdc1ff0ff5
 artifacts:
 - path: evidence/journey-transcript.log
-  journey: "EVAL-001..EVAL-005; pids and start times replaced"
-  sha256: 36c0c2fb33a098c20baa094abadd6323395553a593d005f33e6acd3740b3767a
+  journey: "EVAL-001..EVAL-005 and EVAL-009; pids and start times replaced; the maintainers own sessions counted, not named"
+  sha256: 8f6bbf646e261518efb84e5b0855f4837679ee405e1276756bfbec8fd207d88e
 - path: evidence/browser-observations.log
-  journey: "EVAL-006, EVAL-007, EVAL-008"
-  sha256: c34aa317d146d453170f4861e020593ef76524d030dcfa41426e32d83569111b
+  journey: "EVAL-006..EVAL-009"
+  sha256: af939326107700c495630483807812341a9a7daa0291b282a34e2255fba0b9eb

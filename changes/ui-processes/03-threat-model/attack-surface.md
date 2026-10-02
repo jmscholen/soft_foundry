@@ -7,7 +7,8 @@ See `trust-boundaries.md`.
 
 ## Externally controlled inputs
 - The output of `ps`: every process of this user, each with a command line that process chose.
-- The working directory of each soft-foundry process.
+- The working directory of each soft-foundry process and of each coding shell.
+- For a session in another repository: that repository's checked-out branch name and the `status` and `current_phase` of the matching change record there. Another repository's files are someone else's input.
 - The request to `/api/processes` (no parameters are read).
 
 ## Authorization boundaries
@@ -32,4 +33,4 @@ One `ps` and one `lsof` per soft-foundry process per uncached answer, reused for
 Unchanged: loopback only.
 
 ## Proposed attack cases
-ATTACK-001 a spoofed process with hostile arguments; ATTACK-002 the route against the server's refusals and with parameters; ATTACK-003 listing does not disturb processes; ATTACK-004 a prompt mentioning soft-foundry.
+ATTACK-001 a spoofed process with hostile arguments; ATTACK-002 the route against the server's refusals and with parameters; ATTACK-003 listing does not disturb processes; ATTACK-004 a prompt mentioning soft-foundry; ATTACK-005 hand-started sessions carrying a token, in and out of Soft Foundry repositories.

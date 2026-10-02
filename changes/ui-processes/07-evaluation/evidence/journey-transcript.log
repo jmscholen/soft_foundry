@@ -6,8 +6,12 @@ running: 5 soft-foundry processes
   pid N  phase run intake  change search-index  shell codex (session pid N)  in <scratch>/sess-b  since <time>
   pid N  ui  port 4879  in this repository  since <time>
   pid N  phase run  shell claude  in this repository  since <time>
+sessions: 7 coding shells open in Soft Foundry repositories
+  pid N  grok  change search-index (phase intake, intake)  branch change/search-index  in <scratch>/sess-b  since <time>
+  pid N  claude  change checkout-flow (phase intake, intake)  branch change/checkout-flow  in this repository  since <time>
 recorded as started by phase run with no process found: 1
   ! warn change stalled phase intake: started 2026-10-02T03:00:00Z (codex) and never finished; the session may have been interrupted
+  (and 5 of the maintainer's own sessions in other repositories, listed by the command and left out of this record)
 exit 0
 
 ### EVAL-002 the same from a repository with nothing of its own running
@@ -18,17 +22,24 @@ running: 5 soft-foundry processes
   pid N  phase run intake  change search-index  shell codex (session pid N)  in <scratch>/sess-b  since <time>
   pid N  ui  port 4879  in <scratch>/sess-a  since <time>
   pid N  phase run  shell claude  in <scratch>/sess-a  since <time>
+sessions: 7 coding shells open in Soft Foundry repositories
+  pid N  grok  change search-index (phase intake, intake)  branch change/search-index  in <scratch>/sess-b  since <time>
+  pid N  claude  change checkout-flow (phase intake, intake)  branch change/checkout-flow  in <scratch>/sess-a  since <time>
+  (and 5 of the maintainer's own sessions in other repositories, listed by the command and left out of this record)
 exit 0
 
 ### EVAL-003 the data the page reads
-keys: version, generated_at, processes, recorded_runs
+keys: version, generated_at, processes, sessions, recorded_runs
   {"command"=>"ui", "phase"=>nil, "change"=>nil, "shell"=>nil, "port"=>4877, "session"=>nil, "repository"=>"~/dev/soft_foundry", "here"=>false, "self"=>false}
   {"command"=>"phase run", "phase"=>"intake", "change"=>"checkout-flow", "shell"=>"claude", "port"=>nil, "session"=>{"pid"=>N, "name"=>"claude"}, "repository"=>".", "here"=>true, "self"=>false}
   {"command"=>"phase run", "phase"=>"intake", "change"=>"search-index", "shell"=>"codex", "port"=>nil, "session"=>{"pid"=>N, "name"=>"codex"}, "repository"=>"<scratch>/sess-b", "here"=>false, "self"=>false}
   {"command"=>"ui", "phase"=>nil, "change"=>nil, "shell"=>nil, "port"=>4879, "session"=>nil, "repository"=>".", "here"=>true, "self"=>true}
   {"command"=>"phase run", "phase"=>nil, "change"=>nil, "shell"=>"claude", "port"=>nil, "session"=>nil, "repository"=>".", "here"=>true, "self"=>false}
+sessions staged for this evaluation (7 listed in all):
+  {"shell"=>"grok", "repository"=>"<scratch>/sess-b", "here"=>false, "branch"=>"change/search-index", "change"=>"search-index", "phase"=>"intake", "status"=>"intake"}
+  {"shell"=>"claude", "repository"=>".", "here"=>true, "branch"=>"change/checkout-flow", "change"=>"checkout-flow", "phase"=>"intake", "status"=>"intake"}
 recorded_runs:
-  {"change"=>"checkout-flow", "phase"=>"intake", "shell"=>"claude", "started_at"=>"2026-10-02T13:30:04Z", "live"=>true, "pid"=>N}
+  {"change"=>"checkout-flow", "phase"=>"intake", "shell"=>"claude", "started_at"=>"2026-10-02T14:27:56Z", "live"=>true, "pid"=>N}
   {"change"=>"stalled", "phase"=>"intake", "shell"=>"codex", "started_at"=>"2026-10-02T03:00:00Z", "live"=>false, "pid"=>nil}
 
 ### EVAL-004 a session that dies is reported as interrupted
@@ -38,12 +49,16 @@ running: 4 soft-foundry processes
   pid N  phase run intake  change search-index  shell codex (session pid N)  in <scratch>/sess-b  since <time>
   pid N  ui  port 4879  in this repository  since <time>
   pid N  phase run  shell claude  in this repository  since <time>
+sessions: 7 coding shells open in Soft Foundry repositories
+  pid N  grok  change search-index (phase intake, intake)  branch change/search-index  in <scratch>/sess-b  since <time>
+  pid N  claude  change checkout-flow (phase intake, intake)  branch change/checkout-flow  in this repository  since <time>
 recorded as started by phase run with no process found: 2
-  ! warn change checkout-flow phase intake: started 2026-10-02T13:30:04Z (claude) and never finished; the session may have been interrupted
+  ! warn change checkout-flow phase intake: started 2026-10-02T14:27:56Z (claude) and never finished; the session may have been interrupted
   ! warn change stalled phase intake: started 2026-10-02T03:00:00Z (codex) and never finished; the session may have been interrupted
+  (and 5 of the maintainer's own sessions in other repositories, listed by the command and left out of this record)
 exit 0
 
 ### EVAL-005 output with non-ASCII bytes stripped
 recorded as started by phase run with no process found: 2
-  ! warn change checkout-flow phase intake: started 2026-10-02T13:30:04Z (claude) and never finished; the session may have been interrupted
+  ! warn change checkout-flow phase intake: started 2026-10-02T14:27:56Z (claude) and never finished; the session may have been interrupted
   ! warn change stalled phase intake: started 2026-10-02T03:00:00Z (codex) and never finished; the session may have been interrupted

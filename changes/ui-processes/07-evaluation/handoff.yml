@@ -1,9 +1,9 @@
 phase: 07-evaluation
 skill: evaluation
-status: in_progress
-commit_sha: 0d3a0436374b6af728209f039ed577a40c960d3a
+status: complete
+commit_sha: dd18466001ecc7246f8266643a154bcdc1ff0ff5
 started_at: '2026-10-02T13:20:00Z'
-completed_at: '2026-10-02T13:33:00Z'
+completed_at: '2026-10-02T14:27:00Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -24,5 +24,5 @@ findings:
   severity: major
   summary: macOS only; Linux rests on one test in CI.
 next: attack
-notes: Performed directly by the interactive session, not a fresh-context agent; see 00-intake/assumptions.md. Sessions were real phase runners with stand-in shells that sleep. The browser pass preceded one stylesheet rule that is part of the verified commit.
+notes: Performed directly by the interactive session, not a fresh-context agent; see 00-intake/assumptions.md. Sessions were real phase runners with stand-in shells that sleep. The browser pass preceded one stylesheet rule that is part of the verified commit. Produced again after the remediation in 09-remediation/summary.md.
 executed_by:

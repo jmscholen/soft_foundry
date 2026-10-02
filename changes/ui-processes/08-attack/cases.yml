@@ -1,4 +1,4 @@
-commit_sha: 0d3a0436374b6af728209f039ed577a40c960d3a
+commit_sha: dd18466001ecc7246f8266643a154bcdc1ff0ff5
 authorization_envelope:
   target: soft-foundry ui on 127.0.0.1:4879 serving a scratch repository, and processes this session started
   environment: local
@@ -16,6 +16,15 @@ cases:
     steps: ["start a ruby script named soft-foundry with arguments: phase run, a script tag as the phase, ../../etc as the change, a bold tag as the shell, and a token after --", "start a real runner with a token after --", "read /api/processes and search it"]
     expected_safe_behavior: the spoof is listed with only its command; none of the hostile strings or tokens appear
     observed: listed as phase run with no phase and no change and the default shell; zero occurrences of script, <b>, ../, or either token
+    result: denied
+    evidence: [evidence/attack-transcript.log]
+  - id: ATTACK-005
+    threat: THREAT-001
+    violation_attempted: leak a token from a hand-started session's arguments, or be listed from outside a Soft Foundry repository
+    starting_privilege: any process of this user
+    steps: ["start processes named claude and grok with --api-key sk-session in their arguments: one in a Soft Foundry repository, one in a subdirectory of another, one in a plain directory", "read /api/processes and search it"]
+    expected_safe_behavior: the two in Soft Foundry repositories are listed by shell, repository, branch, and change only; the third is not listed; the token and arguments appear nowhere
+    observed: two listed, the plain-directory one absent; zero occurrences of sk-session, api-key, or the command they ran
     result: denied
     evidence: [evidence/attack-transcript.log]
   - id: ATTACK-002

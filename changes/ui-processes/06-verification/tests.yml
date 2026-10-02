@@ -1,11 +1,11 @@
-commit_sha: 0d3a0436374b6af728209f039ed577a40c960d3a
+commit_sha: dd18466001ecc7246f8266643a154bcdc1ff0ff5
 checks:
   - id: CHECK-001
     kind: tests
     command: "bundle exec rake test with ANTHROPIC_API_KEY, OPENAI_API_KEY, OPENROUTER_API_KEY, XAI_API_KEY, SOFT_FOUNDRY_BILLING, and SOFT_FOUNDRY_GUARD unset"
     result: pass
     evidence: evidence/tests.log
-    criteria: [REQ-PS-001, REQ-PS-002, REQ-PS-003, REQ-PS-004, REQ-PS-005, REQ-PS-006]
+    criteria: [REQ-PS-001, REQ-PS-002, REQ-PS-003, REQ-PS-004, REQ-PS-005, REQ-PS-006, REQ-PS-009]
     red_commit: 365382a3f531c38fff7c2996cc43d25df097f1d2
     test_path: test/processes_test.rb
   - id: CHECK-002
@@ -14,6 +14,12 @@ checks:
     result: fail
     evidence: evidence/red-at-365382a.log
     criteria: [failing-test-first]
+  - id: CHECK-006
+    kind: custom
+    command: "test/processes_test.rb and test/cli_ps_test.rb run in a worktree checked out at 79e48c2, the remediation RED commit"
+    result: fail
+    evidence: evidence/red-at-79e48c2.log
+    criteria: [failing-test-first, REQ-PS-009]
   - id: CHECK-003
     kind: lint
     command: "soft-foundry check"

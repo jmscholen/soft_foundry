@@ -1,4 +1,4 @@
-commit_sha: 0d3a0436374b6af728209f039ed577a40c960d3a
+commit_sha: dd18466001ecc7246f8266643a154bcdc1ff0ff5
 journeys:
   - id: EVAL-001
     criteria: [REQ-PS-001, REQ-PS-003, REQ-PS-004, REQ-PS-005]
@@ -7,6 +7,14 @@ journeys:
     steps: ["soft-foundry ps in the first repository"]
     assertions: ["five processes besides itself, one line each; its own two say in this repository; the other repository's run names the change from its branch and its codex session; the unfinished run is warned about; exit 0"]
     evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-009
+    criteria: [REQ-PS-009]
+    persona: maintainer with sessions open in several terminals
+    starting_state: as EVAL-001, plus three hand-started stand-in shells (claude on the change's branch here, grok in a subdirectory of the other repository, claude outside any Soft Foundry repository), and the maintainer's five real sessions in four repositories
+    steps: ["soft-foundry ps in the first repository and in an empty directory", "the Running view, the board, and a change in a browser against the real repository"]
+    assertions: ["seven sessions listed: the two staged ones in Soft Foundry repositories with shell, change, recorded phase, branch, and repository, and the maintainer's five; the shell outside a Soft Foundry repository is not listed; the phase runners' own sessions are not listed twice", "the Sessions table shows all five real sessions with their terminals; the board says 5 coding-shell sessions and flags the change with a session open; the change names the session and its terminal"]
+    evidence: [evidence/journey-transcript.log, evidence/browser-observations.log]
     result: pass
   - id: EVAL-002
     criteria: [REQ-PS-001]

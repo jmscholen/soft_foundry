@@ -1,5 +1,5 @@
-commit_sha: 0d3a0436374b6af728209f039ed577a40c960d3a
+commit_sha: dd18466001ecc7246f8266643a154bcdc1ff0ff5
 artifacts:
 - path: evidence/attack-transcript.log
-  produced_by: "all four cases against staged processes and a loopback server; pids replaced"
-  sha256: 19ff76ff7de8518a78c256c14e5be0f05ef425f51eddeb1004dd26819cbca922
+  produced_by: "all five cases against staged processes and a loopback server; pids replaced"
+  sha256: 4b9504b43a8d419cf9aeba8a1d4d7f6aa9a135827e887725a04e875c6cef14f9

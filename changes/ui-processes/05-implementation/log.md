@@ -7,7 +7,10 @@
    - `lib/soft_foundry/cli.rb`: the `ps` command, an injectable `processes:` factory, help text.
    - `lib/soft_foundry/ui/server.rb`: the `/api/processes` route.
    - `lib/soft_foundry/ui/assets/`: the Running view; running and interrupted flags on the board; "Running now" and interrupted notes and a gate marker on a change; every poll also reads the process list.
-3. `README.md`: a paragraph on `ps` and the Running view.
+3. The maintainer reported that sessions in other terminals were not shown. RED `79e48c2`, GREEN `dd18466`:
+   - `Processes#sessions`: coding shells whose working directory is inside a repository with a control plane, with terminal (a new `tty` column from `ps`), branch, change, and the change's recorded phase and status.
+   - `ps` prints a `sessions:` section; the Running view has a Sessions table above Commands; the board flags "Session open" and a change says which session is open on it.
+4. `README.md`: a paragraph on `ps` and the Running view.
 
 ## Decisions
 See `decisions.md`.

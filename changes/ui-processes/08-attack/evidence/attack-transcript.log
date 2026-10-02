@@ -3,15 +3,20 @@ ps shows it as: ~/.asdf/installs/ruby/2.7.8/bin/ruby <scratch>/fakebin/soft-foun
 listed as: {"command"=>"phase run", "phase"=>nil, "change"=>nil, "shell"=>"claude", "port"=>nil, "session"=>nil, "repository"=>".", "here"=>true, "self"=>false}
 occurrences in the answer of script, <b>, ../, sk-spoof, sk-not-shown, secret-flag: 0
 
+### ATTACK-005 a hand-started session with a token in its arguments, and one outside any Soft Foundry repository
+ps shows the sessions as: 4 processes carrying --api-key sk-session
+sessions listed in the scratch repositories: 2 (of three started; the one outside a Soft Foundry repository is not listed: true)
+occurrences in the answer of sk-session, api-key, sleep: 0
+
 ### ATTACK-002 the new route obeys the server's refusals
 cross-site -> 403
 Host: attacker.example:4879 -> 403
 POST -> 405
-/api/processes/1 and /api/processes?pid=1;kill -> 404 200 1205 bytes
+/api/processes/1 and /api/processes?pid=1;kill -> 404 200 2835 bytes
 CORS headers -> 0
 
 ### ATTACK-003 nothing is signalled or changed by listing
-staged processes still alive after forty reads: alive alive alive 
+staged processes still alive after forty reads: alive alive alive alive alive alive 
 
 ### ATTACK-004 a prompt that mentions soft-foundry is not a soft-foundry process
 listed commands: {"ui"=>2, "phase run"=>2}

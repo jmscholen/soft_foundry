@@ -4,7 +4,7 @@
 That the listing repeats nothing a process put in its command line beyond validated fields, cannot be made to run anything, obeys the server's refusals, and does not disturb what it lists.
 
 ## Threats mapped
-ATTACK-001: THREAT-001. ATTACK-002: THREAT-002, THREAT-003. ATTACK-003: THREAT-002. ATTACK-004: THREAT-001, THREAT-004.
+ATTACK-001: THREAT-001. ATTACK-002: THREAT-002, THREAT-003. ATTACK-003: THREAT-002. ATTACK-004: THREAT-001, THREAT-004. ATTACK-005: THREAT-001 (hand-started sessions, added with the remediation).
 
 ## Adversarial journeys
 For each ATTACK case record threat ID, attempted violation, starting privilege/state, steps, expected denial/safe behavior, observed result, and evidence. Recorded in `cases.yml`.

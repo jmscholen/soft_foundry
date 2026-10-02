@@ -1,9 +1,9 @@
 phase: 05-implementation
 skill: implementation
 status: complete
-commit_sha: 0d3a0436374b6af728209f039ed577a40c960d3a
+commit_sha: dd18466001ecc7246f8266643a154bcdc1ff0ff5
 started_at: '2026-10-02T13:20:00Z'
-completed_at: '2026-10-02T13:27:00Z'
+completed_at: '2026-10-02T14:19:00Z'
 resolved_model:
   profile: coding_high
   provider: anthropic
@@ -15,5 +15,5 @@ outputs:
 blocking: []
 findings: []
 next: verify
-notes: Performed directly by the interactive session, not a fresh-context agent; see 00-intake/assumptions.md. Tests committed first at 365382a (RED); implementation at 0d3a043 (GREEN).
+notes: Performed directly by the interactive session, not a fresh-context agent; see 00-intake/assumptions.md. Tests committed first at 365382a (RED); implementation at 0d3a043 (GREEN); remediation tests at 79e48c2 (RED), fix at dd18466 (GREEN).
 executed_by:

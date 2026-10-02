@@ -11,6 +11,7 @@
 - REQ-PS-005: `soft-foundry ps [--json]` prints one line per process, leaves itself out, warns on interrupted runs, exits 0, and exits 1 with a reason if the process list cannot be read.
 - REQ-PS-006: the server answers `/api/processes` under the same refusals as the other data routes, and listing never signals or changes a process.
 - REQ-PS-007: the page has a Running view listing every process, with changes in this repository linked and interrupted runs listed; the board flags changes with something running or interrupted and says how many processes are running; a change says what is running on it now and marks the gate. All of it follows processes starting and stopping.
+- REQ-PS-009: every coding shell (claude, codex, grok) a person has open in a repository that has a Soft Foundry control plane is listed as a session, in any terminal and any repository: the shell, its terminal, its repository, the checked-out branch, the change that branch belongs to, and the phase and status that change's record gives. A phase runner's own session and a shell's child processes are not listed twice; a shell outside any Soft Foundry repository is not listed. Added after the maintainer reported that the first version "does not seem to be capturing other session running in other terminals".
 - REQ-PS-008 (accessibility, WCAG 2.2 AA): the new view keeps the page's floor: a table with caption and scoped headers (1.3.1), words rather than colour for running and interrupted (1.4.1), keyboard reachable links (2.1.1), no sideways page scroll at narrow widths (1.4.10); the command's output is line-oriented words with no colour.
 
 ## Constraints
@@ -20,7 +21,8 @@
 
 ## Non-goals
 - Stopping, restarting, or attaching to a session.
-- Sessions not started through soft-foundry, and `soft-foundry shell`, which replaces its own process with the shell and so is no longer a soft-foundry process.
+- Saying what a session is doing at this moment. A session's phase is what its change's record says, which is where the work stands, not a reading of the session.
+- Sessions in tools other than claude, codex, and grok (an editor's assistant, a desktop app working outside a Soft Foundry repository).
 - Other users' processes, other machines, history of past runs.
 - Windows.
 

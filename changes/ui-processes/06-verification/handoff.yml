@@ -1,9 +1,9 @@
 phase: 06-verification
 skill: verification
-status: in_progress
-commit_sha: 0d3a0436374b6af728209f039ed577a40c960d3a
+status: complete
+commit_sha: dd18466001ecc7246f8266643a154bcdc1ff0ff5
 started_at: '2026-10-02T13:27:00Z'
-completed_at: '2026-10-02T13:31:00Z'
+completed_at: '2026-10-02T14:27:00Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -17,8 +17,9 @@ outputs:
 - evidence/check.log
 - evidence/syntax-warnings.log
 - evidence/scan-against-self.log
+- evidence/red-at-79e48c2.log
 blocking: []
 findings: []
 next: evaluate
-notes: Performed directly by the interactive session, not a fresh-context agent; see 00-intake/assumptions.md. macOS only; Linux is left to CI.
+notes: Performed directly by the interactive session, not a fresh-context agent; see 00-intake/assumptions.md. macOS only; Linux is left to CI. Produced again after the remediation in 09-remediation/summary.md.
 executed_by:
