@@ -60,6 +60,7 @@ class SnapshotTest < Minitest::Test
 
       assert_equal "remediate", workflow.dig("transitions", "review", "on_blocking_findings")
       assert_includes workflow["judgments"], "APPROVED"
+      assert_equal SoftFoundry::Gate::CHECKS["phase in progress"], workflow.dig("check_descriptions", "phase in progress")
       assert_equal "gated", workflow.dig("tracks", "default")
       assert_equal({ "high" => "gated" }, workflow.dig("tracks", "forced_by_risk"))
       iterative = workflow.dig("tracks", "list").find { |t| t["name"] == "iterative" }

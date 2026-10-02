@@ -38,7 +38,7 @@ ul, ol { list-style: none; }
 a { color: inherit; text-underline-offset: 0.18em; }
 code, .mono { font-family: var(--mono); font-size: 0.875em; }
 :focus-visible { outline: 3px solid var(--cold); outline-offset: 2px; border-radius: 2px; }
-main:focus { outline: none; }
+main:focus, h1:focus { outline: none; }
 
 .sr-only {
   position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
@@ -173,3 +173,35 @@ table.board { border-collapse: collapse; width: 100%; font-size: 0.9375rem; }
 
 /* Links that stand alone are at least 24 CSS pixels tall. */
 .wordmark, .back, .board th[scope="row"] a { display: inline-block; padding-block: 0.2rem; }
+
+/* Pausing updates also stops the one animation. */
+[data-paused] .gate { animation: none; }
+
+/* Workflow view */
+.tracks { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 1rem; }
+.track { padding: 1rem 1.25rem; background: var(--surface); border: 1px solid var(--line); border-top: 6px solid var(--ink); }
+.track[data-exploring] { border-top-color: var(--pour); }
+.track h3 { font: 700 1.25rem/1.2 var(--display); text-transform: capitalize; }
+.track p { margin-top: 0.5rem; }
+.track .facts { margin-top: 0.75rem; }
+.inline { display: flex; flex-wrap: wrap; gap: 0.3rem 0.5rem; }
+.inline li { font-family: var(--mono); font-size: 0.8125rem; padding: 0.1rem 0.4rem; border: 1px solid var(--line); background: var(--ground); }
+.explain li { display: block; padding: 0.55rem 0; border-bottom: 1px solid var(--line); max-width: 80ch; }
+.explain li:first-child { border-top: 1px solid var(--line); }
+.explain .term { font-weight: 650; }
+.explain .detail { display: block; color: var(--steel); font-size: 0.9375rem; }
+
+/* Timeline and spend */
+.timeline { border-top: 1px solid var(--line); max-width: 64rem; }
+.timeline li { display: grid; grid-template-columns: 11.5rem 6.5rem 1fr; gap: 0.25rem 1rem; align-items: baseline; padding: 0.5rem 0; border-bottom: 1px solid var(--line); }
+.timeline time, .timeline .at { font-family: var(--mono); font-size: 0.8125rem; color: var(--steel); }
+.timeline .kind { font: 600 0.8125rem/1.4 var(--display); letter-spacing: 0.08em; text-transform: uppercase; }
+.timeline .label { overflow-wrap: anywhere; }
+table.spend { border-collapse: collapse; font-size: 0.9375rem; background: var(--surface); min-width: 32rem; }
+.spend th, .spend td { padding: 0.45rem 0.9rem; border-bottom: 1px solid var(--line); text-align: right; }
+.spend th:first-child, .spend td:first-child, .spend th[scope="row"] { text-align: left; }
+.spend thead th { font-weight: 400; color: var(--steel); }
+.spend td.over { color: var(--flaw); font-weight: 600; }
+@media (max-width: 40rem) {
+  .timeline li { grid-template-columns: 1fr; gap: 0; }
+}
