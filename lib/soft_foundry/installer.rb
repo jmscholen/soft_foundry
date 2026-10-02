@@ -51,9 +51,10 @@ module SoftFoundry
       # Uncommitted edits are protected whenever a repository exists, even
       # under --allow-non-git; git-ignored files count as uncommitted.
       dirty = @git.repository? ? @git.dirty_paths : []
-      actions = adapter_actions + source.entries.map { |entry| entry_action(entry, previous, dirty) }
+      entries = adopted_entries
+      actions = adapter_actions + entries.map { |entry| entry_action(entry, previous, dirty) }
 
-      packaged = source.paths.select { |p| p.start_with?(".ai/") }
+      packaged = entries.map(&:path).select { |p| p.start_with?(".ai/") }
       warnings = (previous.files.keys - packaged).map { |p| "manifest entry ignored, not in the packaged set: #{p}" }
 
       manifest = Manifest.new(soft_foundry_version: @version)
@@ -108,6 +109,31 @@ module SoftFoundry
 
     private
 
+    # Application repos get iterative as the packaged default track.
+    # This repository keeps default: gated in the committed workflow.yml.
+    # The substitution is applied to every install/update comparison so a
+    # later init does not see the adopted default as a conflict against
+    # the source file. An existing workflow.yml that already chose gated
+    # or iterative is treated as identical so init does not flip it.
+    def adopted_entries
+      source.entries.map { |entry| adopt_workflow(entry) }
+    end
+
+    def same_except_default_track?(left, right)
+      normalize_default_track(left) == normalize_default_track(right)
+    end
+
+    def normalize_default_track(bytes)
+      bytes.to_s.dup.force_encoding("UTF-8").sub(/^([ \t]*default:[ \t]*)(?:gated|iterative)([ \t]*)$/, "\\1<track>\\2")
+    end
+
+    def adopt_workflow(entry)
+      return entry unless entry.path == ".ai/workflow.yml"
+      text = entry.bytes.dup.force_encoding("UTF-8")
+      patched = text.sub(/^([ \t]*default:[ \t]*)gated([ \t]*)$/, "\\1iterative\\2")
+      patched == text ? entry : Source::Entry.new(path: entry.path, bytes: patched.b)
+    end
+
     def pointer(p) = Action.new(path: p.path, status: p.status, reason: p.reason, bytes: p.bytes, kind: :pointer, adopt: false)
 
     def gitignore_action
@@ -152,6 +178,7 @@ module SoftFoundry
         return act(entry, "created", "", :ai, true) unless exists
         existing = File.binread(dest)
         return act(entry, "skipped", "identical", :ai, true) if existing == entry.bytes
+        return act(entry, "skipped", "identical", :ai, true) if entry.path == ".ai/workflow.yml" && same_except_default_track?(existing, entry.bytes)
         return act(entry, "conflict", "uncommitted modifications", :ai, false) if dirty?(entry.path, dirty)
         return act(entry, "updated", "owned by manifest", :ai, true) if previous.owned?(entry.path, existing)
         reason = previous.include?(entry.path) ? "differs from manifest hash" : "not in manifest"

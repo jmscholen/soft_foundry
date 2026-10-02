@@ -220,4 +220,24 @@ class InstallerAttackRemediationTest < Minitest::Test
     end
     with_target_repo { |dir| assert installer(dir).plan.clean }
   end
+
+  def test_init_packages_iterative_as_the_default_track
+    with_target_repo do |dir|
+      installer(dir).apply(installer(dir).plan)
+      wf = YAML.safe_load_file(File.join(dir, ".ai/workflow.yml"))
+      assert_equal "iterative", wf.dig("tracks", "default")
+      assert_equal "gated", wf.dig("tracks", "forced_by_risk", "high")
+      source_wf = YAML.safe_load_file(File.join(REPO_ROOT, ".ai/workflow.yml"))
+      assert_equal "gated", source_wf.dig("tracks", "default"), "this repository stays gated"
+    end
+  end
+
+  def test_a_second_init_does_not_conflict_on_the_packaged_default_track
+    with_target_repo do |dir|
+      installer(dir).apply(installer(dir).plan)
+      commit_all(dir)
+      a = action(installer(dir).plan, ".ai/workflow.yml")
+      assert_equal "skipped", a.status, a.reason
+    end
+  end
 end

@@ -1,0 +1,9 @@
+checks:
+  - id: CHECK-001
+    kind: tests
+    command: bundle exec rake test
+    result: pass
+    evidence: evidence/tests.log
+    criteria: [REQ-001]
+    red_commit: 0000000000000000000000000000000000000000
+    test_path: test/cli_json_test.rb

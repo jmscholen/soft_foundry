@@ -1,5 +1,16 @@
 # `.ai/` Control Plane
 
+## Minimum context
+
+Load only what the current turn needs:
+
+1. `AGENTS.md` and this file.
+2. `workflow.yml` for the lifecycle and tracks.
+3. `changes/<slug>/metadata.yml` for the live change, if any.
+4. The current phase skill under `skills/<name>/` (or `skills/exploration/` while exploring).
+
+Do not load closed records, `harness-evals/`, or other skills' templates unless the current phase names them.
+
 `.ai/` defines HOW engineering work is performed. It contains lifecycle orchestration, skill contracts, policies, model profiles, maturity policy, repository capability assessment, runtime configuration, and deterministic checks. It should not become a duplicate home for product/domain documentation; canonical human/agent product documentation belongs under `docs/`.
 
 A skill is a declarative agent definition. The harness loads its instructions, model profile, permissions, required inputs, template-derived working artifacts, tools, and completion gate into an isolated execution context.

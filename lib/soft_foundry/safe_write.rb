@@ -17,7 +17,10 @@ module SoftFoundry
       refuse_symlink!(path)
       tmp = path + TMP_SUFFIX
       raise TargetError, "#{tmp} already exists (planted or leftover temporary file); remove it and rerun" if File.symlink?(tmp) || File.exist?(tmp)
-      File.open(tmp, File::WRONLY | File::CREAT | File::EXCL | File::NOFOLLOW, 0o644) { |f| f.write(bytes) }
+      File.open(tmp, File::WRONLY | File::CREAT | File::EXCL | File::NOFOLLOW, 0o644) do |f|
+        f.binmode
+        f.write(bytes.b)
+      end
       refuse_symlink!(path)
       File.rename(tmp, path)
     rescue Errno::EEXIST, Errno::ELOOP => e

@@ -131,6 +131,8 @@ module SoftFoundry
         end
         if errors.empty?
           @out.puts "check: ok"
+          default = ControlPlane.new(root).default_track
+          @out.puts "track: packaged default is #{default}; high risk still forces gated. This Soft Foundry repo itself stays gated."
         elsif plan.clean
           raise InternalError.new("control-plane check failed immediately after a clean install", component: "control plane", diagnostic: errors.map(&:message))
         else
@@ -245,11 +247,15 @@ module SoftFoundry
         ".ai/manifest.yml" => File.exist?(File.join(@root, Manifest::PATH)),
         "pre-commit hook" => File.exist?(File.join(@root, ".git/hooks/pre-commit")) && File.read(File.join(@root, ".git/hooks/pre-commit")).include?(Hooks::MARKER),
         "guard hook" => !Hooks.claude_installed?(@root).nil? || !Hooks.codex_installed?(@root).nil?,
-        "local runtime" => File.exist?(File.join(@root, ".soft-foundry/runtime.yml"))
+        "local runtime" => File.exist?(File.join(@root, ".soft-foundry/runtime.yml")),
+        "default track" => plane.present?
       }
       mode, source = Guard.mode(@root)
       hosts = "claude: #{Hooks.claude_installed?(@root) ? 'installed' : 'not installed'}, codex: #{Hooks.codex_installed?(@root) ? 'installed' : 'not installed'}"
-      detail = { "guard hook" => " (#{hosts}; mode: #{mode}, #{source})#{checks['guard hook'] ? '' : '; install with `soft-foundry hooks install --claude` or `--codex`'}" }
+      detail = {
+        "guard hook" => " (#{hosts}; mode: #{mode}, #{source})#{checks['guard hook'] ? '' : '; install with `soft-foundry hooks install --claude` or `--codex`'}; warn reports and allows, block refuses",
+        "default track" => plane.present? ? " (#{plane.default_track}; high risk forces #{plane.track_forced_by_risk('high') || 'none'})" : ""
+      }
       checks.each { |name, ok| @out.puts "#{ok ? '✓ pass' : '✗ fail'} #{name}#{detail[name]}" }
       checks.values.all? ? 0 : 2
     end
@@ -274,7 +280,7 @@ module SoftFoundry
           @err.puts "unknown track '#{track}'; .ai/workflow.yml defines: #{plane.track_names.join(', ')}"
           return EXIT_TARGET
         end
-        record = ChangeRecord.create(@root, slug, control_plane: plane, title: title, branch: branch, worktree: @root, track: track)
+        record = ChangeRecord.create(@root, slug, control_plane: plane, title: title, branch: branch, worktree: ".", track: track)
         @out.puts "created #{relative(record.dir)} with #{plane.phases.size} phase directories"
         @out.puts "branch: #{branch || slug}"
         @out.puts track_line(record)

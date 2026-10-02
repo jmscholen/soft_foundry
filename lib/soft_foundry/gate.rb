@@ -4,6 +4,7 @@ require "yaml"
 require "date"
 require_relative "learning"
 require_relative "content_scan"
+require_relative "text"
 
 module SoftFoundry
   # Deterministic completion gate for one lifecycle phase of a change record.
@@ -182,7 +183,7 @@ module SoftFoundry
     def placeholder_check(phase, skill)
       remaining = skill.required_files.select do |f|
         path = File.join(@record.phase_dir(phase), f)
-        File.file?(path) && File.read(path).match?(PLACEHOLDER)
+        File.file?(path) && Text.read(path).match?(PLACEHOLDER)
       end
       remaining.empty? ? Check.new("no placeholders", :pass, "") : Check.new("no placeholders", :fail, "TBD remains in: #{remaining.join(', ')}")
     end

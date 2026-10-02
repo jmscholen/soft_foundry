@@ -23,6 +23,7 @@ class ChangeRecordTest < Minitest::Test
       assert_equal "done", record.handoff(plane.phase("learn"))["next"]
       assert_equal "Add widget", record.metadata.dig("change", "title")
       assert_equal "change/add-widget", record.metadata.dig("git", "branch")
+      assert_equal ".", record.metadata.dig("git", "worktree")
       assert_equal "intake", record.metadata["current_phase"]
     end
   end

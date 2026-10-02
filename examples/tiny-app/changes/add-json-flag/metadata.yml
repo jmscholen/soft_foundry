@@ -1,0 +1,30 @@
+change:
+  id: add-json-flag
+  title: Add a --json flag
+git:
+  worktree: "."
+  branch: change/add-json-flag
+type: feature
+risk: low
+track: iterative
+status: closed
+current_phase: done
+created_at: "2026-09-30T00:00:00Z"
+surfaces:
+  application: true
+  database: false
+  infrastructure: false
+  security: false
+  accessibility: true    # CLI output is perceived by a person
+  observability: false
+  policy: false
+human_decisions: []
+vetted:
+  at: "2026-09-30T00:20:00Z"
+  by: Alex
+  commit: 1111111111111111111111111111111111111111
+skipped_phases:
+  - phase: threat_model
+    rationale: Flag formats existing output; no new trust boundary
+  - phase: attack
+    rationale: No authorization surface; evaluation covered malformed flags

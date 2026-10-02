@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "control_plane"
+require_relative "text"
 
 module SoftFoundry
   # Go-live advisories for one change record: things a person should know
@@ -236,7 +237,7 @@ module SoftFoundry
       return [Notice.new("accessibility", "the accessibility review (13-review/accessibility.md) has not run yet")] unless status == "complete"
       path = File.join(@record.phase_dir(phase), "accessibility.md")
       return [Notice.new("accessibility", "13-review/accessibility.md is missing")] unless File.file?(path)
-      body = File.read(path)
+      body = Text.read(path)
       conformance = section_body(path, "Conformance").to_s
       if body.match?(PLACEHOLDER)
         [Notice.new("accessibility", "13-review/accessibility.md still contains TBD placeholders")]
@@ -257,7 +258,7 @@ module SoftFoundry
       return [Notice.new("policy", "the policy-conformance review (13-review/policy-conformance.md) has not run yet")] unless status == "complete"
       path = File.join(@record.phase_dir(phase), "policy-conformance.md")
       return [Notice.new("policy", "13-review/policy-conformance.md is missing")] unless File.file?(path)
-      return [Notice.new("policy", "13-review/policy-conformance.md still contains TBD placeholders")] if File.read(path).match?(PLACEHOLDER)
+      return [Notice.new("policy", "13-review/policy-conformance.md still contains TBD placeholders")] if Text.read(path).match?(PLACEHOLDER)
       notices = []
       if section_body(path, "Conformance").to_s.match?(NOT_APPLICABLE)
         notices << Notice.new("policy", "13-review/policy-conformance.md declares conformance N/A although the change declares a policy surface")
@@ -285,7 +286,7 @@ module SoftFoundry
     # when the file or heading is absent.
     def section_body(path, heading)
       return nil unless File.file?(path)
-      lines = File.read(path).lines
+      lines = Text.read(path).lines
       start = lines.index { |l| l.strip == "## #{heading}" }
       return nil unless start
       body = lines[(start + 1)..].take_while { |l| !l.start_with?("## ") }

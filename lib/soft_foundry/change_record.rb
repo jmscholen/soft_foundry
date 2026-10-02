@@ -17,7 +17,7 @@ module SoftFoundry
       raise "change record already exists: #{record.dir}" if record.exists?
       track ||= control_plane.default_track
       raise ArgumentError, "unknown track '#{track}'; .ai/workflow.yml defines: #{control_plane.track_names.join(', ')}" unless control_plane.track(track)
-      record.send(:scaffold, title: title || slug, branch: branch || slug, worktree: worktree || root, track: track, now: now)
+      record.send(:scaffold, title: title || slug, branch: branch || slug, worktree: worktree || ".", track: track, now: now)
       record
     end
 
