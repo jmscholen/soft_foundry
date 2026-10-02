@@ -193,6 +193,23 @@ class UIServerTest < Minitest::Test
     end
   end
 
+  # Found by ATTACK-005: enough silent connections used to fill every
+  # slot, and real requests were answered 503 until the silent ones timed
+  # out. The connection that has waited longest without sending a request
+  # now gives up its slot.
+  def test_silent_connections_cannot_crowd_out_a_request
+    with_server(read_timeout: 5) do |_dir, port, _server|
+      silent = Array.new(40) { TCPSocket.new("127.0.0.1", port) }
+      sleep 0.2
+      started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      assert_equal 200, get(port, "/").status
+      assert_equal 200, get(port, "/api/changes").status
+      assert_operator Process.clock_gettime(Process::CLOCK_MONOTONIC) - started, :<, 2
+    ensure
+      Array(silent).each(&:close)
+    end
+  end
+
   # Record text is data. It is returned JSON-encoded with a JSON content
   # type, so a browser never interprets it as markup.
   def test_record_text_is_returned_as_json_not_markup
