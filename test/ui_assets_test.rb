@@ -63,9 +63,7 @@ class UIAssetsTest < Minitest::Test
   end
 
   def test_page_offers_the_workflow_view_and_the_change_history
-    page = asset("index.html")
     script = asset("app.js")
-    assert_match(%r{<a href="#/workflow"[^>]*>Workflow</a>}, page)
     assert_includes script, '"/api/workflow"'
     %w[Timeline Spend Tracks].each { |heading| assert_includes script, "\"#{heading}\"" }
   end
@@ -75,6 +73,19 @@ class UIAssetsTest < Minitest::Test
   def test_pause_stops_the_animation
     assert_match(/\[data-paused\][^{]*\{[^}]*animation:\s*none/, asset("app.css"))
     assert_includes asset("app.js"), "data-paused"
+  end
+
+  # The page starts from every repository and carries the server's token
+  # on each request for data.
+  def test_page_starts_from_repositories_and_sends_the_token
+    page = asset("index.html")
+    script = asset("app.js")
+    assert_match(%r{<a href="#/"[^>]*>Repositories</a>}, page)
+    refute_match(%r{href="#/workflow"}, page, "the workflow belongs to a repository, so it is not in the top navigation")
+    assert_includes script, '"/api/repositories"'
+    assert_includes script, "X-Soft-Foundry-Token"
+    assert_includes script, "sessionStorage"
+    assert_includes script, "history.replaceState"
   end
 
   def test_page_offers_the_running_view

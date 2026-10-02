@@ -15,6 +15,7 @@ class CLIUiTest < Minitest::Test
     end
 
     def start = (@calls << :start) && 4321
+    def url = "http://127.0.0.1:4321/#token=abc"
     def stop = @calls << :stop
 
     def serve
@@ -25,8 +26,8 @@ class CLIUiTest < Minitest::Test
 
   def ui(dir, *args, server: FakeServer.new)
     built = []
-    factory = lambda do |root, port:|
-      built << [root, port]
+    factory = lambda do |root, port:, repos:|
+      built << [root, port, repos]
       server
     end
     out = StringIO.new
@@ -39,8 +40,8 @@ class CLIUiTest < Minitest::Test
     with_fixture_repo do |dir|
       code, out, built, server = ui(dir)
       assert_equal 0, code, out
-      assert_equal "ui: serving http://127.0.0.1:4321/ (read-only; press Ctrl-C to stop)\nui: stopped\n", out
-      assert_equal [[File.expand_path(dir), 0]], built
+      assert_equal "ui: serving http://127.0.0.1:4321/#token=abc (read-only; press Ctrl-C to stop)\nui: stopped\n", out
+      assert_equal [[File.expand_path(dir), 0, []]], built
       assert_equal %i[start serve stop], server.calls
     end
   end
@@ -48,7 +49,16 @@ class CLIUiTest < Minitest::Test
   def test_ui_passes_the_requested_port
     with_fixture_repo do |dir|
       _, _, built, = ui(dir, "--port", "8123")
-      assert_equal 8123, built.first.last
+      assert_equal 8123, built.first[1]
+    end
+  end
+
+  def test_ui_passes_repositories_to_add
+    with_fixture_repo do |dir|
+      with_fixture_repo do |other|
+        _, _, built, = ui(dir, "--repo", other, "--repo", dir)
+        assert_equal [File.expand_path(other), File.expand_path(dir)], built.first.last
+      end
     end
   end
 
@@ -88,7 +98,7 @@ class CLIUiTest < Minitest::Test
   def test_help_describes_ui
     with_fixture_repo do |dir|
       _, out = cli(dir)
-      assert_includes out, "soft-foundry ui [--port N]"
+      assert_includes out, "soft-foundry ui [--port N] [--repo PATH]..."
       assert_includes out, "read-only"
     end
   end

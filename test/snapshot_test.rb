@@ -281,6 +281,22 @@ class SnapshotTest < Minitest::Test
     end
   end
 
+  # For a list of repositories: what is open, without gating anything.
+  def test_overview_counts_changes_and_lists_the_open_ones
+    with_snapshot do |dir, record, snapshot|
+      cli(dir, "change", "new", "done", "--title", "Finished")
+      SoftFoundry::ChangeRecord.new(dir, "done", control_plane: record.control_plane).close!
+      cli(dir, "change", "new", "broken", "--title", "x")
+      File.write(File.join(dir, "changes", "broken", "metadata.yml"), "change: [unterminated\n")
+      overview = snapshot.overview
+      assert_plain overview
+      assert_equal 2, overview["open"]
+      assert_equal 1, overview["closed"]
+      assert_equal [{ "slug" => "broken", "error" => "unreadable" },
+                    { "slug" => "c1", "title" => "First change", "status" => "intake", "current_phase" => "intake" }], overview["changes"]
+    end
+  end
+
   def test_board_has_a_row_per_change_and_a_cell_per_phase
     with_snapshot do |dir, record, snapshot|
       complete_phase!(record, "intake", sha: head(dir))
