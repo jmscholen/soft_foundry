@@ -10,14 +10,14 @@ class ProcessesTest < Minitest::Test
 
   # What `ps` prints: pid, parent pid, start time, command line.
   PS = <<~TEXT
-    100     1 Fri Oct  2 00:36:11 2026     /opt/ruby/bin/ruby -Ilib exe/soft-foundry ui --port 4877
-    200     1 Fri Oct  2 00:02:33 2026     /opt/ruby/bin/ruby /opt/ruby/bin/soft-foundry phase run verify --change pdf-review --shell claude -- --dangerously-skip-permissions --api-key sk-secret
-    201   200 Fri Oct  2 00:02:34 2026     /usr/local/bin/claude -p --dangerously-skip-permissions You are a fresh-context agent. Do not run soft-foundry phase run yourself.
-    300     1 Fri Oct  2 01:00:00 2026     /opt/ruby/bin/soft-foundry ci
-    400     1 Fri Oct  2 01:00:00 2026     vim soft-foundry.md
-    401     1 Fri Oct  2 01:00:00 2026     grep soft-foundry phase run
-    500     1 Fri Oct  2 01:00:00 2026     /tmp/soft-foundry phase run <script>alert(1)</script> --change ../../etc --shell <b>sh</b>
-    600     1 Fri Oct  2 01:00:00 2026     ruby -w -I lib /work/exe/soft-foundry gate review --change team/alpha
+    100     1 ttys011 Fri Oct  2 00:36:11 2026     /opt/ruby/bin/ruby -Ilib exe/soft-foundry ui --port 4877
+    200     1 ??      Fri Oct  2 00:02:33 2026     /opt/ruby/bin/ruby /opt/ruby/bin/soft-foundry phase run verify --change pdf-review --shell claude -- --dangerously-skip-permissions --api-key sk-secret
+    201   200 ??      Fri Oct  2 00:02:34 2026     /usr/local/bin/claude -p --dangerously-skip-permissions You are a fresh-context agent. Do not run soft-foundry phase run yourself.
+    300     1 ??      Fri Oct  2 01:00:00 2026     /opt/ruby/bin/soft-foundry ci
+    400     1 ttys001 Fri Oct  2 01:00:00 2026     vim soft-foundry.md
+    401     1 ttys001 Fri Oct  2 01:00:00 2026     grep soft-foundry phase run
+    500     1 ??      Fri Oct  2 01:00:00 2026     /tmp/soft-foundry phase run <script>alert(1)</script> --change ../../etc --shell <b>sh</b>
+    600     1 pts/3   Fri Oct  2 01:00:00 2026     ruby -w -I lib /work/exe/soft-foundry gate review --change team/alpha
   TEXT
 
   def processes(root, ps: PS, cwd: {})
@@ -92,7 +92,7 @@ class ProcessesTest < Minitest::Test
     with_fixture_repo do |dir|
       sh(dir, "git", "checkout", "-qb", "change/c1")
       cli(dir, "change", "new", "c1", "--title", "x")
-      ps = "700 1 Fri Oct  2 01:00:00 2026 ruby /bin/soft-foundry phase run intake\n701 1 Fri Oct  2 01:00:00 2026 ruby /bin/soft-foundry ui\n"
+      ps = "700 1 ?? Fri Oct  2 01:00:00 2026 ruby /bin/soft-foundry phase run intake\n701 1 ?? Fri Oct  2 01:00:00 2026 ruby /bin/soft-foundry ui\n"
       list = by_pid(processes(dir, ps: ps, cwd: { 700 => File.realpath(dir), 701 => File.realpath(dir) }).list)
       assert_equal "c1", list[700]["change"]
       assert_nil list[701]["change"], "a command that is not about one change has none"
@@ -119,7 +119,7 @@ class ProcessesTest < Minitest::Test
       stamp.call("discover", nil)
       stamp.call("specify", nil)
 
-      ps = "800 1 Fri Oct  2 00:00:00 2026 ruby /bin/soft-foundry phase run discover --change c1 --shell codex\n"
+      ps = "800 1 ?? Fri Oct  2 00:00:00 2026 ruby /bin/soft-foundry phase run discover --change c1 --shell codex\n"
       runs = processes(dir, ps: ps, cwd: { 800 => File.realpath(dir) }).snapshot["recorded_runs"]
       assert_equal %w[discover specify], runs.map { |r| r["phase"] }
       assert_equal [true, false], runs.map { |r| r["live"] }
@@ -137,6 +137,93 @@ class ProcessesTest < Minitest::Test
       assert_equal [], snapshot["recorded_runs"]
       assert_includes snapshot["error"], "could not list processes"
       assert_equal [], processes(dir, ps: "garbage line\n\n  12 x\n").list
+    end
+  end
+
+  # The sessions a person has open: a coding shell (claude, codex, grok)
+  # started by hand in a terminal, in a repository that has a Soft Foundry
+  # control plane. They are not soft-foundry processes, and they are most
+  # of what is going on.
+  SESSIONS = <<~TEXT
+    900     1 ttys004 Fri Oct  2 02:00:00 2026     claude --allow-dangerously-skip-permissions --api-key sk-session
+    901     1 ttys005 Fri Oct  2 02:01:00 2026     claude
+    902     1 ttys007 Fri Oct  2 02:02:00 2026     /opt/homebrew/bin/grok
+    903     1 pts/2   Fri Oct  2 02:03:00 2026     node /usr/local/bin/codex --model x
+    904     1 ttys009 Fri Oct  2 02:04:00 2026     claude
+    905   900 ttys004 Fri Oct  2 02:05:00 2026     claude --worker
+    906     1 ttys010 Fri Oct  2 02:06:00 2026     vim claude.md
+    910     1 ??      Fri Oct  2 02:07:00 2026     ruby /bin/soft-foundry phase run intake --change c1
+    911   910 ??      Fri Oct  2 02:07:01 2026     claude -p prompt text
+  TEXT
+
+  def with_two_repositories
+    with_fixture_repo do |here|
+      with_fixture_repo do |other|
+        sh(here, "git", "checkout", "-qb", "change/c1")
+        cli(here, "change", "new", "c1", "--title", "x")
+        meta = File.join(here, "changes", "c1", "metadata.yml")
+        File.write(meta, File.read(meta).sub(/^current_phase: .*/, "current_phase: implement").sub(/^status: .*/, "status: in_progress"))
+        FileUtils.mkdir_p(File.join(other, "lib", "deep"))
+        Dir.mktmpdir("not-governed") do |plain|
+          yield File.realpath(here), File.realpath(other), File.realpath(plain)
+        end
+      end
+    end
+  end
+
+  def test_lists_coding_shell_sessions_open_in_soft_foundry_repositories
+    with_two_repositories do |here, other, plain|
+      cwd = { 900 => here, 901 => other, 902 => File.join(other, "lib", "deep"), 903 => other, 904 => plain, 905 => here, 906 => here, 910 => here, 911 => here }
+      snapshot = processes(here, ps: SESSIONS, cwd: cwd).snapshot
+      sessions = by_pid(snapshot["sessions"])
+      assert_equal [900, 901, 902, 903], sessions.keys.sort, "not: one outside a governed repository, a child of a session, an editor, a phase runner's own session"
+
+      mine = sessions[900]
+      assert_equal "claude", mine["shell"]
+      assert_equal "ttys004", mine["terminal"]
+      assert mine["here"]
+      assert_equal ".", mine["repository"]
+      assert_equal "change/c1", mine["branch"]
+      assert_equal "c1", mine["change"]
+      assert_equal "implement", mine["phase"]
+      assert_equal "in_progress", mine["status"]
+      assert_match(/\A2026-10-0\dT\d\d:00:00Z\z/, mine["started_at"])
+
+      elsewhere = sessions[901]
+      refute elsewhere["here"]
+      assert_equal "main", elsewhere["branch"]
+      assert_nil elsewhere["change"], "main has no change record"
+      assert_nil elsewhere["phase"]
+      assert_equal sessions[901]["repository"], sessions[902]["repository"], "a session in a subdirectory belongs to the repository above it"
+      assert_equal "grok", sessions[902]["shell"]
+      assert_equal "codex", sessions[903]["shell"]
+      assert_equal "pts/2", sessions[903]["terminal"]
+
+      text = JSON.generate(snapshot)
+      %w[sk-session dangerously --worker --model prompt].each { |secret| refute_includes text, secret }
+      assert_equal snapshot, JSON.parse(text)
+      assert_equal [910], snapshot["processes"].map { |p| p["pid"] }
+      assert_equal({ "pid" => 911, "name" => "claude" }, snapshot["processes"].first["session"])
+    end
+  end
+
+  # Another repository's record is someone else's file: what is read from
+  # it is checked like a command line is.
+  def test_a_session_reports_nothing_unvalidated_from_another_repository
+    with_two_repositories do |here, other, _plain|
+      sh(other, "git", "checkout", "-qb", "change/evil")
+      cli(other, "change", "new", "evil", "--title", "x")
+      File.write(File.join(other, "changes", "evil", "metadata.yml"), "status: \"<b>bad</b>\"\ncurrent_phase: \"<script>x</script>\"\n")
+      session = processes(here, ps: "901 1 ttys005 Fri Oct  2 02:01:00 2026 claude\n", cwd: { 901 => other }).snapshot["sessions"].first
+      assert_equal "evil", session["change"]
+      assert_nil session["phase"]
+      assert_nil session["status"]
+
+      File.write(File.join(other, "changes", "evil", "metadata.yml"), "change: [unterminated\n")
+      session = processes(here, ps: "901 1 <b> Fri Oct  2 02:01:00 2026 claude\n", cwd: { 901 => other }).snapshot["sessions"].first
+      assert_equal "evil", session["change"]
+      assert_nil session["phase"]
+      assert_nil session["terminal"]
     end
   end
 
