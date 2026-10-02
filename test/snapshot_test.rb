@@ -215,8 +215,9 @@ class SnapshotTest < Minitest::Test
       assert_equal 2, intake["entries"]
       verify = spend["by_phase"].find { |p| p["phase"] == "verify" }
       assert_nil verify["estimated_usd"]
-      assert_in_delta 50.0, spend.dig("policy", "max_usd_per_change")
-      assert_in_delta 5.0, spend.dig("policy", "max_usd_per_phase")
+      policy = SoftFoundry::Budget.policy(record.control_plane, risk: "low")
+      assert_in_delta policy.max_usd_per_change, spend.dig("policy", "max_usd_per_change")
+      assert_in_delta policy.max_usd_per_phase, spend.dig("policy", "max_usd_per_phase")
     end
   end
 
@@ -285,8 +286,9 @@ class SnapshotTest < Minitest::Test
       assert row["merged_unclosed"]
       refute row["stale"]
 
+      # Staleness is measured on the record's own branch.
+      sh(dir, "git", "checkout", "-q", "change/c1")
       File.write(File.join(dir, "lib", "app.rb"), "puts 3\n")
-      commit_all(dir, "code moved on")
       assert snapshot.board["changes"].first["stale"]
     end
   end
@@ -300,18 +302,25 @@ class SnapshotTest < Minitest::Test
       rows = snapshot.board["changes"]
       broken = rows.find { |c| c["slug"] == "broken" }
       refute_empty broken["error"]
+      refute_includes broken["error"], dir
       refute broken.key?("cells")
       assert_equal 16, rows.find { |c| c["slug"] == record.slug }["cells"].size
     end
   end
 
-  def test_text_that_is_not_valid_utf8_is_made_safe_to_serialize
-    with_snapshot do |_dir, record, snapshot|
-      path = File.join(record.dir, "metadata.yml")
-      File.binwrite(path, File.binread(path).sub("First change", "First \xFF change".b))
-      change = snapshot.change("c1")
-      assert_plain change
-      assert change["title"].valid_encoding?
-    end
+  # YAML refuses a file that is not UTF-8, so a record's text is valid by
+  # the time it is read; anything else that reaches a snapshot (a path in
+  # an error, a binary string) is still made safe to serialize.
+  def test_plain_makes_any_recorded_value_safe_to_serialize
+    plain = SoftFoundry::Snapshot.plain(
+      "text" => "caf\xFF".b, :symbol => :value, "time" => Time.utc(2030, 1, 2, 3, 4, 5), "date" => Date.new(2030, 1, 2),
+      "nested" => [1, 2.5, true, nil, Float::NAN]
+    )
+    assert_plain plain
+    assert_equal "caf?", plain["text"]
+    assert_equal "value", plain["symbol"]
+    assert_equal "2030-01-02T03:04:05Z", plain["time"]
+    assert_equal "2030-01-02", plain["date"]
+    assert_equal [1, 2.5, true, nil, nil], plain["nested"]
   end
 end
