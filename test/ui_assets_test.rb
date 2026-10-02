@@ -62,6 +62,21 @@ class UIAssetsTest < Minitest::Test
     end
   end
 
+  def test_page_offers_the_workflow_view_and_the_change_history
+    page = asset("index.html")
+    script = asset("app.js")
+    assert_match(%r{<a href="#/workflow"[^>]*>Workflow</a>}, page)
+    assert_includes script, '"/api/workflow"'
+    %w[Timeline Spend Tracks].each { |heading| assert_includes script, "\"#{heading}\"" }
+  end
+
+  # Carried from ui-server's review (REV-024): pausing also stops the one
+  # animation on the page.
+  def test_pause_stops_the_animation
+    assert_match(/\[data-paused\][^{]*\{[^}]*animation:\s*none/, asset("app.css"))
+    assert_includes asset("app.js"), "data-paused"
+  end
+
   def test_assets_ship_in_the_gem
     spec = Gem::Specification.load(File.expand_path("../soft_foundry.gemspec", __dir__))
     %w[index.html app.css app.js].each { |name| assert_includes spec.files, "lib/soft_foundry/ui/assets/#{name}" }
