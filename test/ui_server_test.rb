@@ -88,6 +88,23 @@ class UIServerTest < Minitest::Test
     end
   end
 
+  Listing = Struct.new(:data) do
+    def snapshot = data
+  end
+
+  def test_api_returns_running_processes
+    data = { "version" => 1, "processes" => [{ "pid" => 7, "command" => "ci" }], "recorded_runs" => [] }
+    with_server(processes: ->(_root) { Listing.new(data) }) do |_dir, port, _server|
+      response = get(port, "/api/processes")
+      assert_equal 200, response.status
+      assert_equal "application/json; charset=utf-8", response.headers["content-type"]
+      assert_equal data, JSON.parse(response.body)
+      assert_equal 403, get(port, "/api/processes", "Sec-Fetch-Site" => "cross-site").status
+      assert_equal 405, request(port, "POST /api/processes HTTP/1.1").status
+      assert_equal 404, get(port, "/api/processes/7").status
+    end
+  end
+
   def test_a_slug_with_a_slash_is_addressed_by_query
     with_server do |dir, port, _server|
       cli(dir, "change", "new", "team/alpha", "--title", "Nested")
@@ -145,7 +162,7 @@ class UIServerTest < Minitest::Test
   end
 
   # The route table is exact. Nothing in the URL names a file.
-  def test_only_the_six_routes_exist
+  def test_only_the_listed_routes_exist
     with_server do |dir, port, _server|
       File.write(File.join(dir, "secret.txt"), "s3cret")
       ["/../secret.txt", "/secret.txt", "/app.js/..", "/app.js/", "//app.js", "/assets/index.html", "/index.html", "/%2e%2e/secret.txt",

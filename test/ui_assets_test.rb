@@ -77,6 +77,11 @@ class UIAssetsTest < Minitest::Test
     assert_includes asset("app.js"), "data-paused"
   end
 
+  def test_page_offers_the_running_view
+    assert_match(%r{<a href="#/running"[^>]*>Running</a>}, asset("index.html"))
+    assert_includes asset("app.js"), '"/api/processes"'
+  end
+
   def test_assets_ship_in_the_gem
     spec = Gem::Specification.load(File.expand_path("../soft_foundry.gemspec", __dir__))
     %w[index.html app.css app.js].each { |name| assert_includes spec.files, "lib/soft_foundry/ui/assets/#{name}" }
