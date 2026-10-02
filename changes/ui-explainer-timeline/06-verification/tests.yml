@@ -1,15 +1,34 @@
-commit_sha: TBD
+commit_sha: ab1723b2ace53d5cc8516924b716011fddc2ed67
 checks:
   - id: CHECK-001
-    kind: tests   # tests | lint | static_analysis | security_scan | iac_validate | migration_check | custom
-    command: TBD
-    result: TBD   # pass | fail | error | skipped
-    evidence: evidence/TBD
-    criteria: [AC-001]
-    # Optional, per check: the commit at which this test existed and failed
-    # (RED) and the test file. The gate verifies red_commit is a commit that
-    # precedes commit_sha, holds test_path, and that APP or INFRA code changed
-    # after it. A feature, fix, or refactor with no red_commit on any check is
-    # advised as having no failing-test-first evidence.
-    # red_commit: TBD
-    # test_path: TBD
+    kind: tests
+    command: "bundle exec rake test with ANTHROPIC_API_KEY, OPENAI_API_KEY, OPENROUTER_API_KEY, XAI_API_KEY, SOFT_FOUNDRY_BILLING, and SOFT_FOUNDRY_GUARD unset"
+    result: pass
+    evidence: evidence/tests.log
+    criteria: [REQ-UX-001, REQ-UX-004, REQ-UX-005, REQ-UX-006, REQ-UX-007]
+    red_commit: 8ca41db075466da5cc70cfdd5a8a02fae8dbe766
+    test_path: test/snapshot_test.rb
+  - id: CHECK-002
+    kind: custom
+    command: "test/snapshot_test.rb and test/ui_assets_test.rb run in a worktree checked out at 8ca41db, the RED commit"
+    result: fail
+    evidence: evidence/red-at-8ca41db.log
+    criteria: [failing-test-first]
+  - id: CHECK-003
+    kind: lint
+    command: "soft-foundry check"
+    result: pass
+    evidence: evidence/check.log
+    criteria: [control-plane-consistency]
+  - id: CHECK-004
+    kind: static_analysis
+    command: "ruby -wc on every lib/ Ruby file, exe/soft-foundry, and the two changed test files; node --check on lib/soft_foundry/ui/assets/app.js"
+    result: pass
+    evidence: evidence/syntax-warnings.log
+    criteria: [coding-standard]
+  - id: CHECK-005
+    kind: security_scan
+    command: "soft-foundry scan over the control plane and every change record"
+    result: pass
+    evidence: evidence/scan-against-self.log
+    criteria: [record-text-is-text]

@@ -1,12 +1,50 @@
-commit_sha: TBD
+commit_sha: ab1723b2ace53d5cc8516924b716011fddc2ed67
 journeys:
   - id: EVAL-001
-    criteria: [AC-001]
-    persona: TBD
-    starting_state: TBD
-    steps:
-      - TBD
-    assertions:
-      - TBD
-    evidence: [evidence/TBD]
-    result: TBD   # pass | fail | blocked
+    criteria: [REQ-UX-001, REQ-UX-003]
+    persona: a program consuming the data
+    starting_state: this repository served on 4879
+    steps: ["GET /api/workflow, summarised", "GET / and look for the Workflow link"]
+    assertions: ["16 phases, 19 check descriptions, both tracks, 4 judgments; verify lists eleven checks including evidence current and red evidence; every listed check has a description", "the link is present"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-002
+    criteria: [REQ-UX-004, REQ-UX-005]
+    persona: maintainer following a change
+    starting_state: scratch repository; one iterative low-risk change with three ledger entries (one unpriced), two iterations (one with markup where its time belongs), and a recorded decision
+    steps: ["change status costly --json, summarised"]
+    assertions: ["six timeline events, oldest first; the iteration with the unusable time is absent while the track still counts two iterations", "totals 10.5 with over_cap true and needs_approval false against a 10.0 cap and a 20.0 approval line; intake over its 5.0 phase cap, implement within, verify unpriced and not over"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-003
+    criteria: [REQ-UX-004]
+    persona: maintainer
+    starting_state: this repository
+    steps: ["change status ui-server --json, summarised"]
+    assertions: ["19 events: created, nine started, nine completed, in time order"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-004
+    criteria: [REQ-UX-001, REQ-UX-002]
+    persona: newcomer in a browser
+    starting_state: this repository served on 4877
+    steps: ["open #/workflow/verify", "select review", "read Ways back, Tracks, Judgments"]
+    assertions: ["verify is selected from the URL with its eleven checks described and its four files", "the URL names review, focus stays, and the panel says it can return to remediate on blocking findings", "five moves with conditions; both tracks; the forced track for high risk; four verdicts"]
+    evidence: [evidence/browser-observations.log]
+    result: pass
+  - id: EVAL-005
+    criteria: [REQ-UX-003, REQ-UX-004, REQ-UX-005]
+    persona: maintainer in a browser
+    starting_state: both servers
+    steps: ["open ui-server at its attack gate", "open the scratch change", "open an unknown change"]
+    assertions: ["each check shows what it checks; 19 timeline events; the empty-ledger message names the command", "six events, the cap note, and the table with Over, Within, Unknown; markup in a name and in a time renders as text or is absent; no injected elements", "No such change, with a way back"]
+    evidence: [evidence/browser-observations.log]
+    result: pass
+  - id: EVAL-006
+    criteria: [REQ-UX-006]
+    persona: keyboard-only user; user who pauses motion
+    starting_state: as EVAL-005
+    steps: ["pause and resume", "inspect the new table and list", "check page overflow"]
+    assertions: ["data-paused set and removed", "caption, scoped headers, focusable scroll region, ordered list, state words", "none"]
+    evidence: [evidence/browser-observations.log]
+    result: pass
