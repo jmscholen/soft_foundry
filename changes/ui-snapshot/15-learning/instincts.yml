@@ -1,15 +1,16 @@
-# Instincts: what this change taught, as reusable one-line triggers with an
-# action, a confidence score, and evidence in this record. `soft-foundry
-# learn list` shows them across every record; `learn promote` copies those
-# at or above the threshold in .ai/policies/learning.yml into
-# .ai/rules/learned.md, and only through a change record on a change
-# branch, never by the change that learned them. An empty list is a valid
-# answer; a malformed entry fails the learning gate.
-instincts: []
-# - id: kebab-case-unique-id
-#   trigger: when ... (the situation an agent will recognise)
-#   action: do ... (one thing, imperative)
-#   confidence: 0.8          # 0.0 to 1.0; promotion threshold is policy
-#   domain: testing          # git | testing | security | review | ...
-#   evidence:
-#     - finding: REV-001     # a finding id, phase, or path in this record
+# Instincts from the ui-snapshot change.
+instincts:
+- id: diff-old-and-new-output-when-refactoring-printing-code
+  trigger: when refactoring code that produces a command's text output
+  action: run the previous commit's code and the new code against the same real data and diff the output and exit codes
+  confidence: 0.85
+  domain: testing
+  evidence:
+  - path: changes/ui-snapshot/07-evaluation/evidence/journey-transcript.log
+- id: read-the-method-before-asserting-on-it
+  trigger: when writing a failing test that depends on existing behaviour you have not read
+  action: read the method the assertion rests on first, so the test fails for the missing feature and not for a wrong guess
+  confidence: 0.8
+  domain: testing
+  evidence:
+  - path: changes/ui-snapshot/05-implementation/deviations.md

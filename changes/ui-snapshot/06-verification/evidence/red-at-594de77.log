@@ -1,0 +1,35 @@
+== test/change_index_test.rb at 594de77
+   1   1) Error:
+   1   2) Error:
+   1   3) Error:
+   1 3 runs, 0 assertions, 0 failures, 3 errors, 0 skips
+   3 NameError: uninitialized constant SoftFoundry::ChangeIndex
+== test/snapshot_test.rb at 594de77
+   1   1) Error:
+   1   2) Error:
+   1   3) Error:
+   1   4) Error:
+   1   5) Error:
+   1   6) Error:
+   1   7) Error:
+   1   8) Error:
+   1   9) Error:
+   1  10) Error:
+   1  11) Error:
+   1  12) Error:
+   1  13) Error:
+   1  14) Error:
+   1  15) Error:
+   1 15 runs, 0 assertions, 0 failures, 15 errors, 0 skips
+  15 NameError: uninitialized constant SoftFoundry::Snapshot
+== test/cli_change_json_test.rb at 594de77
+   1   1) Error:
+   1   2) Error:
+   1   3) Error:
+   1   4) Failure:
+   1   5) Failure:
+   1 8 runs, 15 assertions, 2 failures, 3 errors, 0 skips
+   1 Expected "Soft Foundry 0.15.0\n\nUsage:\n  soft-foundry init [options]             install the control plane into this repository, then onboard\n      --dry-run  --force  --no-onboard  --root PATH  --allow-non-git\n      --maturity scan|deep|off (default scan)  --reassess\n  soft-foundry onboard [options]           discover providers, repair agent adapters, assess maturity\n      --maturity scan|deep|off (default scan)  --reassess\n  soft-foundry doctor                     validate repository bootstrap\n  soft-foundry check                      lint the .ai/ control plane\n  soft-foundry change new <slug> [--track gated|iterative]\n                                          create changes/<slug>/ from phase templates; the track\n                                          defaults to .ai/workflow.yml tracks.default\n  soft-foundry change status [slug]       show track, phase status, and gate results\n  soft-foundry change list                list change records\n  soft-foundry change vet <slug> [--by NAME]\n                                          iterative track: record the person's acceptance of the\n                                          explored feature, lock the specification at HEAD, and\n                                          make the phases from implementation onward apply\n  soft-foundry change reopen <slug> --reason TEXT\n                                          iterative track: send a vetted change back to exploring,\n                                          resetting every phase from implementation onward\n  soft-foundry change close <slug> [--pr N] [--confirm ID]... [--force]\n                                          mark a merged change's lifecycle closed; refuses if\n                                          unmerged, or if an undischarged item lacks a --confirm ID\n                                          or a PR comment reading \"CONFIRMED: <id>\"\n  soft-foundry change request-discharge <slug> --pr N\n                                          post a PR comment asking a human to confirm each\n                                          undischarged acceptance criterion\n  soft-foundry gate <phase|all> [--change SLUG]\n                                          evaluate a phase's completion gate\n  soft-foundry scan [path...]             scan .ai/, AGENTS.md, CLAUDE.md, and every change record (or\n                                          the given paths) for invisible Unicode, secret-shaped strings,\n                                          instruction-override phrases, and fetch-and-execute commands\n  soft-foundry learn list [--min-confidence X]\n                                          instincts recorded by every change's learning phase,\n                                          highest confidence first\n  soft-foundry learn promote [--min-confidence X] [--dry-run]\n                                          copy instincts at or above the threshold (.ai/policies/learning.yml,\n                                          default 0.80) into .ai/rules/learned.md through the change\n                                          record on the current branch\n  soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex|grok] [--dry-run] [-- args...]\n                                          run one phase in a fresh coding-shell session with only its\n                                          skill in the prompt; stamps executed_by in the handoff and\n                                          gates the phase when the session returns\n  soft-foundry budget status [--change SLUG]\n                                          show billing mode and compare recorded spend against\n                                          .ai/policies/budget.yml (no budget on a subscription)\n  soft-foundry budget record --phase P --provider NAME --model NAME\n                             --tokens-in N --tokens-out N [--usd X] [--change SLUG]\n                                          record a phase's spend into the change's ledger; warns\n                                          each time the total passes another warning interval\n  soft-foundry budget threshold [USD|off|default]\n                                          show or set how often recorded spend warns (machine-local)\n  soft-foundry ci                         check + gate every change record (used by CI and pre-commit)\n  soft-foundry hooks install              install the pre-commit hook\n  soft-foundry hooks install --claude [--local] | --codex\n                                          install the PreToolUse guard into .claude/settings.json\n                                          (or settings.local.json) or .codex/hooks.json so a coding\n                                          shell's tool calls are checked against the active skill's\n                                          permissions.yml (codex: then trust it with /hooks)\n  soft-foundry hooks uninstall --claude [--local] | --codex\n                                          remove only Soft Foundry's guard entry\n  soft-foundry guard                      the hook itself: reads a tool call from stdin, exits 2 to\n                                          refuse it in block mode; mode from .ai/policies/enforcement.yml,\n                                          .soft-foundry/enforcement.yml, or SOFT_FOUNDRY_GUARD=warn|block|off\n  soft-foundry update [--yes]             check RubyGems for a newer release; --yes installs it\n  soft-foundry models                     show locally accessible models\n  soft-foundry shell claude|codex|grok    launch a coding shell in this repository\n  soft-foundry version\n\n`AGENTS.md` and `.ai/` are canonical. Vendor files such as `CLAUDE.md` only point to them.\n" to include "change status [slug] [--json]".
+   1 Expected: 0
+   1 JSON::ParserError: unexpected character: 'c1' at line 1 column 1
+   2 JSON::ParserError: unexpected character: 'c1:' at line 1 column 1

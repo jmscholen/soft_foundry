@@ -1,12 +1,42 @@
-commit_sha: TBD
+commit_sha: 684fe7df390ac91fc3c854b68864af9c22c742d5
 journeys:
   - id: EVAL-001
-    criteria: [AC-001]
-    persona: TBD
-    starting_state: TBD
-    steps:
-      - TBD
-    assertions:
-      - TBD
-    evidence: [evidence/TBD]
-    result: TBD   # pass | fail | blocked
+    criteria: [REQ-SNAP-003, REQ-SNAP-006]
+    persona: maintainer of this repository
+    starting_state: this repository on change/ui-snapshot, twenty records, eighteen closed
+    steps: ["change list --json, summarised", "grep the output for the repository path and the home directory", "time the command"]
+    assertions: ["exit 0; version 1; 16 phases; 20 changes; 18 closed, 2 evaluated, 0 errors", "ui-snapshot and upstream-failure-reporting carry gate states; cross-cli-hooks is not evaluated and reports six waived phases", "0 matches for an absolute path", "0.22 s, against about 8 s to gate every record"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-002
+    criteria: [REQ-SNAP-004, REQ-SNAP-005, REQ-SNAP-006]
+    persona: a program consuming the JSON
+    starting_state: as EVAL-001
+    steps: ["change status upstream-failure-reporting --json, summarised", "change status cross-cli-hooks --json, summarised"]
+    assertions: ["exit 0; intake complete/pass with nine named checks; fifteen pending; timeline created, started, completed; cap 10.0 for a low-risk change", "exit 2, as the text form; three stale gates; three advisories; six skipped phases with rationale; no worktree key"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-003
+    criteria: [REQ-SNAP-003, REQ-SNAP-007]
+    persona: a program consuming the JSON
+    starting_state: scratch repository with this repository's .ai/ and one new record
+    steps: ["mark specification complete before intake; change status --json", "change status (text)", "change status nope --json", "write invalid YAML to a second record's metadata.yml; change list --json"]
+    assertions: ["exit 2; failed true; specify is fail with the two failing checks and their detail", "exit 2 and the same two check names", "soft-foundry: no change record at changes/nope; exit 1", "exit 0; the broken record is a row with a repository-relative error; the good record still has 16 cells"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-004
+    criteria: [REQ-SNAP-001]
+    persona: maintainer and CI
+    starting_state: this repository; main checked out in a second worktree and run against the same records
+    steps: ["change status cross-cli-hooks", "change status lifecycle-tracks", "change status upstream-failure-reporting", "change list", "ci"]
+    assertions: ["each command's output and exit code is identical between main's code and this branch's"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-005
+    criteria: [REQ-SNAP-007]
+    persona: screen-reader user or CI log reader
+    starting_state: this repository
+    steps: ["the help entries for change status and change list with every non-ASCII byte stripped"]
+    assertions: ["both entries read complete; the flag and what it prints are stated in words"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
