@@ -25,6 +25,7 @@ require_relative "content_scan"
 require_relative "change_index"
 require_relative "snapshot"
 require_relative "ui/server"
+require_relative "processes"
 
 module SoftFoundry
   class CLI
@@ -33,7 +34,7 @@ module SoftFoundry
     EXIT_CONFLICTS = 3
     EXIT_INTERNAL = 4
 
-    def initialize(argv, out: $stdout, err: $stderr, input: $stdin, root: Dir.pwd, source: nil, updater: nil, pr_discharge: nil, shell: nil, runner: nil, ui_server: nil)
+    def initialize(argv, out: $stdout, err: $stderr, input: $stdin, root: Dir.pwd, source: nil, updater: nil, pr_discharge: nil, shell: nil, runner: nil, ui_server: nil, processes: nil)
       @argv = argv.dup
       @out = out
       @err = err
@@ -45,6 +46,7 @@ module SoftFoundry
       @shell = shell
       @runner = runner
       @ui_server = ui_server
+      @processes = processes
     end
 
     def run
@@ -66,6 +68,7 @@ module SoftFoundry
       when "scan" then scan
       when "update" then update
       when "ui" then ui
+      when "ps" then ps
       when "shell"
         shell_name = @argv.shift or raise ArgumentError, "Usage: soft-foundry shell <claude|codex|grok> [args...]"
         # The shell is where model spend actually happens, so say how it is
@@ -959,6 +962,40 @@ module SoftFoundry
       0
     end
 
+    # `ps [--json]`: every soft-foundry process running on this machine
+    # under this user, in any repository, and the runs this repository's
+    # records say were started and never finished.
+    def ps
+      json = flag("--json")
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+      data = (@processes || ->(root) { Processes.new(root) }).call(@root).snapshot
+      if json
+        @out.puts JSON.pretty_generate(data)
+        return data["error"] ? EXIT_TARGET : 0
+      end
+      raise TargetError, data["error"] if data["error"]
+
+      running = data["processes"].reject { |p| p["self"] }
+      @out.puts(running.empty? ? "running: no soft-foundry processes" : "running: #{running.size} soft-foundry #{running.size == 1 ? 'process' : 'processes'}")
+      running.each do |p|
+        parts = ["pid #{p['pid']}", [p["command"], (p["phase"] unless p["command"] == "ui")].compact.join(" ")]
+        parts << "change #{p['change']}" if p["change"]
+        parts << "port #{p['port']}" if p["port"]
+        parts << "shell #{p['shell']}#{p['session'] ? " (session pid #{p['session']['pid']})" : ''}" if p["shell"]
+        parts << (p["here"] ? "in this repository" : "in #{p['repository'] || 'an unknown directory'}")
+        parts << "since #{p['started_at']}" if p["started_at"]
+        @out.puts "  #{parts.join('  ')}"
+      end
+      stopped = data["recorded_runs"].reject { |r| r["live"] }
+      unless stopped.empty?
+        @out.puts "recorded as started by phase run with no process found: #{stopped.size}"
+        stopped.each do |r|
+          @out.puts "  ! warn change #{r['change']} phase #{r['phase']}: started #{r['started_at']} (#{r['shell']}) and never finished; the session may have been interrupted"
+        end
+      end
+      0
+    end
+
     def print_result(result)
       @out.puts "#{result.phase.output}  #{result.status}  #{result.failed? ? 'FAIL' : (result.skipped? ? 'SKIP' : 'PASS')}"
       result.checks.each do |c|
@@ -1066,6 +1103,10 @@ module SoftFoundry
                                                   change record phase by phase and each gate's checks; it
                                                   follows the records as they change and stops on Ctrl-C
                                                   (N defaults to a free port)
+          soft-foundry ps [--json]                list every soft-foundry process running on this machine under
+                                                  your user, in any repository: what it is running, for which
+                                                  change and phase, in which coding-shell session, and since
+                                                  when; warns about phase runs recorded here that never finished
           soft-foundry ci                         check + gate every change record (used by CI and pre-commit)
           soft-foundry hooks install              install the pre-commit hook
           soft-foundry hooks install --claude [--local] | --codex
