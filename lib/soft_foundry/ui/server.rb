@@ -56,6 +56,7 @@ module SoftFoundry
         @cache = {}
         @lock = Mutex.new
         @connections = 0
+        @waiting = {}
         @counter = Mutex.new
       end
 
@@ -73,7 +74,9 @@ module SoftFoundry
       end
 
       # Answers requests until `stop`. Each connection gets a thread, so
-      # one that sends nothing cannot hold up the rest.
+      # one that sends nothing cannot hold up the rest, and when every slot
+      # is taken the connection that has waited longest without sending a
+      # request gives up its slot to the new one.
       def serve
         loop do
           client = @listener.accept
@@ -157,9 +160,13 @@ module SoftFoundry
       end
 
       def handle(socket)
-        return write(socket, "GET", error(503, "too many connections")) unless admit
+        return write(socket, "GET", error(503, "too many connections")) unless admit(socket)
         begin
-          verb, target, headers, problem = read_request(socket)
+          verb, target, headers, problem = begin
+            read_request(socket)
+          ensure
+            @counter.synchronize { @waiting.delete(socket) }
+          end
           write(socket, verb || "GET", problem || respond(verb, target, headers))
         ensure
           @counter.synchronize { @connections -= 1 }
@@ -170,10 +177,18 @@ module SoftFoundry
         socket.close unless socket.closed?
       end
 
-      def admit
+      # At the limit, the oldest connection still waiting to send its
+      # request is closed to make room. Only when every slot is busy
+      # answering is the newcomer turned away.
+      def admit(socket)
         @counter.synchronize do
-          return false if @connections >= MAX_CONNECTIONS
+          if @connections >= MAX_CONNECTIONS
+            idle = @waiting.keys.first or return false
+            @waiting.delete(idle)
+            idle.close unless idle.closed?
+          end
           @connections += 1
+          @waiting[socket] = true
         end
         true
       end
