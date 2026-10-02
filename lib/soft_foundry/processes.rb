@@ -2,6 +2,8 @@
 
 require "open3"
 require "time"
+require "date"
+require "yaml"
 require_relative "git"
 require_relative "shell"
 require_relative "control_plane"
@@ -9,11 +11,12 @@ require_relative "change_index"
 require_relative "snapshot"
 
 module SoftFoundry
-  # The Soft Foundry processes running on this machine under this user:
-  # every `soft-foundry ...` command still alive, in whichever repository
-  # and session it was started, with what it is doing and the coding-shell
-  # session a phase runner launched. Read from `ps`; nothing is signalled
-  # or changed.
+  # What is going on with Soft Foundry on this machine under this user:
+  # every `soft-foundry ...` command still alive, with what it is doing and
+  # the coding-shell session a phase runner launched; and every coding
+  # shell (claude, codex, grok) a person has open in a repository that has
+  # a Soft Foundry control plane, with the change its branch is on. Read
+  # from `ps`; nothing is signalled or changed.
   #
   # A command line is whatever a process chose to call itself, and a
   # runner's passthrough flags or a session's prompt are not ours to
@@ -31,7 +34,13 @@ module SoftFoundry
     # Commands that act on one change, so the branch names it when the
     # command line does not.
     CHANGE_SCOPED = ["phase run", "gate", "change status", "budget status", "budget record"].freeze
-    LINE = /\A\s*(\d+)\s+(\d+)\s+(\w{3}\s+\w{3}\s+\d+\s+[\d:]+\s+\d{4})\s+(.*)\z/
+    LINE = /\A\s*(\d+)\s+(\d+)\s+(\S+)\s+(\w{3}\s+\w{3}\s+\d+\s+[\d:]+\s+\d{4})\s+(.*)\z/
+    TERMINAL = %r{\A[A-Za-z][\w/]{0,19}\z}
+    BRANCH = %r{\A[\w][\w./-]{0,99}\z}
+    WORD = /\A[a-z_]{1,24}\z/
+    # Runtimes a coding shell may be started under; the shell is then the
+    # script they run.
+    RUNTIMES = %w[node bun].freeze
     PHASE = /\A[A-Za-z0-9][A-Za-z0-9_-]{0,39}\z/
     SLUG = %r{\A[A-Za-z0-9][A-Za-z0-9._/-]{0,99}\z}
     NAME = /\A[\w.-]{1,40}\z/
@@ -45,20 +54,81 @@ module SoftFoundry
     # Running processes as plain data, with the runs this repository's
     # records say were started and never finished.
     def snapshot
-      list = self.list
-      { "version" => Snapshot::VERSION, "generated_at" => Time.now.utc.iso8601, "processes" => list, "recorded_runs" => recorded_runs(list) }
+      rows = self.rows
+      list = commands(rows)
+      { "version" => Snapshot::VERSION, "generated_at" => Time.now.utc.iso8601, "processes" => list,
+        "sessions" => sessions(rows, list), "recorded_runs" => recorded_runs(list) }
     rescue SystemCallError, IOError => e
-      { "version" => Snapshot::VERSION, "generated_at" => Time.now.utc.iso8601, "processes" => [], "recorded_runs" => [],
+      { "version" => Snapshot::VERSION, "generated_at" => Time.now.utc.iso8601, "processes" => [], "sessions" => [], "recorded_runs" => [],
         "error" => "could not list processes: #{Snapshot.plain(e.message)}" }
     end
 
-    def list
-      rows = @ps.call.to_s.scrub("?").lines.filter_map { |line| LINE.match(line.chomp) }
-                .map { |m| { pid: m[1].to_i, ppid: m[2].to_i, started: m[3], tokens: m[4].split } }
+    # Running `soft-foundry ...` commands, oldest first.
+    def list = commands(rows)
+
+    private
+
+    def rows
+      @ps.call.to_s.scrub("?").lines.filter_map { |line| LINE.match(line.chomp) }
+         .map { |m| { pid: m[1].to_i, ppid: m[2].to_i, tty: m[3], started: m[4], tokens: m[5].split } }
+    end
+
+    def commands(rows)
       rows.filter_map { |row| describe(row, rows) }.sort_by { |p| [p["started_at"].to_s, p["pid"]] }
     end
 
-    private
+    # Coding shells open in a repository with a control plane, oldest
+    # first. Not a phase runner's own session (that is reported with the
+    # runner) and not a shell's own child processes.
+    def sessions(rows, commands)
+      shells = rows.filter_map { |row| (name = shell_name(row[:tokens])) && [row, name] }
+      pids = shells.map { |row, _| row[:pid] }
+      runners = commands.map { |c| c["pid"] }
+      shells.filter_map do |row, name|
+        next if pids.include?(row[:ppid]) || runners.include?(row[:ppid])
+        root = governed_root(directory(row[:pid])) or next
+        here = root == real(@root)
+        branch = Git.new(root).branch.to_s
+        change = branch_change(root)
+        phase, status = change ? recorded_position(root, change) : nil
+        { "pid" => row[:pid], "shell" => name, "terminal" => row[:tty].match?(TERMINAL) ? row[:tty] : nil,
+          "repository" => here ? "." : display(root), "here" => here, "branch" => branch.match?(BRANCH) ? branch : nil,
+          "change" => change, "phase" => phase, "status" => status, "started_at" => started(row[:started]) }
+      end.sort_by { |s| [s["started_at"].to_s, s["pid"]] }
+    end
+
+    # The coding shell a process is, by its executable (or the script a
+    # runtime is running), or nil.
+    def shell_name(tokens)
+      name = File.basename(tokens.first.to_s)
+      name = File.basename(tokens[1].to_s) if RUNTIMES.include?(name)
+      Shell::COMMANDS.value?(name) ? name : nil
+    end
+
+    # The repository a directory is in, if that repository has a Soft
+    # Foundry control plane: the nearest directory above holding
+    # .ai/workflow.yml.
+    def governed_root(dir)
+      40.times do
+        return nil if dir.nil?
+        return dir if File.file?(File.join(dir, ".ai", "workflow.yml"))
+        parent = File.dirname(dir)
+        return nil if parent == dir
+        dir = parent
+      end
+      nil
+    end
+
+    # Where a change's own record says it is. Another repository's record
+    # is someone else's file: only values that look like a phase or status
+    # word are repeated.
+    def recorded_position(root, change)
+      meta = YAML.safe_load_file(File.join(root, "changes", change, "metadata.yml"), permitted_classes: [Time, Date], aliases: true)
+      return nil unless meta.is_a?(Hash)
+      [meta["current_phase"].to_s.then { |v| v.match?(PHASE) ? v : nil }, meta["status"].to_s.then { |v| v.match?(WORD) ? v : nil }]
+    rescue StandardError
+      nil
+    end
 
     def describe(row, rows)
       args = arguments(row[:tokens]) or return nil
@@ -195,7 +265,7 @@ module SoftFoundry
     end
 
     def run_ps
-      out, status = Open3.capture2({ "LC_ALL" => "C" }, "ps", "x", "-ww", "-o", "pid=", "-o", "ppid=", "-o", "lstart=", "-o", "command=", err: File::NULL)
+      out, status = Open3.capture2({ "LC_ALL" => "C" }, "ps", "x", "-ww", "-o", "pid=", "-o", "ppid=", "-o", "tty=", "-o", "lstart=", "-o", "command=", err: File::NULL)
       raise IOError, "ps exited #{status.exitstatus}" unless status.success?
       out
     end

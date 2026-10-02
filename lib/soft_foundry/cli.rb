@@ -986,6 +986,17 @@ module SoftFoundry
         parts << "since #{p['started_at']}" if p["started_at"]
         @out.puts "  #{parts.join('  ')}"
       end
+      shells = Array(data["sessions"])
+      @out.puts(shells.empty? ? "sessions: no coding shells open in Soft Foundry repositories" : "sessions: #{shells.size} coding #{shells.size == 1 ? 'shell' : 'shells'} open in Soft Foundry repositories")
+      shells.each do |s|
+        parts = ["pid #{s['pid']}", s["shell"]]
+        parts << "terminal #{s['terminal']}" if s["terminal"]
+        parts << (s["change"] ? "change #{s['change']}#{s['phase'] || s['status'] ? " (#{[s['phase'] && "phase #{s['phase']}", s['status']].compact.join(', ')})" : ''}" : "no change record for its branch")
+        parts << "branch #{s['branch']}" if s["branch"]
+        parts << (s["here"] ? "in this repository" : "in #{s['repository'] || 'an unknown directory'}")
+        parts << "since #{s['started_at']}" if s["started_at"]
+        @out.puts "  #{parts.join('  ')}"
+      end
       stopped = data["recorded_runs"].reject { |r| r["live"] }
       unless stopped.empty?
         @out.puts "recorded as started by phase run with no process found: #{stopped.size}"
@@ -1103,10 +1114,12 @@ module SoftFoundry
                                                   change record phase by phase and each gate's checks; it
                                                   follows the records as they change and stops on Ctrl-C
                                                   (N defaults to a free port)
-          soft-foundry ps [--json]                list every soft-foundry process running on this machine under
-                                                  your user, in any repository: what it is running, for which
-                                                  change and phase, in which coding-shell session, and since
-                                                  when; warns about phase runs recorded here that never finished
+          soft-foundry ps [--json]                list what is running on this machine under your user, in any
+                                                  repository: every soft-foundry command, and every claude,
+                                                  codex, or grok session open in a repository that has a
+                                                  control plane, with its terminal, branch, and the change
+                                                  and phase that branch is on; warns about phase runs
+                                                  recorded here that never finished
           soft-foundry ci                         check + gate every change record (used by CI and pre-commit)
           soft-foundry hooks install              install the pre-commit hook
           soft-foundry hooks install --claude [--local] | --codex

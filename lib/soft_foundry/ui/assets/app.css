@@ -212,3 +212,4 @@ table.procs { min-width: 46rem; width: 100%; }
 .procs .mono { overflow-wrap: anywhere; }
 .procs tr[data-self] td, .procs tr[data-self] th { color: var(--steel); }
 .procs th[scope="row"], .procs td:nth-child(3), .procs td:nth-child(5), .procs td:nth-child(6) { white-space: nowrap; }
+.procs .detail { display: block; color: var(--steel); font-size: 0.875rem; }
