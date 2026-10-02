@@ -163,10 +163,13 @@ class UIServerTest < Minitest::Test
         data = JSON.parse(get(port, "/api/processes").body)
         assert_equal there["id"], data["sessions"].first["repo"]
         assert_nil data["processes"].first["repo"]
-        text = JSON.generate(data) + get(port, "/api/repositories").body + get(port, "/api/changes?repo=#{there['id']}").body
-        refute_includes text, "\"root\""
+        # Where a repository is on disk is said once, in the list of
+        # repositories, and nowhere else; a plain directory never.
+        assert_equal other, there["path"]
+        text = JSON.generate(data) + get(port, "/api/changes?repo=#{there['id']}").body
+        refute_includes text + get(port, "/api/repositories").body, "\"root\""
         refute_includes text, other
-        refute_includes text, plain
+        refute_includes text + get(port, "/api/repositories").body, plain
       end
     end
   end
@@ -202,7 +205,7 @@ class UIServerTest < Minitest::Test
       response = get(port, "/api/processes")
       assert_equal 200, response.status
       assert_equal "application/json; charset=utf-8", response.headers["content-type"]
-      assert_equal data, JSON.parse(response.body)
+      assert_equal data.merge("processes" => [{ "pid" => 7, "command" => "ci", "repo" => nil }]), JSON.parse(response.body)
       assert_equal 403, get(port, "/api/processes", "Sec-Fetch-Site" => "cross-site").status
       assert_equal 405, request(port, "POST /api/processes HTTP/1.1").status
       assert_equal 404, get(port, "/api/processes/7").status

@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
+require "digest"
 require "json"
+require "openssl"
+require "securerandom"
 require "socket"
 require "uri"
 require_relative "../errors"
@@ -12,11 +15,18 @@ require_relative "../processes"
 
 module SoftFoundry
   module UI
-    # A read-only HTTP server for one repository's workflow and change
-    # records, for a browser on the same machine. It listens on the
-    # loopback address only, answers GET and HEAD on seven fixed routes,
-    # and never takes a file name from a request. Every request reads the
-    # control plane and the records afresh, so the page follows edits.
+    # A read-only HTTP server for the workflow and change records of the
+    # Soft Foundry repositories on this machine, for a browser on the same
+    # machine. It listens on the loopback address only, answers GET and
+    # HEAD on eight fixed routes, and never takes a file name from a
+    # request. Every request reads the control plane and the records
+    # afresh, so the page follows edits.
+    #
+    # It knows the repository it was started in, any added at start, and
+    # any in which a session or command is found running. A request names
+    # a repository by the id the server gave it, never by a path. Data is
+    # answered only to a request carrying the token in the link the
+    # command printed.
     class Server
       ADDRESS = "127.0.0.1"
       ASSETS = File.expand_path("assets", __dir__)
@@ -26,10 +36,12 @@ module SoftFoundry
         "/app.js" => ["app.js", "text/javascript; charset=utf-8"]
       }.freeze
       JSON_TYPE = "application/json; charset=utf-8"
+      ROUTES = %w[/api/workflow /api/changes /api/change /api/processes /api/repositories].freeze
       REQUEST_LINE = %r{\A([A-Z]+) (/\S*) HTTP/1\.[01]\z}
       MAX_HEADER_BYTES = 8192
       MAX_CONNECTIONS = 16
-      REASONS = { 200 => "OK", 400 => "Bad Request", 403 => "Forbidden", 404 => "Not Found", 405 => "Method Not Allowed",
+      TOKEN_HEADER = "x-soft-foundry-token"
+      REASONS = { 200 => "OK", 400 => "Bad Request", 401 => "Unauthorized", 403 => "Forbidden", 404 => "Not Found", 405 => "Method Not Allowed",
                   408 => "Request Timeout", 431 => "Request Header Fields Too Large", 500 => "Internal Server Error",
                   503 => "Service Unavailable" }.freeze
       # Nothing inline, nothing remote, no framing, no form targets: the
@@ -43,13 +55,21 @@ module SoftFoundry
         "Connection" => "close"
       }.freeze
 
-      attr_reader :port
+      attr_reader :port, :token
 
       # `ttl` is how long an API answer is reused, so several tabs polling
       # do not each start a gate run; `read_timeout` is how long a
       # connection may take to send its request.
-      def initialize(root, port: 0, ttl: 2, read_timeout: 2, clock: -> { Process.clock_gettime(Process::CLOCK_MONOTONIC) }, processes: nil)
-        @root = File.expand_path(root)
+      def initialize(root, port: 0, ttl: 2, read_timeout: 2, clock: -> { Process.clock_gettime(Process::CLOCK_MONOTONIC) }, processes: nil,
+                     token: SecureRandom.urlsafe_base64(24), repos: [])
+        @root = real(root)
+        @token = token.to_s
+        @registry = Mutex.new
+        @repos = {}
+        register(@root)
+        repos.each do |path|
+          raise TargetError, "#{path} has no .ai/workflow.yml; --repo takes a repository with a Soft Foundry control plane" unless register(real(path))
+        end
         @requested_port = port
         @ttl = ttl
         @read_timeout = read_timeout
@@ -63,6 +83,10 @@ module SoftFoundry
       end
 
       def address = ADDRESS
+
+      # The link to open: the token rides in the fragment, which a browser
+      # keeps to itself, and the page sends it back as a header.
+      def url = "http://#{ADDRESS}:#{port}/#token=#{token}"
 
       # Binds the listener and returns the port (the one asked for, or the
       # one the system chose for port 0).
@@ -105,12 +129,19 @@ module SoftFoundry
           return [200, asset[1], File.binread(File.join(ASSETS, asset[0])), {}]
         end
         return error(403, "the request came from another site") unless own_site?(headers["sec-fetch-site"])
+        return error(404, "no such page") unless ROUTES.include?(path)
+        return error(401, "this needs the link soft-foundry ui printed when it started; open that link again") unless authorized?(headers[TOKEN_HEADER])
+        return error(400, "the query string is not valid") if query.to_s.match?(/%(?![0-9A-Fa-f]{2})/)
+        params = URI.decode_www_form(query.to_s).to_h.transform_values { |value| value.to_s.scrub("?") }
+        return cached("processes") { running } if path == "/api/processes"
+        return cached("repositories") { repositories } if path == "/api/repositories"
+
+        id, root = repository(params["repo"])
+        return error(404, "no such repository") unless root
         case path
-        when "/api/workflow" then cached("workflow") { snapshot.workflow }
-        when "/api/changes" then cached("changes") { snapshot.board }
-        when "/api/processes" then cached("processes") { @processes.call(@root).snapshot }
-        when "/api/change" then change(query)
-        else error(404, "no such page")
+        when "/api/workflow" then cached("workflow:#{id}") { snapshot(root).workflow }
+        when "/api/changes" then cached("changes:#{id}") { snapshot(root).board }
+        when "/api/change" then change(id, root, params["slug"].to_s)
         end
       end
 
@@ -123,24 +154,80 @@ module SoftFoundry
       # do not send the header are not browsers.
       def own_site?(site) = site.nil? || %w[same-origin none].include?(site)
 
-      def change(query)
-        return error(400, "the query string is not valid") if query.to_s.match?(/%(?![0-9A-Fa-f]{2})/)
-        slug = URI.decode_www_form(query.to_s).to_h["slug"].to_s.scrub("?")
+      # The token is compared in constant time and only ever read from the
+      # header: a link someone pastes elsewhere does not carry it.
+      def authorized?(given)
+        given = given.to_s
+        given.bytesize == @token.bytesize && OpenSSL.fixed_length_secure_compare(given, @token)
+      end
+
+      def change(id, root, slug)
         return error(400, "name a change with ?slug=") if slug.empty?
-        # Only a slug this repository's own listing returned is ever loaded.
-        return error(404, "no such change") unless index.slugs.include?(slug)
-        cached("change:#{slug}") { snapshot.change(slug) }
+        # Only a slug that repository's own listing returned is ever loaded.
+        return error(404, "no such change") unless index(root).slugs.include?(slug)
+        cached("change:#{id}:#{slug}") { snapshot(root).change(slug) }
       end
 
       # A fresh control plane per answer: a long-lived process must not
       # serve a workflow it read at startup.
-      def snapshot
-        plane = ControlPlane.new(@root)
-        git = Git.new(@root)
-        Snapshot.new(@root, plane: plane, git: git, index: ChangeIndex.new(@root, plane: plane, git: git))
+      def snapshot(root)
+        plane = ControlPlane.new(root)
+        git = Git.new(root)
+        Snapshot.new(root, plane: plane, git: git, index: ChangeIndex.new(root, plane: plane, git: git))
       end
 
-      def index = ChangeIndex.new(@root, plane: ControlPlane.new(@root), git: Git.new(@root))
+      def index(root) = ChangeIndex.new(root, plane: ControlPlane.new(root), git: Git.new(root))
+
+      def real(path)
+        File.realpath(path)
+      rescue SystemCallError
+        File.expand_path(path)
+      end
+
+      def repo_id(root) = Digest::SHA256.hexdigest(root)[0, 12]
+
+      # Remembers a repository and returns its id, or nil when the
+      # directory has no control plane. Once known, a repository stays
+      # known for as long as the server runs, so a page open on it does
+      # not lose it when its last session closes.
+      def register(root)
+        return nil unless root && File.file?(File.join(root, ".ai", "workflow.yml"))
+        @registry.synchronize { @repos[repo_id(root)] ||= root }
+        repo_id(root)
+      end
+
+      # The id and path a request's `repo` names: the home repository when
+      # it names none, nothing when it names one the server never issued.
+      def repository(id)
+        return [repo_id(@root), @root] if id.nil?
+        root = @registry.synchronize { @repos[id] }
+        root ? [id, root] : nil
+      end
+
+      # What is running, with each entry's repository as an id. This is
+      # also how repositories are found: one with a session or a command
+      # in it becomes known here.
+      def running
+        data = @processes.call(@root).snapshot(roots: @registry.synchronize { @repos.values }, with_roots: true)
+        %w[processes sessions recorded_runs].each do |key|
+          Array(data[key]).each { |entry| entry["repo"] = register(entry.delete("root")) }
+        end
+        data
+      end
+
+      def repositories
+        running
+        list = @registry.synchronize { @repos.to_a }.map do |id, root|
+          about = begin
+            snapshot(root).overview
+          rescue StandardError => e
+            { "open" => 0, "closed" => 0, "changes" => [], "error" => e.message.gsub("#{root}/", "") }
+          end
+          { "id" => id, "name" => Snapshot.plain(File.basename(root)), "path" => Processes.display(root), "home" => root == @root }.merge(about)
+        end
+        { "version" => Snapshot::VERSION, "generated_at" => Time.now.utc.iso8601,
+          "repositories" => list.sort_by { |repo| [repo["home"] ? 0 : 1, repo["name"].to_s.downcase, repo["id"]] } }
+      end
 
       # One answer at a time is computed, so concurrent requests wait for
       # it rather than each starting their own git subprocesses. Errors
@@ -155,7 +242,8 @@ module SoftFoundry
           [200, JSON_TYPE, body, {}]
         end
       rescue StandardError => e
-        error(500, "could not read this from the repository: #{e.message.gsub("#{@root}/", '')}")
+        roots = @registry.synchronize { @repos.values }
+        error(500, "could not read this from the repository: #{roots.reduce(e.message) { |text, root| text.gsub("#{root}/", '') }}")
       end
 
       def error(status, message, extra = {})

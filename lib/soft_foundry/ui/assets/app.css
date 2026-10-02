@@ -213,3 +213,24 @@ table.procs { min-width: 46rem; width: 100%; }
 .procs tr[data-self] td, .procs tr[data-self] th { color: var(--steel); }
 .procs th[scope="row"], .procs td:nth-child(3), .procs td:nth-child(5), .procs td:nth-child(6) { white-space: nowrap; }
 .procs .detail { display: block; color: var(--steel); font-size: 0.875rem; }
+
+/* Where you are: the repository, and its two pages. */
+.crumbs { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.35rem 0.75rem; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--line); color: var(--steel); }
+.crumbs a { display: inline-block; padding-block: 0.2rem; }
+.crumbs .repo { font: 700 1.125rem/1.2 var(--display); letter-spacing: 0.04em; color: var(--ink); }
+.crumbs .path { font-size: 0.8125rem; overflow-wrap: anywhere; }
+.crumbs .tabs { margin-left: auto; display: flex; gap: 1.25rem; }
+.crumbs .tabs a { text-decoration: none; }
+.crumbs .tabs a[aria-current="page"] { color: var(--ink); box-shadow: 0 2px 0 var(--ink); }
+
+/* Repositories */
+.repos { display: grid; grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr)); gap: 1.25rem; margin-top: 2rem; }
+.repo-card { padding: 1.1rem 1.25rem 1.25rem; background: var(--surface); border: 1px solid var(--line); border-top: 6px solid var(--line); min-width: 0; }
+.repo-card[data-live] { border-top-color: var(--pour); }
+.repo-card h2 { font: 700 1.5rem/1.15 var(--display); letter-spacing: 0.01em; text-transform: none; color: var(--ink); margin-bottom: 0.15rem; overflow-wrap: anywhere; }
+.repo-card h2 a { display: inline-block; padding-block: 0.15rem; }
+.repo-card .path { color: var(--steel); font-size: 0.8125rem; overflow-wrap: anywhere; }
+.repo-card h3 { font: 700 0.8125rem/1.2 var(--display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--steel); margin: 1.1rem 0 0.3rem; }
+.repo-card .plain li { padding: 0.4rem 0; }
+.repo-card .meta { margin-top: 0.75rem; }
+@media (max-width: 40rem) { .crumbs .tabs { margin-left: 0; width: 100%; } }
