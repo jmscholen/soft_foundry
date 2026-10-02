@@ -1,5 +1,8 @@
-commit_sha: TBD
+commit_sha: 952808b9f07f1ddc712376123374fecfaebc7db8
 artifacts:
-  - path: TBD
-    journey: EVAL-001
-    sha256: TBD
+- path: evidence/journey-transcript.log
+  journey: "EVAL-001..EVAL-005; the token and ids replaced; the maintainers own repositories counted, not named"
+  sha256: 9dfc0b58fdb77fc0c658738abea03cf7d8e0cafd85d21c6068be14243139ea5a
+- path: evidence/browser-observations.log
+  journey: "EVAL-006..EVAL-010, on the real machine"
+  sha256: 0d02cd0fbb65a14a7e7efbf141c23e844a8b840fdde81ab0b701cecc8d1b38e9

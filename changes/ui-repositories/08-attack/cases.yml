@@ -1,21 +1,56 @@
-commit_sha: TBD
+commit_sha: 952808b9f07f1ddc712376123374fecfaebc7db8
 authorization_envelope:
-  target: TBD
-  environment: TBD          # local | ephemeral | test | staging | production
-  authorized_by: TBD
-  allowed_surfaces: []
-  prohibited_surfaces: []
-  data_constraints: TBD
-  network_constraints: TBD
+  target: soft-foundry ui on 127.0.0.1:4879, started in a scratch repository
+  environment: local
+  authorized_by: the maintainer, by asking for this change in this session
+  allowed_surfaces: [the loopback listener, scratch repositories and processes the evaluation script created]
+  prohibited_surfaces: [any other host, any process or file not created by the script]
+  data_constraints: fabricated records only; the maintainer's repositories are counted, not named
+  network_constraints: loopback only
   destructive_actions: prohibited
 cases:
   - id: ATTACK-001
+    threat: THREAT-002
+    violation_attempted: read data without the token
+    starting_privilege: any local client
+    steps: ["each of five data routes with no token, a wrong token, the right token in the query string, the right token as a cookie", "a thousand guessed tokens", "search the page's own files for the token"]
+    expected_safe_behavior: 401 each time, with nothing about any repository in the body; the page's files carry no token
+    observed: 401 for all four ways on all five routes and for all thousand guesses; 200 only with the header; zero occurrences in the page's files
+    result: denied
+    evidence: [evidence/attack-transcript.log]
+  - id: ATTACK-002
+    threat: THREAT-003
+    violation_attempted: use or obtain the token from another origin
+    starting_privilege: a page on another origin that somehow has the token
+    steps: ["the right token with a cross-site marker", "with a foreign Host", "as a POST", "a preflight asking to send the token header", "look for CORS headers"]
+    expected_safe_behavior: 403, 403, 405, a refused preflight, and no CORS header
+    observed: 403, 403, 405, 405, none
+    result: denied
+    evidence: [evidence/attack-transcript.log]
+  - id: ATTACK-003
     threat: THREAT-001
-    violation_attempted: TBD
-    starting_privilege: TBD
-    steps:
-      - TBD
-    expected_safe_behavior: TBD
-    observed: TBD
-    result: TBD   # denied | violated | blocked_by_provider | blocked_by_scope
-    evidence: [evidence/TBD]
+    violation_attempted: make the server read a directory it did not register, or a change from the wrong repository
+    starting_privilege: a client holding the token
+    steps: ["repo set to a registered repository's path, a plain directory's path, /etc, .., twelve zeros, a real id with a character added, and empty", "a change of one repository asked through another's id", "a plain directory with a claude process in it"]
+    expected_safe_behavior: 404 for each; the plain directory is not a repository
+    observed: 404 for all seven and for the cross-repository change; the plain directory is not listed
+    result: denied
+    evidence: [evidence/attack-transcript.log]
+  - id: ATTACK-004
+    threat: THREAT-004
+    violation_attempted: inject through a repository's directory name
+    starting_privilege: whoever created a directory the user opens a session in
+    steps: ["a repository whose directory is named with an HTML tag, with a grok process in it", "read /api/repositories"]
+    expected_safe_behavior: the name is data in JSON with a JSON content type; links use the hex id, not the name
+    observed: listed with the name as a string; application/json. Rendering as text is by the same code path attacked in ui-server and was not repeated in a browser for this name.
+    result: denied
+    evidence: [evidence/attack-transcript.log]
+  - id: ATTACK-005
+    threat: THREAT-001
+    violation_attempted: learn absolute paths from answers that should not carry them
+    starting_privilege: a client holding the token
+    steps: ["search a repository's board for a scratch path", "search the process list and the list of repositories"]
+    expected_safe_behavior: none in a board; paths only in the list of repositories and each running entry's repository field
+    observed: zero in the board; present in exactly those two answers
+    result: denied
+    evidence: [evidence/attack-transcript.log]

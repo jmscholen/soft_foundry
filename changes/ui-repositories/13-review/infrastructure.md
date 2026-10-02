@@ -1,12 +1,12 @@
 # Infrastructure Review
 
 ## Scope reviewed
-TBD
+No Infrastructure as Code is present in or modified by this change. No file is added to the gem; nothing under `.ai/`.
 
 ## Findings
 | ID | Severity | Location | Finding | Rule or requirement |
 | --- | --- | --- | --- | --- |
-| REV-TBD | blocking / major / minor | TBD | TBD | TBD |
+| REV-027 | info | dependencies | `securerandom`, `digest`, and `openssl` are standard library; the gemspec is unchanged. | `.ai/rules/dependencies.md` |
 
 ## Conformance
-TBD or N/A with justification
+N/A: no infrastructure is present or modified.

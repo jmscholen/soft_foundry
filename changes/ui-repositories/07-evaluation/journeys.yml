@@ -1,12 +1,82 @@
-commit_sha: TBD
+commit_sha: 952808b9f07f1ddc712376123374fecfaebc7db8
 journeys:
   - id: EVAL-001
-    criteria: [AC-001]
-    persona: TBD
-    starting_state: TBD
-    steps:
-      - TBD
-    assertions:
-      - TBD
-    evidence: [evidence/TBD]
-    result: TBD   # pass | fail | blocked
+    criteria: [REQ-REPO-001, REQ-REPO-006]
+    persona: a program holding the link
+    starting_state: four scratch repositories (one the server's own, one with a claude session, one named with --repo, one whose directory name is markup with a grok session), a plain directory with a claude process, and the maintainer's own repositories
+    steps: ["soft-foundry ui --port 4879 --repo <scratch>/gamma", "GET /api/repositories with the token"]
+    assertions: ["the printed link ends in #token= and a code", "the four staged repositories are listed with home, open and closed counts, and open changes; the plain directory is not"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-002
+    criteria: [REQ-REPO-002, REQ-REPO-005]
+    persona: a program holding the link
+    starting_state: as EVAL-001
+    steps: ["changes and workflow for three repositories by id", "changes with no repository named", "a change in another repository"]
+    assertions: ["each repository answers with its own changes and sixteen phases", "the server's own repository", "the change's title and sixteen gates"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-003
+    criteria: [REQ-REPO-003, REQ-REPO-007]
+    persona: a program holding the link
+    starting_state: as EVAL-001
+    steps: ["GET /api/processes"]
+    assertions: ["each staged session carries its repository's id, branch, and change; no entry has a root key"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-004
+    criteria: [REQ-REPO-004]
+    persona: maintainer
+    starting_state: as EVAL-001, server running
+    steps: ["open a codex session in a new repository", "close it"]
+    assertions: ["the repository is listed within one answer", "it is still listed after the session ends"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-005
+    criteria: [REQ-REPO-001, REQ-REPO-008]
+    persona: reader of the terminal output
+    starting_state: as EVAL-001
+    steps: ["ui --repo on a directory with no control plane", "the help entry with non-ASCII stripped"]
+    assertions: ["one line naming the directory and what --repo takes; exit 1", "reads complete, including that the link carries the token"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-006
+    criteria: [REQ-REPO-001, REQ-REPO-006]
+    persona: the maintainer in a browser, real machine
+    starting_state: five sessions open in four Soft Foundry repositories; the server started in this one
+    steps: ["open the printed link"]
+    assertions: ["the home page is Repositories; the token is gone from the address bar; four cards, each with its sessions, open changes, and counts; the lede counts repositories and sessions"]
+    evidence: [evidence/browser-observations.log]
+    result: pass
+  - id: EVAL-007
+    criteria: [REQ-REPO-002, REQ-REPO-003]
+    persona: the maintainer in a browser, real machine
+    starting_state: as EVAL-006
+    steps: ["click another repository", "click its open change", "click Workflow", "click Repositories"]
+    assertions: ["each page's address, title, and bar name that repository; its board flags the session open on its change; the change says which session and terminal; the workflow is that repository's; the way back works"]
+    evidence: [evidence/browser-observations.log]
+    result: pass
+  - id: EVAL-008
+    criteria: [REQ-REPO-003]
+    persona: the maintainer in a browser, real machine
+    starting_state: as EVAL-006
+    steps: ["open Running", "click a session's change in another repository"]
+    assertions: ["five sessions, each linked to its repository; those with a change linked to it", "lands on that change in that repository"]
+    evidence: [evidence/browser-observations.log]
+    result: pass
+  - id: EVAL-009
+    criteria: [REQ-REPO-006, REQ-REPO-008]
+    persona: someone with the address but not the link
+    starting_state: the tab's stored token removed
+    steps: ["load the bare address", "fetch a data route without the header"]
+    assertions: ["a page that says to open the link from the terminal, with no repository shown", "401"]
+    evidence: [evidence/browser-observations.log]
+    result: pass
+  - id: EVAL-010
+    criteria: [REQ-REPO-008]
+    persona: keyboard user at 614 px
+    starting_state: as EVAL-006
+    steps: ["inspect structure of the home page and the repository bar", "check sideways scroll on each kind of page"]
+    assertions: ["landmark, current tab, headings as stated", "none"]
+    evidence: [evidence/browser-observations.log]
+    result: pass

@@ -1,15 +1,23 @@
-# Instincts: what this change taught, as reusable one-line triggers with an
-# action, a confidence score, and evidence in this record. `soft-foundry
-# learn list` shows them across every record; `learn promote` copies those
-# at or above the threshold in .ai/policies/learning.yml into
-# .ai/rules/learned.md, and only through a change record on a change
-# branch, never by the change that learned them. An empty list is a valid
-# answer; a malformed entry fails the learning gate.
-instincts: []
-# - id: kebab-case-unique-id
-#   trigger: when ... (the situation an agent will recognise)
-#   action: do ... (one thing, imperative)
-#   confidence: 0.8          # 0.0 to 1.0; promotion threshold is policy
-#   domain: testing          # git | testing | security | review | ...
-#   evidence:
-#     - finding: REV-001     # a finding id, phase, or path in this record
+# Instincts from the ui-repositories change.
+instincts:
+- id: a-wider-view-needs-a-wider-frame
+  trigger: when adding a view whose scope is wider or narrower than the page or tool it is added to
+  action: say on every page what it is scoped to, and change the navigation to match the scopes, before adding the view
+  confidence: 0.85
+  domain: design
+  evidence:
+  - path: changes/ui-repositories/00-intake/request.md
+- id: ask-with-options-after-being-corrected
+  trigger: when the user has corrected a misreading and the next step has more than one reasonable direction
+  action: put the directions to them with what each costs, and build the one they choose
+  confidence: 0.85
+  domain: intake
+  evidence:
+  - path: changes/ui-repositories/00-intake/assumptions.md
+- id: a-catch-all-must-say-which-failure-it-caught
+  trigger: when one handler covers both a failed request and a fault in handling its answer
+  action: report them differently, and log the cause; a programming error must not read as a network problem
+  confidence: 0.8
+  domain: debugging
+  evidence:
+  - path: changes/ui-repositories/05-implementation/log.md

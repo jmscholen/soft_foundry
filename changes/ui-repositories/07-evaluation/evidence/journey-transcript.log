@@ -1,0 +1,39 @@
+### EVAL-001 the link, and what the page gets with it
+$ soft-foundry ui --port 4879 --repo <scratch>/gamma    (in <scratch>/alpha)
+ui: serving http://127.0.0.1:4879/#token=<token> (read-only; press Ctrl-C to stop)
+repositories known: 8 (4 staged for this evaluation; the rest are the maintainer's own, with sessions open, and are not written here)
+  alpha: home=true open=2 closed=0 changes=["checkout-flow", "shipped"]
+  <b>markup: home=false open=1 closed=0 changes=["x"]
+  beta: home=false open=1 closed=0 changes=["search-index"]
+  gamma: home=false open=1 closed=0 changes=["idle"]
+
+### EVAL-002 each repository's own pages
+alpha: changes ["checkout-flow", "shipped"], workflow phases 16
+beta: changes ["search-index"], workflow phases 16
+gamma: changes ["idle"], workflow phases 16
+no repo named -> the one the server was started in: ["checkout-flow", "shipped"]
+a change in beta: Search index, 16 gates
+
+### EVAL-003 sessions carry their repository
+sessions listed: 7 (2 staged)
+  claude in beta on change/search-index: change "search-index"
+  grok in <b>markup on main: change nil
+any entry with a root key: false
+
+### EVAL-004 a repository added later appears without restarting
+after a codex session opens in a new repository: true
+after that session closes, the repository is still known: true
+
+### EVAL-005 refusals in words
+$ soft-foundry ui --repo <scratch>/plain
+soft-foundry: <scratch>/plain has no .ai/workflow.yml; --repo takes a repository with a Soft Foundry control plane
+exit 1
+$ soft-foundry | grep -A7 'soft-foundry ui'
+  soft-foundry ui [--port N] [--repo PATH]...
+                                          serve a read-only page on http://127.0.0.1:N/ for every Soft
+                                          Foundry repository with a session or command running, this
+                                          one, and any named with --repo: each repository's changes
+                                          phase by phase, each gate's checks, and what is running. It
+                                          follows the records as they change and stops on Ctrl-C. Open
+                                          the link it prints: it carries the token the page needs
+                                          (N defaults to a free port)

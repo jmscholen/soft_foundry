@@ -2,4 +2,9 @@
 
 | ID | Threats | Mitigation | Where enforced | Verified by |
 | --- | --- | --- | --- | --- |
-| MIT-001 | THREAT-001 | TBD | TBD | TBD |
+| MIT-001 | THREAT-001 | A repository is selected only by an id found in the server's registry; the registry holds only directories the server registered, each with `.ai/workflow.yml`. A slug is accepted only if that repository's listing contains it. | `UI::Server#repository`, `#register`, `#change` | `test_a_request_cannot_name_a_repository_by_path`, `test_repositories_are_the_home_one_and_those_with_something_running`; ATTACK-003 |
+| MIT-002 | THREAT-002 | Every data route requires the `X-Soft-Foundry-Token` header to equal the server's token (24 random bytes, fixed-length constant-time comparison). The query string and cookies are never consulted. | `UI::Server#authorized?`, `#respond` | `test_data_needs_the_token_the_link_carried`, `test_a_token_is_made_up_for_each_server`; ATTACK-001 |
+| MIT-003 | THREAT-003 | The token is in the link's fragment, which is not sent to any server; the page removes it from the address at once and keeps it in session storage. `no-referrer`, no CORS headers, and a refused preflight mean another origin can neither send the header nor read an answer. The Host and cross-site checks still apply with a valid token. | `app.js` `takeToken`; `UI::Server::HEADERS`, `#respond` | `test_page_starts_from_repositories_and_sends_the_token`; ATTACK-002; EVAL-006, EVAL-009 |
+| MIT-004 | THREAT-004 | Unchanged from ui-server: text nodes only, CSP without inline or remote script. The repository id used in links is the server's hex id, never a name. | `app.js` `el`, `repoHref`; `UI::Server::HEADERS` | `test_script_never_parses_strings_as_markup_or_code`; ATTACK-004 |
+| MIT-005 | THREAT-005 | Accepted for now: no limit on the registry. Each entry is a path and costs one overview per home page. A cap is a follow-up. | Recorded here and in `13-review/operations.md` | n/a |
+| MIT-006 | THREAT-006 | Accepted: the token is a per-run bearer secret shown in the terminal. It dies with the server. The README says to treat the link like a password and not to paste it. | `README.md` | n/a |

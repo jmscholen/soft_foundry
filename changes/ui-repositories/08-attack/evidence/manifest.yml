@@ -1,5 +1,5 @@
-commit_sha: TBD
+commit_sha: 952808b9f07f1ddc712376123374fecfaebc7db8
 artifacts:
-  - path: TBD
-    case: ATTACK-001
-    sha256: TBD
+- path: evidence/attack-transcript.log
+  produced_by: "all five cases against a loopback server and scratch repositories; the token replaced"
+  sha256: a713bf42ea564526b4cc2302c0a87cb3da9ff610e5e453c9fe10dc5e5b031678
