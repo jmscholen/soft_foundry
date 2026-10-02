@@ -1,5 +1,5 @@
-commit_sha: TBD
+commit_sha: 0d3a0436374b6af728209f039ed577a40c960d3a
 artifacts:
-  - path: TBD
-    case: ATTACK-001
-    sha256: TBD
+- path: evidence/attack-transcript.log
+  produced_by: "all four cases against staged processes and a loopback server; pids replaced"
+  sha256: 19ff76ff7de8518a78c256c14e5be0f05ef425f51eddeb1004dd26819cbca922

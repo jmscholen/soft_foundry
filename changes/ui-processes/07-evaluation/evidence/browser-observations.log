@@ -1,0 +1,39 @@
+Browser evaluation at the working tree that became 0d3a043 (one stylesheet rule, keeping short
+table columns on one line, was added after the first screenshot). Chrome on macOS, dark scheme,
+window 614 CSS px wide, through the Claude in Chrome extension; values are from the live DOM and
+one screenshot. Served from a scratch repository (sess-a) on 4879 while these ran at once:
+  - the maintainer's own `soft-foundry ui` on 4877 in ~/dev/soft_foundry (not started by this work)
+  - `phase run intake --change checkout-flow --shell claude` in sess-a, with a stand-in claude
+  - `phase run intake --shell codex -- --secret-flag sk-not-shown` in sess-b on branch
+    change/search-index, with a stand-in codex
+  - a record in sess-a (stalled) whose handoff says a codex run started and never finished
+
+EVAL-006 the Running view (#/running)
+  nav: Changes, Running, Workflow; Running has aria-current. Title "Running · Soft Foundry".
+  lede: "3 Soft Foundry processes are running on this machine besides this page, 1 in this repository."
+  rows (Doing | Change | Session | Repository | Started | Process):
+    ui on port 4877 | none | none | ~/dev/soft_foundry | 2026-10-02 04:36 UTC | pid 87483
+    ui on port 4879 (this page) | none | none | this repository | ... (row dimmed)
+    phase run intake | checkout-flow (a link) | claude, pid 40357 | this repository | ...
+    phase run intake | search-index (text, another repository) | codex, pid 40375 | <scratch>/sess-b | ...
+  "Started here and never finished": stalled: intake, codex session, started 2026-10-02 03:00 UTC.
+  The secret flag after `--` appears nowhere on the page or in /api/processes.
+  At 614 px the page does not scroll sideways (overflow 0); the table scrolls inside its own region.
+
+EVAL-007 the board and a change say what is running
+  Board: "3 Soft Foundry processes are running on this machine. See what is running" (a link);
+    checkout-flow carries the flag "Running: phase run intake"; stalled carries "Interrupted run".
+  #/change/checkout-flow: note "Running now: soft-foundry phase run intake in a claude session
+    (pid 40357), pid 40348, since 2026-10-02 13:22 UTC."; the intake gate reads "In progress,
+    running now" and has the molten edge.
+  #/change/stalled: note "A codex session was started for intake at 2026-10-02 03:00 UTC and never
+    recorded as finished, and no such process is running. It was probably interrupted; run the
+    phase again."
+
+EVAL-008 it follows sessions as they start and stop
+  The checkout-flow runner and its session were killed (SIGKILL). Within one poll, with the change
+    open: the "Running now" note was replaced by the interrupted note for a claude session started at
+    13:22, and the intake gate read "In progress" without "running now".
+
+Not exercised: a screen reader; the light scheme; 200% zoom; a real Claude or Codex session (the
+stand-ins only sleep, so the session name is real and the session's behaviour is not).

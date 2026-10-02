@@ -1,25 +1,35 @@
 # Threat Model
 
+A delta on `changes/ui-server/03-threat-model/`, which covers the listener, the routes, and the page. This change adds one data route, two subprocess calls, and a new kind of untrusted input: other processes' command lines.
+
 ## Trust boundaries
-TBD
+See `trust-boundaries.md`.
 
 ## Externally controlled inputs
-TBD
+- The output of `ps`: every process of this user, each with a command line that process chose.
+- The working directory of each soft-foundry process.
+- The request to `/api/processes` (no parameters are read).
 
 ## Authorization boundaries
-TBD
+Unchanged: reachability only. The new data (which commands are running, in which directories, with which pids) is visible to the same local parties, who can run `ps` themselves.
 
 ## Abuse cases
-TBD
+- A process names itself soft-foundry and puts markup, a path, or a secret in its arguments, to inject into the page or have it repeat a secret.
+- A real runner is given a secret after `--`, or a session's prompt holds one, and the list repeats it.
+- A request tries to pass a pid or a command to the listing.
+- Listing is used to signal or disturb a process.
+- A website reads which sessions the viewer is running.
 
 ## Injection / XSS / CSRF / SSRF / file risks
-TBD or N/A with justification
+- Command injection: THREAT-002. `ps` and `lsof` are run with fixed argument arrays; the only variable is an integer pid taken from `ps` output by a digits-only pattern.
+- XSS and disclosure through command lines: THREAT-001. Only validated fields are reported and the page renders them as text.
+- CSRF, SSRF, file: unchanged from ui-server; the route reads no parameter and no file named by a request.
 
 ## Resource exhaustion and DoS
-TBD
+One `ps` and one `lsof` per soft-foundry process per uncached answer, reused for 2 s under the server's single computation lock. A machine with very many soft-foundry processes pays one `lsof` each.
 
 ## Infrastructure exposure
-TBD
+Unchanged: loopback only.
 
 ## Proposed attack cases
-TBD
+ATTACK-001 a spoofed process with hostile arguments; ATTACK-002 the route against the server's refusals and with parameters; ATTACK-003 listing does not disturb processes; ATTACK-004 a prompt mentioning soft-foundry.

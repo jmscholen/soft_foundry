@@ -1,15 +1,17 @@
-# Instincts: what this change taught, as reusable one-line triggers with an
-# action, a confidence score, and evidence in this record. `soft-foundry
-# learn list` shows them across every record; `learn promote` copies those
-# at or above the threshold in .ai/policies/learning.yml into
-# .ai/rules/learned.md, and only through a change record on a change
-# branch, never by the change that learned them. An empty list is a valid
-# answer; a malformed entry fails the learning gate.
-instincts: []
-# - id: kebab-case-unique-id
-#   trigger: when ... (the situation an agent will recognise)
-#   action: do ... (one thing, imperative)
-#   confidence: 0.8          # 0.0 to 1.0; promotion threshold is policy
-#   domain: testing          # git | testing | security | review | ...
-#   evidence:
-#     - finding: REV-001     # a finding id, phase, or path in this record
+# Instincts from the ui-processes change.
+instincts:
+- id: report-fields-never-the-command-line
+  trigger: when showing or logging information about another process
+  action: report named fields that pass validation and never the command line, which can hold a prompt, a token, or anything the process chose
+  confidence: 0.9
+  domain: security
+  evidence:
+  - finding: ATTACK-001
+  - path: changes/ui-processes/03-threat-model/mitigations.md
+- id: compare-what-is-recorded-as-started-with-what-is-alive
+  trigger: when a record says a run started and nothing says it ended
+  action: check whether the process is alive before waiting on it; a start with no finish and no process is an interrupted run to redo
+  confidence: 0.8
+  domain: operations
+  evidence:
+  - path: changes/ui-processes/07-evaluation/evidence/journey-transcript.log

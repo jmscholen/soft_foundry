@@ -94,6 +94,8 @@ soft-foundry ui --port 4877
 
 A change also shows its timeline, built only from the times its files record, and its spend ledger against the budget caps for its risk. The Workflow view explains the lifecycle itself: each phase, the checks its gate runs and what each one establishes, the files it must produce, the moves that go back, and the tracks.
 
+The Running view lists every Soft Foundry process alive on this machine under your user, in any repository and any session: what it is running, for which change and phase, the coding-shell session a phase runner launched, where, and since when. A change with something running says so and marks the gate, and a `phase run` that the record says started, never finished, and has no process is flagged as interrupted. `soft-foundry ps` prints the same list in a terminal (`--json` for the data). Only a few validated fields are shown, never a command line; a shell opened with `soft-foundry shell` replaces its process and is not listed.
+
 It only shows. Nothing can be run or edited from the page: the server answers GET on six fixed routes, binds 127.0.0.1 with no option to bind anything else, refuses requests that name another host or come from another site, and treats everything in a record as text. It has no login, so any program running on the same machine can read it; do not run it on a shared host.
 
 `soft-foundry check` lints the control plane itself. `soft-foundry ci` runs the lint plus every change record's gates, and `soft-foundry hooks install` wires it into a pre-commit hook. The GitHub Actions workflow runs the same two commands.

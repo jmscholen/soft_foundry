@@ -1,12 +1,66 @@
-commit_sha: TBD
+commit_sha: 0d3a0436374b6af728209f039ed577a40c960d3a
 journeys:
   - id: EVAL-001
-    criteria: [AC-001]
-    persona: TBD
-    starting_state: TBD
-    steps:
-      - TBD
-    assertions:
-      - TBD
-    evidence: [evidence/TBD]
-    result: TBD   # pass | fail | blocked
+    criteria: [REQ-PS-001, REQ-PS-003, REQ-PS-004, REQ-PS-005]
+    persona: maintainer
+    starting_state: two scratch repositories each with a phase run in progress, a ui server on the first, a record there with an unfinished run, a spoofed process, and the maintainer's own ui server in the real repository
+    steps: ["soft-foundry ps in the first repository"]
+    assertions: ["five processes besides itself, one line each; its own two say in this repository; the other repository's run names the change from its branch and its codex session; the unfinished run is warned about; exit 0"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-002
+    criteria: [REQ-PS-001]
+    persona: maintainer
+    starting_state: as EVAL-001, from a directory with no control plane
+    steps: ["soft-foundry ps"]
+    assertions: ["the same five, each with its repository path; no interrupted-run section, since there are no records here"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-003
+    criteria: [REQ-PS-001, REQ-PS-002]
+    persona: a program consuming the data
+    starting_state: as EVAL-001
+    steps: ["GET /api/processes, printed without pids and times"]
+    assertions: ["named fields only; the server marks itself; the live run is matched to its recorded start with a pid, the stalled one is not"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-004
+    criteria: [REQ-PS-004]
+    persona: maintainer
+    starting_state: as EVAL-001
+    steps: ["SIGKILL one runner and its session", "soft-foundry ps"]
+    assertions: ["four processes; two interrupted runs, the new one naming its change, phase, shell, and start"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-005
+    criteria: [REQ-PS-008]
+    persona: screen-reader user or CI log reader
+    starting_state: as EVAL-004
+    steps: ["ps output with every non-ASCII byte stripped"]
+    assertions: ["each warning reads complete, led by the word warn"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-006
+    criteria: [REQ-PS-007, REQ-PS-008]
+    persona: maintainer in a browser, 614 px wide
+    starting_state: the first repository served on 4879 with the sessions running
+    steps: ["open #/running"]
+    assertions: ["four rows across three repositories; this page's server labelled; the change in this repository is a link, the other is text; the stalled run listed; no secret flag; no sideways page scroll"]
+    evidence: [evidence/browser-observations.log]
+    result: pass
+  - id: EVAL-007
+    criteria: [REQ-PS-007]
+    persona: maintainer in a browser
+    starting_state: as EVAL-006
+    steps: ["open the board", "open checkout-flow", "open stalled"]
+    assertions: ["a count with a link; Running and Interrupted flags", "a Running now note with the session, and the gate marked", "the interrupted note"]
+    evidence: [evidence/browser-observations.log]
+    result: pass
+  - id: EVAL-008
+    criteria: [REQ-PS-007]
+    persona: maintainer in a browser
+    starting_state: checkout-flow open
+    steps: ["kill its runner and session", "wait one poll"]
+    assertions: ["the running note is replaced by the interrupted note and the gate marker goes"]
+    evidence: [evidence/browser-observations.log]
+    result: pass
