@@ -129,12 +129,18 @@ class UIServerTest < Minitest::Test
     end
   end
 
-  def test_a_request_another_site_made_is_refused
+  # The data is for this page only. The page itself carries nothing
+  # about the repository, so a link to it from another site still opens.
+  def test_a_request_for_data_that_another_site_made_is_refused
     with_server do |_dir, port, _server|
-      assert_equal 403, get(port, "/api/changes", "Sec-Fetch-Site" => "cross-site").status
-      assert_equal 403, get(port, "/api/changes", "Sec-Fetch-Site" => "same-site").status
+      %w[/api/changes /api/workflow /api/change?slug=c1 /api/nope].each do |path|
+        assert_equal 403, get(port, path, "Sec-Fetch-Site" => "cross-site").status, path
+        assert_equal 403, get(port, path, "Sec-Fetch-Site" => "same-site").status, path
+      end
       assert_equal 200, get(port, "/api/changes", "Sec-Fetch-Site" => "same-origin").status
-      assert_equal 200, get(port, "/", "Sec-Fetch-Site" => "none").status
+      assert_equal 200, get(port, "/api/changes", "Sec-Fetch-Site" => "none").status
+      assert_equal 200, get(port, "/", "Sec-Fetch-Site" => "cross-site").status
+      refute_includes get(port, "/", "Sec-Fetch-Site" => "cross-site").body, "First change"
     end
   end
 

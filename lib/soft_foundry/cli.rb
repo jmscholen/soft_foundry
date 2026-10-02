@@ -24,6 +24,7 @@ require_relative "learning"
 require_relative "content_scan"
 require_relative "change_index"
 require_relative "snapshot"
+require_relative "ui/server"
 
 module SoftFoundry
   class CLI
@@ -32,7 +33,7 @@ module SoftFoundry
     EXIT_CONFLICTS = 3
     EXIT_INTERNAL = 4
 
-    def initialize(argv, out: $stdout, err: $stderr, input: $stdin, root: Dir.pwd, source: nil, updater: nil, pr_discharge: nil, shell: nil, runner: nil)
+    def initialize(argv, out: $stdout, err: $stderr, input: $stdin, root: Dir.pwd, source: nil, updater: nil, pr_discharge: nil, shell: nil, runner: nil, ui_server: nil)
       @argv = argv.dup
       @out = out
       @err = err
@@ -43,6 +44,7 @@ module SoftFoundry
       @pr_discharge = pr_discharge
       @shell = shell
       @runner = runner
+      @ui_server = ui_server
     end
 
     def run
@@ -63,6 +65,7 @@ module SoftFoundry
       when "learn" then learn
       when "scan" then scan
       when "update" then update
+      when "ui" then ui
       when "shell"
         shell_name = @argv.shift or raise ArgumentError, "Usage: soft-foundry shell <claude|codex|grok> [args...]"
         # The shell is where model spend actually happens, so say how it is
@@ -933,6 +936,29 @@ module SoftFoundry
       0
     end
 
+    # `ui [--port N]`: the board and each change's gates as a page, served
+    # to this machine only, until interrupted. It shows; it changes nothing.
+    def ui
+      port = option("--port") || "0"
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+      raise TargetError, "--port expects a whole number from 0 to 65535; got '#{port}'" unless port.match?(/\A\d{1,5}\z/) && port.to_i <= 65_535
+      raise TargetError, "no .ai/workflow.yml here; run `soft-foundry init` first" unless plane.present?
+
+      server = (@ui_server || ->(root, port:) { UI::Server.new(root, port: port) }).call(@root, port: port.to_i)
+      bound = server.start
+      @out.puts "ui: serving http://#{UI::Server::ADDRESS}:#{bound}/ (read-only; press Ctrl-C to stop)"
+      @out.flush
+      begin
+        server.serve
+      rescue SignalException
+        nil
+      ensure
+        server.stop
+      end
+      @out.puts "ui: stopped"
+      0
+    end
+
     def print_result(result)
       @out.puts "#{result.phase.output}  #{result.status}  #{result.failed? ? 'FAIL' : (result.skipped? ? 'SKIP' : 'PASS')}"
       result.checks.each do |c|
@@ -1036,6 +1062,10 @@ module SoftFoundry
                                                   each time the total passes another warning interval
           soft-foundry budget threshold [USD|off|default]
                                                   show or set how often recorded spend warns (machine-local)
+          soft-foundry ui [--port N]              serve a read-only page on http://127.0.0.1:N/ showing every
+                                                  change record phase by phase and each gate's checks; it
+                                                  follows the records as they change and stops on Ctrl-C
+                                                  (N defaults to a free port)
           soft-foundry ci                         check + gate every change record (used by CI and pre-commit)
           soft-foundry hooks install              install the pre-commit hook
           soft-foundry hooks install --claude [--local] | --codex
