@@ -1,11 +1,101 @@
 threats:
   - id: THREAT-001
-    requirements: [REQ-001]
-    category: authorization   # authentication | authorization | isolation | injection | xss | csrf | ssrf | file | secrets | replay | concurrency | resource_exhaustion | dependency | infrastructure
-    attacker: TBD
-    goal: TBD
-    vector: TBD
-    impact: TBD
-    likelihood: TBD
+    requirements: [REQ-UI-003]
+    category: isolation
+    attacker: a website open in the viewer's browser
+    goal: read the board and change records
+    vector: DNS rebinding, pointing its own hostname at 127.0.0.1 so its page becomes same-origin with the server
+    impact: disclosure of change titles, findings, and paths to a remote party
+    likelihood: low
     mitigation: MIT-001
+    attack_case_required: true
+  - id: THREAT-002
+    requirements: [REQ-UI-003]
+    category: csrf
+    attacker: a website open in the viewer's browser
+    goal: read the data routes cross-origin
+    vector: fetch, script, or image requests to http://127.0.0.1:PORT/api/...
+    impact: disclosure as THREAT-001
+    likelihood: low
+    mitigation: MIT-002
+    attack_case_required: true
+  - id: THREAT-003
+    requirements: [REQ-UI-002]
+    category: file
+    attacker: any client that can connect
+    goal: read a file other than the page's own
+    vector: path traversal in the request target or in the slug
+    impact: disclosure of repository or system files
+    likelihood: medium
+    mitigation: MIT-003
+    attack_case_required: true
+  - id: THREAT-004
+    requirements: [REQ-UI-009]
+    category: xss
+    attacker: whoever wrote a change record or the workflow (a contributor, a cloned repository's author)
+    goal: run script in the viewer's page
+    vector: markup or script in a title, rationale, blocking string, finding, or check detail
+    impact: script in the page's origin; with no write routes, limited to reading what the page can already read and misleading the viewer
+    likelihood: medium
+    mitigation: MIT-004
+    attack_case_required: true
+  - id: THREAT-005
+    requirements: [REQ-UI-002]
+    category: csrf
+    attacker: a website open in the viewer's browser, or any local client
+    goal: change a record or run a command through the server
+    vector: POST, PUT, PATCH, DELETE, or a GET with side effects
+    impact: none possible if the mitigation holds; the tool's records are its audit trail
+    likelihood: low
+    mitigation: MIT-005
+    attack_case_required: true
+  - id: THREAT-006
+    requirements: [REQ-UI-004]
+    category: resource_exhaustion
+    attacker: a local process
+    goal: make the page unusable or the machine busy
+    vector: held-open connections, oversized headers, many distinct data requests
+    impact: the page stops updating; bounded CPU from gate runs
+    likelihood: low
+    mitigation: MIT-006
+    attack_case_required: true
+  - id: THREAT-007
+    requirements: [REQ-UI-001]
+    category: infrastructure
+    attacker: another host on the network
+    goal: reach the server
+    vector: connecting to the machine's LAN address
+    impact: disclosure to the network
+    likelihood: low
+    mitigation: MIT-007
+    attack_case_required: true
+  - id: THREAT-008
+    requirements: [REQ-UI-003]
+    category: authorization
+    attacker: another local user or process on the same machine
+    goal: read the board
+    vector: connecting to the loopback port
+    impact: disclosure of record contents to a local party who, on a single-user machine, can already read the files
+    likelihood: low
+    mitigation: MIT-008
+    attack_case_required: false
+  - id: THREAT-009
+    requirements: [REQ-UI-002]
+    category: file
+    attacker: whoever wrote the repository
+    goal: make the server disclose a file outside the repository to the viewer's page
+    vector: a symlink in place of a record file
+    impact: the viewer sees fields of their own file on their own machine; no boundary is crossed unless combined with THREAT-001 or THREAT-002
+    likelihood: low
+    mitigation: MIT-009
+    attack_case_required: true
+  - id: THREAT-010
+    requirements: [REQ-UI-004]
+    category: injection
+    attacker: any client that can connect
+    goal: confuse the parser into answering a second, hidden request
+    vector: a body on a GET, pipelined requests, an absolute-form target, binary input
+    impact: a route or header check bypassed
+    likelihood: low
+    mitigation: MIT-010
     attack_case_required: true

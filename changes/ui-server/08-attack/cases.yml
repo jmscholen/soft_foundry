@@ -1,21 +1,92 @@
-commit_sha: TBD
+commit_sha: 5d36e6f80e14c07928d3b5f1490403b17e01982e
 authorization_envelope:
-  target: TBD
-  environment: TBD          # local | ephemeral | test | staging | production
-  authorized_by: TBD
-  allowed_surfaces: []
-  prohibited_surfaces: []
-  data_constraints: TBD
-  network_constraints: TBD
+  target: soft-foundry ui on 127.0.0.1:4878, serving a scratch repository built for the purpose
+  environment: local
+  authorized_by: the maintainer, by asking for this change in this session; the target is a process this session started on their machine
+  allowed_surfaces: [the loopback HTTP listener, the scratch repository's files]
+  prohibited_surfaces: [any other host, any other process, the real repository's records]
+  data_constraints: the scratch repository holds only fabricated records; the symlink case points at /etc/passwd, which is world-readable
+  network_constraints: loopback only, plus one connection attempt to this machine's own LAN address
   destructive_actions: prohibited
 cases:
   - id: ATTACK-001
+    threat: THREAT-003
+    violation_attempted: read a file that is not one of the page's three
+    starting_privilege: any local client; no credentials exist
+    steps: ["ten traversal and direct paths with curl --path-as-is, including encoded dots, a NUL, .git/config, and a file placed beside the repository", "six hostile slugs"]
+    expected_safe_behavior: 404 for each, with no file content in the body
+    observed: every request 404; the body is the fixed error
+    result: denied
+    evidence: [evidence/attack-transcript.log]
+  - id: ATTACK-002
     threat: THREAT-001
-    violation_attempted: TBD
-    starting_privilege: TBD
-    steps:
-      - TBD
-    expected_safe_behavior: TBD
-    observed: TBD
-    result: TBD   # denied | violated | blocked_by_provider | blocked_by_scope
-    evidence: [evidence/TBD]
+    violation_attempted: be treated as the server's own origin under another hostname
+    starting_privilege: a browser page whose hostname resolves to 127.0.0.1
+    steps: ["seven Host values: another name with and without the port, names containing 127.0.0.1 or localhost as a label, the right address with the wrong port, [::1], 0.0.0.0", "an HTTP/1.0 request with no Host"]
+    expected_safe_behavior: 403 on the page and on the data
+    observed: 403 for all, on both
+    result: denied
+    evidence: [evidence/attack-transcript.log]
+  - id: ATTACK-003
+    threat: THREAT-002
+    violation_attempted: read the data routes from another origin
+    starting_privilege: a browser page on another origin
+    steps: ["requests marked cross-site and same-site with an Origin header", "look for CORS headers on a permitted answer", "a preflight"]
+    expected_safe_behavior: 403; no Access-Control header anywhere; preflight refused
+    observed: 403; zero CORS headers; OPTIONS 405
+    result: denied
+    evidence: [evidence/attack-transcript.log]
+  - id: ATTACK-004
+    threat: THREAT-005
+    violation_attempted: change a record through the server
+    starting_privilege: any local client
+    steps: ["POST, PUT, PATCH, DELETE with a JSON body to a change", "compare a checksum of the record's files before and after"]
+    expected_safe_behavior: 405; the record unchanged
+    observed: 405 for each; the checksum is identical
+    result: denied
+    evidence: [evidence/attack-transcript.log]
+  - id: ATTACK-005
+    threat: THREAT-006
+    violation_attempted: make the page unusable by holding connections open
+    starting_privilege: a local process
+    steps: ["open forty connections that send nothing", "request the page and the board", "request again after the read timeout"]
+    expected_safe_behavior: both requests answered promptly
+    observed: "at 93b9422: 503 for both until the silent connections timed out (violated). At the remediated commit: 200 for both in 0.11 s"
+    result: denied
+    evidence: [evidence/attack-at-93b9422.log, evidence/attack-transcript.log]
+  - id: ATTACK-006
+    threat: THREAT-010
+    violation_attempted: crash the parser or have it answer a hidden second request
+    starting_privilege: any local client
+    steps: ["a 9 KB header", "a 20 KB path", "200 random bytes", "a GET with a Content-Length whose body is a second request for a file outside the repository"]
+    expected_safe_behavior: 431, 431, 400, and exactly one response; the server keeps answering
+    observed: as expected; one response; the server answered 200 afterwards
+    result: denied
+    evidence: [evidence/attack-transcript.log]
+  - id: ATTACK-007
+    threat: THREAT-004
+    violation_attempted: run script in the page from a record's text
+    starting_privilege: author of a change record
+    steps: ["a record whose title, risk, blocking strings, finding, and skip rationale carry img/onerror, script, svg/onload, an event-handler attribute, and a javascript: URL", "fetch it over the wire", "open the change and the board in Chrome and query the DOM"]
+    expected_safe_behavior: JSON with a JSON content type; in the page, text only
+    observed: application/json; the document title is the payload as text (the payload would have set it to 1337); zero injected elements or handler attributes on either view
+    result: denied
+    evidence: [evidence/attack-transcript.log, evidence/hostile-render.log]
+  - id: ATTACK-008
+    threat: THREAT-009
+    violation_attempted: disclose a file outside the repository through a symlinked metadata.yml
+    starting_privilege: author of the repository
+    steps: ["changes/linked/metadata.yml is a symlink to /etc/passwd", "read the board and the change", "search both answers for a line of the file"]
+    expected_safe_behavior: an error naming the record; none of the file's content
+    observed: "no content in either run. At 93b9422 the error was a Ruby message (undefined method dig for String), a defect; at the remediated commit it is changes/linked/metadata.yml is not a mapping"
+    result: denied
+    evidence: [evidence/attack-at-93b9422.log, evidence/attack-transcript.log]
+  - id: ATTACK-009
+    threat: THREAT-007
+    violation_attempted: reach the server from another interface, or make it listen on one
+    starting_privilege: a host on the same network; the person starting the command
+    steps: ["list the listening socket", "connect to this machine's LAN address on the port", "soft-foundry ui --host 0.0.0.0"]
+    expected_safe_behavior: listening on 127.0.0.1 only; connection refused; the flag refused
+    observed: 127.0.0.1:4878; curl exit 7 (could not connect); unknown option, exit 1
+    result: denied
+    evidence: [evidence/attack-transcript.log]

@@ -1,0 +1,47 @@
+Browser evaluation of the page served by `soft-foundry ui --port 4877` from this repository
+(21 records: 3 open, 18 closed). Chrome on macOS, dark colour scheme, driven through the Claude in
+Chrome extension; values are what the live DOM and screenshots showed. The page's three files are
+byte-identical at 93b9422 (when most of this was observed) and 5d36e6f (the verified commit); the
+final pass (board, landmarks, tab order, focus ring, pause) was at 5d36e6f.
+
+EVAL-004 the board
+  title "Changes · Soft Foundry"; h1 "Changes"; lede "3 open changes, none failing. 18 closed records."
+  Open (3): ui-server sixteen pending/optional cells; ui-snapshot pass at 00, 05, 06, 07, 13, 15 and waived
+    or optional elsewhere, flag "3 advisories"; upstream-failure-reporting pass at 00.
+  Closed (18): recorded-complete marks (ring with a dot), distinct from evaluated pass (filled disc).
+  Column numbers 00..15 share one baseline (one distinct top offset across sixteen headers).
+  No console errors.
+
+EVAL-005 one change, its gates, and staying current
+  #/change/ui-snapshot: h1 is the title; meta line slug, status, risk, type, branch; "Gated track."
+    Sixteen gates in order; 15 learn selected by default (last completed); panel lists nine checks.
+  #/change/cross-cli-hooks (closed): note "This record is closed. Its stale gates mean code has changed
+    since its evidence was recorded, which is expected once a change has merged." 06 verify selected by
+    default (first stale); its failing check is "evidence current" with the changed paths.
+  Clicking 13 review: hash becomes #/change/cross-cli-hooks/review, that button alone has
+    aria-expanded="true", panel heading "13 review: Stale", focus stays on the button.
+  Live update: with #/change/ui-server open and focus on the intake gate, the handoff was edited from
+    in_progress back to pending on disk. Within one poll the gate read "Pending", focus was still on
+    the intake gate, and the live region read "This change was updated at 23:55:35."
+  Hidden tab: while document.hidden was true the "Updated" time did not advance (no polling).
+  Pause: aria-pressed true and "Paused"; pressing again resumes.
+  First navigation from an extension-driven tab was answered 403 "the request came from another site"
+    at 0d69a4d's design; fixed before GREEN (see 05-implementation/deviations.md).
+
+EVAL-006 accessibility
+  Keyboard: tab order is skip link, wordmark, Changes, Pause updates, the Open table's scroll region,
+    each change link, the Closed table's scroll region, and so on. Gates are buttons. A real Tab press
+    put a 3px solid outline (rgb 127,176,240) on the focused link; :focus-visible matched.
+  Structure: html lang="en"; header, nav, main, footer; one h1 per view; h2 per section; tables have a
+    caption, th scope="col" and scope="row"; each cell carries its state as a visually hidden word.
+  Colour: each state has its own shape and a word. Text contrast, computed from the palette:
+    light  ink 13.8, steel 5.4, pour 5.1, sound 5.4, flaw 5.5, cold 5.8 on the ground (4.5 needed)
+    dark   ink 14.8, steel 7.9, pour 7.2, sound 8.5, flaw 7.9, cold 8.0 on the ground
+  Reflow: with the body constrained to 320 CSS px, nothing outside the two table scroll regions
+    extended past 320 px on either view; gates wrapped two to a row at 120 px each.
+  Target size: gate buttons 120 by 101; Pause 32 high; standalone links were 18 high and were given
+    block padding to reach 24.
+  Motion: one animation (the in-progress gate's top edge), off under prefers-reduced-motion.
+
+Not exercised, and said so in results.md: a screen reader; the light scheme on screen (contrast is
+computed, not viewed); 200% browser zoom; a real 320 px viewport (the window would not go below 500).

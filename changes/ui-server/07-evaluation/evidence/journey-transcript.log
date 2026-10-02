@@ -1,0 +1,40 @@
+
+### EVAL-001 start, serve, stop
+$ soft-foundry ui --port 4879   (first line printed)
+ui: serving http://127.0.0.1:4879/ (read-only; press Ctrl-C to stop)
+GET / -> 200 text/html; charset=utf-8 955 bytes in 0.001344s
+GET /app.css -> 200 text/css; charset=utf-8 10698 bytes in 0.000669s
+GET /app.js -> 200 text/javascript; charset=utf-8 21693 bytes in 0.000675s
+GET /api/workflow -> 200 application/json; charset=utf-8 22840 bytes in 0.016129s
+GET /api/changes -> 200 application/json; charset=utf-8 34805 bytes in 0.665692s
+GET /api/change?slug=ui-server -> 200 application/json; charset=utf-8 6299 bytes in 0.060216s
+second GET /api/changes within 2 s -> 0.000520s (reused)
+board: 21 changes, 3 gated now, 18 closed
+$ kill -TERM
+exit 0
+ui: serving http://127.0.0.1:4879/ (read-only; press Ctrl-C to stop)
+ui: stopped
+
+### EVAL-002 refusals name what to do
+$ soft-foundry ui --port 4880   (already in use)
+soft-foundry: port 4880 is already in use; pass another --port, or omit it to let the system choose
+exit 1
+$ soft-foundry ui --port eighty
+soft-foundry: --port expects a whole number from 0 to 65535; got 'eighty'
+exit 1
+$ soft-foundry ui --host 0.0.0.0
+soft-foundry: unknown option(s): --host 0.0.0.0
+exit 1
+$ soft-foundry ui   (a directory with no .ai/)
+soft-foundry: no .ai/workflow.yml here; run `soft-foundry init` first
+exit 1
+
+### EVAL-003 the page's data follows a record edit
+before: intake: pending/pending
+after marking intake in progress and waiting out the 2 s reuse: intake: in_progress/in_progress
+
+### EVAL-007 help and output with non-ASCII bytes stripped
+  soft-foundry ui [--port N]              serve a read-only page on http://127.0.0.1:N/ showing every
+                                          change record phase by phase and each gate's checks; it
+                                          follows the records as they change and stops on Ctrl-C
+                                          (N defaults to a free port)
