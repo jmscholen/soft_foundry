@@ -1,0 +1,16 @@
+# Instincts from the ui-snapshot change.
+instincts:
+- id: diff-old-and-new-output-when-refactoring-printing-code
+  trigger: when refactoring code that produces a command's text output
+  action: run the previous commit's code and the new code against the same real data and diff the output and exit codes
+  confidence: 0.85
+  domain: testing
+  evidence:
+  - path: changes/ui-snapshot/07-evaluation/evidence/journey-transcript.log
+- id: read-the-method-before-asserting-on-it
+  trigger: when writing a failing test that depends on existing behaviour you have not read
+  action: read the method the assertion rests on first, so the test fails for the missing feature and not for a wrong guess
+  confidence: 0.8
+  domain: testing
+  evidence:
+  - path: changes/ui-snapshot/05-implementation/deviations.md

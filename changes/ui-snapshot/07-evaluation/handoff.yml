@@ -1,0 +1,27 @@
+phase: 07-evaluation
+skill: evaluation
+status: complete
+commit_sha: 684fe7df390ac91fc3c854b68864af9c22c742d5
+started_at: '2026-10-02T03:42:00Z'
+completed_at: '2026-10-02T03:44:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- evaluation-plan.md
+- journeys.yml
+- results.md
+- evidence/manifest.yml
+- evidence/journey-transcript.log
+blocking: []
+findings:
+- id: EVAL-NOTE-001
+  severity: info
+  summary: A closed record gated on request reports stale gates; the page must label that as expected.
+- id: EVAL-NOTE-002
+  severity: info
+  summary: Agent-typed handoff times and tool-written created_at disagree by hours in real records; the timeline reports times as recorded.
+next: attack
+notes: Performed directly by the interactive session, not a fresh-context agent; see 00-intake/assumptions.md.
+executed_by:

@@ -1,0 +1,36 @@
+phase: 13-review
+skill: review
+status: complete
+commit_sha: 684fe7df390ac91fc3c854b68864af9c22c742d5
+started_at: '2026-10-02T03:44:00Z'
+completed_at: '2026-10-02T03:46:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- functional.md
+- architecture.md
+- security.md
+- accessibility.md
+- policy-conformance.md
+- infrastructure.md
+- operations.md
+- consolidated.md
+blocking: []
+findings:
+- id: REV-002
+  severity: minor
+  summary: Timeline keeps events whose recorded time is not a usable time; fix in ui-explainer-timeline.
+- id: REV-003
+  severity: minor
+  summary: A malformed budget ledger fails one change detail; the server must answer with an error.
+- id: REV-004
+  severity: minor
+  summary: checks_for is compared with the gate for intake only.
+- id: REV-011
+  severity: minor
+  summary: Record text is passed through as data; the page must render it as text only.
+next: judge
+notes: Performed directly by the interactive session, not a fresh-context agent; see 00-intake/assumptions.md. The review is therefore not independent.
+executed_by:

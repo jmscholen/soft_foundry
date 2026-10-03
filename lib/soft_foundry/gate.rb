@@ -2,6 +2,7 @@
 
 require "yaml"
 require "date"
+require_relative "change_record"
 require_relative "learning"
 require_relative "content_scan"
 
@@ -19,6 +20,45 @@ module SoftFoundry
 
     SHA = /\A[0-9a-f]{7,40}\z/
     PLACEHOLDER = /\bTBD\b/
+
+    # What each check establishes, for anything that explains a gate to a
+    # person. Keyed by the name `evaluate` reports.
+    CHECKS = {
+      "handoff present" => "The phase directory has a handoff.yml.",
+      "handoff status" => "The handoff's status is one of #{ChangeRecord::STATUSES.join(', ')}.",
+      "phase pending" => "The phase has not started, so there is nothing to gate.",
+      "phase in progress" => "The phase is being worked on and is not gated until it is complete.",
+      "blocking recorded" => "A blocked phase names what is blocking it.",
+      "handoff identity" => "The handoff names this phase and the skill the workflow assigns to it.",
+      "track permitted" => "The change's track is defined, has an exploring stage if the change is exploring, and is the one its risk forces.",
+      "not exploring" => "No phase from implementation onward is complete while the change is still exploring.",
+      "required files present" => "Every file the skill's completion.yml requires exists.",
+      "no placeholders" => "No required file still contains a TBD placeholder.",
+      "no blocking conditions" => "The handoff lists no unresolved blocking condition.",
+      "commit_sha recorded" => "The handoff is bound to a commit that exists in this repository.",
+      "completed_at recorded" => "The handoff records when the phase was completed.",
+      "predecessor complete" => "The phase before this one is complete (optional, waived, and track-optional phases are stepped over).",
+      "evidence current" => "No application, test, or infrastructure code changed after the commit this evidence describes.",
+      "specification locked" => "The specification is unchanged since the person vetted the change.",
+      "red evidence" => "Each test named with a red_commit existed before the implementation and code changed after it.",
+      "instincts valid" => "The instincts the learning phase recorded are well formed.",
+      "content clean" => "The phase's files carry no invisible text or secret-shaped strings."
+    }.freeze
+
+    # The checks a complete `phase` is put through, in the order `evaluate`
+    # runs them. Checks that depend on the change's own state (exploring,
+    # vetted) are listed where they can apply.
+    def self.checks_for(plane, phase)
+      names = ["handoff identity"]
+      names << "track permitted" if plane.phases.first == phase
+      names << "not exploring" if plane.hardening_phase?(phase)
+      names += ["required files present", "no placeholders", "no blocking conditions", "commit_sha recorded", "completed_at recorded", "predecessor complete"]
+      names << "evidence current" if plane.skill(phase.skill).commit_bound?
+      names << "specification locked" if phase.id == "specify"
+      names << "red evidence" if phase.id == "verify"
+      names << "instincts valid" if phase.id == "learn"
+      names << "content clean"
+    end
 
     def initialize(record, git: Git.new(record.root))
       @record = record

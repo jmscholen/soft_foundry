@@ -1,0 +1,73 @@
+
+### EVAL-001 the board for this repository
+$ soft-foundry change list --json | summary
+exit 0
+version=1 default_branch=main phases=16 changes=20
+closed=18 evaluated=2 errors=0
+ui-snapshot: status=intake failed=false stale=false merged_unclosed=false advisories=0 cells={"pending"=>16}
+upstream-failure-reporting: status=in_progress failed=false stale=false merged_unclosed=false advisories=0 cells={"pass"=>1, "pending"=>15}
+cross-cli-hooks (closed): evaluated=false cells={"complete"=>6, "pending"=>10} waived=discover,specify,threat_model,plan,attack,judge
+$ grep -c for an absolute path or home directory in the board
+0
+$ time for the board (closed records are not gated)
+real 0.22
+
+### EVAL-002 one change in full
+$ soft-foundry change status upstream-failure-reporting --json | summary
+exit 0
+slug=upstream-failure-reporting status=in_progress current_phase=discover failed=false track=gated
+00-intake: complete/pass completed_at=2026-09-09T15:43:34Z
+  pass handoff identity
+  pass track permitted
+  pass required files present
+  pass no placeholders
+  pass no blocking conditions
+  pass commit_sha recorded
+  pass completed_at recorded
+  pass predecessor complete
+  pass content clean
+pending gates: 15
+timeline: created, started, completed
+spend entries: 0, cap: 10.0
+$ soft-foundry change status cross-cli-hooks --json | summary (a closed record is still gated on request)
+exit 2
+states={"pass"=>3, "pending"=>10, "stale"=>3} advisories=3 skipped=discover,specify,threat_model,plan,attack,judge
+timeline first/last: 2026-09-24T12:20:00Z started .. 2026-09-24T16:18:30Z created
+worktree key present: false
+
+### EVAL-003 a failing and a stale gate keep exit 2
+$ soft-foundry change status --json (specification complete before intake)
+exit 2
+failed=true specify=fail
+  fail no placeholders: TBD remains in: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md
+  fail predecessor complete: 01-discovery is pending
+$ soft-foundry change status (text) for the same record
+c1: Scratch change  [status: intake, phase: intake, risk: TBD]
+  track: gated
+  00-intake              pending      
+  01-discovery           pending      
+  02-specification       complete     FAIL: no placeholders, predecessor complete
+exit 2
+$ soft-foundry change status nope --json
+soft-foundry: no change record at changes/nope
+exit 1
+$ a record whose metadata.yml is not valid YAML
+exit 0
+broken: error: (changes/broken/metadata.yml): did not find expected ',' or ']' while parsing a flow sequence at line 1 column 9
+c1: cells=16
+
+### EVAL-004 text output is unchanged from main
+identical (exit 2/2, 22 lines): soft-foundry change status cross-cli-hooks
+identical (exit 0/0, 23 lines): soft-foundry change status lifecycle-tracks
+identical (exit 0/0, 18 lines): soft-foundry change status upstream-failure-reporting
+identical (exit 0/0, 20 lines): soft-foundry change list
+identical (exit 0/0, 53 lines): soft-foundry ci
+
+### EVAL-005 help text, non-ASCII bytes stripped
+$ soft-foundry | grep -A4 'change status' | LC_ALL=C tr -cd '\11\12\15\40-\176'
+  soft-foundry change status [slug] [--json]
+                                          show track, phase status, and gate results; --json prints
+                                          the same state with every check, advisory, recorded time,
+                                          and spend entry as JSON (same exit code)
+  soft-foundry change list [--json]       list change records; --json prints every record with one
+                                          cell per phase (closed records are not re-gated)

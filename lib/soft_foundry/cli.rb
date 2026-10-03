@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "json"
 require "yaml"
 require_relative "onboarding"
 require_relative "shell"
@@ -21,6 +22,8 @@ require_relative "guard"
 require_relative "phase_runner"
 require_relative "learning"
 require_relative "content_scan"
+require_relative "change_index"
+require_relative "snapshot"
 
 module SoftFoundry
   class CLI
@@ -281,9 +284,15 @@ module SoftFoundry
         billing_notice(record: record)
         0
       when "status"
-        status(@argv.shift || current_slug)
+        json = flag("--json")
+        slug = @argv.shift || current_slug
+        json ? status_json(slug) : status(slug)
       when "list"
-        list_changes.each { |slug| @out.puts slug }
+        if flag("--json")
+          @out.puts JSON.pretty_generate(snapshot.board)
+        else
+          list_changes.each { |slug| @out.puts slug }
+        end
         0
       when "close"
         change_close(@argv.shift)
@@ -382,17 +391,16 @@ module SoftFoundry
     end
 
     def track_line(record)
-      definition = record.track_definition
-      return "track: #{record.track} (not defined in .ai/workflow.yml)" unless definition
-      line = "track: #{record.track}"
-      if record.exploring?
-        n = record.iterations.size
-        last = record.iterations.last
-        deployed = last && last["deployed"].is_a?(Hash) && last["deployed"]["environment"]
+      track = Snapshot.track(record)
+      return "track: #{track['name']} (not defined in .ai/workflow.yml)" unless track["defined"]
+      line = "track: #{track['name']}"
+      if track["exploring"]
+        n = track["iterations"]
+        deployed = track["last_deployed"]
         line += " (exploring; #{n} #{n == 1 ? 'iteration' : 'iterations'} recorded#{deployed ? ", last deployed to #{deployed}" : ''}; run `soft-foundry change vet` when the person has accepted the feature)"
-      elsif (v = record.vetted)
-        line += " (vetted by #{v['by']} at #{v['commit'].to_s[0, 12]} on #{v['at']}; specification locked)"
-      elsif definition.exploring?
+      elsif (v = track["vetted"])
+        line += " (vetted by #{v['by']} at #{v['commit'][0, 12]} on #{v['at']}; specification locked)"
+      elsif track["exploring_stage"]
         line += " (exploring stage not entered)"
       end
       line
@@ -472,6 +480,14 @@ module SoftFoundry
       results.each { |r| @out.puts format("  %-22s %-12s %s", r.phase.output, r.status, summarize(r)) }
       print_advisories(record)
       results.any?(&:failed?) ? 2 : 0
+    end
+
+    # The same state as `status`, as JSON (Snapshot#change), with the same
+    # exit code. The shape is versioned and not yet a stable contract.
+    def status_json(slug)
+      change = snapshot.change(slug)
+      @out.puts JSON.pretty_generate(change)
+      change["failed"] ? 2 : 0
     end
 
     def budget
@@ -648,7 +664,6 @@ module SoftFoundry
 
     def ci
       code = check
-      default_branch = git.repository? ? git.default_branch : nil
       list_changes.each do |slug|
         record = load_record(slug)
         if record.metadata["status"] == "closed"
@@ -660,9 +675,8 @@ module SoftFoundry
         results.reject(&:skipped?).each { |r| print_result(r) }
         code = 2 if results.any?(&:failed?)
         print_advisories(record)
-        sha = record.finished_commit_sha
-        if default_branch && sha && git.ancestor?(sha, default_branch)
-          @out.puts "  ✗ fail merged into #{default_branch} but status is '#{record.metadata['status']}', not 'closed' — run `soft-foundry change close #{slug}`"
+        if index.merged_unclosed?(record)
+          @out.puts "  ✗ fail merged into #{index.default_branch} but status is '#{record.metadata['status']}', not 'closed' — run `soft-foundry change close #{slug}`"
           code = 2
         end
       end
@@ -953,17 +967,10 @@ module SoftFoundry
       found or raise "no change record for branch '#{branch}'; run `soft-foundry change new <slug>` or pass --change SLUG"
     end
 
-    def load_record(slug)
-      record = ChangeRecord.new(@root, slug, control_plane: plane)
-      raise "no change record at #{relative(record.dir)}" unless record.exists?
-      record
-    end
-
-    def list_changes
-      base = File.join(@root, "changes")
-      return [] unless File.directory?(base)
-      Dir.glob("**/metadata.yml", base: base).map { |p| File.dirname(p) }.sort
-    end
+    def index = @index ||= ChangeIndex.new(@root, plane: plane, git: git)
+    def snapshot = @snapshot ||= Snapshot.new(@root, plane: plane, git: git, index: index)
+    def load_record(slug) = index.record(slug)
+    def list_changes = index.slugs
 
     def relative(path)
       path.delete_prefix("#{@root}/")
@@ -984,8 +991,12 @@ module SoftFoundry
           soft-foundry change new <slug> [--track gated|iterative]
                                                   create changes/<slug>/ from phase templates; the track
                                                   defaults to .ai/workflow.yml tracks.default
-          soft-foundry change status [slug]       show track, phase status, and gate results
-          soft-foundry change list                list change records
+          soft-foundry change status [slug] [--json]
+                                                  show track, phase status, and gate results; --json prints
+                                                  the same state with every check, advisory, recorded time,
+                                                  and spend entry as JSON (same exit code)
+          soft-foundry change list [--json]       list change records; --json prints every record with one
+                                                  cell per phase (closed records are not re-gated)
           soft-foundry change vet <slug> [--by NAME]
                                                   iterative track: record the person's acceptance of the
                                                   explored feature, lock the specification at HEAD, and
