@@ -108,7 +108,7 @@ module SoftFoundry
     # recorded history, and the spend ledger.
     def change(slug)
       record = @index.record(slug)
-      meta = record.metadata
+      meta = metadata(record)
       results = Gate.new(record, git: @git).evaluate_all
       summary(record, meta).merge(
         "version" => VERSION,
@@ -134,6 +134,14 @@ module SoftFoundry
 
     def plain(value) = self.class.plain(value)
     def now = Time.now.utc.iso8601
+
+    # A record's metadata is whatever YAML someone put in that file; only
+    # a mapping is a record.
+    def metadata(record)
+      meta = record.metadata
+      raise "changes/#{record.slug}/metadata.yml is not a mapping" unless meta.is_a?(Hash)
+      meta
+    end
 
     def workflow_phase(phase)
       skill = @plane.skill(phase.skill)
@@ -164,7 +172,7 @@ module SoftFoundry
 
     def board_row(slug)
       record = @index.record(slug)
-      meta = record.metadata
+      meta = metadata(record)
       row = summary(record, meta).merge("track" => record.track, "exploring" => record.exploring?)
       if row["closed"]
         return row.merge("evaluated" => false, "merged_unclosed" => false, "stale" => false, "failed" => false, "advisories" => nil,

@@ -1,0 +1,17 @@
+phase: '09-remediation'
+skill: remediation
+status: complete
+commit_sha: 5d36e6f80e14c07928d3b5f1490403b17e01982e
+started_at: '2026-10-02T03:59:00Z'
+completed_at: '2026-10-02T04:01:00Z'
+resolved_model:
+  profile: coding_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- summary.md
+blocking: []
+findings: []
+next: verify
+notes: Performed directly by the interactive session, not a fresh-context agent; see 00-intake/assumptions.md. Verification, evaluation, and attack were all produced again after this.
+executed_by:

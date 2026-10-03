@@ -308,6 +308,24 @@ class SnapshotTest < Minitest::Test
     end
   end
 
+  # Found by ATTACK-008: a metadata.yml that is valid YAML but not a
+  # mapping (here, a symlink to a plain text file) was reported with a
+  # Ruby error. It is named for what it is, and none of it is repeated.
+  def test_a_metadata_file_that_is_not_a_mapping_is_named_plainly
+    with_snapshot do |dir, _record, snapshot|
+      outside = File.join(dir, "outside.txt")
+      File.write(outside, "root:x:0:0:secret line\n")
+      FileUtils.mkdir_p(File.join(dir, "changes", "linked"))
+      File.symlink(outside, File.join(dir, "changes", "linked", "metadata.yml"))
+
+      row = snapshot.board["changes"].find { |c| c["slug"] == "linked" }
+      assert_equal "changes/linked/metadata.yml is not a mapping", row["error"]
+      error = assert_raises(RuntimeError) { snapshot.change("linked") }
+      assert_equal "changes/linked/metadata.yml is not a mapping", error.message
+      refute_includes JSON.generate(snapshot.board), "secret line"
+    end
+  end
+
   # YAML refuses a file that is not UTF-8, so a record's text is valid by
   # the time it is read; anything else that reaches a snapshot (a path in
   # an error, a binary string) is still made safe to serialize.

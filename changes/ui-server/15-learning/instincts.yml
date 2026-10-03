@@ -1,0 +1,25 @@
+# Instincts from the ui-server change.
+instincts:
+- id: open-the-page-before-trusting-its-tests
+  trigger: when a change serves a page to a browser
+  action: load it in a real browser before recording verification; a request test only proves the server does what the test author assumed a browser sends
+  confidence: 0.9
+  domain: testing
+  evidence:
+  - path: changes/ui-server/05-implementation/deviations.md
+  - path: changes/ui-server/07-evaluation/evidence/browser-observations.log
+- id: every-limit-states-what-happens-at-the-limit
+  trigger: when adding a cap on connections, size, rate, or queue length
+  action: decide and test what happens when the cap is reached, from the point of view of a legitimate caller arriving then
+  confidence: 0.85
+  domain: security
+  evidence:
+  - finding: ATTACK-005
+  - path: changes/ui-server/09-remediation/summary.md
+- id: stop-background-servers-in-scripts-with-sigterm
+  trigger: when a script starts a server in the background and must stop it
+  action: send SIGTERM, not SIGINT; a non-interactive shell starts background jobs with SIGINT ignored
+  confidence: 0.8
+  domain: testing
+  evidence:
+  - path: changes/ui-server/05-implementation/log.md

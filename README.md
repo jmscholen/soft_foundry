@@ -83,6 +83,17 @@ A gate passes only when the phase's required files exist with no `TBD` placehold
 
 `soft-foundry change status [slug] --json` prints the same state as data: every gate with each check's outcome and detail, the advisories, the recorded timeline, and the spend ledger, with the same exit code as the text form. `soft-foundry change list --json` prints every record with one cell per phase; closed records report what their handoffs recorded and are not gated again. Both carry `"version": 1` and are not yet a stable contract.
 
+### Seeing it in a browser
+
+```sh
+soft-foundry ui            # ui: serving http://127.0.0.1:PORT/ (read-only; press Ctrl-C to stop)
+soft-foundry ui --port 4877
+```
+
+`soft-foundry ui` serves one page to this machine only. The first view is every change record with one cell per phase: open changes are gated as you look, closed records show what their handoffs recorded. Opening a change shows its sixteen gates in order, and selecting a gate lists each check with its outcome and detail, what is blocking it, and why a pending phase may stay pending. The page follows the records as they change, about every five seconds while the tab is visible.
+
+It only shows. Nothing can be run or edited from the page: the server answers GET on six fixed routes, binds 127.0.0.1 with no option to bind anything else, refuses requests that name another host or come from another site, and treats everything in a record as text. It has no login, so any program running on the same machine can read it; do not run it on a shared host.
+
 `soft-foundry check` lints the control plane itself. `soft-foundry ci` runs the lint plus every change record's gates, and `soft-foundry hooks install` wires it into a pre-commit hook. The GitHub Actions workflow runs the same two commands.
 
 ### Runtime enforcement: the guard hook

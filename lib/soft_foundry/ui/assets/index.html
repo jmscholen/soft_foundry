@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Soft Foundry</title>
+<link rel="stylesheet" href="/app.css">
+<script src="/app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="masthead">
+  <a class="wordmark" href="#/">Soft Foundry</a>
+  <nav aria-label="Views">
+    <ul id="nav">
+      <li><a href="#/" data-view="board">Changes</a></li>
+    </ul>
+  </nav>
+  <div class="live">
+    <span id="updated">Loading</span>
+    <button type="button" id="pause" aria-pressed="false">Pause updates</button>
+  </div>
+</header>
+<p id="announce" class="sr-only" aria-live="polite"></p>
+<main id="main" tabindex="-1"></main>
+<footer class="colophon">
+  <p>This page only shows. It is served to this machine alone by <code>soft-foundry ui</code>, and every change to a record is made with the CLI.</p>
+</footer>
+</body>
+</html>
