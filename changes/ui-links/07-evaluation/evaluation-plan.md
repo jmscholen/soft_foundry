@@ -1,16 +1,17 @@
 # Evaluation Plan
 
 ## Intent being proven
-TBD
+Nothing on the page names a change, phase, repository, or commit without being a link to it, and hovering or focusing any of them says what it is and which file it lives in.
 
 ## Personas
-TBD
+- The maintainer, who asked for this, on the real machine.
+- A keyboard user.
 
 ## Journeys
-For each journey record: EVAL ID, requirement IDs, starting state, steps, assertions, evidence, result.
+For each journey record: EVAL ID, requirement IDs, starting state, steps, assertions, evidence, result. Recorded in `journeys.yml`; all in `evidence/browser-observations.log`.
 
 ## UI walkthrough evidence
-Capture screenshots or equivalent browser evidence at meaningful state transitions.
+`evidence/browser-observations.log`.
 
 ## Accessibility interaction
-Applicable whenever `surfaces.accessibility` is true (see `.ai/rules/accessibility.md`): keyboard-only operation, focus order and visible focus, error identification, and screen-reader readable output or names. Record what was exercised and the result; N/A must say why nothing a person perceives or operates changed.
+`surfaces.accessibility` is true. Exercised: keyboard focus opens the popup, `aria-describedby` is set, Escape closes it, `role="tooltip"` on the element. Not exercised: a screen reader, the light scheme, 200% zoom, keeping the popup open under the pointer.

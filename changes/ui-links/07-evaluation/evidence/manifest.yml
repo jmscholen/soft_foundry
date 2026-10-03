@@ -1,5 +1,5 @@
-commit_sha: TBD
+commit_sha: 3562625d953805f7ee47a9a0a3fc032d146ea22d
 artifacts:
-  - path: TBD
-    journey: EVAL-001
-    sha256: TBD
+- path: evidence/browser-observations.log
+  journey: "EVAL-001..EVAL-003, on the real machine"
+  sha256: f56f824ae3cc1af7dae3c69e5833d5d701ba5cfe2e898bf3db78e8ab5880963e

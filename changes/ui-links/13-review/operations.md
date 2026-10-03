@@ -1,12 +1,12 @@
 # Operations Review
 
 ## Scope reviewed
-TBD
+Cost.
 
 ## Findings
 | ID | Severity | Location | Finding | Rule or requirement |
 | --- | --- | --- | --- | --- |
-| REV-TBD | blocking / major / minor | TBD | TBD | TBD |
+| REV-020 | info | popups | No request on hover. The Workflow for the repository on screen is fetched once per repository so phase popups have content on every page. | Bounded cost |
 
 ## Conformance
-TBD or N/A with justification
+Conforms.

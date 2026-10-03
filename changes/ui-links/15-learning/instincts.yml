@@ -1,15 +1,16 @@
-# Instincts: what this change taught, as reusable one-line triggers with an
-# action, a confidence score, and evidence in this record. `soft-foundry
-# learn list` shows them across every record; `learn promote` copies those
-# at or above the threshold in .ai/policies/learning.yml into
-# .ai/rules/learned.md, and only through a change record on a change
-# branch, never by the change that learned them. An empty list is a valid
-# answer; a malformed entry fails the learning gate.
-instincts: []
-# - id: kebab-case-unique-id
-#   trigger: when ... (the situation an agent will recognise)
-#   action: do ... (one thing, imperative)
-#   confidence: 0.8          # 0.0 to 1.0; promotion threshold is policy
-#   domain: testing          # git | testing | security | review | ...
-#   evidence:
-#     - finding: REV-001     # a finding id, phase, or path in this record
+# Instincts from the ui-links change.
+instincts:
+- id: every-reference-is-a-link-with-its-source
+  trigger: when a page names a thing that has its own page or file
+  action: make the name a link, and let hovering or focusing it say what it is and which file it lives in
+  confidence: 0.85
+  domain: design
+  evidence:
+  - path: changes/ui-links/00-intake/request.md
+- id: a-complaint-phrased-as-a-question-is-a-requirement
+  trigger: when the user asks "is this too much to ask" or similar about something missing
+  action: treat the thing as a requirement, build it everywhere it applies, and say where it was missing
+  confidence: 0.8
+  domain: intake
+  evidence:
+  - path: changes/ui-links/00-intake/request.md

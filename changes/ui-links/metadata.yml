@@ -4,18 +4,18 @@ change:
 git:
   worktree: /Users/jscholen-iou/dev/soft_foundry
   branch: change/ui-links
-type: TBD                  # feature | fix | refactor | docs | infrastructure | security | chore
-risk: TBD                  # low | medium | high; a high risk change is always on the gated track (.ai/workflow.yml tracks.forced_by_risk)
+type: feature                  # feature | fix | refactor | docs | infrastructure | security | chore
+risk: low                  # low | medium | high; a high risk change is always on the gated track (.ai/workflow.yml tracks.forced_by_risk)
 track: gated            # gated | iterative (.ai/workflow.yml tracks:); set by `change new --track`
-status: intake          # intake | exploring | in_progress | awaiting_human | judged | closed
-current_phase: intake
+status: in_progress          # intake | exploring | in_progress | awaiting_human | judged | closed
+current_phase: learn
 created_at: 2026-10-03T01:28:36Z
 surfaces:
-  application: false
+  application: true
   database: false
   infrastructure: false
   security: false
-  accessibility: false    # true when a person perceives or operates the result (UI, CLI output, documents); loads .ai/rules/accessibility.md and enables the go-live accessibility advisories. Set automatically by `change new` when the repository profile records a user-facing framework.
+  accessibility: true    # true when a person perceives or operates the result (UI, CLI output, documents); loads .ai/rules/accessibility.md and enables the go-live accessibility advisories. Set automatically by `change new` when the repository profile records a user-facing framework.
   observability: false
   policy: false           # true when the change alters what the application collects, shares, retains, protects, or promises in its privacy policy, security policy, or terms; loads .ai/rules/policy-conformance.md and enables the go-live policy advisories. Set automatically by `change new` when the repository profile records a published policy document.
 
@@ -47,6 +47,18 @@ reopenings: []
 # Phases the harness would otherwise require, deliberately not run for
 # this change, each with a non-empty rationale. An entry with an empty
 # rationale does not count as a skip - the phase stays required.
-skipped_phases: []
+skipped_phases:
+- phase: discover
+  rationale: Repository already discovered for prior changes at an identical layout; this change touches only the three page files written in the changes it is stacked on.
+- phase: specify
+  rationale: Intake captures the requirements with stable IDs REQ-LINK-001..004 in 00-intake/request.md, including the accessibility requirement REQ-LINK-004 with its WCAG success criteria, at sufficient granularity for a change this size (gated track, by the repository's established process for repository-native changes).
+- phase: threat_model
+  rationale: No new surface. No route, no data, and no request changed; popups are built from data the page already renders, through the same text-only helpers, and the security review states this. The threat models of ui-server and ui-repositories cover the page.
+- phase: plan
+  rationale: The request was three sentences; the decisions a plan would hold are in 05-implementation/decisions.md.
+- phase: attack
+  rationale: No new surface to attack; see the threat_model rationale. The static test that forbids markup-parsing APIs covers the popup code. Recorded as a real limitation.
+- phase: judge
+  rationale: An isolated, fresh-context judgment is the skill's explicit design; self-judgment would not satisfy that. The maintainer's own merge decision is the real judgment point, and the advisory reports this skip on every gate run, as intended.
 # - phase: threat_model
 #   rationale: TBD

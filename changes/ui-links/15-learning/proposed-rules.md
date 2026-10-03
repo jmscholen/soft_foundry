@@ -4,4 +4,4 @@ Proposals are not self-applied. Each becomes a governance change against `.ai/` 
 
 | Proposal | Target file | Motivating finding | Draft wording |
 | --- | --- | --- | --- |
-| TBD | TBD | TBD | TBD |
+| None new | | | The proposals in changes/ui-repositories/15-learning/proposed-rules.md (re-rate carried findings; run browser scripts in a test) cover this change too. |
