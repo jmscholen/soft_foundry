@@ -1,28 +1,29 @@
 # Consolidated Review
 
 ## Functional
-TBD
+Conforms. Both defects shown failing against the real release, then fixed; the previous change's evaluation could not have found them (REV-002).
 
 ## Architecture
-TBD
+Conforms.
 
 ## Security
-TBD
+Conforms; the version agreement is unchanged.
 
 ## Accessibility
-TBD
+Conforms.
 
 ## Policy conformance
-TBD
+N/A.
 
 ## Infrastructure
-TBD
+N/A; the workflow worked on its first real run.
 
 ## Operations
-TBD
+Conforms; one manual crossover (REV-010).
 
 ## Blocking findings
-TBD
+None.
 
 ## Residual concerns
-TBD
+- REV-010: the step from 0.17.0 to 0.17.1 is manual, once.
+- This change's record skips `judge` with rationale and its review was performed in the implementing session; the advisory says so.

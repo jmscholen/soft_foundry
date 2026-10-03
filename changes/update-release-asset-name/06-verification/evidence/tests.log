@@ -1,0 +1,14 @@
+Run options: --seed N
+# Running:
+......................................................................................................................................................................................................................................................................................................................................................F..............................................................................................
+Finished.
+  1) Failure:
+UIServerTest#test_silent_connections_cannot_crowd_out_a_request [test/ui_server_test.rb:331]:
+Expected 3.2555979997850955 to be < 2.
+437 runs, 2889 assertions, 1 failures, 0 errors, 0 skips
+rake aborted!
+Command failed with status (1)
+/Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/bundle:25:in `load'
+/Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/bundle:25:in `<main>'
+Tasks: TOP => test
+(See full trace by running task with --trace)

@@ -1,16 +1,17 @@
 # Learning
 
 ## What this change taught us
-TBD
+- A stand-in exercised the real code but not the real conditions: the source tarball was named by its address, and the install ran from inside the repository, where the shim happened to be right. Both defects lived exactly in the gap between the stand-in and the real thing, which the previous record named as owed. Owing it was right; the lesson is to run the owed test before calling the feature usable.
+- `ruby -S` is a PATH lookup. Under a version manager, PATH is the wrong place to find the running Ruby's own tools.
 
 ## Reviewer/evaluator/attack findings worth generalizing
-TBD
+- REV-002: when a stand-in is used, write down what it does not reproduce, and test that part first when the real thing arrives.
 
 ## Proposed deterministic checks
-TBD
+None new.
 
 ## Proposed rule changes
-TBD
+None.
 
 ## Proposed harness evals
-TBD
+See `proposed-evals.md`.

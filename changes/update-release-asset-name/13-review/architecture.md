@@ -1,12 +1,12 @@
 # Architecture Review
 
 ## Scope reviewed
-TBD
+`Updater.gem_command`, the downloader's signature.
 
 ## Findings
 | ID | Severity | Location | Finding | Rule or requirement |
 | --- | --- | --- | --- | --- |
-| REV-TBD | blocking / major / minor | TBD | TBD | TBD |
+| REV-004 | info | `gem_command` | One place names the gem command; both subprocesses use it. | Single source |
 
 ## Conformance
-TBD or N/A with justification
+Conforms.

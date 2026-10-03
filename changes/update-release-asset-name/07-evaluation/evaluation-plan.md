@@ -1,16 +1,16 @@
 # Evaluation Plan
 
 ## Intent being proven
-TBD
+`update --yes`, from a directory that is not this repository, installs the real GitHub release.
 
 ## Personas
-TBD
+The maintainer on this machine, from the home directory.
 
 ## Journeys
-For each journey record: EVAL ID, requirement IDs, starting state, steps, assertions, evidence, result.
+For each journey record: EVAL ID, requirement IDs, starting state, steps, assertions, evidence, result. Recorded in `journeys.yml`; transcript in `evidence/network-transcript.log`.
 
 ## UI walkthrough evidence
-Capture screenshots or equivalent browser evidence at meaningful state transitions.
+No UI.
 
 ## Accessibility interaction
-Applicable whenever `surfaces.accessibility` is true (see `.ai/rules/accessibility.md`): keyboard-only operation, focus order and visible focus, error identification, and screen-reader readable output or names. Record what was exercised and the result; N/A must say why nothing a person perceives or operates changed.
+Command-line output only; each outcome is a line in words; the refusals name the file and the reason.

@@ -4,4 +4,4 @@ Proposals are not self-applied. Each becomes a governance change against `.ai/` 
 
 | Proposal | Target file | Motivating finding | Draft wording |
 | --- | --- | --- | --- |
-| TBD | TBD | TBD | TBD |
+| None | | | |

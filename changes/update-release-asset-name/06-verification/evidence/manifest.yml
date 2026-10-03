@@ -1,5 +1,17 @@
-commit_sha: TBD
+commit_sha: 5dfa6b4b4fc79552c0d6c188ab02b98998c01d7e
 artifacts:
-  - path: TBD
-    produced_by: TBD
-    sha256: TBD
+- path: evidence/tests.log
+  produced_by: "bundle exec rake test with every provider key, SOFT_FOUNDRY_BILLING, SOFT_FOUNDRY_GUARD, and GITHUB_TOKEN unset; timings and seed removed"
+  sha256: dc2291f2a1b78d1e8205e30e8ad8696cfb43e7a4bbf49bcc2e1713e58631eac2
+- path: evidence/red-at-1da10bc.log
+  produced_by: "test/updater_github_test.rb run in a worktree checked out at the RED commit 1da10bc"
+  sha256: 2ffc7b0d49a32d0594c68eb741e89645c7798710ea24eac5981f339021c721a1
+- path: evidence/check.log
+  produced_by: "soft-foundry check"
+  sha256: 2be6498003ac7633f001dde7fb6c82d20d270c7515d869ca3f7276b8c1f3730e
+- path: evidence/syntax-warnings.log
+  produced_by: "ruby -wc on every lib/ Ruby file, exe/soft-foundry, and the test file"
+  sha256: 0272aabb1b1e33de879b4981f256cb5b06945569e8b0450483c989a4e2008279
+- path: evidence/scan-against-self.log
+  produced_by: "soft-foundry scan over the control plane and every change record of this repository"
+  sha256: 187b513d632f5f89d5c913b4db47c251c94f5a1aa544867c40f9709f7ba9465b

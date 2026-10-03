@@ -1,12 +1,34 @@
-commit_sha: TBD
+commit_sha: 5dfa6b4b4fc79552c0d6c188ab02b98998c01d7e
 journeys:
   - id: EVAL-001
-    criteria: [AC-001]
-    persona: TBD
-    starting_state: TBD
-    steps:
-      - TBD
-    assertions:
-      - TBD
-    evidence: [evidence/TBD]
-    result: TBD   # pass | fail | blocked
+    criteria: [REQ-UPD-007]
+    persona: maintainer, home directory
+    starting_state: the real release v0.17.0 exists; 0.17.0's updater
+    steps: ["check, then install the latest"]
+    assertions: ["refused: the file is named by a UUID, not soft_foundry-0.17.0.gem (the defect)"]
+    evidence: [evidence/network-transcript.log]
+    result: pass
+  - id: EVAL-002
+    criteria: [REQ-UPD-008]
+    persona: maintainer, home directory
+    starting_state: the asset named correctly, gem still via ruby -S
+    steps: ["install the latest"]
+    assertions: ["fails: ruby -S gem resolves to a shim for another Ruby (the second defect)"]
+    evidence: [evidence/network-transcript.log]
+    result: pass
+  - id: EVAL-003
+    criteria: [REQ-UPD-007, REQ-UPD-008, REQ-UPD-009]
+    persona: maintainer, home directory
+    starting_state: both fixes
+    steps: ["check, then install the latest"]
+    assertions: ["Successfully installed soft_foundry-0.17.0 from the release's attached gem"]
+    evidence: [evidence/network-transcript.log]
+    result: pass
+  - id: EVAL-004
+    criteria: [REQ-UPD-009]
+    persona: maintainer, home directory
+    starting_state: after EVAL-003
+    steps: ["soft-foundry version", "soft-foundry update"]
+    assertions: ["0.17.0; the installed command checks GitHub and says up to date; exit 0"]
+    evidence: [evidence/network-transcript.log]
+    result: pass

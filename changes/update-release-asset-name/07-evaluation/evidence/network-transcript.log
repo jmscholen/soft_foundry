@@ -1,0 +1,35 @@
+Against the real release v0.17.0 (the first ever), from the home directory, under the asdf Ruby the
+global soft-foundry wrapper uses. Transcribed from the session; pids and the token-free addresses
+are as printed.
+
+### EVAL-001 the defect, with 0.17.0's updater (before this change)
+check: current=0.16.0 latest=0.17.0 update_available=true
+install ok=false
+the release's file is named 8981f80a-6ac7-4219-87f1-9436328d906b, not soft_foundry-0.17.0.gem; not installing it
+
+### EVAL-002 after naming the download by the asset (first half of this change)
+check: latest=0.17.0 update_available=true
+install ok=false
+  /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby: no Ruby script found in input (LoadError)
+(ruby -S gem resolved to the asdf shim for another Ruby when run from the home directory; the
+earlier evaluation of 0.17.0 had run from this repository, where the shim resolves to 3.3.1)
+
+### EVAL-003 after both halves, the real release installs
+check: latest=0.17.0 update_available=true
+install ok=true
+  Successfully installed soft_foundry-0.17.0
+  1 gem installed
+
+### EVAL-004 the installed command afterwards, from the home directory
+$ soft-foundry version
+0.17.0
+$ soft-foundry update
+current: 0.17.0
+latest:  0.17.0
+up to date
+exit 0
+
+### EVAL-005 what the installed 0.17.0 cannot do
+The gem now installed carries the two defects, so its own `update --yes` to 0.17.1 will refuse the
+asset by name. The crossover to 0.17.1 is made once more from a checkout of this change; from 0.17.1
+on, `soft-foundry update --yes` is self-sufficient.
