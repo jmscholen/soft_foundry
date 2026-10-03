@@ -1,0 +1,37 @@
+phase: 13-review
+skill: review
+status: complete
+commit_sha: dd18466001ecc7246f8266643a154bcdc1ff0ff5
+started_at: '2026-10-02T13:34:00Z'
+completed_at: '2026-10-02T14:29:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- functional.md
+- architecture.md
+- security.md
+- accessibility.md
+- policy-conformance.md
+- infrastructure.md
+- operations.md
+- consolidated.md
+blocking: []
+findings:
+- id: REV-007
+  severity: major
+  summary: 'Evidence gap: evaluated on macOS only; Linux paths rest on one CI test.'
+- id: REV-013
+  severity: minor
+  summary: The unauthenticated page now shows activity across repositories
+  not only the one viewed.:
+- id: REV-020
+  severity: major
+  summary: 'Evidence gap: no screen reader, light scheme, or zoom.'
+- id: REV-002
+  severity: minor
+  summary: An unrecognised shell is reported as the default instead of nothing.
+next: judge
+notes: Performed directly by the interactive session, not a fresh-context agent; see 00-intake/assumptions.md. The review is therefore not independent. Produced again after the remediation in 09-remediation/summary.md.
+executed_by:

@@ -60,6 +60,7 @@ class SnapshotTest < Minitest::Test
 
       assert_equal "remediate", workflow.dig("transitions", "review", "on_blocking_findings")
       assert_includes workflow["judgments"], "APPROVED"
+      assert_equal SoftFoundry::Gate::CHECKS["phase in progress"], workflow.dig("check_descriptions", "phase in progress")
       assert_equal "gated", workflow.dig("tracks", "default")
       assert_equal({ "high" => "gated" }, workflow.dig("tracks", "forced_by_risk"))
       iterative = workflow.dig("tracks", "list").find { |t| t["name"] == "iterative" }
@@ -76,6 +77,19 @@ class SnapshotTest < Minitest::Test
       ran = gate(snapshot.change("c1"), "intake")["checks"].map { |c| c["name"] }
       listed = snapshot.workflow["phases"].first["checks"].map { |c| c["name"] }
       assert_empty ran - listed
+    end
+  end
+
+  # Carried from ui-snapshot's review (REV-004): every phase, not only the
+  # first, lists the checks its gate runs.
+  def test_workflow_checks_cover_what_the_gate_runs_for_every_phase
+    with_snapshot do |dir, record, snapshot|
+      record.control_plane.phases.each { |phase| complete_phase!(record, phase.id, sha: head(dir)) }
+      edit_yaml(File.join(record.dir, "metadata.yml")) { |m| m["vetted"] = { "at" => "2030-01-02T10:00:00Z", "by" => "Ada", "commit" => head(dir) } }
+      listed = snapshot.workflow["phases"].to_h { |p| [p["id"], p["checks"].map { |c| c["name"] }] }
+      snapshot.change("c1")["gates"].each do |g|
+        assert_empty g["checks"].map { |c| c["name"] } - listed.fetch(g["phase"]), g["phase"]
+      end
     end
   end
 
@@ -194,6 +208,40 @@ class SnapshotTest < Minitest::Test
     end
   end
 
+  # Carried from ui-snapshot's review (REV-002): a recorded "time" that
+  # is a placeholder or free text is not an event on a timeline.
+  def test_timeline_leaves_out_events_whose_time_is_not_a_time
+    with_snapshot do |dir, record, snapshot|
+      complete_phase!(record, "intake", sha: head(dir))
+      edit_yaml(record.handoff_path(record.control_plane.phase("intake"))) do |h|
+        h["started_at"] = "TBD"
+        h["completed_at"] = "2030-01-01T10:00:00Z"
+      end
+      edit_yaml(File.join(record.dir, "metadata.yml")) do |m|
+        m["human_decisions"] = [{ "boundary" => "legal commitment", "subject" => "terms", "decided_by" => "Ada", "decided_at" => "soon", "decision" => "approved" }]
+        m["reopenings"] = [{ "at" => "2030-01-03", "from_commit" => "abc1234", "reason" => "reshape" }]
+      end
+      timeline = snapshot.change("c1")["timeline"]
+      assert_equal %w[created completed reopened], timeline.map { |e| e["kind"] }
+      assert_equal "2030-01-03", timeline.last["at"]
+    end
+  end
+
+  def test_spend_flags_what_is_over_its_cap
+    with_snapshot do |_dir, record, snapshot|
+      edit_yaml(File.join(record.dir, "metadata.yml")) { |m| m["risk"] = "low" }
+      policy = SoftFoundry::Budget.policy(record.control_plane, risk: "low")
+      budget = SoftFoundry::Budget.new(record)
+      budget.record!(phase: "intake", provider: "anthropic", model: "m", tokens_in: 1, tokens_out: 1, estimated_usd: policy.max_usd_per_phase + 1)
+      budget.record!(phase: "verify", provider: "anthropic", model: "m", tokens_in: 1, tokens_out: 1, estimated_usd: 0.01)
+      spend = snapshot.change("c1")["spend"]
+      assert spend["by_phase"].find { |p| p["phase"] == "intake" }["over_cap"]
+      refute spend["by_phase"].find { |p| p["phase"] == "verify" }["over_cap"]
+      assert_equal spend.dig("totals", "estimated_usd") > policy.max_usd_per_change, spend.dig("totals", "over_cap")
+      assert_includes [true, false], spend.dig("totals", "needs_approval")
+    end
+  end
+
   def test_spend_totals_group_by_phase_and_carry_the_policy
     with_snapshot do |_dir, record, snapshot|
       edit_yaml(File.join(record.dir, "metadata.yml")) { |m| m["risk"] = "low" }
@@ -230,6 +278,22 @@ class SnapshotTest < Minitest::Test
       assert_equal 1, advisories.size
       assert_equal "review", advisories.first["area"]
       refute_empty advisories.first["message"]
+    end
+  end
+
+  # For a list of repositories: what is open, without gating anything.
+  def test_overview_counts_changes_and_lists_the_open_ones
+    with_snapshot do |dir, record, snapshot|
+      cli(dir, "change", "new", "done", "--title", "Finished")
+      SoftFoundry::ChangeRecord.new(dir, "done", control_plane: record.control_plane).close!
+      cli(dir, "change", "new", "broken", "--title", "x")
+      File.write(File.join(dir, "changes", "broken", "metadata.yml"), "change: [unterminated\n")
+      overview = snapshot.overview
+      assert_plain overview
+      assert_equal 2, overview["open"]
+      assert_equal 1, overview["closed"]
+      assert_equal [{ "slug" => "broken", "error" => "unreadable" },
+                    { "slug" => "c1", "title" => "First change", "status" => "intake", "current_phase" => "intake" }], overview["changes"]
     end
   end
 
@@ -305,6 +369,24 @@ class SnapshotTest < Minitest::Test
       refute_includes broken["error"], dir
       refute broken.key?("cells")
       assert_equal 16, rows.find { |c| c["slug"] == record.slug }["cells"].size
+    end
+  end
+
+  # Found by ATTACK-008: a metadata.yml that is valid YAML but not a
+  # mapping (here, a symlink to a plain text file) was reported with a
+  # Ruby error. It is named for what it is, and none of it is repeated.
+  def test_a_metadata_file_that_is_not_a_mapping_is_named_plainly
+    with_snapshot do |dir, _record, snapshot|
+      outside = File.join(dir, "outside.txt")
+      File.write(outside, "root:x:0:0:secret line\n")
+      FileUtils.mkdir_p(File.join(dir, "changes", "linked"))
+      File.symlink(outside, File.join(dir, "changes", "linked", "metadata.yml"))
+
+      row = snapshot.board["changes"].find { |c| c["slug"] == "linked" }
+      assert_equal "changes/linked/metadata.yml is not a mapping", row["error"]
+      error = assert_raises(RuntimeError) { snapshot.change("linked") }
+      assert_equal "changes/linked/metadata.yml is not a mapping", error.message
+      refute_includes JSON.generate(snapshot.board), "secret line"
     end
   end
 

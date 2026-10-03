@@ -1,0 +1,51 @@
+Browser evaluation at the working tree that became ab1723b (two cosmetic edits followed the
+observations: one sentence of the workflow lede, and no focus outline on the h1). Chrome on macOS,
+dark scheme, through the Claude in Chrome extension; values are from the live DOM and screenshots.
+Two servers: this repository on 4877 (22 records) and a scratch repository on 4878 with one
+iterative change carrying three ledger entries, two iterations (one with "<b>not a time</b>" as its
+time), and a human decision by "<i>Ada</i>".
+
+EVAL-004 the workflow view (#/workflow, #/workflow/verify)
+  nav: Changes, Workflow; Workflow has aria-current="page"; title "Workflow · Soft Foundry"; h1 "Workflow".
+  Sixteen phases in order, each "Required" or "Optional" in words; the four optional phases have a
+    dashed edge as well. 06 verify selected from the URL.
+  Panel for verify: skill, directory, model profile, "Then evaluate"; summary says it is a hardening
+    phase and that its evidence is commit-bound; eleven checks, each with its description; files
+    results.md, tests.yml, evidence/manifest.yml, handoff.yml.
+  Selecting 13 review: hash #/workflow/review, focus stays on the button, facts include
+    "Can return to remediate (on blocking findings)".
+  Ways back: remediate to verify (always); observe to verify (when code changed); review to remediate
+    (on blocking findings); judge to remediate (when the judgment is BLOCKED); judge to intake (when
+    the judgment is REJECTED).
+  Tracks: gated (default) and iterative with its exploring stage, what must be complete before a
+    person vets it, and what is not required first; "A high risk change is always on the gated track."
+  Judgments: the four verdicts.
+
+EVAL-005 a change's checks explained, timeline, and spend
+  #/change/ui-server/attack: each check shows its detail and "Checks: <description>".
+  Timeline for ui-server: 19 events, oldest first, created then started/completed pairs, times as
+    "2026-10-02 03:47 UTC". Spend: "No spend is recorded. Whoever runs a phase records it with
+    soft-foundry budget record."
+  #/change/costly (scratch): lede "Iterative track, exploring: 2 iterations recorded. Not yet vetted
+    by a person."
+    Timeline, six events: iteration 1, the decision, created, three spend entries. The iteration whose
+    time is "<b>not a time</b>" is absent. The decision reads "... approved by <i>Ada</i>" as text.
+    Spend: "Recorded $10.50 across 3 entries: 421000 tokens in, 48200 out. 1 entry has no cost."
+    Policy line: cap $10.00 per change, $5.00 per phase, a person approves above $20.00.
+    Note: "Over the cap for one change. Continuing is a financial commitment that needs a person's
+    approval."
+    Table: intake 120000 / 8000 / $6.40 / 1 / Over; implement ... $4.10 / 1 / Within; verify ...
+    not priced / 1 / Unknown.
+    Elements under <main> matching b, i, script, img: 0.
+  An unknown change shows "No such change" with a way back.
+
+EVAL-006 accessibility of the new parts
+  Pause sets data-paused on the root and the stylesheet stops the gate animation under it; resuming
+    removes it.
+  New tables and lists: the spend table has a caption and scoped headers and sits in a focusable
+    scroll region; the timeline is an ordered list; "Over", "Within", "Unknown" are words.
+  No horizontal overflow of the page on either view at the window's width.
+  Colours are the palette already measured in ui-server; no new colour was introduced.
+
+Not exercised: a screen reader; the light scheme on screen; 200% zoom; a 320 px viewport for the new
+views (the timeline collapses to one column under 40rem by rule, not observed).

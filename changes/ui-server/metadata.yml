@@ -1,0 +1,43 @@
+---
+change:
+  id: ui-server
+  title: 'soft-foundry ui: a read-only local page showing every change''s gates'
+git:
+  worktree: "/Users/jscholen-iou/dev/soft_foundry"
+  branch: change/ui-server
+type: feature
+risk: medium
+track: gated
+status: closed
+current_phase: done
+created_at: 2026-10-02 03:47:57.000000000 Z
+surfaces:
+  application: true
+  database: false
+  infrastructure: false
+  security: true
+  accessibility: true
+  observability: false
+  policy: false
+human_decisions: []
+vetted:
+reopenings: []
+skipped_phases:
+- phase: discover
+  rationale: Repository already discovered for prior changes at an identical layout.
+    The facts this change needed (no runtime dependency exists, WEBrick is no longer
+    standard library, lib/ is packaged and .ai/ is copied to adopters, how tests inject
+    collaborators) were read before planning and are recorded in 00-intake/assumptions.md
+    and 05-implementation/decisions.md.
+- phase: specify
+  rationale: Intake captures the requirements with stable IDs REQ-UI-001..009 in 00-intake/request.md,
+    including the accessibility requirement REQ-UI-008 with its WCAG success criteria,
+    at sufficient granularity for a change this size (gated track, by the repository's
+    established process for repository-native changes).
+- phase: plan
+  rationale: The maintainer approved the plan for all three UI changes before work
+    began; this change's part is restated in 05-implementation/log.md.
+- phase: judge
+  rationale: An isolated, fresh-context judgment is the skill's explicit design; self-judgment
+    would not satisfy that. The maintainer's own merge decision is the real judgment
+    point, and the advisory reports this skip on every gate run, as intended.

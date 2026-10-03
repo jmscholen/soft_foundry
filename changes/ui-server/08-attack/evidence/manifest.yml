@@ -1,0 +1,11 @@
+commit_sha: 5d36e6f80e14c07928d3b5f1490403b17e01982e
+artifacts:
+- path: evidence/attack-transcript.log
+  produced_by: "all nine cases against the remediated server"
+  sha256: 3da0fabdfdf2e7b0b080c16898a1de6aa3aecd10cdbd300b51063b8038ccc973
+- path: evidence/attack-at-93b9422.log
+  produced_by: "the same cases before remediation; ATTACK-005 violated"
+  sha256: 68bfe29bdd88a567a1b9a6f7df26fc93aae76df4a9aa0a78e62dba1a934ef50d
+- path: evidence/hostile-render.log
+  produced_by: "ATTACK-007 as rendered in Chrome"
+  sha256: 752c7eb3d70a6b2ef9d664f950382324fd13ef269fa1b09ed0082810def50e92

@@ -1,0 +1,52 @@
+---
+change:
+  id: ui-explainer-timeline
+  title: 'soft-foundry ui: the workflow explained, and each change''s timeline and
+    spend'
+git:
+  worktree: "/Users/jscholen-iou/dev/soft_foundry"
+  branch: change/ui-explainer-timeline
+type: feature
+risk: low
+track: gated
+status: closed
+current_phase: done
+created_at: 2026-10-02 04:17:12.000000000 Z
+surfaces:
+  application: true
+  database: false
+  infrastructure: false
+  security: false
+  accessibility: true
+  observability: false
+  policy: false
+human_decisions: []
+vetted:
+reopenings: []
+skipped_phases:
+- phase: discover
+  rationale: Repository already discovered for prior changes at an identical layout;
+    this change adds no technology and no file. What the real records hold (few recorded
+    times, empty ledgers) was read before building and is recorded in 07-evaluation/results.md.
+- phase: specify
+  rationale: Intake captures the requirements with stable IDs REQ-UX-001..007 in 00-intake/request.md,
+    including the accessibility requirement REQ-UX-006 with its WCAG success criteria,
+    at sufficient granularity for a change this size (gated track, by the repository's
+    established process for repository-native changes).
+- phase: threat_model
+  rationale: No new surface. The server's routes, headers, and refusals are unchanged
+    and its tests pass unchanged; the threat model in changes/ui-server/03-threat-model/
+    covers the page, and the one relevant behaviour here (record text in the new views
+    is text) is exercised with hostile strings in evaluation.
+- phase: plan
+  rationale: The maintainer approved the plan for all three UI changes before work
+    began; this change's part is restated in 05-implementation/log.md.
+- phase: attack
+  rationale: No new surface to attack; see the threat_model rationale. Markup in a
+    name and in a time was rendered as text or kept off the timeline in EVAL-005.
+    Recorded as a real limitation, since nothing here was adversarially tested beyond
+    that.
+- phase: judge
+  rationale: An isolated, fresh-context judgment is the skill's explicit design; self-judgment
+    would not satisfy that. The maintainer's own merge decision is the real judgment
+    point, and the advisory reports this skip on every gate run, as intended.

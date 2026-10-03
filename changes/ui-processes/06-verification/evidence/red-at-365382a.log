@@ -1,0 +1,11 @@
+== test/processes_test.rb at 365382a
+   1 7 runs, 0 assertions, 0 failures, 7 errors, 0 skips
+   7 NameError: uninitialized constant SoftFoundry::Processes
+== test/cli_ps_test.rb at 365382a
+   1 5 runs, 0 assertions, 0 failures, 5 errors, 0 skips
+   5 ArgumentError: unknown keyword: :processes
+== test/ui_server_test.rb at 365382a
+   1 20 runs, 174 assertions, 0 failures, 1 errors, 0 skips
+   1 ArgumentError: unknown keyword: :processes
+== test/ui_assets_test.rb at 365382a
+   1 9 runs, 102 assertions, 1 failures, 0 errors, 0 skips

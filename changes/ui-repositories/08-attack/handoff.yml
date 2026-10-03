@@ -1,0 +1,21 @@
+phase: '08-attack'
+skill: adversarial-testing
+status: complete
+commit_sha: 952808b9f07f1ddc712376123374fecfaebc7db8
+started_at: '2026-10-02T15:21:00Z'
+completed_at: '2026-10-02T15:24:00Z'
+resolved_model:
+  profile: adversarial_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- attack-plan.md
+- cases.yml
+- results.md
+- evidence/manifest.yml
+- evidence/attack-transcript.log
+blocking: []
+findings: []
+next: remediate
+notes: Performed directly by the interactive session that wrote the code, not a fresh-context agent, so the attacker knew the code; see 00-intake/assumptions.md. All five cases denied.
+executed_by:

@@ -1,0 +1,27 @@
+phase: 07-evaluation
+skill: evaluation
+status: complete
+commit_sha: 3562625d953805f7ee47a9a0a3fc032d146ea22d
+started_at: '2026-10-03T01:33:00Z'
+completed_at: '2026-10-03T01:37:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- evaluation-plan.md
+- journeys.yml
+- results.md
+- evidence/manifest.yml
+- evidence/browser-observations.log
+blocking: []
+findings:
+- id: EVAL-NOTE-001
+  severity: minor
+  summary: A gate referenced from another change has a popup with its path but not its state.
+- id: EVAL-NOTE-004
+  severity: major
+  summary: No screen reader, light scheme, or zoom.
+next: attack
+notes: Performed directly by the interactive session, not a fresh-context agent; see 00-intake/assumptions.md. On the maintainer's real machine; one defect (headers without popups) found and fixed before the verified commit.
+executed_by:

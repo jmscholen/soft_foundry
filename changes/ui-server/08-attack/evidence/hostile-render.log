@@ -1,0 +1,28 @@
+ATTACK-007, rendering half. Chrome, page served by `soft-foundry ui --port 4878` from the scratch
+repository described in cases.yml. Observed by querying the live DOM after the page drew.
+
+Record under attack (changes/hostile):
+  title:      <img src=x onerror="document.title=1337"><script>document.title=1337</script>
+  risk:       <u>high</u>
+  blocking:   <b onmouseover=alert(1)>blocked</b> | javascript:alert(1)
+  finding:    id <i>F-1</i>, severity "><script>alert(2)</script>, summary <svg onload=alert(3)>
+  rationale:  <script>alert(4)</script>
+
+Change view (#/change/hostile):
+  document.title          <img src=x onerror="document.title=1337"><script>document.title=1337</script> · Soft Foundry
+                          (the record's title as text; neither payload ran, or it would read 1337)
+  h1 text                 the same string, as text
+  elements under <main> matching script, img, svg, b, i, u, iframe, [onerror], [onload], [onmouseover]:   0
+  links under <main>      one, href "#/" (the page's own)
+  blocking list items     "<b onmouseover=alert(1)>blocked</b>", "javascript:alert(1)" as text, not links
+  finding                 "<i>F-1</i> · "><script>alert(2)</script>" and "<svg onload=alert(3)>" as text
+  meta line               "Risk: <u>high</u>" as text
+
+Board (#/):
+  document.title          Changes · Soft Foundry
+  injected elements       0
+  hostile row             slug, then the title as text, then its sixteen cells
+  linked row              "Unreadable" and the error text; no cells
+  plain row               unaffected
+
+Result: denied. Every string from the record is a text node.

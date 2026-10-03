@@ -24,6 +24,8 @@ require_relative "learning"
 require_relative "content_scan"
 require_relative "change_index"
 require_relative "snapshot"
+require_relative "ui/server"
+require_relative "processes"
 
 module SoftFoundry
   class CLI
@@ -32,7 +34,7 @@ module SoftFoundry
     EXIT_CONFLICTS = 3
     EXIT_INTERNAL = 4
 
-    def initialize(argv, out: $stdout, err: $stderr, input: $stdin, root: Dir.pwd, source: nil, updater: nil, pr_discharge: nil, shell: nil, runner: nil)
+    def initialize(argv, out: $stdout, err: $stderr, input: $stdin, root: Dir.pwd, source: nil, updater: nil, pr_discharge: nil, shell: nil, runner: nil, ui_server: nil, processes: nil)
       @argv = argv.dup
       @out = out
       @err = err
@@ -43,6 +45,8 @@ module SoftFoundry
       @pr_discharge = pr_discharge
       @shell = shell
       @runner = runner
+      @ui_server = ui_server
+      @processes = processes
     end
 
     def run
@@ -63,6 +67,8 @@ module SoftFoundry
       when "learn" then learn
       when "scan" then scan
       when "update" then update
+      when "ui" then ui
+      when "ps" then ps
       when "shell"
         shell_name = @argv.shift or raise ArgumentError, "Usage: soft-foundry shell <claude|codex|grok> [args...]"
         # The shell is where model spend actually happens, so say how it is
@@ -933,6 +939,77 @@ module SoftFoundry
       0
     end
 
+    # `ui [--port N] [--repo PATH]...`: every Soft Foundry repository with
+    # something going on, each change's gates, and what is running, as a
+    # page served to this machine only until interrupted. It shows; it
+    # changes nothing. The link it prints carries the token the page needs.
+    def ui
+      port = option("--port") || "0"
+      repos = options("--repo").map { |path| File.expand_path(path, @root) }
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+      raise TargetError, "--port expects a whole number from 0 to 65535; got '#{port}'" unless port.match?(/\A\d{1,5}\z/) && port.to_i <= 65_535
+      raise TargetError, "no .ai/workflow.yml here; run `soft-foundry init` first" unless plane.present?
+
+      server = (@ui_server || ->(root, port:, repos:) { UI::Server.new(root, port: port, repos: repos) }).call(@root, port: port.to_i, repos: repos)
+      server.start
+      @out.puts "ui: serving #{server.url} (read-only; press Ctrl-C to stop)"
+      @out.flush
+      begin
+        server.serve
+      rescue SignalException
+        nil
+      ensure
+        server.stop
+      end
+      @out.puts "ui: stopped"
+      0
+    end
+
+    # `ps [--json]`: every soft-foundry process running on this machine
+    # under this user, in any repository, and the runs this repository's
+    # records say were started and never finished.
+    def ps
+      json = flag("--json")
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+      data = (@processes || ->(root) { Processes.new(root) }).call(@root).snapshot
+      if json
+        @out.puts JSON.pretty_generate(data)
+        return data["error"] ? EXIT_TARGET : 0
+      end
+      raise TargetError, data["error"] if data["error"]
+
+      running = data["processes"].reject { |p| p["self"] }
+      @out.puts(running.empty? ? "running: no soft-foundry processes" : "running: #{running.size} soft-foundry #{running.size == 1 ? 'process' : 'processes'}")
+      running.each do |p|
+        parts = ["pid #{p['pid']}", [p["command"], (p["phase"] unless p["command"] == "ui")].compact.join(" ")]
+        parts << "change #{p['change']}" if p["change"]
+        parts << "port #{p['port']}" if p["port"]
+        parts << "shell #{p['shell']}#{p['session'] ? " (session pid #{p['session']['pid']})" : ''}" if p["shell"]
+        parts << (p["here"] ? "in this repository" : "in #{p['repository'] || 'an unknown directory'}")
+        parts << "since #{p['started_at']}" if p["started_at"]
+        @out.puts "  #{parts.join('  ')}"
+      end
+      shells = Array(data["sessions"])
+      @out.puts(shells.empty? ? "sessions: no coding shells open in Soft Foundry repositories" : "sessions: #{shells.size} coding #{shells.size == 1 ? 'shell' : 'shells'} open in Soft Foundry repositories")
+      shells.each do |s|
+        parts = ["pid #{s['pid']}", s["shell"]]
+        parts << "terminal #{s['terminal']}" if s["terminal"]
+        parts << (s["change"] ? "change #{s['change']}#{s['phase'] || s['status'] ? " (#{[s['phase'] && "phase #{s['phase']}", s['status']].compact.join(', ')})" : ''}" : "no change record for its branch")
+        parts << "branch #{s['branch']}" if s["branch"]
+        parts << (s["here"] ? "in this repository" : "in #{s['repository'] || 'an unknown directory'}")
+        parts << "since #{s['started_at']}" if s["started_at"]
+        @out.puts "  #{parts.join('  ')}"
+      end
+      stopped = data["recorded_runs"].reject { |r| r["live"] }
+      unless stopped.empty?
+        @out.puts "recorded as started by phase run with no process found: #{stopped.size}"
+        stopped.each do |r|
+          @out.puts "  ! warn change #{r['change']} phase #{r['phase']}: started #{r['started_at']} (#{r['shell']}) and never finished; the session may have been interrupted"
+        end
+      end
+      0
+    end
+
     def print_result(result)
       @out.puts "#{result.phase.output}  #{result.status}  #{result.failed? ? 'FAIL' : (result.skipped? ? 'SKIP' : 'PASS')}"
       result.checks.each do |c|
@@ -1036,6 +1113,20 @@ module SoftFoundry
                                                   each time the total passes another warning interval
           soft-foundry budget threshold [USD|off|default]
                                                   show or set how often recorded spend warns (machine-local)
+          soft-foundry ui [--port N] [--repo PATH]...
+                                                  serve a read-only page on http://127.0.0.1:N/ for every Soft
+                                                  Foundry repository with a session or command running, this
+                                                  one, and any named with --repo: each repository's changes
+                                                  phase by phase, each gate's checks, and what is running. It
+                                                  follows the records as they change and stops on Ctrl-C. Open
+                                                  the link it prints: it carries the token the page needs
+                                                  (N defaults to a free port)
+          soft-foundry ps [--json]                list what is running on this machine under your user, in any
+                                                  repository: every soft-foundry command, and every claude,
+                                                  codex, or grok session open in a repository that has a
+                                                  control plane, with its terminal, branch, and the change
+                                                  and phase that branch is on; warns about phase runs
+                                                  recorded here that never finished
           soft-foundry ci                         check + gate every change record (used by CI and pre-commit)
           soft-foundry hooks install              install the pre-commit hook
           soft-foundry hooks install --claude [--local] | --codex

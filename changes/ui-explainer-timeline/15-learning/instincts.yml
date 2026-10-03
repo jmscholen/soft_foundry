@@ -1,0 +1,16 @@
+# Instincts from the ui-explainer-timeline change.
+instincts:
+- id: look-at-the-real-data-before-building-a-view-of-it
+  trigger: when asked for a timeline, history, or dashboard over existing records
+  action: read what the real records actually hold first, and say in the intake what the view will and will not be able to show
+  confidence: 0.8
+  domain: design
+  evidence:
+  - path: changes/ui-explainer-timeline/07-evaluation/results.md
+- id: carry-deferred-findings-into-the-next-intake-by-id
+  trigger: when a review defers a finding to a later change
+  action: name the finding's ID in that later change's intake as a requirement, and close it with a test there
+  confidence: 0.85
+  domain: review
+  evidence:
+  - path: changes/ui-explainer-timeline/00-intake/request.md

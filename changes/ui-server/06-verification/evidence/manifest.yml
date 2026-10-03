@@ -1,0 +1,20 @@
+commit_sha: 5d36e6f80e14c07928d3b5f1490403b17e01982e
+artifacts:
+- path: evidence/tests.log
+  produced_by: "bundle exec rake test with every provider key, SOFT_FOUNDRY_BILLING, and SOFT_FOUNDRY_GUARD unset; timings and seed removed"
+  sha256: 2f412e8799452f396e133b1dbe585dbcda7b6e5ed328c3a6ddcfb3ae94436dbd
+- path: evidence/red-at-0d69a4d.log
+  produced_by: "the three new test files run in a worktree checked out at the RED commit 0d69a4d"
+  sha256: 31a2fa639c4672a38770f3dc37f93fb0968ac59065f3d7d8b0718298f1bcfd18
+- path: evidence/red-at-ae60e88.log
+  produced_by: "the two remediation tests run in a worktree checked out at the RED commit ae60e88"
+  sha256: 041f93caf4caf53033421d3e4a258b53ad6af19f43e7b450d3c702c4db8e39f1
+- path: evidence/check.log
+  produced_by: "soft-foundry check"
+  sha256: 2be6498003ac7633f001dde7fb6c82d20d270c7515d869ca3f7276b8c1f3730e
+- path: evidence/syntax-warnings.log
+  produced_by: "ruby -wc on every lib/ Ruby file, exe/soft-foundry, and the new test files; node --check on app.js"
+  sha256: 30dcef72b2ec2021c6a667276598dceb130c03a248a533756cc13682e14562f1
+- path: evidence/scan-against-self.log
+  produced_by: "soft-foundry scan over the control plane and every change record of this repository"
+  sha256: 0fe68657f952e3d8fe9e94ca17e0c4c54c6f446bfbb0aa241cf45b947b5f1927

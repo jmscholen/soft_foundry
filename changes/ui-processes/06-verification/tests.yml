@@ -1,0 +1,40 @@
+commit_sha: dd18466001ecc7246f8266643a154bcdc1ff0ff5
+checks:
+  - id: CHECK-001
+    kind: tests
+    command: "bundle exec rake test with ANTHROPIC_API_KEY, OPENAI_API_KEY, OPENROUTER_API_KEY, XAI_API_KEY, SOFT_FOUNDRY_BILLING, and SOFT_FOUNDRY_GUARD unset"
+    result: pass
+    evidence: evidence/tests.log
+    criteria: [REQ-PS-001, REQ-PS-002, REQ-PS-003, REQ-PS-004, REQ-PS-005, REQ-PS-006, REQ-PS-009]
+    red_commit: 365382a3f531c38fff7c2996cc43d25df097f1d2
+    test_path: test/processes_test.rb
+  - id: CHECK-002
+    kind: custom
+    command: "test/processes_test.rb, test/cli_ps_test.rb, test/ui_server_test.rb, test/ui_assets_test.rb run in a worktree checked out at 365382a, the RED commit"
+    result: fail
+    evidence: evidence/red-at-365382a.log
+    criteria: [failing-test-first]
+  - id: CHECK-006
+    kind: custom
+    command: "test/processes_test.rb and test/cli_ps_test.rb run in a worktree checked out at 79e48c2, the remediation RED commit"
+    result: fail
+    evidence: evidence/red-at-79e48c2.log
+    criteria: [failing-test-first, REQ-PS-009]
+  - id: CHECK-003
+    kind: lint
+    command: "soft-foundry check"
+    result: pass
+    evidence: evidence/check.log
+    criteria: [control-plane-consistency]
+  - id: CHECK-004
+    kind: static_analysis
+    command: "ruby -wc on every lib/ Ruby file, exe/soft-foundry, and the four test files; node --check on lib/soft_foundry/ui/assets/app.js"
+    result: pass
+    evidence: evidence/syntax-warnings.log
+    criteria: [coding-standard]
+  - id: CHECK-005
+    kind: security_scan
+    command: "soft-foundry scan over the control plane and every change record"
+    result: pass
+    evidence: evidence/scan-against-self.log
+    criteria: [REQ-PS-002]

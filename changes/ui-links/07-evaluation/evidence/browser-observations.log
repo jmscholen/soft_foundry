@@ -1,0 +1,51 @@
+Browser evaluation of the page served from this repository on 4879, opened with the printed link.
+Chrome on macOS, dark scheme, through the Claude in Chrome extension, on the real machine (four
+repositories, five sessions; other repositories' names are left out). Values are from the live DOM,
+with popups opened by dispatching the same mouseover and focus events a person causes, and one
+screenshot. Observed at the working tree that became 3562625 (the commit popup and the board
+header's popup were added during this pass and re-observed).
+
+EVAL-001 references are links
+  Repositories: every repository name, every change under it, every phase next to a change, and every
+    command's change and phase are links.
+  Board: every column header (00 intake ... 15 learn) links to that phase in the Workflow (32 links
+    across the two tables); every flag that points somewhere is a link: "3 advisories" to the change,
+    "Session open: claude" to Running, "Interrupted: <phase>" to that gate, "Failing" and "Stale
+    evidence" to the first such gate.
+  A change: the advisory "independent review (13-review)" links 13-review; the check detail
+    "predecessor complete: 13-review" links it; the gate panel's skill carries "what this phase is
+    for" linking the Workflow; every timeline event's phase is a link (6 on this change); the spend
+    table's phases are links; "Rerun from verification" links the verify gate; a running command's
+    phase and an interrupted run's phase are links; the session note links to Running.
+  Workflow: "Then judge", every "Can return to" target, both ends of each way back (10 links), and
+    each track's required and not-required phases (5 links) are links.
+  Running: each session's repository and change are links; a running command's phase is a link
+    when there is one (none was running at the time).
+
+EVAL-002 the popup says what a reference points at, and where it lives
+  Hovering a repository card's name: "soft_foundry / 1 session open, 7 open changes, 18 closed. /
+    ~/dev/soft_foundry/ (.ai/workflow.yml, changes/)".
+  Hovering a change: "ui-explainer-timeline in soft_foundry / <title>. in progress, phase learn. /
+    changes/ui-explainer-timeline/metadata.yml".
+  Hovering a gate reference inside the change: "13-review: Pass / Handoff complete. 9 checks, none
+    failing. / changes/ui-explainer-timeline/13-review/handoff.yml" (screenshot: a dark box under the
+    link with the title, the sentence, and the path in monospace beneath a rule).
+  Hovering a phase reference: "15 learn / Worked by the learning skill into 15-learning/. Its gate
+    runs 10 checks; it must produce findings.md, proposed-rules.md, proposed-evals.md, instincts.yml,
+    handoff.yml. / .ai/workflow.yml, .ai/skills/learning/".
+  Hovering a commit: "Commit ab1723b2ace5 / The commit this phase's evidence describes. See it with
+    git show ab1723b2ace5. / .git (git show ab1723b2ace5)".
+  Hovering a change in another repository, from Running: its slug and repository, status and phase,
+    and the path with that repository's directory in front:
+    "~/.../<repo>/changes/<slug>/metadata.yml".
+  Hovering a repository from Running: its sessions, open and closed counts, and its path.
+
+EVAL-003 the popup is a tooltip
+  Focusing a gate link with the keyboard opens the same popup; the link gets aria-describedby="tip";
+    the popup element has role="tooltip". Escape closes it. Moving focus away closes it. Navigating
+    closes it.
+  No sideways page scroll on any page at the window's width.
+
+Not exercised: a screen reader (whether the described-by text is read with the link); the light
+scheme; 200% zoom; pointer hover of the popup itself to keep it open (the code keeps it open while
+the pointer is over it; this was not driven).

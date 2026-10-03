@@ -1,0 +1,56 @@
+commit_sha: dd18466001ecc7246f8266643a154bcdc1ff0ff5
+authorization_envelope:
+  target: soft-foundry ui on 127.0.0.1:4879 serving a scratch repository, and processes this session started
+  environment: local
+  authorized_by: the maintainer, by asking for this change in this session
+  allowed_surfaces: [the loopback listener, processes started by the evaluation script]
+  prohibited_surfaces: [any process not started by the script, any other host]
+  data_constraints: fabricated records and fabricated tokens only
+  network_constraints: loopback only
+  destructive_actions: prohibited
+cases:
+  - id: ATTACK-001
+    threat: THREAT-001
+    violation_attempted: inject markup or leak a token through a process's arguments
+    starting_privilege: any process of this user
+    steps: ["start a ruby script named soft-foundry with arguments: phase run, a script tag as the phase, ../../etc as the change, a bold tag as the shell, and a token after --", "start a real runner with a token after --", "read /api/processes and search it"]
+    expected_safe_behavior: the spoof is listed with only its command; none of the hostile strings or tokens appear
+    observed: listed as phase run with no phase and no change and the default shell; zero occurrences of script, <b>, ../, or either token
+    result: denied
+    evidence: [evidence/attack-transcript.log]
+  - id: ATTACK-005
+    threat: THREAT-001
+    violation_attempted: leak a token from a hand-started session's arguments, or be listed from outside a Soft Foundry repository
+    starting_privilege: any process of this user
+    steps: ["start processes named claude and grok with --api-key sk-session in their arguments: one in a Soft Foundry repository, one in a subdirectory of another, one in a plain directory", "read /api/processes and search it"]
+    expected_safe_behavior: the two in Soft Foundry repositories are listed by shell, repository, branch, and change only; the third is not listed; the token and arguments appear nowhere
+    observed: two listed, the plain-directory one absent; zero occurrences of sk-session, api-key, or the command they ran
+    result: denied
+    evidence: [evidence/attack-transcript.log]
+  - id: ATTACK-002
+    threat: THREAT-003
+    violation_attempted: read the list from another origin, write to it, or pass it a pid or a command
+    starting_privilege: a page on another origin; any local client
+    steps: ["cross-site request", "foreign Host", "POST", "/api/processes/1", "?pid=1;kill"]
+    expected_safe_behavior: 403, 403, 405, 404, and the query ignored
+    observed: 403, 403, 405, 404, and 200 with the same list; no CORS header
+    result: denied
+    evidence: [evidence/attack-transcript.log]
+  - id: ATTACK-003
+    threat: THREAT-002
+    violation_attempted: disturb a process by listing it
+    starting_privilege: any local client
+    steps: ["read the list forty times", "check each staged process is still alive"]
+    expected_safe_behavior: all alive
+    observed: all alive
+    result: denied
+    evidence: [evidence/attack-transcript.log]
+  - id: ATTACK-004
+    threat: THREAT-004
+    violation_attempted: be listed as a soft-foundry process by mentioning it in an argument
+    starting_privilege: any process of this user
+    steps: ["start a process named claude whose argument is a prompt telling it to run soft-foundry phase run"]
+    expected_safe_behavior: not listed
+    observed: the listed commands are the two ui servers and the two phase runs already there
+    result: denied
+    evidence: [evidence/attack-transcript.log]
