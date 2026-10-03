@@ -69,6 +69,31 @@ class CLIUpdateTest < Minitest::Test
     end
   end
 
+  # The gem is machine-wide, but the control plane in the repository the
+  # command runs in was written by whichever version installed it. After an
+  # update the person is told when that repository is behind.
+  def test_after_installing_the_repository_is_told_to_refresh_its_control_plane
+    with_target_repo do |dir|
+      init(dir)
+      installer = ->(v) { SoftFoundry::Updater::InstallResult.new(ok: true, message: "Successfully installed soft_foundry-#{v}") }
+      u = SoftFoundry::Updater.new(current: SoftFoundry::VERSION, fetcher: -> { ["99.0.0", nil] }, installer:)
+      code, out = run_cli(dir, ["--yes"], u)
+      assert_equal 0, code, out
+      assert_includes out, "updated to 99.0.0"
+      assert_includes out, ".ai/ here was installed by soft-foundry #{SoftFoundry::VERSION}; run `soft-foundry init` to bring it up to 99.0.0"
+    end
+  end
+
+  def test_the_check_names_github_releases
+    with_fixture_repo do |dir|
+      u = SoftFoundry::Updater.new(current: "0.3.0", fetcher: -> { ["0.4.0", nil] })
+      _, out = run_cli(dir, [], u)
+      assert_includes out, "soft-foundry update --yes"
+      _, help = cli(dir)
+      assert_includes help, "check the GitHub repository for a newer release"
+    end
+  end
+
   def test_fetch_error_is_reported_with_nonzero_exit
     with_fixture_repo do |dir|
       u = SoftFoundry::Updater.new(fetcher: -> { [nil, "network unreachable"] })
