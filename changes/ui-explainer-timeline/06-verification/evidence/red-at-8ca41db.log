@@ -1,0 +1,12 @@
+== test/snapshot_test.rb at 8ca41db
+  1) Failure:
+SnapshotTest#test_timeline_leaves_out_events_whose_time_is_not_a_time [test/snapshot_test.rb:224]:
+  2) Failure:
+SnapshotTest#test_spend_flags_what_is_over_its_cap [test/snapshot_test.rb:237]:
+19 runs, 163 assertions, 2 failures, 0 errors, 0 skips
+== test/ui_assets_test.rb at 8ca41db
+  1) Failure:
+UIAssetsTest#test_pause_stops_the_animation [test/ui_assets_test.rb:76]:
+  2) Failure:
+UIAssetsTest#test_page_offers_the_workflow_view_and_the_change_history [test/ui_assets_test.rb:68]:
+8 runs, 90 assertions, 2 failures, 0 errors, 0 skips

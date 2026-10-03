@@ -79,6 +79,7 @@ module SoftFoundry
         "transitions" => plain(@plane.transitions),
         "rules" => plain(@plane.rules),
         "judgments" => plain(@plane.judgments),
+        "check_descriptions" => Gate::CHECKS,
         "tracks" => {
           "default" => @plane.default_track,
           "forced_by_risk" => plain(@plane.tracks_raw["forced_by_risk"].is_a?(Hash) ? @plane.tracks_raw["forced_by_risk"] : {}),
@@ -237,12 +238,13 @@ module SoftFoundry
     end
 
     # What the record says happened, oldest first. Only recorded times are
-    # used; an event with no time recorded is not guessed at.
+    # used; an event with no time recorded, or with a placeholder or free
+    # text where a time belongs, is left out rather than guessed at.
     def timeline(record, meta)
       events = []
       add = lambda do |at, kind, label, phase = nil|
         at = self.class.stamp(at)
-        events << { "at" => at, "kind" => kind, "phase" => phase, "label" => plain(label) } if at
+        events << { "at" => at, "kind" => kind, "phase" => phase, "label" => plain(label) } if at && sortable(at)
       end
       add.call(meta["created_at"], "created", "change record created")
       @plane.phases.each do |phase|
@@ -270,12 +272,15 @@ module SoftFoundry
       events.each_with_index.sort_by { |event, i| [sortable(event["at"]), i] }.map(&:first)
     end
 
-    # Times that cannot be read as times sort after those that can.
+    # A recorded time as a number to order by, or nil when what was
+    # recorded is not a date.
     def sortable(at)
-      Time.parse(at).to_f
+      at.match?(/\A\d{4}-\d\d-\d\d/) ? Time.parse(at).to_f : nil
     rescue ArgumentError
-      Float::INFINITY
+      nil
     end
+
+    def over?(amount, cap) = !amount.nil? && !cap.nil? && amount > cap
 
     # A ledger entry names its phase by id or by output directory.
     def phase_id(key) = @plane.phase(key.to_s)&.id || plain(key.to_s)
@@ -292,13 +297,16 @@ module SoftFoundry
       end
       {
         "totals" => { "tokens_in" => totals.tokens_in, "tokens_out" => totals.tokens_out, "estimated_usd" => totals.estimated_usd,
-                      "entries_missing_cost" => totals.entries_missing_cost },
+                      "entries_missing_cost" => totals.entries_missing_cost,
+                      "over_cap" => over?(totals.estimated_usd, policy&.max_usd_per_change),
+                      "needs_approval" => over?(totals.estimated_usd, policy&.require_human_approval_above_usd) },
         "policy" => policy && { "max_usd_per_change" => policy.max_usd_per_change, "max_usd_per_phase" => policy.max_usd_per_phase,
                                 "require_human_approval_above_usd" => policy.require_human_approval_above_usd },
         "by_phase" => entries.group_by { |e| phase_id(e.phase) }.map do |phase, list|
           priced = list.filter_map(&:estimated_usd)
           { "phase" => phase, "tokens_in" => list.sum(&:tokens_in), "tokens_out" => list.sum(&:tokens_out),
-            "estimated_usd" => priced.empty? ? nil : priced.sum, "entries" => list.size }
+            "estimated_usd" => priced.empty? ? nil : priced.sum, "entries" => list.size,
+            "over_cap" => over?(priced.empty? ? nil : priced.sum, policy&.max_usd_per_phase) }
         end,
         "entries" => entries.map do |e|
           { "phase" => phase_id(e.phase), "provider" => plain(e.provider), "model" => plain(e.model), "tokens_in" => e.tokens_in,

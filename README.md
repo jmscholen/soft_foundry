@@ -92,6 +92,8 @@ soft-foundry ui --port 4877
 
 `soft-foundry ui` serves one page to this machine only. The first view is every change record with one cell per phase: open changes are gated as you look, closed records show what their handoffs recorded. Opening a change shows its sixteen gates in order, and selecting a gate lists each check with its outcome and detail, what is blocking it, and why a pending phase may stay pending. The page follows the records as they change, about every five seconds while the tab is visible.
 
+A change also shows its timeline, built only from the times its files record, and its spend ledger against the budget caps for its risk. The Workflow view explains the lifecycle itself: each phase, the checks its gate runs and what each one establishes, the files it must produce, the moves that go back, and the tracks.
+
 It only shows. Nothing can be run or edited from the page: the server answers GET on six fixed routes, binds 127.0.0.1 with no option to bind anything else, refuses requests that name another host or come from another site, and treats everything in a record as text. It has no login, so any program running on the same machine can read it; do not run it on a shared host.
 
 `soft-foundry check` lints the control plane itself. `soft-foundry ci` runs the lint plus every change record's gates, and `soft-foundry hooks install` wires it into a pre-commit hook. The GitHub Actions workflow runs the same two commands.

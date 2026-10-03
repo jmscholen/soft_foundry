@@ -1,0 +1,8 @@
+commit_sha: ab1723b2ace53d5cc8516924b716011fddc2ed67
+artifacts:
+- path: evidence/journey-transcript.log
+  journey: "EVAL-001, EVAL-002, EVAL-003"
+  sha256: 23a4298ab082d9980989399004d89909af3045d18a493daf049377e393d64c76
+- path: evidence/browser-observations.log
+  journey: "EVAL-004, EVAL-005, EVAL-006"
+  sha256: d307f82c474ac570231df2dc1aca7050a1642fd84a3a24b7b8c3c2622bbd67ae

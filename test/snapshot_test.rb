@@ -60,6 +60,7 @@ class SnapshotTest < Minitest::Test
 
       assert_equal "remediate", workflow.dig("transitions", "review", "on_blocking_findings")
       assert_includes workflow["judgments"], "APPROVED"
+      assert_equal SoftFoundry::Gate::CHECKS["phase in progress"], workflow.dig("check_descriptions", "phase in progress")
       assert_equal "gated", workflow.dig("tracks", "default")
       assert_equal({ "high" => "gated" }, workflow.dig("tracks", "forced_by_risk"))
       iterative = workflow.dig("tracks", "list").find { |t| t["name"] == "iterative" }
@@ -76,6 +77,19 @@ class SnapshotTest < Minitest::Test
       ran = gate(snapshot.change("c1"), "intake")["checks"].map { |c| c["name"] }
       listed = snapshot.workflow["phases"].first["checks"].map { |c| c["name"] }
       assert_empty ran - listed
+    end
+  end
+
+  # Carried from ui-snapshot's review (REV-004): every phase, not only the
+  # first, lists the checks its gate runs.
+  def test_workflow_checks_cover_what_the_gate_runs_for_every_phase
+    with_snapshot do |dir, record, snapshot|
+      record.control_plane.phases.each { |phase| complete_phase!(record, phase.id, sha: head(dir)) }
+      edit_yaml(File.join(record.dir, "metadata.yml")) { |m| m["vetted"] = { "at" => "2030-01-02T10:00:00Z", "by" => "Ada", "commit" => head(dir) } }
+      listed = snapshot.workflow["phases"].to_h { |p| [p["id"], p["checks"].map { |c| c["name"] }] }
+      snapshot.change("c1")["gates"].each do |g|
+        assert_empty g["checks"].map { |c| c["name"] } - listed.fetch(g["phase"]), g["phase"]
+      end
     end
   end
 
@@ -191,6 +205,40 @@ class SnapshotTest < Minitest::Test
       assert_equal "2030-01-01T10:00:00Z", timeline[2]["at"]
       assert_includes timeline[4]["label"], "reshape"
       assert timeline.all? { |e| e["at"].is_a?(String) && !e["label"].to_s.empty? }
+    end
+  end
+
+  # Carried from ui-snapshot's review (REV-002): a recorded "time" that
+  # is a placeholder or free text is not an event on a timeline.
+  def test_timeline_leaves_out_events_whose_time_is_not_a_time
+    with_snapshot do |dir, record, snapshot|
+      complete_phase!(record, "intake", sha: head(dir))
+      edit_yaml(record.handoff_path(record.control_plane.phase("intake"))) do |h|
+        h["started_at"] = "TBD"
+        h["completed_at"] = "2030-01-01T10:00:00Z"
+      end
+      edit_yaml(File.join(record.dir, "metadata.yml")) do |m|
+        m["human_decisions"] = [{ "boundary" => "legal commitment", "subject" => "terms", "decided_by" => "Ada", "decided_at" => "soon", "decision" => "approved" }]
+        m["reopenings"] = [{ "at" => "2030-01-03", "from_commit" => "abc1234", "reason" => "reshape" }]
+      end
+      timeline = snapshot.change("c1")["timeline"]
+      assert_equal %w[created completed reopened], timeline.map { |e| e["kind"] }
+      assert_equal "2030-01-03", timeline.last["at"]
+    end
+  end
+
+  def test_spend_flags_what_is_over_its_cap
+    with_snapshot do |_dir, record, snapshot|
+      edit_yaml(File.join(record.dir, "metadata.yml")) { |m| m["risk"] = "low" }
+      policy = SoftFoundry::Budget.policy(record.control_plane, risk: "low")
+      budget = SoftFoundry::Budget.new(record)
+      budget.record!(phase: "intake", provider: "anthropic", model: "m", tokens_in: 1, tokens_out: 1, estimated_usd: policy.max_usd_per_phase + 1)
+      budget.record!(phase: "verify", provider: "anthropic", model: "m", tokens_in: 1, tokens_out: 1, estimated_usd: 0.01)
+      spend = snapshot.change("c1")["spend"]
+      assert spend["by_phase"].find { |p| p["phase"] == "intake" }["over_cap"]
+      refute spend["by_phase"].find { |p| p["phase"] == "verify" }["over_cap"]
+      assert_equal spend.dig("totals", "estimated_usd") > policy.max_usd_per_change, spend.dig("totals", "over_cap")
+      assert_includes [true, false], spend.dig("totals", "needs_approval")
     end
   end
 
