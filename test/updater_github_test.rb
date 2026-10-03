@@ -21,6 +21,7 @@ class UpdaterGithubTest < Minitest::Test
     assert_nil error
     assert_equal "0.17.0", release.version
     assert_equal RELEASE["assets"][0]["browser_download_url"], release.gem_url
+    assert_equal "soft_foundry-0.17.0.gem", release.gem_name
     assert_equal RELEASE["tarball_url"], release.tarball_url
   end
 
@@ -28,6 +29,7 @@ class UpdaterGithubTest < Minitest::Test
     release, = SoftFoundry::Updater.parse_release(JSON.generate(RELEASE.merge("tag_name" => "0.17.0", "assets" => [])))
     assert_equal "0.17.0", release.version
     assert_nil release.gem_url
+    assert_nil release.gem_name
     assert_equal RELEASE["tarball_url"], release.tarball_url
   end
 
@@ -47,10 +49,12 @@ class UpdaterGithubTest < Minitest::Test
   # this command, never through a shell.
   def updater(release, downloads: {}, &runner)
     ran = []
-    downloader = lambda do |url, dir|
-      body = downloads.fetch(url)
-      path = File.join(dir, body[:name])
-      File.write(path, body[:bytes] || "gem bytes")
+    # Saves under the name the updater asks for, as the real downloader
+    # does; a download's final address is not a name (GitHub's is a UUID).
+    downloader = lambda do |url, dir, name|
+      downloads.fetch(url)
+      path = File.join(dir, name)
+      File.write(path, "gem bytes")
       path
     end
     run = lambda do |argv, chdir|
@@ -61,9 +65,12 @@ class UpdaterGithubTest < Minitest::Test
     [u, ran]
   end
 
+  # Found by the first real release (v0.17.0): the asset's download
+  # redirects to objects.githubusercontent.com/.../<uuid>, and a file named
+  # from that address failed the name check. The name is the asset's.
   def test_installs_the_gem_attached_to_the_release
-    release = SoftFoundry::Updater::Release.new(version: "0.17.0", gem_url: "https://example.test/soft_foundry-0.17.0.gem", tarball_url: nil)
-    u, ran = updater(release, downloads: { release.gem_url => { name: "soft_foundry-0.17.0.gem" } })
+    release = SoftFoundry::Updater::Release.new(version: "0.17.0", gem_url: "https://github.com/x/releases/download/v0.17.0/soft_foundry-0.17.0.gem", gem_name: "soft_foundry-0.17.0.gem", tarball_url: nil)
+    u, ran = updater(release, downloads: { release.gem_url => { name: "8981f80a-6ac7-4219-87f1-9436328d906b" } })
     result = u.install!("0.17.0")
     assert result.ok, result.message
     assert_equal 1, ran.size
@@ -73,8 +80,8 @@ class UpdaterGithubTest < Minitest::Test
   end
 
   def test_builds_from_the_source_when_no_gem_is_attached
-    release = SoftFoundry::Updater::Release.new(version: "0.17.0", gem_url: nil, tarball_url: "https://example.test/tarball/v0.17.0")
-    u, ran = updater(release, downloads: { release.tarball_url => { name: "source.tar.gz" } }) do |argv, chdir|
+    release = SoftFoundry::Updater::Release.new(version: "0.17.0", gem_url: nil, gem_name: nil, tarball_url: "https://example.test/tarball/v0.17.0")
+    u, ran = updater(release, downloads: { release.tarball_url => { name: "v0.17.0" } }) do |argv, chdir|
       if argv.first == "tar"
         src = File.join(argv[argv.index("-C") + 1], "jmscholen-soft_foundry-abc123")
         FileUtils.mkdir_p(src)
@@ -95,7 +102,7 @@ class UpdaterGithubTest < Minitest::Test
   end
 
   def test_refuses_a_gem_whose_name_is_not_the_release
-    release = SoftFoundry::Updater::Release.new(version: "0.17.0", gem_url: "https://example.test/other.gem", tarball_url: nil)
+    release = SoftFoundry::Updater::Release.new(version: "0.17.0", gem_url: "https://example.test/other.gem", gem_name: "evil-9.9.9.gem", tarball_url: nil)
     u, ran = updater(release, downloads: { release.gem_url => { name: "evil-9.9.9.gem" } })
     result = u.install!("0.17.0")
     refute result.ok
@@ -104,7 +111,7 @@ class UpdaterGithubTest < Minitest::Test
   end
 
   def test_refuses_to_install_a_version_other_than_the_release_found
-    release = SoftFoundry::Updater::Release.new(version: "0.17.0", gem_url: "https://example.test/soft_foundry-0.17.0.gem", tarball_url: nil)
+    release = SoftFoundry::Updater::Release.new(version: "0.17.0", gem_url: "https://example.test/soft_foundry-0.17.0.gem", gem_name: "soft_foundry-0.17.0.gem", tarball_url: nil)
     u, ran = updater(release)
     result = u.install!("0.18.0")
     refute result.ok
@@ -113,14 +120,14 @@ class UpdaterGithubTest < Minitest::Test
   end
 
   def test_a_release_with_neither_gem_nor_source_cannot_be_installed
-    release = SoftFoundry::Updater::Release.new(version: "0.17.0", gem_url: nil, tarball_url: nil)
+    release = SoftFoundry::Updater::Release.new(version: "0.17.0", gem_url: nil, gem_name: nil, tarball_url: nil)
     u, ran = updater(release)
     refute u.install!("0.17.0").ok
     assert_empty ran
   end
 
   def test_a_failed_download_is_reported_not_raised
-    release = SoftFoundry::Updater::Release.new(version: "0.17.0", gem_url: "https://example.test/soft_foundry-0.17.0.gem", tarball_url: nil)
+    release = SoftFoundry::Updater::Release.new(version: "0.17.0", gem_url: "https://example.test/soft_foundry-0.17.0.gem", gem_name: "soft_foundry-0.17.0.gem", tarball_url: nil)
     u, = updater(release, downloads: {})
     result = u.install!("0.17.0")
     refute result.ok
