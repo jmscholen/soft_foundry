@@ -207,6 +207,33 @@ class ProcessesTest < Minitest::Test
     end
   end
 
+  # The server needs to know which repository each entry is in; nothing
+  # else is told.
+  def test_roots_are_reported_only_when_asked_for
+    with_two_repositories do |here, other, _plain|
+      cwd = { 900 => here, 901 => other, 910 => here }
+      kept = processes(here, ps: SESSIONS, cwd: cwd)
+      refute_includes JSON.generate(kept.snapshot), "\"root\""
+      data = kept.snapshot(with_roots: true)
+      assert_equal here, by_pid(data["sessions"])[900]["root"]
+      assert_equal other, by_pid(data["sessions"])[901]["root"]
+      assert_equal here, by_pid(data["processes"])[910]["root"]
+    end
+  end
+
+  def test_recorded_runs_are_looked_for_in_every_repository_named
+    with_two_repositories do |here, other, _plain|
+      cli(other, "change", "new", "o1", "--title", "x")
+      path = File.join(other, "changes", "o1", "00-intake", "handoff.yml")
+      h = YAML.safe_load_file(path)
+      h["executed_by"] = { "shell" => "grok", "started_at" => "2026-10-02T04:00:00Z", "finished_at" => nil }
+      File.write(path, YAML.dump(h))
+      assert_empty processes(here, ps: "").snapshot["recorded_runs"]
+      runs = processes(here, ps: "").snapshot(roots: [here, other], with_roots: true)["recorded_runs"]
+      assert_equal [["o1", "intake", other]], runs.map { |r| [r["change"], r["phase"], r["root"]] }
+    end
+  end
+
   # Another repository's record is someone else's file: what is read from
   # it is checked like a command line is.
   def test_a_session_reports_nothing_unvalidated_from_another_repository

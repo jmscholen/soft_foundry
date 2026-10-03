@@ -53,18 +53,33 @@ module SoftFoundry
 
     # Running processes as plain data, with the runs this repository's
     # records say were started and never finished.
-    def snapshot
+    #
+    # `roots` names the repositories whose records are searched for
+    # unfinished runs (this one, unless given). With `with_roots`, every
+    # entry also carries the absolute path of the repository it is in,
+    # for a caller that keeps a registry of repositories; that path is
+    # otherwise never reported.
+    def snapshot(roots: nil, with_roots: false)
       rows = self.rows
       list = commands(rows)
-      { "version" => Snapshot::VERSION, "generated_at" => Time.now.utc.iso8601, "processes" => list,
-        "sessions" => sessions(rows, list), "recorded_runs" => recorded_runs(list) }
+      data = { "version" => Snapshot::VERSION, "generated_at" => Time.now.utc.iso8601, "processes" => list,
+               "sessions" => sessions(rows, list), "recorded_runs" => (roots || [@root]).flat_map { |root| recorded_runs(real(root), list) } }
+      %w[processes sessions recorded_runs].each { |key| data[key].each { |entry| entry.delete("root") } } unless with_roots
+      data
     rescue SystemCallError, IOError => e
       { "version" => Snapshot::VERSION, "generated_at" => Time.now.utc.iso8601, "processes" => [], "sessions" => [], "recorded_runs" => [],
         "error" => "could not list processes: #{Snapshot.plain(e.message)}" }
     end
 
     # Running `soft-foundry ...` commands, oldest first.
-    def list = commands(rows)
+    def list = commands(rows).each { |entry| entry.delete("root") }
+
+    # A directory as shown to a person: under the home directory as ~/...
+    def self.display(dir)
+      return nil unless dir
+      home = File.realpath(Dir.home)
+      Snapshot.plain(dir == home || dir.start_with?("#{home}/") ? dir.sub(home, "~") : dir)
+    end
 
     private
 
@@ -93,7 +108,7 @@ module SoftFoundry
         phase, status = change ? recorded_position(root, change) : nil
         { "pid" => row[:pid], "shell" => name, "terminal" => row[:tty].match?(TERMINAL) ? row[:tty] : nil,
           "repository" => here ? "." : display(root), "here" => here, "branch" => branch.match?(BRANCH) ? branch : nil,
-          "change" => change, "phase" => phase, "status" => status, "started_at" => started(row[:started]) }
+          "change" => change, "phase" => phase, "status" => status, "started_at" => started(row[:started]), "root" => root }
       end.sort_by { |s| [s["started_at"].to_s, s["pid"]] }
     end
 
@@ -135,7 +150,8 @@ module SoftFoundry
       command = command_of(args) or return nil
       args = args.take_while { |a| a != "--" }
       dir = directory(row[:pid])
-      here = !dir.nil? && dir == real(@root)
+      root = governed_root(dir) || dir
+      here = !root.nil? && root == real(@root)
       {
         "pid" => row[:pid],
         "command" => command,
@@ -147,7 +163,8 @@ module SoftFoundry
         "repository" => here ? "." : display(dir),
         "here" => here,
         "self" => row[:pid] == Process.pid,
-        "started_at" => started(row[:started])
+        "started_at" => started(row[:started]),
+        "root" => root
       }
     end
 
@@ -225,12 +242,7 @@ module SoftFoundry
       File.expand_path(path)
     end
 
-    # A directory as shown to a person: under the home directory as ~/...
-    def display(dir)
-      return nil unless dir
-      home = real(Dir.home)
-      Snapshot.plain(dir == home || dir.start_with?("#{home}/") ? dir.sub(home, "~") : dir)
-    end
+    def display(dir) = self.class.display(dir)
 
     # `ps` reports the start in local time, e.g. "Fri Oct  2 00:02:33 2026".
     def started(text)
@@ -239,26 +251,26 @@ module SoftFoundry
       nil
     end
 
-    # Phases this repository's open records say `phase run` started and
-    # did not finish, each matched with the live process if there is one.
-    def recorded_runs(list)
-      plane = ControlPlane.new(@root)
+    # Phases a repository's open records say `phase run` started and did
+    # not finish, each matched with the live process if there is one.
+    def recorded_runs(root, list)
+      plane = ControlPlane.new(root)
       return [] unless plane.present?
-      index = ChangeIndex.new(@root, plane: plane, git: Git.new(@root))
-      index.slugs.flat_map { |slug| runs_in(index, plane, slug, list) }
+      index = ChangeIndex.new(root, plane: plane, git: Git.new(root))
+      index.slugs.flat_map { |slug| runs_in(root, index, plane, slug, list) }
     rescue StandardError
       []
     end
 
-    def runs_in(index, plane, slug, list)
+    def runs_in(root, index, plane, slug, list)
       record = index.record(slug)
       return [] if record.metadata["status"] == "closed"
       plane.phases.filter_map do |phase|
         by = record.handoff(phase)&.fetch("executed_by", nil)
         next unless by.is_a?(Hash) && by["started_at"] && by["finished_at"].nil?
-        live = list.find { |p| p["here"] && p["command"] == "phase run" && p["change"] == slug && plane.phase(p["phase"].to_s) == phase }
+        live = list.find { |p| p["root"] == root && p["command"] == "phase run" && p["change"] == slug && plane.phase(p["phase"].to_s) == phase }
         { "change" => slug, "phase" => phase.id, "shell" => Snapshot.plain(by["shell"].to_s), "started_at" => Snapshot.stamp(by["started_at"]),
-          "live" => !live.nil?, "pid" => live && live["pid"] }
+          "live" => !live.nil?, "pid" => live && live["pid"], "root" => root }
       end
     rescue StandardError
       []

@@ -1,0 +1,17 @@
+== test/ui_server_test.rb at 83f631c
+   1 25 runs, 1 assertions, 0 failures, 24 errors, 0 skips
+  22 ArgumentError: unknown keyword: :token
+   1 ArgumentError: unknown keywords: :token, :repos
+   1 NoMethodError: undefined method `token' for an instance of SoftFoundry::UI::Server
+== test/processes_test.rb at 83f631c
+   1 11 runs, 97 assertions, 0 failures, 2 errors, 0 skips
+   2 ArgumentError: wrong number of arguments (given 1, expected 0)
+== test/snapshot_test.rb at 83f631c
+   1 20 runs, 169 assertions, 0 failures, 1 errors, 0 skips
+   1 NoMethodError: undefined method `overview' for an instance of SoftFoundry::Snapshot
+== test/cli_ui_test.rb at 83f631c
+   1 7 runs, 34 assertions, 3 failures, 2 errors, 0 skips
+   1 NoMethodError: undefined method `[]' for nil
+   1 NoMethodError: undefined method `last' for nil
+== test/ui_assets_test.rb at 83f631c
+   1 10 runs, 104 assertions, 1 failures, 0 errors, 0 skips

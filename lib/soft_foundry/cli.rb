@@ -939,17 +939,20 @@ module SoftFoundry
       0
     end
 
-    # `ui [--port N]`: the board and each change's gates as a page, served
-    # to this machine only, until interrupted. It shows; it changes nothing.
+    # `ui [--port N] [--repo PATH]...`: every Soft Foundry repository with
+    # something going on, each change's gates, and what is running, as a
+    # page served to this machine only until interrupted. It shows; it
+    # changes nothing. The link it prints carries the token the page needs.
     def ui
       port = option("--port") || "0"
+      repos = options("--repo").map { |path| File.expand_path(path, @root) }
       raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
       raise TargetError, "--port expects a whole number from 0 to 65535; got '#{port}'" unless port.match?(/\A\d{1,5}\z/) && port.to_i <= 65_535
       raise TargetError, "no .ai/workflow.yml here; run `soft-foundry init` first" unless plane.present?
 
-      server = (@ui_server || ->(root, port:) { UI::Server.new(root, port: port) }).call(@root, port: port.to_i)
-      bound = server.start
-      @out.puts "ui: serving http://#{UI::Server::ADDRESS}:#{bound}/ (read-only; press Ctrl-C to stop)"
+      server = (@ui_server || ->(root, port:, repos:) { UI::Server.new(root, port: port, repos: repos) }).call(@root, port: port.to_i, repos: repos)
+      server.start
+      @out.puts "ui: serving #{server.url} (read-only; press Ctrl-C to stop)"
       @out.flush
       begin
         server.serve
@@ -1110,9 +1113,13 @@ module SoftFoundry
                                                   each time the total passes another warning interval
           soft-foundry budget threshold [USD|off|default]
                                                   show or set how often recorded spend warns (machine-local)
-          soft-foundry ui [--port N]              serve a read-only page on http://127.0.0.1:N/ showing every
-                                                  change record phase by phase and each gate's checks; it
-                                                  follows the records as they change and stops on Ctrl-C
+          soft-foundry ui [--port N] [--repo PATH]...
+                                                  serve a read-only page on http://127.0.0.1:N/ for every Soft
+                                                  Foundry repository with a session or command running, this
+                                                  one, and any named with --repo: each repository's changes
+                                                  phase by phase, each gate's checks, and what is running. It
+                                                  follows the records as they change and stops on Ctrl-C. Open
+                                                  the link it prints: it carries the token the page needs
                                                   (N defaults to a free port)
           soft-foundry ps [--json]                list what is running on this machine under your user, in any
                                                   repository: every soft-foundry command, and every claude,

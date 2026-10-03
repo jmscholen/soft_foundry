@@ -8,12 +8,14 @@ class UIServerTest < Minitest::Test
   include FoundryFixture
 
   Response = Struct.new(:status, :headers, :body)
+  TOKEN = "test-token"
+  WITH_TOKEN = { "X-Soft-Foundry-Token" => TOKEN }.freeze
 
   def with_server(**options)
     with_fixture_repo do |dir|
       cli(dir, "change", "new", "c1", "--title", "First change")
       commit_all(dir, "record c1")
-      server = SoftFoundry::UI::Server.new(dir, port: 0, **options)
+      server = SoftFoundry::UI::Server.new(dir, port: 0, token: TOKEN, **options)
       port = server.start
       thread = Thread.new { server.serve }
       begin
@@ -42,7 +44,8 @@ class UIServerTest < Minitest::Test
     Response.new(status, lines.to_h { |l| k, v = l.split(": ", 2); [k.downcase, v] }, body.to_s)
   end
 
-  def get(port, path, extra = {}) = request(port, "GET #{path} HTTP/1.1", { "Host" => "127.0.0.1:#{port}" }.merge(extra))
+  # A request as the page makes it: with the token the server's link carried.
+  def get(port, path, extra = {}) = request(port, "GET #{path} HTTP/1.1", { "Host" => "127.0.0.1:#{port}" }.merge(WITH_TOKEN).merge(extra))
 
   def test_serves_the_page_and_its_assets
     with_server do |_dir, port, _server|
@@ -89,7 +92,111 @@ class UIServerTest < Minitest::Test
   end
 
   Listing = Struct.new(:data) do
-    def snapshot = data
+    def snapshot(**) = Marshal.load(Marshal.dump(data))
+  end
+
+  # The data is for whoever was given the link. The page's own files say
+  # nothing about any repository and are served without it.
+  def test_data_needs_the_token_the_link_carried
+    with_server do |_dir, port, server|
+      %w[/api/changes /api/workflow /api/processes /api/repositories /api/change?slug=c1].each do |path|
+        assert_equal 401, request(port, "GET #{path} HTTP/1.1", { "Host" => "127.0.0.1:#{port}" }).status, path
+        assert_equal 401, get(port, path, "X-Soft-Foundry-Token" => "wrong").status, path
+        assert_equal 401, get(port, "#{path}#{path.include?('?') ? '&' : '?'}token=#{TOKEN}", "X-Soft-Foundry-Token" => "").status, "the token is not accepted in the address"
+        assert_equal 200, get(port, path).status, path
+      end
+      assert_equal 200, request(port, "GET / HTTP/1.1").status
+      assert_equal 200, request(port, "GET /app.js HTTP/1.1").status
+      refute_includes request(port, "GET /api/changes HTTP/1.1", { "Host" => "127.0.0.1:#{port}" }).body, "First change"
+      assert_equal "http://127.0.0.1:#{port}/#token=#{TOKEN}", server.url
+    end
+  end
+
+  def test_a_token_is_made_up_for_each_server
+    with_fixture_repo do |dir|
+      a = SoftFoundry::UI::Server.new(dir, port: 0).token
+      b = SoftFoundry::UI::Server.new(dir, port: 0).token
+      refute_equal a, b
+      assert_operator a.length, :>=, 32
+      assert_match(/\A[\w-]+\z/, a)
+    end
+  end
+
+  def with_other_repository
+    with_fixture_repo do |other|
+      sh(other, "git", "checkout", "-qb", "change/elsewhere")
+      cli(other, "change", "new", "elsewhere", "--title", "Work in another repository")
+      cli(other, "change", "new", "shipped", "--title", "Done")
+      plane = SoftFoundry::ControlPlane.new(other)
+      SoftFoundry::ChangeRecord.new(other, "shipped", control_plane: plane).close!
+      Dir.mktmpdir("not-governed") { |plain| yield File.realpath(other), File.realpath(plain) }
+    end
+  end
+
+  # One page for every Soft Foundry repository with something going on:
+  # the one the server was started in, and any a session or command is in.
+  def test_repositories_are_the_home_one_and_those_with_something_running
+    with_other_repository do |other, plain|
+      running = { "version" => 1, "processes" => [{ "pid" => 9, "command" => "ci", "root" => plain }],
+                  "sessions" => [{ "pid" => 7, "shell" => "claude", "change" => "elsewhere", "root" => other }], "recorded_runs" => [] }
+      with_server(processes: ->(_root) { Listing.new(running) }) do |dir, port, _server|
+        list = JSON.parse(get(port, "/api/repositories").body)["repositories"]
+        assert_equal 2, list.size, "a directory with no control plane is not a repository"
+        home = list.find { |r| r["home"] }
+        there = list.find { |r| !r["home"] }
+        assert_equal File.basename(dir), home["name"]
+        assert_equal File.basename(other), there["name"]
+        assert_match(/\A[0-9a-f]{12}\z/, there["id"])
+        assert_equal 1, there["open"]
+        assert_equal 1, there["closed"]
+        assert_equal [{ "slug" => "elsewhere", "title" => "Work in another repository", "status" => "intake", "current_phase" => "intake" }], there["changes"]
+        assert_equal 1, home["open"]
+
+        board = JSON.parse(get(port, "/api/changes?repo=#{there['id']}").body)
+        assert_equal %w[elsewhere shipped], board["changes"].map { |c| c["slug"] }
+        assert_equal ["c1"], JSON.parse(get(port, "/api/changes").body)["changes"].map { |c| c["slug"] }, "no repo means the home repository"
+        assert_equal ["c1"], JSON.parse(get(port, "/api/changes?repo=#{home['id']}").body)["changes"].map { |c| c["slug"] }
+        assert_equal "Work in another repository", JSON.parse(get(port, "/api/change?repo=#{there['id']}&slug=elsewhere").body)["title"]
+        assert_equal 404, get(port, "/api/change?repo=#{there['id']}&slug=c1").status, "a slug belongs to its repository"
+        assert_equal 16, JSON.parse(get(port, "/api/workflow?repo=#{there['id']}").body)["phases"].size
+
+        data = JSON.parse(get(port, "/api/processes").body)
+        assert_equal there["id"], data["sessions"].first["repo"]
+        assert_nil data["processes"].first["repo"]
+        # Where a repository is on disk is said once, in the list of
+        # repositories, and nowhere else; a plain directory never.
+        assert_equal other, there["path"]
+        text = JSON.generate(data) + get(port, "/api/changes?repo=#{there['id']}").body
+        refute_includes text + get(port, "/api/repositories").body, "\"root\""
+        refute_includes text, other
+        refute_includes text + get(port, "/api/repositories").body, plain
+      end
+    end
+  end
+
+  # A repository is named by an id the server handed out, never by a path.
+  def test_a_request_cannot_name_a_repository_by_path
+    with_other_repository do |other, _plain|
+      with_server do |_dir, port, _server|
+        ["000000000000", other, "..", "%2Fetc", ""].each do |repo|
+          assert_equal 404, get(port, "/api/changes?repo=#{URI.encode_www_form_component(repo)}").status, repo.inspect
+        end
+        refute_includes get(port, "/api/repositories").body, File.basename(other), "nothing is running there, so it is not known"
+      end
+    end
+  end
+
+  def test_repositories_can_be_added_when_the_server_starts
+    with_other_repository do |other, plain|
+      with_server(repos: [other]) do |_dir, port, _server|
+        names = JSON.parse(get(port, "/api/repositories").body)["repositories"].map { |r| r["name"] }
+        assert_includes names, File.basename(other)
+      end
+      with_fixture_repo do |dir|
+        error = assert_raises(SoftFoundry::TargetError) { SoftFoundry::UI::Server.new(dir, port: 0, repos: [plain]) }
+        assert_includes error.message, "has no .ai/workflow.yml"
+      end
+    end
   end
 
   def test_api_returns_running_processes
@@ -98,7 +205,7 @@ class UIServerTest < Minitest::Test
       response = get(port, "/api/processes")
       assert_equal 200, response.status
       assert_equal "application/json; charset=utf-8", response.headers["content-type"]
-      assert_equal data, JSON.parse(response.body)
+      assert_equal data.merge("processes" => [{ "pid" => 7, "command" => "ci", "repo" => nil }]), JSON.parse(response.body)
       assert_equal 403, get(port, "/api/processes", "Sec-Fetch-Site" => "cross-site").status
       assert_equal 405, request(port, "POST /api/processes HTTP/1.1").status
       assert_equal 404, get(port, "/api/processes/7").status

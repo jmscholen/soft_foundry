@@ -105,6 +105,19 @@ module SoftFoundry
       }
     end
 
+    # What a repository has in hand, for a list of repositories: counts,
+    # and its open changes by name and recorded position. Nothing is gated.
+    def overview
+      rows = @index.slugs.map do |slug|
+        summary(@index.record(slug), metadata(@index.record(slug)))
+      rescue StandardError
+        { "slug" => slug, "error" => "unreadable", "closed" => false }
+      end
+      open = rows.reject { |row| row["closed"] }
+      { "open" => open.size, "closed" => rows.size - open.size,
+        "changes" => open.map { |row| row.slice("slug", "title", "status", "current_phase", "error") } }
+    end
+
     # One change in full: every gate with its checks, the advisories, the
     # recorded history, and the spend ledger.
     def change(slug)
