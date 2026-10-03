@@ -1,0 +1,41 @@
+threats:
+  - id: THREAT-001
+    requirements: [REQ-PS-002]
+    category: xss
+    attacker: any process of this user, or whoever supplies a runner's passthrough arguments or a session's prompt
+    goal: inject markup into the page, or have the list repeat a secret from a command line
+    vector: a process named soft-foundry with hostile arguments; a secret after `--`; a prompt
+    impact: script in the page, or a secret shown to anything that can read the page
+    likelihood: low
+    mitigation: MIT-001
+    attack_case_required: true
+  - id: THREAT-002
+    requirements: [REQ-PS-006]
+    category: injection
+    attacker: any client that can connect, or any process of this user
+    goal: run a command through the listing
+    vector: request parameters; shell metacharacters in a command line or working directory
+    impact: command execution as the user
+    likelihood: low
+    mitigation: MIT-002
+    attack_case_required: true
+  - id: THREAT-003
+    requirements: [REQ-PS-006]
+    category: isolation
+    attacker: a website open in the viewer's browser
+    goal: learn which sessions the viewer is running and where
+    vector: cross-origin request or DNS rebinding to /api/processes
+    impact: disclosure of project directories and activity
+    likelihood: low
+    mitigation: MIT-003
+    attack_case_required: true
+  - id: THREAT-004
+    requirements: [REQ-PS-001]
+    category: authorization
+    attacker: any process of this user
+    goal: make the viewer believe a soft-foundry session is running that is not, or hide one
+    vector: starting a process named soft-foundry; starting a session without soft-foundry
+    impact: a misleading row, or a missing one; nothing is controlled through the list
+    likelihood: low
+    mitigation: MIT-004
+    attack_case_required: false

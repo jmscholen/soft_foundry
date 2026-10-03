@@ -83,6 +83,26 @@ A gate passes only when the phase's required files exist with no `TBD` placehold
 
 `soft-foundry change status [slug] --json` prints the same state as data: every gate with each check's outcome and detail, the advisories, the recorded timeline, and the spend ledger, with the same exit code as the text form. `soft-foundry change list --json` prints every record with one cell per phase; closed records report what their handoffs recorded and are not gated again. Both carry `"version": 1` and are not yet a stable contract.
 
+### Seeing it in a browser
+
+```sh
+soft-foundry ui                      # ui: serving http://127.0.0.1:PORT/#token=... (read-only; press Ctrl-C to stop)
+soft-foundry ui --port 4877 --repo ~/dev/another-project
+```
+
+`soft-foundry ui` serves one page, to this machine only, for every Soft Foundry repository that has something going on. Open the link it prints: it carries a token, made up for that run, without which the page shows nothing. Treat the link like a password and do not paste it anywhere; it stops working when the server stops.
+
+The page has two levels.
+
+- **Repositories** is the home page: the repository you started the server in, any you named with `--repo`, and any in which a `claude`, `codex`, or `grok` session or a `soft-foundry` command is running. Each shows its open sessions (terminal, branch, change, recorded phase), its open changes, and how many are closed.
+- **A repository** has its own pages, named at the top of each: **Changes**, one row per change record with a cell per phase (open changes are gated as you look, closed ones show what was recorded), and **Workflow**, the lifecycle as that repository defines it. Opening a change shows its sixteen gates in order; selecting a gate lists each check with its outcome, detail, and what it establishes. A change also shows its timeline, its spend against the budget caps, and any session or command running on it.
+
+**Running** lists every session and command across all of them, each linked to its repository and change, and flags a `phase run` that started, never finished, and has no process. `soft-foundry ps` prints the same in a terminal.
+
+Everything the page names is a link: a change, a phase, a repository, a commit. Hovering or focusing one shows what it points at (a gate's state, a phase's purpose, a change's status, a repository's sessions) and the file it lives in.
+
+The page follows the records as they change, about every five seconds while the tab is visible. It only shows: nothing can be run or edited from it. The server answers GET on fixed routes, binds 127.0.0.1 with no option to bind anything else, names a repository only by an id it issued and never by a path, refuses requests that name another host or come from another site, and treats everything in a record as text. A session's phase is what its change's record says, not a reading of the session.
+
 `soft-foundry check` lints the control plane itself. `soft-foundry ci` runs the lint plus every change record's gates, and `soft-foundry hooks install` wires it into a pre-commit hook. The GitHub Actions workflow runs the same two commands.
 
 ### Runtime enforcement: the guard hook

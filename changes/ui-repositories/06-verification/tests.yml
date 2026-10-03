@@ -1,0 +1,34 @@
+commit_sha: 952808b9f07f1ddc712376123374fecfaebc7db8
+checks:
+  - id: CHECK-001
+    kind: tests
+    command: "bundle exec rake test with ANTHROPIC_API_KEY, OPENAI_API_KEY, OPENROUTER_API_KEY, XAI_API_KEY, SOFT_FOUNDRY_BILLING, and SOFT_FOUNDRY_GUARD unset"
+    result: pass
+    evidence: evidence/tests.log
+    criteria: [REQ-REPO-001, REQ-REPO-004, REQ-REPO-005, REQ-REPO-006, REQ-REPO-007]
+    red_commit: 83f631c428e532b5f8ae6a48939aac9c7eba956b
+    test_path: test/ui_server_test.rb
+  - id: CHECK-002
+    kind: custom
+    command: "test/ui_server_test.rb, test/processes_test.rb, test/snapshot_test.rb, test/cli_ui_test.rb, test/ui_assets_test.rb run in a worktree checked out at 83f631c, the RED commit"
+    result: fail
+    evidence: evidence/red-at-83f631c.log
+    criteria: [failing-test-first]
+  - id: CHECK-003
+    kind: lint
+    command: "soft-foundry check"
+    result: pass
+    evidence: evidence/check.log
+    criteria: [control-plane-consistency]
+  - id: CHECK-004
+    kind: static_analysis
+    command: "ruby -wc on every lib/ Ruby file, exe/soft-foundry, and the five test files; node --check on lib/soft_foundry/ui/assets/app.js"
+    result: pass
+    evidence: evidence/syntax-warnings.log
+    criteria: [coding-standard]
+  - id: CHECK-005
+    kind: security_scan
+    command: "soft-foundry scan over the control plane and every change record"
+    result: pass
+    evidence: evidence/scan-against-self.log
+    criteria: [REQ-REPO-007]

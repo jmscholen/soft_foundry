@@ -1,0 +1,61 @@
+Browser evaluation of the page served from this repository on 4879, opened with the link the
+command printed. Chrome on macOS, dark scheme, window 614 CSS px wide, through the Claude in
+Chrome extension; values are from the live DOM and screenshots. This is the real machine, not a
+staged one: five coding-shell sessions were open in four Soft Foundry repositories (four claude,
+one grok), none started by this work. The other three repositories' names, branches, and changes
+are not written here.
+
+Observed at the working tree that became 952808b. Two faults were found in this pass and fixed
+before that commit: the Running view failed to draw (a helper shadowed by a local variable; the
+page said "Not connected"), and a link carrying the token did nothing when opened in a tab that
+already had the page.
+
+EVAL-006 the home page answers "what is going on, and where"
+  Opening the printed link: title "Repositories · Soft Foundry"; the address bar then shows
+    http://127.0.0.1:4879/#/ with no token in it.
+  nav: Repositories (current), Running. No Changes or Workflow at the top any more.
+  lede: "4 Soft Foundry repositories on this machine: the one this page was started in, and every
+    one with a session or a command running. 5 coding-shell sessions are open across them."
+  Four cards, each with a molten top edge (something is running in each):
+    soft_foundry, ~/dev/soft_foundry, "This page was started here."; Sessions: "claude in ttys009
+      on change/ui-repositories: ui-repositories, phase intake"; Commands running: "soft-foundry ui";
+      Open changes (6), each a link with its recorded status and phase; "18 closed. All changes and
+      gates in soft_foundry".
+    three more, each naming its sessions with terminal and branch, its open changes (1, 1, and 0),
+      and a link to all its changes. One has two claude sessions on a branch with no change record.
+
+EVAL-007 into another repository and back
+  Clicking another repository's name: #/r/<id>/changes; title "Changes · <repo> · Soft Foundry";
+    a bar at the top reads "Repositories / <repo> ~/…/<repo>" with tabs Changes (current) and
+    Workflow; h1 "Changes in <repo>"; "In this repository now: 1 coding-shell session. See
+    everything that is running"; its one open change carries the flag "Session open: grok".
+  Clicking that change: #/r/<id>/change/<slug>; the same bar; sixteen gates; the note says a grok
+    session is open on it and in which terminal. (That record has no handoffs, so every gate reads
+    Missing and the page says 16 gates are failing: that is the record's real state.)
+  Workflow tab: #/r/<id>/workflow; h1 "Workflow in <repo>"; that repository's sixteen phases.
+  "Repositories" in the bar returns to the home page.
+
+EVAL-008 Running links to where each thing is
+  lede: "5 coding-shell sessions are open across 4 Soft Foundry repositories on this machine. 1 Soft
+    Foundry command is running besides this page."
+  Sessions table: five rows; every row's Repository cell is a link to that repository; the three
+    rows whose branch has a change record link to that change in its own repository; the two on a
+    branch without one say so.
+  Clicking a session's change in another repository lands on #/r/<id>/change/<slug> with the
+    repository bar and the session note.
+
+EVAL-009 the token
+  With the tab's stored token removed and the page reloaded at http://127.0.0.1:4879/: h1 "Open the
+    link from your terminal", an explanation, and no repository shown. A fetch of /api/repositories
+    without the header answers 401.
+  Restoring the token restores the page.
+
+EVAL-010 accessibility of the new parts
+  The repository bar is a nav landmark labelled "Repository"; the current tab has aria-current.
+  Each card's repository name is an h2 link; Sessions, Commands running, Open changes are h3.
+  No sideways page scroll at 614 px on the home page, a board, a change, the workflow, or Running.
+  Colours are the existing palette. "This page was started here", "No coding shell is open here",
+    and the session and change lines are all words.
+
+Not exercised: a screen reader; the light scheme; 200% zoom; a repository found only because a
+soft-foundry command (not a session) is running in it, in a browser (covered by a server test).

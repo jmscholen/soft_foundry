@@ -1,0 +1,76 @@
+
+### ATTACK-001 path traversal and files outside the route table
+GET /../outside.txt -> 404
+GET /..%2foutside.txt -> 404
+GET /%2e%2e/%2e%2e/etc/passwd -> 404
+GET /app.js/../../outside.txt -> 404
+GET /lib/app.rb -> 404
+GET /.ai/workflow.yml -> 404
+GET /changes/plain/metadata.yml -> 404
+GET /.git/config -> 404
+GET //etc/passwd -> 404
+GET /app.js%00.html -> 404
+body of /../outside.txt: {"error":"no such page"}
+GET /api/change?slug=../../outside.txt -> 404
+GET /api/change?slug=..%2F..%2Fetc -> 404
+GET /api/change?slug=plain/../hostile -> 404
+GET /api/change?slug=/etc/passwd -> 404
+GET /api/change?slug=plain%00 -> 404
+GET /api/change?slug=. -> 404
+
+### ATTACK-002 DNS rebinding: a hostname that resolves to 127.0.0.1
+Host: attacker.example:4878 -> / 403 , /api/changes 403
+Host: attacker.example -> / 403 , /api/changes 403
+Host: 127.0.0.1.attacker.example:4878 -> / 403 , /api/changes 403
+Host: localhost.attacker.example:4878 -> / 403 , /api/changes 403
+Host: 127.0.0.1:1 -> / 403 , /api/changes 403
+Host: [::1]:4878 -> / 403 , /api/changes 403
+Host: 0.0.0.0:4878 -> / 403 , /api/changes 403
+no Host header (HTTP/1.0) -> HTTP/1.1 403 Forbidden
+
+### ATTACK-003 another site reading the data
+Sec-Fetch-Site: cross-site, Origin: https://attacker.example -> /api/changes 403, /api/change?slug=plain 403
+Sec-Fetch-Site: same-site, Origin: https://attacker.example -> /api/changes 403, /api/change?slug=plain 403
+CORS headers on a same-origin answer: 0
+OPTIONS preflight -> 405
+CSP: Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+
+### ATTACK-004 writing through the server
+POST /api/change?slug=plain with a body -> 405
+PUT /api/change?slug=plain with a body -> 405
+PATCH /api/change?slug=plain with a body -> 405
+DELETE /api/change?slug=plain with a body -> 405
+status of plain afterwards: intake
+checksum of changes/plain after the attempts: a8e5ae988cf2 (before: a8e5ae988cf2)
+
+### ATTACK-005 holding connections open
+with 40 silent connections open, GET / -> 200
+and GET /api/changes -> 200
+answered in 0.11 s
+after the read timeout, GET /api/changes -> 200
+
+### ATTACK-006 oversized and malformed requests
+9 KB header -> 431
+20 KB path -> 431
+binary garbage -> HTTP/1.1 400 Bad Request
+request smuggling shape (two requests, body on a GET) -> 1 response(s)
+server still answering -> 200
+
+### ATTACK-007 hostile text in a record
+content-type: Content-Type: application/json; charset=utf-8
+title: <img src=x onerror="document.title=1337"><script>document.title=1337</script>
+risk: <u>high</u>
+blocking: ["<b onmouseover=alert(1)>blocked</b>", "javascript:alert(1)"]
+finding: {"id"=>"<i>F-1</i>", "severity"=>"\"><script>alert(2)</script>", "summary"=>"<svg onload=alert(3)>"}
+(rendering is checked in a browser: see results.md)
+
+### ATTACK-008 a record whose metadata.yml is a symlink out of the repository
+board row: {"slug"=>"linked", "error"=>"changes/linked/metadata.yml is not a mapping"}
+detail -> 500: {"error":"could not read this from the repository: changes/linked/metadata.yml is not a mapping"}
+does any answer contain a line of /etc/passwd: 0
+
+### ATTACK-009 reaching the server from off the machine
+listening on 127.0.0.1:4878
+connect to the LAN address, port 4878 -> 000 (curl exit 7)
+--host flag -> soft-foundry: unknown option(s): --host 0.0.0.0
+ exit 1

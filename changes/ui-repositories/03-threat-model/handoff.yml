@@ -1,0 +1,26 @@
+phase: 03-threat-model
+skill: threat-modeling
+status: complete
+commit_sha: 952808b9f07f1ddc712376123374fecfaebc7db8
+started_at: '2026-10-02T15:06:00Z'
+completed_at: '2026-10-02T15:07:00Z'
+resolved_model:
+  profile: adversarial_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- attack-surface.md
+- trust-boundaries.md
+- threats.yml
+- mitigations.md
+blocking: []
+findings:
+- id: THREAT-005
+  severity: minor
+  summary: 'Accepted: no cap on the number of repositories the server remembers.'
+- id: THREAT-006
+  severity: minor
+  summary: 'Accepted: the token is a bearer secret printed to the terminal for the life of the run.'
+next: plan
+notes: Performed directly by the interactive session, not a fresh-context agent; see 00-intake/assumptions.md. A delta on the ui-server and ui-processes threat models. Issued ids and a header token were decided before the tests were written; the files were written up after the implementation.
+executed_by:

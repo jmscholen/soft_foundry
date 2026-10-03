@@ -1,0 +1,10 @@
+== every reference-shaped element in the page's script carries data-ref (counts of link makers and of plain anchors with hrefs into a repository):
+gateLink/phaseLink/changeLink/repoLink calls: 34
+plain el("a", ...) with a repository href (should be only the page's own navigation): 7
+173:        el("a", { href: repoHref(id), "aria-current": page === "changes" ? "page" : null, text: "Changes" }),
+174:        el("a", { href: repoHref(id, "workflow"), "aria-current": page === "workflow" ? "page" : null, text: "Workflow" })));
+275:    return el("a", { href: changeHref(slug, phase, repo), "data-ref": "gate", "data-slug": slug, "data-phase": phase, "data-repo": repo 
+280:    return el("a", { href: repoHref(repo || currentRepo(), "workflow/" + encodeURIComponent(phase)), "data-ref": "phase", "data-phase": 
+285:    return el("a", { href: changeHref(slug, null, repo), "data-ref": "change", "data-slug": slug, "data-repo": repo || currentRepo(), "d
+290:    return el("a", { href: repoHref(id), "data-ref": "repo", "data-repo": id, "data-key": key || null, text: label || repoName(id) });
+474:        el("a", { href: repoHref(currentRepo(), "workflow/" + encodeURIComponent(phase.id)), "data-ref": "phase", "data-phase": phase.id

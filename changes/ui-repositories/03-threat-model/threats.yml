@@ -1,0 +1,61 @@
+threats:
+  - id: THREAT-001
+    requirements: [REQ-REPO-005]
+    category: file
+    attacker: anything that can send a request with the token, or a page script fed a hostile value
+    goal: make the server read a directory it did not register, or a change from the wrong repository
+    vector: a path, traversal, or forged id in `repo`; a slug of another repository
+    impact: disclosure of files outside the known repositories
+    likelihood: low
+    mitigation: MIT-001
+    attack_case_required: true
+  - id: THREAT-002
+    requirements: [REQ-REPO-006]
+    category: authentication
+    attacker: another local user or process, or a website open in the viewer's browser
+    goal: read the data without the link
+    vector: no token, a guessed token, the token in the query string or a cookie
+    impact: disclosure of what is being worked on across every known repository
+    likelihood: medium
+    mitigation: MIT-002
+    attack_case_required: true
+  - id: THREAT-003
+    requirements: [REQ-REPO-006]
+    category: secrets
+    attacker: a website the viewer visits, or anything reading browser history or logs
+    goal: obtain the token
+    vector: Referer, history, a cross-origin request that echoes it, the address bar
+    impact: as THREAT-002, for the life of that server run
+    likelihood: low
+    mitigation: MIT-003
+    attack_case_required: true
+  - id: THREAT-004
+    requirements: [REQ-REPO-001]
+    category: xss
+    attacker: whoever wrote a repository the user has a session open in, or any local process that opens a shell-named process in a hostile directory
+    goal: run script in the page, or mislead the viewer
+    vector: markup in a directory name, a change title, a branch name, or a record
+    impact: script in the page's origin, which now holds the token
+    likelihood: low
+    mitigation: MIT-004
+    attack_case_required: true
+  - id: THREAT-005
+    requirements: [REQ-REPO-004]
+    category: resource_exhaustion
+    attacker: a local process
+    goal: make the server slow or large
+    vector: opening shell-named processes in many governed directories
+    impact: a longer home page and more memory, until the server is restarted
+    likelihood: low
+    mitigation: MIT-005
+    attack_case_required: false
+  - id: THREAT-006
+    requirements: [REQ-REPO-006]
+    category: secrets
+    attacker: anyone who can see the terminal, its scrollback, or a pasted link
+    goal: obtain the token
+    vector: the link is printed in full; people paste links
+    impact: as THREAT-002 for that run
+    likelihood: medium
+    mitigation: MIT-006
+    attack_case_required: false

@@ -1,0 +1,58 @@
+commit_sha: 5d36e6f80e14c07928d3b5f1490403b17e01982e
+journeys:
+  - id: EVAL-001
+    criteria: [REQ-UI-001, REQ-UI-002, REQ-UI-004]
+    persona: maintainer
+    starting_state: this repository on change/ui-server
+    steps: ["soft-foundry ui --port 4879", "GET each of the six routes", "GET /api/changes again within 2 s", "send the process SIGTERM"]
+    assertions: ["first line is ui: serving http://127.0.0.1:4879/ (read-only; press Ctrl-C to stop)", "each route 200 with its content type; the board takes 0.67 s, a change 0.06 s", "the repeat takes under a millisecond", "ui: stopped; exit 0"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-002
+    criteria: [REQ-UI-001]
+    persona: reader of the terminal output
+    starting_state: as EVAL-001, and an empty directory
+    steps: ["ui on a port already in use", "ui --port eighty", "ui --host 0.0.0.0", "ui in a directory with no .ai/"]
+    assertions: ["each prints one line naming the problem and what to do, and exits 1"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-003
+    criteria: [REQ-UI-004, REQ-UI-007]
+    persona: a program consuming the data
+    starting_state: scratch repository with one record, server running
+    steps: ["read the change", "mark intake in progress on disk", "read again after 2.5 s"]
+    assertions: ["pending/pending", "in_progress/in_progress"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-004
+    criteria: [REQ-UI-005]
+    persona: maintainer in a browser
+    starting_state: this repository served on 4877
+    steps: ["open the URL", "read the board"]
+    assertions: ["three open changes gated now, eighteen closed as recorded, flags and key present, column numbers aligned, no console error"]
+    evidence: [evidence/browser-observations.log]
+    result: pass
+  - id: EVAL-005
+    criteria: [REQ-UI-006, REQ-UI-007]
+    persona: maintainer in a browser
+    starting_state: as EVAL-004
+    steps: ["open ui-snapshot", "open cross-cli-hooks (closed)", "select the review gate", "edit a handoff on disk while watching ui-server", "hide the tab", "pause"]
+    assertions: ["sixteen gates; the default selection is the last completed or the first failing or stale gate", "the closed-record note explains the stale gates", "the URL names the gate, one button is expanded, focus stays", "the gate changes within one poll, focus stays, the live region announces once", "no polling while hidden", "aria-pressed reflects paused"]
+    evidence: [evidence/browser-observations.log]
+    result: pass
+  - id: EVAL-006
+    criteria: [REQ-UI-008]
+    persona: keyboard-only user; low-vision user
+    starting_state: as EVAL-004
+    steps: ["tab through the board", "inspect structure", "compute contrast", "constrain the body to 320 px", "measure targets"]
+    assertions: ["logical order; 3px focus outline on a real Tab press", "lang, landmarks, one h1, captions, th scope, a word in every cell", "all text at least 5.1:1 light and 7.2:1 dark", "no overflow outside the table scroll regions", "standalone targets at least 24 px after a fix"]
+    evidence: [evidence/browser-observations.log]
+    result: pass
+  - id: EVAL-007
+    criteria: [REQ-UI-001]
+    persona: screen-reader user or CI log reader
+    starting_state: this repository
+    steps: ["the help entry for ui with non-ASCII bytes stripped"]
+    assertions: ["reads complete: what it serves, that it is read-only, how it stops, the default port"]
+    evidence: [evidence/journey-transcript.log]
+    result: pass

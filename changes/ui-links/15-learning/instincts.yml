@@ -1,0 +1,16 @@
+# Instincts from the ui-links change.
+instincts:
+- id: every-reference-is-a-link-with-its-source
+  trigger: when a page names a thing that has its own page or file
+  action: make the name a link, and let hovering or focusing it say what it is and which file it lives in
+  confidence: 0.85
+  domain: design
+  evidence:
+  - path: changes/ui-links/00-intake/request.md
+- id: a-complaint-phrased-as-a-question-is-a-requirement
+  trigger: when the user asks "is this too much to ask" or similar about something missing
+  action: treat the thing as a requirement, build it everywhere it applies, and say where it was missing
+  confidence: 0.8
+  domain: intake
+  evidence:
+  - path: changes/ui-links/00-intake/request.md

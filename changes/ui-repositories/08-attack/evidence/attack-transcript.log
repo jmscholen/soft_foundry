@@ -1,0 +1,32 @@
+### ATTACK-001 data without the token
+/api/repositories: none 401, wrong 401, in the address 401, as a cookie 401, right 200
+/api/processes: none 401, wrong 401, in the address 401, as a cookie 401, right 200
+/api/changes: none 401, wrong 401, in the address 401, as a cookie 401, right 200
+/api/workflow: none 401, wrong 401, in the address 401, as a cookie 401, right 200
+/api/change?slug=checkout-flow: none 401, wrong 401, in the address 401, as a cookie 401, right 200
+body of a refused request: {"error":"this needs the link soft-foundry ui printed when it started; open that link again"}
+the page's own files without it: / 200 /app.js 200; occurrences of the token in them: 0
+a thousand guesses: 1000 401 
+
+### ATTACK-002 with the token, from another site or another name
+cross-site -> 403; Host attacker.example -> 403; POST -> 405; CORS headers -> 0
+preflight for the token header from another origin -> 405
+
+### ATTACK-003 naming a repository the server did not issue
+repo=<scratch>/gamma -> 404
+repo=<scratch>/plain -> 404
+repo=/etc -> 404
+repo=.. -> 404
+repo=000000000000 -> 404
+repo=848db542cfd6x -> 404
+repo= -> 404
+a change of beta asked of alpha -> 404
+the plain directory with a claude in it is not a repository: true
+
+### ATTACK-004 a repository whose directory name is markup
+name as data: <b>markup
+content type: Content-Type: application/json; charset=utf-8
+
+### ATTACK-005 nothing leaves by path
+occurrences of a scratch path in a repository's board: 0
+where a path is given: the list of repositories (1 answer) and each running entry's repository field (1 answer), with the home directory shortened

@@ -1,0 +1,10 @@
+# Each criterion must be testable and map to at least one requirement.
+# Criteria are locked once specification completes; changing them requires a
+# recorded requirement change, never a downstream edit.
+criteria:
+  - id: AC-001
+    requirements: [REQ-001]
+    given: TBD
+    when: TBD
+    then: TBD
+    verified_by: []   # test names, EVAL IDs, or ATTACK IDs, filled by later phases
