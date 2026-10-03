@@ -261,8 +261,8 @@ Every line `soft-foundry` prints carries its outcome as a word (`pass`, `fail`, 
 ## Updating
 
 ```bash
-soft-foundry update          # checks RubyGems, reports current vs. latest; writes nothing
-soft-foundry update --yes    # installs the newer version if one was found
+soft-foundry update          # checks the GitHub repository's latest release; writes nothing
+soft-foundry update --yes    # installs it under the Ruby that runs soft-foundry, from any repository
 ```
 
 This tool has no interactive prompts anywhere. `--yes` is the explicit second step that actually installs, the same way `--force` and `--dry-run` work elsewhere in this CLI: the plain command is always safe to run and never touches anything.

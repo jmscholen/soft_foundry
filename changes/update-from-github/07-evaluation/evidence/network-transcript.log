@@ -1,0 +1,14 @@
+### EVAL-001 the check, against api.github.com
+current=0.16.0 latest=nil update_available=false error="no release has been published on GitHub yet (https://github.com/jmscholen/soft_foundry/releases)"
+
+### EVAL-002 the full install path, against the real repository's source
+(no release exists yet, so the release is stood in for by main's source tarball, whose version.rb says 0.16.0)
+ok=true
+  Successfully installed soft_foundry-0.16.0
+  1 gem installed
+
+### EVAL-003 the same source asked for as a version it is not
+ok=false: the release's file is named soft_foundry-0.16.0.gem, not soft_foundry-0.17.0.gem; not installing it
+
+### EVAL-004 what is installed afterwards
+soft_foundry (0.16.0, 0.15.0, 0.3.0, 0.2.0)

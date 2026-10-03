@@ -1,0 +1,13 @@
+### EVAL-005 the command, from this checkout, with no release published
+$ soft-foundry update
+update: could not check for a new version (no release has been published on GitHub yet (https://github.com/jmscholen/soft_foundry/releases))
+exit 1
+
+### EVAL-006 the global command in another directory still runs the locally installed gem
+$ cd ~ && soft-foundry version
+0.16.0
+
+### EVAL-007 help, with non-ASCII bytes stripped
+  soft-foundry update [--yes]             check the GitHub repository for a newer release; --yes installs
+                                          it under the Ruby that runs soft-foundry (the gem is not on
+                                          RubyGems; a release is a v<version> tag with the gem attached)

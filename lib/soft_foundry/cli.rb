@@ -936,6 +936,16 @@ module SoftFoundry
         return EXIT_TARGET
       end
       @out.puts "updated to #{result.latest}"
+      installed_here = begin
+        File.exist?(File.join(@root, Manifest::PATH)) ? Manifest.load(@root).soft_foundry_version.to_s : ""
+      rescue StandardError
+        ""
+      end
+      # The gem is machine-wide; this repository's .ai/ was written by the
+      # version that installed it, and only `init` brings that forward.
+      if !installed_here.empty? && installed_here != result.latest
+        @out.puts ".ai/ here was installed by soft-foundry #{installed_here}; run `soft-foundry init` to bring it up to #{result.latest}"
+      end
       0
     end
 
@@ -1139,7 +1149,9 @@ module SoftFoundry
           soft-foundry guard                      the hook itself: reads a tool call from stdin, exits 2 to
                                                   refuse it in block mode; mode from .ai/policies/enforcement.yml,
                                                   .soft-foundry/enforcement.yml, or SOFT_FOUNDRY_GUARD=warn|block|off
-          soft-foundry update [--yes]             check RubyGems for a newer release; --yes installs it
+          soft-foundry update [--yes]             check the GitHub repository for a newer release; --yes installs
+                                                  it under the Ruby that runs soft-foundry (the gem is not on
+                                                  RubyGems; a release is a v<version> tag with the gem attached)
           soft-foundry models                     show locally accessible models
           soft-foundry shell claude|codex|grok    launch a coding shell in this repository
           soft-foundry version

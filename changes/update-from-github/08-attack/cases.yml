@@ -1,0 +1,38 @@
+commit_sha: b7764e2687a9290cdbbec2901cc444e95756ff35
+authorization_envelope:
+  target: the updater in this checkout, against replaced network responses and the repository's own public source
+  environment: local
+  authorized_by: the maintainer, by asking for this change in this session
+  allowed_surfaces: [the updater's code paths, the public repository's tarball]
+  prohibited_surfaces: [any release or tag creation, any other host]
+  data_constraints: fabricated release JSON only
+  network_constraints: github.com only
+  destructive_actions: prohibited
+cases:
+  - id: ATTACK-001
+    threat: THREAT-001
+    violation_attempted: install a file the release's JSON names that is not the gem
+    starting_privilege: control of the release JSON
+    steps: ["a release whose asset is evil-9.9.9.gem", "install! 0.17.0"]
+    expected_safe_behavior: refused by name; no subprocess run
+    observed: refused with the file's name in the message; the runner saw nothing
+    result: denied
+    evidence: [../06-verification/evidence/tests.log]
+  - id: ATTACK-002
+    threat: THREAT-001
+    violation_attempted: have a version installed other than the release found, or a source whose version differs from the tag
+    starting_privilege: control of the release JSON or of the tagged source
+    steps: ["install! 0.18.0 when the release is 0.17.0", "build the real main source (0.16.0) as release 0.17.0"]
+    expected_safe_behavior: refused before any install
+    observed: refused in both; EVAL-003 shows the real refusal
+    result: denied
+    evidence: [../06-verification/evidence/tests.log, ../07-evaluation/evidence/network-transcript.log]
+  - id: ATTACK-003
+    threat: THREAT-003
+    violation_attempted: receive the GITHUB_TOKEN at a host a redirect names
+    starting_privilege: control of a redirect target
+    steps: ["reasoned from Updater#real_download: the Authorization header is dropped unless the host ends in github.com; at most five redirects"]
+    expected_safe_behavior: no token leaves github.com
+    observed: not run; the code path is read, not exercised, and no test covers it
+    result: blocked_by_scope
+    evidence: [../03-threat-model/mitigations.md]

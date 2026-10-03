@@ -27,7 +27,7 @@ infrastructure:
   detected: [github-actions]
   iac:
     tools: []
-  deployment_targets: [rubygems]
+  deployment_targets: [github-releases]
 
 environments:
   development:

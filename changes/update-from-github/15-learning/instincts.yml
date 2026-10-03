@@ -1,0 +1,16 @@
+# Instincts from the update-from-github change.
+instincts:
+- id: exercise-the-real-path-with-a-stand-in
+  trigger: when the thing a feature needs (a release, a server, a record) does not exist yet
+  action: find the nearest real thing that drives the same code, run it, and record what it could not prove
+  confidence: 0.85
+  domain: evaluation
+  evidence:
+  - path: changes/update-from-github/07-evaluation/evidence/network-transcript.log
+- id: install-under-the-ruby-that-runs-the-command
+  trigger: when a Ruby tool installs or updates itself
+  action: run gem through RbConfig.ruby, not the gem on PATH, so the install lands where the command runs
+  confidence: 0.8
+  domain: operations
+  evidence:
+  - path: changes/update-from-github/05-implementation/decisions.md

@@ -1,0 +1,10 @@
+== test/updater_github_test.rb at ae3e48b
+   1 15 runs, 3 assertions, 3 failures, 12 errors, 0 skips
+   3 ArgumentError: unknown keyword: :http
+   1 Expected: ["github-releases"]
+   6 NameError: uninitialized constant SoftFoundry::Updater::Release
+   3 NoMethodError: undefined method `parse_release' for class SoftFoundry::Updater
+== test/cli_update_test.rb at ae3e48b
+   1 9 runs, 37 assertions, 2 failures, 0 errors, 0 skips
+   1 Expected "Soft Foundry 0.16.0\n\nUsage:\n  soft-foundry init [options]             install the control plane into this repository, then onbo
+   1 Expected "current: 0.16.0\nlatest:  99.0.0\ninstalling 99.0.0...\nSuccessfully installed soft_foundry-99.0.0\nupdated to 99.0.0\n" to includ
