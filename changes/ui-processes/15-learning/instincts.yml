@@ -1,0 +1,32 @@
+# Instincts from the ui-processes change.
+instincts:
+- id: check-the-request-against-the-users-real-situation
+  trigger: when a feature is meant to show what is happening on the user's machine or in their data
+  action: before calling it done, run it against the real situation in front of you and ask whether what the user would expect to see is there; a staged evaluation only proves the thing you built
+  confidence: 0.9
+  domain: evaluation
+  evidence:
+  - path: changes/ui-processes/09-remediation/summary.md
+  - finding: REV-026
+- id: a-non-goal-that-excludes-the-obvious-reading-needs-a-question
+  trigger: when writing a non-goal or a known limit that leaves out something the request could plainly mean
+  action: ask the user before accepting it, rather than recording it as a limit
+  confidence: 0.8
+  domain: intake
+  evidence:
+  - path: changes/ui-processes/05-implementation/deviations.md
+- id: report-fields-never-the-command-line
+  trigger: when showing or logging information about another process
+  action: report named fields that pass validation and never the command line, which can hold a prompt, a token, or anything the process chose
+  confidence: 0.9
+  domain: security
+  evidence:
+  - finding: ATTACK-001
+  - path: changes/ui-processes/03-threat-model/mitigations.md
+- id: compare-what-is-recorded-as-started-with-what-is-alive
+  trigger: when a record says a run started and nothing says it ended
+  action: check whether the process is alive before waiting on it; a start with no finish and no process is an interrupted run to redo
+  confidence: 0.8
+  domain: operations
+  evidence:
+  - path: changes/ui-processes/07-evaluation/evidence/journey-transcript.log

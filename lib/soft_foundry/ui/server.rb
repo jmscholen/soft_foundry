@@ -8,12 +8,13 @@ require_relative "../git"
 require_relative "../control_plane"
 require_relative "../change_index"
 require_relative "../snapshot"
+require_relative "../processes"
 
 module SoftFoundry
   module UI
     # A read-only HTTP server for one repository's workflow and change
     # records, for a browser on the same machine. It listens on the
-    # loopback address only, answers GET and HEAD on six fixed routes,
+    # loopback address only, answers GET and HEAD on seven fixed routes,
     # and never takes a file name from a request. Every request reads the
     # control plane and the records afresh, so the page follows edits.
     class Server
@@ -47,12 +48,13 @@ module SoftFoundry
       # `ttl` is how long an API answer is reused, so several tabs polling
       # do not each start a gate run; `read_timeout` is how long a
       # connection may take to send its request.
-      def initialize(root, port: 0, ttl: 2, read_timeout: 2, clock: -> { Process.clock_gettime(Process::CLOCK_MONOTONIC) })
+      def initialize(root, port: 0, ttl: 2, read_timeout: 2, clock: -> { Process.clock_gettime(Process::CLOCK_MONOTONIC) }, processes: nil)
         @root = File.expand_path(root)
         @requested_port = port
         @ttl = ttl
         @read_timeout = read_timeout
         @clock = clock
+        @processes = processes || ->(dir) { Processes.new(dir) }
         @cache = {}
         @lock = Mutex.new
         @connections = 0
@@ -106,6 +108,7 @@ module SoftFoundry
         case path
         when "/api/workflow" then cached("workflow") { snapshot.workflow }
         when "/api/changes" then cached("changes") { snapshot.board }
+        when "/api/processes" then cached("processes") { @processes.call(@root).snapshot }
         when "/api/change" then change(query)
         else error(404, "no such page")
         end
