@@ -1,12 +1,58 @@
-commit_sha: TBD
+commit_sha: b7764e2687a9290cdbbec2901cc444e95756ff35
 journeys:
   - id: EVAL-001
-    criteria: [AC-001]
-    persona: TBD
-    starting_state: TBD
-    steps:
-      - TBD
-    assertions:
-      - TBD
-    evidence: [evidence/TBD]
-    result: TBD   # pass | fail | blocked
+    criteria: [REQ-UPD-001]
+    persona: maintainer
+    starting_state: this checkout; no release exists on GitHub
+    steps: ["Updater#check against api.github.com"]
+    assertions: ["no update; the error says no release has been published and gives the releases page"]
+    evidence: [evidence/network-transcript.log]
+    result: pass
+  - id: EVAL-002
+    criteria: [REQ-UPD-002]
+    persona: maintainer
+    starting_state: as EVAL-001; the repository's main source tarball stands in for a release's source (its version.rb says 0.16.0)
+    steps: ["install! 0.16.0 with no gem attached"]
+    assertions: ["downloaded from GitHub, extracted, built with gem build, installed with gem install --local under the running Ruby: Successfully installed soft_foundry-0.16.0"]
+    evidence: [evidence/network-transcript.log]
+    result: pass
+  - id: EVAL-003
+    criteria: [REQ-UPD-002]
+    persona: maintainer
+    starting_state: as EVAL-002, asked for 0.17.0
+    steps: ["install! 0.17.0 from the same source"]
+    assertions: ["refused: the built file is soft_foundry-0.16.0.gem, not soft_foundry-0.17.0.gem; nothing installed"]
+    evidence: [evidence/network-transcript.log]
+    result: pass
+  - id: EVAL-004
+    criteria: [REQ-UPD-002]
+    persona: maintainer
+    starting_state: after EVAL-002
+    steps: ["gem list"]
+    assertions: ["0.16.0 present alongside the older versions; nothing else changed"]
+    evidence: [evidence/network-transcript.log]
+    result: pass
+  - id: EVAL-005
+    criteria: [REQ-UPD-001, REQ-UPD-006]
+    persona: reader of the terminal
+    starting_state: this checkout
+    steps: ["soft-foundry update"]
+    assertions: ["one line: could not check, no release published, the page to look at; exit 1"]
+    evidence: [evidence/command-transcript.log]
+    result: pass
+  - id: EVAL-006
+    criteria: [REQ-UPD-002]
+    persona: maintainer in another directory
+    starting_state: the global wrapper
+    steps: ["soft-foundry version from the home directory"]
+    assertions: ["the installed gem answers, so an install under that Ruby is what the command everywhere uses"]
+    evidence: [evidence/command-transcript.log]
+    result: pass
+  - id: EVAL-007
+    criteria: [REQ-UPD-006]
+    persona: screen-reader user or CI log reader
+    starting_state: this checkout
+    steps: ["the help entry with non-ASCII stripped"]
+    assertions: ["reads complete and says where releases come from"]
+    evidence: [evidence/command-transcript.log]
+    result: pass

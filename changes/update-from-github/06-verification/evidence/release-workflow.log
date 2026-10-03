@@ -1,0 +1,30 @@
+release workflow as written:
+# A tag v<version> becomes a GitHub release with the built gem attached.
+# `soft-foundry update --yes` installs that gem; nothing goes to RubyGems.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+      - name: The tag must be the version in the code
+        run: |
+          version="$(ruby -Ilib exe/soft-foundry version)"
+          test "v${version}" = "${GITHUB_REF_NAME}" || { echo "tag ${GITHUB_REF_NAME} but lib/soft_foundry/version.rb says ${version}"; exit 1; }
+      - run: bundle exec rake test
+      - run: gem build soft_foundry.gemspec
+      - name: Publish the gem as the release's asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" soft_foundry-*.gem --title "${GITHUB_REF_NAME}" --generate-notes

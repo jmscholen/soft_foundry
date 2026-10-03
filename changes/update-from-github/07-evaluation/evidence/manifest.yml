@@ -1,5 +1,8 @@
-commit_sha: TBD
+commit_sha: b7764e2687a9290cdbbec2901cc444e95756ff35
 artifacts:
-  - path: TBD
-    journey: EVAL-001
-    sha256: TBD
+- path: evidence/network-transcript.log
+  journey: "EVAL-001..EVAL-004 against api.github.com and the repository source"
+  sha256: 8627c16af6eba81c20cf951443606bce01d0ddca0494c783e869664f8ba4409c
+- path: evidence/command-transcript.log
+  journey: "EVAL-005..EVAL-007"
+  sha256: c452f4e51fd0bdbae8604b32655f280b5895496c3b7ac567e3652ef47a436676

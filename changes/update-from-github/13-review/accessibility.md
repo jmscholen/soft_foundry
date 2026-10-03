@@ -3,12 +3,13 @@
 Standard: `.ai/rules/accessibility.md` (WCAG 2.2 AA for user interfaces; CLI output, document, and evidence rules). Cite the success criterion or rule in every finding.
 
 ## Scope reviewed
-TBD
+`surfaces.accessibility: true` for command-line output: the `update` command's lines, the help entry, the README section.
 
 ## Findings
 | ID | Severity | Location | Finding | Rule or requirement |
 | --- | --- | --- | --- | --- |
-| REV-TBD | blocking / major / minor | TBD | TBD | TBD |
+| REV-014 | info | messages | One line per outcome, in words, each naming the next step: the releases page, `--yes`, `init`. No colour, no prompt. | CLI rules |
+| REV-015 | info | help | Three lines, wrapped like the rest. | CLI rules |
 
 ## Conformance
-TBD: conforms / conforms with advisories / does not conform / N/A. N/A is valid only when `surfaces.accessibility` is false and this section says what was examined to conclude nothing a person perceives or operates changed.
+Conforms to the command-line rules. WCAG user-interface criteria do not apply: nothing rendered.

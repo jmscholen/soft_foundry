@@ -1,5 +1,3 @@
-commit_sha: TBD
-artifacts:
-  - path: TBD
-    case: ATTACK-001
-    sha256: TBD
+commit_sha: b7764e2687a9290cdbbec2901cc444e95756ff35
+artifacts: []
+# The cases rest on the verification tests and the evaluation transcript; see cases.yml.

@@ -3,18 +3,18 @@
 Standard: `.ai/rules/policy-conformance.md`. Cite the policy document and clause, or a rule from that file, in every finding.
 
 ## Documents checked
-TBD: the privacy policy, security policy, and terms recorded under `policies:` in `.ai/repository.yml`, each with the path or URL and the version or date examined; or a statement that the application publishes none and that this is itself a go-live gap.
+This repository's `policies:` block in `.ai/repository.yml`: privacy, security, and terms all NOT_APPLICABLE with rationale. There is no published text to check a clause against.
 
 ## Scope reviewed
-TBD
+`surfaces.policy` is false for this change. Examined: the outbound calls. The profile's privacy rationale says "the only outbound calls are provider model listings and the RubyGems version check"; the version check now goes to api.github.com and github.com instead, and sends `GITHUB_TOKEN` if the environment has one.
 
 ## Findings
 | ID | Severity | Location | Finding | Policy clause or rule |
 | --- | --- | --- | --- | --- |
-| REV-TBD | blocking / major / minor | TBD | TBD | TBD |
+| REV-016 | minor | `.ai/repository.yml` privacy rationale | Still names RubyGems as the version check's destination. True in spirit (one outbound check), wrong in detail; a one-line follow-up edit to the profile. | Rule: say what is sent where |
 
 ## Policy text changes required
-TBD: None, or one line per clause that must be published before this change goes live. Publishing a change to a privacy policy, security policy, or terms is a legal commitment under `.ai/policies/human-boundaries.yml`: park the change with `status: awaiting_human` in `metadata.yml` and record the person's decision under `human_decisions` there.
+None (no published policy).
 
 ## Conformance
-TBD: conforms / conforms with advisories / does not conform / N/A. N/A is valid only when `surfaces.policy` is false and this section says what was examined to conclude the change alters nothing the application collects, shares, retains, protects, or promises.
+N/A, with the statement above of what was examined: `surfaces.policy: false` is correct.

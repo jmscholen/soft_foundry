@@ -1,21 +1,33 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
 phase: 13-review
 skill: review
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: b7764e2687a9290cdbbec2901cc444e95756ff35
+started_at: '2026-10-03T21:31:00Z'
+completed_at: '2026-10-03T21:31:00Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- functional.md
+- architecture.md
+- security.md
+- accessibility.md
+- policy-conformance.md
+- infrastructure.md
+- operations.md
+- consolidated.md
+blocking: []
+findings:
+- id: REV-002
+  severity: major
+  summary: 'Evidence gap: the attached-gem path and the workflow run for real only with the first tag.'
+- id: REV-009
+  severity: minor
+  summary: Integrity rests on TLS and on the workflow being the only release path; no checksum.
+- id: REV-016
+  severity: minor
+  summary: The profile's privacy rationale still names RubyGems.
 next: judge
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: Performed directly by the interactive session, not a fresh-context agent; see 00-intake/assumptions.md. The review is therefore not independent.
+executed_by:

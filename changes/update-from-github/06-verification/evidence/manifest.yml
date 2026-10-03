@@ -1,5 +1,20 @@
-commit_sha: TBD
+commit_sha: b7764e2687a9290cdbbec2901cc444e95756ff35
 artifacts:
-  - path: TBD
-    produced_by: TBD
-    sha256: TBD
+- path: evidence/tests.log
+  produced_by: "bundle exec rake test with every provider key, SOFT_FOUNDRY_BILLING, SOFT_FOUNDRY_GUARD, and GITHUB_TOKEN unset; timings and seed removed"
+  sha256: 2f90a369fb1a9ca88666e97a50bdf0339883113561881f647d83774ed0fc7038
+- path: evidence/red-at-ae3e48b.log
+  produced_by: "the two test files run in a worktree checked out at the RED commit ae3e48b"
+  sha256: 64f7b9abd4c0cc381bde6300c79895d87244d2edba740e11dd5d3597b66b3ff0
+- path: evidence/check.log
+  produced_by: "soft-foundry check"
+  sha256: 2be6498003ac7633f001dde7fb6c82d20d270c7515d869ca3f7276b8c1f3730e
+- path: evidence/syntax-warnings.log
+  produced_by: "ruby -wc on every lib/ Ruby file, exe/soft-foundry, and the two test files"
+  sha256: 733996e877adbdaebec59d0f62b12f41ae5bdc12a696d7d36b4764b7a5b69636
+- path: evidence/scan-against-self.log
+  produced_by: "soft-foundry scan over the control plane and every change record of this repository"
+  sha256: 9ef2c7a0b7ed6f1ade171a32514cfc844ec7709f076212e2e8abe128339f1fe9
+- path: evidence/release-workflow.log
+  produced_by: "the release workflow as committed"
+  sha256: dd13e818fb17c14972b97e311b95fab3ee57670456e24bb4b4160af274407e70

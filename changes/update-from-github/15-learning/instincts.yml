@@ -1,15 +1,16 @@
-# Instincts: what this change taught, as reusable one-line triggers with an
-# action, a confidence score, and evidence in this record. `soft-foundry
-# learn list` shows them across every record; `learn promote` copies those
-# at or above the threshold in .ai/policies/learning.yml into
-# .ai/rules/learned.md, and only through a change record on a change
-# branch, never by the change that learned them. An empty list is a valid
-# answer; a malformed entry fails the learning gate.
-instincts: []
-# - id: kebab-case-unique-id
-#   trigger: when ... (the situation an agent will recognise)
-#   action: do ... (one thing, imperative)
-#   confidence: 0.8          # 0.0 to 1.0; promotion threshold is policy
-#   domain: testing          # git | testing | security | review | ...
-#   evidence:
-#     - finding: REV-001     # a finding id, phase, or path in this record
+# Instincts from the update-from-github change.
+instincts:
+- id: exercise-the-real-path-with-a-stand-in
+  trigger: when the thing a feature needs (a release, a server, a record) does not exist yet
+  action: find the nearest real thing that drives the same code, run it, and record what it could not prove
+  confidence: 0.85
+  domain: evaluation
+  evidence:
+  - path: changes/update-from-github/07-evaluation/evidence/network-transcript.log
+- id: install-under-the-ruby-that-runs-the-command
+  trigger: when a Ruby tool installs or updates itself
+  action: run gem through RbConfig.ruby, not the gem on PATH, so the install lands where the command runs
+  confidence: 0.8
+  domain: operations
+  evidence:
+  - path: changes/update-from-github/05-implementation/decisions.md
