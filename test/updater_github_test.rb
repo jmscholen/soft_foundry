@@ -75,7 +75,8 @@ class UpdaterGithubTest < Minitest::Test
     assert result.ok, result.message
     assert_equal 1, ran.size
     argv, = ran.first
-    assert_equal [RbConfig.ruby, "-S", "gem", "install", "--local"], argv.first(5)
+    assert_equal [RbConfig.ruby, File.join(RbConfig::CONFIG["bindir"], "gem"), "install", "--local"], argv.first(4)
+    assert File.file?(argv[1]), "the gem command of the running Ruby exists"
     assert_match(%r{/soft_foundry-0\.17\.0\.gem\z}, argv.last)
   end
 
@@ -97,7 +98,7 @@ class UpdaterGithubTest < Minitest::Test
     result = u.install!("0.17.0")
     assert result.ok, result.message
     assert_equal ["tar", RbConfig.ruby, RbConfig.ruby], ran.map { |argv, _| argv.first }
-    assert_equal %w[-S gem build soft_foundry.gemspec], ran[1][0][1..]
+    assert_equal [File.join(RbConfig::CONFIG["bindir"], "gem"), "build", "soft_foundry.gemspec"], ran[1][0][1..]
     assert_match(%r{/soft_foundry-0\.17\.0\.gem\z}, ran[2][0].last)
   end
 
