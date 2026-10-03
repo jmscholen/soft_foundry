@@ -93,6 +93,22 @@ class UIAssetsTest < Minitest::Test
     assert_includes asset("app.js"), '"/api/processes"'
   end
 
+  # Every reference is a link, and each has a popup that says what it
+  # points at and where that lives; the popup is a tooltip that keyboard
+  # focus also opens and Escape closes.
+  def test_references_are_links_with_a_located_popup
+    page = asset("index.html")
+    script = asset("app.js")
+    assert_match(/<div id="tip" role="tooltip" hidden>/, page)
+    %w[gateLink phaseLink changeLink repoLink linkify located describeRef].each { |fn| assert_includes script, "function #{fn}(" }
+    assert_includes script, '"data-ref"'
+    assert_includes script, "aria-describedby"
+    assert_includes script, 'event.key === "Escape"'
+    assert_includes script, "focusin"
+    assert_includes script, "handoff.yml"
+    assert_includes script, "metadata.yml"
+  end
+
   def test_assets_ship_in_the_gem
     spec = Gem::Specification.load(File.expand_path("../soft_foundry.gemspec", __dir__))
     %w[index.html app.css app.js].each { |name| assert_includes spec.files, "lib/soft_foundry/ui/assets/#{name}" }

@@ -99,6 +99,8 @@ The page has two levels.
 
 **Running** lists every session and command across all of them, each linked to its repository and change, and flags a `phase run` that started, never finished, and has no process. `soft-foundry ps` prints the same in a terminal.
 
+Everything the page names is a link: a change, a phase, a repository, a commit. Hovering or focusing one shows what it points at (a gate's state, a phase's purpose, a change's status, a repository's sessions) and the file it lives in.
+
 The page follows the records as they change, about every five seconds while the tab is visible. It only shows: nothing can be run or edited from it. The server answers GET on fixed routes, binds 127.0.0.1 with no option to bind anything else, names a repository only by an id it issued and never by a path, refuses requests that name another host or come from another site, and treats everything in a record as text. A session's phase is what its change's record says, not a reading of the session.
 
 `soft-foundry check` lints the control plane itself. `soft-foundry ci` runs the lint plus every change record's gates, and `soft-foundry hooks install` wires it into a pre-commit hook. The GitHub Actions workflow runs the same two commands.

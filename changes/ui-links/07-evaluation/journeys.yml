@@ -1,0 +1,26 @@
+commit_sha: 3562625d953805f7ee47a9a0a3fc032d146ea22d
+journeys:
+  - id: EVAL-001
+    criteria: [REQ-LINK-001]
+    persona: maintainer in a browser, real machine
+    starting_state: the page open on this repository with four repositories and five sessions known
+    steps: ["Repositories", "the board", "a change", "the Workflow", "Running"]
+    assertions: ["every named change, phase, repository, and running thing is a link, as listed in the log; column headers link to the Workflow; flags link to what they flag"]
+    evidence: [evidence/browser-observations.log]
+    result: pass
+  - id: EVAL-002
+    criteria: [REQ-LINK-002, REQ-LINK-003]
+    persona: maintainer in a browser, real machine
+    starting_state: as EVAL-001
+    steps: ["hover a repository, a change, a gate, a phase, a commit, and a change in another repository"]
+    assertions: ["each popup names what it points at and ends with its path; a reference in another repository carries that repository's directory in front"]
+    evidence: [evidence/browser-observations.log]
+    result: pass
+  - id: EVAL-003
+    criteria: [REQ-LINK-004]
+    persona: keyboard user
+    starting_state: as EVAL-001
+    steps: ["focus a gate link", "press Escape", "navigate"]
+    assertions: ["the popup opens with aria-describedby set and role tooltip; Escape closes it; navigation closes it"]
+    evidence: [evidence/browser-observations.log]
+    result: pass

@@ -234,3 +234,18 @@ table.procs { min-width: 46rem; width: 100%; }
 .repo-card .plain li { padding: 0.4rem 0; }
 .repo-card .meta { margin-top: 0.75rem; }
 @media (max-width: 40rem) { .crumbs .tabs { margin-left: 0; width: 100%; } }
+
+/* A flag that goes somewhere looks like the others and underlines on focus or hover. */
+a.flag { text-decoration: none; }
+a.flag:hover, a.flag:focus-visible { text-decoration: underline; }
+.board thead th a { text-decoration: none; color: inherit; display: inline-block; }
+.board thead th a:hover .name, .board thead th a:focus-visible .name { text-decoration: underline; }
+
+/* The popup that says what a reference points at. */
+#tip { position: absolute; z-index: 3; max-width: 24rem; padding: 0.6rem 0.8rem; background: var(--ink); color: var(--ground); font-size: 0.875rem; line-height: 1.4; border-radius: 3px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); }
+#tip strong { display: block; font: 700 0.9375rem/1.3 var(--display); letter-spacing: 0.02em; }
+#tip .tip-line { display: block; margin-top: 0.2rem; overflow-wrap: anywhere; }
+#tip .mono { opacity: 0.8; }
+@media (prefers-color-scheme: dark) { #tip { background: var(--surface); color: var(--ink); border: 1px solid var(--line); } }
+#tip .tip-where { display: block; margin-top: 0.4rem; padding-top: 0.35rem; border-top: 1px solid rgba(128, 128, 128, 0.35); font-size: 0.8125rem; opacity: 0.85; }
+.ref { text-decoration: underline dotted; text-underline-offset: 0.18em; cursor: help; }

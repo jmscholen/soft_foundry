@@ -1,0 +1,17 @@
+commit_sha: 3562625d953805f7ee47a9a0a3fc032d146ea22d
+artifacts:
+- path: evidence/tests.log
+  produced_by: "bundle exec rake test with every provider key, SOFT_FOUNDRY_BILLING, and SOFT_FOUNDRY_GUARD unset; timings and seed removed"
+  sha256: 7cc0fa013eaf1b482ce77eb90f771ed3c45135c6b104a9f526ee9d25116f54c2
+- path: evidence/check.log
+  produced_by: "soft-foundry check"
+  sha256: 2be6498003ac7633f001dde7fb6c82d20d270c7515d869ca3f7276b8c1f3730e
+- path: evidence/syntax-warnings.log
+  produced_by: "ruby -wc on every lib/ Ruby file, exe/soft-foundry, and test/ui_assets_test.rb; node --check on app.js"
+  sha256: 2db9108d38991f4bc038772e41838d279315d87c888c87403b05c944b0f501e8
+- path: evidence/scan-against-self.log
+  produced_by: "soft-foundry scan over the control plane and every change record of this repository"
+  sha256: 566952d4c918222ada0e28fe257d5830c8a55473f18e804f75fe0012fb2ed1a6
+- path: evidence/references.log
+  produced_by: "counts over app.js of link makers and of plain anchors with repository addresses"
+  sha256: 00fefe4c2ac92a52a31607506ef4b4c938832d9d290a49157f4ba24a04a1efbf

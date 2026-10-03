@@ -1,0 +1,32 @@
+commit_sha: 3562625d953805f7ee47a9a0a3fc032d146ea22d
+checks:
+  - id: CHECK-001
+    kind: tests
+    command: "bundle exec rake test with ANTHROPIC_API_KEY, OPENAI_API_KEY, OPENROUTER_API_KEY, XAI_API_KEY, SOFT_FOUNDRY_BILLING, and SOFT_FOUNDRY_GUARD unset"
+    result: pass
+    evidence: evidence/tests.log
+    criteria: [REQ-LINK-001, REQ-LINK-002, REQ-LINK-003, REQ-LINK-004]
+  - id: CHECK-002
+    kind: lint
+    command: "soft-foundry check"
+    result: pass
+    evidence: evidence/check.log
+    criteria: [control-plane-consistency]
+  - id: CHECK-003
+    kind: static_analysis
+    command: "ruby -wc on every lib/ Ruby file, exe/soft-foundry, and test/ui_assets_test.rb; node --check on lib/soft_foundry/ui/assets/app.js"
+    result: pass
+    evidence: evidence/syntax-warnings.log
+    criteria: [coding-standard]
+  - id: CHECK-004
+    kind: security_scan
+    command: "soft-foundry scan over the control plane and every change record"
+    result: pass
+    evidence: evidence/scan-against-self.log
+    criteria: [record-text-is-text]
+  - id: CHECK-005
+    kind: custom
+    command: "grep over app.js for the four link makers and for plain anchors with repository addresses"
+    result: pass
+    evidence: evidence/references.log
+    criteria: [REQ-LINK-001]
