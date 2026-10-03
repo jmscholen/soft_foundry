@@ -1,4 +1,4 @@
-commit_sha: 5dfa6b4b4fc79552c0d6c188ab02b98998c01d7e
+commit_sha: 5f8560f45a9651addb8eab99401e95b6c543ba16
 checks:
   - id: CHECK-001
     kind: tests
@@ -14,6 +14,12 @@ checks:
     result: fail
     evidence: evidence/red-at-1da10bc.log
     criteria: [failing-test-first]
+  - id: CHECK-006
+    kind: custom
+    command: "test/ui_server_test.rb -n /crowd/ after the assertion was changed from a fixed 2 s to the read timeout"
+    result: pass
+    evidence: evidence/tests.log
+    criteria: [flaky-test-named]
   - id: CHECK-003
     kind: lint
     command: "soft-foundry check"

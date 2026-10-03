@@ -32,3 +32,4 @@ lib/soft_foundry/updater.rb: Syntax OK
 lib/soft_foundry/version.rb: Syntax OK
 exe/soft-foundry: Syntax OK
 test/updater_github_test.rb: Syntax OK
+test/ui_server_test.rb: Syntax OK

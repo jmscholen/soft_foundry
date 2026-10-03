@@ -14,3 +14,10 @@ instincts:
   domain: integration
   evidence:
   - path: changes/update-release-asset-name/07-evaluation/evidence/network-transcript.log
+- id: assert-the-bound-the-code-guarantees-not-a-stopwatch
+  trigger: when a test asserts that something happens within a number of seconds
+  action: make the bound the one the code guarantees (a timeout, a deadline), not a figure that depends on the machine being idle
+  confidence: 0.85
+  domain: testing
+  evidence:
+  - path: changes/update-release-asset-name/06-verification/results.md

@@ -24,6 +24,8 @@ Conforms; one manual crossover (REV-010).
 ## Blocking findings
 None.
 
+The flaky test that failed once in two earlier records is identified and fixed here (REV-011).
+
 ## Residual concerns
 - REV-010: the step from 0.17.0 to 0.17.1 is manual, once.
 - This change's record skips `judge` with rationale and its review was performed in the implementing session; the advisory says so.
