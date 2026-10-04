@@ -1,0 +1,5 @@
+commit_sha: 5f8560f45a9651addb8eab99401e95b6c543ba16
+artifacts:
+- path: evidence/network-transcript.log
+  journey: "EVAL-001..EVAL-004 against the real release v0.17.0"
+  sha256: 30e2be6ba409dcb8f6a99a59181ccfc193919038bd902fe97ae641c401ead4c9

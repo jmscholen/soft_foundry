@@ -1,0 +1,40 @@
+commit_sha: 5f8560f45a9651addb8eab99401e95b6c543ba16
+checks:
+  - id: CHECK-001
+    kind: tests
+    command: "bundle exec rake test with ANTHROPIC_API_KEY, OPENAI_API_KEY, OPENROUTER_API_KEY, XAI_API_KEY, SOFT_FOUNDRY_BILLING, SOFT_FOUNDRY_GUARD, and GITHUB_TOKEN unset"
+    result: pass
+    evidence: evidence/tests.log
+    criteria: [REQ-UPD-007, REQ-UPD-008]
+    red_commit: 1da10bc0450df3281d93cfb5db9fe10cabd28c91
+    test_path: test/updater_github_test.rb
+  - id: CHECK-002
+    kind: custom
+    command: "test/updater_github_test.rb run in a worktree checked out at 1da10bc, the RED commit"
+    result: fail
+    evidence: evidence/red-at-1da10bc.log
+    criteria: [failing-test-first]
+  - id: CHECK-006
+    kind: custom
+    command: "test/ui_server_test.rb -n /crowd/ after the assertion was changed from a fixed 2 s to the read timeout"
+    result: pass
+    evidence: evidence/tests.log
+    criteria: [flaky-test-named]
+  - id: CHECK-003
+    kind: lint
+    command: "soft-foundry check"
+    result: pass
+    evidence: evidence/check.log
+    criteria: [control-plane-consistency]
+  - id: CHECK-004
+    kind: static_analysis
+    command: "ruby -wc on every lib/ Ruby file, exe/soft-foundry, and the test file"
+    result: pass
+    evidence: evidence/syntax-warnings.log
+    criteria: [coding-standard]
+  - id: CHECK-005
+    kind: security_scan
+    command: "soft-foundry scan over the control plane and every change record"
+    result: pass
+    evidence: evidence/scan-against-self.log
+    criteria: [control-plane-consistency]

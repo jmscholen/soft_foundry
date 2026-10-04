@@ -1,0 +1,23 @@
+# Instincts from the update-release-asset-name change.
+instincts:
+- id: never-locate-the-running-rubys-tools-through-path
+  trigger: when a Ruby program runs gem, bundle, or ruby as a subprocess
+  action: use RbConfig.ruby and RbConfig::CONFIG["bindir"] paths, not ruby -S or a bare name, so a version manager's shim for another Ruby is never picked up
+  confidence: 0.85
+  domain: operations
+  evidence:
+  - path: changes/update-release-asset-name/07-evaluation/evidence/network-transcript.log
+- id: a-downloads-final-address-is-not-a-file-name
+  trigger: when saving a file fetched over HTTP through redirects
+  action: name it from what you asked for, not from where the bytes came from
+  confidence: 0.85
+  domain: integration
+  evidence:
+  - path: changes/update-release-asset-name/07-evaluation/evidence/network-transcript.log
+- id: assert-the-bound-the-code-guarantees-not-a-stopwatch
+  trigger: when a test asserts that something happens within a number of seconds
+  action: make the bound the one the code guarantees (a timeout, a deadline), not a figure that depends on the machine being idle
+  confidence: 0.85
+  domain: testing
+  evidence:
+  - path: changes/update-release-asset-name/06-verification/results.md

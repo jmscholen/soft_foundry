@@ -320,15 +320,18 @@ class UIServerTest < Minitest::Test
   # Found by ATTACK-005: enough silent connections used to fill every
   # slot, and real requests were answered 503 until the silent ones timed
   # out. The connection that has waited longest without sending a request
-  # now gives up its slot.
+  # now gives up its slot. What is asserted is that the requests are
+  # answered before the silent connections could have timed out (the read
+  # timeout), not a fixed number of seconds: under load the board alone
+  # took over two seconds, which is what made this test flaky.
   def test_silent_connections_cannot_crowd_out_a_request
-    with_server(read_timeout: 5) do |_dir, port, _server|
+    with_server(read_timeout: 8) do |_dir, port, _server|
       silent = Array.new(40) { TCPSocket.new("127.0.0.1", port) }
       sleep 0.2
       started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       assert_equal 200, get(port, "/").status
       assert_equal 200, get(port, "/api/changes").status
-      assert_operator Process.clock_gettime(Process::CLOCK_MONOTONIC) - started, :<, 2
+      assert_operator Process.clock_gettime(Process::CLOCK_MONOTONIC) - started, :<, 8
     ensure
       Array(silent).each(&:close)
     end

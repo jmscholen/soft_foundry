@@ -1,0 +1,20 @@
+phase: 15-learning
+skill: learning
+status: complete
+commit_sha: 5f8560f45a9651addb8eab99401e95b6c543ba16
+started_at: '2026-10-03T21:53:00Z'
+completed_at: '2026-10-03T22:33:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- findings.md
+- proposed-rules.md
+- proposed-evals.md
+- instincts.yml
+blocking: []
+findings: []
+next: done
+notes: Performed directly by the interactive session, not a fresh-context agent; see 00-intake/assumptions.md.
+executed_by:
