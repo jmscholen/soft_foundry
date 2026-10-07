@@ -1,6 +1,6 @@
 # Verification Results
 
-Commit SHA: 98b55d14586da5d7ce8485d1148cb9bec48907a1
+Commit SHA: 93acd899cc20cb4c25bc7ffe38d374925c2920fa
 
 ## Deterministic checks
 | Check | Result | Evidence |
@@ -11,7 +11,9 @@ Commit SHA: 98b55d14586da5d7ce8485d1148cb9bec48907a1
 | CHECK-004 ruby -wc and node --check | pass, no warnings | evidence/syntax-warnings.log |
 | CHECK-005 soft-foundry ci against this repository | pass | evidence/ci-against-self.log |
 | CHECK-006 soft-foundry scan | pass: 0 errors; 5 warnings, all in older records' quoted attacks | evidence/scan-against-self.log |
-| CHECK-007 hook timing, 5,000 entries, real process | pass: 0.193 to 0.198 s per prompt, exit 0 each run | evidence/timing.log |
+| CHECK-007 hook timing, 5,000 entries, real process | pass: 0.197 to 0.217 s per prompt, exit 0 each run | evidence/timing.log |
+| CHECK-008 remediation REM-001 test (grok argument order) | pass, inside CHECK-001 | evidence/tests.log |
+| CHECK-009 that test at the remediation RED commit 88eee99 | fail as intended: 7 runs, 1 failure | evidence/red-at-88eee99.log |
 
 Acceptance criteria and the tests that cover them (all in CHECK-001):
 - AC-001: GuardTest#test_grok_tool_names_get_the_same_decisions_as_claude_codes, #test_a_grok_payload_through_the_cli_is_refused_in_block_mode
@@ -34,4 +36,4 @@ Acceptance criteria and the tests that cover them (all in CHECK-001):
 None. CHECK-002's failures are the RED evidence, expected.
 
 ## Evidence
-Every log in evidence/ was produced at 98b55d14586da5d7ce8485d1148cb9bec48907a1 (CHECK-002 at the RED commit, by design); hashes in evidence/manifest.yml. Limits: AC-012's Codex branch is exercised with a stubbed launcher and a seeded ledger, not a live Codex turn (its login has expired on this machine).
+This is the second verification run; the first, at 98b55d1, was superseded by remediation REM-001. Every log in evidence/ was produced at 93acd899cc20cb4c25bc7ffe38d374925c2920fa (CHECK-002 and CHECK-009 at their RED commits, by design); hashes in evidence/manifest.yml. Limits: AC-012's Codex branch is exercised with a stubbed launcher and a seeded ledger, not a live Codex turn (its login has expired on this machine).

@@ -1,10 +1,10 @@
 ---
 phase: 07-evaluation
 skill: evaluation
-status: in_progress
-commit_sha: 98b55d14586da5d7ce8485d1148cb9bec48907a1
-started_at: '2026-10-07T22:01:30Z'
-completed_at: '2026-10-07T22:23:47Z'
+status: complete
+commit_sha: 93acd899cc20cb4c25bc7ffe38d374925c2920fa
+started_at: '2026-10-07T22:48:00Z'
+completed_at: '2026-10-07T22:57:00Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -16,9 +16,6 @@ outputs:
 - evidence/manifest.yml
 blocking: []
 findings:
-- id: EVAL-OBS-001
-  severity: minor
-  summary: Resume command runs on inline after the prompt text on the change page.
 - id: EVAL-OBS-002
   severity: minor
   summary: Grok payloads carry no transcript path, so Grok status checks only the
@@ -31,8 +28,7 @@ findings:
   summary: Codex capture and the runner Codex lookup were not exercised live (login
     expired).
 next: attack
-notes: Performed by the interactive session that implemented the change. Live Claude
-  Code and Grok; Codex blocked by its expired login (EVAL-006). Reopened 2026-10-07
-  by remediation REM-001 (grok argument order); evidence to be regenerated at the
-  remediated commit.
+notes: Performed by the interactive session that implemented the change. Second run
+  after REM-001, with EVAL-008 added. Live Claude Code and Grok; Codex blocked by
+  its expired login (EVAL-006).
 executed_by:

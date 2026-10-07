@@ -1,10 +1,10 @@
 ---
 phase: 06-verification
 skill: verification
-status: in_progress
-commit_sha: 98b55d14586da5d7ce8485d1148cb9bec48907a1
-started_at: '2026-10-07T21:54:40Z'
-completed_at: '2026-10-07T22:01:11Z'
+status: complete
+commit_sha: 93acd899cc20cb4c25bc7ffe38d374925c2920fa
+started_at: '2026-10-07T22:42:00Z'
+completed_at: '2026-10-07T22:47:00Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -16,8 +16,7 @@ outputs:
 blocking: []
 findings: []
 next: evaluate
-notes: Performed by the interactive session that also implemented the change (not
-  a fresh-context agent). Deterministic checks only; nothing was repaired. Reopened
-  2026-10-07 by remediation REM-001 (grok argument order); evidence to be regenerated
-  at the remediated commit.
+notes: Performed by the interactive session that also implemented the change. Rerun
+  at the remediated commit after REM-001 (the first run, at 98b55d1, is superseded).
+  Deterministic checks only; nothing was repaired.
 executed_by:

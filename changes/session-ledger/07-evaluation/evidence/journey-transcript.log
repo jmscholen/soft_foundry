@@ -1,7 +1,7 @@
 # session-ledger evaluation transcript
-# soft-foundry commit: 1644e2738c725a2581944ba2f06f9cf3de69a8c7
+# soft-foundry commit: 93acd899cc20cb4c25bc7ffe38d374925c2920fa
 # claude: 2.1.293 (Claude Code); grok: grok 1.0.30 (04b7ffed98c6) [stable]; codex: codex-cli 0.139.0
-# scratch: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY (home for installs: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/home; ledger: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/state/sessions.jsonl)
+# scratch: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2 (home for installs: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/home; ledger: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/state/sessions.jsonl)
 
 ### EVAL-001 install, reinstall, doctor, uninstall at user level (temporary HOME)
 $ soft-foundry hooks install --sessions
@@ -11,7 +11,7 @@ installed session hook in ~/.grok/hooks/soft-foundry-sessions.json (UserPromptSu
 installed find-session skill in ~/.claude/skills/find-session/SKILL.md
 installed find-session skill in ~/.agents/skills/find-session/SKILL.md
 codex runs a user hook only after you review and trust it: open codex and run /hooks
-ledger: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/state/sessions.jsonl (each session is recorded from its next prompt; `soft-foundry sessions` to look one up)
+ledger: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/state/sessions.jsonl (each session is recorded from its next prompt; `soft-foundry sessions` to look one up)
 [exit 0]
 $ soft-foundry hooks install --sessions
 installed session hook in ~/.claude/settings.json (UserPromptSubmit, claude)
@@ -20,7 +20,7 @@ installed session hook in ~/.grok/hooks/soft-foundry-sessions.json (UserPromptSu
 installed find-session skill in ~/.claude/skills/find-session/SKILL.md
 installed find-session skill in ~/.agents/skills/find-session/SKILL.md
 codex runs a user hook only after you review and trust it: open codex and run /hooks
-ledger: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/state/sessions.jsonl (each session is recorded from its next prompt; `soft-foundry sessions` to look one up)
+ledger: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/state/sessions.jsonl (each session is recorded from its next prompt; `soft-foundry sessions` to look one up)
 [exit 0]
 --- ~/.claude/settings.json after two installs:
 {
@@ -64,25 +64,25 @@ ledger: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-89
   }
 }
 --- skills:
-/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/home/.agents/skills/find-session:
+/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/home/.agents/skills/find-session:
 total 8
-drwxr-xr-x@ 3 jscholen-iou  wheel    96 Oct  7 18:12 .
-drwxr-xr-x@ 3 jscholen-iou  wheel    96 Oct  7 18:12 ..
--rw-r--r--@ 1 jscholen-iou  wheel  1581 Oct  7 18:12 SKILL.md
+drwxr-xr-x@ 3 jscholen-iou  wheel    96 Oct  7 18:35 .
+drwxr-xr-x@ 3 jscholen-iou  wheel    96 Oct  7 18:35 ..
+-rw-r--r--@ 1 jscholen-iou  wheel  1581 Oct  7 18:35 SKILL.md
 
-/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/home/.claude/skills/find-session:
+/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/home/.claude/skills/find-session:
 total 8
-drwxr-xr-x@ 3 jscholen-iou  wheel    96 Oct  7 18:12 .
-drwxr-xr-x@ 3 jscholen-iou  wheel    96 Oct  7 18:12 ..
--rw-r--r--@ 1 jscholen-iou  wheel  1581 Oct  7 18:12 SKILL.md
-✓ pass session hook (installed for claude, codex, grok; ledger: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/state/sessions.jsonl)
+drwxr-xr-x@ 3 jscholen-iou  wheel    96 Oct  7 18:35 .
+drwxr-xr-x@ 3 jscholen-iou  wheel    96 Oct  7 18:35 ..
+-rw-r--r--@ 1 jscholen-iou  wheel  1581 Oct  7 18:35 SKILL.md
+✓ pass session hook (installed for claude, codex, grok; ledger: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/state/sessions.jsonl)
 $ soft-foundry hooks uninstall --sessions
 removed session hook from ~/.claude/settings.json
 removed session hook from ~/.codex/hooks.json
 removed session hook from ~/.grok/hooks/soft-foundry-sessions.json
 removed find-session skill from ~/.claude/skills/find-session/SKILL.md
 removed find-session skill from ~/.agents/skills/find-session/SKILL.md
-ledger kept: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/state/sessions.jsonl (delete it yourself to forget recorded sessions)
+ledger kept: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/state/sessions.jsonl (delete it yourself to forget recorded sessions)
 [exit 0]
 --- ~/.claude/settings.json after uninstall:
 {
@@ -103,88 +103,89 @@ ledger kept: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77
 ! warn session hook (not installed; optional: `soft-foundry hooks install --sessions` records every coding session so it can be found and resumed)
 
 ### Scratch repository on change/demo with this repository's control plane
-repo: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/repo, branch change/demo
+repo: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/repo, branch change/demo
 
 ### EVAL-002 a live Claude Code session is recorded, updated in place, found, and resumed
-claude session_id: d1802009-e3c9-450e-a5bc-9096fc01cd1a
+claude session_id: a870073a-cb47-41e0-a553-45ace498c68e
 --- ledger rows for it:
 1
-{"agent":"claude","session_id":"d1802009-e3c9-450e-a5bc-9096fc01cd1a","first_at":"2026-10-07T22:12:51Z","first_prompt":"Reply with only the word ok. Marker: evalclaude1791411169","cwd":"/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/repo","repo":"/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/repo","branch":"change/demo","change":"demo","phase":"specify","last_at":"2026-10-07T22:12:51Z","latest_prompt":"Reply with only the word ok. Marker: evalclaude1791411169","transcript":"/Users/jscholen-iou/.claude/projects/-private-tmp-claude-501--Users-jscholen-iou-dev-soft-foundry-21cb77dc-894b-4e11-b3e3-663360363d3b-scratchpad-evalrun-UiUY-repo/d1802009-e3c9-450e-a5bc-9096fc01cd1a.jsonl"}
+{"agent":"claude","session_id":"a870073a-cb47-41e0-a553-45ace498c68e","first_at":"2026-10-07T22:35:15Z","first_prompt":"Reply with only the word ok. Marker: evalclaude1791412513","cwd":"/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/repo","repo":"/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/repo","branch":"change/demo","change":"demo","phase":"specify","last_at":"2026-10-07T22:35:15Z","latest_prompt":"Reply with only the word ok. Marker: evalclaude1791412513","transcript":"/Users/jscholen-iou/.claude/projects/-private-tmp-claude-501--Users-jscholen-iou-dev-soft-foundry-21cb77dc-894b-4e11-b3e3-663360363d3b-scratchpad-evalrun-mku2-repo/a870073a-cb47-41e0-a553-45ace498c68e.jsonl"}
 --- after a second prompt (rows, latest):
 1
-first: Reply with only the word ok. Marker: evalclaude1791411169 | latest: Reply with only the word ok. second-prompt | change demo phase specify
-$ soft-foundry sessions evalclaude1791411169
-sessions: 1 recorded session matches (ledger: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/state/sessions.jsonl)
-session: 2026-10-07 22:12 UTC claude resumable
-  where: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/repo (branch change/demo, change demo, phase specify)
-  first: Reply with only the word ok. Marker: evalclaude1791411169
+first: Reply with only the word ok. Marker: evalclaude1791412513 | latest: Reply with only the word ok. second-prompt | change demo phase specify
+$ soft-foundry sessions evalclaude1791412513
+sessions: 1 recorded session matches (ledger: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/state/sessions.jsonl)
+session: 2026-10-07 22:35 UTC claude resumable
+  where: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/repo (branch change/demo, change demo, phase specify)
+  first: Reply with only the word ok. Marker: evalclaude1791412513
   latest: Reply with only the word ok. second-prompt
-  resume: cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/repo && claude --resume d1802009-e3c9-450e-a5bc-9096fc01cd1a
+  resume: cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/repo && claude --resume a870073a-cb47-41e0-a553-45ace498c68e
 [exit 0]
-resume command: cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/repo && claude --resume d1802009-e3c9-450e-a5bc-9096fc01cd1a
+resume command: cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/repo && claude --resume a870073a-cb47-41e0-a553-45ace498c68e
 --- running the printed command with a question appended:
-evalclaude1791411169
+evalclaude1791412513
 
 ### EVAL-003 a live Grok session (hooks from both .claude/settings.json and .grok/hooks) is one row, agent grok, and resumes
 [grok exit 0]
---- ledger rows for 71717a8e-110b-406a-b624-35a011c59027:
+--- ledger rows for f9ca0426-73d4-4a93-a5d0-91799b870298:
 1
-agent grok | first: Reply with only the word ok. Marker: evalgrok1791411182 | change demo | transcript nil
-$ soft-foundry sessions evalgrok1791411182
-sessions: 1 recorded session matches (ledger: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/state/sessions.jsonl)
-session: 2026-10-07 22:13 UTC grok resumable
-  where: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/repo (branch change/demo, change demo, phase specify)
-  first: Reply with only the word ok. Marker: evalgrok1791411182
-  resume: cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/repo && grok --resume 71717a8e-110b-406a-b624-35a011c59027
+agent grok | first: Reply with only the word ok. Marker: evalgrok1791412526 | change demo | transcript nil
+$ soft-foundry sessions evalgrok1791412526
+sessions: 1 recorded session matches (ledger: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/state/sessions.jsonl)
+session: 2026-10-07 22:35 UTC grok resumable
+  where: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/repo (branch change/demo, change demo, phase specify)
+  first: Reply with only the word ok. Marker: evalgrok1791412526
+  resume: cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/repo && grok --resume f9ca0426-73d4-4a93-a5d0-91799b870298
 [exit 0]
-resume command: cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/repo && grok --resume 71717a8e-110b-406a-b624-35a011c59027
+resume command: cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/repo && grok --resume f9ca0426-73d4-4a93-a5d0-91799b870298
 --- running the printed command headless with a question appended:
-evalgrok1791411182
+evalgrok1791412526
 
 ### EVAL-004 the find-session skill, across agents
 --- Claude Code asked to find the Grok session:
+- **Latest prompt:** "What was the marker in my first message? Reply with only the marker."
+
 **Resume command:**
 ```
-cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/repo && grok --resume 71717a8e-110b-406a-b624-35a011c59027
+cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/repo && grok --resume f9ca0426-73d4-4a93-a5d0-91799b870298
 ```
 
-The search also matched a Claude session (`0d781a1c-…`). I left it out because the only place the marker shows up there is your request asking me to find it.
-
-I didn't run the resume command.
+The search also matched a Claude session (`ba87f071-…`), but I left it out. Its only match is your current request to find the marker, so the marker wasn't actually used there.
 --- Grok asked to find the Claude session:
-I'll use the find-session skill to locate the session that used the marker `evalclaude1791411169` and return its exact resume command.The skill says to search with `soft-foundry sessions` and ignore this lookup itself. I'll search for that marker now.`soft-foundry sessions` isn't in this install, so I'll search the agent session stores the skill names next.The marker is in a Claude transcript, not this lookup. I'll pull that session's metadata and the resume command format the skill expects.A second transcript also mentions the marker. I'll check whether that's real earlier work or just this lookup echoing it.The marker was used in a Claude session, and the session-ledger work is in the Soft Foundry repo. I'll read how that code prints the resume command.The installed `soft-foundry` is older than the session-ledger code. I'll run that checkout's `sessions` command so the resume line is the one it prints.The session that used the marker `evalclaude1791411169` is a resumable Claude session from 2026-10-07 22:12 UTC, in this repo on branch `change/demo` (change `demo`, phase `specify`).
+I'll use the find-session skill to locate the session that used `evalclaude1791412513` and return its exact resume command.`soft-foundry sessions` isn't available in this version, so I'll search the agent session stores for that marker.The Grok hit is this lookup itself, so I'll inspect the Claude transcripts and how resume commands are formed.The marker is in a Claude transcript, not this lookup. I'll check the session ledger and whether a local `soft-foundry sessions` can print the resume line.The installed 0.17.0 binary has no `sessions` command. The eval copy is 0.18.0, so I'll run that.The session that used `evalclaude1791412513` is a resumable Claude Code session from 2026-10-07 22:35 UTC. It was on branch `change/demo`, change `demo`, phase `specify`, in `/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/repo`. The first prompt was "Reply with only the word ok. Marker: evalclaude1791412513".
 
 ```
-cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/repo && claude --resume d1802009-e3c9-450e-a5bc-9096fc01cd1a
+cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/repo && claude --resume a870073a-cb47-41e0-a553-45ace498c68e
 ```
 
-Its first prompt was `Reply with only the word ok. Marker: evalclaude1791411169`. A newer Grok row matches only because it is this lookup, so it is not the session.
+This lookup itself also matched and was ignored.
+
 ### EVAL-005 the recorded sessions reach the change's UI data
-ui: http://127.0.0.1:55608 (token withheld)
-grok resumable phase=specify resume=cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/repo && grok --resume 01a1186d-a566-7f93-98ca-669692bef712
-claude resumable phase=specify resume=cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/repo && claude --resume 0d781a1c-c0f8-4fa9-9d27-b3c3098236e5
-grok resumable phase=specify resume=cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/repo && grok --resume 71717a8e-110b-406a-b624-35a011c59027
-claude resumable phase=specify resume=cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/repo && claude --resume d1802009-e3c9-450e-a5bc-9096fc01cd1a
+ui: http://127.0.0.1:56617 (token withheld)
+grok resumable phase=specify resume=cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/repo && grok --resume 01a11882-74dc-7982-aae1-3dad2245004d
+claude resumable phase=specify resume=cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/repo && claude --resume ba87f071-283e-4f7b-864a-19995f5e416c
+grok resumable phase=specify resume=cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/repo && grok --resume f9ca0426-73d4-4a93-a5d0-91799b870298
+claude resumable phase=specify resume=cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/repo && claude --resume a870073a-cb47-41e0-a553-45ace498c68e
 
 ### EVAL-006 Codex
 ERROR: Your access token could not be refreshed. Please log out and sign in again.
-2026-10-07T22:18:28.637766Z ERROR codex_login::auth::manager: Failed to refresh token: Your access token could not be refreshed. Please log out and sign in again.
+2026-10-07T22:37:28.431352Z ERROR codex_login::auth::manager: Failed to refresh token: Your access token could not be refreshed. Please log out and sign in again.
 ERROR: Your access token could not be refreshed. Please log out and sign in again.
 
 ### EVAL-007 accessibility of the command output
 --- sessions output with every non-ASCII byte deleted and NO_COLOR set:
-sessions: 4 recorded sessions match (ledger: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/state/sessions.jsonl)
-session: 2026-10-07 22:13 UTC grok resumable
-  where: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/repo (branch change/demo, change demo, phase specify)
-  first: Use the find-session skill. Find the agent session where the marker evalclaude1791411169 was used, and give me its exact resume command.
-  resume: cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/repo && grok --resume 01a1186d-a566-7f93-98ca-669692bef712
-session: 2026-10-07 22:13 UTC claude resumable
-  where: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/repo (branch change/demo, change demo, phase specify)
-  first: Use the find-session skill. Find the agent session where the marker evalgrok1791411182 was used, and give me its exact resume command.
-  resume: cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/repo && claude --resume 0d781a1c-c0f8-4fa9-9d27-b3c3098236e5
-session: 2026-10-07 22:13 UTC grok resumable
-  where: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY/repo (branch change/demo, change demo, phase specify)
-  first: Reply with only the word ok. Marker: evalgrok1791411182
+sessions: 4 recorded sessions match (ledger: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/state/sessions.jsonl)
+session: 2026-10-07 22:36 UTC grok resumable
+  where: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/repo (branch change/demo, change demo, phase specify)
+  first: Use the find-session skill. Find the agent session where the marker evalclaude1791412513 was used, and give me its exact resume command.
+  resume: cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/repo && grok --resume 01a11882-74dc-7982-aae1-3dad2245004d
+session: 2026-10-07 22:35 UTC claude resumable
+  where: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/repo (branch change/demo, change demo, phase specify)
+  first: Use the find-session skill. Find the agent session where the marker evalgrok1791412526 was used, and give me its exact resume command.
+  resume: cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/repo && claude --resume ba87f071-283e-4f7b-864a-19995f5e416c
+session: 2026-10-07 22:35 UTC grok resumable
+  where: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/repo (branch change/demo, change demo, phase specify)
+  first: Reply with only the word ok. Marker: evalgrok1791412526
 --- escape sequences in sessions output (count):
 0
 --- resume with nothing recorded:
@@ -192,4 +193,17 @@ $ soft-foundry resume nothing-here
 resume: no recorded session for change nothing-here; list what is recorded with `soft-foundry sessions --change nothing-here`
 [exit 1]
 
-# end of transcript; scratch kept at /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.UiUY
+### EVAL-008 phase run launches Grok with the runner's own arguments and records the session it started
+would run intake of demo with: grok -s 5d178315-c466-43e2-89d1-d27071cd179b --always-approve -p <prompt>
+[phase run exit 0]
+running intake of demo in a fresh grok session (intake skill); executed_by recorded in changes/demo/00-intake/handoff.yml
+I'll run the intake phase for the demo change. First I'm reading the project instructions and only this phase's skill contract.The skill contract is loaded. Next I’ll read the intake templates, the change record, and the schemas that define a complete handoff.The change record only has the title “demo” — no outcome, task type, or risk. Intake will record that and block, rather than invent a change.Intake for `demo` is **blocked**. The handoff is in `changes/demo/00-intake/handoff.yml`.
+grok exited 0
+00-intake  blocked  PASS
+executed_by.session_id: 8b8d6eae-30fd-49cb-904d-8d61ded3998b; cwd: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/repo
+ledger rows with that ID: 1
+$ soft-foundry resume demo intake
+cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2/repo && grok --resume 8b8d6eae-30fd-49cb-904d-8d61ded3998b
+[exit 0]
+
+# end of transcript; scratch kept at /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/evalrun.mku2

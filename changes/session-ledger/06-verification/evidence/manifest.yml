@@ -1,24 +1,27 @@
 ---
-commit_sha: 98b55d14586da5d7ce8485d1148cb9bec48907a1
+commit_sha: 93acd899cc20cb4c25bc7ffe38d374925c2920fa
 artifacts:
 - path: evidence/tests.log
   produced_by: full suite, provider keys unset
-  sha256: 7b4fcf4baa0d9a46f0d77ad9231789cc1de4683eb72f7e97220eb65481fd92ec
+  sha256: 468c0eb4828f793ae2d7878d94647eda9240f3a54cdc2bcd2c535363f7d30213
 - path: evidence/red-at-d278ecf.log
   produced_by: new and changed tests at the RED commit d278ecf
-  sha256: 301fabb4bb8d435ae685a921d5d5baeaaf233b1583a24f4d0281c6be8ac5360a
+  sha256: f20649bf33b753ec36f42c659e05a5a7f2df720dac77d83a4929bef07a59183f
+- path: evidence/red-at-88eee99.log
+  produced_by: cross_cli_hooks_test at the remediation RED commit 88eee99
+  sha256: 539b2800cd3f8dbbaf2b11cbf370b73eee340729450746c2960819c232807cbc
 - path: evidence/check.log
   produced_by: soft-foundry check
-  sha256: 012f374e13ec99a0bb0f4d95a123903f9c9c6466aabd4cd05791d57d149b029c
+  sha256: d96e206fc6dc104d664066ec0784bd553eca420bf163801336dd5b8fd91ed2f1
 - path: evidence/syntax-warnings.log
   produced_by: ruby -wc and node --check
-  sha256: 47cfdae980f58fe26765a2a6225c7b296667df8c60a8beddc1b9fa68f3bb73f7
+  sha256: 9896ed41acc78f12af4c27e7b0996138b4737a70c5d1004ba856657616d9444f
 - path: evidence/ci-against-self.log
   produced_by: soft-foundry ci against this repository
-  sha256: fa736ab8b283d3d4e93af7f845fb42eaf356777857a26c67334e0ae994d97919
+  sha256: '0288ea5cb70244b6ebb1be84cc160636c4beb7d47d2bb10b0a4708b39ebc945a'
 - path: evidence/scan-against-self.log
   produced_by: soft-foundry scan
-  sha256: 6013d3b0883fc66f939f6ea1c3c643a64583cf2c612a8efc6afc10e1cb7ddb5d
+  sha256: 7e81ae1597024ae28d26a98ce8a1aafc18b613c06a5537f0d26f494dd7ea1983
 - path: evidence/timing.log
   produced_by: session log timing, 5,000-entry ledger
-  sha256: b8b7ac5c3d5008368c061145778de75016dc475743ee0e55c1a478bec8479936
+  sha256: 50159de70d31748ae2f7d205b8aab4724faa15cb87d89c6d13c372262f6fd32c

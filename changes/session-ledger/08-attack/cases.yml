@@ -1,4 +1,4 @@
-commit_sha: 98b55d14586da5d7ce8485d1148cb9bec48907a1
+commit_sha: 93acd899cc20cb4c25bc7ffe38d374925c2920fa
 authorization_envelope:
   target: soft-foundry session log, sessions, resume, hooks install --sessions, guard (this checkout)
   environment: local
@@ -51,7 +51,7 @@ cases:
     starting_privilege: a huge prompt, a corrupted ledger, or a hostile repository
     steps: [each input through session log, then a normal prompt, then sessions]
     expected_safe_behavior: exit 0 silently and quickly; existing rows and the corrupt line kept; the alias bomb is not expanded
-    observed: all exit 0 with no output; the 8 MB payload took 0.16 s and was not recorded (FIND-ATK-001); earlier rows kept 3 of 3 and the garbage line kept; sessions exit 0; the alias bomb took 0.35 s and recorded change x with phase nil
+    observed: all exit 0 with no output; the 8 MB payload took 0.17 s and was not recorded (FIND-ATK-001); earlier rows kept 3 of 3 and the garbage line kept; sessions exit 0; the alias bomb took 0.39 s and recorded change x with phase nil
     result: denied
     evidence: [evidence/attack-transcript.log]
   - id: ATTACK-006

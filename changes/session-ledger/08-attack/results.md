@@ -1,6 +1,6 @@
 # Attack Results
 
-Commit SHA: 98b55d14586da5d7ce8485d1148cb9bec48907a1 (the transcript header shows the record commit 1644e27 checked out; it changes no APP, TESTS, or INFRA file after 98b55d14586da5d7ce8485d1148cb9bec48907a1)
+Commit SHA: 93acd899cc20cb4c25bc7ffe38d374925c2920fa (second run, after remediation REM-001; the first, at 98b55d1, is superseded and had the same outcomes)
 
 ## Authorization envelope
 Local CLI processes in a throwaway directory with synthetic data and a temporary HOME; no network; no real agent configuration touched; destructive actions prohibited. See `cases.yml`.

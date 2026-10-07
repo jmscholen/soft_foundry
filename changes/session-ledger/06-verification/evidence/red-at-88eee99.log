@@ -1,0 +1,4 @@
+# worktree at RED commit 88eee991da4e78a0152ba26dceaac7d0394c9be4, code as it was before its GREEN commit
+  1) Failure:
+CrossCliHooksTest#test_grok_runs_headless_with_a_chosen_session_id_and_the_claude_guard_hook [test/cross_cli_hooks_test.rb:162]:
+7 runs, 53 assertions, 1 failures, 0 errors, 0 skips
