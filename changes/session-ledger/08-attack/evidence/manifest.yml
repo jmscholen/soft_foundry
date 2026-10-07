@@ -1,5 +1,7 @@
-commit_sha: TBD
+---
+commit_sha: 98b55d14586da5d7ce8485d1148cb9bec48907a1
 artifacts:
-  - path: TBD
-    case: ATTACK-001
-    sha256: TBD
+- path: evidence/attack-transcript.log
+  produced_by: 'attack script: eight cases against the real CLI in a throwaway directory;
+    key values printed by name only'
+  sha256: 63203d12903adc9057b54a2cf40e60299a69cbf7a299dfeded2543976655da1a

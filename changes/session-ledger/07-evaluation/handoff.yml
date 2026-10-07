@@ -1,21 +1,36 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 07-evaluation
 skill: evaluation
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 98b55d14586da5d7ce8485d1148cb9bec48907a1
+started_at: '2026-10-07T22:01:30Z'
+completed_at: '2026-10-07T22:23:47Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+- evaluation-plan.md
+- journeys.yml
+- results.md
+- evidence/manifest.yml
+blocking: []
+findings:
+- id: EVAL-OBS-001
+  severity: minor
+  summary: Resume command runs on inline after the prompt text on the change page.
+- id: EVAL-OBS-002
+  severity: minor
+  summary: Grok payloads carry no transcript path, so Grok status checks only the
+    folder.
+- id: EVAL-OBS-003
+  severity: minor
+  summary: List item accessible name is fragmentary in the browser accessibility tree.
+- id: EVAL-006
+  severity: major
+  summary: Codex capture and the runner Codex lookup were not exercised live (login
+    expired).
 next: attack
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: Performed by the interactive session that implemented the change. Live Claude
+  Code and Grok; Codex blocked by its expired login (EVAL-006).
+executed_by:

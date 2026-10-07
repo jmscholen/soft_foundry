@@ -1,12 +1,58 @@
-commit_sha: TBD
+commit_sha: 98b55d14586da5d7ce8485d1148cb9bec48907a1
 journeys:
   - id: EVAL-001
-    criteria: [AC-001]
-    persona: TBD
-    starting_state: TBD
-    steps:
-      - TBD
-    assertions:
-      - TBD
-    evidence: [evidence/TBD]
-    result: TBD   # pass | fail | blocked
+    criteria: [AC-011]
+    persona: the maintainer
+    starting_state: a home directory whose Claude settings already hold a theme and a hook of their own
+    steps: [hooks install --sessions twice, inspect the three agent files and both skill files, doctor, hooks uninstall --sessions, doctor]
+    assertions: [one Soft Foundry entry per file after two installs, the person's theme and hook untouched, skills present, doctor says installed then not installed, uninstall leaves only the person's own entries]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-002
+    criteria: [AC-002, AC-003, AC-008, AC-009, AC-010]
+    persona: the maintainer
+    starting_state: the session hook installed; a repository on branch change/demo at phase specify
+    steps: [a live claude -p prompt with a unique marker, a second prompt resuming it, sessions <marker>, resume demo --agent claude, run the printed command with a question appended]
+    assertions: [exactly one ledger row for the session, latest prompt updated, change demo and phase specify recorded, the printed command resumes the same conversation and it remembers the marker]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-003
+    criteria: [AC-007, AC-008, AC-009]
+    persona: the maintainer
+    starting_state: as EVAL-002, with both the Claude settings entry and Grok's own hook file present
+    steps: [a live grok -p prompt with a unique marker and a chosen session ID, sessions <marker>, resume demo --agent grok, run the printed command with a question appended]
+    assertions: [one row, agent grok, despite two hooks firing; the printed command resumes the conversation]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-004
+    criteria: [AC-008]
+    persona: a coding agent
+    starting_state: the find-session skill available to both agents
+    steps: [ask Claude Code in plain English for the Grok session, ask Grok for the Claude Code session]
+    assertions: [each returns the other agent's session with its resume command, not the lookup request itself]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-005
+    criteria: [AC-013]
+    persona: the maintainer
+    starting_state: the ledger from EVAL-002 and EVAL-003
+    steps: [soft-foundry ui, read the change's data with the token, open the change page in a browser]
+    assertions: [both sessions with resume commands in the data; a "Recorded sessions" heading and list on the page, status in text]
+    evidence: [evidence/journey-transcript.log]
+    result: pass
+  - id: EVAL-006
+    criteria: [AC-012]
+    persona: the maintainer
+    starting_state: Codex 0.139.0 installed
+    steps: [codex exec a one-word prompt]
+    assertions: [a Codex session reaches the hook]
+    evidence: [evidence/journey-transcript.log]
+    result: blocked
+  - id: EVAL-007
+    criteria: [AC-008, AC-009]
+    persona: the maintainer using a screen reader or a plain terminal
+    starting_state: the ledger from EVAL-002 and EVAL-003
+    steps: [sessions with NO_COLOR and non-ASCII deleted, count escape sequences, resume a change with nothing recorded]
+    assertions: [meaning survives stripping, no escape sequences, the failure says what to do next]
+    evidence: [evidence/journey-transcript.log]
+    result: pass

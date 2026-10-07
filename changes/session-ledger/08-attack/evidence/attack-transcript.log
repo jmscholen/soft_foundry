@@ -1,0 +1,83 @@
+# session-ledger attack transcript
+# soft-foundry commit: 1644e2738c725a2581944ba2f06f9cf3de69a8c7; scratch: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/attackrun.AVPG
+
+### ATTACK-001 shell injection through a printed resume command
+[session log exit 0, stdout+stderr bytes: 0]
+[session log exit 0, stdout+stderr bytes: 0]
+[session log exit 0, stdout+stderr bytes: 0]
+[session log exit 0, stdout+stderr bytes: 0]
+[session log exit 0, stdout+stderr bytes: 0]
+[session log exit 0, stdout+stderr bytes: 0]
+rows recorded: 1 (expect 1: only the folder case)
+printed: cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/attackrun.AVPG/it\'s\ \$\(touch\ /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/attackrun.AVPG/PWNED\)\ \`touch\ /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/attackrun.AVPG/PWNED2\`\ \;\ touch\ /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/attackrun.AVPG/PWNED3 && claude --resume evil-folder-1
+/private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/attackrun.AVPG/it's $(touch /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/attackrun.AVPG/PWNED) `touch /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/attackrun.AVPG/PWNED2` ; touch /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/attackrun.AVPG/PWNED3
+[cd exit 0]
+files named PWNED created: 0
+
+### ATTACK-002 terminal control sequences in prompt and folder
+[session log exit 0, stdout+stderr bytes: 0]
+escape bytes in the ledger: 0
+escape or bell bytes in sessions output: 0
+sessions: 1 recorded session matches (ledger: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/attackrun.AVPG/state/sessions.jsonl)
+session: 2026-10-07 22:24 UTC claude folder missing
+  where: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/attackrun.AVPG/esc[31mred
+  first: clear [2J[H title ]0;pwned bell  del  c1  end
+
+### ATTACK-003 secrets in a prompt
+[session log exit 0, stdout+stderr bytes: 0]
+in ledger? AWS access key id: 0
+in ledger? OpenAI-style key: 0
+in ledger? GitHub token: 0
+in ledger? private key header: 0
+in ledger? Slack token: 0
+in ledger? Google API key: 0
+stored: keys: [masked] [masked] [masked] [masked] [masked] [masked]
+modes: dir 700 file 600
+
+### ATTACK-004 symlinks at the ledger, its lock, its directory, and a settings file
+[session log exit 0, stdout+stderr bytes: 0]
+target now: original
+[session log exit 0, stdout+stderr bytes: 0]
+target now: original; ledger exists: no
+[session log exit 0, stdout+stderr bytes: 0]
+files in the real directory: 0
+[session log exit 0, stdout+stderr bytes: 0]
+modes after a write: dir 700 file 600
+soft-foundry: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/attackrun.AVPG/h/.claude/settings.json is a symlink; refusing to write through it
+[install exit 1]; real.json now: {}
+
+### ATTACK-005 oversized, nested, and corrupt input
+[8 MB payload exit 0]
+took 0.16 s; recorded: false
+[deeply nested exit 0]
+[binary garbage exit 0]
+[session log exit 0, stdout+stderr bytes: 0]
+earlier rows kept: 3 of 3 present: 3; garbage kept: 1
+[sessions over a corrupt ledger exit 0]
+[session log exit 0, stdout+stderr bytes: 0]
+took 0.35 s
+recorded change="x" phase=nil
+
+### ATTACK-006 Grok tool calls against the guard (block mode)
+✗ fail guard: write .ai/rules/x.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+[guard exit 2] write into the control plane
+✗ fail guard: search_replace .ai/policies/enforcement.yml is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+[guard exit 2] search_replace on the enforcement policy
+✗ fail guard: read_file .ai/harness-evals/secret.yml is in implementation's deny_read set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+[guard exit 2] read_file of harness evals
+✗ fail guard: run_terminal_command .ai/harness-evals/secret.yml names a path implementation is denied (Bash is checked against deny sets only); the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+[guard exit 2] shell read of harness evals
+✗ fail guard: write /etc/hosts outside the repository; no skill may write there; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+[guard exit 2] write outside the repository
+[guard exit 0] allowed write (control)
+[guard exit 0] an unmapped tool name (residual TM-001)
+
+### ATTACK-007 markup in a prompt reaching the UI
+[session log exit 0, stdout+stderr bytes: 0]
+stored as text: <img src=x onerror=alert(1)><script>alert(2)</script>
+markup-parsing APIs in app.js: 0
+
+### ATTACK-008 fifty concurrent hook processes
+rows: 50 of 50; leftover temporary files: 0
+
+# end of transcript

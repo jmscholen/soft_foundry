@@ -1,21 +1,83 @@
-commit_sha: TBD
+commit_sha: 98b55d14586da5d7ce8485d1148cb9bec48907a1
 authorization_envelope:
-  target: TBD
-  environment: TBD          # local | ephemeral | test | staging | production
-  authorized_by: TBD
-  allowed_surfaces: []
-  prohibited_surfaces: []
-  data_constraints: TBD
-  network_constraints: TBD
+  target: soft-foundry session log, sessions, resume, hooks install --sessions, guard (this checkout)
+  environment: local
+  authorized_by: the maintainer ("go ahead and start working on the plan", 2026-10-07), within the repository's own change lifecycle
+  allowed_surfaces: [CLI processes, a throwaway directory under the session scratchpad, a temporary HOME]
+  prohibited_surfaces: [the real home directory's agent configuration, other repositories, any network service]
+  data_constraints: synthetic prompts and fake key shapes only
+  network_constraints: none used
   destructive_actions: prohibited
 cases:
   - id: ATTACK-001
     threat: THREAT-001
-    violation_attempted: TBD
-    starting_privilege: TBD
-    steps:
-      - TBD
-    expected_safe_behavior: TBD
-    observed: TBD
-    result: TBD   # denied | violated | blocked_by_provider | blocked_by_scope
-    evidence: [evidence/TBD]
+    violation_attempted: run a command when a person pastes a printed resume command; record a session ID carrying shell syntax
+    starting_privilege: anyone who can shape a hook payload or name a folder
+    steps: [a folder named with a quote, $(...), backticks, and a semicolon; five session IDs with ; $() newline backticks and ../]
+    expected_safe_behavior: the folder is shell-quoted and cd reaches exactly it; malformed IDs are not recorded
+    observed: one row (the folder case); sh ran the printed cd part and printed the literal folder; no PWNED file was created; none of the five IDs was recorded
+    result: denied
+    evidence: [evidence/attack-transcript.log]
+  - id: ATTACK-002
+    threat: THREAT-003
+    violation_attempted: inject terminal control sequences through a prompt and a folder name
+    starting_privilege: a prompt author or folder name
+    steps: [record a prompt with CSI, OSC title, BEL, DEL, and a C1 byte from a folder whose name holds ESC and BEL, then list it]
+    expected_safe_behavior: no control byte in the ledger or the output
+    observed: zero escape bytes in the ledger and zero escape or bell bytes in sessions output. Side effect - the stored folder loses its control characters, so that session reports folder missing (FIND-ATK-002)
+    result: denied
+    evidence: [evidence/attack-transcript.log]
+  - id: ATTACK-003
+    threat: THREAT-002
+    violation_attempted: keep secrets from a prompt on disk
+    starting_privilege: a person pasting keys into a prompt
+    steps: [record a prompt with an AWS key ID, an OpenAI-style key, a GitHub token, a private-key header, a Slack token, and a Google API key]
+    expected_safe_behavior: none appears in the ledger; files private
+    observed: all six masked; stored as six [masked] markers; directory 700, file 600
+    result: denied
+    evidence: [evidence/attack-transcript.log]
+  - id: ATTACK-004
+    threat: THREAT-004
+    violation_attempted: redirect writes through a symlinked ledger, lock file, or directory, or through a symlinked agent settings file; keep loose permissions
+    starting_privilege: another local process able to plant links
+    steps: [ledger path a symlink, lock path a symlink, ledger directory a symlink, pre-existing 755 directory and 644 file, ~/.claude/settings.json a symlink during install]
+    expected_safe_behavior: nothing written through a link; permissions tightened; install refuses
+    observed: target file unchanged in every case; no ledger created when the lock was a link; nothing in the linked directory's target; modes became 700 and 600; install exited 1 naming the symlink and left the target unchanged
+    result: denied
+    evidence: [evidence/attack-transcript.log]
+  - id: ATTACK-005
+    threat: THREAT-005
+    violation_attempted: stall or break the hook with an 8 MB payload, 100,000-deep nesting, binary bytes, a corrupt ledger line, or a YAML alias bomb in a repository's change metadata
+    starting_privilege: a huge prompt, a corrupted ledger, or a hostile repository
+    steps: [each input through session log, then a normal prompt, then sessions]
+    expected_safe_behavior: exit 0 silently and quickly; existing rows and the corrupt line kept; the alias bomb is not expanded
+    observed: all exit 0 with no output; the 8 MB payload took 0.16 s and was not recorded (FIND-ATK-001); earlier rows kept 3 of 3 and the garbage line kept; sessions exit 0; the alias bomb took 0.35 s and recorded change x with phase nil
+    result: denied
+    evidence: [evidence/attack-transcript.log]
+  - id: ATTACK-006
+    threat: THREAT-008
+    violation_attempted: write the control plane, edit the enforcement policy, read harness evals, or write outside the repository with Grok tool names
+    starting_privilege: a Grok session in a trusted folder during implementation, block mode
+    steps: [write, search_replace, read_file, run_terminal_command, write to /etc/hosts, an allowed write, an unmapped tool name]
+    expected_safe_behavior: each refused with exit 2 and a reason; the allowed write passes
+    observed: five refused with exit 2 naming tool, path, set, and mode; the allowed write passed; edit_file (an unmapped name) passed as not guarded, the residual recorded as TM-001
+    result: denied
+    evidence: [evidence/attack-transcript.log]
+  - id: ATTACK-007
+    threat: THREAT-007
+    violation_attempted: run script in the local UI through a recorded prompt
+    starting_privilege: a prompt author
+    steps: [record a prompt holding img onerror and script markup, inspect what is stored and how app.js renders text]
+    expected_safe_behavior: stored and rendered as text only
+    observed: stored verbatim as text; app.js contains no markup-parsing API (and UIAssetsTest forbids them)
+    result: denied
+    evidence: [evidence/attack-transcript.log]
+  - id: ATTACK-008
+    threat: THREAT-009
+    violation_attempted: lose entries with 50 concurrent hook processes
+    starting_privilege: many sessions prompting at once
+    steps: [50 background session log processes against one empty ledger]
+    expected_safe_behavior: 50 rows, no temporary files left
+    observed: 50 of 50 rows, 0 leftover temporary files
+    result: denied
+    evidence: [evidence/attack-transcript.log]
