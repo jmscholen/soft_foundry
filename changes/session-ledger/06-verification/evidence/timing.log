@@ -1,0 +1,7 @@
+# commit 98b55d14586da5d7ce8485d1148cb9bec48907a1; exe/soft-foundry session log as a separate process, 5,000-entry ledger, payload from a folder inside this repository (git lookups included); five runs
+run 1: exit 0, 0.197 s
+run 2: exit 0, 0.193 s
+run 3: exit 0, 0.198 s
+run 4: exit 0, 0.194 s
+run 5: exit 0, 0.195 s
+entries after: 5005

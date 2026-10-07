@@ -1,5 +1,24 @@
-commit_sha: TBD
+---
+commit_sha: 98b55d14586da5d7ce8485d1148cb9bec48907a1
 artifacts:
-  - path: TBD
-    produced_by: TBD
-    sha256: TBD
+- path: evidence/tests.log
+  produced_by: full suite, provider keys unset
+  sha256: 7b4fcf4baa0d9a46f0d77ad9231789cc1de4683eb72f7e97220eb65481fd92ec
+- path: evidence/red-at-d278ecf.log
+  produced_by: new and changed tests at the RED commit d278ecf
+  sha256: 301fabb4bb8d435ae685a921d5d5baeaaf233b1583a24f4d0281c6be8ac5360a
+- path: evidence/check.log
+  produced_by: soft-foundry check
+  sha256: 012f374e13ec99a0bb0f4d95a123903f9c9c6466aabd4cd05791d57d149b029c
+- path: evidence/syntax-warnings.log
+  produced_by: ruby -wc and node --check
+  sha256: 47cfdae980f58fe26765a2a6225c7b296667df8c60a8beddc1b9fa68f3bb73f7
+- path: evidence/ci-against-self.log
+  produced_by: soft-foundry ci against this repository
+  sha256: fa736ab8b283d3d4e93af7f845fb42eaf356777857a26c67334e0ae994d97919
+- path: evidence/scan-against-self.log
+  produced_by: soft-foundry scan
+  sha256: 6013d3b0883fc66f939f6ea1c3c643a64583cf2c612a8efc6afc10e1cb7ddb5d
+- path: evidence/timing.log
+  produced_by: session log timing, 5,000-entry ledger
+  sha256: b8b7ac5c3d5008368c061145778de75016dc475743ee0e55c1a478bec8479936
