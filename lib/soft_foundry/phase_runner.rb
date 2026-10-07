@@ -27,7 +27,9 @@ module SoftFoundry
     SHELLS = {
       "claude" => ->(prompt, extra, id, name) { ["-p", "--session-id", id, "--name", name, *extra, prompt] },
       "codex" => ->(prompt, extra, _id, _name) { ["exec", *extra, prompt] },
-      "grok" => ->(prompt, extra, id, _name) { ["-p", "-s", id, *extra, prompt] } # `grok -p` is its single-turn headless form
+      # `grok -p` (--single) is its headless form and takes the prompt as its
+      # value, so it comes last with the prompt right after it.
+      "grok" => ->(prompt, extra, id, _name) { ["-s", id, *extra, "-p", prompt] }
     }.freeze
     PRESET_ID = %w[claude grok].freeze
 
