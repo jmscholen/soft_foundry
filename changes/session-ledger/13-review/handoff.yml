@@ -1,21 +1,68 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 13-review
 skill: review
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 742dbd4c8557b2b6b0f3b1c9b499cde26b48c290
+started_at: '2026-10-07T22:47:01Z'
+completed_at: '2026-10-07T23:00:17Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}
+  provider: xAI
+  model: grok-4.7
+outputs:
+- functional.md
+- architecture.md
+- security.md
+- accessibility.md
+- policy-conformance.md
+- infrastructure.md
+- operations.md
+- consolidated.md
+blocking: []
+findings:
+- id: REV-SEC-001
+  severity: major
+  summary: Resume commands quote the folder but interpolate a session ID already in
+    the ledger without re-checking it or shell-quoting it, so a same-user writer can
+    make a pasted command run more than the resume.
+- id: REV-SEC-002
+  severity: minor
+  summary: SOFT_FOUNDRY_SESSIONS is honored with no check that it is absolute and
+    outside a repository, and record chmods that parent to 0700. A relative value
+    writes the ledger into the worktree.
+- id: REV-FUN-001
+  severity: minor
+  summary: soft-foundry session with any subcommand other than log exits 0 and prints
+    nothing.
+- id: REV-FUN-002
+  severity: minor
+  summary: phase and phase run error text still says --shell claude|codex, omitting
+    grok, which the runner and the help text accept.
+- id: REV-A11Y-001
+  severity: minor
+  summary: Prompt truncation is marked only with U+2026, so the cut disappears if
+    non-ASCII characters are stripped.
+- id: REV-A11Y-002
+  severity: minor
+  summary: resume prints the command and no status word, including when the folder
+    or transcript is missing.
+- id: REV-ARCH-001
+  severity: minor
+  summary: Implementation wrote .ai/schemas.md, .ai/templates/handoff.yml, and README.md
+    outside its write set. Review accepts the exception because REQ-SL-015 requires
+    it; the maintainer still accepts the control-plane edit at merge.
 next: judge
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: 'Independent review of HEAD 742dbd4 (application code identical to 93acd89).
+  No implementation and no earlier phase evidence was modified. Permissions followed
+  as policy. Accessibility and policy results are go-live advisories. No policy text
+  change is owed. Blocking findings: none.'
+executed_by:
+  runner: soft-foundry phase run
+  shell: grok
+  fresh_context: true
+  started_at: '2026-10-07T22:47:01Z'
+  finished_at: '2026-10-07T23:00:55Z'
+  exit_status: 0
+  previous_phase: attack
+  session_id: db5e756b-9de2-4489-ba6c-5eea7652c845
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"
