@@ -1,13 +1,13 @@
 # Attack Plan
 
 ## Intent to challenge
-TBD
+That a line written into the ledger by anything other than `record` can reach a printed command, or that a command built from a bad ID can run more than the agent.
 
 ## Threats mapped
-TBD
+THREAT-001 of changes/session-ledger (shell injection through a printed resume command), widened by REV-SEC-001 to a same-user writer of the ledger.
 
 ## Adversarial journeys
-For each ATTACK case record threat ID, attempted violation, starting privilege/state, steps, expected denial/safe behavior, observed result, and evidence.
+`cases.yml`, run by the real CLI against a scratch ledger.
 
 ## Safety boundary
-Production/third-party destructive or security testing requires explicit authorization.
+Local, synthetic, throwaway directory; a stub `claude` on PATH stands in for the agent.

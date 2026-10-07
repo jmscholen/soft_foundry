@@ -1,0 +1,13 @@
+# commit 6f753070e06ed9eb74b9744541b409429f81afa8; ledger /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/sq-attack.v5ln/state/sessions.jsonl
+### ATTACK-001 planted session IDs and agents through sessions, --json, resume, and the printed command
+planted lines: 8
+sessions: none found
+sessions: 0 recorded in /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/sq-attack.v5ln/state/sessions.jsonl; try fewer words or no filters
+[sessions exit 0]
+json entries: 0
+resume: no recorded session for change c1; list what is recorded with `soft-foundry sessions --change c1`
+[resume exit 1]
+### ATTACK-002 a value that bypassed the check is still inert when pasted
+built: cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/sq-attack.v5ln && claude --resume x\;\ touch\ PWNED5
+claude called with: --resume x; touch PWNED5
+PWNED files created: 0

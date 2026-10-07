@@ -1,16 +1,16 @@
 # Evaluation Plan
 
 ## Intent being proven
-TBD
+A person's real sessions look up and resume exactly as before, and a line planted in the ledger never appears.
 
 ## Personas
-TBD
+The maintainer at a terminal.
 
 ## Journeys
-For each journey record: EVAL ID, requirement IDs, starting state, steps, assertions, evidence, result.
+EVAL-001 and EVAL-002 in `journeys.yml`, run by the real CLI as separate processes against a scratch ledger.
 
 ## UI walkthrough evidence
-Capture screenshots or equivalent browser evidence at meaningful state transitions.
+N/A: the UI reads through the same `entries`; the snapshot path is covered by CHECK-001.
 
 ## Accessibility interaction
-Applicable whenever `surfaces.accessibility` is true (see `.ai/rules/accessibility.md`): keyboard-only operation, focus order and visible focus, error identification, and screen-reader readable output or names. Record what was exercised and the result; N/A must say why nothing a person perceives or operates changed.
+Output lines and status words are unchanged from 0.18.0; checked in the transcript.

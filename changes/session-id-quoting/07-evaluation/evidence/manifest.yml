@@ -1,5 +1,6 @@
-commit_sha: TBD
+---
+commit_sha: 6f753070e06ed9eb74b9744541b409429f81afa8
 artifacts:
-  - path: TBD
-    journey: EVAL-001
-    sha256: TBD
+- path: evidence/journey-transcript.log
+  produced_by: two journeys with the real CLI
+  sha256: 607e0e6f3510d42bf409fd865eda35d23c4522d94cbf6022b2ced6cdadd5d0a6
