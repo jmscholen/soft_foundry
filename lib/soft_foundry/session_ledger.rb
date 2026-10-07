@@ -48,8 +48,17 @@ module SoftFoundry
       AGENTS.include?(shell.to_s) ? shell.to_s : "claude"
     end
 
+    # Both the folder and the ID are quoted: lookup only returns entries
+    # `record` could have written, but the command is pasted into a shell.
     def self.resume_command(entry)
-      "cd #{Shellwords.escape(entry['cwd'].to_s)} && #{RESUME.fetch(entry['agent'], RESUME['claude'])} #{entry['session_id']}"
+      "cd #{Shellwords.escape(entry['cwd'].to_s)} && #{RESUME.fetch(entry['agent'], RESUME['claude'])} #{Shellwords.escape(entry['session_id'].to_s)}"
+    end
+
+    # Whether a line read back from the ledger is one `record` could have
+    # written. Anyone who can write the file can add others; they are kept
+    # in it but never looked up.
+    def self.trusted?(entry)
+      entry["session_id"].is_a?(String) && entry["session_id"].match?(ID) && AGENTS.include?(entry["agent"]) && entry["cwd"].is_a?(String)
     end
 
     # Whether the session can still be resumed from here, as a word.
@@ -93,12 +102,13 @@ module SoftFoundry
       end
     end
 
-    # Every entry that parses, oldest line first.
+    # Every entry that parses and could have come from `record`, oldest
+    # line first.
     def entries
       return [] unless File.file?(@path)
       File.foreach(@path).filter_map do |line|
         data = JSON.parse(line)
-        data if data.is_a?(Hash) && data["session_id"]
+        data if data.is_a?(Hash) && self.class.trusted?(data)
       rescue JSON::ParserError
         nil
       end

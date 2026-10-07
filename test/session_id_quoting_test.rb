@@ -51,7 +51,7 @@ class SessionIdQuotingTest < Minitest::Test
 
   def test_resume_command_quotes_the_session_id_too
     cmd = SoftFoundry::SessionLedger.resume_command({ "agent" => "claude", "session_id" => "x; touch PWNED", "cwd" => "/tmp" })
-    assert cmd.end_with?("claude --resume x\;\\ touch\\ PWNED"), cmd
+    assert cmd.end_with?('claude --resume x\;\ touch\ PWNED'), cmd
     plain = SoftFoundry::SessionLedger.resume_command({ "agent" => "grok", "session_id" => "0199-abc", "cwd" => "/tmp" })
     assert_equal "cd /tmp && grok --resume 0199-abc", plain
   end
