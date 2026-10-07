@@ -114,4 +114,12 @@ class UIAssetsTest < Minitest::Test
     %w[index.html app.css app.js].each { |name| assert_includes spec.files, "lib/soft_foundry/ui/assets/#{name}" }
     assert_includes spec.files, "lib/soft_foundry/ui/server.rb"
   end
+  # A change's recorded sessions render under their own heading, apart
+  # from the shells open now, with status and resume command as text.
+  def test_change_page_lists_recorded_sessions_as_text
+    script = asset("app.js")
+    assert_includes script, "Recorded sessions"
+    assert_includes script, "recorded_sessions"
+    assert_match(/resume/, script[script.index("recorded_sessions")..])
+  end
 end

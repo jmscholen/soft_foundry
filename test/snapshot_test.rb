@@ -93,6 +93,31 @@ class SnapshotTest < Minitest::Test
     end
   end
 
+  # Sessions the prompt hook recorded for this change in this repository,
+  # with their resume commands; other repositories' and other changes'
+  # sessions stay out.
+  def test_change_lists_its_recorded_sessions
+    with_snapshot do |dir, _record, _snapshot|
+      Dir.mktmpdir("sf-ledger") do |state|
+        path = File.join(state, "sessions.jsonl")
+        sh(dir, "git", "checkout", "-qb", "change/c1")
+        ledger = SoftFoundry::SessionLedger.new(path)
+        ledger.record({ "session_id" => "mine-1", "cwd" => dir, "prompt" => "work on c1" }, shell: "claude")
+        Dir.mktmpdir("elsewhere") { |other| ledger.record({ "session_id" => "other-1", "cwd" => other, "prompt" => "elsewhere" }, shell: "claude") }
+        plane = SoftFoundry::ControlPlane.new(dir)
+        snapshot = SoftFoundry::Snapshot.new(dir, plane: plane, git: SoftFoundry::Git.new(dir), ledger: ledger)
+        change = snapshot.change("c1")
+        assert_plain change
+        sessions = change["recorded_sessions"]
+        assert_equal ["mine-1"], sessions.map { |s| s["session_id"] }
+        assert_equal "claude", sessions.first["agent"]
+        assert_equal "resumable", sessions.first["status"]
+        assert sessions.first["resume"].end_with?("claude --resume mine-1")
+        assert_equal "work on c1", sessions.first["first_prompt"]
+      end
+    end
+  end
+
   def test_change_reports_each_gate_with_its_checks
     with_snapshot do |dir, record, snapshot|
       complete_phase!(record, "intake", sha: head(dir))

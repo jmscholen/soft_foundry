@@ -80,7 +80,7 @@ class PhaseRunnerTest < Minitest::Test
       code, out, launches = run_phase(dir, "review", "--dry-run")
       assert_equal 0, code, out
       assert_empty launches
-      assert_includes out, "would run review of c1 with: claude -p <prompt>"
+      assert_match(/would run review of c1 with: claude -p --session-id [0-9a-f-]{36} --name c1\/review <prompt>/, out)
       assert_includes out, "Phase: review (changes/c1/13-review/)"
       assert_includes out, "Skill: review (profile reasoning_high)"
       assert_includes out, ".ai/skills/review/SKILL.md"
@@ -112,7 +112,7 @@ class PhaseRunnerTest < Minitest::Test
       assert_equal 0, code, out
       assert_equal 1, launches.size
       assert_equal "claude", launches.first.executable
-      assert_equal ["-p", launches.first.prompt], launches.first.args
+      assert_equal ["-p", "--session-id", launches.first.session_id, "--name", "c1/review", launches.first.prompt], launches.first.args
       assert_includes out, "running review of c1 in a fresh claude session (review skill)"
       assert_includes out, "claude exited 0"
       assert_includes out, "13-review  complete  PASS"
@@ -125,6 +125,8 @@ class PhaseRunnerTest < Minitest::Test
       assert_equal 0, executed["exit_status"]
       assert executed["started_at"] && executed["finished_at"]
       assert_equal "evaluate", executed["previous_phase"]
+      assert_equal launches.first.session_id, executed["session_id"]
+      assert_equal File.realpath(dir), File.realpath(executed["cwd"])
 
       # A review run this way carries no fresh-context advisory.
       notices = SoftFoundry::Advisory.new(record).notices.select { |n| n.message.include?("fresh-context") }
@@ -181,6 +183,38 @@ class PhaseRunnerTest < Minitest::Test
       h = record.handoff(record.control_plane.phase("intake"))
       assert h.key?("executed_by")
       assert_nil h["executed_by"]
+    end
+  end
+  # Codex cannot be handed a session ID, so the runner takes the newest
+  # Codex session the prompt hook recorded in this repository after the
+  # run started; with nothing recorded the field stays null.
+  def test_a_codex_run_records_the_session_the_ledger_saw
+    with_reviewable_change do |dir, record|
+      Dir.mktmpdir("sf-ledger") do |state|
+        path = File.join(state, "sessions.jsonl")
+        with_env("SOFT_FOUNDRY_SESSIONS" => path) do
+          _, _, launches = run_phase(dir, "review", "--shell", "codex") do |_launch|
+            SoftFoundry::SessionLedger.new(path).record({ "session_id" => "019a-codex-1", "cwd" => dir, "prompt" => "You are a fresh-context agent" }, shell: "codex")
+            complete_handoff!(record, "review", dir)
+          end
+          assert_nil launches.first.session_id
+          executed = record.handoff(record.control_plane.phase("review"))["executed_by"]
+          assert_equal "019a-codex-1", executed["session_id"]
+        end
+      end
+    end
+  end
+
+  def test_a_codex_run_with_no_recorded_session_leaves_session_id_null
+    with_reviewable_change do |dir, record|
+      Dir.mktmpdir("sf-ledger") do |state|
+        with_env("SOFT_FOUNDRY_SESSIONS" => File.join(state, "sessions.jsonl")) do
+          run_phase(dir, "review", "--shell", "codex") { |_launch| complete_handoff!(record, "review", dir) }
+          executed = record.handoff(record.control_plane.phase("review"))["executed_by"]
+          assert executed.key?("session_id")
+          assert_nil executed["session_id"]
+        end
+      end
     end
   end
 end
