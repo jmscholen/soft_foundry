@@ -8,6 +8,7 @@ require_relative "change_index"
 require_relative "gate"
 require_relative "advisory"
 require_relative "budget"
+require_relative "session_ledger"
 
 module SoftFoundry
   # The state of the workflow and of each change record as plain data
@@ -63,11 +64,12 @@ module SoftFoundry
       end
     end
 
-    def initialize(root, plane:, git:, index: nil)
+    def initialize(root, plane:, git:, index: nil, ledger: nil)
       @root = File.expand_path(root)
       @plane = plane
       @git = git
       @index = index || ChangeIndex.new(@root, plane: plane, git: git)
+      @ledger = ledger || SessionLedger.new(SessionLedger.default_path)
     end
 
     # The lifecycle itself, independent of any change.
@@ -140,13 +142,39 @@ module SoftFoundry
         "gates" => results.map { |result| gate(record, meta, result) },
         "advisories" => Advisory.new(record).notices.map { |n| { "area" => n.area.to_s, "message" => plain(n.message) } },
         "timeline" => timeline(record, meta),
-        "spend" => spend(record, meta)
+        "spend" => spend(record, meta),
+        "recorded_sessions" => recorded_sessions(record)
       )
     end
 
     private
 
     def plain(value) = self.class.plain(value)
+
+    # Sessions the prompt hook recorded for this change in this repository,
+    # newest first. The one place a snapshot carries absolute paths: a
+    # resume command has to cd to the folder the session ran in. The page
+    # is loopback-only and token-gated, and shows the person their own
+    # machine's sessions.
+    def recorded_sessions(record)
+      root = real(@root)
+      @ledger.search(change: record.slug).select { |e| real(e["repo"]) == root }.first(20).map do |e|
+        {
+          "agent" => plain(e["agent"]), "session_id" => plain(e["session_id"]), "phase" => plain(e["phase"]),
+          "first_at" => plain(e["first_at"]), "last_at" => plain(e["last_at"]),
+          "first_prompt" => plain(e["first_prompt"]), "latest_prompt" => plain(e["latest_prompt"]),
+          "status" => SessionLedger.status(e), "resume" => plain(SessionLedger.resume_command(e))
+        }
+      end
+    rescue SystemCallError, JSON::ParserError
+      []
+    end
+
+    def real(dir)
+      dir && File.realpath(dir)
+    rescue SystemCallError
+      dir
+    end
     def now = Time.now.utc.iso8601
 
     # A record's metadata is whatever YAML someone put in that file; only

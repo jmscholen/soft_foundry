@@ -22,7 +22,7 @@ Created from `.ai/templates/handoff.yml`. Field semantics:
 | `blocking` | Must be empty when `complete`. Non-empty forces `blocked`. |
 | `findings` | Items handed to downstream phases. Each has `id`, `severity`, `summary`. |
 | `next` | Lifecycle id the workflow proceeds to. |
-| `executed_by` | Written only by `soft-foundry phase run`: `runner`, `shell`, `fresh_context: true`, `started_at`, `finished_at`, `exit_status`, `previous_phase`. `null` when the phase was worked by whatever session was open. A review or judgment completed without it draws an advisory. |
+| `executed_by` | Written only by `soft-foundry phase run`: `runner`, `shell`, `fresh_context: true`, `started_at`, `finished_at`, `exit_status`, `previous_phase`, `session_id` (the coding session, chosen up front for Claude Code and Grok, taken from the session ledger for Codex, or null), and `cwd` (the folder it ran in, for resuming it). `null` when the phase was worked by whatever session was open. A review or judgment completed without it draws an advisory. |
 
 `surfaces.accessibility: true` means a person perceives or operates the result (UI, CLI output, a document). `change new` sets it when `.ai/repository.yml` records a user-facing framework. It selects `.ai/rules/accessibility.md` for implementation and review, and enables the accessibility go-live advisories.
 

@@ -404,7 +404,8 @@ class StatusWordTest < Minitest::Test
     with_fixture_repo do |dir|
       _code, out = cli(dir, "doctor")
       lines = out.lines.map(&:chomp)
-      assert(lines.all? { |l| l.match?(/\A(✓ pass|✗ fail) \S/) }, out)
+      # Every line leads with a status word; `warn` marks the optional session hook.
+      assert(lines.all? { |l| l.match?(/\A(✓ pass|✗ fail|! warn) \S/) }, out)
       assert_match(/^ pass git repository$/, ascii(out))
       assert_match(/^ fail \.ai\/manifest\.yml$/, ascii(out))
     end

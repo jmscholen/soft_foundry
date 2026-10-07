@@ -10,7 +10,7 @@ class SessionLedgerTest < Minitest::Test
   include FoundryFixture
 
   def with_ledger
-    Dir.mktmpdir("sf-ledger") do |dir|
+    Dir.mktmpdir("sf-state") do |dir|
       yield File.join(dir, "state", "sessions.jsonl"), dir
     end
   end

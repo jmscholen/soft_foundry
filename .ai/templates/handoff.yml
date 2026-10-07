@@ -15,7 +15,8 @@ findings: []               # items for downstream phases: {id, severity, summary
 next: ${NEXT}
 notes: ""
 # Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status).
+# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
+# session_id, cwd).
 # A review or judgment phase completed without it is advised as having been
 # performed by whatever session was already open.
 executed_by: null
