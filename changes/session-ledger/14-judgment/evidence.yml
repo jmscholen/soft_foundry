@@ -1,30 +1,134 @@
-commit_judged: TBD
+commit_judged: 92e9bd356b977a4ca82be679d848e94db3c02fb5
 phases:
+  - phase: 00-intake
+    commit_sha: 8a828f6eadfd8d36dc22ba29de007f7487e017e4
+    current: true
+    result: complete
+    note: "Request and assumptions are unchanged since the change record was opened. Only handoff timestamps moved later. Not commit-bound code evidence."
+  - phase: 01-discovery
+    commit_sha: 8a828f6eadfd8d36dc22ba29de007f7487e017e4
+    current: true
+    result: complete
+    note: "DISC-001 (distinct label) is implemented. DISC-002 (Codex not live-verified) is carried as EVAL-006."
+  - phase: 02-specification
+    commit_sha: 8a828f6eadfd8d36dc22ba29de007f7487e017e4
+    current: true
+    result: complete
+    note: "REQ-SL-001..015 and AC-001..015. Requirements and acceptance criteria are unchanged since 9300702. Gated track; specification locked when this phase completed."
+  - phase: 03-threat-model
+    commit_sha: 8a828f6eadfd8d36dc22ba29de007f7487e017e4
+    current: true
+    result: complete
+    note: "THREAT-001..009 and MIT-001..008. TM-001 is an accepted residual (unmapped Grok tool names)."
+  - phase: 04-plan
+    commit_sha: 8a828f6eadfd8d36dc22ba29de007f7487e017e4
+    current: true
+    result: complete
+  - phase: 05-implementation
+    commit_sha: 98b55d14586da5d7ce8485d1148cb9bec48907a1
+    current: false
+    result: complete
+    note: "Not current for every code path. 93acd89 changed lib/soft_foundry/phase_runner.rb, lib/soft_foundry/ui/assets/app.js, test/cross_cli_hooks_test.rb, and README.md (REM-001). That delta is re-covered by verification, evaluation, and attack at 93acd89. Deviations recorded; REV-ARCH-001 accepts the control-plane writes."
   - phase: 06-verification
-    commit_sha: TBD
-    current: TBD   # true when commit_sha matches the judged commit for all code paths
-    result: TBD
+    commit_sha: 93acd899cc20cb4c25bc7ffe38d374925c2920fa
+    current: true
+    result: complete
+    note: "Second run, after REM-001. git diff --stat 93acd89..92e9bd3 -- lib exe test is empty. CHECK-001 passed (466 runs, 0 failures). RED commits d278ecf and 88eee99. First run at 98b55d1 was superseded, not annotated."
   - phase: 07-evaluation
-    commit_sha: TBD
-    current: TBD
-    result: TBD
+    commit_sha: 93acd899cc20cb4c25bc7ffe38d374925c2920fa
+    current: true
+    result: complete
+    note: "Second run. EVAL-001..005, 007, 008 passed. EVAL-006 blocked by an expired Codex login, not by the change. Same empty code diff as verification."
   - phase: 08-attack
-    commit_sha: TBD
-    current: TBD
-    result: TBD
+    commit_sha: 93acd899cc20cb4c25bc7ffe38d374925c2920fa
+    current: true
+    result: complete
+    note: "Second run. Eight cases, all denied, no violations. FIND-ATK-001 and FIND-ATK-002 are documented fail-safe behavior. Same empty code diff. Run by the implementing session; review re-read the code."
+  - phase: 09-remediation
+    commit_sha: 93acd899cc20cb4c25bc7ffe38d374925c2920fa
+    current: true
+    result: complete
+    note: "Optional phase that ran. REM-001 fixed the Grok -p argument order and the resume-command line break. Required reruns of verify, evaluate, and attack were done at this commit."
+  - phase: 10-user-documentation
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Optional and not started. REQ-SL-015 is met by README, help text, and .ai/schemas.md, checked by review. Not missing evidence."
+  - phase: 11-faq-index
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Optional and not started. No separate FAQ was required once AC-015's README and help text existed."
+  - phase: 12-observability
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Optional and not started. No deployed service. surfaces.observability is false. The silent hook is required by REQ-SL-005; doctor and sessions are the specified signal."
   - phase: 13-review
-    commit_sha: TBD
-    current: TBD
-    result: TBD
-unresolved_findings: []
-# Acceptance criteria or judgment conditions left unsatisfied pending a
-# real-world event (production observation, etc.) rather than more
-# repository evidence, e.g.:
-#   - id: AC-060
-#     description: each fix observed corrected on production
-# `soft-foundry change close` refuses to close this change while any id
-# here lacks a human confirmation - via --confirm ID, or a PR comment
-# reading "CONFIRMED: <id>" (see `soft-foundry change request-discharge`)
-# - and then moves it into `discharged` with the confirmation source.
+    commit_sha: 742dbd4c8557b2b6b0f3b1c9b499cde26b48c290
+    current: true
+    result: complete
+    note: "No blocking findings. Prose committed in 92e9bd3. git diff 742dbd4..92e9bd3 has no lib, exe, or test changes. Seven findings, all carried in unresolved_findings or closed as noted there."
+unresolved_findings:
+  - id: REV-SEC-001
+    severity: major
+    phase: 13-review
+    disposition: acceptable_residual_risk
+    summary: "Resume commands quote the folder and interpolate a session id already in the ledger without re-checking or shell-quoting it. Same-user writer only. Accepted here; mitigation owed in residual-risk.md."
+  - id: REV-SEC-002
+    severity: minor
+    phase: 13-review
+    disposition: acceptable_residual_risk
+    summary: "SOFT_FOUNDRY_SESSIONS is honored with no absolute, out-of-repo check, and record chmods that parent to 0700."
+  - id: REV-FUN-001
+    severity: minor
+    phase: 13-review
+    disposition: acceptable_residual_risk
+    summary: "soft-foundry session with any subcommand other than log exits 0 and prints nothing."
+  - id: REV-FUN-002
+    severity: minor
+    phase: 13-review
+    disposition: acceptable_residual_risk
+    summary: "phase usage text omits grok, which help text and the runner accept."
+  - id: REV-A11Y-001
+    severity: minor
+    phase: 13-review
+    disposition: acceptable_residual_risk
+    summary: "Prompt truncation is marked only with a non-ASCII ellipsis. Go-live advisory."
+  - id: REV-A11Y-002
+    severity: minor
+    phase: 13-review
+    disposition: acceptable_residual_risk
+    summary: "resume prints the command and no status word, including when the folder is missing. Go-live advisory."
+  - id: REV-ARCH-001
+    severity: minor
+    phase: 13-review
+    disposition: accepted_exception
+    summary: "Implementation wrote .ai/schemas.md, .ai/templates/handoff.yml, and README.md outside its write set. Review accepts it because REQ-SL-015 requires it. Maintainer accepts the control-plane edit at merge."
+  - id: EVAL-006
+    severity: major
+    phase: 07-evaluation
+    disposition: acceptable_residual_risk
+    summary: "Codex capture and the runner Codex lookup were not exercised live (login expired). Covered by tests against the documented payload. AC-012's Codex branch is specified as stubbed."
+  - id: EVAL-OBS-002
+    severity: minor
+    phase: 07-evaluation
+    disposition: in_specification
+    summary: "Grok payloads carry no transcript path, so status checks only the folder. Not a missed requirement."
+  - id: TM-001
+    severity: minor
+    phase: 03-threat-model
+    disposition: acceptable_residual_risk
+    summary: "An unmapped Grok tool name passes the guard as not guarded. Confirmed by ATTACK-006."
+  - id: FIND-ATK-001
+    severity: minor
+    phase: 08-attack
+    disposition: documented_behavior
+    summary: "A prompt payload over 1 MB is not recorded; the session is recorded at its next ordinary prompt. Stated in README."
+  - id: FIND-ATK-002
+    severity: minor
+    phase: 08-attack
+    disposition: documented_behavior
+    summary: "A folder name with control characters is stored without them, so its session reports folder missing. Stated in README."
 undischarged: []
 discharged: []

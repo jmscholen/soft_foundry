@@ -1,21 +1,53 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 14-judgment
 skill: final-judgment
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 92e9bd356b977a4ca82be679d848e94db3c02fb5
+started_at: '2026-10-07T23:01:21Z'
+completed_at: '2026-10-07T23:08:33Z'
 resolved_model:
   profile: judgment_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}
+  provider: xAI
+  model: grok-4.7
+outputs:
+- final.md
+- residual-risk.md
+- evidence.yml
+blocking: []
+findings:
+- id: JUDGE-001
+  severity: info
+  summary: Outcome APPROVED_WITH_RESIDUAL_RISK at 92e9bd3. Required phases are complete.
+    Verification, evaluation, and attack are current for that code (93acd89; no lib,
+    exe, or test diff since). Review is current (742dbd4; no code diff since) and
+    has no blocking findings. Documentation, FAQ index, and observability are pending
+    and optional, and they do not leave a specified requirement unmet.
+- id: JUDGE-002
+  severity: major
+  summary: REV-SEC-001 is accepted, not sent back. Resume commands quote the folder
+    and interpolate a session id already on disk. Hook payloads cannot record a bad
+    id (AC-010, ATTACK-001). A same-user edit of the ledger can. Follow-up should
+    quote the id and refuse to print one that fails the identifier pattern.
+- id: JUDGE-003
+  severity: info
+  summary: Also carried, not blocking. REV-SEC-002 (SOFT_FOUNDRY_SESSIONS may name
+    a relative path and the parent is chmod 0700), EVAL-006 (no live Codex turn),
+    TM-001 (unmapped Grok tool names), REV-FUN-001, REV-FUN-002, REV-A11Y-001, REV-A11Y-002,
+    and REV-ARCH-001 (control-plane edits the maintainer still accepts at merge).
+    Nothing is undischarged.
 next: learn
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: Fresh-context judgment under final-judgment permissions, treated as policy.
+  Read the change record and the application code cited in the review. Did not edit
+  any other phase, did not change requirements, and did not run phase run. Implementation
+  commit 98b55d1 is not current for every code path; the only later code change is
+  REM-001 at 93acd89, which the later phases re-checked.
+executed_by:
+  runner: soft-foundry phase run
+  shell: grok
+  fresh_context: true
+  started_at: '2026-10-07T23:01:21Z'
+  finished_at: '2026-10-07T23:09:00Z'
+  exit_status: 0
+  previous_phase: review
+  session_id: dc0024be-a644-4e9b-9a1b-faf0522d1a77
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"
