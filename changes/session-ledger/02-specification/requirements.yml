@@ -1,0 +1,78 @@
+# Implementation-independent requirements. IDs are stable and referenced by
+# acceptance criteria, tests, evaluation journeys, and attack cases.
+requirements:
+  - id: REQ-SL-001
+    category: security
+    statement: The runtime guard gives Grok's file-writing tools (write, search_replace), its read tool (read_file, path in target_file), and its shell tool (run_terminal_command) the same decisions it gives Claude Code's Write/Edit, Read, and Bash.
+    rationale: Grok runs the guard hook from a trusted repository's .claude/settings.json and today every Grok call falls through as "not guarded".
+    source: 00-intake/request.md
+  - id: REQ-SL-002
+    category: functional
+    statement: A session-log command run as a prompt hook records the session it is given in a machine-local ledger, one entry per agent and session ID, updating that entry on later prompts instead of adding another.
+    rationale: The ledger is how a session is found again from any folder.
+    source: 00-intake/request.md
+  - id: REQ-SL-003
+    category: data
+    statement: Each ledger entry records agent, session ID, working folder, repository root, branch, the change whose record matches the branch and that change's current phase when one exists, the transcript path when known, first and last seen times, and the first and latest prompt cut to 140 characters with whitespace collapsed.
+    rationale: These fields are what a person searches by and what a resume command needs.
+    source: 00-intake/request.md
+  - id: REQ-SL-004
+    category: security
+    statement: Secret-shaped strings in a prompt are masked before it is written to the ledger; the ledger's directory is private to the user and the file readable and writable only by the user; the ledger lives outside every repository.
+    rationale: Prompts sometimes contain keys or tokens; the ledger must not become a store of them, and machine-local state must never reach a committed record.
+    source: 00-intake/request.md
+  - id: REQ-SL-005
+    category: failure
+    statement: The session-log command never writes to standard output or standard error, always exits 0, and holds an exclusive lock across its whole read-modify-write, so that a fault in it cannot block, slow noticeably, or inject text into any agent's prompt, and concurrent sessions lose no entries.
+    rationale: The hook runs on every prompt of every session on the machine; hook output can enter an agent's context.
+    source: 00-intake/request.md
+  - id: REQ-SL-006
+    category: functional
+    statement: The agent is recorded as Grok whenever the payload carries Grok's camelCase hookEventName key, regardless of the shell named on the command line.
+    rationale: Grok also runs hooks it finds in Claude's settings files.
+    source: 00-intake/request.md
+  - id: REQ-SL-007
+    category: functional
+    statement: A lookup command lists recorded sessions matching every given word (case-insensitive, across prompts, folder, branch, and change) and optional change, phase, and agent filters, newest first, each with when, agent, where, first prompt, resume command, and whether it is resumable; it offers a JSON form.
+    rationale: Finding a session is the point of the ledger.
+    source: 00-intake/request.md
+  - id: REQ-SL-008
+    category: functional
+    statement: A resume command prints the single newest resume command for a change (optionally a phase and agent) and exits non-zero with the reason when there is none; neither lookup command starts a session.
+    rationale: The common case is "get me back into that change's session".
+    source: 00-intake/request.md
+  - id: REQ-SL-009
+    category: security
+    statement: Printed resume commands take the form cd <folder> && <agent resume invocation> <id>, with the folder shell-quoted, and a session ID that is not a plain identifier (letters, digits, hyphen, underscore, at most 128 characters) is never recorded.
+    rationale: People paste these commands into a shell; nothing from a hook payload may inject into one.
+    source: 00-intake/request.md
+  - id: REQ-SL-010
+    category: operations
+    statement: One install command installs the session hook at user level for Claude Code, Codex, and Grok and a find-session skill for Claude Code and Codex, keeping every other setting and replacing only its own entries when rerun; the matching uninstall removes only those entries; install states Codex's trust step; doctor reports whether the session hook is installed.
+    rationale: Capture only works once installed; reinstall and uninstall must be safe on a person's real configuration.
+    source: 00-intake/request.md
+  - id: REQ-SL-011
+    category: functional
+    statement: A phase run records the session it starts in executed_by (session_id and cwd), choosing the ID up front for Claude Code and Grok and taking it from the ledger for Codex, and treats Grok as a shell the guard can cover when its folder is trusted.
+    rationale: Interrupted runs become resumable; Grok coverage follows REQ-SL-001.
+    source: 00-intake/request.md
+  - id: REQ-SL-012
+    category: functional
+    statement: A change's page in the local UI lists the sessions recorded for that change with their resume commands, labelled distinctly from the shells open now.
+    rationale: The UI is where the maintainer looks at a change.
+    source: 00-intake/request.md
+  - id: REQ-SL-013
+    category: accessibility
+    statement: Every new command-line line states its outcome or status as a word (resumable, folder missing, transcript missing, installed, removed, none found) and no meaning depends on a glyph or color; the UI list is a real list with text status and copyable commands, readable by a screen reader and operable by keyboard.
+    rationale: .ai/rules/accessibility.md (command-line rules; WCAG 2.2 1.3.1, 2.1.1, 4.1.2).
+    source: .ai/rules/accessibility.md
+  - id: REQ-SL-014
+    category: performance
+    statement: Recording a prompt completes in under one second with a 5,000-entry ledger on the maintainer's machine.
+    rationale: The hook runs before every prompt is sent.
+    source: 00-intake/request.md
+  - id: REQ-SL-015
+    category: operations
+    statement: README, help text, and .ai/schemas.md describe the ledger (what it stores and where), the new commands, the install step, Grok coverage, and the new executed_by fields.
+    rationale: People must know what is kept on their disk and how to use it.
+    source: 00-intake/request.md

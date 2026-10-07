@@ -1,0 +1,46 @@
+threats:
+  - id: THREAT-001
+    requirements: [REQ-SL-009]
+    category: injection
+    attacker: anything that shapes a hook payload (a cloned repository's folder name, a crafted session ID)
+    goal: make a pasted resume command run another command
+  - id: THREAT-002
+    requirements: [REQ-SL-004]
+    category: secrets
+    attacker: a later reader of the ledger (a backup, a shared screen, another process of the same user)
+    goal: recover a key pasted into a prompt
+  - id: THREAT-003
+    requirements: [REQ-SL-003, REQ-SL-013]
+    category: injection
+    attacker: a prompt author or repository branch name
+    goal: inject terminal control sequences into `sessions` output
+  - id: THREAT-004
+    requirements: [REQ-SL-004]
+    category: file
+    attacker: another local user or process
+    goal: read the ledger, or redirect its writes through a symlink
+  - id: THREAT-005
+    requirements: [REQ-SL-005, REQ-SL-014]
+    category: resource_exhaustion
+    attacker: a huge prompt or a corrupted ledger
+    goal: stall or break every prompt on the machine
+  - id: THREAT-006
+    requirements: [REQ-SL-010]
+    category: file
+    attacker: a symlinked or malformed settings file
+    goal: make the installer overwrite something else, or lose the person's other hooks
+  - id: THREAT-007
+    requirements: [REQ-SL-012]
+    category: xss
+    attacker: a prompt author
+    goal: run script in the local UI through a recorded prompt
+  - id: THREAT-008
+    requirements: [REQ-SL-001]
+    category: authorization
+    attacker: a Grok session (or a prompt steering it)
+    goal: write outside the active skill's write set through a tool name the guard does not map
+  - id: THREAT-009
+    requirements: [REQ-SL-005]
+    category: concurrency
+    attacker: several sessions prompting at once
+    goal: lose ledger entries to an interleaved read-modify-write

@@ -39,7 +39,7 @@ environments:
 policies:
   privacy:
     status: NOT_APPLICABLE
-    rationale: Library gem with no users' data; the only outbound calls are provider model listings and the RubyGems version check, documented in README.md, and nothing about a person is stored or transmitted.
+    rationale: Library gem with no users' data; the only outbound calls are provider model listings and the RubyGems version check, documented in README.md, and nothing about a person is transmitted. Once the optional session hook is installed (`soft-foundry hooks install --sessions`), the user's own machine keeps a local index of their coding sessions in ~/.soft-foundry/sessions.jsonl (folders, branches, and prompt excerpts with secret shapes masked), readable only by that user and never sent anywhere; README.md documents it.
   security:
     status: NOT_APPLICABLE
     rationale: "Maintainer decision (2026-09-15, changes/security-policy-not-applicable): Soft Foundry is a developer tool, not a service that collects or processes user information, so no published security policy is owed. No SECURITY.md exists; vulnerability reports go through the public GitHub repository's issues."

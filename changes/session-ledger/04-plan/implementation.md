@@ -1,0 +1,10 @@
+# Implementation Plan
+
+1. **RED commit.** Tests for every acceptance criterion that can be automated (AC-001..014), failing: `test/session_ledger_test.rb` (capture, masking, modes, lock, Grok detection, lookup, resume, ID validation, quoting, performance), additions to `test/guard_test.rb` (Grok names), `test/hooks_sessions_test.rb` (user-level install and uninstall against a temporary HOME), `test/phase_runner_test.rb` (session IDs), `test/snapshot_test.rb` or `ui_server_test.rb` (recorded sessions on a change).
+2. **Guard.** Add `write search_replace` to the write tools, `read_file` to the read tools (path from `file_path` or `target_file`), `run_terminal_command` to the shell tools.
+3. **`lib/soft_foundry/session_ledger.rb`.** `SessionLedger.new(path:, now:)`: `record(payload, shell:)` (agent detection, ID check, repo/branch/change/phase lookup, sanitize, upsert under flock, modes, symlink refusal), `entries`, `search(words:, change:, phase:, agent:)`, `resume_command(entry)`, `status(entry)`. `SessionLedger.default_path(env)`.
+4. **CLI.** `session log --shell X` (silent wrapper, rescue everything, exit 0), `sessions`, `resume`, `hooks install|uninstall --sessions`, a `doctor` line, help text.
+5. **Hooks.** `Hooks.install_sessions(home)` / `uninstall_sessions(home)`: `UserPromptSubmit` entries with marker `soft-foundry:sessions` in `~/.claude/settings.json`, `~/.codex/hooks.json`, `~/.grok/hooks/soft-foundry-sessions.json`; the find-session `SKILL.md` to `~/.claude/skills/find-session/` and `~/.agents/skills/find-session/`, written only when absent or carrying the marker.
+6. **Runner.** Session ID per shell, `executed_by.session_id`/`cwd`, Codex lookup after the run, `HOOKED_SHELLS` gains grok with the trust-folder warning.
+7. **Snapshot/UI.** `recorded_sessions` on the change detail (filtered by repository root and slug); `app.js` renders "Recorded sessions" with command text.
+8. **Docs and version.** README sections, help, `.ai/schemas.md` `executed_by`, version 0.18.0.
