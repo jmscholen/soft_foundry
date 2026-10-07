@@ -1,7 +1,7 @@
 ---
 phase: '08-attack'
 skill: adversarial-testing
-status: complete
+status: in_progress
 commit_sha: 98b55d14586da5d7ce8485d1148cb9bec48907a1
 started_at: '2026-10-07T22:12:00Z'
 completed_at: '2026-10-07T22:30:00Z'
@@ -30,5 +30,6 @@ findings:
     guarded.'
 next: remediate
 notes: Performed by the interactive session that implemented the change, not an independent
-  attacker. Eight cases, all denied.
+  attacker. Eight cases, all denied. Reopened 2026-10-07 by remediation REM-001 (grok
+  argument order); evidence to be regenerated at the remediated commit.
 executed_by:

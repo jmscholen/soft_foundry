@@ -1,7 +1,7 @@
 ---
 phase: 06-verification
 skill: verification
-status: complete
+status: in_progress
 commit_sha: 98b55d14586da5d7ce8485d1148cb9bec48907a1
 started_at: '2026-10-07T21:54:40Z'
 completed_at: '2026-10-07T22:01:11Z'
@@ -17,5 +17,7 @@ blocking: []
 findings: []
 next: evaluate
 notes: Performed by the interactive session that also implemented the change (not
-  a fresh-context agent). Deterministic checks only; nothing was repaired.
+  a fresh-context agent). Deterministic checks only; nothing was repaired. Reopened
+  2026-10-07 by remediation REM-001 (grok argument order); evidence to be regenerated
+  at the remediated commit.
 executed_by:

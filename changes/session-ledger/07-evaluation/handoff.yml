@@ -1,7 +1,7 @@
 ---
 phase: 07-evaluation
 skill: evaluation
-status: complete
+status: in_progress
 commit_sha: 98b55d14586da5d7ce8485d1148cb9bec48907a1
 started_at: '2026-10-07T22:01:30Z'
 completed_at: '2026-10-07T22:23:47Z'
@@ -32,5 +32,7 @@ findings:
     expired).
 next: attack
 notes: Performed by the interactive session that implemented the change. Live Claude
-  Code and Grok; Codex blocked by its expired login (EVAL-006).
+  Code and Grok; Codex blocked by its expired login (EVAL-006). Reopened 2026-10-07
+  by remediation REM-001 (grok argument order); evidence to be regenerated at the
+  remediated commit.
 executed_by:
