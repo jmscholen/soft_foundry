@@ -1,6 +1,6 @@
 # Evaluation Results
 
-Commit SHA: 2a746801fcf688ae95104973f463856df1468355
+Commit SHA: 4f3b2dadb445605f059bc1ff942d0de183d35044
 
 ## Journey outcomes
 | Journey | Criteria | Result | Evidence |
@@ -10,9 +10,9 @@ Commit SHA: 2a746801fcf688ae95104973f463856df1468355
 | EVAL-003 | REQ-PN-007 | pass | evidence/live-panel-transcript.log |
 | EVAL-004 | REQ-PN-006 | pass | evidence/live-panel-transcript.log |
 
-Third run, after remediations REM-001 and REM-002 (the runs at d1cf0d6 and 2bdc19f are superseded); run on 2026-10-08 from 13:03 UTC with the record commit dca19ae checked out, whose code is 2a74680. Each member wrote its draft in its own temporary folder outside the repository and the runner copied both in. In round 1 Claude Code moved to Grok's position (a root VERSION file holding 0.1.0) with one added finding, Grok accepted, and both ended with the same `agree:` text. Claude Code wrote the four specification files citing both drafts; the gate passed (`panel recorded: 2 members, 1 round, agreed`); `failures` and `dropped` are empty; nothing outside the phase folder changed except the change's metadata. The guard (warn mode) logged two panel narrowings on real sessions: Grok listing the parent of its own temporary folder in the independent stage, and Claude Code running a shell command on the panel folder in the argument stage; neither changed a file, and the run's fingerprints found nothing.
+Fourth run, after remediations REM-001, REM-002, and REM-003 (the runs at d1cf0d6, 2bdc19f, and 2a74680 are superseded); run on 2026-10-08 from 14:44 to 15:04 UTC with the record commit 538b336 checked out, whose code is 4f3b2da, in a scratch repository whose `.gitignore` excludes `.soft-foundry/` as an installed repository's does. Each member wrote its draft in its own temporary folder outside the repository and the runner copied both in; the drafts differed. The members did not agree in round 1 and did in round 2, so this run exercised a second argument round live. Claude Code wrote the specification files citing both drafts; the gate passed (`panel recorded: 2 members, 2 rounds, agreed`); `failures` and `dropped` are empty; the runner's repository-wide comparison found no change outside each stage's allowance; nothing outside the phase folder changed except the change's metadata, which the runner writes.
 
-The three runs settled on different version locations (VERSION file, constant, VERSION file), each from the members' own investigation, which is the independence the panel is for.
+Across the four runs the panels settled on different designs (VERSION file, constant, VERSION file, VERSION file with corrections), each from the members' own investigation.
 
 ## Failures
 None.

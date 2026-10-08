@@ -1,5 +1,5 @@
 ---
-commit_sha: 2a746801fcf688ae95104973f463856df1468355
+commit_sha: 4f3b2dadb445605f059bc1ff942d0de183d35044
 authorization_envelope:
   target: soft-foundry phase run --panel and soft-foundry guard (this checkout)
   environment: local
@@ -105,6 +105,20 @@ cases:
     and the run fails
   observed: 'outcome failed with: panel/grok-1/ changed after the independent round
     (argument stage, round 1, claude-1); no consensus ran'
+  result: denied
+  evidence:
+  - evidence/attack-transcript.log
+- id: ATTACK-008
+  threat: THREAT-002
+  violation_attempted: plant a handoff finding or rewrite application code through
+    a shell variable during the argument
+  starting_privilege: a member session
+  steps:
+  - 'grok-1: f=.../handoff.yml; printf ... >> "$f"'
+  - 'claude-1: f=lib/app.rb; printf planted > "$f"'
+  expected_safe_behavior: the repository-wide comparison fails the run
+  observed: both runs failed naming the file (handoff.yml, lib/app.rb); no consensus
+    ran
   result: denied
   evidence:
   - evidence/attack-transcript.log

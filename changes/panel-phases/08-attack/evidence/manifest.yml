@@ -1,7 +1,7 @@
 ---
-commit_sha: 2a746801fcf688ae95104973f463856df1468355
+commit_sha: 4f3b2dadb445605f059bc1ff942d0de183d35044
 artifacts:
 - path: evidence/attack-transcript.log
   produced_by: guard, refusal, forged-agreement, and REM-001 cases against the real
     CLI
-  sha256: 4a28a01500eb749311cc527b3fab4044851b69e245b832f0d5e7164be914e1ef
+  sha256: 75868dc221e7495686324c12faa2a237ed5fed21cab77071c1c87343e41eeaa8
