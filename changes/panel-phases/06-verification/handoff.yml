@@ -1,7 +1,7 @@
 ---
 phase: 06-verification
 skill: verification
-status: complete
+status: in_progress
 commit_sha: d1cf0d618b8157ab8ff24bfa6379b654a0f47da2
 started_at: '2026-10-08T03:00:00Z'
 completed_at: '2026-10-08T03:18:17Z'
@@ -17,5 +17,5 @@ blocking: []
 findings: []
 next: evaluate
 notes: Performed by the interactive session that implemented the change. Deterministic
-  checks only.
+  checks only. Reopened by remediation REM-001 (REV-FUN-001, REV-SEC-001, -002, -003).
 executed_by:

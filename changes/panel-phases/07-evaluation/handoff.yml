@@ -1,7 +1,7 @@
 ---
 phase: 07-evaluation
 skill: evaluation
-status: complete
+status: in_progress
 commit_sha: d1cf0d618b8157ab8ff24bfa6379b654a0f47da2
 started_at: '2026-10-08T03:04:00Z'
 completed_at: '2026-10-08T03:18:17Z'
@@ -24,5 +24,6 @@ findings:
   summary: Guard warns on shell reads of deny-write paths (pre-existing).
 next: attack
 notes: Performed by the interactive session that implemented the change; the live
-  panel members were fresh Claude Code and Grok sessions.
+  panel members were fresh Claude Code and Grok sessions. Reopened by remediation
+  REM-001 (REV-FUN-001, REV-SEC-001, -002, -003).
 executed_by:

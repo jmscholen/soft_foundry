@@ -24,6 +24,10 @@ class PanelPhasesTest < Minitest::Test
   end
 
   def phase(record, id = "specify") = record.control_plane.phase(id)
+
+  # Where a member writes its independent draft: the folder the runner names
+  # in its environment, else the record's panel folder.
+  def draft_dir(record, l) = l.env["SOFT_FOUNDRY_PANEL_DRAFT_DIR"] || File.join(panel_dir(record), l.member)
   def panel_dir(record, id = "specify") = File.join(record.phase_dir(phase(record, id)), "panel")
 
   # A stand-in for the agents. `opinions` maps a member name to the agree
@@ -35,8 +39,8 @@ class PanelPhasesTest < Minitest::Test
         dir = panel_dir(record)
         case l.stage
         when "independent"
-          FileUtils.mkdir_p(File.join(dir, l.member))
-          File.write(File.join(dir, l.member, "draft.md"), "# #{l.member} draft\nTheory from #{l.member}.\n")
+          FileUtils.mkdir_p(draft_dir(record, l))
+          File.write(File.join(draft_dir(record, l), "draft.md"), "# #{l.member} draft\nTheory from #{l.member}.\n")
         when "argument"
           round = l.round
           line = Array(opinions[l.member])[round - 1]
@@ -172,8 +176,8 @@ class PanelPhasesTest < Minitest::Test
           path = File.join(panel_dir(record), "ARGUMENT.md")
           case l.stage
           when "independent"
-            FileUtils.mkdir_p(File.join(panel_dir(record), l.member))
-            File.write(File.join(panel_dir(record), l.member, "draft.md"), "draft\n")
+            FileUtils.mkdir_p(draft_dir(record, l))
+            File.write(File.join(draft_dir(record, l), "draft.md"), "draft\n")
           when "argument"
             text = l.member == "claude-1" ? "## claude-1, round #{l.round}\nagree: X\n## grok-1, round #{l.round}\nagree: X\n" : "## grok-1, round #{l.round}\nI disagree.\n"
             File.open(path, "a") { |f| f.puts text }
@@ -198,8 +202,8 @@ class PanelPhasesTest < Minitest::Test
           path = File.join(panel_dir(record), "ARGUMENT.md")
           case l.stage
           when "independent"
-            FileUtils.mkdir_p(File.join(panel_dir(record), l.member))
-            File.write(File.join(panel_dir(record), l.member, "draft.md"), "draft\n")
+            FileUtils.mkdir_p(draft_dir(record, l))
+            File.write(File.join(draft_dir(record, l), "draft.md"), "draft\n")
           when "argument"
             File.write(path, "## #{l.member}, round 1\nagree: X\n") # overwrites instead of appending
           when "consensus"

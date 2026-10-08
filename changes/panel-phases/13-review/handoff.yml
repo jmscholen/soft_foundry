@@ -1,7 +1,7 @@
 ---
 phase: 13-review
 skill: review
-status: complete
+status: in_progress
 commit_sha: 726edc107151e91e708ea8ba4ce367ee516bf19f
 started_at: '2026-10-08T03:18:23Z'
 completed_at: '2026-10-08T03:30:00Z'
@@ -84,7 +84,8 @@ notes: Independent review of HEAD 726edc1 (panel code at d1cf0d6). No applicatio
   executable was not launched. Accessibility and policy results are go-live advisories.
   No policy text change is owed. No blocking findings. Majors are for judgment. The
   skipped specification leaves the expected accessibility advisory that no accessibility
-  requirement was recorded. Permissions followed as policy.
+  requirement was recorded. Permissions followed as policy. Reopened by remediation
+  REM-001 (REV-FUN-001, REV-SEC-001, -002, -003).
 executed_by:
   runner: soft-foundry phase run
   shell: grok

@@ -1,7 +1,7 @@
 ---
 phase: '08-attack'
 skill: adversarial-testing
-status: complete
+status: in_progress
 commit_sha: d1cf0d618b8157ab8ff24bfa6379b654a0f47da2
 started_at: '2026-10-08T03:02:00Z'
 completed_at: '2026-10-08T03:18:17Z'
@@ -21,5 +21,5 @@ findings:
   summary: A malformed panel member name disables narrowing instead of failing closed.
 next: remediate
 notes: Performed by the interactive session that implemented the change, not an independent
-  attacker.
+  attacker. Reopened by remediation REM-001 (REV-FUN-001, REV-SEC-001, -002, -003).
 executed_by:
