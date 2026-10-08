@@ -1,22 +1,53 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 13-review
 skill: review
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 2bcd186a2e6b97178c196bef26a05d7ec29100ed
+started_at: '2026-10-08T00:51:24Z'
+completed_at: '2026-10-08T01:01:15Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}
+  provider: xAI
+  model: grok-4.7
+outputs:
+- functional.md
+- architecture.md
+- security.md
+- accessibility.md
+- policy-conformance.md
+- infrastructure.md
+- operations.md
+- consolidated.md
+blocking: []
+findings:
+- id: REV-FUN-001
+  severity: major
+  summary: When one of implement or remediate has a resolvable provider and the other
+    does not, phase run review and phase run judge ignore the known provider and start
+    the first installed shell, which can be the implementer's provider.
+  failure: Implementation is complete with provider anthropic, remediation is complete
+    with a null provider and no shell, and claude, codex, and grok are installed.
+    phase run review with no --shell starts claude, which is anthropic, the same provider
+    as implementation, and the warning only says remediation is not recorded. The
+    known provider required codex. Remediation provider claude-opus with shell claude
+    does the same, because that string becomes nil and the shell is not read.
 next: judge
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: Independent review of HEAD 2bcd186 (lib, test, README, and .ai identical to
+  53e4108). Implementation and earlier phase evidence were not modified. Permissions
+  followed as policy. The RED-test setup correction and the control-plane writes in
+  05-implementation/deviations.md are approved. No blocking findings. Accessibility
+  conforms (declared surface). Policy conformance is N/A (surfaces.policy is false;
+  no policy text change is owed). The specify phase was skipped, so the go-live accessibility
+  advisory about a missing accessibility requirement still applies and is not a defect
+  in this review. This session ran on grok (xAI); implementation and remediation recorded
+  anthropic.
+executed_by:
+  runner: soft-foundry phase run
+  shell: grok
+  fresh_context: true
+  started_at: '2026-10-08T00:51:24Z'
+  finished_at: '2026-10-08T01:03:09Z'
+  exit_status: 0
+  previous_phase: attack
+  session_id: 11bc33bb-1926-4e7a-8abc-ed86c8efe135
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"
