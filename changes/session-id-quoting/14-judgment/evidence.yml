@@ -1,30 +1,90 @@
-commit_judged: TBD
+commit_judged: c34f65cd6dc86c6b523629705884efbfa6450336
 phases:
+  - phase: 00-intake
+    commit_sha: 4eeaa0a3f5cc882876f6764b5a2926a9e82b18ac
+    current: true
+    result: complete
+    note: "REQ-SQ-001..003 and the assumptions are the acceptance bar. The handoff names 4eeaa0a, which is the branch point; the intake files were committed in d08f74e and are unchanged through the judged commit. Not commit-bound code evidence."
+  - phase: 01-discovery
+    commit_sha: null
+    current: true
+    result: skipped
+    note: "Pending, waived in metadata.yml skipped_phases. Rationale: repository discovered in session-ledger; this change adds no technology and touches one file."
+  - phase: 02-specification
+    commit_sha: null
+    current: true
+    result: skipped
+    note: "Pending, waived in metadata.yml skipped_phases. Rationale: intake holds REQ-SQ-001..003. Those three are what this judgment checked."
+  - phase: 03-threat-model
+    commit_sha: null
+    current: true
+    result: skipped
+    note: "Pending, waived in metadata.yml skipped_phases. Rationale: parent THREAT-001, widened to a same-user ledger writer. Covered by 08-attack."
+  - phase: 04-plan
+    commit_sha: null
+    current: true
+    result: skipped
+    note: "Pending, waived in metadata.yml skipped_phases. Rationale: 05-implementation/log.md is the plan record for a change this size."
+  - phase: 05-implementation
+    commit_sha: 6f753070e06ed9eb74b9744541b409429f81afa8
+    current: true
+    result: complete
+    note: "GREEN commit. git diff --name-only 6f75307..c34f65c -- lib exe test infra is empty. RED af7da27. The quoting-oracle correction in deviations.md is approved by review and by this judgment."
   - phase: 06-verification
-    commit_sha: TBD
-    current: TBD   # true when commit_sha matches the judged commit for all code paths
-    result: TBD
+    commit_sha: 6f753070e06ed9eb74b9744541b409429f81afa8
+    current: true
+    result: complete
+    note: "Current for the judged code: no lib, exe, test, or infra diff since this commit. CHECK-001 passed (468 runs, 3129 assertions, 0 failures). CHECK-002 failed as intended at af7da27 (2 runs, 2 failures). Manifest hashes match the logs."
   - phase: 07-evaluation
-    commit_sha: TBD
-    current: TBD
-    result: TBD
+    commit_sha: 6f753070e06ed9eb74b9744541b409429f81afa8
+    current: true
+    result: complete
+    note: "Same code as the judged commit. EVAL-001 and EVAL-002 passed. EVAL-OBS-001 is in-specification (skip with no warning). Transcript hash matches the manifest."
   - phase: 08-attack
-    commit_sha: TBD
-    current: TBD
-    result: TBD
+    commit_sha: 6f753070e06ed9eb74b9744541b409429f81afa8
+    current: true
+    result: complete
+    note: "Same code as the judged commit. ATTACK-001 and ATTACK-002 denied, no violations. Run by the implementing session; review re-read the code and re-ran the new test; this judgment probed trusted? and resume_command. Transcript hash matches the manifest."
+  - phase: 09-remediation
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Optional and not started. Attack findings are empty and review has no blocking findings, so there was nothing to remediate."
+  - phase: 10-user-documentation
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Optional and not started. Valid session commands are unchanged. No new user-facing command. Not missing evidence for REQ-SQ-001..003."
+  - phase: 11-faq-index
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Optional and not started. No separate FAQ was required."
+  - phase: 12-observability
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Optional and not started. surfaces.observability is false. No deployed service and no new production failure mode. Review operations agrees."
   - phase: 13-review
-    commit_sha: TBD
-    current: TBD
-    result: TBD
-unresolved_findings: []
-# Acceptance criteria or judgment conditions left unsatisfied pending a
-# real-world event (production observation, etc.) rather than more
-# repository evidence, e.g.:
-#   - id: AC-060
-#     description: each fix observed corrected on production
-# `soft-foundry change close` refuses to close this change while any id
-# here lacks a human confirmation - via --confirm ID, or a PR comment
-# reading "CONFIRMED: <id>" (see `soft-foundry change request-discharge`)
-# - and then moves it into `discharged` with the confirmation source.
+    commit_sha: d08f74e79af9408d0d34524b803ffc57ae279911
+    current: true
+    result: complete
+    note: "No blocking findings. Handoff bound to d08f74e; prose committed in c34f65c. git diff d08f74e..c34f65c has no lib, exe, test, or infra changes. Residuals are carried in unresolved_findings."
+unresolved_findings:
+  - id: RES-001
+    severity: minor
+    phase: 13-review
+    disposition: acceptable_residual_risk
+    summary: "An id matching SessionLedger::ID that starts with a hyphen is trusted and pasted unchanged. Shellwords.escape does not neutralize it. Not a shell breakout. Agent CLIs were not run. Accepted; not a miss of REQ-SQ-001 or REQ-SQ-002."
+  - id: RES-002
+    severity: minor
+    phase: 13-review
+    disposition: acceptable_residual_risk
+    summary: "A trusted line is still shown with stored cwd and prompt text. Control-character stripping happens on write, not again on read. Out of scope for REQ-SQ-001. The resume command still shell-quotes the folder and the id."
+  - id: EVAL-OBS-001
+    severity: minor
+    phase: 07-evaluation
+    disposition: in_specification
+    summary: "sessions says 0 recorded when every line is untrusted, and suggests fewer search words. The intake chose skip with no warning. The missing-file sentence is different. Not a missed requirement."
 undischarged: []
 discharged: []
