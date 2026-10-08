@@ -202,7 +202,7 @@ module SoftFoundry
         case stage
         when "independent"
           if writes
-            [decision.paths.reject { |p| p.start_with?(ctx[:own]) }, "panel member #{member} may write only its own draft in the independent stage"]
+            [decision.paths, "panel member #{member} may write only its own draft folder outside the repository in the independent stage"]
           elsif shell
             [named.select { |p| p.start_with?(ctx[:phase_dir]) || staged_elsewhere.call(p) }, "panel member #{member} may not touch the phase's files from the shell in the independent stage"]
           else

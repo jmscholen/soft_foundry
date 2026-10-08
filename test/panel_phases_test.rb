@@ -247,7 +247,9 @@ class PanelPhasesTest < Minitest::Test
       base = "changes/c1/02-specification"
       g = ->(stage) { SoftFoundry::Guard.new(dir, env: { "SOFT_FOUNDRY_PANEL_MEMBER" => "claude-1", "SOFT_FOUNDRY_PANEL_STAGE" => stage }) }
       ind = g.call("independent")
-      assert_equal :allow, ind.decide("Write", { "file_path" => "#{base}/panel/claude-1/draft.md" }).outcome
+      # REM-002: independent drafts are written outside the repository, so
+      # no in-repository write is allowed in this stage, not even its own folder.
+      assert ind.decide("Write", { "file_path" => "#{base}/panel/claude-1/draft.md" }).violation?
       assert ind.decide("Write", { "file_path" => "#{base}/panel/grok-1/draft.md" }).violation?
       assert ind.decide("Write", { "file_path" => "#{base}/specification.md" }).violation?
       assert ind.decide("Read", { "file_path" => "#{base}/panel/grok-1/draft.md" }).violation?

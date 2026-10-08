@@ -108,13 +108,21 @@ module SoftFoundry
       FileUtils.mkdir_p(dir)
       notes = []
       failures = []
+      @dropped = []
+      before_independent = fingerprint_phase_folder
       statuses = launcher.call(independent_launches)
+      touched = changed_since(before_independent)
+      unless touched.empty?
+        failures << "the phase folder changed during the independent stage (#{touched.join(', ')})"
+        return Outcome.new(outcome: "failed", rounds: 0, agreed_text: nil, notes: notes, failures: failures, consensus_status: nil)
+      end
       drafted = collect_drafts(statuses, notes)
       if drafted.size < MIN_MEMBERS
         failures << "fewer than two members wrote a draft (#{notes.join('; ')}); nothing to argue"
         return Outcome.new(outcome: "failed", rounds: 0, agreed_text: nil, notes: notes, failures: failures, consensus_status: nil)
       end
       unless drafted.size == @members.size
+        @dropped = @members.map(&:name) - drafted
         @members = @members.select { |m| drafted.include?(m.name) }
         warn.call("! warn panel: continuing with #{@members.map(&:name).join(' and ')}; #{notes.join('; ')}")
       end
@@ -132,10 +140,16 @@ module SoftFoundry
           status = launcher.call([argument_launch(m, round)]).first.to_i
           notes << "#{m.name} exited #{status} in round #{round}" unless status.zero?
           after = File.exist?(argument_path) ? File.read(argument_path) : ""
+          # A draft or a phase output changed by anyone but the runner is not
+          # something a later round can repair: the run fails here.
+          fatal = changed_drafts(frozen).map { |d| "#{d} changed after the independent round (argument stage, round #{round}, #{m.name})" } +
+                  changed_outputs(outputs).map { |f| "#{f} was written before the consensus (argument stage, round #{round}, #{m.name})" }
+          unless fatal.empty?
+            failures.concat(fatal)
+            return Outcome.new(outcome: "failed", rounds: round, agreed_text: nil, notes: notes, failures: failures, consensus_status: nil)
+          end
           problems = []
           problems << "#{m.name} changed ARGUMENT.md text it did not write in round #{round}" unless after.start_with?(before)
-          problems.concat(changed_drafts(frozen).map { |d| "#{d} changed after the independent round (argument stage, round #{round}, #{m.name})" })
-          problems.concat(changed_outputs(outputs).map { |f| "#{f} was written before the consensus (argument stage, round #{round}, #{m.name})" })
           if problems.empty?
             lines[m.name] = status.zero? ? self.class.agree_line(after[before.size..]) : nil
           else
@@ -144,8 +158,6 @@ module SoftFoundry
               notes << note
               warn.call("! warn panel: #{note}; that round cannot end in agreement")
             end
-            frozen = fingerprint_drafts
-            outputs = fingerprint_outputs
           end
         end
         texts = lines.values
@@ -155,7 +167,7 @@ module SoftFoundry
         end
       end
       agreed = !agreed_text.nil?
-      say.call(agreed ? "panel: agreed after #{rounds} #{rounds == 1 ? 'round' : 'rounds'}: #{agreed_text}" : "panel: no agreement after #{rounds} #{rounds == 1 ? 'round' : 'rounds'}")
+      say.call(agreed ? "✓ pass panel: agreed after #{rounds} #{rounds == 1 ? 'round' : 'rounds'}: #{agreed_text}" : "! warn panel: no agreement after #{rounds} #{rounds == 1 ? 'round' : 'rounds'}")
       argument_text = File.read(argument_path)
       consensus_status = launcher.call([consensus_launch(agreed)]).first.to_i
       failures << "#{@members.first.name} exited #{consensus_status} while writing the consensus" unless consensus_status.zero?
@@ -175,7 +187,8 @@ module SoftFoundry
         "outcome" => outcome.outcome,
         "agreed" => outcome.agreed_text,
         "notes" => outcome.notes,
-        "failures" => outcome.failures
+        "failures" => outcome.failures,
+        "dropped" => @dropped || []
       }
     end
 
@@ -227,6 +240,19 @@ module SoftFoundry
     end
 
     def fingerprint(paths) = paths.to_h { |f| [f, Digest::SHA256.file(f).hexdigest] }
+
+    # Every file in the repository's phase folder except the handoff, which
+    # only the runner and the consensus write.
+    def fingerprint_phase_folder
+      pdir = @record.phase_dir(@phase)
+      fingerprint(Dir.glob(File.join(pdir, "**", "*"), File::FNM_DOTMATCH).select { |f| File.file?(f) && File.basename(f) != "handoff.yml" })
+    end
+
+    def changed_since(before)
+      now = fingerprint_phase_folder
+      pdir = @record.phase_dir(@phase)
+      (now.keys | before.keys).reject { |f| now[f] == before[f] }.map { |f| f.delete_prefix("#{pdir}/") }.sort
+    end
 
     def fingerprint_drafts
       @members.to_h { |m| ["panel/#{m.name}/", fingerprint(Dir.glob(File.join(dir, m.name, "**", "*")).select { |f| File.file?(f) })] }
