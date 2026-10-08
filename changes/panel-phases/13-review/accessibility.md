@@ -1,17 +1,19 @@
 # Accessibility Review
 
-Standard: `.ai/rules/accessibility.md` (WCAG 2.2 AA for user interfaces; CLI output, document, and evidence rules). Cite the success criterion or rule in every finding.
+Standard: `.ai/rules/accessibility.md` (command-line and log output rules; document rules for the README). `surfaces.accessibility` is true. No web or native UI is in this change, so WCAG 2.2 AA's widget criteria are not the surface. The CLI rules are.
 
 ## Scope reviewed
 
-`surfaces.accessibility` is true. A person invokes `soft-foundry phase run --panel` and reads its stdout and stderr. No HTML or native UI is added. Examined `CLI#panel_run`, `Panel#run` status lines, the help text, the README panel section, the live transcript in `07-evaluation/evidence/live-panel-transcript.log`, and the lines produced by the stand-in panels in this review. The specification phase was skipped, so there is no requirement with `category: accessibility`. That gap is the go-live advisory the record already produces, not a separate finding.
+Every line `panel_run` and `Panel#run` print: refusals (`✗ fail panel:`), the member and session-count lines (`panel:`), dry-run `would run` lines, `running ... as a panel`, `✓ pass panel: agreed`, `! warn panel: no agreement`, the spoil warning, the dropped-member warning, the split parking warning, and each `✗ fail panel:` failure. Also the generic `CLI#run` rescue, which is where a deleted `ARGUMENT.md` lands, and the panel section of `README.md` (headings, no images, link text is the command itself). No ANSI color is emitted on these paths. Glyphs are accompanied by `pass`, `fail`, or `warn` except on the rescue path below. The specification phase was skipped for this change, so there is no `category: accessibility` requirement; that gap is the go-live advisory the gate already prints, not a new finding.
 
 ## Findings
 
-None. REV-A11Y-001 (refusals and failures did not start with a fail word) and REV-A11Y-002 (the agreed and no-agreement lines had no pass or warn word) are closed. Reproduced here: agreement prints `✓ pass panel: agreed after 1 round: ...`, no agreement prints `! warn panel: no agreement after ...`, a dropped member and a split print `! warn panel:`, and refusals and integrity failures print `✗ fail panel:`. Stripping the glyph leaves `pass`, `warn`, or `fail`.
+| ID | Severity | Location | Finding | Failure it prevents | Rule or requirement |
+| --- | --- | --- | --- | --- | --- |
+| REV-FUN-008 | minor | `Panel#run` argument loop; `CLI#run` rescue of `StandardError` | The reachable failure "member deletes `ARGUMENT.md`" is not a `fail` line. | Argument stage, first of two members, deletes `panel/ARGUMENT.md` (the argument stage may write that path). The next turn raises `Errno::ENOENT`. The person sees `soft-foundry: No such file or directory @ rb_sysopen - .../ARGUMENT.md` and exit 1. There is no `fail` / `warn` word, the handoff stays `pending`, and the line does not say what to do next. A screen reader or a log search for `fail panel` does not find it. | `.ai/rules/accessibility.md`, command-line rules: every outcome carries a word (`pass`, `fail`, `warn`, `skip`, `created`, `conflict`); an error names what went wrong and what to do next. |
 
-The two introductory lines use the stable prefix `panel:` (members, round limit, session ceiling). The `running ... as a panel` line matches the single-session runner. Those are facts, not outcomes. `.ai/rules/accessibility.md` allows a stable searchable prefix for a fact and requires a status word for an outcome.
+The informational `panel:` and `running` lines are not outcomes. They use a stable searchable prefix. Outcome lines for agree, split, refuse, and snapshot failure use `pass`, `warn`, or `fail` plus the glyph. Those match the rule.
 
 ## Conformance
 
-Conforms. No ANSI color is emitted by the runner. Output is one fact per line. The command does not prompt. Error lines name the phase and the reason. A not-applicable statement would be wrong: a person operates the command and reads its output.
+Conforms with advisories. REV-FUN-008 is the advisory. It is not a reason to withhold this handoff.

@@ -1,10 +1,10 @@
 ---
 phase: 13-review
 skill: review
-status: in_progress
-commit_sha: 11c69d2045fe1d1db2e3118b7e3f17f401b95169
-started_at: '2026-10-08T13:17:59Z'
-completed_at: '2026-10-08T13:43:36Z'
+status: complete
+commit_sha: 661b454458508391ba341fea32c5bcb6668d20e8
+started_at: '2026-10-08T15:05:04Z'
+completed_at: '2026-10-08T15:25:16Z'
 resolved_model:
   profile: reasoning_high
   provider: xAI
@@ -20,93 +20,111 @@ outputs:
 - consolidated.md
 blocking: []
 findings:
-- id: REV-SEC-007
+- id: REV-SEC-011
   severity: major
-  summary: handoff.yml is excluded from both fingerprints, so an argument-stage shell
-    assignment can plant findings that a consensus merge keeps, and the gate passes.
-  failure: 'Argument stage, grok-1, Bash f=changes/c1/02-specification/handoff.yml;
-    printf planted > "$f" is allow (reason: names no path denied to specification).
-    The literal redirect of that path is a violation, in the independent and argument
-    stages, as is Write of the handoff. Stand-in --panel claude,grok: grok-1 sets
-    findings to id PLANTED and notes to planted-note during round 1; the consensus
-    only merges status, commit_sha, and completed_at. Exit 0, panel.outcome agreed,
-    panel.failures empty, status complete, panel recorded passes, and the handoff
-    still has that note and that finding. The same assignment is allow in the independent
-    stage.'
-- id: REV-SEC-008
+  summary: A member can list the shared temp directory, copy the other draft, change
+    one byte, and the panel still completes as agreed.
+  failure: 'Independent stage, grok-1. Both soft-foundry-panel-* directories already
+    exist under the system temp directory before either member writes. grok-1 reads
+    the other draft.md and writes those bytes plus one newline. Exit 0, panel.outcome
+    agreed, panel.failures empty, status complete. The stored drafts differ only by
+    that newline.
+
+    '
+- id: REV-SEC-012
   severity: major
-  summary: A shell write outside the phase folder is invisible to the runner. A literal
-    redirect can replace an earlier phase file or metadata.yml, and an assignment
-    can replace application code. The panel still completes as agreed.
-  failure: 'Independent, argument, and consensus Bash printf planted > changes/c1/00-intake/request.md
-    are allow. Independent Bash printf planted > changes/c1/metadata.yml is allow.
-    Independent Bash f=lib/app.rb; printf planted > "$f" is allow; the literal redirect
-    of lib/app.rb is a violation. Write of the intake file is a violation. Stand-in
-    --panel claude,grok, independent stage: replacing 00-intake/request.md exits 0,
-    outcome agreed, failures empty, status complete, panel recorded passes, and the
-    file is the replacement. The same run replacing lib/app.rb leaves puts :planted
-    there. The same run setting metadata risk to planted leaves risk planted.'
-- id: REV-SEC-009
+  summary: A detached child can change a tracked file after the handoff already says
+    agreed. spawn_panel waits only for the direct child.
+  failure: 'Consensus member double-forks with Process.setsid and, once handoff.yml
+    contains outcome agreed, writes lib/app.rb as "puts :planted". Exit 0, panel recorded
+    passes, panel.failures empty, status complete. After the command returns, lib/app.rb
+    is that text.
+
+    '
+- id: REV-SEC-013
   severity: major
-  summary: Independent drafts live under the shared temp directory. A shell scan that
-    does not contain the staging prefix is allowed and can copy another member's draft
-    into the record as a second independent draft.
-  failure: 'Independent Bash cd "${TMPDIR:-/tmp}"; for d in */; do find "$d" -name
-    draft.md -print; done is allow. The same command iterating soft-foundry-panel-*
-    is a violation, and Read of another member''s staging path is a violation. Both
-    staging directories are created before either member runs. Stand-in --panel claude,grok:
-    claude-1 writes "Only claude wrote this sentence."; grok-1 finds that file only
-    by listing Dir.tmpdir and writes those bytes as its own draft. Exit 0, outcome
-    agreed, failures empty, status complete, panel recorded passes, and panel/grok-1/draft.md
-    is byte-identical to panel/claude-1/draft.md. The live panel stored drafts under
-    /var/folders/.../T/soft-foundry-panel-*, the same shared temp directory.'
-- id: REV-SEC-010
+  summary: An argument-stage write of an executable .git/hooks/pre-commit is invisible
+    to git ls-files, and the panel completes as agreed.
+  failure: 'Argument stage, claude-1, writes an executable .git/hooks/pre-commit.
+    git ls-files -co --exclude-standard does not list it. Exit 0, outcome agreed,
+    failures empty, status complete, and the hook is still that script. The next git
+    commit runs it.
+
+    '
+- id: REV-SEC-014
+  severity: major
+  summary: A gitignored .soft-foundry/enforcement.yml is invisible to the snapshot.
+    Quoted mode off turns the guard off for later sessions.
+  failure: 'Argument stage writes .soft-foundry/enforcement.yml. git check-ignore
+    matches .gitignore, git ls-files does not list it, and the panel exits 0 with
+    outcome agreed, failures empty, and status complete, file still present. Guard.mode
+    returns off when that file''s YAML mode is the quoted string off. Later guard
+    calls on the checkout are silent and allow the call. Unquoted off is a YAML boolean
+    and is ignored; the quoted form is not.
+
+    '
+- id: REV-SEC-015
+  severity: major
+  summary: A caught write is left on disk. The next panel run treats it as the baseline
+    and completes as agreed.
+  failure: 'Argument stage writes lib/app.rb as "puts :planted". That run exits 1
+    and names the file. The bytes stay. A blocked phase is not refused, so a second
+    panel whose members never touch lib/app.rb exits 0, outcome agreed, failures empty,
+    status complete, and lib/app.rb is still that text.
+
+    '
+- id: REV-SEC-016
   severity: minor
-  summary: An argument-stage shell assignment can add a dotfile in the phase folder.
-    The output fingerprint does not see dotfiles, so the run still agrees. The same
-    file during the independent stage fails the run.
-- id: REV-FUN-006
+  summary: A detected handoff plant is merged, not replaced, so the blocked handoff
+    still carries the attacker's findings.
+- id: REV-FUN-007
   severity: minor
-  summary: A split whose consensus also changes a draft is parked at awaiting_human.
-    The command exits 1 and names the failure, and the README says a failed panel
-    is not parked.
+  summary: An agree line is not held to one sentence. Both members can append the
+    same paragraph and the panel agrees.
+- id: REV-FUN-008
+  severity: minor
+  summary: Deleting ARGUMENT.md raises Errno::ENOENT. The CLI prints a soft-foundry
+    path error with no fail word, and the handoff stays pending.
+- id: REV-FUN-009
+  severity: minor
+  summary: A consensus-stage stray write blocks the run but leaves panel.outcome as
+    agreed or split, not failed.
 - id: REV-FUN-002
   severity: minor
-  summary: "--shell-arg is accepted; its test shares the GREEN commit d1cf0d6 and
+  summary: "--shell-arg is covered by a test that shares GREEN commit d1cf0d6 and
     has no RED commit of its own."
 - id: REV-ARCH-001
   severity: minor
-  summary: Gate.checks_for lists panel recorded for every panel phase; evaluate runs
+  summary: Gate.checks_for lists panel recorded for every panel phase. evaluate runs
     it only when a complete handoff has a panel block.
 - id: REV-ARCH-002
   severity: minor
   summary: Control-plane and README writes are outside the implementation write set.
     Accepted because REQ-PN-001, REQ-PN-005, and REQ-PN-010 require them.
 next: judge
-notes: 'Third review, after REM-002, at 11c69d2 (panel code 2a74680). First-review
-  majors REV-FUN-001, REV-FUN-003, REV-SEC-001, REV-SEC-002, REV-SEC-003, and REV-A11Y-001
-  are closed. Second-review majors REV-SEC-004, REV-SEC-005, and REV-SEC-006 are closed
-  on the inputs they named, as are REV-FUN-004, REV-FUN-005, and REV-A11Y-002. Controls
-  re-run here: independent specification.md exits 1 outcome failed; argument draft
-  replacement exits 1 outcome failed with no consensus; independent dotfile exits
-  1; in-repo Write of the member folder is a violation. New majors REV-SEC-007, REV-SEC-008,
-  and REV-SEC-009 were reproduced with Guard#decide and panel_run in a throwaway repository.
-  ruby -Ilib:test test/panel_remediation_test.rb passed (29 runs, 185 assertions,
-  0 failures), including the original panel tests. No application, test, infrastructure,
-  or earlier-phase file was modified. Accessibility and policy results are go-live
-  advisories. No policy text change is owed. No blocking findings; majors are for
-  judgment. Provider xAI, not the Anthropic provider that implemented and remediated.
-  Permissions followed as policy; this session did not show a guard refusal, so the
-  write boundary was observed by the agent rather than enforced in-process. The skipped
-  specification leaves the expected accessibility advisory that no accessibility requirement
-  was recorded. Reopened by remediation REM-003 (REV-SEC-007..010, REV-FUN-006).'
+notes: 'Fourth review, after REM-003, at 661b454 (panel code 4f3b2da). Closed and
+  reproduced in a throwaway repository: REV-SEC-007, REV-SEC-008 for a synchronous
+  git-visible write, REV-SEC-009 for byte-identical drafts, REV-SEC-010, and REV-FUN-006.
+  REV-SEC-011 is the temp-directory residual REM-003 asked judgment to accept; it
+  was reproduced and is not called closed. REV-SEC-012, REV-SEC-013, REV-SEC-014,
+  and REV-SEC-015 are holes in the snapshot itself. No application, test, infrastructure,
+  or earlier-phase file was modified. The full verification suite was not re-run;
+  06-verification at this commit records it passing on this tree. Accessibility and
+  policy results are go-live advisories. No policy text change is owed. No blocking
+  findings; majors are for judgment. Provider xAI, not the Anthropic provider that
+  implemented and remediated. Permissions followed as policy; this session did not
+  show a guard refusal, so the write boundary was observed by the agent rather than
+  enforced in-process. The skipped specification leaves the expected accessibility
+  advisory that no accessibility requirement was recorded.
+
+  '
 executed_by:
   runner: soft-foundry phase run
   shell: grok
   fresh_context: true
-  started_at: '2026-10-08T13:17:59Z'
-  finished_at: '2026-10-08T13:44:11Z'
+  started_at: '2026-10-08T15:05:04Z'
+  finished_at: '2026-10-08T15:25:49Z'
   exit_status: 0
   previous_phase: attack
-  session_id: 7fec669b-8065-4020-9ef2-bc3f8349b608
+  session_id: bba3d348-fd37-403d-a565-3b7af9291205
   cwd: "/Users/jscholen-iou/dev/soft_foundry"
