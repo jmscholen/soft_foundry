@@ -14,7 +14,7 @@ No document has status PASS, so there is no published clause to cite. `surfaces.
 
 ## Scope reviewed
 
-What this change collects, shares, retains, or promises. The panel starts coding shells the person already runs, on the person's machine, against the repository. It writes drafts and `ARGUMENT.md` under the change record. It does not add a form, a log of personal data, a recipient, a retention rule, a consent mechanism, or a security promise to a published policy. Session ids in the `panel:` block are ids the runner chose for the local shells, the same kind the single-session runner already records. The live evaluation and the attack phase used synthetic text in a scratch repository.
+What this change collects, shares, retains, or promises. The panel starts coding shells the person already runs, on the person's machine, against the repository. It writes drafts and `ARGUMENT.md` under the change record. It does not add a form, a log of personal data, a recipient, a retention rule, a consent mechanism, or a security promise to a published policy. Session ids in the `panel:` block are ids the runner chose for the local shells, the same kind the single-session runner already records. Staging directories are removed when the run ends. The live evaluation and the attack phase used synthetic text in a scratch repository. REV-SEC-007..009 are integrity failures inside that local record; they do not change what a published policy tells a user.
 
 ## Findings
 
@@ -26,4 +26,4 @@ None.
 
 ## Conformance
 
-N/A. `surfaces.policy` is false. Examined the panel command, the handoff `panel:` block, the prompts, the staging directories (removed after the run), and the three `policies:` entries above. The change does not alter what the application collects, shares, retains, protects, or promises.
+N/A. `surfaces.policy` is false. Examined the panel command, the handoff `panel:` block, the prompts, the staging directories, and the three `policies:` entries above. The change does not alter what the application collects, shares, retains, protects, or promises.

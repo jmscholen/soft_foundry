@@ -1,10 +1,10 @@
 ---
 phase: 13-review
 skill: review
-status: in_progress
-commit_sha: a47a2f35ba68fd3cce6b3e703348e65debaf8ffb
-started_at: '2026-10-08T04:08:01Z'
-completed_at: '2026-10-08T04:27:46Z'
+status: complete
+commit_sha: 11c69d2045fe1d1db2e3118b7e3f17f401b95169
+started_at: '2026-10-08T13:17:59Z'
+completed_at: '2026-10-08T13:43:36Z'
 resolved_model:
   profile: reasoning_high
   provider: xAI
@@ -20,47 +20,56 @@ outputs:
 - consolidated.md
 blocking: []
 findings:
-- id: REV-SEC-004
+- id: REV-SEC-007
   severity: major
-  summary: Independent stage allows an in-repo own-folder write, and a search that
-    names no sibling path can read it.
-  failure: 'Independent stage, specify panel. claude-1 Write to changes/c1/02-specification/panel/claude-1/draft.md
-    is allow (reason: in specification''s write set). grok-1 Grep with pattern Theory
-    and no path is allow (reason: tool Grep is not guarded), as are Glob **/*.md and
-    Grep path changes/c1. Those searches run from the repository root and return the
-    draft before the argument round. Block mode does not stop either call, because
-    neither is a violation. Grep given the sibling path is a violation and is not
-    this case.'
-- id: REV-SEC-005
+  summary: handoff.yml is excluded from both fingerprints, so an argument-stage shell
+    assignment can plant findings that a consensus merge keeps, and the gate passes.
+  failure: 'Argument stage, grok-1, Bash f=changes/c1/02-specification/handoff.yml;
+    printf planted > "$f" is allow (reason: names no path denied to specification).
+    The literal redirect of that path is a violation, in the independent and argument
+    stages, as is Write of the handoff. Stand-in --panel claude,grok: grok-1 sets
+    findings to id PLANTED and notes to planted-note during round 1; the consensus
+    only merges status, commit_sha, and completed_at. Exit 0, panel.outcome agreed,
+    panel.failures empty, status complete, panel recorded passes, and the handoff
+    still has that note and that finding. The same assignment is allow in the independent
+    stage.'
+- id: REV-SEC-008
   severity: major
-  summary: An argument-stage shell assignment can replace another draft, and the next
-    round can agree to the replacement.
-  failure: 'Argument stage, claude-1, Bash f=changes/c1/02-specification/panel/grok-1/draft.md;
-    printf replaced > "$f" is allow (reason: names no path denied to specification).
-    The direct cp of those two paths is a violation. Stand-in --panel claude,grok
-    --max-rounds 2 with that replacement in round 1 and both members agreeing on round
-    2: command exits 0, panel.outcome is agreed, rounds is 2, status is complete,
-    panel/grok-1/draft.md is the replacement, panel.failures is empty. The note says
-    the draft changed. The gate would cite the replaced file.'
-- id: REV-SEC-006
+  summary: A shell write outside the phase folder is invisible to the runner. A literal
+    redirect can replace an earlier phase file or metadata.yml, and an assignment
+    can replace application code. The panel still completes as agreed.
+  failure: 'Independent, argument, and consensus Bash printf planted > changes/c1/00-intake/request.md
+    are allow. Independent Bash printf planted > changes/c1/metadata.yml is allow.
+    Independent Bash f=lib/app.rb; printf planted > "$f" is allow; the literal redirect
+    of lib/app.rb is a violation. Write of the intake file is a violation. Stand-in
+    --panel claude,grok, independent stage: replacing 00-intake/request.md exits 0,
+    outcome agreed, failures empty, status complete, panel recorded passes, and the
+    file is the replacement. The same run replacing lib/app.rb leaves puts :planted
+    there. The same run setting metadata risk to planted leaves risk planted.'
+- id: REV-SEC-009
   severity: major
-  summary: An independent-stage shell assignment can write a phase output, and that
-    write is the fingerprint baseline.
-  failure: 'Independent stage, Bash f=changes/c1/02-specification/specification.md;
-    printf x > "$f" is allow. The direct redirect of that path is a violation. Stand-in
-    claude,grok panel whose independent stage writes "POISONED during independent"
-    into specification.md and whose consensus edits that file in place: command exits
-    0, outcome agreed, status complete, panel.failures empty, no warn line, and specification.md
-    still starts with the injected line.'
-- id: REV-FUN-004
+  summary: Independent drafts live under the shared temp directory. A shell scan that
+    does not contain the staging prefix is allowed and can copy another member's draft
+    into the record as a second independent draft.
+  failure: 'Independent Bash cd "${TMPDIR:-/tmp}"; for d in */; do find "$d" -name
+    draft.md -print; done is allow. The same command iterating soft-foundry-panel-*
+    is a violation, and Read of another member''s staging path is a violation. Both
+    staging directories are created before either member runs. Stand-in --panel claude,grok:
+    claude-1 writes "Only claude wrote this sentence."; grok-1 finds that file only
+    by listing Dir.tmpdir and writes those bytes as its own draft. Exit 0, outcome
+    agreed, failures empty, status complete, panel recorded passes, and panel/grok-1/draft.md
+    is byte-identical to panel/claude-1/draft.md. The live panel stored drafts under
+    /var/folders/.../T/soft-foundry-panel-*, the same shared temp directory.'
+- id: REV-SEC-010
   severity: minor
-  summary: A three-or-four-member panel completes as agreed without a member who wrote
-    no draft. The warning and panel.notes name who was dropped; panel.members does
-    not.
-- id: REV-FUN-005
+  summary: An argument-stage shell assignment can add a dotfile in the phase folder.
+    The output fingerprint does not see dotfiles, so the run still agrees. The same
+    file during the independent stage fails the run.
+- id: REV-FUN-006
   severity: minor
-  summary: A draft written only at panel/<member>/ is reported as no draft and the
-    panel fails closed, leaving the file in the phase folder.
+  summary: A split whose consensus also changes a draft is parked at awaiting_human.
+    The command exits 1 and names the failure, and the README says a failed panel
+    is not parked.
 - id: REV-FUN-002
   severity: minor
   summary: "--shell-arg is accepted; its test shares the GREEN commit d1cf0d6 and
@@ -73,29 +82,31 @@ findings:
   severity: minor
   summary: Control-plane and README writes are outside the implementation write set.
     Accepted because REQ-PN-001, REQ-PN-005, and REQ-PN-010 require them.
-- id: REV-A11Y-002
-  severity: minor
-  summary: The agreed and no-agreement lines have no pass/fail/warn/skip word. Refusals
-    use "fail panel:" and the split uses "warn panel:".
 next: judge
-notes: Second review, after REM-001, at a47a2f3 (panel code 2bdc19f). First-review
+notes: 'Third review, after REM-002, at 11c69d2 (panel code 2a74680). First-review
   majors REV-FUN-001, REV-FUN-003, REV-SEC-001, REV-SEC-002, REV-SEC-003, and REV-A11Y-001
-  are closed; panel_phases_test and panel_remediation_test passed (24 runs, 167 assertions).
-  New majors REV-SEC-004, REV-SEC-005, and REV-SEC-006 were reproduced with Guard#decide
-  and panel_run in a throwaway repository. No application, test, infrastructure, or
-  earlier-phase file was modified. Accessibility and policy results are go-live advisories.
-  No policy text change is owed. No blocking findings; majors are for judgment. Provider
-  xAI, not the Anthropic provider that implemented and remediated. Permissions followed
-  as policy. The skipped specification leaves the expected accessibility advisory
-  that no accessibility requirement was recorded. Reopened by remediation REM-002
-  (REV-SEC-004, -005, -006).
+  are closed. Second-review majors REV-SEC-004, REV-SEC-005, and REV-SEC-006 are closed
+  on the inputs they named, as are REV-FUN-004, REV-FUN-005, and REV-A11Y-002. Controls
+  re-run here: independent specification.md exits 1 outcome failed; argument draft
+  replacement exits 1 outcome failed with no consensus; independent dotfile exits
+  1; in-repo Write of the member folder is a violation. New majors REV-SEC-007, REV-SEC-008,
+  and REV-SEC-009 were reproduced with Guard#decide and panel_run in a throwaway repository.
+  ruby -Ilib:test test/panel_remediation_test.rb passed (29 runs, 185 assertions,
+  0 failures), including the original panel tests. No application, test, infrastructure,
+  or earlier-phase file was modified. Accessibility and policy results are go-live
+  advisories. No policy text change is owed. No blocking findings; majors are for
+  judgment. Provider xAI, not the Anthropic provider that implemented and remediated.
+  Permissions followed as policy; this session did not show a guard refusal, so the
+  write boundary was observed by the agent rather than enforced in-process. The skipped
+  specification leaves the expected accessibility advisory that no accessibility requirement
+  was recorded.'
 executed_by:
   runner: soft-foundry phase run
   shell: grok
   fresh_context: true
-  started_at: '2026-10-08T04:08:01Z'
-  finished_at: '2026-10-08T04:32:17Z'
+  started_at: '2026-10-08T13:17:59Z'
+  finished_at: '2026-10-08T13:44:11Z'
   exit_status: 0
   previous_phase: attack
-  session_id: c5f66d62-ae16-4aab-bede-61125d33b752
+  session_id: 7fec669b-8065-4020-9ef2-bc3f8349b608
   cwd: "/Users/jscholen-iou/dev/soft_foundry"
