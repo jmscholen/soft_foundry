@@ -20,7 +20,12 @@ surfaces:
   accessibility: true
   observability: false
   policy: false
-human_decisions: []
+human_decisions:
+- boundary: residual risk acceptance
+  subject: "panel members are same-user agent sessions, not sandboxed; the fourth review's REV-SEC-011..015 (detached processes, .git/hooks, ignored files, copy-and-tweak drafts, leftovers from a failed run) are accepted as residual risk; cheap fixes (rerun refusal over a failed run, the ARGUMENT.md crash, outcome failed on consensus stray writes) go to a follow-up change"
+  decided_by: maintainer (in the session that built the change)
+  decided_at: "2026-10-08T17:39:56Z"
+  decision: approved
 vetted:
 reopenings: []
 skipped_phases:
