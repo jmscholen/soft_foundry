@@ -1,24 +1,97 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 13-review
 skill: review
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 726edc107151e91e708ea8ba4ce367ee516bf19f
+started_at: '2026-10-08T03:18:23Z'
+completed_at: '2026-10-08T03:30:00Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: xAI
+  model: grok-4.7
+outputs:
+- functional.md
+- architecture.md
+- security.md
+- accessibility.md
+- policy-conformance.md
+- infrastructure.md
+- operations.md
+- consolidated.md
+blocking: []
+findings:
+- id: REV-FUN-001
+  severity: major
+  summary: Member process results are discarded. A non-zero consensus exit after agreement
+    exits 0 with the handoff still pending. Members that exit non-zero without writing
+    are parked as a panel split with exit_status 0. A missing later executable leaves
+    any member already spawned running.
+  failure: 'phase run specify --panel claude,grok --max-rounds 1, both members append
+    agree: same, and the consensus launcher returns 1 without editing the handoff:
+    the command exits 0, status stays pending, executed_by.exit_status is 0, panel.outcome
+    is agreed, and the gate skips every check. The same launcher returning 1 from
+    every stage with no writes parks the change at awaiting_human as a split. --panel
+    grok,claude when claude is not on PATH spawns grok and then raises, leaving that
+    process running.'
+- id: REV-SEC-001
+  severity: major
+  summary: Shell commands escape panel write narrowing. Independent-stage Bash can
+    write the phase files. Argument-stage Bash can replace another member's draft.
+  failure: 'Independent stage, member claude-1, Bash command `printf x > changes/c1/02-specification/specification.md`:
+    Guard allows it (names no path denied to specification), so the member writes
+    the phase output before the argument round. Argument-stage `cp` of claude-1''s
+    draft onto grok-1''s draft is also allowed, and the spoil check only watches ARGUMENT.md.'
+- id: REV-SEC-002
+  severity: major
+  summary: Unguarded tools escape independent-stage read narrowing. Claude Code Grep
+    reads another member's draft.
+  failure: 'Independent stage, tool Grep, path changes/c1/02-specification/panel/grok-1/draft.md:
+    Guard allows it because Grep is not a guarded tool and carries no path, so claude-1
+    reads grok-1''s draft before the argument round.'
+- id: REV-SEC-003
+  severity: major
+  summary: The consensus stage is not narrowed, so the writer can replace the drafts
+    the gate cites, and the agree sentence is copied into the consensus instructions.
+  failure: Consensus-stage Write to changes/c1/02-specification/panel/grok-1/draft.md
+    is allowed. claude-1 replaces grok-1's draft, cites panel/grok-1/, and panel recorded
+    passes on the replaced file. The consensus prompt interpolates that round's agree
+    sentence into the instruction text, and the prompt tells the member the prompt
+    is its instructions, so a sentence the other member was told to copy becomes part
+    of the consensus instructions.
+- id: REV-FUN-002
+  severity: minor
+  summary: "--shell-arg is accepted; its test shares the GREEN commit and has no RED
+    commit of its own."
+- id: REV-FUN-003
+  severity: minor
+  summary: Dry run prints the independent-round commands only, not the later resume
+    or consensus commands.
+- id: REV-ARCH-001
+  severity: minor
+  summary: Gate.checks_for lists panel recorded for every panel phase; evaluate runs
+    it only when a complete handoff has a panel block.
+- id: REV-ARCH-002
+  severity: minor
+  summary: Control-plane and README writes are outside the implementation write set.
+    Accepted because REQ-PN-001, REQ-PN-005, and REQ-PN-010 require them.
+- id: REV-A11Y-001
+  severity: minor
+  summary: 'Panel refusals have no fail/warn status word and no panel: prefix.'
 next: judge
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: Independent review of HEAD 726edc1 (panel code at d1cf0d6). No application,
+  test, infrastructure, or earlier-phase file was modified. Guard decisions and the
+  two launcher failure cases were reproduced in a throwaway repository; a missing
+  executable was not launched. Accessibility and policy results are go-live advisories.
+  No policy text change is owed. No blocking findings. Majors are for judgment. The
+  skipped specification leaves the expected accessibility advisory that no accessibility
+  requirement was recorded. Permissions followed as policy.
+executed_by:
+  runner: soft-foundry phase run
+  shell: grok
+  fresh_context: true
+  started_at: '2026-10-08T03:18:23Z'
+  finished_at: '2026-10-08T03:31:18Z'
+  exit_status: 0
+  previous_phase: attack
+  session_id: 2f0ecc74-4333-461e-b796-0df707db5fba
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"
