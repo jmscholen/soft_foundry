@@ -6,6 +6,7 @@ require "fileutils"
 require "securerandom"
 require "tmpdir"
 require "digest"
+require "open3"
 require_relative "control_plane"
 require_relative "change_record"
 require_relative "phase_provider"
@@ -104,60 +105,69 @@ module SoftFoundry
     # Runs every stage through `launcher`, which takes an array of launches
     # to start together and returns their exit statuses. `say` and `warn`
     # receive status lines for the person.
+    #
+    # The runner, not the guard, is the authority on what changed: a member
+    # is an agent with a shell, and a shell can always hide a path. Between
+    # stages the runner compares every file git can see in the repository.
+    # Nothing may change in the independent stage (drafts go outside the
+    # repository); in an argument turn only ARGUMENT.md may change, by
+    # appending; in the consensus only the phase's own files outside panel/.
     def run(launcher, say:, warn:)
       FileUtils.mkdir_p(dir)
       notes = []
       failures = []
       @dropped = []
-      before_independent = fingerprint_phase_folder
+      failed = ->(rounds) { Outcome.new(outcome: "failed", rounds: rounds, agreed_text: nil, notes: notes, failures: failures, consensus_status: nil) }
+
+      before = repository_snapshot
       statuses = launcher.call(independent_launches)
-      touched = changed_since(before_independent)
+      touched = changed_files(before)
       unless touched.empty?
-        failures << "the phase folder changed during the independent stage (#{touched.join(', ')})"
-        return Outcome.new(outcome: "failed", rounds: 0, agreed_text: nil, notes: notes, failures: failures, consensus_status: nil)
+        failures << "the repository changed during the independent stage (#{touched.join(', ')})"
+        return failed.call(0)
       end
       drafted = collect_drafts(statuses, notes)
       if drafted.size < MIN_MEMBERS
         failures << "fewer than two members wrote a draft (#{notes.join('; ')}); nothing to argue"
-        return Outcome.new(outcome: "failed", rounds: 0, agreed_text: nil, notes: notes, failures: failures, consensus_status: nil)
+        return failed.call(0)
       end
       unless drafted.size == @members.size
         @dropped = @members.map(&:name) - drafted
         @members = @members.select { |m| drafted.include?(m.name) }
         warn.call("! warn panel: continuing with #{@members.map(&:name).join(' and ')}; #{notes.join('; ')}")
       end
+      copies = identical_drafts
+      unless copies.empty?
+        failures.concat(copies.map { |a, b| "#{b}'s draft is identical to #{a}'s; a panel needs independent drafts" })
+        return failed.call(0)
+      end
       File.write(argument_path, "# Argument\n\n") unless File.exist?(argument_path)
-      frozen = fingerprint_drafts
-      outputs = fingerprint_outputs
+
       agreed_text = nil
       rounds = 0
+      argument_rel = repo_relative(argument_path)
       (1..@max_rounds).each do |round|
         rounds = round
         lines = {}
         spoiled = false
         @members.each do |m|
-          before = File.exist?(argument_path) ? File.read(argument_path) : ""
+          snap = repository_snapshot
+          text_before = File.read(argument_path)
           status = launcher.call([argument_launch(m, round)]).first.to_i
           notes << "#{m.name} exited #{status} in round #{round}" unless status.zero?
-          after = File.exist?(argument_path) ? File.read(argument_path) : ""
-          # A draft or a phase output changed by anyone but the runner is not
-          # something a later round can repair: the run fails here.
-          fatal = changed_drafts(frozen).map { |d| "#{d} changed after the independent round (argument stage, round #{round}, #{m.name})" } +
-                  changed_outputs(outputs).map { |f| "#{f} was written before the consensus (argument stage, round #{round}, #{m.name})" }
-          unless fatal.empty?
-            failures.concat(fatal)
-            return Outcome.new(outcome: "failed", rounds: round, agreed_text: nil, notes: notes, failures: failures, consensus_status: nil)
+          stray = changed_files(snap) - [argument_rel]
+          unless stray.empty?
+            failures << "files changed during the argument (round #{round}, #{m.name}): #{stray.join(', ')}"
+            return failed.call(round)
           end
-          problems = []
-          problems << "#{m.name} changed ARGUMENT.md text it did not write in round #{round}" unless after.start_with?(before)
-          if problems.empty?
-            lines[m.name] = status.zero? ? self.class.agree_line(after[before.size..]) : nil
+          text_after = File.exist?(argument_path) ? File.read(argument_path) : ""
+          if text_after.start_with?(text_before)
+            lines[m.name] = status.zero? ? self.class.agree_line(text_after[text_before.size..]) : nil
           else
             spoiled = true
-            problems.each do |note|
-              notes << note
-              warn.call("! warn panel: #{note}; that round cannot end in agreement")
-            end
+            note = "#{m.name} changed ARGUMENT.md text it did not write in round #{round}"
+            notes << note
+            warn.call("! warn panel: #{note}; that round cannot end in agreement")
           end
         end
         texts = lines.values
@@ -168,11 +178,14 @@ module SoftFoundry
       end
       agreed = !agreed_text.nil?
       say.call(agreed ? "✓ pass panel: agreed after #{rounds} #{rounds == 1 ? 'round' : 'rounds'}: #{agreed_text}" : "! warn panel: no agreement after #{rounds} #{rounds == 1 ? 'round' : 'rounds'}")
-      argument_text = File.read(argument_path)
+
+      snap = repository_snapshot
       consensus_status = launcher.call([consensus_launch(agreed)]).first.to_i
       failures << "#{@members.first.name} exited #{consensus_status} while writing the consensus" unless consensus_status.zero?
-      changed_drafts(frozen).each { |d| failures << "#{d} changed after the independent round (consensus stage, #{@members.first.name})" }
-      failures << "panel/ARGUMENT.md changed during the consensus (#{@members.first.name})" unless File.read(argument_path) == argument_text
+      phase_rel = "#{repo_relative(@record.phase_dir(@phase))}/"
+      panel_rel = "#{repo_relative(dir)}/"
+      stray = changed_files(snap).reject { |f| f.start_with?(phase_rel) && !f.start_with?(panel_rel) }
+      failures << "files other than the phase's own outputs changed during the consensus (#{@members.first.name}): #{stray.join(', ')}" unless stray.empty?
       Outcome.new(outcome: agreed ? "agreed" : "split", rounds: rounds, agreed_text: agreed_text, notes: notes, failures: failures, consensus_status: consensus_status)
     ensure
       (@staging || {}).each_value { |d| FileUtils.rm_rf(File.dirname(d)) if d.include?(STAGING_PREFIX) }
@@ -239,36 +252,32 @@ module SoftFoundry
       end
     end
 
-    def fingerprint(paths) = paths.to_h { |f| [f, Digest::SHA256.file(f).hexdigest] }
-
-    # Every file in the repository's phase folder except the handoff, which
-    # only the runner and the consensus write.
-    def fingerprint_phase_folder
-      pdir = @record.phase_dir(@phase)
-      fingerprint(Dir.glob(File.join(pdir, "**", "*"), File::FNM_DOTMATCH).select { |f| File.file?(f) && File.basename(f) != "handoff.yml" })
+    # Every file git can see in the repository (tracked, or untracked and not
+    # ignored), with a digest; a tracked file that is gone maps to :missing.
+    def repository_snapshot
+      out, status = Open3.capture2("git", "-C", @root, "ls-files", "-co", "--exclude-standard", "-z")
+      raise "git ls-files failed in #{@root}" unless status.success?
+      out.split("\0").to_h do |rel|
+        path = File.join(@root, rel)
+        [rel, File.file?(path) ? Digest::SHA256.file(path).hexdigest : :missing]
+      end
     end
 
-    def changed_since(before)
-      now = fingerprint_phase_folder
-      pdir = @record.phase_dir(@phase)
-      (now.keys | before.keys).reject { |f| now[f] == before[f] }.map { |f| f.delete_prefix("#{pdir}/") }.sort
+    def changed_files(before)
+      now = repository_snapshot
+      (now.keys | before.keys).reject { |f| now[f] == before[f] }.sort
     end
 
-    def fingerprint_drafts
-      @members.to_h { |m| ["panel/#{m.name}/", fingerprint(Dir.glob(File.join(dir, m.name, "**", "*")).select { |f| File.file?(f) })] }
-    end
+    def repo_relative(path) = File.expand_path(path).delete_prefix("#{File.realpath(@root)}/").delete_prefix("#{@root}/")
 
-    def changed_drafts(before) = fingerprint_drafts.reject { |k, v| before[k] == v }.keys
-
-    # The phase's own files, outside panel/, which only the consensus writes.
-    def fingerprint_outputs
-      pdir = @record.phase_dir(@phase)
-      fingerprint(Dir.glob(File.join(pdir, "**", "*")).select { |f| File.file?(f) && !f.start_with?("#{dir}/") && File.basename(f) != "handoff.yml" })
-    end
-
-    def changed_outputs(before)
-      now = fingerprint_outputs
-      (now.keys | before.keys).reject { |f| now[f] == before[f] }.map { |f| f.delete_prefix("#{@record.phase_dir(@phase)}/") }
+    # Pairs of members whose drafts are byte-for-byte the same.
+    def identical_drafts
+      digests = @members.to_h do |m|
+        files = Dir.glob(File.join(dir, m.name, "**", "*")).select { |f| File.file?(f) }.sort
+        [m.name, Digest::SHA256.hexdigest(files.map { |f| File.binread(f) }.join("\0"))]
+      end
+      names = digests.keys
+      names.each_with_index.flat_map { |a, i| names[(i + 1)..].select { |b| digests[a] == digests[b] }.map { |b| [a, b] } }
     end
 
     def launch(member, stage, round: nil, agreed: nil)

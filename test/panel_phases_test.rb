@@ -177,7 +177,7 @@ class PanelPhasesTest < Minitest::Test
           case l.stage
           when "independent"
             FileUtils.mkdir_p(draft_dir(record, l))
-            File.write(File.join(draft_dir(record, l), "draft.md"), "draft\n")
+            File.write(File.join(draft_dir(record, l), "draft.md"), "draft by #{l.member}\n")
           when "argument"
             text = l.member == "claude-1" ? "## claude-1, round #{l.round}\nagree: X\n## grok-1, round #{l.round}\nagree: X\n" : "## grok-1, round #{l.round}\nI disagree.\n"
             File.open(path, "a") { |f| f.puts text }
@@ -203,7 +203,7 @@ class PanelPhasesTest < Minitest::Test
           case l.stage
           when "independent"
             FileUtils.mkdir_p(draft_dir(record, l))
-            File.write(File.join(draft_dir(record, l), "draft.md"), "draft\n")
+            File.write(File.join(draft_dir(record, l), "draft.md"), "draft by #{l.member}\n")
           when "argument"
             File.write(path, "## #{l.member}, round 1\nagree: X\n") # overwrites instead of appending
           when "consensus"

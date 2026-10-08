@@ -964,14 +964,14 @@ module SoftFoundry
         h["status"] = "blocked"
         h["blocking"] = Array(h["blocking"]) + outcome.failures.map { |f| "panel failed: #{f}" }
       end
-      if outcome.outcome == "split"
+      if outcome.outcome == "split" && outcome.failures.empty?
         h["status"] = "blocked"
         blocking = Array(h["blocking"])
         blocking << "panel split: the panel did not agree after #{outcome.rounds} rounds; a person decides between the positions in #{phase.output}/panel/ARGUMENT.md" unless blocking.any? { |b| b.to_s.start_with?("panel split") }
         h["blocking"] = blocking
       end
       File.write(handoff_path, YAML.dump(h))
-      if outcome.outcome == "split"
+      if outcome.outcome == "split" && outcome.failures.empty?
         meta = record.metadata
         meta["status"] = "awaiting_human"
         File.write(meta_path, YAML.dump(meta))
