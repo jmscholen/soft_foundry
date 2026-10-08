@@ -1,4 +1,4 @@
-# commit 53e4108fc38bb3077a3057b161328067ca06dc7e; scratch /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/xp-eval.dtHJ
+# commit a963a27e4fc34e5200aa212bbc9d51d67e293cd1; scratch /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/xp-eval.rHei
 ### ATTACK-001 slip a major finding past findings explained
 --- severity in capitals
   ✗ fail findings explained: no failure: on A1; every finding above minor names the concrete input or state and the wrong result it leads to, or it is minor

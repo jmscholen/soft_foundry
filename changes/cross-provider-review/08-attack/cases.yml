@@ -1,5 +1,5 @@
 ---
-commit_sha: 53e4108fc38bb3077a3057b161328067ca06dc7e
+commit_sha: a963a27e4fc34e5200aa212bbc9d51d67e293cd1
 authorization_envelope:
   target: soft-foundry gate review and the advisory (this checkout)
   environment: local

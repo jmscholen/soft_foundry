@@ -1,5 +1,5 @@
 ---
-commit_sha: 53e4108fc38bb3077a3057b161328067ca06dc7e
+commit_sha: a963a27e4fc34e5200aa212bbc9d51d67e293cd1
 journeys:
 - id: EVAL-001
   criteria:
@@ -63,6 +63,19 @@ journeys:
   - phase run review --dry-run with non-ASCII bytes deleted
   assertions:
   - the shell line keeps its meaning
+  evidence:
+  - evidence/journey-transcript.log
+  result: pass
+- id: EVAL-006
+  criteria:
+  - REQ-XP-003
+  persona: the maintainer
+  starting_state: implementation on anthropic, remediation complete with no provider
+    recorded
+  steps:
+  - phase run review --dry-run
+  assertions:
+  - codex is chosen, not claude, with a warn line naming the missing provider
   evidence:
   - evidence/journey-transcript.log
   result: pass

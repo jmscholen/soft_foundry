@@ -1,6 +1,6 @@
 ---
-commit_sha: 53e4108fc38bb3077a3057b161328067ca06dc7e
+commit_sha: a963a27e4fc34e5200aa212bbc9d51d67e293cd1
 artifacts:
 - path: evidence/attack-transcript.log
   produced_by: two cases with the real CLI against a scratch repository
-  sha256: 3d4fbe7ec59936b49b25008974ef96082b321abd9ff19f8c4c770b79827435de
+  sha256: e2c60c1156426ac05ce6e5864d47f312ca5cc62f6937727194717635c99b000d

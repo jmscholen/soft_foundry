@@ -1,6 +1,6 @@
 # Attack Results
 
-Commit SHA: 53e4108fc38bb3077a3057b161328067ca06dc7e
+Commit SHA: a963a27e4fc34e5200aa212bbc9d51d67e293cd1
 
 ## Authorization envelope
 Local CLI processes and a scratch repository; synthetic handoffs; nothing destructive. See `cases.yml`.

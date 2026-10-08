@@ -1,18 +1,18 @@
 ---
-commit_sha: 53e4108fc38bb3077a3057b161328067ca06dc7e
+commit_sha: a963a27e4fc34e5200aa212bbc9d51d67e293cd1
 artifacts:
 - path: evidence/tests.log
   produced_by: full suite
-  sha256: 435cd1c885649f3bcb1ec46ba3432cb2bb86a81cf1dcbe2cac951d127d5e59e4
+  sha256: 74fd2a9d01e4dec6ac4ff12ddee8fdda32947e6f8c85e6e839544180541b614d
 - path: evidence/red-at-eb3ace3.log
   produced_by: new tests at the RED commit
-  sha256: 65528b9c001940734a8ac4103aca8ad6b8561405e555838e6d5f8d277e700e5c
+  sha256: '0768fb82fd6ef8143f7e47165da144f2d0dc365c13c74585b07c9c6d588ab96d'
 - path: evidence/check.log
   produced_by: soft-foundry check
-  sha256: d0c56a3b8d1375e81e671b9922ee086895d455da0cf15aa41cdc81f7de2716ae
+  sha256: 8a3aa97f6b5f067042aedc7fff2eff70ce049a5bb4f08ed03ce8f5334e912602
 - path: evidence/syntax-warnings.log
   produced_by: ruby -wc
-  sha256: dc7ed893a976fd031b7e4c07659d9923672e7fae88cbf459eb9c2c25f690fdf3
+  sha256: 612180acdfda7f57cf20cb5e41a5d46dd17c6ddbc8b8e483ddbdd6de4ec35b65
 - path: evidence/scan-against-self.log
   produced_by: soft-foundry scan
-  sha256: 2a158498bad8fee40c4a321472623f4cae05152dc8528e6c55f9fe7ee834108f
+  sha256: ea363b93053ab4f423fd748b80f87153add8adaf2779773ece0d7e016e773fce

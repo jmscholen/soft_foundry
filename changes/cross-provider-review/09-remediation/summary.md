@@ -16,3 +16,9 @@ Verification, evaluation, and attack evidence at 0370e02.
 
 ## Required reruns
 Verification, evaluation, and attack, all at the remediated commit; ATTACK-001 must now deny the `critical` case.
+
+## REM-002 (from 13-review)
+- **Finding.** REV-FUN-001 (major), from the first review (fresh Grok session): when implementation's provider was known and remediation's was not, the runner fell back to the first installed shell, which could be implementation's own provider; and a provider string it did not recognize (`claude-opus`) became unknown without reading the recorded shell.
+- **Root cause.** `default_shell` treated any unknown provider as "nothing is known", and `PhaseProvider.of` stopped at an unrecognized name.
+- **Changes.** RED `b4dd692` (two tests; the same commit reopened 06, 07, 08, and 13). GREEN `a963a27`: known providers are always avoided; with some unknown, the choice still differs from the known ones and a `! warn shell:` line names what is missing; an unrecognized name falls back to `executed_by.shell`. README states it.
+- **Evidence invalidated.** Verification, evaluation, attack, and review at 2bcd186. All rerun at a963a27; review runs again in a fresh session.
