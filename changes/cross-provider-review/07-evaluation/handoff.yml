@@ -1,7 +1,7 @@
 ---
 phase: 07-evaluation
 skill: evaluation
-status: complete
+status: in_progress
 commit_sha: 0370e02436d1b5a2a60fdaa057db67d19dabd158
 started_at: '2026-10-08T00:52:00Z'
 completed_at: '2026-10-08T00:44:03Z'
@@ -21,5 +21,7 @@ findings:
   summary: On this machine the review default is Codex, whose login has expired; use
     --shell grok until it is renewed.
 next: attack
-notes: Performed by the interactive session that implemented the change.
+notes: Performed by the interactive session that implemented the change. Reopened
+  by remediation REM-001 (FIND-ATK-001); evidence to be regenerated at the remediated
+  commit.
 executed_by:

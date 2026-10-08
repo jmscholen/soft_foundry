@@ -212,4 +212,20 @@ class CrossProviderReviewTest < Minitest::Test
     assert_includes skill, "defensive"
     assert_includes File.read(File.join(REPO_ROOT, ".ai", "templates", "handoff.yml")), "failure:"
   end
+  # FIND-ATK-001: a serious finding under any other severity word must not
+  # skip the check. Only minor findings may go without a failure.
+  def test_any_severity_but_minor_must_name_its_failure
+    with_reviewable_change do |dir, record|
+      result = review_with_findings(record, dir, [
+        { "id" => "REV-C", "severity" => "critical", "summary" => "s" },
+        { "id" => "REV-H", "severity" => "High", "summary" => "s" },
+        { "id" => "REV-N", "summary" => "no severity at all" },
+        { "id" => "REV-M", "severity" => "Minor", "summary" => "s" }
+      ])
+      c = check(result, "findings explained")
+      assert_equal :fail, c.outcome
+      %w[REV-C REV-H REV-N].each { |id| assert_includes c.detail, id }
+      refute_includes c.detail, "REV-M"
+    end
+  end
 end
