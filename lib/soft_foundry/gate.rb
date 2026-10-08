@@ -42,7 +42,7 @@ module SoftFoundry
       "specification locked" => "The specification is unchanged since the person vetted the change.",
       "red evidence" => "Each test named with a red_commit existed before the implementation and code changed after it.",
       "instincts valid" => "The instincts the learning phase recorded are well formed.",
-      "findings explained" => "Every blocking or major review finding names the failure it prevents.",
+      "findings explained" => "Every review finding above minor names the failure it prevents.",
       "content clean" => "The phase's files carry no invisible text or secret-shaped strings."
     }.freeze
 
@@ -152,17 +152,19 @@ module SoftFoundry
       Check.new("content clean", :warn, findings.first(4).map(&describe).join("; ") + (findings.size > 4 ? " …" : ""))
     end
 
-    # A review's blocking and major findings must say what failure they
-    # prevent (`failure:` in the handoff). Structure only: the gate checks
-    # the field is there and not empty, never that the failure is real.
-    EXPLAINED = %w[blocking major].freeze
+    # A review's findings must say what failure they prevent (`failure:`
+    # in the handoff), except minor ones. Any other severity word, or none,
+    # counts as serious, so a finding cannot skip the check by being called
+    # critical. Structure only: the gate checks the field is there and not
+    # empty, never that the failure is real.
+    UNEXPLAINED_OK = %w[minor].freeze
 
     def findings_explained_check(handoff)
-      findings = Array(handoff["findings"]).select { |f| f.is_a?(Hash) && EXPLAINED.include?(f["severity"].to_s.downcase) }
-      return Check.new("findings explained", :pass, "no blocking or major findings") if findings.empty?
+      findings = Array(handoff["findings"]).select { |f| f.is_a?(Hash) && !UNEXPLAINED_OK.include?(f["severity"].to_s.strip.downcase) }
+      return Check.new("findings explained", :pass, "no findings above minor") if findings.empty?
       missing = findings.select { |f| f["failure"].to_s.strip.empty? }.map { |f| f["id"] || "(no id)" }
-      return Check.new("findings explained", :fail, "no failure: on #{missing.join(', ')}; a blocking or major finding names the concrete input or state and the wrong result it leads to, or it is minor") unless missing.empty?
-      Check.new("findings explained", :pass, "#{findings.size} blocking or major #{findings.size == 1 ? 'finding names its' : 'findings name their'} failure")
+      return Check.new("findings explained", :fail, "no failure: on #{missing.join(', ')}; every finding above minor names the concrete input or state and the wrong result it leads to, or it is minor") unless missing.empty?
+      Check.new("findings explained", :pass, "#{findings.size} #{findings.size == 1 ? 'finding above minor names its' : 'findings above minor name their'} failure")
     end
 
     # The learning phase's instincts must be well-formed to be promotable:

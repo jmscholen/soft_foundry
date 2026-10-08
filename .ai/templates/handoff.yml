@@ -12,7 +12,7 @@ resolved_model:
 outputs: []                # files produced, relative to this phase directory
 blocking: []               # unresolved blocking conditions; must be empty when complete
 findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # blocking and major findings also carry failure: (the concrete input
+                           # findings above minor also carry failure: (the concrete input
                            # or state and the wrong result it leads to)
 next: ${NEXT}
 notes: ""
