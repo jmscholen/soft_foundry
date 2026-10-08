@@ -1,5 +1,5 @@
 # Deviations From Plan
 
-None / TBD
-
-Each deviation records: what changed, why the plan could not be followed, which requirements are affected, and who must approve it.
+1. **Writes outside the implementation write set.** `.ai/workflow.yml`, `.ai/policies/human-boundaries.yml`, `.ai/schemas.md` (`CONTROL_PLANE`, denied to implementation), and `README.md` (no path group). REQ-PN-001, -005, and -010 require them and no skill's write set covers them; same precedent as changes/session-ledger and changes/cross-provider-review. Approval: review, and the maintainer at merge.
+2. **`--shell-arg SHELL=ARG` added (REQ-PN-001 extended).** Not in intake. Headless members need their shell's own permission flag to write their drafts, and the shared `-- args` reach every member, so a mixed panel could not be started headless at all. The test `test_shell_args_reach_only_their_shell` was written before the code, but in the same commit as the code (d1cf0d6), not as its own RED commit. Approval: review.
+3. **Two test edits after writing, before the GREEN commit.** A regex lost an escape for Shellwords' `\=`, and was corrected; no behavior changed. Approval: review.

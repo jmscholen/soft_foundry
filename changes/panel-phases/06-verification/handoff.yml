@@ -1,24 +1,21 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 06-verification
 skill: verification
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: d1cf0d618b8157ab8ff24bfa6379b654a0f47da2
+started_at: '2026-10-08T03:00:00Z'
+completed_at: '2026-10-08T03:18:17Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+- results.md
+- tests.yml
+- evidence/manifest.yml
+blocking: []
+findings: []
 next: evaluate
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: Performed by the interactive session that implemented the change. Deterministic
+  checks only.
+executed_by:

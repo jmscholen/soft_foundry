@@ -1,12 +1,59 @@
-commit_sha: TBD
+---
+commit_sha: d1cf0d618b8157ab8ff24bfa6379b654a0f47da2
 journeys:
-  - id: EVAL-001
-    criteria: [AC-001]
-    persona: TBD
-    starting_state: TBD
-    steps:
-      - TBD
-    assertions:
-      - TBD
-    evidence: [evidence/TBD]
-    result: TBD   # pass | fail | blocked
+- id: EVAL-001
+  criteria:
+  - REQ-PN-009
+  persona: the maintainer
+  starting_state: a scratch change with intake complete
+  steps:
+  - phase run specify --panel claude,grok --max-rounds 2 with per-shell args --dry-run
+  assertions:
+  - members, providers, round limit, at most 7 sessions, and each launch command are
+    printed; nothing starts
+  evidence:
+  - evidence/live-panel-transcript.log
+  result: pass
+- id: EVAL-002
+  criteria:
+  - REQ-PN-002
+  - REQ-PN-003
+  - REQ-PN-004
+  - REQ-PN-005
+  persona: the maintainer
+  starting_state: as EVAL-001
+  steps:
+  - the same command without --dry-run
+  assertions:
+  - two drafts, an ARGUMENT.md with one section per member per round, agreement detected,
+    the consensus written by claude-1 citing both drafts, the panel block and executed_by
+    recorded, nothing outside the phase folder changed
+  evidence:
+  - evidence/live-panel-transcript.log
+  - evidence/live-ARGUMENT.md
+  result: pass
+- id: EVAL-003
+  criteria:
+  - REQ-PN-007
+  persona: the maintainer
+  starting_state: as EVAL-002, with a logging PreToolUse hook
+  steps:
+  - read the hook log
+  assertions:
+  - hook processes under both shells see the member and stage the runner set, in every
+    stage
+  evidence:
+  - evidence/live-panel-transcript.log
+  result: pass
+- id: EVAL-004
+  criteria:
+  - REQ-PN-006
+  persona: the maintainer
+  starting_state: after EVAL-002
+  steps:
+  - soft-foundry gate specify
+  assertions:
+  - 'panel recorded passes: 2 members, 1 round, agreed'
+  evidence:
+  - evidence/live-panel-transcript.log
+  result: pass

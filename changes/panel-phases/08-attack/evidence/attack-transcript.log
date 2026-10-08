@@ -1,0 +1,50 @@
+# commit d1cf0d618b8157ab8ff24bfa6379b654a0f47da2; scratch /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/pn-attack.ZPS2
+### ATTACK-002 guard narrowing, through the real guard command in block mode
+[guard exit 0] own draft (allowed)
+✗ fail guard: Write changes/c1/02-specification/panel/grok-1/draft.md panel member claude-1 may write only under changes/c1/02-specification/panel/claude-1/ in the independent stage; the specification skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+[guard exit 2] another member's folder
+✗ fail guard: Write changes/c1/02-specification/specification.md panel member claude-1 may write only under changes/c1/02-specification/panel/claude-1/ in the independent stage; the specification skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+[guard exit 2] the phase's own output during the independent stage
+✗ fail guard: Read changes/c1/02-specification/panel/grok-1/draft.md panel member claude-1 may not read another member's draft or ARGUMENT.md in the independent stage; the specification skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+[guard exit 2] reading another member's draft early
+✗ fail guard: Bash changes/c1/02-specification/panel/ARGUMENT.md panel member claude-1 may not read another member's draft or ARGUMENT.md in the independent stage; the specification skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+[guard exit 2] shell read of ARGUMENT.md early
+✗ fail guard: read_file changes/c1/02-specification/panel/claude-1/draft.md panel member grok-1 may not read another member's draft or ARGUMENT.md in the independent stage; the specification skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+[guard exit 2] Grok's read tool on another member's draft
+✗ fail guard: Write changes/c1/02-specification/panel/claude-1/draft.md panel member claude-1 may write only changes/c1/02-specification/panel/ARGUMENT.md in the argument stage; the specification skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+[guard exit 2] rewriting its own draft during the argument stage
+[guard exit 0] appending to ARGUMENT.md (allowed)
+[guard exit 0] a forged member name (ignored: falls back to the skill's own permissions)
+✗ fail guard: Write lib/app.rb is in specification's deny_write set; the specification skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
+[guard exit 2] application code (the skill already denies it)
+### ATTACK-004 malformed panel requests, through the real CLI
+--- phase run specify --panel claude,bash --dry-run
+c1: cannot run specify as a panel: --panel takes shells from claude, codex, grok; got bash
+--- phase run specify --panel claude,grok,claude,grok,codex --dry-run
+c1: cannot run specify as a panel: --panel takes two to four members; got 5
+--- phase run specify --panel claude/../x,grok --dry-run
+c1: cannot run specify as a panel: --panel takes shells from claude, codex, grok; got claude/../x
+--- phase run specify --panel claude,grok --max-rounds 0 --dry-run
+c1: cannot run specify as a panel: --max-rounds takes a whole number from 1 to 5
+--- phase run specify --panel claude,grok --max-rounds 100 --dry-run
+c1: cannot run specify as a panel: --max-rounds takes a whole number from 1 to 5
+--- phase run specify --panel claude,grok --max-rounds two --dry-run
+c1: cannot run specify as a panel: --max-rounds takes a whole number from 1 to 5
+--- phase run specify --panel claude,grok --shell-arg bash=--x --dry-run
+c1: cannot run specify as a panel: --shell-arg takes SHELL=ARG with SHELL one of claude, codex, grok; got 'bash=--x'
+--- phase run specify --panel claude,grok --shell claude --dry-run
+c1: cannot run specify as a panel: --panel and --shell cannot be given together; the panel names its shells
+### ATTACK-005 a panel on implementation
+c1: cannot run implement as a panel: implement is not a panel phase (panel_phases in .ai/workflow.yml: specify, threat_model, plan, remediate, review)
+### ATTACK-003 forged agreement and rewritten history, through the CLI with stand-in agents
+--- claude-1 writes an agree line for grok-1 too: outcome split
+    panel: claude-1 (claude, anthropic), grok-1 (grok, xai)
+    panel: at most 1 argument round; at most 5 sessions; the first member writes the consensus
+    panel: no agreement after 1 round
+    ! warn panel: split after 1 round; the change is parked at awaiting_human until a person records the decision under human_decisions (boundary: panel split)
+--- grok-1 rewrites the file so both appear to agree: outcome split
+    panel: claude-1 (claude, anthropic), grok-1 (grok, xai)
+    panel: at most 1 argument round; at most 5 sessions; the first member writes the consensus
+    ! warn panel: grok-1 changed ARGUMENT.md text it did not write in round 1; that round cannot end in agreement
+    panel: no agreement after 1 round
+    ! warn panel: split after 1 round; the change is parked at awaiting_human until a person records the decision under human_decisions (boundary: panel split)

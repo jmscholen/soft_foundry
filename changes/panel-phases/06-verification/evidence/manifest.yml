@@ -1,5 +1,18 @@
-commit_sha: TBD
+---
+commit_sha: d1cf0d618b8157ab8ff24bfa6379b654a0f47da2
 artifacts:
-  - path: TBD
-    produced_by: TBD
-    sha256: TBD
+- path: evidence/tests.log
+  produced_by: full suite
+  sha256: 3c4ce2920fe684535d2dec5005c31a667f800c7cb396bd23aca3dfa712cc86c8
+- path: evidence/red-at-553030c.log
+  produced_by: panel tests at the RED commit
+  sha256: a8ce29111aa94268614a32270970b4f8fd42a57ece4777c8f237989de52dad35
+- path: evidence/check.log
+  produced_by: soft-foundry check
+  sha256: 469c6cd86a045d86fbffbd120904aa362d4fb2fb4ccf8d81057b30befea8af86
+- path: evidence/syntax-warnings.log
+  produced_by: ruby -wc
+  sha256: 3b0c05ed7a5100bc2fea2357f4afb905d87dc7eaae81aaebebbf5e248b9536c1
+- path: evidence/scan-against-self.log
+  produced_by: soft-foundry scan
+  sha256: 95d6eeeb985efb8496a541a7dd97d660849395cdc13ebb86e535cff76a845314

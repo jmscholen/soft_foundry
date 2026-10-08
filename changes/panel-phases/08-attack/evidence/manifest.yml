@@ -1,5 +1,6 @@
-commit_sha: TBD
+---
+commit_sha: d1cf0d618b8157ab8ff24bfa6379b654a0f47da2
 artifacts:
-  - path: TBD
-    case: ATTACK-001
-    sha256: TBD
+- path: evidence/attack-transcript.log
+  produced_by: guard, refusal, and forged-agreement cases against the real CLI
+  sha256: 1564d6d2f04d07bab4e2d20c24ba325c1d4fb27aac015ab283aff4db46b7c821

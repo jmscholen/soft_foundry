@@ -1,0 +1,22 @@
+# worktree at RED commit 553030c3cc00cb408d2523aeacba6c81fc89e424
+  1) Error:
+PanelPhasesTest#test_a_forged_agree_line_does_not_count:
+  2) Error:
+PanelPhasesTest#test_the_gate_checks_a_recorded_panel:
+  3) Error:
+PanelPhasesTest#test_dry_run_prints_the_members_the_limit_and_the_commands:
+  4) Error:
+PanelPhasesTest#test_an_agreeing_panel_runs_every_stage_and_records_the_panel:
+  5) Error:
+PanelPhasesTest#test_a_panel_that_never_agrees_is_split_and_parks_the_change:
+  6) Error:
+PanelPhasesTest#test_rewriting_earlier_argument_text_spoils_the_round:
+  7) Error:
+PanelPhasesTest#test_panels_are_refused_where_they_do_not_belong:
+  8) Error:
+PanelPhasesTest#test_a_single_provider_panel_is_advised:
+  9) Error:
+PanelPhasesTest#test_workflow_lists_panel_phases_and_check_lints_them:
+PanelPhasesTest#test_members_are_named_by_shell_and_validated:
+PanelPhasesTest#test_the_guard_narrows_each_member_to_its_stage:
+11 runs, 0 assertions, 0 failures, 11 errors, 0 skips

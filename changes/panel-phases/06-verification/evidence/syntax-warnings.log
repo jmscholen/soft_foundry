@@ -1,0 +1,9 @@
+# commit d1cf0d618b8157ab8ff24bfa6379b654a0f47da2
+lib/soft_foundry/panel.rb: Syntax OK 
+lib/soft_foundry/cli.rb: Syntax OK 
+lib/soft_foundry/guard.rb: Syntax OK 
+lib/soft_foundry/gate.rb: Syntax OK 
+lib/soft_foundry/advisory.rb: Syntax OK 
+lib/soft_foundry/control_plane.rb: Syntax OK 
+lib/soft_foundry/check.rb: Syntax OK 
+test/panel_phases_test.rb: Syntax OK 

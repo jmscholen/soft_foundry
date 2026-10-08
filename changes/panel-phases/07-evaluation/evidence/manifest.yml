@@ -1,5 +1,9 @@
-commit_sha: TBD
+---
+commit_sha: d1cf0d618b8157ab8ff24bfa6379b654a0f47da2
 artifacts:
-  - path: TBD
-    journey: EVAL-001
-    sha256: TBD
+- path: evidence/live-panel-transcript.log
+  produced_by: 'live panel: Claude Code and Grok on a scratch specification phase'
+  sha256: adaf51c699dcdf38115d151664d618c5d1bcc5d4a6b166fb06fa544ad45f3a58
+- path: evidence/live-ARGUMENT.md
+  produced_by: the ARGUMENT.md the live panel wrote
+  sha256: ed64b0411c13b1c8ac3c6df7fe7959a73e76e86c0fec568b518bd61bf543d676

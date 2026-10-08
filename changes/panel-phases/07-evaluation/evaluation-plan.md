@@ -1,16 +1,16 @@
 # Evaluation Plan
 
 ## Intent being proven
-TBD
+A person can run a real phase as a panel of two different agents and get two independent drafts, a recorded argument, an agreed consensus that cites both drafts and passes the gate, with each member's session narrowed by the guard.
 
 ## Personas
-TBD
+The maintainer with a hard specification question.
 
 ## Journeys
-For each journey record: EVAL ID, requirement IDs, starting state, steps, assertions, evidence, result.
+`journeys.yml`. One live panel: Claude Code 2.1.293 and Grok 1.0.30 on the specification phase of a scratch change ("where does the version number live"), run with the real CLI through a `PATH` shim, the guard installed in warn mode, and a logging hook recording the panel environment each hook process sees. The split path, forged agreement, and refusals are exercised by the attack phase and the tests; a live split was not forced.
 
 ## UI walkthrough evidence
-Capture screenshots or equivalent browser evidence at meaningful state transitions.
+N/A: the panel adds no page; its records reach the existing change page as files and advisories.
 
 ## Accessibility interaction
-Applicable whenever `surfaces.accessibility` is true (see `.ai/rules/accessibility.md`): keyboard-only operation, focus order and visible focus, error identification, and screen-reader readable output or names. Record what was exercised and the result; N/A must say why nothing a person perceives or operates changed.
+The `panel:` lines and `! warn panel:` lines carry status words; no prompts.
