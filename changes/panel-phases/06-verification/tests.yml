@@ -1,5 +1,5 @@
 ---
-commit_sha: 2bdc19fbb760243a9e30eda2db7b0c32722d1479
+commit_sha: 2a746801fcf688ae95104973f463856df1468355
 checks:
 - id: CHECK-001
   kind: tests
@@ -76,3 +76,14 @@ checks:
   evidence: evidence/red-at-2ca6ff2.log
   criteria:
   - failing-test-first
+- id: CHECK-009
+  kind: tests
+  command: the five REM-002 tests in test/panel_remediation_test.rb within CHECK-001
+  result: pass
+  evidence: evidence/tests.log
+  criteria:
+  - REQ-PN-002
+  - REQ-PN-003
+  - REQ-PN-007
+  red_commit: f69d6f2d1471778dfc9417bbf06a081eee86b779
+  test_path: test/panel_remediation_test.rb
