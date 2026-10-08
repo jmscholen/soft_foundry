@@ -1,7 +1,7 @@
 ---
 phase: 13-review
 skill: review
-status: complete
+status: in_progress
 commit_sha: a47a2f35ba68fd3cce6b3e703348e65debaf8ffb
 started_at: '2026-10-08T04:08:01Z'
 completed_at: '2026-10-08T04:27:46Z'
@@ -87,7 +87,8 @@ notes: Second review, after REM-001, at a47a2f3 (panel code 2bdc19f). First-revi
   No policy text change is owed. No blocking findings; majors are for judgment. Provider
   xAI, not the Anthropic provider that implemented and remediated. Permissions followed
   as policy. The skipped specification leaves the expected accessibility advisory
-  that no accessibility requirement was recorded.
+  that no accessibility requirement was recorded. Reopened by remediation REM-002
+  (REV-SEC-004, -005, -006).
 executed_by:
   runner: soft-foundry phase run
   shell: grok

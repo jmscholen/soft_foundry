@@ -194,4 +194,82 @@ class PanelRemediationTest < PanelPhasesTest
       refute_includes calls.first.find { |l| l.member == "grok-1" }.args, "--add-dir"
     end
   end
+  # --- REM-002: the runner, not the shell parser, is the authority ----------------------
+
+  # REV-SEC-006: anything written in the repository's phase folder during
+  # the independent stage fails the run, however it was written.
+  def test_a_repository_write_during_the_independent_stage_fails_the_run
+    with_specifiable_change do |dir, record|
+      calls = []
+      launcher = scripted(record, calls) do |l|
+        File.write(File.join(record.phase_dir(phase(record)), "specification.md"), "POISONED during independent\n") if l.stage == "independent" && l.member == "claude-1"
+        false
+      end
+      code, out = run_panel(dir, "specify", "--panel", "claude,grok", launcher: launcher)
+      refute_equal 0, code
+      assert_includes out, "✗ fail panel: the phase folder changed during the independent stage (specification.md)"
+      assert_equal "failed", record.handoff(phase(record)).dig("panel", "outcome")
+      refute(calls.flatten.any? { |l| l.stage == "consensus" }, "a consensus ran on a poisoned folder")
+    end
+  end
+
+  # REV-SEC-004: an in-repository draft is where another member's search
+  # would find it, so it is refused by the guard and fails the run.
+  def test_an_in_repository_draft_during_the_independent_stage_fails_the_run
+    with_specifiable_change do |dir, record|
+      calls = []
+      launcher = scripted(record, calls) do |l|
+        if l.stage == "independent" && l.member == "grok-1"
+          FileUtils.mkdir_p(File.join(panel_dir(record), "grok-1"))
+          File.write(File.join(panel_dir(record), "grok-1", "early.md"), "visible to a repo-wide search\n")
+        end
+        false
+      end
+      code, out = run_panel(dir, "specify", "--panel", "claude,grok", launcher: launcher)
+      refute_equal 0, code
+      assert_includes out, "✗ fail panel: the phase folder changed during the independent stage (panel/grok-1/early.md)"
+    end
+  end
+
+  def test_the_guard_refuses_an_in_repository_draft_in_the_independent_stage
+    with_specifiable_change do |dir, record|
+      meta = File.join(record.dir, "metadata.yml")
+      File.write(meta, File.read(meta).sub(/^current_phase: .*$/, "current_phase: specify"))
+      g = SoftFoundry::Guard.new(dir, env: { "SOFT_FOUNDRY_PANEL_MEMBER" => "claude-1", "SOFT_FOUNDRY_PANEL_STAGE" => "independent" })
+      assert g.decide("Write", { "file_path" => "changes/c1/02-specification/panel/claude-1/draft.md" }).violation?
+    end
+  end
+
+  # REV-SEC-005: a draft replaced during the argument fails the run, even
+  # if a later round agrees.
+  def test_a_draft_replaced_during_the_argument_fails_the_run_even_if_a_later_round_agrees
+    with_specifiable_change do |dir, record|
+      calls = []
+      launcher = scripted(record, calls) do |l|
+        if l.stage == "argument" && l.member == "claude-1" && l.round == 1
+          File.write(File.join(panel_dir(record), "grok-1", "draft.md"), "replaced\n")
+          File.open(File.join(panel_dir(record), "ARGUMENT.md"), "a") { |f| f.puts "## claude-1, round 1\nno agreement yet" }
+          true
+        end
+      end
+      code, out = run_panel(dir, "specify", "--panel", "claude,grok", "--max-rounds", "2", launcher: launcher)
+      refute_equal 0, code
+      h = record.handoff(phase(record))
+      assert_equal "failed", h.dig("panel", "outcome")
+      assert_includes out, "✗ fail panel: panel/grok-1/ changed after the independent round (argument stage, round 1, claude-1)"
+      refute(calls.flatten.any? { |l| l.stage == "consensus" }, "a consensus ran over a replaced draft")
+    end
+  end
+
+  # REV-FUN-004 and REV-A11Y-002, carried with the fix.
+  def test_a_dropped_member_is_recorded_and_outcome_lines_carry_status_words
+    with_specifiable_change do |dir, record|
+      calls = []
+      launcher = scripted(record, calls, statuses: {}) { |l| l.stage == "independent" && l.member == "codex-1" } # writes nothing
+      code, out = run_panel(dir, "specify", "--panel", "claude,grok,codex", launcher: launcher)
+      assert_equal 0, code, out
+      assert_equal ["codex-1"], record.handoff(phase(record)).dig("panel", "dropped")
+      assert_includes out, "✓ pass panel: agreed after 1 round"
+    end
+  end
 end

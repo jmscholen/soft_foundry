@@ -1,7 +1,7 @@
 ---
 phase: 07-evaluation
 skill: evaluation
-status: complete
+status: in_progress
 commit_sha: 2bdc19fbb760243a9e30eda2db7b0c32722d1479
 started_at: '2026-10-08T04:05:00Z'
 completed_at: '2026-10-08T03:55:50Z'
@@ -25,4 +25,5 @@ findings:
 next: attack
 notes: Performed by the interactive session that implemented the change; the live
   panel members were fresh Claude Code and Grok sessions. Second run, after REM-001.
+  Reopened by remediation REM-002 (REV-SEC-004, -005, -006).
 executed_by:
