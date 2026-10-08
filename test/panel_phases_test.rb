@@ -285,4 +285,21 @@ class PanelPhasesTest < Minitest::Test
       assert_includes out, "! warn panel: every member of the specification panel (02-specification) ran on anthropic"
     end
   end
+  # Headless members need their own permission flags, which differ by
+  # shell; --shell-arg SHELL=ARG gives each shell its own.
+  def test_shell_args_reach_only_their_shell
+    with_specifiable_change do |dir, record|
+      calls = []
+      code, out = run_panel(dir, "specify", "--panel", "claude,grok", "--shell-arg", "claude=--permission-mode=acceptEdits", "--shell-arg", "grok=--always-approve", "--dry-run", launcher: agents(record, {}, calls))
+      assert_equal 0, code, out
+      assert_match(/claude-1 independent with: claude -p --session-id \S+ --name \S+ --permission-mode\\=acceptEdits <prompt>/, out)
+      assert_match(/grok-1 independent with: grok -s \S+ --always-approve -p <prompt>/, out)
+      refute_match(/claude .*--always-approve/, out)
+      ["claude", "bash=--x", "=--x"].each do |bad|
+        code, out = run_panel(dir, "specify", "--panel", "claude,grok", "--shell-arg", bad, "--dry-run", launcher: agents(record, {}, calls))
+        refute_equal 0, code, bad
+        assert_includes out, "--shell-arg takes SHELL=ARG", bad
+      end
+    end
+  end
 end

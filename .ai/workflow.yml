@@ -86,6 +86,14 @@ rules:
   path_groups: .ai/paths.yml
   handoff_template: .ai/templates/handoff.yml
 
+# Phases that `soft-foundry phase run <phase> --panel SHELL,SHELL` may run
+# as a panel: members investigate independently into
+# <phase>/panel/<member>/, argue in <phase>/panel/ARGUMENT.md until they
+# agree, and the first member writes the phase's outputs. A panel never
+# writes code, so implement is never listed. A panel that does not agree
+# parks the change at awaiting_human (.ai/policies/human-boundaries.yml).
+panel_phases: [specify, threat_model, plan, remediate, review]
+
 judgments:
   - APPROVED
   - APPROVED_WITH_RESIDUAL_RISK

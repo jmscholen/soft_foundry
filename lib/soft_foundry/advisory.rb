@@ -109,8 +109,21 @@ module SoftFoundry
       end
       notices.concat(fresh_context_notices)
       notices.concat(same_provider_notices)
+      notices.concat(panel_provider_notices)
       notices.concat(red_evidence_notices)
       notices
+    end
+
+    # A panel exists to bring different views; one whose members all ran on
+    # the same provider is reported, never failed.
+    def panel_provider_notices
+      @plane.phases.filter_map do |phase|
+        panel = (@record.handoff(phase) || {})["panel"]
+        next unless panel.is_a?(Hash)
+        providers = Array(panel["members"]).filter_map { |m| m["provider"] if m.is_a?(Hash) }.uniq
+        next unless providers.size == 1 && Array(panel["members"]).size > 1
+        Notice.new("panel", "every member of the #{@plane.skill(phase.skill).name} panel (#{phase.output}) ran on #{providers.first}; a panel on more than one provider brings more independent views")
+      end
     end
 
     # Review and judgment prefer a different provider from the phases their

@@ -7,6 +7,7 @@ require "fileutils"
 require_relative "control_plane"
 require_relative "change_record"
 require_relative "git"
+require_relative "panel"
 
 module SoftFoundry
   # Runtime enforcement of a skill's declared permissions: a PreToolUse
@@ -57,10 +58,11 @@ module SoftFoundry
       [DEFAULT_MODE, "default"]
     end
 
-    def initialize(root, plane: ControlPlane.new(root), git: Git.new(root))
+    def initialize(root, plane: ControlPlane.new(root), git: Git.new(root), env: ENV)
       @root = File.expand_path(root)
       @plane = plane
       @git = git
+      @env = env
     end
 
     # The change and skill whose permissions apply right now, or nil with
@@ -88,7 +90,15 @@ module SoftFoundry
     end
 
     # Decides one tool call. `tool_input` is the hook payload's tool_input.
+    # A panel member's session (SOFT_FOUNDRY_PANEL_MEMBER and _STAGE, set by
+    # `phase run --panel`) is narrowed further, never widened.
     def decide(tool_name, tool_input)
+      decision = decide_by_skill(tool_name, tool_input)
+      return decision if decision.violation?
+      narrow_for_panel(tool_name, decision)
+    end
+
+    def decide_by_skill(tool_name, tool_input)
       record, skill, why = active
       return Decision.new(outcome: :allow, reason: why, skill: nil, paths: []) unless skill
 
@@ -139,6 +149,36 @@ module SoftFoundry
     end
 
     private
+
+    # Independent stage: write only under the member's own folder, and read
+    # no other member's folder or ARGUMENT.md. Argument stage: write only
+    # ARGUMENT.md. A member name that is not one the runner makes is
+    # ignored, not trusted.
+    def narrow_for_panel(tool_name, decision)
+      member = @env[Panel::MEMBER_ENV].to_s
+      stage = @env[Panel::STAGE_ENV].to_s
+      return decision unless member.match?(Panel::NAME) && %w[independent argument].include?(stage)
+      record, = active
+      phase = record && @plane.phase(record.metadata["current_phase"].to_s)
+      return decision unless phase
+      base = "changes/#{record.slug}/#{phase.output}/panel/"
+      own = "#{base}#{member}/"
+      argument = "#{base}ARGUMENT.md"
+      bad, why =
+        if WRITE_TOOLS.include?(tool_name) || PATCH_TOOLS.include?(tool_name)
+          if stage == "independent"
+            [decision.paths.reject { |p| p.start_with?(own) }, "panel member #{member} may write only under #{own} in the independent stage"]
+          else
+            [decision.paths.reject { |p| p == argument }, "panel member #{member} may write only #{argument} in the argument stage"]
+          end
+        elsif stage == "independent"
+          [decision.paths.select { |p| p.start_with?(base) && !p.start_with?(own) }, "panel member #{member} may not read another member's draft or ARGUMENT.md in the independent stage"]
+        else
+          [[], nil]
+        end
+      return decision if bad.empty?
+      Decision.new(outcome: :violation, reason: why, skill: decision.skill, paths: bad)
+    end
 
     def violation(skill, paths, reason)
       Decision.new(outcome: :violation, reason: reason, skill: skill.name, paths: paths)

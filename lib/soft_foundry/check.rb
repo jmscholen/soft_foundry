@@ -25,6 +25,7 @@ module SoftFoundry
       findings.concat(check_path_groups)
       findings.concat(check_transitions)
       findings.concat(check_tracks)
+      findings.concat(check_panel_phases)
       findings.concat(check_enforcement)
       findings.concat(check_content)
       @plane.phases.each { |phase| findings.concat(check_phase(phase)) }
@@ -32,6 +33,17 @@ module SoftFoundry
     end
 
     private
+
+    # A panel never writes code, and only lifecycle phases can be panelled.
+    def check_panel_phases
+      Array(@plane.workflow["panel_phases"]).filter_map do |id|
+        if id.to_s == "implement"
+          Finding.new(:error, "workflow: panel_phases names 'implement'; a panel never writes code")
+        elsif !@plane.phase(id.to_s)
+          Finding.new(:error, "workflow: panel_phases names '#{id}', which is not a lifecycle phase")
+        end
+      end
+    end
 
     def check_templates
       %w[templates/handoff.yml templates/change/metadata.yml].reject { |f| File.exist?(File.join(@plane.dir, f)) }

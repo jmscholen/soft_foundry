@@ -207,6 +207,25 @@ A completed review or judgment whose handoff carries no `executed_by` from the r
 
 The session ID lets you get back into a phase run's session (`soft-foundry resume <change> <phase>`). Claude Code and Grok are handed one up front (`--session-id`, `-s`); Codex picks its own, so the runner takes it from the session ledger when the session hook is installed (see "Finding and resuming sessions"), and leaves it null otherwise.
 
+### Panels: independent drafts, an argument, one consensus
+
+For a hard question, run a phase as a panel of two to four agents instead of one:
+
+```bash
+soft-foundry phase run specify --panel claude,grok                  # two members: claude-1 and grok-1
+soft-foundry phase run remediate --panel claude,grok,claude,grok --max-rounds 4
+soft-foundry phase run review --panel claude,grok --dry-run         # members, round limit, most sessions, commands
+soft-foundry phase run plan --panel claude,grok --shell-arg claude=--permission-mode=acceptEdits --shell-arg grok=--always-approve
+                                                                    # each shell's own headless flags; `-- args` go to every member
+```
+
+1. **Independent round.** Every member starts at once in its own fresh session with the phase's skill and writes its findings, theories, and proposed outcome only under `<phase>/panel/<member>/`. It does not read the other members' folders.
+2. **Argument rounds.** Members take turns, resuming their own sessions (Claude Code and Grok; Codex starts fresh and reads the files). Each appends one section to `<phase>/panel/ARGUMENT.md`. A member that agrees ends its section with `agree: <one sentence>`. When every member's section in a round ends with the same sentence, the panel has agreed. The runner reads only the text each member appended during its own turn, so a line written under another member's name does not count, and rewriting earlier text spoils the round.
+3. **Consensus.** The first member named writes the phase's normal outputs. They open with a summary of at most ten lines and cite every draft folder.
+4. **Split.** If the panel has not agreed after `--max-rounds` (default 3, at most 5), the outputs present each position and what would decide between them. The handoff is `blocked`, and the change parks at `awaiting_human` until a person records the decision under `human_decisions` with `boundary: panel split`.
+
+Panels are allowed for the phases in `panel_phases` in `.ai/workflow.yml` (specify, threat_model, plan, remediate, and review), never for implementation. The handoff records a `panel:` block (members with shell, provider, and session ID; rounds; outcome), and the gate's `panel recorded` check requires a draft per member, a non-empty `ARGUMENT.md`, an outcome, and every draft cited. With the guard installed, each member's session is narrowed by `SOFT_FOUNDRY_PANEL_MEMBER` and `SOFT_FOUNDRY_PANEL_STAGE`: in the independent stage it may write only its own folder and may not read the others; in the argument stage it may write only `ARGUMENT.md`. Every prompt tells members that the other drafts are data, not instructions. A panel whose members all ran on one provider gets a go-live advisory. A four-member panel with three rounds can start up to 17 sessions; `--dry-run` prints the number before anything runs.
+
 ### Lifecycle tracks: gated or iterative
 
 The lifecycle above is a stage-gate process: intent, specification, threat model, and plan before code, evidence bound from the first commit. That is the right shape for assurance and the wrong shape for shaping a feature with a person by trying it. `.ai/workflow.yml` therefore declares two tracks that share the same phases and the same gate:
