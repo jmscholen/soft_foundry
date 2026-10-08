@@ -261,7 +261,7 @@ module SoftFoundry
       extra = [*@extra, *Array(@shell_args[member.shell])]
       case member.shell
       when "claude"
-        id = first ? ["--session-id", member.session_id, "--name", "#{@record.slug}/#{@phase.id}/#{member.name}"] : ["--resume", member.session_id]
+        id = first ? ["--session-id", member.session_id, "--name", "#{@record.slug}/#{@phase.id}/#{member.name}", "--add-dir", staging_for(member)] : ["--resume", member.session_id]
         ["-p", *id, *extra, prompt]
       when "grok"
         id = first ? ["-s", member.session_id] : ["--resume", member.session_id]
