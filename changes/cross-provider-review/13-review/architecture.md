@@ -2,20 +2,24 @@
 
 ## Scope reviewed
 
-`lib/soft_foundry/phase_provider.rb` (new), the `default_shell` addition on `PhaseRunner`, the `prefer_different_provider_from` key on the review and final-judgment skills, and the calls from `CLI#phase`, `Advisory`, and `Check`. Compared with `.ai/rules/architecture.md` and `.ai/rules/general.md`. No new gem.
+`PhaseProvider`, `PhaseRunner#default_shell`, `CLI#phase`, `Advisory#same_provider_notices`, `Gate#findings_explained_check`, and `Check#check_skill_contract`, against `.ai/rules/architecture.md` and `.ai/rules/general.md`. The diff from `4c777bd` to HEAD, excluding `changes/`, is the twenty-one files in the implementation log: the two skill declarations, the review skill text and seven templates, the handoff template, `.ai/schemas.md`, README, six library files, the version, and one test file.
 
 ## Findings
 
 None.
 
-## What was checked
+## Decisions checked
 
-`PhaseProvider` is a leaf module. `Advisory` can ask which provider a handoff names without loading `PhaseRunner`, which loads `Gate`. That split is the decision in `05-implementation/decisions.md`, and it removes the cycle the log describes. `PhaseRunner.provider_of` delegates to it. The skill key is data on the skill that wants the behavior, not a field on the shared `reasoning_high` profile, so other skills that use that profile are unchanged.
+The preference lives on the review and final-judgment skills, not on the shared `reasoning_high` profile. Profiles are shared; putting it on the skill is the decision in `05-implementation/decisions.md`, and it matches REQ-XP-001.
 
-The selection bug in REV-FUN-001 is a branch in `default_shell`, not a layering or dependency problem. It is filed on the functional review.
+`PhaseProvider` is a module with no dependency on the runner, the gate, or the advisory. `PhaseRunner.provider_of` delegates to it. That split is what breaks the load cycle the implementation log describes (advisory, runner, gate, change record). It is a small module for a demonstrated cycle, which `.ai/rules/architecture.md` allows.
 
-**Control-plane writes, accepted.** Implementation edited `.ai/skills/review/skill.yml`, `.ai/skills/review/SKILL.md`, the review templates, `.ai/skills/final-judgment/skill.yml`, `.ai/templates/handoff.yml`, and `.ai/schemas.md` (`CONTROL_PLANE`, denied to the implementation skill) and `README.md` (no path group). REQ-XP-001, REQ-XP-005, REQ-XP-006, and REQ-XP-007 require those edits, and no skill's write set covers them. The same exception was accepted on `changes/phase-runner` and `changes/session-ledger`. The diff of those files is the preference key, the failure-it-prevents column, the `failure:` note, and the README and schema paragraphs. Nothing else was slipped in. The maintainer still accepts the control-plane edit at merge, as the deviation says.
+Provider resolution has one implementation. The runner and the advisory both call it, so a name that means anthropic to the default also means anthropic to the notice.
+
+## Deviation
+
+Implementation wrote `.ai/` and `README.md`, which are outside that skill's write set. REQ-XP-001, REQ-XP-005, REQ-XP-006, and REQ-XP-007 name those files, and no skill's write set covers them. The diff is only those edits plus the library, the test, and the version. `05-implementation/deviations.md` records it and asks review to approve it. Approved. The maintainer still accepts the control-plane edits at merge, as that deviation says.
 
 ## Conformance
 
-Conforms. The new module solves a cycle that loading the runner from the advisory demonstrated. The preference lives on the two skills that have it. The control-plane exception above is accepted.
+Conforms. The new code follows the existing runner, gate, and advisory boundaries. No cyclic dependency was reintroduced. The control-plane writes are an approved deviation, not an unrecorded one.

@@ -2,7 +2,9 @@
 
 ## Scope reviewed
 
-`.ai/rules/infrastructure.md`, because review loads it whenever infrastructure as code is present or modified. `.ai/repository.yml` records `infrastructure.iac.tools: []` and `infrastructure.detected: [github-actions]`. `git diff eb3ace3^..HEAD` has no Terraform, OpenTofu, Pulumi, or CloudFormation, and it does not touch `.github/`. `surfaces.infrastructure` is false.
+`.ai/rules/infrastructure.md` and `.ai/repository.yml` `infrastructure:`. The profile records `iac.tools: []` and `infrastructure.detected_or_not_applicable: NOT_APPLICABLE` (library gem; CI is the only automation). `surfaces.infrastructure` is false.
+
+The diff from `4c777bd` to HEAD, excluding `changes/`, was listed. It does not touch `.github/`, Terraform, OpenTofu, Pulumi, CloudFormation, or any other infrastructure definition. No plan, IAM, network, state, secret, or rollback behavior is introduced.
 
 ## Findings
 
@@ -10,4 +12,4 @@ None.
 
 ## Conformance
 
-N/A. No infrastructure-as-code tool is recorded, and this change does not add or modify one. Plan safety, replacement, IAM, network exposure, state, secrets, drift, and rollback under `.ai/rules/infrastructure.md` do not apply to a Ruby default for `phase run`. GitHub Actions is unchanged.
+N/A. No infrastructure-as-code tool is present, and this change does not add or modify one, so the provider, plan-safety, destructive-change, IAM, state, drift, and recovery checks in `.ai/rules/infrastructure.md` have nothing to apply to.

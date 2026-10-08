@@ -2,19 +2,23 @@
 
 ## Scope reviewed
 
-Operator-visible behavior of `phase run` for review and judgment: the `shell:` line, the `! warn shell:` line, the same-provider advisory, and the `findings explained` gate line. `surfaces.observability` is false. There is no deployed service. `12-observability/` is still the pending template, which is allowed: the phase is optional and this change adds no production process. Compared with `.ai/rules/observability.md` and `.ai/rules/errors.md`.
+`.ai/rules/observability.md` and `.ai/rules/errors.md` for a library with no deployed service. `surfaces.observability` is false. The observability phase is still pending; it is optional, and there is no service to alarm on. The operator surface is the CLI.
 
 ## Findings
 
-None. The launch warning's wrong reason is REV-FUN-001, on the functional review. It is not a second defect.
+None.
 
-## What was checked
+## Failure modes and how they are seen
 
-- **Choice is visible.** A differing shell prints one `shell:` line on standard output before the session starts. No differing installed shell, or an unresolvable provider, prints one `! warn shell:` line on standard error and still names `--shell`.
-- **Same-provider review is visible after the fact.** When the completed review records a canonical provider that matches implementation or remediation, `same_provider_notices` prints an advisory and the gate still passes. That is the detection path `.ai/rules/observability.md` asks for on a local CLI: the person sees it on `phase run`, `gate`, `change status`, and `change close`. It does not fire when the provider string does not normalize, which attack already recorded.
-- **REV-FUN-001's warning does not name the collision.** In the probed input the warning says remediation's provider is not recorded and then starts claude, which is implementation's provider. The operator is told to pass `--shell`, not that the shell just chosen is anthropic. After that session, an honestly recorded `provider: anthropic` still produces the same-provider advisory. The session has already run on the implementer's provider.
-- **No new alarm or dashboard.** A library gem with no service does not gain a failure mode that a dashboard would detect. The lines above are the operator surface.
+- The chosen shell is not logged in or fails to start. The child exits non-zero and the runner prints `{shell} exited {status}`, then runs the gate. Intake records this as a non-goal: "installed" means on `PATH`, not logged in. EVAL-OBS-001 is that case for Codex on this machine. `--shell` is the recovery. No new silent success.
+- No installed shell is on another provider. `! warn shell:` on stderr names the providers and the shell that will be used. The same-provider advisory fires again after the phase completes, if the handoff's provider matches.
+- A named phase's provider is not recorded, and another shell is on a different known provider. `! warn shell:` names the missing phase and the provider the choice differs from. Probed.
+- A review finding above minor has no `failure:`. `findings explained` fails and names the finding ids.
+
+`Shell.resolve` raises when the command is not on `PATH`. `default_shell` treats that raise as "not installed" (`rescue nil`) and either picks another allowlisted shell or warns and uses the first. The not-installed result is the predicate. An unexpected exception from the path check would take the same path; that input is not one the requirement describes, and the warning still fires when no alternative shell remains. Not filed.
+
+No metric, dashboard, or alarm is owed. Nothing is deployed.
 
 ## Conformance
 
-Conforms. The new lines and the advisory are the operational signals, and they behave as specified on the inputs the tests cover. REV-FUN-001 is the case where the launch warning names the wrong fact. No production metric or alarm is owed.
+Conforms for a library. The new failure modes are visible on stdout or stderr with a status word, and the gate reports a missing `failure:`. The pending observability phase does not leave a deployed failure undetected, because there is no deployed service.

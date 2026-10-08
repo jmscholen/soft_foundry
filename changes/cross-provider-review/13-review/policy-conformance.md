@@ -1,27 +1,20 @@
 # Privacy and Security Policy Conformance Review
 
-Standard: `.ai/rules/policy-conformance.md`. Cite the policy document and clause, or a rule from that file, in every finding.
+Standard: `.ai/rules/policy-conformance.md`.
 
 ## Documents checked
 
-`.ai/repository.yml` `policies:`, assessed at `2026-09-09T15:35:27Z` (commit `cc348f93f3d265af3f92f7fa7d0b09cbbf8a520a`). This change does not add or edit a policy file. None of the three entries is `PASS`, so there is no published document text and no version to cite.
+`.ai/repository.yml` `policies:`, as recorded by discovery for init-command. No document is published:
 
-| Document | Status in the profile | What was examined |
-| --- | --- | --- |
-| privacy | NOT_APPLICABLE | Rationale in the profile: a library gem; no users' data is transmitted. The session ledger stays on the machine. There is no privacy-policy clause. |
-| security | NOT_APPLICABLE | Rationale dated 2026-09-15 (change security-policy-not-applicable): no SECURITY.md; reports go through GitHub issues. There is no security-policy clause. |
-| terms | NOT_APPLICABLE | Rationale: no service is offered. There is no terms document. |
+- privacy: NOT_APPLICABLE. Library gem with no users' data. The rationale names provider model listings, the RubyGems version check, and the optional local session index, which is not sent anywhere.
+- security: NOT_APPLICABLE. Maintainer decision of 2026-09-15 in changes/security-policy-not-applicable: a developer tool, not a service that collects user information. No SECURITY.md.
+- terms: NOT_APPLICABLE. No service is offered.
+
+There is no published clause to cite. That absence is the recorded answer, not a document this change contradicts.
 
 ## Scope reviewed
 
-`surfaces.policy` is false. The diff was checked against the triggers in `.ai/rules/policy-conformance.md`:
-
-- Collects something new: no. Provider names and shell names are already in the change record. The new lines print them on the person's own terminal.
-- Adds a recipient: no. Choosing claude, codex, or grok launches a tool the person already runs. No new service receives repository content.
-- Changes retention or deletion: no. Handoffs are written as they were. Nothing new is stored about a person.
-- Changes purpose: no.
-- Changes a security commitment a policy names: no published policy names one. The advisory is an engineering notice, not a promise a customer was shown.
-- Changes consent or a rights mechanism: no.
+`surfaces.policy` is false. Examined the diff and the runtime behavior: the runner reads `resolved_model.provider` and `executed_by.shell` from handoffs already in the repository, chooses among `claude`, `codex`, and `grok` on `PATH`, prints one line, and the gate checks that a review finding above minor has a non-empty `failure:`. Nothing new is collected from a person, stored, or sent. The default shell for review and judgment can now be a different local coding agent than claude; those agents were already reached with `--shell`, and the privacy rationale says the gem transmits nothing about a person. No retention, purpose, consent, or security promise changes.
 
 ## Findings
 
@@ -33,4 +26,4 @@ None.
 
 ## Conformance
 
-N/A. `surfaces.policy` is false. The diff and the three `policies:` entries were examined. The change does not collect, share, retain, or promise anything the application did not already, and it does not require an edit to a privacy policy, a security policy, or terms, because the profile records that this gem publishes none.
+N/A. `surfaces.policy` is false. The examination above is what supports that: the change does not alter what the application collects, shares, retains, protects, or promises, and the profile records no published privacy policy, security policy, or terms to update. No policy text change is owed, and no human decision is requested.

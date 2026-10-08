@@ -1,12 +1,12 @@
 # Consolidated Review
 
-Reviewed at `2bcd186a2e6b97178c196bef26a05d7ec29100ed`. Library, tests, README, and `.ai/` match the verified commit `53e4108fc38bb3077a3057b161328067ca06dc7e`.
+Reviewed at `2c06a8e9581c4a956abcb11a03168c11ed8dace3`. Library, tests, README, and `.ai/` match the verified commit `a963a27e4fc34e5200aa212bbc9d51d67e293cd1`.
 
-Rules applied: baseline `general` and `architecture`; discovery's `ruby` and `testing`; `security`, `errors`, `git`, `dependencies`, `observability`, and `learned`. No database and no Rails. No infrastructure-as-code tool. Accessibility and policy conformance are in their own files. `learned.md` is satisfied: the failing tests were committed at `eb3ace3` and `e62bc6e` before the fixes, and the evidence after REM-001 was regenerated rather than annotated.
+Rules applied: baseline `general` and `architecture`; `ruby`, `testing`, `security`, `errors`, `git`, and `dependencies` from the repository profile (Ruby, Minitest, no new dependency, no database, no Rails); `learned` (failing tests committed at `eb3ace3`, `e62bc6e`, and `b4dd692` before the fixes; evidence after REM-002 regenerated rather than annotated). No infrastructure-as-code tool. Accessibility and policy conformance are in their own files. Discovery was skipped for this change; the rule set is the profile's, not a fresh discovery.
 
 ## Functional
 
-Conforms with a major finding. REQ-XP-001, REQ-XP-004, REQ-XP-005, REQ-XP-006, and REQ-XP-007 hold. REQ-XP-002 holds for the accepted names and for a blank provider falling through to the shell. REQ-XP-003 holds when every completed named phase resolves, and fails when one resolves and another does not (REV-FUN-001): the probe started claude, the implementer's provider, while a known provider of anthropic was already on the record. The RED-test setup fix and the grok usage line are approved.
+Conforms. REQ-XP-001 through REQ-XP-007 hold. REV-FUN-001 does not reproduce: with implementation on anthropic, remediation unrecorded, and claude, codex, and grok installed, `phase run review` starts codex and the warning names the missing provider. An unrecognized provider falls back to the recorded shell. The RED-test setup fix and the grok usage line are approved.
 
 ## Architecture
 
@@ -14,7 +14,7 @@ Conforms. `PhaseProvider` exists so the advisory does not load the runner. The p
 
 ## Security
 
-Conforms. The launched executable is an allowlisted shell. The advisory-silencing residual (a canonical provider that is not the shell) and the structural `failure: n/a` residual are the ones attack recorded. REV-FUN-001 is a wrong default, not an injection.
+Conforms. The launched executable is an allowlisted shell, and the raw provider string is not interpolated into the command or the message. The advisory-silencing residual and the structural `failure: n/a` residual are the ones attack recorded.
 
 ## Accessibility
 
@@ -22,7 +22,7 @@ Conforms. Declared surface. The new lines use the prefix `shell:` or the word `w
 
 ## Policy conformance
 
-N/A. `surfaces.policy` is false. Privacy, security, and terms are NOT_APPLICABLE in `.ai/repository.yml`. Nothing new is collected, shared, or retained. No policy text change is owed.
+N/A. `surfaces.policy` is false. Privacy, security, and terms are NOT_APPLICABLE in `.ai/repository.yml`. Nothing new is collected, shared, or retained. No policy text change is owed. No human decision is requested.
 
 ## Infrastructure
 
@@ -30,7 +30,7 @@ N/A. No infrastructure-as-code tool is recorded, and the diff touches none.
 
 ## Operations
 
-Conforms for a library with no deployed service. The `shell:` line, the warning, and the same-provider advisory are the operator surface. The observability phase has not run and is optional. REV-FUN-001's warning names the unresolved phase and not the known provider the chosen shell collides with; the post-run advisory still fires if the review records that provider.
+Conforms for a library with no deployed service. The `shell:` line, the warning, the exit status, and the same-provider advisory are the operator surface. The observability phase has not run and is optional.
 
 ## Blocking findings
 
@@ -38,11 +38,12 @@ None.
 
 ## Residual concerns
 
-- `failure: n/a` passes `findings explained`. The intake says the check is structural. ATTACK-001 recorded it.
-- A review that writes a different canonical provider silences the same-provider advisory. ATTACK-002 and the implementation decision recorded it. An unrecognized provider string also yields nil and skips the advisory; that path is part of REV-FUN-001's second input, not a separate residual.
+- `failure: n/a` passes `findings explained`. The intake says the check is structural. ATTACK-001 recorded it. A non-hash entry in `findings` is ignored by the same check (probe: a string passes with "no findings above minor"). The template and the schema require a hash; an ill-formed entry is also invisible to a reader that expects `id` and `severity`. Not filed: it is outside the structure the requirement checks, next to `n/a`.
+- A handoff that writes a recognized provider other than the shell that ran silences the advisory and steers `default_shell`. ATTACK-002 and the implementation decision recorded it. A blank provider still falls back to the shell, and the advisory still fires.
 - On this machine the default for an anthropic implementation is codex, whose login has expired (EVAL-OBS-001). The intake non-goal stands: `--shell grok` is how this review was run.
+- When the only installed shell is already on a known provider, and another named phase's provider is unrecorded, the warning says no other provider's shell is installed and does not also name the unrecorded phase. The shell chosen is the one REQ-XP-003 requires. Not filed.
 - User-documentation, FAQ index, and observability phases are still pending. README covers REQ-XP-007. Those phases are optional; this review did not fill them.
 
 ## Unresolved findings
 
-- REV-FUN-001 (major). `phase run review` or `phase run judge`, with no `--shell`, starts the first installed shell when any of `prefer_different_provider_from` has no resolvable provider, including when another of those phases has a known provider that the first shell matches.
+None.
