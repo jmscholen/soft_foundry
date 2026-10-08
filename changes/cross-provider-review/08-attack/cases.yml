@@ -1,5 +1,5 @@
 ---
-commit_sha: 0370e02436d1b5a2a60fdaa057db67d19dabd158
+commit_sha: 53e4108fc38bb3077a3057b161328067ca06dc7e
 authorization_envelope:
   target: soft-foundry gate review and the advisory (this checkout)
   environment: local
@@ -25,9 +25,9 @@ cases:
   - severity critical, a word the check does not list
   expected_safe_behavior: every serious finding without a real failure fails the check
   observed: capitals and whitespace fail as intended; n/a passes (structure-only check,
-    as specified); severity critical passes as 'no blocking or major findings', so
-    a serious finding under another word skips the check (FIND-ATK-001)
-  result: violated
+    as specified); severity critical now fails too (fixed by REM-001; at 0370e02 it
+    passed, FIND-ATK-001)
+  result: denied
   evidence:
   - evidence/attack-transcript.log
 - id: ATTACK-002

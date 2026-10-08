@@ -1,5 +1,5 @@
 ---
-commit_sha: 0370e02436d1b5a2a60fdaa057db67d19dabd158
+commit_sha: 53e4108fc38bb3077a3057b161328067ca06dc7e
 checks:
 - id: CHECK-001
   kind: tests
@@ -45,3 +45,13 @@ checks:
   evidence: evidence/scan-against-self.log
   criteria:
   - content-clean
+- id: CHECK-006
+  kind: tests
+  command: test_any_severity_but_minor_must_name_its_failure within CHECK-001 (remediation
+    REM-001)
+  result: pass
+  evidence: evidence/tests.log
+  criteria:
+  - REQ-XP-005
+  red_commit: e62bc6ecdc631e49fa55fe9d130cec5408471c57
+  test_path: test/cross_provider_review_test.rb

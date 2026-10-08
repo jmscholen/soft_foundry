@@ -1,6 +1,6 @@
 # Evaluation Results
 
-Commit SHA: 0370e02436d1b5a2a60fdaa057db67d19dabd158
+Commit SHA: 53e4108fc38bb3077a3057b161328067ca06dc7e
 
 ## Journey outcomes
 | Journey | Criteria | Result | Evidence |
@@ -10,6 +10,8 @@ Commit SHA: 0370e02436d1b5a2a60fdaa057db67d19dabd158
 | EVAL-003 | REQ-XP-002, REQ-XP-003 | pass | evidence/journey-transcript.log |
 | EVAL-004 | REQ-XP-004, REQ-XP-005 | pass | evidence/journey-transcript.log |
 | EVAL-005 | REQ-XP-003 | pass | evidence/journey-transcript.log |
+
+Second run, after remediation REM-001; the journeys and outcomes are the same as at 0370e02, with the gate's wording now "above minor".
 
 ## Failures
 None. The evidence was regenerated once: the first script ran EVAL-005 after EVAL-004 had completed the review, so `phase run` refused and printed nothing; the script was reordered and every journey rerun.

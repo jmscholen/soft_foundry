@@ -1,18 +1,18 @@
-# commit 0370e02436d1b5a2a60fdaa057db67d19dabd158; scratch /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/xp-eval.tvgF; installed: claude codex grok 
+# commit 53e4108fc38bb3077a3057b161328067ca06dc7e; scratch /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/xp-eval.dtHJ; installed: claude codex grok 
 ### EVAL-001 review with no --shell after an Anthropic implementation
 shell: codex (implementation ran on anthropic; the review skill prefers a different provider)
 would run review of demo with: codex exec <prompt>
 ### EVAL-002 the person's --shell wins
-would run review of demo with: grok -s af0e896f-034b-4573-a733-fecb25a3a9bf -p <prompt>
+would run review of demo with: grok -s 8e917394-01eb-4287-b600-aa0aab16d86c -p <prompt>
 ### EVAL-003 implementation provider not recorded
 ! warn shell: the provider of implementation is not recorded, so review runs on claude; name one with --shell
-would run review of demo with: claude -p --session-id febf17ce-10ef-4499-9130-49d65e3a31c3 --name demo/review <prompt>
+would run review of demo with: claude -p --session-id d3347aaa-01d3-4466-9072-bc4df2889bfa --name demo/review <prompt>
 ### EVAL-005 accessibility: the new lines with non-ASCII bytes deleted
 shell: codex (implementation ran on anthropic; the review skill prefers a different provider)
 ### EVAL-004 a review completed on the same provider is advised; its gate reads the failure field
 13-review  complete  FAIL
-  ✗ fail findings explained: no failure: on REV-1; a blocking or major finding names the concrete input or state and the wrong result it leads to, or it is minor
+  ✗ fail findings explained: no failure: on REV-1; every finding above minor names the concrete input or state and the wrong result it leads to, or it is minor
   ! warn review: review (13-review) ran on anthropic, the same provider as implementation; .ai/skills/review/skill.yml prefers a different one (`soft-foundry phase run review` picks one when --shell is not given)
 --- after naming the failure and recording the review on xAI:
 13-review  complete  PASS
-  ✓ pass findings explained: 1 blocking or major finding names its failure
+  ✓ pass findings explained: 1 finding above minor names its failure

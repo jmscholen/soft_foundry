@@ -1,6 +1,6 @@
 ---
-commit_sha: 0370e02436d1b5a2a60fdaa057db67d19dabd158
+commit_sha: 53e4108fc38bb3077a3057b161328067ca06dc7e
 artifacts:
 - path: evidence/journey-transcript.log
   produced_by: five journeys with the real CLI and this machine's PATH
-  sha256: beaa0f959aa0486ee7ee37c501e894e5e2c407dfd3931651838a35c1e22dcd6b
+  sha256: ec01de25f8e8617af24494ea2caaba2d8f80916474d0c6b2a10e60fcd99c8f09

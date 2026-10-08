@@ -1,10 +1,10 @@
 ---
 phase: '08-attack'
 skill: adversarial-testing
-status: in_progress
-commit_sha: 0370e02436d1b5a2a60fdaa057db67d19dabd158
-started_at: '2026-10-08T00:53:00Z'
-completed_at: '2026-10-08T00:44:03Z'
+status: complete
+commit_sha: 53e4108fc38bb3077a3057b161328067ca06dc7e
+started_at: '2026-10-08T01:02:00Z'
+completed_at: '2026-10-08T00:51:15Z'
 resolved_model:
   profile: adversarial_high
   provider: anthropic
@@ -18,10 +18,10 @@ blocking: []
 findings:
 - id: FIND-ATK-001
   severity: major
-  summary: A serious finding with an unlisted severity word (critical, high) skips
-    findings explained.
+  summary: 'Fixed by REM-001: any severity but minor now needs failure:.'
+  failure: at 0370e02, a review finding marked critical with no failure named passed
+    the review gate
 next: remediate
 notes: Performed by the interactive session that implemented the change, not an independent
-  attacker. Reopened by remediation REM-001 (FIND-ATK-001); evidence to be regenerated
-  at the remediated commit.
+  attacker. Second run, after REM-001.
 executed_by:

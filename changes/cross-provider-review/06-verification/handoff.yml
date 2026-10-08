@@ -1,10 +1,10 @@
 ---
 phase: 06-verification
 skill: verification
-status: in_progress
-commit_sha: 0370e02436d1b5a2a60fdaa057db67d19dabd158
-started_at: '2026-10-08T00:50:00Z'
-completed_at: '2026-10-08T00:44:03Z'
+status: complete
+commit_sha: 53e4108fc38bb3077a3057b161328067ca06dc7e
+started_at: '2026-10-08T01:00:00Z'
+completed_at: '2026-10-08T00:51:06Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -16,7 +16,6 @@ outputs:
 blocking: []
 findings: []
 next: evaluate
-notes: Performed by the interactive session that implemented the change. Deterministic
-  checks only. Reopened by remediation REM-001 (FIND-ATK-001); evidence to be regenerated
-  at the remediated commit.
+notes: Performed by the interactive session that implemented the change. Second run,
+  after REM-001. Deterministic checks only.
 executed_by:
