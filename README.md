@@ -199,7 +199,7 @@ The runner refuses what the gate would refuse afterwards (an exploring change, a
 shell: codex (implementation ran on anthropic; the review skill prefers a different provider)
 ```
 
-If no installed shell runs on another provider, or implementation's provider is not recorded, it says so with a `! warn shell:` line and uses what is there. `--shell` always wins. A review or judgment that ran on the same provider anyway gets a go-live advisory. "Installed" means on `PATH`, not logged in: if the chosen shell cannot start, name another with `--shell`.
+If a named phase's provider is not recorded, the known ones are still avoided and a `! warn shell:` line says which is missing; if none is known, or no installed shell runs on another provider, the warning says so and the first installed shell is used. A provider name it does not recognize falls back to the shell `phase run` recorded. `--shell` always wins. A review or judgment that ran on the same provider anyway gets a go-live advisory. "Installed" means on `PATH`, not logged in: if the chosen shell cannot start, name another with `--shell`.
 
 **Findings name the failure they prevent.** Every review finding states the concrete input or state and the wrong result it leads to. In the review handoff, every finding above `minor` (whatever its severity word) carries it as `failure:`, and the gate's `findings explained` check fails without it; a finding that cannot name one is minor. Asking for defensive additions (validation, rescues, or nil checks for states the code cannot reach) is not blocking or major unless the reviewer names the input that reaches the state.
 

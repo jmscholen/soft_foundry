@@ -15,13 +15,12 @@ module SoftFoundry
 
     module_function
 
-    # The handoff's resolved_model.provider, else the shell `phase run`
-    # recorded, else nil. A provider name it does not know is nil too.
+    # The handoff's resolved_model.provider when it is a name this knows,
+    # else the shell `phase run` recorded, else nil.
     def of(handoff)
       return nil unless handoff.is_a?(Hash)
       named = handoff.dig("resolved_model", "provider").to_s.strip.downcase
-      return NAMES[named] unless named.empty?
-      SHELLS[handoff.dig("executed_by", "shell").to_s]
+      NAMES[named] || SHELLS[handoff.dig("executed_by", "shell").to_s]
     end
 
     def of_shell(shell) = SHELLS[shell.to_s]

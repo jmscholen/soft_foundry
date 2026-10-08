@@ -63,14 +63,17 @@ module SoftFoundry
       known = used.reject { |_, provider| provider.nil? }
       on_path = SHELLS.keys.select { |s| installed.call(s) }
       fallback = on_path.first || "claude"
-      unless unknown.empty?
-        return Choice.new(shell: fallback, line: "! warn shell: the provider of #{unknown.join(' and ')} is not recorded, so #{phase.id} runs on #{fallback}; name one with --shell")
+      if known.empty?
+        return Choice.new(shell: fallback, line: unknown.empty? ? nil : "! warn shell: the provider of #{unknown.join(' and ')} is not recorded, so #{phase.id} runs on #{fallback}; name one with --shell")
       end
-      return Choice.new(shell: fallback, line: nil) if known.empty?
+      # Avoid every provider that is known, even when another is not.
       providers = known.map(&:last).uniq
       ran = known.map { |p, provider| "#{words(p)} #{known.index([p, provider]).zero? ? 'ran on' : 'on'} #{provider}" }.join(", ")
       pick = on_path.find { |s| !providers.include?(PhaseProvider.of_shell(s)) }
-      if pick
+      if pick && !unknown.empty?
+        owners = known.map { |p, provider| "#{words(p)}'s #{provider}" }.join(" and ")
+        Choice.new(shell: pick, line: "! warn shell: the provider of #{unknown.join(' and ')} is not recorded; #{phase.id} runs on #{pick}, which differs from #{owners}")
+      elsif pick
         Choice.new(shell: pick, line: "shell: #{pick} (#{ran}; the #{skill.name} skill prefers a different provider)")
       else
         Choice.new(shell: fallback, line: "! warn shell: no installed shell runs on a provider other than #{providers.join(' or ')}, so #{phase.id} runs on #{fallback}")
