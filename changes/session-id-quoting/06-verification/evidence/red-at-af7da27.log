@@ -1,0 +1,6 @@
+# worktree at RED commit af7da27687406f0fdb67df115c3204d2ebc70770
+  1) Failure:
+SessionIdQuotingTest#test_lookup_skips_lines_record_would_never_have_written [test/session_id_quoting_test.rb:37]:
+  2) Failure:
+SessionIdQuotingTest#test_resume_command_quotes_the_session_id_too [test/session_id_quoting_test.rb:54]:
+2 runs, 2 assertions, 2 failures, 0 errors, 0 skips

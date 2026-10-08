@@ -1,0 +1,12 @@
+# commit 6f753070e06ed9eb74b9744541b409429f81afa8; ledger /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/sq-eval.q5XJ/state/sessions.jsonl
+### EVAL-001 a real session still looks up and resumes exactly as before
+sessions: 1 recorded session matches (ledger: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/sq-eval.q5XJ/state/sessions.jsonl)
+session: 2026-10-07 23:58 UTC grok resumable
+  where: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/sq-eval.q5XJ/work
+  first: refactor the parser
+  resume: cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/sq-eval.q5XJ/work && grok --resume 0199d1a2-5b6c-7d8e-9f00-112233445566
+resume: cd /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/sq-eval.q5XJ/work && grok --resume 0199d1a2-5b6c-7d8e-9f00-112233445566
+### EVAL-002 a planted line is not shown, and the file keeps it
+sessions: 1 recorded session matches (ledger: /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/sq-eval.q5XJ/state/sessions.jsonl)
+session: 2026-10-07 23:58 UTC grok resumable
+lines in the ledger: 2
