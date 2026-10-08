@@ -3,18 +3,34 @@
 Standard: `.ai/rules/policy-conformance.md`. Cite the policy document and clause, or a rule from that file, in every finding.
 
 ## Documents checked
-TBD: the privacy policy, security policy, and terms recorded under `policies:` in `.ai/repository.yml`, each with the path or URL and the version or date examined; or a statement that the application publishes none and that this is itself a go-live gap.
+
+`.ai/repository.yml` `policies:`, as assessed at `2026-09-09T15:35:27Z` (commit `cc348f93f3d265af3f92f7fa7d0b09cbbf8a520a`). No policy file was added or edited by this change.
+
+| Document | Status in the profile | What was examined |
+| --- | --- | --- |
+| privacy | NOT_APPLICABLE | Rationale in the profile: a library gem, no users' data transmitted; the session ledger stays on the machine in `~/.soft-foundry/sessions.jsonl`. There is no privacy policy text and no version to cite. |
+| security | NOT_APPLICABLE | Rationale dated 2026-09-15 (change security-policy-not-applicable): no SECURITY.md; vulnerability reports go through GitHub issues. There is no security-policy clause to cite. |
+| terms | NOT_APPLICABLE | Rationale: no service is offered. There is no terms document to cite. |
 
 ## Scope reviewed
-TBD
+
+`surfaces.policy` is false. The diff was checked for each trigger in `.ai/rules/policy-conformance.md`:
+
+- Collects something new: no. `record` still writes the same fields. Lookup returns a subset of lines already on disk.
+- Adds a recipient: no. Nothing is sent off the machine. Quoting changes a string printed locally.
+- Changes retention or deletion: no. Rejected lines stay in the ledger. Lookup does not delete them. Nothing new is stored.
+- Changes purpose: no. The ledger is still a local index of the person's own sessions.
+- Changes a security commitment a policy names: no published security policy names session handling, encryption, or disclosure. The code's paste check is tighter. That is an engineering control under `security.md`, not a change to a promise a person was shown.
+- Changes consent or a rights mechanism: no.
 
 ## Findings
-| ID | Severity | Location | Finding | Policy clause or rule |
-| --- | --- | --- | --- | --- |
-| REV-TBD | blocking / major / minor | TBD | TBD | TBD |
+
+None.
 
 ## Policy text changes required
-TBD: None, or one line per clause that must be published before this change goes live. Publishing a change to a privacy policy, security policy, or terms is a legal commitment under `.ai/policies/human-boundaries.yml`: park the change with `status: awaiting_human` in `metadata.yml` and record the person's decision under `human_decisions` there.
+
+None.
 
 ## Conformance
-TBD: conforms / conforms with advisories / does not conform / N/A. N/A is valid only when `surfaces.policy` is false and this section says what was examined to conclude the change alters nothing the application collects, shares, retains, protects, or promises.
+
+N/A. `surfaces.policy` is false. The diff and the three `policies:` entries were examined. The change does not collect, share, or retain anything new, and it does not contradict or require an edit to a privacy policy, a security policy, or terms, because the profile records that this gem publishes none. The stronger local check on ledger lines is not a published security promise.
