@@ -1,24 +1,66 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 14-judgment
 skill: final-judgment
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 625e0da60e7c33ded16566366a68e661e764522f
+started_at: '2026-10-08T17:39:57Z'
+completed_at: '2026-10-08T17:48:00Z'
 resolved_model:
   profile: judgment_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: xAI
+  model: grok-4.7
+outputs:
+- final.md
+- residual-risk.md
+- evidence.yml
+blocking: []
+findings:
+- id: JUDGE-001
+  severity: info
+  summary: 'Outcome APPROVED_WITH_RESIDUAL_RISK at 625e0da. Required phases are complete
+    and their gates are ok. Verification, evaluation, and attack are current for the
+    panel code at 4f3b2da (no lib, exe, test, spec, or infra diff since). Review is
+    current at 661b454 and has no blocking findings. Discover, specify, and plan are
+    skipped with rationales. Documentation, FAQ index, and observability are pending
+    and optional. Nothing is undischarged.
+
+    '
+- id: JUDGE-002
+  severity: major
+  summary: 'REV-SEC-011..015 are accepted, not sent back, and not marked closed. REQ-PN-002
+    does not hold for a one-byte temp-directory copy. The snapshot does not fail a
+    detached post-exit write, a .git/hooks/pre-commit, a gitignored guard override
+    of quoted mode off, or a retry over a planted file. The maintainer recorded that
+    acceptance in metadata.yml human_decisions at 625e0da. Follow-up owes the rerun
+    refusal, the ARGUMENT.md crash, outcome failed on a consensus stray write, and
+    either a narrower README sentence or coverage for hooks and the guard override.
+
+    '
+- id: JUDGE-003
+  severity: info
+  summary: 'Also carried, not blocking: REV-SEC-016, REV-FUN-007, REV-FUN-008, REV-FUN-009,
+    REV-FUN-002, REV-ARCH-001, REV-ARCH-002, ATK-RES-001, and ATTACK-001 (not run
+    against a live model). Attack did not cover REV-SEC-012..015; the fourth review
+    did. Verification, evaluation, and attack were the implementing session. Nothing
+    is undischarged.
+
+    '
 next: learn
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: 'Fresh-context judgment under final-judgment permissions, treated as policy.
+  Read the change record and the panel, spawn, and guard code the review cites. Did
+  not re-run the throwaway attacks, did not edit any other phase, did not change requirements,
+  and did not run phase run. Implementation commit d1cf0d6 is not the current code;
+  REM-003 at 4f3b2da is, and the later phases re-checked it. The maintainer''s human_decisions
+  entry is the acceptance record, not a rewrite of REQ-PN-002.
+
+  '
+executed_by:
+  runner: soft-foundry phase run
+  shell: grok
+  fresh_context: true
+  started_at: '2026-10-08T17:39:57Z'
+  finished_at: '2026-10-08T17:48:05Z'
+  exit_status: 0
+  previous_phase: review
+  session_id: b11874ca-e07b-4e21-aef9-fe80c6150216
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"
