@@ -4,23 +4,21 @@ Standard: `.ai/rules/policy-conformance.md`. Cite the policy document and clause
 
 ## Documents checked
 
-`.ai/repository.yml` `policies:` (assessed for init-command, still the profile this change relies on; discovery was skipped because the layout is unchanged):
+`.ai/repository.yml` `policies:` at the committed profile (assessed 2026-09-09, privacy / security / terms):
 
-- privacy: NOT_APPLICABLE. Library gem with no users' data. The only outbound calls named there are provider model listings and the RubyGems version check. The optional session hook keeps a local index on the user's machine and sends nothing.
-- security: NOT_APPLICABLE. Maintainer decision of 2026-09-15, recorded in that file: no published security policy is owed. No `SECURITY.md`.
+- privacy: NOT_APPLICABLE. Library gem; no users' data. The rationale names the local session index under `~/.soft-foundry/sessions.jsonl` and says it is not sent anywhere.
+- security: NOT_APPLICABLE. Maintainer decision 2026-09-15 in changes/security-policy-not-applicable. No SECURITY.md. Vulnerability reports go through GitHub issues.
 - terms: NOT_APPLICABLE. No service; the gem is distributed under its RubyGems listing.
 
-No published privacy policy, security policy, or terms document exists to cite a clause from. That absence is the recorded answer, not a gap this change creates.
+No document has status PASS, so there is no published clause to cite. `surfaces.policy` is false.
 
 ## Scope reviewed
 
-`surfaces.policy` is false. Examined the diff (`panel.rb`, `cli.rb`, `guard.rb`, `gate.rb`, `advisory.rb`, `check.rb`, `control_plane.rb`, workflow, human-boundaries, schemas, README, version, tests) for a new collection, recipient, retention, purpose, security promise, or consent mechanism.
-
-The panel stores a session id per member in the phase handoff. That is the same kind of value `phase run` already stores in `executed_by.session_id`: a UUID the runner chooses, written into the change record on the user's machine. It is not sent anywhere by this code. Drafts and `ARGUMENT.md` are the agents' writing about the repository, kept in the change record. No form field, cookie, analytics event, new model-provider recipient, retention change, or change to a published promise.
+What this change collects, shares, retains, or promises. The panel starts coding shells the person already runs, on the person's machine, against the repository. It writes drafts and `ARGUMENT.md` under the change record. It does not add a form, a log of personal data, a recipient, a retention rule, a consent mechanism, or a security promise to a published policy. Session ids in the `panel:` block are ids the runner chose for the local shells, the same kind the single-session runner already records. The live evaluation and the attack phase used synthetic text in a scratch repository.
 
 ## Findings
 
-None.
+None. No row: nothing the three documents cover changed, and none of those documents is a published PASS policy.
 
 ## Policy text changes required
 
@@ -28,4 +26,4 @@ None.
 
 ## Conformance
 
-N/A. `surfaces.policy` is false. The examination above is what supports that: the change does not alter what the application collects, shares, retains, protects, or promises, and the profile records no published policy document that a clause could be checked against.
+N/A. `surfaces.policy` is false. Examined the panel command, the handoff `panel:` block, the prompts, the staging directories (removed after the run), and the three `policies:` entries above. The change does not alter what the application collects, shares, retains, protects, or promises.

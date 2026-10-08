@@ -2,20 +2,18 @@
 
 ## Scope reviewed
 
-`.ai/rules/observability.md` and the operational consequences of the panel runner. `surfaces.observability` is false. The repository profile marks failure detection, health, operational visibility, and alerting NOT_APPLICABLE: there is no production service; the CLI exits non-zero. `12-observability/` is still the pending template. This change does not add a service, a dashboard, or an alarm, and none is owed for a library gem.
+How an operator tells that a panel succeeded, failed, split, or was tampered with. `surfaces.observability` is false. `12-observability/` is still the pending template, which is correct for a library with no production service: `.ai/repository.yml` marks failure detection, health, operational visibility, and alerting NOT_APPLICABLE. Rules: `.ai/rules/observability.md`, `.ai/rules/errors.md`. Compared with `CLI#panel_run` and the live transcript.
 
 ## Findings
 
-| ID | Severity | Location | Finding | Failure it prevents | Rule or requirement |
-| --- | --- | --- | --- | --- | --- |
-| REV-FUN-001 | major | see `functional.md` | Recorded here so operations does not drop it. The panel's new failure mode (a member process exits non-zero, or a later executable is missing) is not detected as a failure. It is either a command that exits 0 with the phase still pending, a change parked as a panel split, or an orphaned member process. `soft-foundry ps` will not list a killed panel as an unfinished run, because `executed_by` is written only at the end and then with `exit_status` 0. | Same input as in `functional.md`: consensus exits non-zero after agreement, or every member exits non-zero without writing, or the second shell is not on PATH. | `.ai/rules/observability.md` (a new material failure mode needs a detection path); `.ai/rules/general.md` |
+No separate operations finding. The detection gaps are the security findings:
 
-No second finding. Production dashboard and alarm rules do not apply.
+- REV-SEC-006 exits 0 with no warn line and an empty `panel.failures`. Nothing in the handoff says the phase file was written during the independent round. There is no log, metric, or alarm to add for a local CLI; the missing signal is the exit code and the fail line the other panel failures already use.
+- REV-SEC-005 does emit `! warn panel:` and a `panel.notes` entry, then still exits 0 with status `complete`. An operator who reads the note can see the replaced draft. An operator who trusts the exit code and `outcome: agreed` cannot.
+- REV-FUN-004 emits the same warn and note, then exits 0. The dropped member is absent from `panel.members`.
 
-## What holds
-
-A genuine disagreement still exits non-zero, prints `! warn panel: split`, and parks the change. That path is observable. The single-provider case prints `! warn panel:`. Refusals exit non-zero (see REV-A11Y-001 for the missing status word). Billing notices still print per shell before the panel starts.
+Split, consensus crash, fewer than two staged drafts, and a draft changed during the consensus all exit non-zero, print `✗ fail panel:` or `! warn panel:`, and leave `blocking` set. That is the detection path this CLI has, and it is the one those cases use.
 
 ## Conformance
 
-The production observability standard is not applicable. The CLI failure mode in REV-FUN-001 does not conform to the detection rule.
+The production observability standard is not applicable. The CLI's own failure reporting conforms for the cases the remediation tests cover, and does not conform for REV-SEC-006, which is indistinguishable from a clean agreement.

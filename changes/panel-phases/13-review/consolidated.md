@@ -1,72 +1,51 @@
 # Consolidated Review
 
-Commit reviewed: `726edc107151e91e708ea8ba4ce367ee516bf19f`. No application, test, infrastructure, or earlier-phase file was modified.
+Reviewed at `a47a2f35ba68fd3cce6b3e703348e65debaf8ffb`. Provider xAI, model grok-4.7, which is not the provider that implemented or remediated (both Anthropic). No application, test, infrastructure, or earlier-phase file was modified.
+
+The first review's majors are closed: REV-FUN-001, REV-FUN-003, REV-SEC-001, REV-SEC-002, REV-SEC-003, and REV-A11Y-001. Regression tests in `test/panel_remediation_test.rb` passed (with `test/panel_phases_test.rb`: 24 runs, 167 assertions, 0 failures). The findings below are what those fixes do not cover, reproduced in a throwaway repository.
 
 ## Functional
 
-The happy path matches REQ-PN-001..010: bounds and refusals, per-member drafts, agreement from appended text only, a spoiled round, consensus by the first member, the `panel:` block, a real split parked for a person, `--shell-arg`, the dry run's session cap, and the single-provider advisory. Tests and the live claude/grok panel support that.
-
-REV-FUN-001 (major): member process results are discarded. Reproduced: a non-zero consensus exit after agreement makes the command exit 0 with the handoff still `pending` and `executed_by.exit_status` 0, so the gate skips. Members that exit non-zero without writing are parked as a panel split with `exit_status` 0. A missing later executable leaves any member already spawned running.
-
-REV-FUN-002 (minor): `--shell-arg` is accepted; its test has no RED commit of its own. REV-FUN-003 (minor): dry run prints only the independent-round commands.
+Conforms on refusals, bounds, resume, agreement detection, forged lines, spoiled argument text, non-zero consensus, missing executables, split parking, and the live two-member panel. REV-FUN-004: a three-member panel whose third member writes nothing completes as a two-member agreement (exit 0), with a warning and a note. REV-FUN-005: drafts written only under `panel/<member>/` are reported as no draft and the panel fails closed. REV-FUN-002: `--shell-arg` still has no RED commit of its own; the feature is accepted.
 
 ## Architecture
 
-`Panel`, `CLI`, and `Guard` match the existing runner split. Control-plane and README writes (REV-ARCH-002, minor) are an accepted exception required by the intake. REV-ARCH-001 (minor): `Gate.checks_for` lists `panel recorded` for every panel phase, but the gate runs it only when a complete handoff has a `panel:` block.
+`Panel`, `CLI`, and `Guard` match the decisions in `05-implementation/decisions.md`. REV-ARCH-001: the change page lists `panel recorded` for every panel phase, and the gate runs it only when a complete handoff has a `panel:` block. REV-ARCH-002: control-plane and README writes are outside the implementation write set; accepted because REQ-PN-001, REQ-PN-005, and REQ-PN-010 require them. The fingerprint is taken after the independent round and rebased after a spoiled argument round, which is the structure behind REV-SEC-005 and REV-SEC-006.
 
 ## Security
 
-Does not conform in block mode, reproduced with `Guard` on a specify-phase fixture.
+Does not conform. Three allows, each reproduced with `Guard#decide`, and two of them followed through `panel_run`:
 
-- REV-SEC-001 (major): a shell command can write the phase's files during the independent stage, and can replace another member's draft during the argument stage. Write narrowing covers only Edit/Write/`apply_patch`.
-- REV-SEC-002 (major): Claude Code `Grep` reads another member's draft during the independent stage. The tool is unguarded, so narrowing sees no path.
-- REV-SEC-003 (major): the consensus stage is not narrowed, so the writer can replace the drafts the gate cites, and the agree sentence is interpolated into the consensus instructions.
+- REV-SEC-004. Independent `Write` to the in-repo own folder is allow, and `Grep` with no path (also `Glob **/*.md`, `Grep` of `changes/<slug>`) is allow. The sibling draft is readable before the argument round. Block mode does not stop either call.
+- REV-SEC-005. Argument-stage Bash that hides the draft path in an assignment is allow. The round is spoiled, the replacement becomes the baseline, and round 2 can agree. Reproduced: exit 0, status complete, the cited draft is the replacement, failures empty, a note names the change.
+- REV-SEC-006. The same assignment form writes `specification.md` during the independent stage and is allow. The write is the fingerprint baseline. Reproduced: exit 0, no warn, status complete, the injected line still at the start of the file after an in-place consensus edit.
 
-Bounds, generated member names, forged `agree:` lines, rewritten argument text, and the implement refusal hold. ATK-RES-001 (a malformed member name skips narrowing rather than failing closed) is unchanged and still minor: the runner does not emit such a name, and the skill's own permissions still apply.
+The agree sentence is not copied into the consensus prompt. A draft changed during the consensus fails the run. A malformed member name still disables narrowing (ATK-RES-001); no member input reaches that, so it is not a new finding.
 
 ## Accessibility
 
-Conforms with advisories. REV-A11Y-001 (minor): refusals have no `fail` word and no `panel:` prefix. No UI. New output lines do not use color or a glyph as the only signal. The specification phase was skipped, so the go-live advisory that no accessibility requirement was recorded is expected; intake only says every new output line carries a status word.
+Conforms with advisories. REV-A11Y-002: the agreed and no-agreement lines have no pass/fail/warn/skip word. Refusals and the split warning do. The skipped specification leaves the expected advisory that no accessibility requirement was recorded.
 
 ## Policy conformance
 
-N/A. `surfaces.policy` is false. Privacy, security, and terms in `.ai/repository.yml` are NOT_APPLICABLE. The panel's session ids are the same local handoff values `phase run` already records. No policy text change is owed.
+N/A. `surfaces.policy` is false. Privacy, security, and terms in `.ai/repository.yml` are all NOT_APPLICABLE. Nothing this change collects, shares, retains, or promises is covered by a published clause. Policy text changes owed: None.
 
 ## Infrastructure
 
-N/A. No infrastructure-as-code in the change.
+N/A. No IaC. `surfaces.infrastructure` is false. CI workflow untouched.
 
 ## Operations
 
-No production service, so dashboard and alarm rules do not apply. REV-FUN-001 is the detection gap for the new CLI failure mode. `12-observability/` is still pending; nothing in this change requires it.
+No production service. REV-SEC-006 is indistinguishable from a clean agreement: exit 0, no warn, empty failures. REV-SEC-005 and REV-FUN-004 warn and still exit 0.
 
 ## Blocking findings
 
-None. The majors are for judgment. They are not a reason to withhold this handoff, and they are not accessibility or policy advisories.
+None. The three majors are for judgment. They are not blocking conditions on this handoff.
 
 ## Residual concerns
 
-- ATK-RES-001 stands: a malformed `SOFT_FOUNDRY_PANEL_MEMBER` disables narrowing instead of failing closed. A member does not control the environment its hooks receive.
-- ATTACK-001 was not run live. REV-SEC-003 covers the runner copying the agree sentence into the instruction prompt. A model obeying a draft it was told is data, on a tool the guard does narrow, is still the accepted residual.
-- EVAL-OBS-001: the agree "sentence" is not held to one sentence. The live panel agreed on a paragraph because both members copied it. Detection compares normalized text. Not refiled.
-- EVAL-OBS-002: the guard warns on shell reads of deny-write paths. Pre-existing. Not this change.
-- Verification, evaluation, and attack were done by the session that implemented the change (anthropic), and their handoffs have no `executed_by`. The gate already advises that. This review ran as a fresh grok session.
-- `--shell-arg` and the control-plane writes are accepted deviations, with REV-FUN-002 and REV-ARCH-002 recording the limits.
-- User-documentation, FAQ index, and observability phases are still pending templates. README, help text, schemas, and the human-boundaries entry already cover REQ-PN-010. That is not a defect in the code reviewed here.
+Default guard mode is warn, so violations the tests call denied still run unless a machine sets block. That is existing policy, and it is not one of the findings: those three are allows. A `Process.spawn` failure after both shells have resolved can leave an earlier member running; the missing-executable case is fixed, and this input was not reached. Agreement still does not require the agree line to be one sentence (EVAL-OBS-001); both members copying a longer line is the behavior the equality check specifies.
 
-## Unresolved findings carried forward
+## Unresolved findings
 
-| ID | Severity | From | Disposition |
-| --- | --- | --- | --- |
-| REV-FUN-001 | major | this review | Open. Member results ignored. |
-| REV-SEC-001 | major | this review | Open. Shell writes escape narrowing. |
-| REV-SEC-002 | major | this review | Open. Unguarded tools escape read narrowing. |
-| REV-SEC-003 | major | this review | Open. Consensus can rewrite drafts; agree text enters the prompt. |
-| REV-FUN-002 | minor | this review | Open process gap. Feature accepted. |
-| REV-FUN-003 | minor | this review | Open. Dry run omits later commands. |
-| REV-ARCH-001 | minor | this review | Open. `checks_for` over-claims `panel recorded`. |
-| REV-ARCH-002 | minor | this review | Accepted exception. |
-| REV-A11Y-001 | minor | this review | Open advisory. |
-| ATK-RES-001 | minor | `08-attack` | Still open. Not upgraded. |
-| EVAL-OBS-001 | minor | `07-evaluation` | Accepted. Not a wrong agreement. |
-| EVAL-OBS-002 | minor | `07-evaluation` | Pre-existing. Not this change. |
+REV-SEC-004, REV-SEC-005, REV-SEC-006 (major). REV-FUN-004, REV-FUN-005, REV-FUN-002, REV-ARCH-001, REV-ARCH-002, REV-A11Y-002 (minor).

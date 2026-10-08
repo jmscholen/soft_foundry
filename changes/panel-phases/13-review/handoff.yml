@@ -1,10 +1,10 @@
 ---
 phase: 13-review
 skill: review
-status: in_progress
-commit_sha: 726edc107151e91e708ea8ba4ce367ee516bf19f
-started_at: '2026-10-08T03:18:23Z'
-completed_at: '2026-10-08T03:30:00Z'
+status: complete
+commit_sha: a47a2f35ba68fd3cce6b3e703348e65debaf8ffb
+started_at: '2026-10-08T04:08:01Z'
+completed_at: '2026-10-08T04:27:46Z'
 resolved_model:
   profile: reasoning_high
   provider: xAI
@@ -20,52 +20,51 @@ outputs:
 - consolidated.md
 blocking: []
 findings:
-- id: REV-FUN-001
+- id: REV-SEC-004
   severity: major
-  summary: Member process results are discarded. A non-zero consensus exit after agreement
-    exits 0 with the handoff still pending. Members that exit non-zero without writing
-    are parked as a panel split with exit_status 0. A missing later executable leaves
-    any member already spawned running.
-  failure: 'phase run specify --panel claude,grok --max-rounds 1, both members append
-    agree: same, and the consensus launcher returns 1 without editing the handoff:
-    the command exits 0, status stays pending, executed_by.exit_status is 0, panel.outcome
-    is agreed, and the gate skips every check. The same launcher returning 1 from
-    every stage with no writes parks the change at awaiting_human as a split. --panel
-    grok,claude when claude is not on PATH spawns grok and then raises, leaving that
-    process running.'
-- id: REV-SEC-001
+  summary: Independent stage allows an in-repo own-folder write, and a search that
+    names no sibling path can read it.
+  failure: 'Independent stage, specify panel. claude-1 Write to changes/c1/02-specification/panel/claude-1/draft.md
+    is allow (reason: in specification''s write set). grok-1 Grep with pattern Theory
+    and no path is allow (reason: tool Grep is not guarded), as are Glob **/*.md and
+    Grep path changes/c1. Those searches run from the repository root and return the
+    draft before the argument round. Block mode does not stop either call, because
+    neither is a violation. Grep given the sibling path is a violation and is not
+    this case.'
+- id: REV-SEC-005
   severity: major
-  summary: Shell commands escape panel write narrowing. Independent-stage Bash can
-    write the phase files. Argument-stage Bash can replace another member's draft.
-  failure: 'Independent stage, member claude-1, Bash command `printf x > changes/c1/02-specification/specification.md`:
-    Guard allows it (names no path denied to specification), so the member writes
-    the phase output before the argument round. Argument-stage `cp` of claude-1''s
-    draft onto grok-1''s draft is also allowed, and the spoil check only watches ARGUMENT.md.'
-- id: REV-SEC-002
+  summary: An argument-stage shell assignment can replace another draft, and the next
+    round can agree to the replacement.
+  failure: 'Argument stage, claude-1, Bash f=changes/c1/02-specification/panel/grok-1/draft.md;
+    printf replaced > "$f" is allow (reason: names no path denied to specification).
+    The direct cp of those two paths is a violation. Stand-in --panel claude,grok
+    --max-rounds 2 with that replacement in round 1 and both members agreeing on round
+    2: command exits 0, panel.outcome is agreed, rounds is 2, status is complete,
+    panel/grok-1/draft.md is the replacement, panel.failures is empty. The note says
+    the draft changed. The gate would cite the replaced file.'
+- id: REV-SEC-006
   severity: major
-  summary: Unguarded tools escape independent-stage read narrowing. Claude Code Grep
-    reads another member's draft.
-  failure: 'Independent stage, tool Grep, path changes/c1/02-specification/panel/grok-1/draft.md:
-    Guard allows it because Grep is not a guarded tool and carries no path, so claude-1
-    reads grok-1''s draft before the argument round.'
-- id: REV-SEC-003
-  severity: major
-  summary: The consensus stage is not narrowed, so the writer can replace the drafts
-    the gate cites, and the agree sentence is copied into the consensus instructions.
-  failure: Consensus-stage Write to changes/c1/02-specification/panel/grok-1/draft.md
-    is allowed. claude-1 replaces grok-1's draft, cites panel/grok-1/, and panel recorded
-    passes on the replaced file. The consensus prompt interpolates that round's agree
-    sentence into the instruction text, and the prompt tells the member the prompt
-    is its instructions, so a sentence the other member was told to copy becomes part
-    of the consensus instructions.
+  summary: An independent-stage shell assignment can write a phase output, and that
+    write is the fingerprint baseline.
+  failure: 'Independent stage, Bash f=changes/c1/02-specification/specification.md;
+    printf x > "$f" is allow. The direct redirect of that path is a violation. Stand-in
+    claude,grok panel whose independent stage writes "POISONED during independent"
+    into specification.md and whose consensus edits that file in place: command exits
+    0, outcome agreed, status complete, panel.failures empty, no warn line, and specification.md
+    still starts with the injected line.'
+- id: REV-FUN-004
+  severity: minor
+  summary: A three-or-four-member panel completes as agreed without a member who wrote
+    no draft. The warning and panel.notes name who was dropped; panel.members does
+    not.
+- id: REV-FUN-005
+  severity: minor
+  summary: A draft written only at panel/<member>/ is reported as no draft and the
+    panel fails closed, leaving the file in the phase folder.
 - id: REV-FUN-002
   severity: minor
-  summary: "--shell-arg is accepted; its test shares the GREEN commit and has no RED
-    commit of its own."
-- id: REV-FUN-003
-  severity: minor
-  summary: Dry run prints the independent-round commands only, not the later resume
-    or consensus commands.
+  summary: "--shell-arg is accepted; its test shares the GREEN commit d1cf0d6 and
+    has no RED commit of its own."
 - id: REV-ARCH-001
   severity: minor
   summary: Gate.checks_for lists panel recorded for every panel phase; evaluate runs
@@ -74,25 +73,28 @@ findings:
   severity: minor
   summary: Control-plane and README writes are outside the implementation write set.
     Accepted because REQ-PN-001, REQ-PN-005, and REQ-PN-010 require them.
-- id: REV-A11Y-001
+- id: REV-A11Y-002
   severity: minor
-  summary: 'Panel refusals have no fail/warn status word and no panel: prefix.'
+  summary: The agreed and no-agreement lines have no pass/fail/warn/skip word. Refusals
+    use "fail panel:" and the split uses "warn panel:".
 next: judge
-notes: Independent review of HEAD 726edc1 (panel code at d1cf0d6). No application,
-  test, infrastructure, or earlier-phase file was modified. Guard decisions and the
-  two launcher failure cases were reproduced in a throwaway repository; a missing
-  executable was not launched. Accessibility and policy results are go-live advisories.
-  No policy text change is owed. No blocking findings. Majors are for judgment. The
-  skipped specification leaves the expected accessibility advisory that no accessibility
-  requirement was recorded. Permissions followed as policy. Reopened by remediation
-  REM-001 (REV-FUN-001, REV-SEC-001, -002, -003).
+notes: Second review, after REM-001, at a47a2f3 (panel code 2bdc19f). First-review
+  majors REV-FUN-001, REV-FUN-003, REV-SEC-001, REV-SEC-002, REV-SEC-003, and REV-A11Y-001
+  are closed; panel_phases_test and panel_remediation_test passed (24 runs, 167 assertions).
+  New majors REV-SEC-004, REV-SEC-005, and REV-SEC-006 were reproduced with Guard#decide
+  and panel_run in a throwaway repository. No application, test, infrastructure, or
+  earlier-phase file was modified. Accessibility and policy results are go-live advisories.
+  No policy text change is owed. No blocking findings; majors are for judgment. Provider
+  xAI, not the Anthropic provider that implemented and remediated. Permissions followed
+  as policy. The skipped specification leaves the expected accessibility advisory
+  that no accessibility requirement was recorded.
 executed_by:
   runner: soft-foundry phase run
   shell: grok
   fresh_context: true
-  started_at: '2026-10-08T03:18:23Z'
-  finished_at: '2026-10-08T03:31:18Z'
+  started_at: '2026-10-08T04:08:01Z'
+  finished_at: '2026-10-08T04:32:17Z'
   exit_status: 0
   previous_phase: attack
-  session_id: 2f0ecc74-4333-461e-b796-0df707db5fba
+  session_id: c5f66d62-ae16-4aab-bede-61125d33b752
   cwd: "/Users/jscholen-iou/dev/soft_foundry"
