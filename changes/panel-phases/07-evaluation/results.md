@@ -1,6 +1,6 @@
 # Evaluation Results
 
-Commit SHA: d1cf0d618b8157ab8ff24bfa6379b654a0f47da2
+Commit SHA: 2bdc19fbb760243a9e30eda2db7b0c32722d1479
 
 ## Journey outcomes
 | Journey | Criteria | Result | Evidence |
@@ -10,7 +10,7 @@ Commit SHA: d1cf0d618b8157ab8ff24bfa6379b654a0f47da2
 | EVAL-003 | REQ-PN-007 | pass | evidence/live-panel-transcript.log |
 | EVAL-004 | REQ-PN-006 | pass | evidence/live-panel-transcript.log |
 
-The live panel ran for 11 minutes (03:05 to 03:16 UTC). Both members investigated independently (Grok made about 40 tool calls, Claude Code about 6 before writing). In round 1 Claude Code adopted Grok's proposed contract with two additions, Grok accepted them, and both ended with the same `agree:` text, so the debate ended after one round of a possible two. Claude Code wrote the four specification files citing `panel/claude-1/` and `panel/grok-1/`; the gate passed.
+Second run, after remediation REM-001 (the first, at d1cf0d6, is superseded). The live panel ran for 12 minutes (03:43 to 03:55 UTC). Each member wrote its draft in its own temporary folder outside the repository, and the runner copied both into `panel/claude-1/` and `panel/grok-1/`. In round 1 both members reached the same outcome (the version as a constant in `lib/hello/version.rb`, no root VERSION file; the first run had settled on a VERSION file, which shows the panel deciding from its own investigation each time), and both ended with the same `agree:` text. Claude Code wrote the four specification files citing both drafts three times each; the gate passed; nothing outside the phase folder changed except the change's metadata.
 
 ## Failures
 None.

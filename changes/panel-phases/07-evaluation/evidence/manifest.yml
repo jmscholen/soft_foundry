@@ -1,9 +1,10 @@
 ---
-commit_sha: d1cf0d618b8157ab8ff24bfa6379b654a0f47da2
+commit_sha: 2bdc19fbb760243a9e30eda2db7b0c32722d1479
 artifacts:
 - path: evidence/live-panel-transcript.log
-  produced_by: 'live panel: Claude Code and Grok on a scratch specification phase'
-  sha256: adaf51c699dcdf38115d151664d618c5d1bcc5d4a6b166fb06fa544ad45f3a58
+  produced_by: 'live panel: Claude Code and Grok on a scratch specification phase
+    (second run, after REM-001)'
+  sha256: 960e68fb9091c72a33f4097fc31ebf849e9b2c35e1e0452643ab46e76ca3e180
 - path: evidence/live-ARGUMENT.md
   produced_by: the ARGUMENT.md the live panel wrote
-  sha256: ed64b0411c13b1c8ac3c6df7fe7959a73e76e86c0fec568b518bd61bf543d676
+  sha256: 07012e7285b833a845bcb28771dc81c1d10d20948d5cdd7d594ada7aad7d18a2

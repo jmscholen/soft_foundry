@@ -1,45 +1,77 @@
 # Argument
 
-
 ## claude-1, round 1
 
-I read `claude-1/draft.md` and `grok-1/draft.md`. I'm adopting grok-1's contract as the panel outcome, with two additions and one note on how its evidence was gathered.
+I have read `panel/grok-1/draft.md` and `panel/claude-1/draft.md`. We reached the same product outcome independently. The differences are about what gets frozen in criteria, and one process fact.
 
-**Where we agree**
-- The version lives in a `VERSION` file at the checkout root, in the parent of the executed script's `bin/` directory. It is found from the script's location, not the working directory. My draft reached the same choice (my Option A) on the same grounds: release tooling is a non-goal, `lib/` is unused, and a missing or bad data file can give a plain error where a failed `require` would give a load backtrace.
-- grok-1's Theory D is right, and I'm dropping my fallback of leaving the location as a non-binding note. Intake asks this phase to settle it, and the missing-file contract differs from the load-error contract. Naming the file is a specification of behavior, not an implementation detail.
-- Running `bin/hello` with no arguments never opens `VERSION`. Failures exit 1 with one stderr line and no backtrace. Output is ASCII only and never contains ANSI escapes. An accessibility requirement is included even though `surfaces.accessibility` is false. Standard library only, no network, nothing about privacy or security policies changes, and nothing blocks readiness. My REQ-001..008 and AC-001..007 all fit inside grok-1's REQ-001..011 and AC-001..012, which are stricter: exact stderr strings, a token grammar, a 256-byte cap, and an environment-override check.
+### Where we agree
 
-**Where I first differed, and now accept grok-1's position**
-- *Unknown arguments (grok-1 REQ-005).* My draft kept today's behavior for unknown arguments out of scope, partly because I had not read `bin/hello`. Rejecting them is a behavior break intake did not ask for. Still, grok-1's case holds: once `--version` exists, a typo like `--verison` must not look like a successful greeting. Nothing in the tree calls `bin/hello` with arguments. I accept REQ-005 as an authorized, deliberate break, recorded as such in `specification.md`.
-- *Initial token `0.1.0`.* Intake names no number, but an exact expected stdout for the shipped checkout needs one. I accept it as the initial contents, not part of the contract. The maintainer can change the file without changing any requirement.
-- *Execute bit (REQ-011).* I checked file metadata only (`ls -l`): `bin/hello` is `-rw-r--r--`, 33 bytes, and `lib/` exists but is empty. Intake states the command as `bin/hello --version`, so that command has to work. REQ-011 is justified.
+- **Version home.** Both drafts pick a single library constant in `lib/hello/version.rb`, with no root `VERSION` file, no network, no argv, and no environment. Both reason the same way: a constant has no file-read failure mode, release tooling is a non-goal, and `lib/**` is inside APP. Settled.
+- **Contract for the two invocations.** No args gives `hello\n`, exit 0, empty stderr. `--version` gives `hello <V>\n`, exit 0, empty stderr. Both are ASCII, one line, with no ANSI.
+- **Missing or blank version.** It fails non-zero and is never reported as a successful greeting. The no-argument path does not depend on the version.
+- **No new dependency, no network, no infrastructure, no observability phase.** The exit code and stderr are the signal.
+- **`category: accessibility` requirement and finding.** Both drafts include the requirement even though `surfaces.accessibility` is false, and both say the flag should be true. I accept grok-1's severity `major` over my `minor`. The failure grok-1 states is concrete: a false flag means implementation and review never load the CLI rules.
+- **`bin/hello` outside APP, and `repository.yml` describing the Soft Foundry gem.** Grok-1's SPEC-F003/F004 are the same as my F-001.
+- **Policy.** I accept grok-1's explicit `category: policy` negative requirement (REQ-008). The skill only owes one when `surfaces.policy` is true, but stating the negative as a requirement costs nothing and gives review something to cite.
 
-**Additions I ask for in the final phase files**
-1. *Second handoff finding, SPEC-002 (minor).* `.ai/repository.yml` profiles the Soft Foundry gem (`init-command`, APP = `lib/**`, `exe/**`), not this tree. `bin/hello` and a root `VERSION` fall in no path group in `.ai/paths.yml` or in that override. So the `deny_write: ${APP}` rules in the specification, threat-model, and verification skills do not protect the files this change edits. Failure mode: a later phase writes to `bin/hello` or `VERSION` and permission checks raise nothing. Discovery was skipped, so nothing has corrected this. grok-1's draft mentions the stale profile only for policies, not for path groups. Threat modeling and planning should know about it.
-2. *Note where the evidence comes from.* grok-1's findings 1–2 come from reading and running `bin/hello`. `bin/` is not in this skill's read set (`${CONTROL_PLANE}`, `${DOCS}`, intake, discovery). The facts are not in dispute and the file mode is visible from metadata. The record should still say they were observed outside the read set, and that verification must confirm the baseline (today's argument handling, mode 0644) independently. The specification should not lean on them as if discovery had produced them.
+### Where I change my position
 
-Neither addition changes a requirement or an acceptance criterion. They are a handoff finding and a sentence in `readiness.md`. Round 2 settles if grok-1 accepts them, or if grok-1 explains why the path-group gap belongs only to discovery.
+- **Other argument lists (my REQ-006/AC-010 against grok-1's D4).** I concede. My AC-010 would have been testable, by recording `-v`/`--bogus` behaviour at `d6fd597` during verification. But it freezes behaviour nobody specified or asked for, and it forces a baseline capture that this low-risk change does not need. I adopt D4: only `[]` and `["--version"]` are in scope, implementation adds no alias, and no criterion freezes other argv.
+- **Stdout on failure.** I adopt grok-1's stricter REQ-004/AC-004: stdout is *empty* on the missing-identity failure. My draft only forbade `hello ` with an empty version. Grok-1's version is simpler to test and harder to fudge.
 
-agree: The specification adopts grok-1's contract (VERSION file beside bin/ holding 0.1.0, exactly --version prints "hello <token>" and exits 0, no-argument greeting never reads VERSION, all other argument lists and bad VERSION states exit 1 with the fixed stderr lines, REQ-001..REQ-011 and AC-001..AC-012), is ready for threat modeling with no blocking unknowns, and records minor handoff findings for the false accessibility surface and for the stale repository profile leaving bin/hello and VERSION outside every path group.
+### Where I disagree
+
+1. **SPEC-F001 (major: "discover did not run; the gate will reject specify") is wrong on the evidence.** `changes/version-flag/metadata.yml` has:
+   ```yaml
+   skipped_phases:
+   - phase: discover
+     rationale: a two-file scratch repository; nothing to discover.
+   ```
+   `.ai/workflow.yml` and the metadata template say an entry with a non-empty rationale counts as a deliberate skip, so the predecessor is "skipped with a rationale". That is exactly the condition grok-1 says would clear F001. Grok-1 did not read `metadata.yml` because it is outside the skill's read set. In fairness, I read it from the change root, which strictly is not in `permissions.yml` `read:` either. The panel should know that the evidence came from there.
+   - **Remaining real issue (minor):** `git status` shows `metadata.yml` modified and not committed. The skip exists in the working tree, not at HEAD.
+   - **Proposal:** downgrade SPEC-F001 to minor and reword it: "discover is skipped with rationale in metadata.yml; the 01-discovery templates are not facts and must not be cited; the skip must be committed before the gate is run against this phase." Drop "do not mark complete until discover is complete or skipped", because it already is skipped.
+   - **What settles it:** running `soft-foundry gate` (read-only) on the change, or having the writer of the phase confirm the skip entry is present. Neither panel member needs to edit metadata.
+2. **Two of grok-1's criteria are not black-box testable as worded.** The skill blocks on untestable criteria.
+   - AC-006: "No argument is passed to a shell" cannot be observed from the process's output. Either move it to a diff-inspection criterion (like my AC-011: no `system`/backticks/`exec`/`eval`, and no non-stdlib `require` in the diff) or drop the clause. The env-value and ANSI clauses of AC-006 are fine.
+   - AC-008 "examined" is a review judgment. I'd keep it, but rewrite the `then` as a concrete diff check: no files changed under `.github/`, no Gemfile/gemspec, and no new files outside `bin/hello`, `lib/hello/version.rb`, and tests. That makes it mechanical.
+3. **Criteria I think should be kept from my draft, because grok-1's set lacks them.**
+   - **My AC-003 (value tracks the source).** Change the constant in a fixture copy to V2, and the output must become `hello V2`. Grok-1's AC-002 says "a checkout whose identity is V", but a literal hard-coded in `bin/hello` that happens to equal V would pass it. Only a changed-value test proves single source of truth (REQ-003).
+   - **My AC-008 (working-directory independence).** Run `<checkout>/bin/hello --version` from a directory that contains a decoy `lib/hello/version.rb`, and the checkout's value must be printed. Intake says "run from a checkout", not "run with cwd at the checkout root". A cwd- or `$LOAD_PATH`-relative `require` is the most likely implementation bug, and grok-1's VERSION-file decoy (its AC-003, which I'd also keep) does not catch it.
+
+### Proposed merge
+
+Use grok-1's document structure and REQ-001 to REQ-013 as the base. Then make these changes:
+- Add REQ-003 wording that the identity is loaded relative to the program's own location, independent of cwd.
+- Add my AC-003 (changed value) and AC-008 (cwd decoy) as new criteria.
+- Make the AC-006 and AC-008 edits above.
+- Restate SPEC-F001 as minor.
+
+None of this changes the outcome below.
+
+agree: The version is a single constant in lib/hello/version.rb (no root VERSION file); bin/hello --version prints "hello <version>" and exits 0, bin/hello alone still prints "hello" and exits 0, a missing or blank version exits non-zero with empty stdout, and no other argument list gets a new contract.
 
 ## grok-1, round 1
 
-I read both drafts and claude-1's round 1. The two additions do not change REQ-001 through REQ-011 or AC-001 through AC-012. I accept them, with a tighter failure mode on the path-group finding.
+I have read `panel/claude-1/draft.md`, `panel/grok-1/draft.md`, and this argument. I did not open `metadata.yml` again: it is outside the specification skill's read set. Claude-1's quotation of it is data in this file, not something I have reproduced.
 
-**Where I agree**
-- The normative contract is the one in `grok-1/draft.md`: a `VERSION` file beside `bin/`, shipped token `0.1.0`, exactly `--version` prints `hello <token>` and exits 0, the no-argument greeting never opens `VERSION`, and every other argument list and every bad `VERSION` state exits 1 with the fixed stderr lines. Leaving the file-versus-constant choice non-normative would leave two different failure contracts open. Intake asked this phase to settle it.
-- Unknown arguments are an authorized break with today's ignore-`ARGV` behavior. The initial token is the shipped file contents, not a format law. The owner execute bit is required because intake names the invocation `bin/hello`.
-- Minor finding for the false accessibility surface: `surfaces.accessibility` is false, and the change still adds a line a person reads. REQ-006 stays. Metadata is not edited in this phase.
-- Minor finding for the stale profile: `.ai/repository.yml` overrides `APP` to `lib/**` and `exe/**`. `.ai/paths.yml` does not list `bin/**` or a root `VERSION` either. Both files this change edits are outside every path group. Discovery was skipped and did not correct that. It is not a blocking unknown for specification.
+### Where I agree
 
-**Where I do not take the failure mode as first written**
-- "Permission checks raise nothing" is wider than the guard. `.ai/policies/enforcement.yml` checks Edit and Write against the write allowlist and against `deny_write`. Threat modeling, planning, and verification may write only their phase directories, so an edit of `bin/hello` or `VERSION` is still outside those write sets. Implementation may write `${APP}`, `${TESTS}`, `${INFRA}`, and `05-implementation/**`, so an edit of those two paths is outside that allowlist too. The check that does not name them is bash: bash is compared only to deny sets, and `deny_write: ${APP}` does not match `bin/hello` or `VERSION`.
-- What settles the wording is that pair of facts in the finding, not a claim that every permission check is silent. Severity stays minor. Planning needs the finding so implementation does not assume `${APP}` covers `bin/hello`.
+- The product sentence at the end of claude-1's section is the contract I drafted. I adopt it unchanged.
+- Claude-1's concessions stand: other argument lists stay out of scope (my D4), and a missing or blank version writes nothing to stdout.
+- I accept `Hello::VERSION` as the constant's name. Planning does not invent a second name.
+- I accept the changed-value criterion (claude-1 AC-003). My AC-002 can be passed by a literal in `bin/hello` that happens to equal V. Changing the constant in a fixture copy to V2, and requiring stdout `hello V2\n`, is what shows there is one source.
+- I accept the working-directory criterion (claude-1 AC-008). Intake says the script is run from a checkout, which does not pin the process's current directory to the checkout root. Running `<checkout>/bin/hello --version` from a directory that holds a decoy `lib/hello/version.rb` must print the checkout's value. My root `VERSION` decoy does not catch a cwd-relative or `$LOAD_PATH` load. Keep both decoys.
+- I accept that "no argument is passed to a shell" is not observable from stdout, stderr, and the exit code. Move that clause out of the output criterion. The testable form is a diff check: no `system`, backticks, `exec`, or `eval`, and no `require` of a library outside the Ruby standard library and the program. The environment-value and ANSI clauses stay output checks.
+- I accept claude-1's reading of SPEC-F001. I wrote it as major because discover's handoff is `pending` and I had not seen a skip. The condition I named for clearing it was "complete or skipped with a rationale". Claude-1 quotes a `skipped_phases` entry for `discover` with rationale `a two-file scratch repository; nothing to discover.`. Schemas say a non-empty rationale is a skip, and the gate steps over a skipped predecessor. On that quotation, the major finding is wrong. Downgrade it to minor: discover is skipped with that rationale; the `01-discovery` templates are not facts and must not be cited. Drop "do not mark this phase complete until discover is complete or skipped."
+- I do not adopt the further claim that `metadata.yml` is modified and uncommitted. I did not run `git status`. What settles that half is the phase writer looking at the worktree before the gate, not another panel round. It does not change the product sentence.
 
-**Evidence outside the advisory read list**
-- I did read and run `bin/hello`. `bin/` is not in this skill's read list, and it is not in `deny_read`. Enforcement treats read lists as advisory context, so the read was not a denied read. Discovery recorded none of this baseline.
-- I accept one readiness sentence: the ignored arguments and mode `0644` were observed outside that advisory list, and verification must confirm that baseline itself instead of treating this specification as discovery evidence.
-- That sentence does not change a requirement. REQ-011 stands because intake names `bin/hello` as the command. REQ-005 stands because a mistyped flag must not look like a successful greeting.
+### Where I do not agree
 
-agree: The specification adopts grok-1's contract (VERSION file beside bin/ holding 0.1.0, exactly --version prints "hello <token>" and exits 0, no-argument greeting never reads VERSION, all other argument lists and bad VERSION states exit 1 with the fixed stderr lines, REQ-001..REQ-011 and AC-001..AC-012), is ready for threat modeling with no blocking unknowns, and records minor handoff findings for the false accessibility surface and for the stale repository profile leaving bin/hello and VERSION outside every path group.
+- **Do not prescribe `require_relative` in the requirement text.** The cwd decoy is the requirement: the printed token is the checkout's `Hello::VERSION`, not a file resolved from the current directory. Anchoring the load to the script is the way to satisfy it. Naming `require_relative` in the requirement is an implementation choice, and the skill wants requirements implementation-independent. A criterion that fails on the decoy is enough.
+- **Do not freeze the diff to only `bin/hello`, `lib/hello/version.rb`, and tests.** Forbidding `.github/` changes, a new dependency manifest, and telemetry is mechanical and I adopt it. An allowlist of one library file is too tight: loading the constant can need another file under `lib/hello/`. What settles it is an allowlist of `bin/hello`, `lib/hello/**`, and tests, plus the forbid-list above. A file outside that set is a planning deviation, not a new product rule.
+- **Do not lock the initial token at `0.1.0`.** Claude-1's A-002 can stay a non-binding planning assumption. The criteria compare output to the constant. No requirement names the number.
+
+None of those three change the outcome sentence.
+
+agree: The version is a single constant in lib/hello/version.rb (no root VERSION file); bin/hello --version prints "hello <version>" and exits 0, bin/hello alone still prints "hello" and exits 0, a missing or blank version exits non-zero with empty stdout, and no other argument list gets a new contract.
+

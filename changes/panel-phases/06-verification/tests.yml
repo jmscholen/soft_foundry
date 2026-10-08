@@ -1,10 +1,10 @@
 ---
-commit_sha: d1cf0d618b8157ab8ff24bfa6379b654a0f47da2
+commit_sha: 2bdc19fbb760243a9e30eda2db7b0c32722d1479
 checks:
 - id: CHECK-001
   kind: tests
   command: ruby -Ilib -Itest requiring every test/*_test.rb (-v), provider keys, SOFT_FOUNDRY_BILLING,
-    SOFT_FOUNDRY_GUARD, and the panel variables unset
+    SOFT_FOUNDRY_GUARD, and the panel variables unset; includes test/panel_remediation_test.rb
   result: pass
   evidence: evidence/tests.log
   criteria:
@@ -48,3 +48,31 @@ checks:
   evidence: evidence/scan-against-self.log
   criteria:
   - content-clean
+- id: CHECK-006
+  kind: tests
+  command: test/panel_remediation_test.rb within CHECK-001 (remediation REM-001)
+  result: pass
+  evidence: evidence/tests.log
+  criteria:
+  - REQ-PN-002
+  - REQ-PN-004
+  - REQ-PN-005
+  - REQ-PN-007
+  red_commit: 2ca6ff292b040f8fa9747d29b1d7b658d8974168
+  test_path: test/panel_remediation_test.rb
+- id: CHECK-007
+  kind: tests
+  command: test_a_claude_member_may_write_its_draft_folder within CHECK-001
+  result: pass
+  evidence: evidence/tests.log
+  criteria:
+  - REQ-PN-002
+  red_commit: f638ea423bae917e2e8b404725d2ee0a05b6ded1
+  test_path: test/panel_remediation_test.rb
+- id: CHECK-008
+  kind: custom
+  command: the panel test files in worktrees at the RED commits 2ca6ff2 and f638ea4
+  result: fail
+  evidence: evidence/red-at-2ca6ff2.log
+  criteria:
+  - failing-test-first

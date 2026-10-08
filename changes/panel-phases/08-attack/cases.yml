@@ -1,5 +1,5 @@
 ---
-commit_sha: d1cf0d618b8157ab8ff24bfa6379b654a0f47da2
+commit_sha: 2bdc19fbb760243a9e30eda2db7b0c32722d1479
 authorization_envelope:
   target: soft-foundry phase run --panel and soft-foundry guard (this checkout)
   environment: local
@@ -75,6 +75,20 @@ cases:
   - phase run implement --panel claude,grok --dry-run
   expected_safe_behavior: refused
   observed: refused, naming panel_phases
+  result: denied
+  evidence:
+  - evidence/attack-transcript.log
+- id: ATTACK-006
+  threat: THREAT-002
+  violation_attempted: escape stage narrowing with shell commands, unknown tools (Grep,
+    Glob), a search into another member's staging folder, or a consensus write over
+    a draft
+  starting_privilege: a member session with the guard in block mode
+  steps:
+  - seven guard calls with panel environment
+  expected_safe_behavior: refused with exit 2; the consensus may still write the phase
+    output
+  observed: all six escapes refused; the consensus write to the phase output allowed
   result: denied
   evidence:
   - evidence/attack-transcript.log

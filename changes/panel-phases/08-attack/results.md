@@ -1,6 +1,6 @@
 # Attack Results
 
-Commit SHA: d1cf0d618b8157ab8ff24bfa6379b654a0f47da2
+Commit SHA: 2bdc19fbb760243a9e30eda2db7b0c32722d1479
 
 ## Authorization envelope
 Local CLI processes and the real guard command in a scratch repository; synthetic data; no live agent asked to attack. See `cases.yml`.
@@ -13,9 +13,10 @@ Local CLI processes and the real guard command in a scratch repository; syntheti
 | ATTACK-003 | THREAT-004 | denied | evidence/attack-transcript.log |
 | ATTACK-004 | THREAT-003, THREAT-005 | denied | evidence/attack-transcript.log |
 | ATTACK-005 | THREAT-002 | denied | evidence/attack-transcript.log |
+| ATTACK-006 | THREAT-002 | denied (REM-001 cases: shell, Grep, Glob, staging folders, consensus) | evidence/attack-transcript.log |
 
 ## Violations found
-None.
+None. Second run, after remediation REM-001 (which fixed the review's REV-SEC-001, -002, -003); the first run at d1cf0d6 is superseded.
 
 Residuals: a malformed `SOFT_FOUNDRY_PANEL_MEMBER` is ignored (the skill's own permissions still apply) rather than failing closed; a member cannot change the environment its own hooks receive, so this needs a process outside the panel. Inter-agent prompt injection (ATTACK-001) is mitigated by the prompts and the guard, not prevented.
 
