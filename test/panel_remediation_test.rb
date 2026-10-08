@@ -127,7 +127,7 @@ class PanelRemediationTest < PanelPhasesTest
       assert g.call("independent").decide("Bash", { "command" => "printf x > #{base}/specification.md" }).violation?
       assert g.call("argument").decide("Bash", { "command" => "cp #{base}/panel/claude-1/draft.md #{base}/panel/grok-1/draft.md" }).violation?
       assert g.call("argument").decide("run_terminal_command", { "command" => "rm #{base}/panel/grok-1/draft.md" }).violation?
-      assert_equal :allow, g.call("argument").decide("Bash", { "command" => "ls lib" }).outcome
+      assert_equal :allow, g.call("argument").decide("Bash", { "command" => "ls changes/c1/00-intake" }).outcome
     end
   end
 

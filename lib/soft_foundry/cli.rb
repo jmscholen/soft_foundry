@@ -899,7 +899,7 @@ module SoftFoundry
 
     # `phase run <phase> --panel SHELL,SHELL`: the phase as a panel.
     def panel_run(record, phase, spec, rounds_given, chosen, extra, dry_run, shell_arg_values = [])
-      refuse = ->(why) { @err.puts "#{record.slug}: cannot run #{phase.id} as a panel: #{why}"; EXIT_TARGET }
+      refuse = ->(why) { @err.puts "✗ fail panel: #{record.slug}: cannot run #{phase.id} as a panel: #{why}"; EXIT_TARGET }
       return refuse.call("--panel and --shell cannot be given together; the panel names its shells") if chosen
       unless plane.panel_phases.include?(phase)
         return refuse.call("#{phase.id} is not a panel phase (panel_phases in .ai/workflow.yml: #{plane.panel_phases.map(&:id).join(', ')})")
@@ -924,10 +924,20 @@ module SoftFoundry
       @out.puts "panel: #{members.map { |m| "#{m.name} (#{m.shell}, #{m.provider})" }.join(', ')}"
       @out.puts "panel: at most #{rounds} argument #{rounds == 1 ? 'round' : 'rounds'}; at most #{panel.max_sessions} sessions; the first member writes the consensus"
       if dry_run
-        panel.independent_launches.each do |l|
-          @out.puts "would run #{l.member} independent with: #{l.executable} #{l.args.map { |a| a == l.prompt ? '<prompt>' : Shellwords.escape(a) }.join(' ')}"
+        panel.plan_launches.each do |l|
+          @out.puts "would run #{l.member} #{l.stage} with: #{l.executable} #{l.args.map { |a| a == l.prompt ? '<prompt>' : Shellwords.escape(a) }.join(' ')}"
         end
+        panel.cleanup
         return 0
+      end
+      # Every member's shell must be found before any member starts.
+      unless @panel_launcher
+        members.map(&:shell).uniq.each do |s|
+          Shell.resolve(s)
+        rescue RuntimeError => e
+          panel.cleanup
+          return refuse.call(e.message)
+        end
       end
 
       members.map(&:shell).uniq.each { |s| billing_notice(shell: s) }
@@ -947,8 +957,13 @@ module SoftFoundry
       h = record.handoff(phase) || {}
       h["panel"] = panel.block(outcome)
       h["executed_by"] = { "runner" => "soft-foundry phase run --panel", "shell" => members.first.shell, "fresh_context" => true,
-                           "started_at" => started.iso8601, "finished_at" => Time.now.utc.iso8601, "exit_status" => 0,
+                           "started_at" => started.iso8601, "finished_at" => Time.now.utc.iso8601,
+                           "exit_status" => outcome.consensus_status || 1,
                            "previous_phase" => previous, "session_id" => members.first.session_id, "cwd" => @root }
+      unless outcome.failures.empty?
+        h["status"] = "blocked"
+        h["blocking"] = Array(h["blocking"]) + outcome.failures.map { |f| "panel failed: #{f}" }
+      end
       if outcome.outcome == "split"
         h["status"] = "blocked"
         blocking = Array(h["blocking"])
@@ -962,18 +977,20 @@ module SoftFoundry
         File.write(meta_path, YAML.dump(meta))
         @err.puts "! warn panel: split after #{outcome.rounds} #{outcome.rounds == 1 ? 'round' : 'rounds'}; the change is parked at awaiting_human until a person records the decision under human_decisions (boundary: panel split)"
       end
+      outcome.failures.each { |f| @err.puts "✗ fail panel: #{f}" }
       result = Gate.new(record, git: git).evaluate(phase)
       print_result(result)
       print_advisories(record)
-      return EXIT_TARGET if outcome.outcome == "split"
+      return EXIT_TARGET if outcome.outcome != "agreed" || !outcome.failures.empty?
       result.failed? ? 2 : 0
     end
 
     # Starts each launch as a child process with its panel environment, all
     # at once, and waits for every one. Output is the member's own.
     def spawn_panel(launches)
-      pids = launches.map do |l|
-        Process.spawn(l.env, Shell.resolve(l.executable), *l.args, chdir: @root)
+      executables = launches.map { |l| Shell.resolve(l.executable) }
+      pids = launches.zip(executables).map do |l, executable|
+        Process.spawn(l.env, executable, *l.args, chdir: @root)
       end
       pids.map do |pid|
         Process.wait(pid)
