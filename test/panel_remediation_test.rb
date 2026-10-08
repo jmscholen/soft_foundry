@@ -157,7 +157,7 @@ class PanelRemediationTest < PanelPhasesTest
       end
       code, out = run_panel(dir, "specify", "--panel", "claude,grok", launcher: launcher)
       refute_equal 0, code
-      assert_includes out, "✗ fail panel: panel/grok-1/ changed after the independent round (consensus stage, claude-1)"
+      assert_includes out, "✗ fail panel: files other than the phase's own outputs changed during the consensus (claude-1): changes/c1/02-specification/panel/grok-1/draft.md"
     end
   end
 
@@ -207,7 +207,7 @@ class PanelRemediationTest < PanelPhasesTest
       end
       code, out = run_panel(dir, "specify", "--panel", "claude,grok", launcher: launcher)
       refute_equal 0, code
-      assert_includes out, "✗ fail panel: the phase folder changed during the independent stage (specification.md)"
+      assert_includes out, "✗ fail panel: the repository changed during the independent stage (changes/c1/02-specification/specification.md)"
       assert_equal "failed", record.handoff(phase(record)).dig("panel", "outcome")
       refute(calls.flatten.any? { |l| l.stage == "consensus" }, "a consensus ran on a poisoned folder")
     end
@@ -227,7 +227,7 @@ class PanelRemediationTest < PanelPhasesTest
       end
       code, out = run_panel(dir, "specify", "--panel", "claude,grok", launcher: launcher)
       refute_equal 0, code
-      assert_includes out, "✗ fail panel: the phase folder changed during the independent stage (panel/grok-1/early.md)"
+      assert_includes out, "✗ fail panel: the repository changed during the independent stage (changes/c1/02-specification/panel/grok-1/early.md)"
     end
   end
 
@@ -256,7 +256,7 @@ class PanelRemediationTest < PanelPhasesTest
       refute_equal 0, code
       h = record.handoff(phase(record))
       assert_equal "failed", h.dig("panel", "outcome")
-      assert_includes out, "✗ fail panel: panel/grok-1/ changed after the independent round (argument stage, round 1, claude-1)"
+      assert_includes out, "✗ fail panel: files changed during the argument (round 1, claude-1): changes/c1/02-specification/panel/grok-1/draft.md"
       refute(calls.flatten.any? { |l| l.stage == "consensus" }, "a consensus ran over a replaced draft")
     end
   end
@@ -270,6 +270,93 @@ class PanelRemediationTest < PanelPhasesTest
       assert_equal 0, code, out
       assert_equal ["codex-1"], record.handoff(phase(record)).dig("panel", "dropped")
       assert_includes out, "✓ pass panel: agreed after 1 round"
+    end
+  end
+  # --- REM-003: the whole repository, not a list of folders --------------------------------
+
+  def poison(record, stage, member, rel, text = "planted\n")
+    lambda do |l|
+      if l.stage == stage && l.member == member
+        path = File.join(File.dirname(File.dirname(record.dir)), rel)
+        FileUtils.mkdir_p(File.dirname(path))
+        File.write(path, text)
+      end
+      false
+    end
+  end
+
+  # REV-SEC-007: the handoff is the runner's and the consensus's alone.
+  def test_an_argument_stage_write_to_the_handoff_fails_the_run
+    with_specifiable_change do |dir, record|
+      calls = []
+      code, out = run_panel(dir, "specify", "--panel", "claude,grok", launcher: scripted(record, calls, &poison(record, "argument", "grok-1", "changes/c1/02-specification/handoff.yml", "findings: [PLANTED]\n")))
+      refute_equal 0, code
+      assert_includes out, "files changed during the argument (round 1, grok-1): changes/c1/02-specification/handoff.yml"
+    end
+  end
+
+  # REV-SEC-008: earlier phases, metadata, and code are outside every stage.
+  def test_writes_outside_the_phase_folder_fail_the_run_in_every_stage
+    { ["independent", "claude-1", "changes/c1/00-intake/request.md"] => "the repository changed during the independent stage (changes/c1/00-intake/request.md)",
+      ["independent", "grok-1", "lib/app.rb"] => "the repository changed during the independent stage (lib/app.rb)",
+      ["argument", "claude-1", "changes/c1/metadata.yml"] => "files changed during the argument (round 1, claude-1): changes/c1/metadata.yml",
+      ["consensus", "claude-1", "lib/app.rb"] => "files other than the phase's own outputs changed during the consensus (claude-1): lib/app.rb" }.each do |(stage, member, rel), message|
+      with_specifiable_change do |dir, record|
+        calls = []
+        code, out = run_panel(dir, "specify", "--panel", "claude,grok", launcher: scripted(record, calls, &poison(record, stage, member, rel)))
+        refute_equal 0, code, rel
+        assert_includes out, "✗ fail panel: #{message}", rel
+      end
+    end
+  end
+
+  # REV-SEC-010: a dotfile is a file too.
+  def test_an_argument_stage_dotfile_in_the_phase_folder_fails_the_run
+    with_specifiable_change do |dir, record|
+      calls = []
+      code, out = run_panel(dir, "specify", "--panel", "claude,grok", launcher: scripted(record, calls, &poison(record, "argument", "claude-1", "changes/c1/02-specification/.hidden")))
+      refute_equal 0, code
+      assert_includes out, "changes/c1/02-specification/.hidden"
+    end
+  end
+
+  # REV-SEC-009: a member that copied another's draft has not drafted.
+  def test_identical_drafts_fail_the_panel
+    with_specifiable_change do |dir, record|
+      calls = []
+      copier = scripted(record, calls) do |l|
+        if l.stage == "independent"
+          d = l.env["SOFT_FOUNDRY_PANEL_DRAFT_DIR"]
+          FileUtils.mkdir_p(d)
+          File.write(File.join(d, "draft.md"), "Only claude wrote this sentence.\n")
+          true
+        end
+      end
+      code, out = run_panel(dir, "specify", "--panel", "claude,grok", launcher: copier)
+      refute_equal 0, code
+      assert_includes out, "✗ fail panel: grok-1's draft is identical to claude-1's; a panel needs independent drafts"
+    end
+  end
+
+  # REV-FUN-006: a run that failed is not parked for a person, even if the
+  # members also disagreed.
+  def test_a_failed_split_is_not_parked
+    with_specifiable_change do |dir, record|
+      calls = []
+      launcher = scripted(record, calls) do |l|
+        case l.stage
+        when "argument"
+          File.open(File.join(panel_dir(record), "ARGUMENT.md"), "a") { |f| f.puts "## #{l.member}, round #{l.round}\n#{l.member == 'claude-1' ? 'agree: A' : 'agree: B'}" }
+          true
+        when "consensus"
+          File.write(File.join(File.dirname(File.dirname(record.dir)), "lib", "app.rb"), "planted\n")
+          false
+        end
+      end
+      code, = run_panel(dir, "specify", "--panel", "claude,grok", "--max-rounds", "1", launcher: launcher)
+      refute_equal 0, code
+      refute_equal "awaiting_human", record.metadata["status"]
+      assert_equal "blocked", record.handoff(phase(record))["status"]
     end
   end
 end

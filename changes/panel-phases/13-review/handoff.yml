@@ -1,7 +1,7 @@
 ---
 phase: 13-review
 skill: review
-status: complete
+status: in_progress
 commit_sha: 11c69d2045fe1d1db2e3118b7e3f17f401b95169
 started_at: '2026-10-08T13:17:59Z'
 completed_at: '2026-10-08T13:43:36Z'
@@ -99,7 +99,7 @@ notes: 'Third review, after REM-002, at 11c69d2 (panel code 2a74680). First-revi
   Permissions followed as policy; this session did not show a guard refusal, so the
   write boundary was observed by the agent rather than enforced in-process. The skipped
   specification leaves the expected accessibility advisory that no accessibility requirement
-  was recorded.'
+  was recorded. Reopened by remediation REM-003 (REV-SEC-007..010, REV-FUN-006).'
 executed_by:
   runner: soft-foundry phase run
   shell: grok
