@@ -8,6 +8,8 @@ require_relative "control_plane"
 require_relative "change_record"
 require_relative "gate"
 require_relative "hooks"
+require_relative "shell"
+require_relative "phase_provider"
 
 module SoftFoundry
   # Runs one lifecycle phase of a change in a fresh coding-shell session:
@@ -37,6 +39,43 @@ module SoftFoundry
     # Codex have their own install; Grok runs the Claude Code entry from
     # .claude/settings.json in a folder it trusts.
     HOOKED_SHELLS = %w[claude codex grok].freeze
+
+    # The provider a phase ran on (see PhaseProvider).
+    def self.provider_of(handoff) = PhaseProvider.of(handoff)
+
+    Choice = Data.define(:shell, :line)
+
+    # The shell for a phase when the person named none. A skill that
+    # declares prefer_different_provider_from gets the first installed
+    # shell, in SHELLS order, on a provider none of those phases used;
+    # every other phase gets claude, as before. `line` explains the
+    # choice (a `shell:` line, or a `! warn shell:` line), or is nil.
+    def default_shell(phase, installed: ->(s) { Shell.resolve(s) rescue nil })
+      skill = @plane.skill(phase.skill)
+      named = Array(skill.definition["prefer_different_provider_from"]).filter_map { |id| @plane.phase(id.to_s) }
+      return Choice.new(shell: "claude", line: nil) if named.empty?
+      used = named.filter_map do |p|
+        next unless @record.phase_status(p) == "complete"
+        provider = self.class.provider_of(@record.handoff(p))
+        [p, provider]
+      end
+      unknown = used.select { |_, provider| provider.nil? }.map { |p, _| words(p) }
+      known = used.reject { |_, provider| provider.nil? }
+      on_path = SHELLS.keys.select { |s| installed.call(s) }
+      fallback = on_path.first || "claude"
+      unless unknown.empty?
+        return Choice.new(shell: fallback, line: "! warn shell: the provider of #{unknown.join(' and ')} is not recorded, so #{phase.id} runs on #{fallback}; name one with --shell")
+      end
+      return Choice.new(shell: fallback, line: nil) if known.empty?
+      providers = known.map(&:last).uniq
+      ran = known.map { |p, provider| "#{words(p)} #{known.index([p, provider]).zero? ? 'ran on' : 'on'} #{provider}" }.join(", ")
+      pick = on_path.find { |s| !providers.include?(PhaseProvider.of_shell(s)) }
+      if pick
+        Choice.new(shell: pick, line: "shell: #{pick} (#{ran}; the #{skill.name} skill prefers a different provider)")
+      else
+        Choice.new(shell: fallback, line: "! warn shell: no installed shell runs on a provider other than #{providers.join(' or ')}, so #{phase.id} runs on #{fallback}")
+      end
+    end
 
     def initialize(root, plane:, git:, record:)
       @root = File.expand_path(root)
@@ -127,6 +166,11 @@ module SoftFoundry
     end
 
     private
+
+    # "implementation" for implement, "remediation" for remediate.
+    def words(phase)
+      { "implement" => "implementation", "remediate" => "remediation" }.fetch(phase.id, phase.id.tr("_", " "))
+    end
 
     def real(dir)
       File.realpath(dir)

@@ -9,9 +9,9 @@ TBD: the privacy policy, security policy, and terms recorded under `policies:` i
 TBD
 
 ## Findings
-| ID | Severity | Location | Finding | Policy clause or rule |
-| --- | --- | --- | --- | --- |
-| REV-TBD | blocking / major / minor | TBD | TBD | TBD |
+| ID | Severity | Location | Finding | Failure it prevents | Policy clause or rule |
+| --- | --- | --- | --- | --- | --- |
+| REV-TBD | blocking / major / minor | TBD | TBD | TBD: the concrete input or state and the wrong result (required for blocking and major) | TBD |
 
 ## Policy text changes required
 TBD: None, or one line per clause that must be published before this change goes live. Publishing a change to a privacy policy, security policy, or terms is a legal commitment under `.ai/policies/human-boundaries.yml`: park the change with `status: awaiting_human` in `metadata.yml` and record the person's decision under `human_decisions` there.

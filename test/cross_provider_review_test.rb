@@ -105,6 +105,7 @@ class CrossProviderReviewTest < Minitest::Test
     with_reviewable_change(provider: "anthropic") do |dir, record|
       complete_phase!(record, "remediate", sha: head(dir))
       set_provider(record, "remediate", "openai")
+      complete_phase!(record, "review", sha: head(dir))
       with_installed("claude", "codex", "grok") do
         _, out = dry_run(dir, "judge")
         assert_includes out, "with: grok -s"

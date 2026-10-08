@@ -175,6 +175,9 @@ module SoftFoundry
       (skill.required_files - ["handoff.yml"]).each do |f|
         findings << Finding.new(:error, "skill #{skill.name}: required file '#{f}' has no template") unless File.exist?(File.join(skill.template_dir, f))
       end
+      Array(skill.definition["prefer_different_provider_from"]).each do |id|
+        findings << Finding.new(:error, "skill #{skill.name}: prefer_different_provider_from names '#{id}', which is not a lifecycle phase") unless @plane.phase(id.to_s)
+      end
       findings.concat(check_permissions(skill))
       findings
     end

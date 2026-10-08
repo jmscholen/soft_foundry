@@ -42,6 +42,7 @@ Created from `.ai/templates/handoff.yml`. Field semantics:
 - While the change is `exploring`, a `complete` phase from `implement` onward fails its `not exploring` check; `change vet` is the way forward.
 - After `change vet`, the specification phase carries a `specification locked` check that fails when anything under `02-specification/` changed since the vetted commit, including uncommitted edits.
 - Every complete phase carries a `content clean` check over the files in its directory: invisible Unicode and secret-shaped strings fail it, instruction-override phrases and fetch-and-execute commands warn (a record may quote an attack it found), and `.ai/policies/content-scan.yml` or an in-line `soft-foundry:scan-allow` marker exempts all but invisible text.
+- The review phase carries a `findings explained` check over its handoff's `findings`: every finding with severity `blocking` or `major` needs a non-empty `failure:` (the concrete input or state and the wrong result it leads to). Structure only: the gate does not judge whether the failure is real. Minor findings need none.
 - The learning phase carries an `instincts valid` check over `15-learning/instincts.yml`: every entry needs a kebab-case unique `id`, a `trigger`, an `action`, a numeric `confidence` in 0..1, and non-empty `evidence`; an empty list passes.
 - The verification phase carries a `red evidence` check over the checks in `06-verification/tests.yml` that name a `red_commit` (optionally with `test_path`): each must be a commit that precedes `commit_sha`, hold the test file, and be followed by an `APP` or `INFRA` change before `commit_sha`. Checks without `red_commit` are skipped; the test is not re-run at the RED commit.
 
@@ -52,6 +53,7 @@ A stale or failed gate must be resolved by rerunning the phase, never by editing
 `soft-foundry gate`, `change status`, `ci`, and `change close` print an `advisory:` block after the gate results when something a person should know about before the change ships is missing. Advisories are informational: they never change the exit code or block a phase. Today they cover:
 
 - the review or judge phase waived through `skipped_phases`, with the rationale given;
+- a completed review or judgment that ran on the same provider as a phase its skill names in `prefer_different_provider_from` (`implement` and `remediate` for both): the provider is the handoff's `resolved_model.provider`, else the shell in `executed_by`;
 - a feature, fix, or refactor whose completed verification has no check naming a `red_commit` (no failing-test-first evidence);
 - a change on a track with an exploring stage in a repository whose profile records no `development` environment under `environments:` (`NOT_APPLICABLE` with a rationale is a valid answer);
 - a change that declares `surfaces.accessibility: true` but has no `category: accessibility` requirement, no accessibility observations in evaluation, or an accessibility review that is pending, skipped, still TBD, or N/A;

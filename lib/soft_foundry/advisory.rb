@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "control_plane"
+require_relative "phase_provider"
 
 module SoftFoundry
   # Go-live advisories for one change record: things a person should know
@@ -107,8 +108,29 @@ module SoftFoundry
         notices << Notice.new("judgment", "final judgment was skipped (#{why}); no APPROVED/BLOCKED/REJECTED verdict exists for this change")
       end
       notices.concat(fresh_context_notices)
+      notices.concat(same_provider_notices)
       notices.concat(red_evidence_notices)
       notices
+    end
+
+    # Review and judgment prefer a different provider from the phases their
+    # skill names (prefer_different_provider_from). A completed one that
+    # ran on the same provider as one of them is reported, never failed.
+    def same_provider_notices
+      [["review", "review", "review"], ["judge", "judgment", "judgment"]].filter_map do |id, area, label|
+        phase = @plane.phase(id)
+        next unless phase && @record.phase_status(phase) == "complete"
+        own = PhaseProvider.of(@record.handoff(phase))
+        next unless own
+        names = Array(@plane.skill(phase.skill).definition["prefer_different_provider_from"])
+        same = names.filter_map do |name|
+          other = @plane.phase(name.to_s)
+          next unless other && @record.phase_status(other) == "complete"
+          { "implement" => "implementation", "remediate" => "remediation" }.fetch(other.id, other.id) if PhaseProvider.of(@record.handoff(other)) == own
+        end
+        next if same.empty?
+        Notice.new(area, "#{label} (#{phase.output}) ran on #{own}, the same provider as #{same.join(' and ')}; .ai/skills/#{phase.skill}/skill.yml prefers a different one (`soft-foundry phase run #{id}` picks one when --shell is not given)")
+      end
     end
 
     # A feature, fix, or refactor verified with no check that names a

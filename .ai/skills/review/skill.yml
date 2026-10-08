@@ -3,3 +3,7 @@ model: reasoning_high
 phase: 13-review
 outputs: [functional_review, architecture_review, security_review, accessibility_review, policy_conformance_review, operations_review]
 evidence: commit_bound
+# Phases whose provider this skill's session should differ from. `phase run`
+# without --shell picks an installed shell on another provider, and an
+# advisory names a completed phase that ran on the same one.
+prefer_different_provider_from: [implement, remediate]
