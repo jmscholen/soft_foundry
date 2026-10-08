@@ -296,7 +296,7 @@ class PanelPhasesTest < Minitest::Test
       calls = []
       code, out = run_panel(dir, "specify", "--panel", "claude,grok", "--shell-arg", "claude=--permission-mode=acceptEdits", "--shell-arg", "grok=--always-approve", "--dry-run", launcher: agents(record, {}, calls))
       assert_equal 0, code, out
-      assert_match(/claude-1 independent with: claude -p --session-id \S+ --name \S+ --permission-mode\\=acceptEdits <prompt>/, out)
+      assert_match(/claude-1 independent with: claude -p --session-id \S+ --name \S+ (--add-dir \S+ )?--permission-mode\=acceptEdits <prompt>/, out)
       assert_match(/grok-1 independent with: grok -s \S+ --always-approve -p <prompt>/, out)
       refute_match(/claude .*--always-approve/, out)
       ["claude", "bash=--x", "=--x"].each do |bad|

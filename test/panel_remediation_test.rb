@@ -183,4 +183,15 @@ class PanelRemediationTest < PanelPhasesTest
       assert_match(/would run claude-1 consensus with: claude -p --resume \S+ <prompt>/, out)
     end
   end
+  # Claude Code edits files only inside its working folder unless told
+  # otherwise, so its independent session is given its draft folder.
+  def test_a_claude_member_may_write_its_draft_folder
+    with_specifiable_change do |dir, record|
+      calls = []
+      run_panel(dir, "specify", "--panel", "claude,grok", launcher: agents(record, { "claude-1" => ["same"], "grok-1" => ["same"] }, calls))
+      claude = calls.first.find { |l| l.member == "claude-1" }
+      assert_includes claude.args.each_cons(2).to_a, ["--add-dir", claude.env["SOFT_FOUNDRY_PANEL_DRAFT_DIR"]]
+      refute_includes calls.first.find { |l| l.member == "grok-1" }.args, "--add-dir"
+    end
+  end
 end
