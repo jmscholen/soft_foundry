@@ -1,0 +1,38 @@
+# Instincts: what this change taught, as reusable one-line triggers with an
+# action, a confidence score, and evidence in this record. `soft-foundry
+# learn list` shows them across every record; `learn promote` copies those
+# at or above the threshold in .ai/policies/learning.yml into
+# .ai/rules/learned.md, and only through a change record on a change
+# branch, never by the change that learned them.
+instincts:
+- id: run-built-command-lines-live-once
+  trigger: when code builds the argument list for an external CLI such as claude, codex, or grok
+  action: run the exact built command once against the installed program before review; an array-equality test does not prove the program accepts it
+  confidence: 0.85
+  domain: testing
+  evidence:
+  - finding: REM-001
+  - path: changes/session-ledger/09-remediation/summary.md
+- id: recheck-cli-capabilities-against-the-installed-version
+  trigger: when the code or docs say an agent CLI lacks a capability (hooks, session ids, skills)
+  action: check the installed version's help and bundled docs before building on the claim, and record the version checked
+  confidence: 0.8
+  domain: integration
+  evidence:
+  - path: changes/session-ledger/00-intake/assumptions.md
+  - finding: TM-001
+- id: quote-at-the-point-of-use
+  trigger: when a stored value is placed into a shell command, path, or markup for a person to run or view
+  action: quote or re-validate it at that point, even if it was validated when it was stored
+  confidence: 0.8
+  domain: security
+  evidence:
+  - finding: REV-SEC-001
+  - path: changes/session-ledger/14-judgment/residual-risk.md
+- id: stamp-handoff-times-from-the-clock
+  trigger: when filling started_at or completed_at in a handoff
+  action: take the time from the clock or the commit, never estimate it
+  confidence: 0.75
+  domain: governance
+  evidence:
+  - path: changes/session-ledger/15-learning/findings.md

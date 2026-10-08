@@ -26,6 +26,7 @@ require_relative "change_index"
 require_relative "snapshot"
 require_relative "ui/server"
 require_relative "processes"
+require_relative "session_ledger"
 
 module SoftFoundry
   class CLI
@@ -51,6 +52,8 @@ module SoftFoundry
 
     def run
       command = @argv.shift
+      return session_log if command == "session"
+
       case command
       when "init" then init
       when "onboard" then onboard
@@ -69,6 +72,8 @@ module SoftFoundry
       when "update" then update
       when "ui" then ui
       when "ps" then ps
+      when "sessions" then sessions
+      when "resume" then resume
       when "shell"
         shell_name = @argv.shift or raise ArgumentError, "Usage: soft-foundry shell <claude|codex|grok> [args...]"
         # The shell is where model spend actually happens, so say how it is
@@ -260,6 +265,7 @@ module SoftFoundry
       hosts = "claude: #{Hooks.claude_installed?(@root) ? 'installed' : 'not installed'}, codex: #{Hooks.codex_installed?(@root) ? 'installed' : 'not installed'}"
       detail = { "guard hook" => " (#{hosts}; mode: #{mode}, #{source})#{checks['guard hook'] ? '' : '; install with `soft-foundry hooks install --claude` or `--codex`'}" }
       checks.each { |name, ok| @out.puts "#{ok ? '✓ pass' : '✗ fail'} #{name}#{detail[name]}" }
+      @out.puts session_hook_line
       checks.values.all? ? 0 : 2
     end
 
@@ -695,10 +701,12 @@ module SoftFoundry
       claude = flag("--claude")
       codex = flag("--codex")
       local = flag("--local")
+      user_sessions = flag("--sessions")
       raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
       raise TargetError, "--local applies to --claude only; Codex reads project hooks from .codex/hooks.json" if local && codex
       case sub
       when "install"
+        install_sessions if user_sessions
         if claude || codex
           mode, source = Guard.mode(@root)
           if claude
@@ -711,12 +719,13 @@ module SoftFoundry
             @out.puts "codex runs a project hook only after you review and trust it: open codex in this repository and run /hooks"
           end
           @out.puts "guard mode: #{mode} (#{source})"
-        else
+        elsif !user_sessions
           @out.puts "installed #{relative(Hooks.install(@root))}"
         end
         0
       when "uninstall"
-        raise ArgumentError, "Usage: soft-foundry hooks uninstall --claude [--local] | --codex" unless claude || codex
+        raise ArgumentError, "Usage: soft-foundry hooks uninstall --claude [--local] | --codex | --sessions" unless claude || codex || user_sessions
+        uninstall_sessions if user_sessions
         if claude
           path = Hooks.uninstall_claude(@root, local: local)
           @out.puts(path ? "removed guard hook from #{relative(path)}" : "no guard hook installed in #{relative(Hooks.claude_settings_path(@root, local: local))}")
@@ -727,7 +736,7 @@ module SoftFoundry
         end
         0
       else
-        raise ArgumentError, "Usage: soft-foundry hooks install [--claude [--local]] [--codex] | hooks uninstall --claude [--local] | --codex"
+        raise ArgumentError, "Usage: soft-foundry hooks install [--claude [--local]] [--codex] [--sessions] | hooks uninstall --claude [--local] | --codex | --sessions"
       end
     end
 
@@ -838,10 +847,14 @@ module SoftFoundry
       launch = runner.launch(phase, shell: shell_name, extra: extra)
 
       skill_name = plane.skill(phase.skill).name
+      # Grok runs the Claude Code guard entry, and only in a folder it trusts.
+      installer = shell_name == "grok" ? "claude" : shell_name
       if !PhaseRunner::HOOKED_SHELLS.include?(shell_name)
         @err.puts "! warn guard: #{shell_name} has no hook mechanism, so the #{skill_name} skill's permissions are policy only for this session"
-      elsif (shell_name == "claude" && Hooks.claude_installed?(@root).nil?) || (shell_name == "codex" && Hooks.codex_installed?(@root).nil?)
-        @err.puts "! warn guard: the guard hook is not installed for #{shell_name}, so the session's tool calls will not be checked against the #{skill_name} skill's permissions (`soft-foundry hooks install --#{shell_name}`)"
+      elsif (installer == "claude" && Hooks.claude_installed?(@root).nil?) || (installer == "codex" && Hooks.codex_installed?(@root).nil?)
+        @err.puts "! warn guard: the guard hook is not installed for #{shell_name}, so the session's tool calls will not be checked against the #{skill_name} skill's permissions (`soft-foundry hooks install --#{installer}`)"
+      elsif shell_name == "grok"
+        @err.puts "! warn guard: grok runs the guard hook from .claude/settings.json only in a folder it trusts (/hooks-trust or --trust)"
       end
       if dry_run
         @out.puts "would run #{phase.id} of #{slug} with: #{launch.executable} #{launch.args.map { |a| a == launch.prompt ? '<prompt>' : Shellwords.escape(a) }.join(' ')}"
@@ -855,8 +868,10 @@ module SoftFoundry
       @out.puts "running #{phase.id} of #{slug} in a fresh #{shell_name} session (#{plane.skill(phase.skill).name} skill); executed_by recorded in #{relative(record.handoff_path(phase))}"
       @out.flush
       @err.flush
+      since = record.handoff(phase).dig("executed_by", "started_at")
       status = (@runner || method(:spawn_shell)).call(launch)
-      runner.finish!(phase, status)
+      learned = launch.session_id ? nil : runner.recorded_session(SessionLedger.new(SessionLedger.default_path), shell: shell_name, since: since)
+      runner.finish!(phase, status, session_id: learned)
       @out.puts "#{shell_name} exited #{status}"
       result = Gate.new(record, git: git).evaluate(phase)
       print_result(result)
@@ -1059,6 +1074,111 @@ module SoftFoundry
     def load_record(slug) = index.record(slug)
     def list_changes = index.slugs
 
+    # --- sessions -----------------------------------------------------------
+
+    # `session log --shell X`: the prompt hook. Silent, and 0 whatever
+    # happens, because its output can reach the agent's context and a
+    # fault in it must never block a prompt.
+    def session_log
+      sub = @argv.shift
+      shell = option("--shell")
+      return 0 unless sub == "log"
+      payload = JSON.parse(@input.read(SessionLedger::MAX_INPUT).to_s)
+      SessionLedger.new(SessionLedger.default_path).record(payload, shell: shell)
+      0
+    rescue StandardError, ScriptError
+      0
+    end
+
+    def sessions
+      change = option("--change")
+      phase = option("--phase")
+      agent = option("--agent")
+      limit = Integer(option("--limit") || 20)
+      json = flag("--json")
+      unknown = @argv.select { |a| a.start_with?("--") }
+      raise TargetError, "unknown option(s): #{unknown.join(' ')}" unless unknown.empty?
+      ledger = SessionLedger.new(SessionLedger.default_path)
+      found = ledger.search(words: @argv, change: change, phase: phase, agent: agent)
+      shown = found.first(limit).map { |e| e.merge("status" => SessionLedger.status(e), "resume" => SessionLedger.resume_command(e)) }
+      if json
+        @out.puts JSON.pretty_generate(shown)
+        return 0
+      end
+      if shown.empty?
+        @out.puts "sessions: none found"
+        if File.file?(ledger.path)
+          @out.puts "sessions: #{ledger.entries.size} recorded in #{tilde(ledger.path)}; try fewer words or no filters"
+        else
+          @out.puts "sessions: no ledger at #{tilde(ledger.path)} yet; record every coding session with `soft-foundry hooks install --sessions`"
+        end
+        return 0
+      end
+      @out.puts "sessions: #{found.size} recorded #{found.size == 1 ? 'session matches' : 'sessions match'}#{found.size > shown.size ? " (showing the newest #{shown.size}; --limit N for more)" : ''} (ledger: #{tilde(ledger.path)})"
+      shown.each do |e|
+        @out.puts "session: #{e['last_at'].to_s.sub('T', ' ').sub(/:\d\dZ\z/, ' UTC')} #{e['agent']} #{e['status']}"
+        place = [("branch #{e['branch']}" if e["branch"]), ("change #{e['change']}" if e["change"]), ("phase #{e['phase']}" if e["phase"])].compact
+        @out.puts "  where: #{tilde(e['cwd'].to_s)}#{place.empty? ? '' : " (#{place.join(', ')})"}"
+        @out.puts "  first: #{e['first_prompt']}" unless e["first_prompt"].to_s.empty?
+        @out.puts "  latest: #{e['latest_prompt']}" unless e["latest_prompt"].to_s.empty? || e["latest_prompt"] == e["first_prompt"]
+        @out.puts "  resume: #{e['resume']}"
+      end
+      0
+    end
+
+    # `resume <change> [phase]`: the newest session's resume command, for
+    # pasting. It never starts the session itself.
+    def resume
+      agent = option("--agent")
+      change = @argv.shift or raise ArgumentError, "Usage: soft-foundry resume <change> [phase] [--agent claude|codex|grok]"
+      phase = @argv.shift
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+      entry = SessionLedger.new(SessionLedger.default_path).latest(change: change, phase: phase, agent: agent)
+      unless entry
+        scope = [("in phase #{phase}" if phase), ("by #{agent}" if agent)].compact.join(" ")
+        @err.puts "resume: no recorded session for change #{change}#{scope.empty? ? '' : " #{scope}"}; list what is recorded with `soft-foundry sessions --change #{change}`"
+        return EXIT_TARGET
+      end
+      @out.puts SessionLedger.resume_command(entry)
+      0
+    end
+
+    def install_sessions
+      Hooks.install_sessions(Dir.home).each do |action, path, note|
+        case action
+        when :installed then @out.puts "installed session hook in #{tilde(path)} (UserPromptSubmit, #{note})"
+        when :skill then @out.puts "installed find-session skill in #{tilde(path)}"
+        when :skipped then @out.puts "skip #{tilde(path)}: a find-session skill not written by soft-foundry is already there"
+        end
+      end
+      @out.puts "codex runs a user hook only after you review and trust it: open codex and run /hooks"
+      @out.puts "ledger: #{tilde(SessionLedger.default_path)} (each session is recorded from its next prompt; `soft-foundry sessions` to look one up)"
+    end
+
+    def uninstall_sessions
+      removed = Hooks.uninstall_sessions(Dir.home)
+      @out.puts "no session hook installed in #{tilde(File.join(Dir.home, '.claude'))}, .codex, or .grok" if removed.empty?
+      removed.each do |action, path, _|
+        @out.puts(action == :skill ? "removed find-session skill from #{tilde(path)}" : "removed session hook from #{tilde(path)}")
+      end
+      @out.puts "ledger kept: #{tilde(SessionLedger.default_path)} (delete it yourself to forget recorded sessions)"
+    end
+
+    def session_hook_line
+      installed = Hooks.sessions_installed(Dir.home)
+      missing = Hooks::SESSION_AGENTS - installed
+      if installed.empty?
+        "! warn session hook (not installed; optional: `soft-foundry hooks install --sessions` records every coding session so it can be found and resumed)"
+      else
+        "✓ pass session hook (installed for #{installed.join(', ')}#{missing.empty? ? '' : "; not installed for #{missing.join(', ')}"}; ledger: #{tilde(SessionLedger.default_path)})"
+      end
+    end
+
+    def tilde(path)
+      home = Dir.home
+      path.to_s == home || path.to_s.start_with?("#{home}/") ? "~#{path.to_s.delete_prefix(home)}" : path.to_s
+    end
+
     def relative(path)
       path.delete_prefix("#{@root}/")
     end
@@ -1137,15 +1257,31 @@ module SoftFoundry
                                                   control plane, with its terminal, branch, and the change
                                                   and phase that branch is on; warns about phase runs
                                                   recorded here that never finished
+          soft-foundry sessions [WORD...] [--change SLUG] [--phase PHASE] [--agent claude|codex|grok] [--limit N] [--json]
+                                                  find recorded coding sessions (any repository, open or finished)
+                                                  whose prompts, folder, branch, or change match every word,
+                                                  newest first, each with a status word and the exact resume
+                                                  command; needs `hooks install --sessions`
+          soft-foundry resume <change> [phase] [--agent claude|codex|grok]
+                                                  print the newest recorded session's resume command for a
+                                                  change (it never starts the session)
+          soft-foundry session log --shell claude|codex|grok
+                                                  the session hook itself: records the prompt payload on stdin
+                                                  in ~/.soft-foundry/sessions.jsonl; prints nothing, always exits 0
           soft-foundry ci                         check + gate every change record (used by CI and pre-commit)
           soft-foundry hooks install              install the pre-commit hook
           soft-foundry hooks install --claude [--local] | --codex
                                                   install the PreToolUse guard into .claude/settings.json
                                                   (or settings.local.json) or .codex/hooks.json so a coding
                                                   shell's tool calls are checked against the active skill's
-                                                  permissions.yml (codex: then trust it with /hooks)
-          soft-foundry hooks uninstall --claude [--local] | --codex
-                                                  remove only Soft Foundry's guard entry
+                                                  permissions.yml (codex: then trust it with /hooks; grok runs the
+                                                  claude entry in a folder it trusts)
+          soft-foundry hooks install --sessions   install the session hook at user level for Claude Code, Codex,
+                                                  and Grok (~/.claude/settings.json, ~/.codex/hooks.json,
+                                                  ~/.grok/hooks/) and a find-session skill, so every coding
+                                                  session is recorded (codex: then trust it with /hooks)
+          soft-foundry hooks uninstall --claude [--local] | --codex | --sessions
+                                                  remove only Soft Foundry's guard or session entries
           soft-foundry guard                      the hook itself: reads a tool call from stdin, exits 2 to
                                                   refuse it in block mode; mode from .ai/policies/enforcement.yml,
                                                   .soft-foundry/enforcement.yml, or SOFT_FOUNDRY_GUARD=warn|block|off

@@ -31,10 +31,13 @@ module SoftFoundry
     LOG = ".soft-foundry/guard.log"
     ENV_VAR = "SOFT_FOUNDRY_GUARD"
 
-    WRITE_TOOLS = %w[Edit Write MultiEdit NotebookEdit].freeze
+    # Grok runs this hook from .claude/settings.json in a folder it trusts
+    # but sends its own tool names: write and search_replace (file_path),
+    # read_file (target_file), run_terminal_command (command).
+    WRITE_TOOLS = %w[Edit Write MultiEdit NotebookEdit write search_replace].freeze
     PATCH_TOOLS = %w[apply_patch].freeze # Codex file edits; also reported under Edit/Write with the patch in `command`
-    READ_TOOLS = %w[Read].freeze
-    SHELL_TOOLS = %w[Bash].freeze
+    READ_TOOLS = %w[Read read_file].freeze
+    SHELL_TOOLS = %w[Bash run_terminal_command].freeze
     PATCH_HEADER = /\A\*\*\* (?:Add File|Update File|Delete File|Move to): (.+?)\s*\z/.freeze
 
     # The mode in effect: the environment, then the machine-local override,
@@ -109,7 +112,7 @@ module SoftFoundry
         return violation(skill, unlisted, "is not in #{skill.name}'s write set") unless unlisted.empty?
         Decision.new(outcome: :allow, reason: "in #{skill.name}'s write set", skill: skill.name, paths: paths)
       when *READ_TOOLS
-        path = relative(tool_input["file_path"])
+        path = relative(tool_input["file_path"] || tool_input["target_file"])
         return Decision.new(outcome: :allow, reason: "no file path in the tool call", skill: skill.name, paths: []) unless path
         return violation(skill, [path], "is in #{skill.name}'s deny_read set") if ControlPlane.match_any?(path, sets[:deny_read])
         Decision.new(outcome: :allow, reason: "not denied to #{skill.name}", skill: skill.name, paths: [path])

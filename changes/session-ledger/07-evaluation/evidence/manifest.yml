@@ -1,0 +1,9 @@
+---
+commit_sha: 93acd899cc20cb4c25bc7ffe38d374925c2920fa
+artifacts:
+- path: evidence/journey-transcript.log
+  produced_by: 'evaluation script: eight journeys with live Claude Code and Grok'
+  sha256: 54b7e800644765394c501df448d905bd3340424867218c2409a998bcf100a97f
+- path: evidence/recorded-sessions-section.jpg
+  produced_by: browser screenshot of the change page section after REM-001
+  sha256: 990172304f4de997886dad52a9491eafa0f245f316415de4d18df6d596447c08

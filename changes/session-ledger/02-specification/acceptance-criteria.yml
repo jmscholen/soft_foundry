@@ -1,0 +1,94 @@
+# Each criterion must be testable and map to at least one requirement.
+# Criteria are locked once specification completes; changing them requires a
+# recorded requirement change, never a downstream edit.
+criteria:
+  - id: AC-001
+    requirements: [REQ-SL-001]
+    given: a change in a phase whose skill cannot write lib/
+    when: the guard receives a Grok write or search_replace payload for lib/x.rb, a read_file payload naming a denied path in target_file, and a run_terminal_command naming a denied path
+    then: each gets the violation the equivalent Claude Code tool call gets, and an allowed path is allowed
+    verified_by: []
+  - id: AC-002
+    requirements: [REQ-SL-002, REQ-SL-003]
+    given: an empty ledger
+    when: two prompt payloads for the same agent and session ID arrive, then one for a different session
+    then: the ledger has two entries; the first keeps its first prompt and first-seen time and shows the second prompt as latest
+    verified_by: []
+  - id: AC-003
+    requirements: [REQ-SL-003]
+    given: a payload whose folder is inside a repository on branch change/<slug> with a change record at phase verify
+    when: it is recorded
+    then: the entry names the repository root, branch, change slug, and phase verify; outside a repository those fields are empty and the entry is still recorded
+    verified_by: []
+  - id: AC-004
+    requirements: [REQ-SL-004]
+    given: a prompt containing an API-key-shaped string and 300 characters of text with newlines
+    when: it is recorded
+    then: the stored prompt has the key masked, no newlines, and at most 140 characters plus an ellipsis; the ledger directory is mode 0700 and the file 0600
+    verified_by: []
+  - id: AC-005
+    requirements: [REQ-SL-005]
+    given: invalid JSON, an empty payload, a payload without a session ID, an unwritable ledger location, and a ledger file with a corrupt line
+    when: the session-log command runs on each
+    then: it exits 0 with nothing on stdout or stderr every time, and valid lines in the existing ledger survive
+    verified_by: []
+  - id: AC-006
+    requirements: [REQ-SL-005]
+    given: an empty ledger
+    when: 20 processes record 20 different sessions at the same time
+    then: the ledger holds exactly 20 entries
+    verified_by: []
+  - id: AC-007
+    requirements: [REQ-SL-006]
+    given: a payload with a camelCase hookEventName key
+    when: it is recorded with --shell claude
+    then: the entry's agent is grok and its resume command uses grok --resume
+    verified_by: []
+  - id: AC-008
+    requirements: [REQ-SL-007, REQ-SL-013]
+    given: a ledger with sessions across agents, changes, and phases, one whose folder no longer exists
+    when: the lookup runs with words and filters, and with --json
+    then: only sessions matching every word and filter are listed, newest first, each with its resume command and a status word, the missing-folder one marked folder missing; --json returns the same entries as data
+    verified_by: []
+  - id: AC-009
+    requirements: [REQ-SL-008]
+    given: a ledger with two sessions for change X in different phases and none for change Y
+    when: resume X, resume X <phase>, and resume Y run
+    then: the first prints the newer session's command, the second that phase's, the third exits non-zero naming why; no process is started
+    verified_by: []
+  - id: AC-010
+    requirements: [REQ-SL-009]
+    given: payloads whose folder contains spaces, quotes, and $(...), and whose session ID contains ; or a newline
+    when: they are recorded and looked up
+    then: the folder is shell-quoted so the printed command cd's to exactly that folder, and the bad-ID payload is not recorded
+    verified_by: []
+  - id: AC-011
+    requirements: [REQ-SL-010]
+    given: a home directory whose Claude settings and Codex hooks already hold other hooks and keys
+    when: install --sessions runs twice, then uninstall --sessions
+    then: after install each agent's file has exactly one Soft Foundry session entry and every other key and hook unchanged; the find-session skill files exist for Claude and Codex; after uninstall only Soft Foundry's entries are gone; a symlinked target is refused; install prints the Codex trust step and doctor reports the hook's state
+    verified_by: []
+  - id: AC-012
+    requirements: [REQ-SL-011]
+    given: a change ready for a phase
+    when: phase run launches claude, grok, and codex (stubbed)
+    then: claude gets --session-id <uuid>, grok gets -s <uuid>, executed_by records that session_id and the cwd; for codex executed_by records the newest Codex session the ledger shows for the repository after the run started, or null
+    verified_by: []
+  - id: AC-013
+    requirements: [REQ-SL-012, REQ-SL-013]
+    given: a ledger with sessions for a change
+    when: the change's page is requested from the UI server
+    then: the change data includes those sessions with resume commands, and the page renders them as a labelled list distinct from open shells, with status in text
+    verified_by: []
+  - id: AC-014
+    requirements: [REQ-SL-014]
+    given: a 5,000-entry ledger
+    when: one prompt is recorded through the CLI
+    then: it completes in under one second
+    verified_by: []
+  - id: AC-015
+    requirements: [REQ-SL-015]
+    given: the change's documentation
+    when: a reader looks for what the ledger stores, where, how to install and remove it, and how to look sessions up
+    then: README and help text answer each, and .ai/schemas.md lists executed_by.session_id and cwd
+    verified_by: []

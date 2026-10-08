@@ -1,0 +1,7 @@
+---
+commit_sha: 93acd899cc20cb4c25bc7ffe38d374925c2920fa
+artifacts:
+- path: evidence/attack-transcript.log
+  produced_by: 'attack script: eight cases against the real CLI in a throwaway directory;
+    key values printed by name only'
+  sha256: 4bb14529bbff1fbac413b010bb9194d6d43f78d5d73e6fcbfb1f2d0258cca661

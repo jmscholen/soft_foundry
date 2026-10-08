@@ -23,7 +23,7 @@ module SoftFoundry
   # repeat. Only named fields that pass validation are reported, never
   # the command line.
   class Processes
-    COMMANDS = %w[init onboard models doctor check change budget gate ci hooks guard phase learn scan update ui ps shell].freeze
+    COMMANDS = %w[init onboard models doctor check change budget gate ci hooks guard phase learn scan update ui ps shell session sessions resume].freeze
     SUBCOMMANDS = {
       "change" => %w[new status list vet reopen close request-discharge],
       "budget" => %w[status record threshold],

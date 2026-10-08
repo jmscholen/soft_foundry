@@ -1,0 +1,32 @@
+---
+phase: 01-discovery
+skill: repository-discovery
+status: complete
+commit_sha: 8a828f6eadfd8d36dc22ba29de007f7487e017e4
+started_at: '2026-10-07T21:37:00Z'
+completed_at: '2026-10-07T21:38:15Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+- repository-context.md
+- affected-components.md
+- dependencies.md
+- unknowns.md
+- "../../../.ai/repository.yml"
+blocking: []
+findings:
+- id: DISC-001
+  severity: minor
+  summary: The UI already uses "sessions" for open shells; recorded sessions need
+    a distinct label on the change page.
+- id: DISC-002
+  severity: minor
+  summary: Codex hook payload and exec hook behavior are documented, not live-verified
+    (login expired).
+next: specify
+notes: 'Performed by the interactive session. Updated the privacy rationale in .ai/repository.yml:
+  the session hook makes the user''s machine keep prompt excerpts locally; status
+  stays NOT_APPLICABLE (nothing is transmitted, no service).'
+executed_by:

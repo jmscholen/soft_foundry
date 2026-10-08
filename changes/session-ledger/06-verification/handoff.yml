@@ -1,0 +1,22 @@
+---
+phase: 06-verification
+skill: verification
+status: complete
+commit_sha: 93acd899cc20cb4c25bc7ffe38d374925c2920fa
+started_at: '2026-10-07T22:42:00Z'
+completed_at: '2026-10-07T22:47:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+- results.md
+- tests.yml
+- evidence/manifest.yml
+blocking: []
+findings: []
+next: evaluate
+notes: Performed by the interactive session that also implemented the change. Rerun
+  at the remediated commit after REM-001 (the first run, at 98b55d1, is superseded).
+  Deterministic checks only; nothing was repaired.
+executed_by:

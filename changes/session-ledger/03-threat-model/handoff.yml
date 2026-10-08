@@ -1,0 +1,26 @@
+---
+phase: 03-threat-model
+skill: threat-modeling
+status: complete
+commit_sha: 8a828f6eadfd8d36dc22ba29de007f7487e017e4
+started_at: '2026-10-07T21:39:36Z'
+completed_at: '2026-10-07T21:40:11Z'
+resolved_model:
+  profile: adversarial_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+- attack-surface.md
+- trust-boundaries.md
+- threats.yml
+- mitigations.md
+blocking: []
+findings:
+- id: TM-001
+  severity: minor
+  summary: 'Residual: a Grok tool name added in a later Grok release stays unguarded
+    until mapped.'
+next: plan
+notes: Performed by the interactive session. ATTACK-001..007 proposed for the attack
+  phase.
+executed_by:

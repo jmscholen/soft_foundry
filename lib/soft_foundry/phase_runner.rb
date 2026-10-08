@@ -3,6 +3,7 @@
 require "time"
 require "yaml"
 require "shellwords"
+require "securerandom"
 require_relative "control_plane"
 require_relative "change_record"
 require_relative "gate"
@@ -16,19 +17,26 @@ module SoftFoundry
   # than on a note in the handoff saying the implementing session also
   # reviewed its own work.
   class PhaseRunner
-    Launch = Data.define(:shell, :executable, :args, :prompt)
+    Launch = Data.define(:shell, :executable, :args, :prompt, :session_id)
 
     # Non-interactive invocations. Each takes the prompt as its last
     # argument; anything after `--` on the command line is appended first.
+    # Claude Code and Grok accept the session ID up front, so the record
+    # can say which session to resume; Codex picks its own, and the runner
+    # takes it from the session ledger afterwards.
     SHELLS = {
-      "claude" => ->(prompt, extra) { ["-p", *extra, prompt] },
-      "codex" => ->(prompt, extra) { ["exec", *extra, prompt] },
-      "grok" => ->(prompt, extra) { ["-p", *extra, prompt] } # `grok -p` is its single-turn headless form
+      "claude" => ->(prompt, extra, id, name) { ["-p", "--session-id", id, "--name", name, *extra, prompt] },
+      "codex" => ->(prompt, extra, _id, _name) { ["exec", *extra, prompt] },
+      # `grok -p` (--single) is its headless form and takes the prompt as its
+      # value, so it comes last with the prompt right after it.
+      "grok" => ->(prompt, extra, id, _name) { ["-s", id, *extra, "-p", prompt] }
     }.freeze
+    PRESET_ID = %w[claude grok].freeze
 
-    # Shells with a PreToolUse hook the guard can be installed into.
-    # Grok has no hook mechanism, so under it the permissions are policy.
-    HOOKED_SHELLS = %w[claude codex].freeze
+    # Shells with a PreToolUse hook the guard can run in. Claude Code and
+    # Codex have their own install; Grok runs the Claude Code entry from
+    # .claude/settings.json in a folder it trusts.
+    HOOKED_SHELLS = %w[claude codex grok].freeze
 
     def initialize(root, plane:, git:, record:)
       @root = File.expand_path(root)
@@ -74,7 +82,9 @@ module SoftFoundry
 
     def launch(phase, shell:, extra: [])
       builder = SHELLS.fetch(shell) { raise ArgumentError, "unknown shell '#{shell}'; phase run supports #{SHELLS.keys.join(', ')}" }
-      Launch.new(shell: shell, executable: shell, args: builder.call(prompt(phase), extra), prompt: prompt(phase))
+      id = PRESET_ID.include?(shell) ? SecureRandom.uuid : nil
+      text = prompt(phase)
+      Launch.new(shell: shell, executable: shell, args: builder.call(text, extra, id, "#{@record.slug}/#{phase.id}"), prompt: text, session_id: id)
     end
 
     # Records how the phase is being run before the session starts, so a
@@ -92,17 +102,37 @@ module SoftFoundry
         h["status"] = "in_progress" if h["status"].to_s == "pending"
         h["started_at"] ||= now.utc.iso8601
         h["executed_by"] = { "runner" => "soft-foundry phase run", "shell" => launch.shell, "fresh_context" => true,
-                             "started_at" => now.utc.iso8601, "finished_at" => nil, "exit_status" => nil, "previous_phase" => previous }
+                             "started_at" => now.utc.iso8601, "finished_at" => nil, "exit_status" => nil, "previous_phase" => previous,
+                             "session_id" => launch.session_id, "cwd" => @root }
       end
     end
 
-    def finish!(phase, exit_status, now: Time.now)
+    # `session_id`, when given, is one learned only after the session ran
+    # (Codex's, from the ledger); a preset one is already recorded.
+    def finish!(phase, exit_status, now: Time.now, session_id: nil)
       stamp_handoff(phase) do |h|
-        h["executed_by"] = (h["executed_by"].is_a?(Hash) ? h["executed_by"] : {}).merge("finished_at" => now.utc.iso8601, "exit_status" => exit_status)
+        by = (h["executed_by"].is_a?(Hash) ? h["executed_by"] : {}).merge("finished_at" => now.utc.iso8601, "exit_status" => exit_status)
+        by["session_id"] = session_id if session_id
+        h["executed_by"] = by
       end
+    end
+
+    # The newest session of `shell` the prompt hook recorded in this
+    # repository since `since`, or nil (hook not installed, or none fired).
+    def recorded_session(ledger, shell:, since:)
+      root = File.realpath(@root)
+      ledger.search(agent: shell).find do |e|
+        e["first_at"].to_s >= since.to_s && [e["repo"], e["cwd"]].compact.any? { |dir| real(dir) == root }
+      end&.fetch("session_id", nil)
     end
 
     private
+
+    def real(dir)
+      File.realpath(dir)
+    rescue SystemCallError
+      dir
+    end
 
     def stamp_handoff(phase)
       path = @record.handoff_path(phase)

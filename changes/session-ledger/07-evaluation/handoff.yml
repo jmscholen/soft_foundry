@@ -1,0 +1,34 @@
+---
+phase: 07-evaluation
+skill: evaluation
+status: complete
+commit_sha: 93acd899cc20cb4c25bc7ffe38d374925c2920fa
+started_at: '2026-10-07T22:48:00Z'
+completed_at: '2026-10-07T22:57:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+- evaluation-plan.md
+- journeys.yml
+- results.md
+- evidence/manifest.yml
+blocking: []
+findings:
+- id: EVAL-OBS-002
+  severity: minor
+  summary: Grok payloads carry no transcript path, so Grok status checks only the
+    folder.
+- id: EVAL-OBS-003
+  severity: minor
+  summary: List item accessible name is fragmentary in the browser accessibility tree.
+- id: EVAL-006
+  severity: major
+  summary: Codex capture and the runner Codex lookup were not exercised live (login
+    expired).
+next: attack
+notes: Performed by the interactive session that implemented the change. Second run
+  after REM-001, with EVAL-008 added. Live Claude Code and Grok; Codex blocked by
+  its expired login (EVAL-006).
+executed_by:

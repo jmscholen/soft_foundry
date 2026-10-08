@@ -1,0 +1,13 @@
+# commit 93acd899cc20cb4c25bc7ffe38d374925c2920fa; record changes for 06 onward uncommitted at capture
+change session-ledger
+00-intake  complete  PASS
+01-discovery  complete  PASS
+02-specification  complete  PASS
+03-threat-model  complete  PASS
+04-plan  complete  PASS
+05-implementation  complete  PASS
+06-verification  in_progress  PASS
+07-evaluation  in_progress  PASS
+08-attack  in_progress  PASS
+09-remediation  complete  PASS
+✓ ci passed

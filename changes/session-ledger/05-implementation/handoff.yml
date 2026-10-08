@@ -1,0 +1,29 @@
+---
+phase: 05-implementation
+skill: implementation
+status: complete
+commit_sha: 98b55d14586da5d7ce8485d1148cb9bec48907a1
+started_at: '2026-10-07T21:40:40Z'
+completed_at: '2026-10-07T21:54:31Z'
+resolved_model:
+  profile: coding_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+- log.md
+- decisions.md
+- deviations.md
+blocking: []
+findings:
+- id: IMP-001
+  severity: minor
+  summary: README.md, .ai/schemas.md, and .ai/templates/handoff.yml changed outside
+    the implementation write set (deviation 2).
+- id: IMP-002
+  severity: minor
+  summary: Codex hook payload and codex exec hook firing remain documentation-based;
+    evaluation should try a live Codex turn if the login is renewed.
+next: verify
+notes: Performed by the interactive session. RED d278ecf, GREEN 98b55d1. Writes outside
+  the skill's write set are recorded in deviations.md.
+executed_by:

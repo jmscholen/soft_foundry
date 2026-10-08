@@ -1,0 +1,35 @@
+---
+phase: '08-attack'
+skill: adversarial-testing
+status: complete
+commit_sha: 93acd899cc20cb4c25bc7ffe38d374925c2920fa
+started_at: '2026-10-07T22:49:00Z'
+completed_at: '2026-10-07T22:58:00Z'
+resolved_model:
+  profile: adversarial_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+- attack-plan.md
+- cases.yml
+- results.md
+- evidence/manifest.yml
+blocking: []
+findings:
+- id: FIND-ATK-001
+  severity: minor
+  summary: A prompt payload over 1 MB is not recorded; the session is recorded at
+    its next ordinary prompt.
+- id: FIND-ATK-002
+  severity: minor
+  summary: A folder name with control characters is stored without them, so its session
+    reports folder missing.
+- id: TM-001
+  severity: minor
+  summary: 'Confirmed residual: an unmapped Grok tool name passes the guard as not
+    guarded.'
+next: remediate
+notes: Performed by the interactive session that implemented the change, not an independent
+  attacker. Second run after REM-001; eight cases, all denied, same outcomes as the
+  first.
+executed_by:

@@ -151,17 +151,25 @@ class CrossCliHooksTest < Minitest::Test
     [code, out.string + err.string]
   end
 
-  def test_grok_runs_headless_with_p_and_is_policy_only
+  def test_grok_runs_headless_with_a_chosen_session_id_and_the_claude_guard_hook
     with_reviewable_change do |dir, record|
       runner = SoftFoundry::PhaseRunner.new(dir, plane: record.control_plane, git: SoftFoundry::Git.new(dir), record: record)
       launch = runner.launch(record.control_plane.phase("review"), shell: "grok", extra: ["--always-approve"])
       assert_equal "grok", launch.executable
-      assert_equal ["-p", "--always-approve", launch.prompt], launch.args
+      assert_match(/\A[0-9a-f-]{36}\z/, launch.session_id)
+      # `-p` (--single) takes the prompt as its value, so the prompt must
+      # follow it directly; every other argument goes before it.
+      assert_equal ["-s", launch.session_id, "--always-approve", "-p", launch.prompt], launch.args
       code, out = dry_run(dir, "--shell", "grok")
       assert_equal 0, code, out
-      assert_includes out, "would run review of c1 with: grok -p <prompt>"
-      assert_includes out, "! warn guard: grok has no hook mechanism, so the review skill's permissions are policy only"
+      assert_match(/would run review of c1 with: grok -s [0-9a-f-]{36} -p <prompt>/, out)
+      assert_includes out, "! warn guard: the guard hook is not installed for grok"
+      assert_includes out, "hooks install --claude"
+      cli(dir, "hooks", "install", "--claude")
+      _, out = dry_run(dir, "--shell", "grok")
+      assert_includes out, "! warn guard: grok runs the guard hook from .claude/settings.json only in a folder it trusts (/hooks-trust or --trust)"
       assert_includes SoftFoundry::Shell::COMMANDS.keys, "grok"
+      assert_includes SoftFoundry::PhaseRunner::HOOKED_SHELLS, "grok"
     end
   end
 

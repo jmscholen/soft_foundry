@@ -254,4 +254,31 @@ class GuardTest < Minitest::Test
       assert_includes out, "✓ pass guard hook (claude: installed, codex: not installed; mode: warn"
     end
   end
+  # --- Grok ---------------------------------------------------------------------
+
+  # Grok runs the guard from .claude/settings.json in a trusted folder but
+  # sends its own tool names (checked live against Grok 1.0.30).
+  def test_grok_tool_names_get_the_same_decisions_as_claude_codes
+    with_implementing_change do |dir, guard|
+      %w[write search_replace].each do |tool|
+        assert_equal :allow, guard.decide(tool, { "file_path" => File.join(dir, "lib/app.rb") }).outcome, tool
+        d = guard.decide(tool, { "file_path" => File.join(dir, ".ai/rules/ruby.md") })
+        assert d.violation?, tool
+        assert_equal guard.decide("Write", { "file_path" => File.join(dir, ".ai/rules/ruby.md") }).reason, d.reason
+      end
+      assert guard.decide("read_file", { "target_file" => File.join(dir, ".ai/harness-evals/x.yml") }).violation?
+      assert_equal :allow, guard.decide("read_file", { "target_file" => File.join(dir, "lib/app.rb") }).outcome
+      assert guard.decide("run_terminal_command", { "command" => "cat .ai/harness-evals/x.yml" }).violation?
+      assert_equal :allow, guard.decide("run_terminal_command", { "command" => "ls lib" }).outcome
+    end
+  end
+
+  def test_a_grok_payload_through_the_cli_is_refused_in_block_mode
+    with_implementing_change do |dir, _guard|
+      payload = { "hookEventName" => "pre_tool_use", "tool_name" => "write", "tool_input" => { "file_path" => File.join(dir, ".ai/rules/ruby.md"), "content" => "x" } }
+      code, out = guard_cli(dir, payload, env: { "SOFT_FOUNDRY_GUARD" => "block" })
+      assert_equal 2, code
+      assert_includes out, "✗ fail guard: write .ai/rules/ruby.md"
+    end
+  end
 end

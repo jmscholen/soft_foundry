@@ -117,11 +117,11 @@ soft-foundry hooks uninstall --claude          # removes only Soft Foundry's ent
 soft-foundry doctor                            # reports which hosts have the hook and the mode in effect
 ```
 
-The guard itself is host-neutral: it reads a JSON tool call on stdin and exits 2 to refuse. Claude Code and Codex share the hook file shape and the `PreToolUse` event. Codex names its shell tool `Bash` too, may send `command` as an array, and reports file edits as `apply_patch` (or under the `Edit`/`Write` aliases) with the patch text in `command`; the guard reads every path the patch adds, updates, deletes, or moves to and checks each against the write sets. Codex runs a project hook only after a person reviews and trusts it with `/hooks`. Grok has no hook mechanism, so under Grok the permissions are policy only, and `phase run --shell grok` says so.
+The guard itself is host-neutral: it reads a JSON tool call on stdin and exits 2 to refuse. Claude Code and Codex share the hook file shape and the `PreToolUse` event. Codex names its shell tool `Bash` too, may send `command` as an array, and reports file edits as `apply_patch` (or under the `Edit`/`Write` aliases) with the patch text in `command`; the guard reads every path the patch adds, updates, deletes, or moves to and checks each against the write sets. Codex runs a project hook only after a person reviews and trusts it with `/hooks`. Grok (checked against 1.0.30) runs the Claude Code entry from `.claude/settings.json`, but only in a folder it trusts (`/hooks-trust` or `--trust`), and sends its own tool names: `write` and `search_replace` are checked as writes, `read_file` (path in `target_file`) as a read, and `run_terminal_command` as a shell command. `phase run --shell grok` reminds you of the trust step.
 
 The mode is declared in `.ai/policies/enforcement.yml` (`warn` by default: report the violation, let the call through, log it to the machine-local `.soft-foundry/guard.log`; `block`: refuse it; `off`). A machine can override it in `.soft-foundry/enforcement.yml` or with `SOFT_FOUNDRY_GUARD=warn|block|off`, which wins over both. Outside a change branch, or once a change is closed, nothing is guarded.
 
-What is checked: Edit, Write, MultiEdit, and NotebookEdit against the write and deny_write sets; Read against deny_read only; Bash against the deny sets only, because the guard cannot know what a command writes, so it refuses a command that names a denied path and passes everything else. A restriction the guard cannot see is still policy the agent must honor, as `AGENTS.md` says. Every refusal or warning names the tool, the path, the skill, and the mode:
+What is checked: Edit, Write, MultiEdit, NotebookEdit (and Grok's `write` and `search_replace`) against the write and deny_write sets; Read (`read_file`) against deny_read only; Bash (`run_terminal_command`) against the deny sets only, because the guard cannot know what a command writes, so it refuses a command that names a denied path and passes everything else. A restriction the guard cannot see is still policy the agent must honor, as `AGENTS.md` says. Every refusal or warning names the tool, the path, the skill, and the mode:
 
 ```
 ✗ fail guard: Edit .ai/rules/ruby.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)
@@ -186,14 +186,16 @@ Review and judgment exist to look at the work from outside it. Until now every r
 ```bash
 soft-foundry phase run review                    # a fresh `claude -p` session with only the review skill in its prompt
 soft-foundry phase run judge --shell codex       # or `codex exec`
-soft-foundry phase run judge --shell grok        # or `grok -p` (no hook mechanism: permissions are policy only, and the runner says so)
+soft-foundry phase run judge --shell grok        # or `grok -p` (runs the Claude guard entry only in a folder Grok trusts; the runner says so)
 soft-foundry phase run review --dry-run          # print the command and the prompt, launch nothing
 soft-foundry phase run review -- --model opus    # pass extra arguments to the shell
 ```
 
-The runner refuses what the gate would refuse afterwards (an exploring change, a phase already complete, a pending predecessor), so no session is spent on it. It moves `current_phase` to the phase so the guard applies the right skill, writes `executed_by` into the phase's handoff (runner, shell, `fresh_context: true`, start and finish times, exit status) before and after the session, and runs the phase's gate when the session returns. The agent fills the rest of the handoff itself; the prompt tells it not to touch `executed_by`, not to alter any other phase's evidence, and to record `blocked` rather than pretend.
+The runner refuses what the gate would refuse afterwards (an exploring change, a phase already complete, a pending predecessor), so no session is spent on it. It moves `current_phase` to the phase so the guard applies the right skill, writes `executed_by` into the phase's handoff (runner, shell, `fresh_context: true`, start and finish times, exit status, and the session's `session_id` and `cwd`) before and after the session, and runs the phase's gate when the session returns. The agent fills the rest of the handoff itself; the prompt tells it not to touch `executed_by`, not to alter any other phase's evidence, and to record `blocked` rather than pretend.
 
 A completed review or judgment whose handoff carries no `executed_by` from the runner gets an advisory: it was performed by whatever session was already open, and separation of duties rests on the handoff's notes. If the guard hook is not installed, `phase run` says so before launching, since the session's tool calls would then be checked by nothing.
+
+The session ID lets you get back into a phase run's session (`soft-foundry resume <change> <phase>`). Claude Code and Grok are handed one up front (`--session-id`, `-s`); Codex picks its own, so the runner takes it from the session ledger when the session hook is installed (see "Finding and resuming sessions"), and leaves it null otherwise.
 
 ### Lifecycle tracks: gated or iterative
 
@@ -324,6 +326,25 @@ soft-foundry shell grok
 ```
 
 The launched agent is expected to load the repository's canonical `AGENTS.md` / `.ai/` workflow. `grok` shell launching requires a Grok-compatible CLI executable named `grok` on `PATH`; xAI API model discovery works independently of that shell integration.
+
+### Finding and resuming sessions
+
+`ps` shows the shells open now. To find one that has finished, or one open in a terminal you have lost track of, install the session hook once:
+
+```bash
+soft-foundry hooks install --sessions     # user level: Claude Code, Codex, and Grok, plus a find-session skill
+soft-foundry sessions qr code             # sessions whose prompts, folder, branch, or change match every word
+soft-foundry sessions --change ui-links --phase review --agent codex
+soft-foundry sessions ledger --json       # the same as data
+soft-foundry resume ui-links review       # print the newest matching resume command
+soft-foundry hooks uninstall --sessions   # remove the hooks and the skill; the ledger stays until you delete it
+```
+
+The hook is a `UserPromptSubmit` entry in `~/.claude/settings.json`, `~/.codex/hooks.json`, and `~/.grok/hooks/soft-foundry-sessions.json` that runs `soft-foundry session log`. It prints nothing and always succeeds, so it can never block a prompt or reach the agent's context. Codex runs it only after you review and trust it with `/hooks` inside Codex. The `find-session` skill (`~/.claude/skills/find-session/`, which Grok also reads, and `~/.agents/skills/find-session/` for Codex) lets you ask an agent "find the session where we worked on the QR generator" and get the resume command back.
+
+Each match prints its status as a word (`resumable`, `folder missing`, or `transcript missing`) and the exact command to paste, for example `cd /path/to/repo && codex resume 019a…`. Neither `sessions` nor `resume` starts a session.
+
+**What the ledger keeps, and where.** `~/.soft-foundry/sessions.jsonl` (or `SOFT_FOUNDRY_SESSIONS`), one line per session, readable only by you: the agent, session ID, folder, repository, branch, the change and phase that branch is on, the transcript path the agent reported, first and last prompt times, and the first and latest prompt cut to 140 characters with secret-shaped strings (API keys, tokens, private keys) masked. Nothing is sent anywhere. It is an index, not a backup: a session can be resumed only while its agent still has the transcript. A prompt whose hook payload is larger than 1 MB is skipped (the session is recorded at its next ordinary prompt), and a folder whose name contains control characters is stored without them, so such a session reports `folder missing`. Delete the file to forget everything recorded.
 
 ## Adversarial testing and authorization
 
