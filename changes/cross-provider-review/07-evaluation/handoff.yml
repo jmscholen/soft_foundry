@@ -1,7 +1,7 @@
 ---
 phase: 07-evaluation
 skill: evaluation
-status: complete
+status: in_progress
 commit_sha: 53e4108fc38bb3077a3057b161328067ca06dc7e
 started_at: '2026-10-08T01:01:00Z'
 completed_at: '2026-10-08T00:51:06Z'
@@ -22,5 +22,5 @@ findings:
     --shell grok until it is renewed.
 next: attack
 notes: Performed by the interactive session that implemented the change. Second run,
-  after REM-001.
+  after REM-001. Reopened by remediation REM-002 (REV-FUN-001).
 executed_by:

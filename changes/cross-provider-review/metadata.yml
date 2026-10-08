@@ -10,7 +10,7 @@ type: feature
 risk: low
 track: gated
 status: in_progress
-current_phase: review
+current_phase: remediate
 created_at: 2026-10-08 00:29:02.000000000 Z
 surfaces:
   application: true

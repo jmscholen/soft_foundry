@@ -228,4 +228,23 @@ class CrossProviderReviewTest < Minitest::Test
       refute_includes c.detail, "REV-M"
     end
   end
+  # REV-FUN-001: a known provider still steers the choice when another named
+  # phase's provider is unknown, and an unrecognized provider string falls
+  # back to the shell the runner recorded.
+  def test_a_known_provider_is_avoided_even_when_another_is_unknown
+    with_reviewable_change(provider: "anthropic") do |dir, record|
+      complete_phase!(record, "remediate", sha: head(dir))
+      set_provider(record, "remediate", nil)
+      with_installed("claude", "codex", "grok") do
+        _, out = dry_run(dir, "review")
+        assert_includes out, "with: codex exec"
+        assert_includes out, "! warn shell: the provider of remediation is not recorded; review runs on codex, which differs from implementation's anthropic"
+      end
+    end
+  end
+
+  def test_an_unrecognized_provider_name_falls_back_to_the_recorded_shell
+    assert_equal "anthropic", SoftFoundry::PhaseRunner.provider_of({ "resolved_model" => { "provider" => "claude-opus" }, "executed_by" => { "shell" => "claude" } })
+    assert_nil SoftFoundry::PhaseRunner.provider_of({ "resolved_model" => { "provider" => "claude-opus" } })
+  end
 end

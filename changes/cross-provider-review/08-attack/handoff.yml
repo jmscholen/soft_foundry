@@ -1,7 +1,7 @@
 ---
 phase: '08-attack'
 skill: adversarial-testing
-status: complete
+status: in_progress
 commit_sha: 53e4108fc38bb3077a3057b161328067ca06dc7e
 started_at: '2026-10-08T01:02:00Z'
 completed_at: '2026-10-08T00:51:15Z'
@@ -23,5 +23,5 @@ findings:
     the review gate
 next: remediate
 notes: Performed by the interactive session that implemented the change, not an independent
-  attacker. Second run, after REM-001.
+  attacker. Second run, after REM-001. Reopened by remediation REM-002 (REV-FUN-001).
 executed_by:

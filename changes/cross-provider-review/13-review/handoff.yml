@@ -1,7 +1,7 @@
 ---
 phase: 13-review
 skill: review
-status: complete
+status: in_progress
 commit_sha: 2bcd186a2e6b97178c196bef26a05d7ec29100ed
 started_at: '2026-10-08T00:51:24Z'
 completed_at: '2026-10-08T01:01:15Z'
@@ -40,7 +40,7 @@ notes: Independent review of HEAD 2bcd186 (lib, test, README, and .ai identical 
   no policy text change is owed). The specify phase was skipped, so the go-live accessibility
   advisory about a missing accessibility requirement still applies and is not a defect
   in this review. This session ran on grok (xAI); implementation and remediation recorded
-  anthropic.
+  anthropic. Reopened by remediation REM-002 (REV-FUN-001).
 executed_by:
   runner: soft-foundry phase run
   shell: grok
