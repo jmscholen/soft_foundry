@@ -1,0 +1,12 @@
+# worktree at RED commit f69d6f2d1471778dfc9417bbf06a081eee86b779
+  1) Failure:
+PanelRemediationTest#test_a_draft_replaced_during_the_argument_fails_the_run_even_if_a_later_round_agrees [test/panel_remediation_test.rb:256]:
+  2) Failure:
+PanelRemediationTest#test_a_dropped_member_is_recorded_and_outcome_lines_carry_status_words [test/panel_remediation_test.rb:271]:
+  3) Failure:
+PanelRemediationTest#test_an_in_repository_draft_during_the_independent_stage_fails_the_run [test/panel_remediation_test.rb:229]:
+  4) Failure:
+PanelRemediationTest#test_the_guard_refuses_an_in_repository_draft_in_the_independent_stage [test/panel_remediation_test.rb:239]:
+  5) Failure:
+PanelRemediationTest#test_a_repository_write_during_the_independent_stage_fails_the_run [test/panel_remediation_test.rb:209]:
+29 runs, 173 assertions, 5 failures, 0 errors, 0 skips

@@ -2,9 +2,9 @@
 phase: '09-remediation'
 skill: remediation
 status: complete
-commit_sha: 2bdc19fbb760243a9e30eda2db7b0c32722d1479
+commit_sha: 2a746801fcf688ae95104973f463856df1468355
 started_at: '2026-10-08T03:40:00Z'
-completed_at: '2026-10-08T03:43:27Z'
+completed_at: '2026-10-08T04:40:21Z'
 resolved_model:
   profile: coding_high
   provider: anthropic
@@ -19,6 +19,12 @@ findings:
     rerun.
   failure: before the fix, a crashed consensus exited 0, shell commands and Grep escaped
     stage narrowing, and the consensus writer could replace the drafts the gate cites
+- id: REM-002
+  severity: major
+  summary: REV-SEC-004..006 fixed by runner-side fingerprints and an outside-only
+    independent stage.
+  failure: before the fix, a shell command hiding a path in a variable could replace
+    another member's draft and a later round could still agree over it
 next: verify
 notes: Performed by the interactive session.
 executed_by:
