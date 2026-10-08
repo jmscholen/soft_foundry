@@ -1,22 +1,24 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 15-learning
 skill: learning
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 2a493c7ef0fe856bb63ef2d276874e6a0a2117fb
+started_at: '2026-10-08T01:30:45Z'
+completed_at: '2026-10-08T01:30:45Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+- findings.md
+- proposed-rules.md
+- proposed-evals.md
+- instincts.yml
+blocking: []
+findings:
+- id: PROP-001
+  severity: minor
+  summary: 'General rule: exempt-list, not allow-list, for checks over free-text fields.'
 next: done
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: Performed by the interactive session. Proposals are not applied here.
+executed_by:
