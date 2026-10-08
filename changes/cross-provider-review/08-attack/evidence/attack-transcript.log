@@ -1,0 +1,16 @@
+# commit 0370e02436d1b5a2a60fdaa057db67d19dabd158; scratch /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/xp-eval.tvgF
+### ATTACK-001 slip a major finding past findings explained
+--- severity in capitals
+  ✗ fail findings explained: no failure: on A1; a blocking or major finding names the concrete input or state and the wrong result it leads to, or it is minor
+--- whitespace failure
+  ✗ fail findings explained: no failure: on A2; a blocking or major finding names the concrete input or state and the wrong result it leads to, or it is minor
+--- a non-answer failure (structure-only check: expected to pass, residual)
+  ✓ pass findings explained: 1 blocking or major finding names its failure
+--- an unlisted severity word (residual if it passes)
+  ✓ pass findings explained: no blocking or major findings
+### ATTACK-002 silence the same-provider advisory
+--- review handoff claims another provider (resolved_model is agent-written: residual)
+  ✓ pass findings explained: no blocking or major findings
+--- same provider in other casing
+  ✓ pass findings explained: no blocking or major findings
+  ! warn review: review (13-review) ran on anthropic, the same provider as implementation; .ai/skills/review/skill.yml prefers a different one (`soft-foundry phase run review` picks one when --shell is not given)

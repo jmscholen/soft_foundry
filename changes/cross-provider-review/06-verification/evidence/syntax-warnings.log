@@ -1,0 +1,9 @@
+# commit 0370e02436d1b5a2a60fdaa057db67d19dabd158
+lib/soft_foundry/phase_provider.rb: Syntax OK 
+lib/soft_foundry/phase_runner.rb: Syntax OK 
+lib/soft_foundry/advisory.rb: Syntax OK 
+lib/soft_foundry/gate.rb: Syntax OK 
+lib/soft_foundry/check.rb: Syntax OK 
+lib/soft_foundry/cli.rb: Syntax OK 
+lib/soft_foundry/version.rb: Syntax OK 
+test/cross_provider_review_test.rb: Syntax OK 

@@ -1,15 +1,47 @@
-commit_sha: TBD
+---
+commit_sha: 0370e02436d1b5a2a60fdaa057db67d19dabd158
 checks:
-  - id: CHECK-001
-    kind: tests   # tests | lint | static_analysis | security_scan | iac_validate | migration_check | custom
-    command: TBD
-    result: TBD   # pass | fail | error | skipped
-    evidence: evidence/TBD
-    criteria: [AC-001]
-    # Optional, per check: the commit at which this test existed and failed
-    # (RED) and the test file. The gate verifies red_commit is a commit that
-    # precedes commit_sha, holds test_path, and that APP or INFRA code changed
-    # after it. A feature, fix, or refactor with no red_commit on any check is
-    # advised as having no failing-test-first evidence.
-    # red_commit: TBD
-    # test_path: TBD
+- id: CHECK-001
+  kind: tests
+  command: ruby -Ilib -Itest requiring every test/*_test.rb (-v), provider keys, SOFT_FOUNDRY_BILLING,
+    and SOFT_FOUNDRY_GUARD unset
+  result: pass
+  evidence: evidence/tests.log
+  criteria:
+  - REQ-XP-001
+  - REQ-XP-002
+  - REQ-XP-003
+  - REQ-XP-004
+  - REQ-XP-005
+  - REQ-XP-006
+  red_commit: eb3ace32423d11f706a77b390260d6ac0790b91b
+  test_path: test/cross_provider_review_test.rb
+- id: CHECK-002
+  kind: custom
+  command: test/cross_provider_review_test.rb in a worktree at the RED commit eb3ace32423d11f706a77b390260d6ac0790b91b
+  result: fail
+  evidence: evidence/red-at-eb3ace3.log
+  criteria:
+  - failing-test-first
+- id: CHECK-003
+  kind: lint
+  command: soft-foundry check
+  result: pass
+  evidence: evidence/check.log
+  criteria:
+  - REQ-XP-001
+  - control-plane-consistency
+- id: CHECK-004
+  kind: static_analysis
+  command: ruby -wc on the changed Ruby files
+  result: pass
+  evidence: evidence/syntax-warnings.log
+  criteria:
+  - coding-standard
+- id: CHECK-005
+  kind: security_scan
+  command: soft-foundry scan
+  result: pass
+  evidence: evidence/scan-against-self.log
+  criteria:
+  - content-clean

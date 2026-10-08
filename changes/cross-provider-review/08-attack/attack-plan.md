@@ -1,13 +1,13 @@
 # Attack Plan
 
 ## Intent to challenge
-TBD
+That a review can carry a serious finding past `findings explained` without naming a failure, or can avoid the same-provider advisory.
 
 ## Threats mapped
-TBD
+No threat-model phase (skipped with rationale); the threats are the two named in intake: getting around the new gate check, and silencing the advisory.
 
 ## Adversarial journeys
-For each ATTACK case record threat ID, attempted violation, starting privilege/state, steps, expected denial/safe behavior, observed result, and evidence.
+`cases.yml`, run by the real CLI against the evaluation's scratch repository.
 
 ## Safety boundary
-Production/third-party destructive or security testing requires explicit authorization.
+Local scratch repository; synthetic handoffs; nothing outside the scratch directory touched.
