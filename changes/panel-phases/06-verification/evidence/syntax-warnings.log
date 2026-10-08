@@ -1,4 +1,4 @@
-# commit 2a746801fcf688ae95104973f463856df1468355
+# commit 4f3b2dadb445605f059bc1ff942d0de183d35044
 lib/soft_foundry/panel.rb: Syntax OK 
 lib/soft_foundry/cli.rb: Syntax OK 
 lib/soft_foundry/guard.rb: Syntax OK 

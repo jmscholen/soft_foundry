@@ -2,9 +2,9 @@
 phase: '09-remediation'
 skill: remediation
 status: complete
-commit_sha: 2a746801fcf688ae95104973f463856df1468355
+commit_sha: 4f3b2dadb445605f059bc1ff942d0de183d35044
 started_at: '2026-10-08T03:40:00Z'
-completed_at: '2026-10-08T04:40:21Z'
+completed_at: '2026-10-08T13:54:27Z'
 resolved_model:
   profile: coding_high
   provider: anthropic
@@ -25,6 +25,12 @@ findings:
     independent stage.
   failure: before the fix, a shell command hiding a path in a variable could replace
     another member's draft and a later round could still agree over it
+- id: REM-003
+  severity: major
+  summary: 'REV-SEC-007, -008, -010 fixed by repository-wide snapshots; REV-SEC-009
+    mitigated (identical drafts fail), residual: no OS sandbox.'
+  failure: before the fix, a shell write to the handoff, an earlier phase, or application
+    code during the argument went unnoticed and the panel completed as agreed
 next: verify
 notes: Performed by the interactive session.
 executed_by:
