@@ -1,0 +1,47 @@
+---
+commit_sha: a963a27e4fc34e5200aa212bbc9d51d67e293cd1
+authorization_envelope:
+  target: soft-foundry gate review and the advisory (this checkout)
+  environment: local
+  authorized_by: 'the maintainer ("lets move to #2", 2026-10-08)'
+  allowed_surfaces:
+  - CLI processes
+  - a scratch repository
+  prohibited_surfaces:
+  - this repository's own records
+  data_constraints: synthetic handoffs
+  network_constraints: none used
+  destructive_actions: prohibited
+cases:
+- id: ATTACK-001
+  threat: gate check bypass
+  violation_attempted: carry a serious finding past findings explained without naming
+    a failure
+  starting_privilege: the review agent writing its own handoff
+  steps:
+  - severity MAJOR in capitals
+  - failure of only spaces
+  - failure n/a
+  - severity critical, a word the check does not list
+  expected_safe_behavior: every serious finding without a real failure fails the check
+  observed: capitals and whitespace fail as intended; n/a passes (structure-only check,
+    as specified); severity critical now fails too (fixed by REM-001; at 0370e02 it
+    passed, FIND-ATK-001)
+  result: denied
+  evidence:
+  - evidence/attack-transcript.log
+- id: ATTACK-002
+  threat: advisory silenced
+  violation_attempted: avoid the same-provider advisory
+  starting_privilege: the review agent writing its own handoff
+  steps:
+  - claim openai in resolved_model while the review ran on anthropic
+  - same provider in capitals
+  expected_safe_behavior: the advisory shows whenever the review ran on the implementer's
+    provider
+  observed: capitals are still caught; a review handoff that misstates its provider
+    silences the advisory, because resolved_model is written by the agent (residual,
+    recorded in decisions.md)
+  result: denied
+  evidence:
+  - evidence/attack-transcript.log

@@ -1,0 +1,29 @@
+commit_judged: 2a493c7ef0fe856bb63ef2d276874e6a0a2117fb
+phases:
+  - phase: 06-verification
+    commit_sha: a963a27e4fc34e5200aa212bbc9d51d67e293cd1
+    current: true   # no APP, TESTS, or INFRA change between this commit and the judged commit
+    result: pass
+  - phase: 07-evaluation
+    commit_sha: a963a27e4fc34e5200aa212bbc9d51d67e293cd1
+    current: true
+    result: pass
+  - phase: 08-attack
+    commit_sha: a963a27e4fc34e5200aa212bbc9d51d67e293cd1
+    current: true
+    result: pass
+  - phase: 13-review
+    commit_sha: 2c06a8e9581c4a956abcb11a03168c11ed8dace3
+    current: true   # 2a493c7 records this review only; lib, test, README, and .ai match a963a27
+    result: pass
+unresolved_findings: []
+# Acceptance criteria or judgment conditions left unsatisfied pending a
+# real-world event (production observation, etc.) rather than more
+# repository evidence. None for this change: the accepted limits are in
+# residual-risk.md and do not wait on a later confirmation.
+# `soft-foundry change close` refuses to close this change while any id
+# here lacks a human confirmation - via --confirm ID, or a PR comment
+# reading "CONFIRMED: <id>" (see `soft-foundry change request-discharge`)
+# - and then moves it into `discharged` with the confirmation source.
+undischarged: []
+discharged: []

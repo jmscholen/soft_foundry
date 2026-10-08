@@ -3,3 +3,7 @@ model: judgment_high
 phase: 14-judgment
 outputs: [final_judgment, residual_risk, evidence_manifest]
 evidence: commit_bound
+# Phases whose provider this skill's session should differ from. `phase run`
+# without --shell picks an installed shell on another provider, and an
+# advisory names a completed phase that ran on the same one.
+prefer_different_provider_from: [implement, remediate]

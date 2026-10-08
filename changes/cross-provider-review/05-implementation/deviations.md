@@ -1,0 +1,5 @@
+# Deviations From Plan
+
+1. **One RED test corrected after RED.** `test_remediation_counts_too` ran `phase run judge` without completing review, so the runner refused it for a pending predecessor; review is now completed first. The behavior it checks (remediation's provider is counted) is unchanged. Approval: review.
+2. **Writes outside the implementation write set.** `.ai/skills/review/skill.yml`, `.ai/skills/final-judgment/skill.yml`, `.ai/skills/review/SKILL.md`, the review templates, `.ai/templates/handoff.yml`, `.ai/schemas.md` (all `CONTROL_PLANE`, denied to implementation), and `README.md` (in no path group). They are what REQ-XP-001, -005, -006, and -007 ask for, and no skill's write set covers them; `changes/phase-runner` and `changes/session-ledger` (REV-ARCH-001) set the precedent. The maintainer accepts the control-plane edits at merge. Approval: review, and the maintainer at merge.
+3. **REV-FUN-002 from session-ledger folded in.** The `phase` usage text named `--shell claude|codex`; it now names grok. One line, in a file this change edits anyway.

@@ -1,0 +1,27 @@
+---
+phase: '08-attack'
+skill: adversarial-testing
+status: complete
+commit_sha: a963a27e4fc34e5200aa212bbc9d51d67e293cd1
+started_at: '2026-10-08T01:12:00Z'
+completed_at: '2026-10-08T01:10:42Z'
+resolved_model:
+  profile: adversarial_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+- attack-plan.md
+- cases.yml
+- results.md
+- evidence/manifest.yml
+blocking: []
+findings:
+- id: FIND-ATK-001
+  severity: major
+  summary: 'Fixed by REM-001: any severity but minor now needs failure:.'
+  failure: at 0370e02, a review finding marked critical with no failure named passed
+    the review gate
+next: remediate
+notes: Performed by the interactive session that implemented the change, not an independent
+  attacker. Third run, after REM-002; same outcomes as the second.
+executed_by:

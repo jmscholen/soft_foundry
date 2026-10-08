@@ -1,0 +1,81 @@
+---
+commit_sha: a963a27e4fc34e5200aa212bbc9d51d67e293cd1
+journeys:
+- id: EVAL-001
+  criteria:
+  - REQ-XP-003
+  persona: the maintainer
+  starting_state: claude, codex, and grok on PATH; implementation recorded on anthropic
+  steps:
+  - phase run review --dry-run
+  assertions:
+  - codex is chosen and the shell line says why
+  evidence:
+  - evidence/journey-transcript.log
+  result: pass
+- id: EVAL-002
+  criteria:
+  - REQ-XP-003
+  persona: the maintainer
+  starting_state: as EVAL-001
+  steps:
+  - phase run review --shell grok --dry-run
+  assertions:
+  - grok is used and no shell line is printed
+  evidence:
+  - evidence/journey-transcript.log
+  result: pass
+- id: EVAL-003
+  criteria:
+  - REQ-XP-002
+  - REQ-XP-003
+  persona: the maintainer
+  starting_state: implementation provider removed from its handoff
+  steps:
+  - phase run review --dry-run
+  assertions:
+  - claude is used with a warn line naming the missing provider and --shell
+  evidence:
+  - evidence/journey-transcript.log
+  result: pass
+- id: EVAL-004
+  criteria:
+  - REQ-XP-004
+  - REQ-XP-005
+  persona: the maintainer
+  starting_state: review complete on Anthropic with a major finding and no failure
+  steps:
+  - gate review
+  - name the failure and record the review on xAI
+  - gate review
+  assertions:
+  - 'first: findings explained fails and the same-provider advisory shows'
+  - 'then: both clear'
+  evidence:
+  - evidence/journey-transcript.log
+  result: pass
+- id: EVAL-005
+  criteria:
+  - REQ-XP-003
+  persona: the maintainer reading a plain terminal or a screen reader
+  starting_state: as EVAL-001
+  steps:
+  - phase run review --dry-run with non-ASCII bytes deleted
+  assertions:
+  - the shell line keeps its meaning
+  evidence:
+  - evidence/journey-transcript.log
+  result: pass
+- id: EVAL-006
+  criteria:
+  - REQ-XP-003
+  persona: the maintainer
+  starting_state: implementation on anthropic, remediation complete with no provider
+    recorded
+  steps:
+  - phase run review --dry-run
+  assertions:
+  - codex is chosen, not claude, with a warn line naming the missing provider
+  evidence:
+  - evidence/journey-transcript.log
+  result: pass

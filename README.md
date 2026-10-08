@@ -193,6 +193,16 @@ soft-foundry phase run review -- --model opus    # pass extra arguments to the s
 
 The runner refuses what the gate would refuse afterwards (an exploring change, a phase already complete, a pending predecessor), so no session is spent on it. It moves `current_phase` to the phase so the guard applies the right skill, writes `executed_by` into the phase's handoff (runner, shell, `fresh_context: true`, start and finish times, exit status, and the session's `session_id` and `cwd`) before and after the session, and runs the phase's gate when the session returns. The agent fills the rest of the handoff itself; the prompt tells it not to touch `executed_by`, not to alter any other phase's evidence, and to record `blocked` rather than pretend.
 
+**A different provider for review and judgment.** Both skills declare `prefer_different_provider_from: [implement, remediate]` in their `skill.yml`. Without `--shell`, `phase run review` and `phase run judge` read which provider wrote the code (the handoff's `resolved_model.provider`, else the shell `phase run` recorded) and pick the first installed shell, in the order claude, codex, grok, on another provider:
+
+```
+shell: codex (implementation ran on anthropic; the review skill prefers a different provider)
+```
+
+If a named phase's provider is not recorded, the known ones are still avoided and a `! warn shell:` line says which is missing; if none is known, or no installed shell runs on another provider, the warning says so and the first installed shell is used. A provider name it does not recognize falls back to the shell `phase run` recorded. `--shell` always wins. A review or judgment that ran on the same provider anyway gets a go-live advisory. "Installed" means on `PATH`, not logged in: if the chosen shell cannot start, name another with `--shell`.
+
+**Findings name the failure they prevent.** Every review finding states the concrete input or state and the wrong result it leads to. In the review handoff, every finding above `minor` (whatever its severity word) carries it as `failure:`, and the gate's `findings explained` check fails without it; a finding that cannot name one is minor. Asking for defensive additions (validation, rescues, or nil checks for states the code cannot reach) is not blocking or major unless the reviewer names the input that reaches the state.
+
 A completed review or judgment whose handoff carries no `executed_by` from the runner gets an advisory: it was performed by whatever session was already open, and separation of duties rests on the handoff's notes. If the guard hook is not installed, `phase run` says so before launching, since the session's tool calls would then be checked by nothing.
 
 The session ID lets you get back into a phase run's session (`soft-foundry resume <change> <phase>`). Claude Code and Grok are handed one up front (`--session-id`, `-s`); Codex picks its own, so the runner takes it from the session ledger when the session hook is installed (see "Finding and resuming sessions"), and leaves it null otherwise.

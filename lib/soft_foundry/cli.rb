@@ -825,10 +825,10 @@ module SoftFoundry
     # session, stamped with how it ran, gated when it returns.
     def phase
       sub = @argv.shift
-      raise ArgumentError, "Usage: soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex] [--dry-run] [-- shell args...]" unless sub == "run"
-      target = @argv.shift or raise ArgumentError, "Usage: soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex] [--dry-run] [-- shell args...]"
+      raise ArgumentError, "Usage: soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex|grok] [--dry-run] [-- shell args...]" unless sub == "run"
+      target = @argv.shift or raise ArgumentError, "Usage: soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex|grok] [--dry-run] [-- shell args...]"
       slug = option("--change") || current_slug
-      shell_name = option("--shell") || "claude"
+      chosen = option("--shell")
       dry_run = flag("--dry-run")
       extra = []
       if (i = @argv.index("--"))
@@ -843,6 +843,14 @@ module SoftFoundry
       if (why = runner.refusal(phase))
         @err.puts "#{slug}: cannot run #{phase.id}: #{why}"
         return EXIT_TARGET
+      end
+      # Without --shell, a phase whose skill prefers a different provider
+      # from the phases that wrote the code gets one; the line says why.
+      shell_name = chosen
+      unless shell_name
+        choice = runner.default_shell(phase)
+        shell_name = choice.shell
+        (choice.line.start_with?("!") ? @err : @out).puts(choice.line) if choice.line
       end
       launch = runner.launch(phase, shell: shell_name, extra: extra)
 
@@ -1233,7 +1241,9 @@ module SoftFoundry
           soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex|grok] [--dry-run] [-- args...]
                                                   run one phase in a fresh coding-shell session with only its
                                                   skill in the prompt; stamps executed_by in the handoff and
-                                                  gates the phase when the session returns
+                                                  gates the phase when the session returns. Without --shell,
+                                                  review and judge pick an installed shell on a different
+                                                  provider from implementation and remediation
           soft-foundry budget status [--change SLUG]
                                                   show billing mode and compare recorded spend against
                                                   .ai/policies/budget.yml (no budget on a subscription)

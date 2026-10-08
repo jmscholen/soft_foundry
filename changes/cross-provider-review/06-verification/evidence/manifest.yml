@@ -1,0 +1,18 @@
+---
+commit_sha: a963a27e4fc34e5200aa212bbc9d51d67e293cd1
+artifacts:
+- path: evidence/tests.log
+  produced_by: full suite
+  sha256: 74fd2a9d01e4dec6ac4ff12ddee8fdda32947e6f8c85e6e839544180541b614d
+- path: evidence/red-at-eb3ace3.log
+  produced_by: new tests at the RED commit
+  sha256: '0768fb82fd6ef8143f7e47165da144f2d0dc365c13c74585b07c9c6d588ab96d'
+- path: evidence/check.log
+  produced_by: soft-foundry check
+  sha256: 8a3aa97f6b5f067042aedc7fff2eff70ce049a5bb4f08ed03ce8f5334e912602
+- path: evidence/syntax-warnings.log
+  produced_by: ruby -wc
+  sha256: 612180acdfda7f57cf20cb5e41a5d46dd17c6ddbc8b8e483ddbdd6de4ec35b65
+- path: evidence/scan-against-self.log
+  produced_by: soft-foundry scan
+  sha256: ea363b93053ab4f423fd748b80f87153add8adaf2779773ece0d7e016e773fce

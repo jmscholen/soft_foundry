@@ -1,0 +1,30 @@
+---
+phase: '09-remediation'
+skill: remediation
+status: complete
+commit_sha: a963a27e4fc34e5200aa212bbc9d51d67e293cd1
+started_at: '2026-10-08T00:55:00Z'
+completed_at: '2026-10-08T01:07:14Z'
+resolved_model:
+  profile: coding_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+- summary.md
+blocking: []
+findings:
+- id: REM-001
+  severity: major
+  summary: findings explained now covers every severity except minor; verify, evaluate,
+    attack rerun.
+  failure: before the fix, a review finding marked critical with no failure named
+    passed the review gate
+- id: REM-002
+  severity: major
+  summary: 'REV-FUN-001 fixed: known providers avoided even when another is unrecorded;
+    unrecognized names fall back to the shell.'
+  failure: before the fix, with implementation on anthropic and remediation unrecorded,
+    phase run review started claude, the implementer's provider
+next: verify
+notes: Performed by the interactive session.
+executed_by:

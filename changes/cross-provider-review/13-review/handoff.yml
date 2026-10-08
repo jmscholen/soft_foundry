@@ -1,0 +1,42 @@
+---
+phase: 13-review
+skill: review
+status: complete
+commit_sha: 2c06a8e9581c4a956abcb11a03168c11ed8dace3
+started_at: '2026-10-08T00:51:24Z'
+completed_at: '2026-10-08T01:20:27Z'
+resolved_model:
+  profile: reasoning_high
+  provider: xAI
+  model: grok-4.7
+outputs:
+- functional.md
+- architecture.md
+- security.md
+- accessibility.md
+- policy-conformance.md
+- infrastructure.md
+- operations.md
+- consolidated.md
+blocking: []
+findings: []
+next: judge
+notes: Independent review of HEAD 2c06a8e (lib, test, README, and .ai identical to
+  a963a27). Implementation and earlier phase evidence were not modified. Permissions
+  followed as policy. REV-FUN-001 does not reproduce. The RED-test setup correction
+  and the control-plane writes in 05-implementation/deviations.md are approved. No
+  findings. Accessibility conforms (declared surface). Policy conformance is N/A (surfaces.policy
+  is false; no policy text change is owed; no human decision requested). The specify
+  phase was skipped, so the go-live accessibility advisory about a missing accessibility
+  requirement still applies and is not a defect in this review. This session ran on
+  grok (xAI); implementation and remediation recorded anthropic.
+executed_by:
+  runner: soft-foundry phase run
+  shell: grok
+  fresh_context: true
+  started_at: '2026-10-08T01:10:43Z'
+  finished_at: '2026-10-08T01:22:11Z'
+  exit_status: 0
+  previous_phase: attack
+  session_id: cbd4128f-316b-4297-8eb6-03702f48d97d
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

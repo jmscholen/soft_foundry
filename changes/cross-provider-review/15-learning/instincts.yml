@@ -1,0 +1,19 @@
+# Instincts: what this change taught, as reusable one-line triggers with an
+# action, a confidence score, and evidence in this record.
+instincts:
+- id: exempt-list-not-allow-list
+  trigger: when a check decides what to enforce from a free-text field such as a severity or status word
+  action: list the values that are exempt and enforce on everything else, including a missing value
+  confidence: 0.8
+  domain: governance
+  evidence:
+  - finding: FIND-ATK-001
+  - path: changes/cross-provider-review/09-remediation/summary.md
+- id: unknown-input-keeps-known-constraints
+  trigger: when combining several inputs and one of them is unknown
+  action: still apply what the known inputs require, and say which input is missing
+  confidence: 0.75
+  domain: design
+  evidence:
+  - finding: REV-FUN-001
+  - path: changes/cross-provider-review/09-remediation/summary.md

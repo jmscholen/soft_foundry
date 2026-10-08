@@ -1,0 +1,21 @@
+# commit a963a27e4fc34e5200aa212bbc9d51d67e293cd1; scratch /private/tmp/claude-501/-Users-jscholen-iou-dev-soft-foundry/21cb77dc-894b-4e11-b3e3-663360363d3b/scratchpad/xp-eval.rHei; installed: claude codex grok 
+### EVAL-001 review with no --shell after an Anthropic implementation
+shell: codex (implementation ran on anthropic; the review skill prefers a different provider)
+would run review of demo with: codex exec <prompt>
+### EVAL-002 the person's --shell wins
+would run review of demo with: grok -s 210c62f4-e9af-422e-aa7a-5b80eccc8689 -p <prompt>
+### EVAL-003 implementation provider not recorded
+! warn shell: the provider of implementation is not recorded, so review runs on claude; name one with --shell
+would run review of demo with: claude -p --session-id 53097d90-a3dd-4683-a5c8-110698eb4a12 --name demo/review <prompt>
+### EVAL-006 remediation complete with no provider recorded; implementation on anthropic
+! warn shell: the provider of remediation is not recorded; review runs on codex, which differs from implementation's anthropic
+would run review of demo with: codex exec <prompt>
+### EVAL-005 accessibility: the new lines with non-ASCII bytes deleted
+shell: codex (implementation ran on anthropic; the review skill prefers a different provider)
+### EVAL-004 a review completed on the same provider is advised; its gate reads the failure field
+13-review  complete  FAIL
+  ✗ fail findings explained: no failure: on REV-1; every finding above minor names the concrete input or state and the wrong result it leads to, or it is minor
+  ! warn review: review (13-review) ran on anthropic, the same provider as implementation; .ai/skills/review/skill.yml prefers a different one (`soft-foundry phase run review` picks one when --shell is not given)
+--- after naming the failure and recording the review on xAI:
+13-review  complete  PASS
+  ✓ pass findings explained: 1 finding above minor names its failure

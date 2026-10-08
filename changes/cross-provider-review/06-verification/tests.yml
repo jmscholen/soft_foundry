@@ -1,0 +1,67 @@
+---
+commit_sha: a963a27e4fc34e5200aa212bbc9d51d67e293cd1
+checks:
+- id: CHECK-001
+  kind: tests
+  command: ruby -Ilib -Itest requiring every test/*_test.rb (-v), provider keys, SOFT_FOUNDRY_BILLING,
+    and SOFT_FOUNDRY_GUARD unset
+  result: pass
+  evidence: evidence/tests.log
+  criteria:
+  - REQ-XP-001
+  - REQ-XP-002
+  - REQ-XP-003
+  - REQ-XP-004
+  - REQ-XP-005
+  - REQ-XP-006
+  red_commit: eb3ace32423d11f706a77b390260d6ac0790b91b
+  test_path: test/cross_provider_review_test.rb
+- id: CHECK-002
+  kind: custom
+  command: test/cross_provider_review_test.rb in a worktree at the RED commit eb3ace32423d11f706a77b390260d6ac0790b91b
+  result: fail
+  evidence: evidence/red-at-eb3ace3.log
+  criteria:
+  - failing-test-first
+- id: CHECK-003
+  kind: lint
+  command: soft-foundry check
+  result: pass
+  evidence: evidence/check.log
+  criteria:
+  - REQ-XP-001
+  - control-plane-consistency
+- id: CHECK-004
+  kind: static_analysis
+  command: ruby -wc on the changed Ruby files
+  result: pass
+  evidence: evidence/syntax-warnings.log
+  criteria:
+  - coding-standard
+- id: CHECK-005
+  kind: security_scan
+  command: soft-foundry scan
+  result: pass
+  evidence: evidence/scan-against-self.log
+  criteria:
+  - content-clean
+- id: CHECK-006
+  kind: tests
+  command: test_any_severity_but_minor_must_name_its_failure within CHECK-001 (remediation
+    REM-001)
+  result: pass
+  evidence: evidence/tests.log
+  criteria:
+  - REQ-XP-005
+  red_commit: e62bc6ecdc631e49fa55fe9d130cec5408471c57
+  test_path: test/cross_provider_review_test.rb
+- id: CHECK-007
+  kind: tests
+  command: the two REV-FUN-001 tests within CHECK-001 (remediation REM-002)
+  result: pass
+  evidence: evidence/tests.log
+  criteria:
+  - REQ-XP-002
+  - REQ-XP-003
+  red_commit: b4dd692990926d0275055b9dc71ddc1b556dffa5
+  test_path: test/cross_provider_review_test.rb

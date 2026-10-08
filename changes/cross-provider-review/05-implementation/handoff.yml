@@ -1,0 +1,25 @@
+---
+phase: 05-implementation
+skill: implementation
+status: complete
+commit_sha: 0370e02436d1b5a2a60fdaa057db67d19dabd158
+started_at: '2026-10-08T00:35:00Z'
+completed_at: '2026-10-08T00:44:03Z'
+resolved_model:
+  profile: coding_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+- log.md
+- decisions.md
+- deviations.md
+blocking: []
+findings:
+- id: IMP-001
+  severity: minor
+  summary: Control-plane and README writes outside the implementation write set (deviation
+    2).
+next: verify
+notes: Performed by the interactive session (Anthropic). RED eb3ace3, GREEN 0370e02.
+  Control-plane writes outside the skill's write set are recorded in deviations.md.
+executed_by:

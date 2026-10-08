@@ -11,7 +11,9 @@ resolved_model:
   model: null
 outputs: []                # files produced, relative to this phase directory
 blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}
+findings: []               # items for downstream phases: {id, severity, summary}; a review's
+                           # findings above minor also carry failure: (the concrete input
+                           # or state and the wrong result it leads to)
 next: ${NEXT}
 notes: ""
 # Written by `soft-foundry phase run`, never by the agent: how this phase was

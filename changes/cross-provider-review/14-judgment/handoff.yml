@@ -1,0 +1,55 @@
+---
+phase: 14-judgment
+skill: final-judgment
+status: complete
+commit_sha: 2a493c7ef0fe856bb63ef2d276874e6a0a2117fb
+started_at: '2026-10-08T01:22:29Z'
+completed_at: '2026-10-08T01:31:00Z'
+resolved_model:
+  profile: judgment_high
+  provider: xAI
+  model: grok-4.7
+outputs:
+- final.md
+- residual-risk.md
+- evidence.yml
+blocking: []
+findings:
+- id: JUDGE-RES-001
+  severity: minor
+  summary: 'findings explained stays structural: failure n/a passes, and a non-hash
+    findings entry is ignored. Accepted under REQ-XP-005. Not a defect to remediate.'
+- id: JUDGE-RES-002
+  severity: minor
+  summary: A recognized resolved_model.provider other than the shell that ran silences
+    the same-provider advisory and steers default_shell. Accepted; the provider is
+    agent-written on purpose.
+- id: JUDGE-RES-003
+  severity: minor
+  summary: When no installed shell is on another provider, an unrecorded named phase
+    is not also named in the warning. The shell chosen is still the only one. Accepted.
+- id: JUDGE-RES-004
+  severity: minor
+  summary: 'gate judge prints a false accessibility advisory: the Conformance section
+    says the review does not declare N/A, and the advisory matcher treats that token
+    as a declaration. The review statement is Conforms. Accepted; the review record
+    was not edited.'
+next: learn
+notes: Outcome APPROVED_WITH_RESIDUAL_RISK at HEAD 2a493c7. No APP, TESTS, or INFRA
+  change since a963a27, including the worktree. Verification log hashes match the
+  manifest; the suite was not re-run. Review and this judgment are fresh xAI sessions;
+  implementation and remediation recorded anthropic. gate judge passes with two accessibility
+  advisories (skipped specification, and a false N/A hit) and no same-provider advisory.
+  FIND-ATK-001 and REV-FUN-001 are closed. Optional document, FAQ, and observability
+  phases left pending as not applicable. Permissions followed as policy. executed_by
+  was left as the runner wrote it.
+executed_by:
+  runner: soft-foundry phase run
+  shell: grok
+  fresh_context: true
+  started_at: '2026-10-08T01:22:29Z'
+  finished_at: '2026-10-08T01:30:15Z'
+  exit_status: 0
+  previous_phase: review
+  session_id: 85215f90-a50c-48cf-bbe8-1e5a086defdb
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"
