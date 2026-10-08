@@ -1,0 +1,6 @@
+---
+commit_sha: 6f753070e06ed9eb74b9744541b409429f81afa8
+artifacts:
+- path: evidence/attack-transcript.log
+  produced_by: two cases with the real CLI and a stub agent
+  sha256: 8dc67d74b9b950f62d7d7681d8e80ac6b83aeb3bc67775c7b08122a55e506a5a

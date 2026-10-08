@@ -1,0 +1,22 @@
+---
+phase: '08-attack'
+skill: adversarial-testing
+status: complete
+commit_sha: 6f753070e06ed9eb74b9744541b409429f81afa8
+started_at: '2026-10-07T23:58:00Z'
+completed_at: '2026-10-07T23:59:26Z'
+resolved_model:
+  profile: adversarial_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+- attack-plan.md
+- cases.yml
+- results.md
+- evidence/manifest.yml
+blocking: []
+findings: []
+next: remediate
+notes: Performed by the interactive session that implemented the change, not an independent
+  attacker.
+executed_by:

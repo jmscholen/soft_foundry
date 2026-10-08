@@ -1,0 +1,30 @@
+---
+commit_sha: 6f753070e06ed9eb74b9744541b409429f81afa8
+journeys:
+- id: EVAL-001
+  criteria:
+  - REQ-SQ-002
+  persona: the maintainer
+  starting_state: an empty ledger
+  steps:
+  - record a Grok session through session log
+  - sessions parser
+  - sessions parser --json
+  assertions:
+  - the session is found, resumable, and its command is the same as 0.18.0 would print
+  evidence:
+  - evidence/journey-transcript.log
+  result: pass
+- id: EVAL-002
+  criteria:
+  - REQ-SQ-001
+  persona: the maintainer
+  starting_state: the same ledger plus a planted line matching the same words
+  steps:
+  - sessions parser
+  assertions:
+  - only the real session is listed
+  - the ledger still holds both lines
+  evidence:
+  - evidence/journey-transcript.log
+  result: pass

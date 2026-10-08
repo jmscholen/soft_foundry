@@ -1,0 +1,46 @@
+---
+commit_sha: 6f753070e06ed9eb74b9744541b409429f81afa8
+authorization_envelope:
+  target: soft-foundry sessions, sessions --json, resume, SessionLedger.resume_command
+    (this checkout)
+  environment: local
+  authorized_by: 'the maintainer (decision 2 on 2026-10-07: fix REV-SEC-001 as its
+    own change)'
+  allowed_surfaces:
+  - CLI processes
+  - a scratch ledger
+  prohibited_surfaces:
+  - the real ledger and agent configuration
+  data_constraints: synthetic
+  network_constraints: none used
+  destructive_actions: prohibited
+cases:
+- id: ATTACK-001
+  threat: THREAT-001
+  violation_attempted: get a planted session ID or agent into sessions, sessions --json,
+    or resume
+  starting_privilege: same-user write access to the ledger
+  steps:
+  - 'plant eight lines: six shell-syntax or non-string IDs, one bogus agent, one numeric
+    ID'
+  - run sessions, sessions --json, and resume c1
+  expected_safe_behavior: none is listed and resume finds nothing
+  observed: 'sessions: none found; json entries 0; resume exit 1 with its message'
+  result: denied
+  evidence:
+  - evidence/attack-transcript.log
+- id: ATTACK-002
+  threat: THREAT-001
+  violation_attempted: run a command through a resume command built from a bad ID
+    that skipped the check
+  starting_privilege: a caller of resume_command with an unchecked entry
+  steps:
+  - build the command for session_id x; touch PWNED5
+  - run it with a stub claude
+  expected_safe_behavior: the stub receives the whole ID as one argument and no file
+    is created
+  observed: the stub was called with --resume and the single argument x; touch PWNED5;
+    no PWNED file was created
+  result: denied
+  evidence:
+  - evidence/attack-transcript.log

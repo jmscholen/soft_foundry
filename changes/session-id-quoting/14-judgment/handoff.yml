@@ -1,0 +1,55 @@
+---
+phase: 14-judgment
+skill: final-judgment
+status: complete
+commit_sha: c34f65cd6dc86c6b523629705884efbfa6450336
+started_at: '2026-10-08T00:14:10Z'
+completed_at: '2026-10-08T00:21:13Z'
+resolved_model:
+  profile: judgment_high
+  provider: xAI
+  model: grok-4.7
+outputs:
+- final.md
+- residual-risk.md
+- evidence.yml
+blocking: []
+findings:
+- id: JUDGE-001
+  severity: info
+  summary: Outcome APPROVED_WITH_RESIDUAL_RISK at c34f65c. Required phases are complete.
+    Verification, evaluation, and attack are current for that code (6f75307; no lib,
+    exe, test, or infra diff since). Review is current (d08f74e; prose in c34f65c;
+    no code diff since) and has no blocking findings. Discovery, specification, threat
+    model, and plan are waived in skipped_phases. Remediation, documentation, FAQ
+    index, and observability are pending and optional, and they do not leave REQ-SQ-001..003
+    unmet.
+- id: JUDGE-002
+  severity: minor
+  summary: RES-001 is accepted, not sent back. An id inside SessionLedger::ID that
+    starts with a hyphen (--help, -rf) is trusted and pasted unchanged. Shellwords.escape
+    does not quote it. Confirmed by probe. Agent CLIs were not run. It is not a shell
+    breakout, and it is not a miss of REQ-SQ-001 or REQ-SQ-002. REV-SEC-001's shell-metacharacter
+    paste path is closed.
+- id: JUDGE-003
+  severity: info
+  summary: Also carried, not blocking. RES-002 (a trusted line still prints stored
+    cwd and prompt text; control-character stripping is on write only) is accepted
+    and out of scope. EVAL-OBS-001 matches the intake decision to skip with no warning.
+    REV-SEC-002 stays a non-goal from the parent change. Nothing is undischarged.
+next: learn
+notes: Fresh-context judgment under final-judgment permissions, treated as policy.
+  Read the change record and the application code cited in the review. Probed SessionLedger.trusted?
+  and resume_command on this worktree. Did not edit any other phase, did not change
+  requirements, did not re-run the full suite or the attack shell, and did not run
+  phase run. Code at the judged commit is the GREEN commit 6f75307.
+executed_by:
+  runner: soft-foundry phase run
+  shell: grok
+  fresh_context: true
+  started_at: '2026-10-08T00:14:10Z'
+  finished_at: '2026-10-08T00:21:49Z'
+  exit_status: 0
+  previous_phase: review
+  session_id: d4dda801-857e-4bde-9da6-cd364694ddbe
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

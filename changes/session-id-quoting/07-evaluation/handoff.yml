@@ -1,0 +1,24 @@
+---
+phase: 07-evaluation
+skill: evaluation
+status: complete
+commit_sha: 6f753070e06ed9eb74b9744541b409429f81afa8
+started_at: '2026-10-07T23:57:00Z'
+completed_at: '2026-10-07T23:59:26Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+- evaluation-plan.md
+- journeys.yml
+- results.md
+- evidence/manifest.yml
+blocking: []
+findings:
+- id: EVAL-OBS-001
+  severity: minor
+  summary: sessions says 0 recorded when every line is untrusted.
+next: attack
+notes: Performed by the interactive session that implemented the change.
+executed_by:
