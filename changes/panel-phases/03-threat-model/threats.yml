@@ -1,0 +1,26 @@
+threats:
+  - id: THREAT-001
+    requirements: [REQ-PN-002, REQ-PN-003]
+    category: injection
+    attacker: a member session, or content a member read and repeated
+    goal: steer another member through instructions in a draft or in ARGUMENT.md
+  - id: THREAT-002
+    requirements: [REQ-PN-007]
+    category: authorization
+    attacker: a member session
+    goal: write outside its own folder, read a sibling's draft early, or alter earlier evidence
+  - id: THREAT-003
+    requirements: [REQ-PN-001]
+    category: injection
+    attacker: whoever types the command, or a script building it
+    goal: reach a path or command through a member name or shell value
+  - id: THREAT-004
+    requirements: [REQ-PN-003]
+    category: replay
+    attacker: a member session
+    goal: forge agreement by writing another member's section or agree line
+  - id: THREAT-005
+    requirements: [REQ-PN-001, REQ-PN-009]
+    category: resource_exhaustion
+    attacker: a mistaken or hostile invocation
+    goal: run unbounded rounds or members

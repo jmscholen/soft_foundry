@@ -1,0 +1,22 @@
+# worktree at RED commit 2ca6ff292b040f8fa9747d29b1d7b658d8974168
+  1) Failure:
+PanelRemediationTest#test_a_failed_consensus_fails_the_command [test/panel_remediation_test.rb:33]:
+  2) Failure:
+PanelRemediationTest#test_shell_commands_cannot_write_around_the_stage [test/panel_remediation_test.rb:127]:
+  3) Failure:
+PanelRemediationTest#test_independent_drafts_are_written_outside_the_repository_then_copied_in [test/panel_remediation_test.rb:79]:
+  4) Failure:
+PanelRemediationTest#test_a_draft_changed_after_the_independent_round_spoils_the_panel [test/panel_remediation_test.rb:159]:
+  5) Failure:
+PanelRemediationTest#test_the_guard_lets_an_independent_member_write_only_its_own_draft_folder [test/panel_remediation_test.rb:98]:
+  6) Failure:
+PanelRemediationTest#test_members_that_write_no_draft_fail_the_panel_rather_than_split_it [test/panel_remediation_test.rb:45]:
+  7) Failure:
+PanelRemediationTest#test_refusals_and_the_dry_run_say_what_they_are [test/panel_remediation_test.rb:180]:
+  8) Failure:
+PanelRemediationTest#test_the_consensus_prompt_does_not_carry_the_agreed_text_as_an_instruction [test/panel_remediation_test.rb:170]:
+  9) Failure:
+PanelRemediationTest#test_unknown_tools_naming_another_members_files_are_refused_in_the_independent_stage [test/panel_remediation_test.rb:112]:
+PanelRemediationTest#test_every_shell_is_found_before_any_member_starts [test/panel_remediation_test.rb:67]:
+PanelRemediationTest#test_the_consensus_stage_may_not_touch_the_panel_folder [test/panel_remediation_test.rb:142]:
+23 runs, 127 assertions, 11 failures, 0 errors, 0 skips

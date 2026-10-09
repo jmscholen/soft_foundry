@@ -4,6 +4,7 @@ require "yaml"
 require "date"
 require_relative "change_record"
 require_relative "learning"
+require_relative "panel"
 require_relative "content_scan"
 
 module SoftFoundry
@@ -43,6 +44,7 @@ module SoftFoundry
       "red evidence" => "Each test named with a red_commit existed before the implementation and code changed after it.",
       "instincts valid" => "The instincts the learning phase recorded are well formed.",
       "findings explained" => "Every review finding above minor names the failure it prevents.",
+      "panel recorded" => "A phase run as a panel has a draft per member, a non-empty ARGUMENT.md, an outcome, and every draft cited in its outputs.",
       "content clean" => "The phase's files carry no invisible text or secret-shaped strings."
     }.freeze
 
@@ -59,6 +61,7 @@ module SoftFoundry
       names << "red evidence" if phase.id == "verify"
       names << "instincts valid" if phase.id == "learn"
       names << "findings explained" if phase.id == "review"
+      names << "panel recorded" if plane.panel_phases.include?(phase)
       names << "content clean"
     end
 
@@ -107,6 +110,7 @@ module SoftFoundry
         checks << red_evidence_check(phase, handoff) if phase.id == "verify"
         checks << instincts_check if phase.id == "learn"
         checks << findings_explained_check(handoff) if phase.id == "review"
+        checks << panel_check(phase, handoff) if handoff["panel"].is_a?(Hash)
         checks << content_check(phase)
       end
       Result.new(phase:, status:, checks:)
@@ -165,6 +169,31 @@ module SoftFoundry
       missing = findings.select { |f| f["failure"].to_s.strip.empty? }.map { |f| f["id"] || "(no id)" }
       return Check.new("findings explained", :fail, "no failure: on #{missing.join(', ')}; every finding above minor names the concrete input or state and the wrong result it leads to, or it is minor") unless missing.empty?
       Check.new("findings explained", :pass, "#{findings.size} #{findings.size == 1 ? 'finding above minor names its' : 'findings above minor name their'} failure")
+    end
+
+    # A phase run as a panel (`panel:` in its handoff, written by the
+    # runner) must show the panel's work: a draft per member, the
+    # argument, an outcome, and the drafts cited in the phase's outputs.
+    # Structure only, like every gate check.
+    def panel_check(phase, handoff)
+      panel = handoff["panel"]
+      dir = @record.phase_dir(phase)
+      members = Array(panel["members"]).filter_map { |m| m["name"].to_s if m.is_a?(Hash) }.select { |n| n.match?(Panel::NAME) }
+      problems = []
+      problems << "fewer than two members recorded" if members.size < 2
+      members.each do |name|
+        folder = File.join(dir, "panel", name)
+        problems << "panel/#{name}/ has no draft" unless File.directory?(folder) && Dir.glob("**/*", base: folder).any? { |f| File.file?(File.join(folder, f)) && File.size(File.join(folder, f)).positive? }
+      end
+      argument = File.join(dir, "panel", "ARGUMENT.md")
+      problems << "panel/ARGUMENT.md is missing" unless File.file?(argument)
+      problems << "panel/ARGUMENT.md is empty" if File.file?(argument) && File.read(argument).strip.empty?
+      problems << "outcome is '#{panel['outcome']}', not agreed or split" unless %w[agreed split].include?(panel["outcome"].to_s)
+      outputs = Dir.glob("**/*", base: dir).reject { |f| f.start_with?("panel/") || f == "handoff.yml" }.map { |f| File.join(dir, f) }.select { |f| File.file?(f) }
+      text = outputs.map { |f| File.read(f) }.join("\n")
+      members.each { |name| problems << "panel/#{name}/ is not cited in the phase's outputs" unless text.include?("panel/#{name}/") }
+      return Check.new("panel recorded", :fail, problems.join("; ")) unless problems.empty?
+      Check.new("panel recorded", :pass, "#{members.size} members, #{panel['rounds']} #{panel['rounds'].to_i == 1 ? 'round' : 'rounds'}, #{panel['outcome']}")
     end
 
     # The learning phase's instincts must be well-formed to be promotable:

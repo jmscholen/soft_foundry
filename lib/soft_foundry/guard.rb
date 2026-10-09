@@ -7,6 +7,7 @@ require "fileutils"
 require_relative "control_plane"
 require_relative "change_record"
 require_relative "git"
+require_relative "panel"
 
 module SoftFoundry
   # Runtime enforcement of a skill's declared permissions: a PreToolUse
@@ -57,10 +58,11 @@ module SoftFoundry
       [DEFAULT_MODE, "default"]
     end
 
-    def initialize(root, plane: ControlPlane.new(root), git: Git.new(root))
+    def initialize(root, plane: ControlPlane.new(root), git: Git.new(root), env: ENV)
       @root = File.expand_path(root)
       @plane = plane
       @git = git
+      @env = env
     end
 
     # The change and skill whose permissions apply right now, or nil with
@@ -88,7 +90,18 @@ module SoftFoundry
     end
 
     # Decides one tool call. `tool_input` is the hook payload's tool_input.
+    # A panel member's session (SOFT_FOUNDRY_PANEL_MEMBER and _STAGE, set by
+    # `phase run --panel`) is narrowed further, never widened.
     def decide(tool_name, tool_input)
+      if (staged = own_draft_write(tool_name, tool_input))
+        return staged
+      end
+      decision = decide_by_skill(tool_name, tool_input)
+      return decision if decision.violation?
+      narrow_for_panel(tool_name, tool_input, decision)
+    end
+
+    def decide_by_skill(tool_name, tool_input)
       record, skill, why = active
       return Decision.new(outcome: :allow, reason: why, skill: nil, paths: []) unless skill
 
@@ -139,6 +152,100 @@ module SoftFoundry
     end
 
     private
+
+    # The panel member and stage `phase run --panel` set for this session,
+    # or nil. A member name the runner does not make is ignored, not trusted.
+    def panel_context
+      member = @env[Panel::MEMBER_ENV].to_s
+      stage = @env[Panel::STAGE_ENV].to_s
+      return nil unless member.match?(Panel::NAME) && Panel::STAGES.include?(stage)
+      record, = active
+      phase = record && @plane.phase(record.metadata["current_phase"].to_s)
+      return nil unless phase
+      phase_dir = "changes/#{record.slug}/#{phase.output}/"
+      draft = @env[Panel::DRAFT_ENV].to_s
+      { member: member, stage: stage, skill: record && active[1]&.name, phase_dir: phase_dir, base: "#{phase_dir}panel/",
+        own: "#{phase_dir}panel/#{member}/", argument: "#{phase_dir}panel/ARGUMENT.md",
+        draft: draft.empty? ? nil : File.expand_path(draft) }
+    end
+
+    # In the independent stage a member writes its draft outside the
+    # repository, in the folder the runner named; that write is allowed
+    # here, before the skill's rule that nothing outside the repository
+    # may be written.
+    def own_draft_write(tool_name, tool_input)
+      return nil unless WRITE_TOOLS.include?(tool_name)
+      ctx = panel_context
+      return nil unless ctx && ctx[:stage] == "independent" && ctx[:draft]
+      path = tool_input["file_path"].to_s
+      return nil if path.empty?
+      abs = File.expand_path(path, @root)
+      return nil unless abs.start_with?("#{ctx[:draft]}/")
+      Decision.new(outcome: :allow, reason: "panel member #{ctx[:member]}'s own draft folder", skill: ctx[:skill], paths: [abs])
+    end
+
+    # Independent stage: write only the member's own draft, and name no
+    # other member's draft, ARGUMENT.md, or the phase's own files, with any
+    # tool. Argument stage: write only ARGUMENT.md, and touch nothing else
+    # in the phase folder from the shell. Consensus stage: the drafts and
+    # the argument are frozen. Narrowing never widens a skill decision.
+    def narrow_for_panel(tool_name, tool_input, decision)
+      ctx = panel_context
+      return decision unless ctx
+      member, stage = ctx.values_at(:member, :stage)
+      writes = WRITE_TOOLS.include?(tool_name) || PATCH_TOOLS.include?(tool_name)
+      shell = SHELL_TOOLS.include?(tool_name)
+      named = (decision.paths + mentioned_paths(tool_input)).uniq
+      foreign_draft = ->(p) { p.start_with?(ctx[:base]) && !p.start_with?(ctx[:own]) }
+      staged_elsewhere = ->(p) { p.include?(Panel::STAGING_PREFIX) && !(ctx[:draft] && File.expand_path(p, @root).start_with?("#{ctx[:draft]}/")) }
+      bad, why =
+        case stage
+        when "independent"
+          if writes
+            [decision.paths, "panel member #{member} may write only its own draft folder outside the repository in the independent stage"]
+          elsif shell
+            [named.select { |p| p.start_with?(ctx[:phase_dir]) || staged_elsewhere.call(p) }, "panel member #{member} may not touch the phase's files from the shell in the independent stage"]
+          else
+            [named.select { |p| foreign_draft.call(p) || staged_elsewhere.call(p) || (p.start_with?(ctx[:phase_dir]) && !p.start_with?(ctx[:base]) && !READ_TOOLS.include?(tool_name)) },
+             "panel member #{member} may not read another member's draft or ARGUMENT.md in the independent stage"]
+          end
+        when "argument"
+          if writes
+            [decision.paths.reject { |p| p == ctx[:argument] }, "panel member #{member} may write only #{ctx[:argument]} in the argument stage"]
+          elsif shell
+            [named.select { |p| p.start_with?(ctx[:phase_dir]) && p != ctx[:argument] }, "panel member #{member} may touch only #{ctx[:argument]} from the shell in the argument stage; read drafts with the read tool"]
+          else
+            [[], nil]
+          end
+        else
+          if writes
+            [decision.paths.select { |p| p.start_with?(ctx[:base]) }, "the drafts and ARGUMENT.md are frozen in the consensus stage"]
+          elsif shell
+            [named.select { |p| p.start_with?(ctx[:base]) }, "the drafts and ARGUMENT.md are frozen in the consensus stage; read them with the read tool"]
+          else
+            [[], nil]
+          end
+        end
+      return decision if bad.empty?
+      Decision.new(outcome: :violation, reason: why, skill: decision.skill, paths: bad)
+    end
+
+    # Repository-relative forms of every string in a tool's input that names
+    # a path (a path, a glob, a search root), for tools the guard does not
+    # otherwise know. Absolute paths outside the repository are kept as is.
+    def mentioned_paths(tool_input)
+      strings = []
+      walk = ->(v) { v.is_a?(Hash) ? v.each_value { |x| walk.call(x) } : v.is_a?(Array) ? v.each { |x| walk.call(x) } : (strings << v if v.is_a?(String)) }
+      walk.call(tool_input)
+      strings.filter_map do |text|
+        next if text.include?("\n") || text.length > 4096
+        next unless text.include?("/")
+        candidate = text.strip
+        rel = relative(candidate)
+        rel = "#{rel}/" if rel && File.directory?(File.join(@root, rel.to_s)) && !rel.end_with?("/")
+        rel
+      end
+    end
 
     def violation(skill, paths, reason)
       Decision.new(outcome: :violation, reason: reason, skill: skill.name, paths: paths)
