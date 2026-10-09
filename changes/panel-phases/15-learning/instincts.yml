@@ -1,0 +1,19 @@
+# Instincts: what this change taught, as reusable one-line triggers with an
+# action, a confidence score, and evidence in this record.
+instincts:
+- id: observe-results-not-commands
+  trigger: when enforcing what an untrusted agent step may change
+  action: snapshot what you can see before and after the step and compare, rather than parsing the step's commands for paths
+  confidence: 0.85
+  domain: security
+  evidence:
+  - finding: REV-SEC-005
+  - path: changes/panel-phases/09-remediation/summary.md
+- id: name-the-agent-trust-boundary-first
+  trigger: when a change launches coding-shell sessions that act on the repository
+  action: state in the threat model what those sessions are trusted not to do and what the tool observes, before review
+  confidence: 0.8
+  domain: security
+  evidence:
+  - finding: REV-SEC-011
+  - path: changes/panel-phases/14-judgment/residual-risk.md

@@ -1,0 +1,6 @@
+# worktree at RED commit f638ea423bae917e2e8b404725d2ee0a05b6ded1
+  1) Failure:
+PanelRemediationTest#test_a_claude_member_may_write_its_draft_folder [test/panel_remediation_test.rb:193]:
+  2) Failure:
+PanelPhasesTest#test_shell_args_reach_only_their_shell [test/panel_phases_test.rb:299]:
+24 runs, 152 assertions, 2 failures, 0 errors, 0 skips

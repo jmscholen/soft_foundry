@@ -1,0 +1,19 @@
+---
+phase: 00-intake
+skill: intake
+status: complete
+commit_sha: fb423b9d0933d23c478fea9f7796e2fa00820747
+started_at: '2026-10-08T02:54:18Z'
+completed_at: '2026-10-08T02:54:18Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+- request.md
+- assumptions.md
+blocking: []
+findings: []
+next: discover
+notes: Performed by the interactive session.
+executed_by:

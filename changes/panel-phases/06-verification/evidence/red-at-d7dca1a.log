@@ -1,0 +1,20 @@
+# worktree at RED commit d7dca1a65a294ee5642d4e5c081a126cd03243f0
+  1) Failure:
+PanelRemediationTest#test_a_draft_replaced_during_the_argument_fails_the_run_even_if_a_later_round_agrees [test/panel_remediation_test.rb:259]:
+  2) Failure:
+PanelRemediationTest#test_a_failed_split_is_not_parked [test/panel_remediation_test.rb:358]:
+  3) Failure:
+PanelRemediationTest#test_an_argument_stage_dotfile_in_the_phase_folder_fails_the_run [test/panel_remediation_test.rb:318]:
+  4) Failure:
+PanelRemediationTest#test_writes_outside_the_phase_folder_fail_the_run_in_every_stage [test/panel_remediation_test.rb:307]:
+  5) Failure:
+PanelRemediationTest#test_a_repository_write_during_the_independent_stage_fails_the_run [test/panel_remediation_test.rb:210]:
+  6) Failure:
+PanelRemediationTest#test_an_in_repository_draft_during_the_independent_stage_fails_the_run [test/panel_remediation_test.rb:230]:
+  7) Failure:
+PanelRemediationTest#test_identical_drafts_fail_the_panel [test/panel_remediation_test.rb:336]:
+  8) Failure:
+PanelRemediationTest#test_an_argument_stage_write_to_the_handoff_fails_the_run [test/panel_remediation_test.rb:294]:
+  9) Failure:
+PanelRemediationTest#test_a_draft_changed_after_the_independent_round_spoils_the_panel [test/panel_remediation_test.rb:160]:
+34 runs, 190 assertions, 9 failures, 0 errors, 0 skips

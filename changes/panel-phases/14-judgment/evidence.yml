@@ -1,0 +1,149 @@
+commit_judged: 625e0da60e7c33ded16566366a68e661e764522f
+phases:
+  - phase: 00-intake
+    commit_sha: fb423b9d0933d23c478fea9f7796e2fa00820747
+    current: true
+    result: complete
+    note: "REQ-PN-001..010 are the requirements. Specify was skipped, so this file is the spec. Gate ok."
+  - phase: 01-discovery
+    commit_sha: null
+    current: true
+    result: skipped
+    note: "Pending with a skipped_phases rationale. Layout unchanged since session-ledger. Not missing evidence."
+  - phase: 02-specification
+    commit_sha: null
+    current: true
+    result: skipped
+    note: "Pending with a skipped_phases rationale. Intake IDs are the requirements. Leaves the accessibility go-live advisory. Not a failed criterion."
+  - phase: 03-threat-model
+    commit_sha: fb423b9d0933d23c478fea9f7796e2fa00820747
+    current: true
+    result: complete
+    note: "THREAT-001..005 and MIT-001..005. MIT-002 still names the guard. The code's authority for shell writes is the snapshot, which does not close THREAT-002 for REV-SEC-012..014. The file was not revised; judgment does not edit it. Gate ok."
+  - phase: 04-plan
+    commit_sha: null
+    current: true
+    result: skipped
+    note: "Pending with a skipped_phases rationale. 05-implementation/log.md is the plan record. Not missing evidence."
+  - phase: 05-implementation
+    commit_sha: d1cf0d618b8157ab8ff24bfa6379b654a0f47da2
+    current: false
+    result: complete
+    note: "Not current for every code path. REM-001, REM-002, and REM-003 changed the panel code through 4f3b2da. Later phases re-ran there. Not commit-bound, so the gate does not mark it stale. Gate ok. Deviations 1..3 recorded."
+  - phase: 06-verification
+    commit_sha: 4f3b2dadb445605f059bc1ff942d0de183d35044
+    current: true
+    result: complete
+    note: "Fourth run, after REM-003. No lib, exe, test, spec, or infra diff from 4f3b2da to 625e0da. CHECK-001 passed (515 runs, 3419 assertions, 0 failures). RED commits 553030c, 2ca6ff2, f638ea4, f69d6f2, d7dca1a. Gate ok."
+  - phase: 07-evaluation
+    commit_sha: 4f3b2dadb445605f059bc1ff942d0de183d35044
+    current: true
+    result: complete
+    note: "Fourth run. Live Claude and Grok panel. EVAL-001..004 passed. EVAL-OBS-001 is REV-FUN-007. Split, Codex, and four members not run live. Same empty code diff. Gate ok."
+  - phase: 08-attack
+    commit_sha: 4f3b2dadb445605f059bc1ff942d0de183d35044
+    current: true
+    result: complete
+    note: "Fourth run. ATTACK-002..008 denied. ATTACK-001 not run live. Does not cover REV-SEC-012..015; the fourth review did. Run by the implementing session. Same empty code diff. Gate ok."
+  - phase: 09-remediation
+    commit_sha: 4f3b2dadb445605f059bc1ff942d0de183d35044
+    current: true
+    result: complete
+    note: "REM-001..003. Optional phase that ran. Required reruns of verify, evaluate, and attack were done at this commit. REV-SEC-009 left as the unsandboxed residual. Gate ok."
+  - phase: 10-user-documentation
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Optional and not started. REQ-PN-010 is met by README, help, schemas, and human-boundaries. The README overclaim is residual risk, not a missing phase."
+  - phase: 11-faq-index
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Optional and not started. No separate FAQ was required once REQ-PN-010's README and help text existed."
+  - phase: 12-observability
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Optional and not started. surfaces.observability is false. No deployed service. The false pass on REV-SEC-012..015 is residual risk in the CLI detector, not a missing alarm."
+  - phase: 13-review
+    commit_sha: 661b454458508391ba341fea32c5bcb6668d20e8
+    current: true
+    result: complete
+    note: "Fourth review. No blocking findings. No code diff from 661b454 to 625e0da. Five majors carried in unresolved_findings. Provider xAI, different from the Anthropic implement and remediate sessions. Gate ok."
+# Acceptance criteria or judgment conditions left unsatisfied pending a
+# real-world event (production observation, etc.) rather than more
+# repository evidence. soft-foundry change close refuses to close this
+# change while any id here lacks a human confirmation.
+undischarged: []
+discharged: []
+unresolved_findings:
+  - id: REV-SEC-011
+    severity: major
+    phase: 13-review
+    disposition: acceptable_residual_risk
+    summary: "Temp-directory one-byte copy still completes as agreed. Disclosed unsandboxed limit. Accepted, not closed."
+  - id: REV-SEC-012
+    severity: major
+    phase: 13-review
+    disposition: acceptable_residual_risk
+    summary: "Detached child writes a tracked file after Process.wait returns. Success line already printed. Accepted, not closed."
+  - id: REV-SEC-013
+    severity: major
+    phase: 13-review
+    disposition: acceptable_residual_risk
+    summary: "Executable .git/hooks/pre-commit is invisible to the snapshot and to argument-stage shell narrowing. Accepted, not closed."
+  - id: REV-SEC-014
+    severity: major
+    phase: 13-review
+    disposition: acceptable_residual_risk
+    summary: "Gitignored .soft-foundry/enforcement.yml with quoted mode off disables the guard. Accepted, not closed."
+  - id: REV-SEC-015
+    severity: major
+    phase: 13-review
+    disposition: acceptable_residual_risk
+    summary: "Caught write stays on disk. A second panel run treats it as the baseline and exits 0. Rerun refusal owed to a follow-up."
+  - id: REV-SEC-016
+    severity: minor
+    phase: 13-review
+    disposition: acceptable_residual_risk
+    summary: "Failure path merges the planted handoff, so findings written by the member survive under the blocked status."
+  - id: REV-FUN-007
+    severity: minor
+    phase: 13-review
+    disposition: acceptable_residual_risk
+    summary: "agree: is not held to one sentence. Seen live as EVAL-OBS-001."
+  - id: REV-FUN-008
+    severity: minor
+    phase: 13-review
+    disposition: acceptable_residual_risk
+    summary: "Deleting ARGUMENT.md prints a path error with no fail word and leaves the handoff pending."
+  - id: REV-FUN-009
+    severity: minor
+    phase: 13-review
+    disposition: acceptable_residual_risk
+    summary: "Consensus-stage stray write blocks the run but leaves panel.outcome agreed or split."
+  - id: REV-FUN-002
+    severity: minor
+    phase: 13-review
+    disposition: acceptable_residual_risk
+    summary: "--shell-arg has no RED commit of its own."
+  - id: REV-ARCH-001
+    severity: minor
+    phase: 13-review
+    disposition: acceptable_residual_risk
+    summary: "checks_for lists panel recorded for every panel phase. evaluate runs it only when the handoff has a panel block."
+  - id: REV-ARCH-002
+    severity: minor
+    phase: 13-review
+    disposition: acceptable_residual_risk
+    summary: "Control-plane and README writes are outside the implementation write set. Accepted because the requirements demand them."
+  - id: ATK-RES-001
+    severity: minor
+    phase: 08-attack
+    disposition: acceptable_residual_risk
+    summary: "A malformed SOFT_FOUNDRY_PANEL_MEMBER skips narrowing. The runner sets the variable."
+  - id: ATTACK-001
+    severity: info
+    phase: 08-attack
+    disposition: acceptable_residual_risk
+    summary: "Inter-agent instruction injection was not run against a live model. Prompts and the guard are the mitigation. Not demonstrated."

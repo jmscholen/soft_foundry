@@ -1,0 +1,24 @@
+---
+phase: 15-learning
+skill: learning
+status: complete
+commit_sha: 625e0da60e7c33ded16566366a68e661e764522f
+started_at: '2026-10-08T17:48:43Z'
+completed_at: '2026-10-08T17:48:43Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+- findings.md
+- proposed-rules.md
+- proposed-evals.md
+- instincts.yml
+blocking: []
+findings:
+- id: PROP-001
+  severity: minor
+  summary: State agent-session trust boundaries in threat models.
+next: done
+notes: Performed by the interactive session. Proposals are not applied here.
+executed_by:

@@ -1,0 +1,36 @@
+---
+phase: '09-remediation'
+skill: remediation
+status: complete
+commit_sha: 4f3b2dadb445605f059bc1ff942d0de183d35044
+started_at: '2026-10-08T03:40:00Z'
+completed_at: '2026-10-08T13:54:27Z'
+resolved_model:
+  profile: coding_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+- summary.md
+blocking: []
+findings:
+- id: REM-001
+  severity: major
+  summary: REV-FUN-001 and REV-SEC-001..003 fixed; verify, evaluate, attack, review
+    rerun.
+  failure: before the fix, a crashed consensus exited 0, shell commands and Grep escaped
+    stage narrowing, and the consensus writer could replace the drafts the gate cites
+- id: REM-002
+  severity: major
+  summary: REV-SEC-004..006 fixed by runner-side fingerprints and an outside-only
+    independent stage.
+  failure: before the fix, a shell command hiding a path in a variable could replace
+    another member's draft and a later round could still agree over it
+- id: REM-003
+  severity: major
+  summary: 'REV-SEC-007, -008, -010 fixed by repository-wide snapshots; REV-SEC-009
+    mitigated (identical drafts fail), residual: no OS sandbox.'
+  failure: before the fix, a shell write to the handoff, an earlier phase, or application
+    code during the argument went unnoticed and the panel completed as agreed
+next: verify
+notes: Performed by the interactive session.
+executed_by:

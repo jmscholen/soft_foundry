@@ -22,6 +22,7 @@ Created from `.ai/templates/handoff.yml`. Field semantics:
 | `blocking` | Must be empty when `complete`. Non-empty forces `blocked`. |
 | `findings` | Items handed to downstream phases. Each has `id`, `severity`, `summary`. |
 | `next` | Lifecycle id the workflow proceeds to. |
+| `panel` | Written only by `soft-foundry phase run --panel`: `members` (each `name`, `shell`, `provider`, `session_id`), `rounds`, `max_rounds`, `outcome` (`agreed` or `split`), `agreed` (the agreed sentence), `notes`. Present only when the phase ran as a panel. |
 | `executed_by` | Written only by `soft-foundry phase run`: `runner`, `shell`, `fresh_context: true`, `started_at`, `finished_at`, `exit_status`, `previous_phase`, `session_id` (the coding session, chosen up front for Claude Code and Grok, taken from the session ledger for Codex, or null), and `cwd` (the folder it ran in, for resuming it). `null` when the phase was worked by whatever session was open. A review or judgment completed without it draws an advisory. |
 
 `surfaces.accessibility: true` means a person perceives or operates the result (UI, CLI output, a document). `change new` sets it when `.ai/repository.yml` records a user-facing framework. It selects `.ai/rules/accessibility.md` for implementation and review, and enables the accessibility go-live advisories.
@@ -43,6 +44,7 @@ Created from `.ai/templates/handoff.yml`. Field semantics:
 - After `change vet`, the specification phase carries a `specification locked` check that fails when anything under `02-specification/` changed since the vetted commit, including uncommitted edits.
 - Every complete phase carries a `content clean` check over the files in its directory: invisible Unicode and secret-shaped strings fail it, instruction-override phrases and fetch-and-execute commands warn (a record may quote an attack it found), and `.ai/policies/content-scan.yml` or an in-line `soft-foundry:scan-allow` marker exempts all but invisible text.
 - The review phase carries a `findings explained` check over its handoff's `findings`: every finding whose severity is not `minor` (blocking, major, or any other word, or none) needs a non-empty `failure:` (the concrete input or state and the wrong result it leads to). Structure only: the gate does not judge whether the failure is real. Minor findings need none.
+- A phase whose handoff has a `panel:` block carries a `panel recorded` check: at least two members, a non-empty draft under `panel/<member>/` for each, a non-empty `panel/ARGUMENT.md`, an `outcome` of `agreed` or `split`, and every `panel/<member>/` path cited in the phase's own files.
 - The learning phase carries an `instincts valid` check over `15-learning/instincts.yml`: every entry needs a kebab-case unique `id`, a `trigger`, an `action`, a numeric `confidence` in 0..1, and non-empty `evidence`; an empty list passes.
 - The verification phase carries a `red evidence` check over the checks in `06-verification/tests.yml` that name a `red_commit` (optionally with `test_path`): each must be a commit that precedes `commit_sha`, hold the test file, and be followed by an `APP` or `INFRA` change before `commit_sha`. Checks without `red_commit` are skipped; the test is not re-run at the RED commit.
 
@@ -53,6 +55,7 @@ A stale or failed gate must be resolved by rerunning the phase, never by editing
 `soft-foundry gate`, `change status`, `ci`, and `change close` print an `advisory:` block after the gate results when something a person should know about before the change ships is missing. Advisories are informational: they never change the exit code or block a phase. Today they cover:
 
 - the review or judge phase waived through `skipped_phases`, with the rationale given;
+- a phase run as a panel whose members all ran on one provider;
 - a completed review or judgment that ran on the same provider as a phase its skill names in `prefer_different_provider_from` (`implement` and `remediate` for both): the provider is the handoff's `resolved_model.provider`, else the shell in `executed_by`;
 - a feature, fix, or refactor whose completed verification has no check naming a `red_commit` (no failing-test-first evidence);
 - a change on a track with an exploring stage in a repository whose profile records no `development` environment under `environments:` (`NOT_APPLICABLE` with a rationale is a valid answer);
