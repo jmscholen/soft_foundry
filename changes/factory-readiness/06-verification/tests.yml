@@ -1,15 +1,34 @@
-commit_sha: TBD
+commit_sha: 776b64080523aa25e272a40b6d892035546e2a48
 checks:
   - id: CHECK-001
-    kind: tests   # tests | lint | static_analysis | security_scan | iac_validate | migration_check | custom
-    command: TBD
-    result: TBD   # pass | fail | error | skipped
-    evidence: evidence/TBD
-    criteria: [AC-001]
-    # Optional, per check: the commit at which this test existed and failed
-    # (RED) and the test file. The gate verifies red_commit is a commit that
-    # precedes commit_sha, holds test_path, and that APP or INFRA code changed
-    # after it. A feature, fix, or refactor with no red_commit on any check is
-    # advised as having no failing-test-first evidence.
-    # red_commit: TBD
-    # test_path: TBD
+    kind: tests
+    command: ruby -Ilib -Itest -e 'Dir["test/**/*_test.rb"].sort.each{|f| require "./"+f}'
+    result: pass
+    evidence: evidence/test-suite.txt
+    criteria: [AC-FR-001, AC-FR-002, AC-FR-003, AC-FR-004, AC-FR-005, AC-FR-006, AC-FR-007, AC-FR-008, AC-FR-009, AC-FR-010, AC-FR-011, AC-FR-012, AC-FR-013, AC-FR-014, AC-FR-016, AC-FR-017, AC-FR-018, AC-FR-019, AC-FR-020]
+    red_commit: 26497a4
+    test_path: test/factory_readiness_test.rb
+  - id: CHECK-002
+    kind: tests
+    command: LANG=C LC_ALL=C, same suite
+    result: pass
+    evidence: evidence/test-suite-c-locale.txt
+    criteria: [AC-FR-001]
+  - id: CHECK-003
+    kind: static_analysis
+    command: soft-foundry check
+    result: pass
+    evidence: evidence/check.txt
+    criteria: [AC-FR-011, AC-FR-018]
+  - id: CHECK-004
+    kind: custom
+    command: soft-foundry eval
+    result: pass
+    evidence: evidence/eval.txt
+    criteria: [AC-FR-009]
+  - id: CHECK-005
+    kind: custom
+    command: soft-foundry ci
+    result: pass
+    evidence: evidence/ci.txt
+    criteria: [AC-FR-009]

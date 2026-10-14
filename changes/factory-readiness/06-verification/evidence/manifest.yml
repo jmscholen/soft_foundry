@@ -1,5 +1,17 @@
-commit_sha: TBD
+commit_sha: 776b64080523aa25e272a40b6d892035546e2a48
 artifacts:
-  - path: TBD
-    produced_by: TBD
-    sha256: TBD
+  - path: test-suite.txt
+    produced_by: ruby -Ilib -Itest (every test file loaded, minitest)
+    sha256: b0d99f774dc0cab4f7adf9be4ea98d47439f2ea827e9173348a4e042bf0c42b3
+  - path: test-suite-c-locale.txt
+    produced_by: same suite under LANG=C LC_ALL=C
+    sha256: 74f7e8decd22493d344b195867487ce74460842c781be24e70cbd0da9e3f7886
+  - path: check.txt
+    produced_by: soft-foundry check
+    sha256: f0cc91f46a6435afba747c4c46342051398613f85a6ec6958d80700e7053b6b9
+  - path: eval.txt
+    produced_by: soft-foundry eval
+    sha256: 43c40d30394d04e19bf3de385ad4a0399d6dba8a1e8b2b5085d959bb671ff3bf
+  - path: ci.txt
+    produced_by: soft-foundry ci
+    sha256: 5930cd6f6c66b259bc3dbcb45a65f5530bae317cd72679a775a60e5111e8b98c
