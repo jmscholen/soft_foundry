@@ -84,6 +84,18 @@ module SoftFoundry
       ok ? out.lines(chomp: true).uniq.sort : []
     end
 
+    # The newest commit that touched `path`, or nil when no commit has.
+    def last_commit_for(path)
+      out, ok = run("log", "-1", "--format=%H", "--", path)
+      ok && !out.strip.empty? ? out.strip : nil
+    end
+
+    # The contents of `path` at commit `sha`, or nil when absent there.
+    def blob(sha, path)
+      out, ok = run("show", "#{sha}:#{path}")
+      ok ? out : nil
+    end
+
     # The commit a branch points at: local first, then origin's copy, so a
     # CI checkout that fetched every branch still finds it. Nil if neither.
     def branch_tip(name)
