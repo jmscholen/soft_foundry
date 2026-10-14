@@ -3,13 +3,68 @@
 # learn list` shows them across every record; `learn promote` copies those
 # at or above the threshold in .ai/policies/learning.yml into
 # .ai/rules/learned.md, and only through a change record on a change
-# branch, never by the change that learned them. An empty list is a valid
-# answer; a malformed entry fails the learning gate.
-instincts: []
-# - id: kebab-case-unique-id
-#   trigger: when ... (the situation an agent will recognise)
-#   action: do ... (one thing, imperative)
-#   confidence: 0.8          # 0.0 to 1.0; promotion threshold is policy
-#   domain: testing          # git | testing | security | review | ...
-#   evidence:
-#     - finding: REV-001     # a finding id, phase, or path in this record
+# branch, never by the change that learned them.
+instincts:
+- id: run-the-lifecycle-in-block-mode-before-trusting-a-warn-mode-control
+  trigger: when a guard, lint, or hook has been running in a mode that reports but allows
+  action: switch it to refuse and run one full lifecycle under it before calling it a control; what it had only been reporting is the first finding
+  confidence: 0.9
+  domain: security
+  evidence:
+  - finding: REM-001
+  - path: changes/factory-readiness/06-verification/results.md
+- id: back-a-name-based-check-with-a-state-check
+  trigger: when a control decides by recognising path names in free text such as a shell command
+  action: do not add another spelling to the parser; record the state the names protect before the call and restore it after, then accept the remaining same-user routes as the sandbox residual
+  confidence: 0.85
+  domain: security
+  evidence:
+  - finding: ATK-F8
+  - path: changes/factory-readiness/09-remediation/summary.md
+- id: a-hook-decides-or-refuses-never-raises
+  trigger: when writing a hook whose refusal is one exit code and whose other exits the host treats as allow
+  action: rescue everything into a refusal; an exception is a fail-open
+  confidence: 0.9
+  domain: security
+  evidence:
+  - finding: ATK-F6
+  - path: changes/factory-readiness/08-attack/results.md
+- id: record-a-baseline-only-in-the-call-that-consumes-it
+  trigger: when a pre-call baseline and a post-call check protect a piece of state and only some tool calls have the post-call half
+  action: record the baseline only for the calls that have the check, and let the person's own commands clear it; otherwise the check reverts the person's edit between calls
+  confidence: 0.85
+  domain: design
+  evidence:
+  - finding: EVAL-F7
+  - path: changes/factory-readiness/09-remediation/summary.md
+- id: a-skill-may-name-what-it-may-read
+  trigger: when a skill's shell commands are checked against what it may not write and the skill must run tests or the tool over those paths
+  action: treat naming a readable path in a shell command as a read, refuse only what the skill may not read and what is protected, and let the gate's staleness check catch a write
+  confidence: 0.85
+  domain: governance
+  evidence:
+  - finding: REM-001
+  - path: changes/factory-readiness/09-remediation/summary.md
+- id: bind-waivers-to-risk-and-never-waive-the-verdict
+  trigger: when a lifecycle lets a required phase be waived with a sentence
+  action: list per declared risk what may be waived, make review and judgment unwaivable, refuse to close without a judgment, and plant the waived record as a harness eval so the refusal is measured
+  confidence: 0.9
+  domain: governance
+  evidence:
+  - finding: REQ-FR-007
+  - path: changes/factory-readiness/01-discovery/repository-context.md
+- id: build-invisible-and-secret-shapes-at-run-time
+  trigger: when a test fixture or an eval case needs an invisible character or a secret-shaped string
+  action: substitute a named token at run time; a literal in the file is decoded by the tool that writes it and refused by the scan that reads it
+  confidence: 0.8
+  domain: testing
+  evidence:
+  - path: changes/factory-readiness/05-implementation/log.md
+- id: let-the-runner-rerun-what-the-gate-calls-stale
+  trigger: when a remediation changes code after an evidence phase completed in a fresh session
+  action: let the phase runner accept a complete phase whose gate reports stale evidence instead of asking anyone to edit that phase's handoff
+  confidence: 0.8
+  domain: governance
+  evidence:
+  - finding: REM-001
+  - path: test/factory_readiness_test.rb
