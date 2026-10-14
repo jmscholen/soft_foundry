@@ -1,17 +1,23 @@
-commit_sha: fe9e40d0a820eba58770daa593d4c9a7a26ea206
+commit_sha: aa546508a3c41e30526664aac17bf113fdff2ec8
 artifacts:
 - path: evidence/cd-dotdot-downgrade.txt
   case: ATTACK-001
-  sha256: 250914dfbddb5df9f898e98c6dfe9264a70a50709e600578c1d61115e953f848
+  sha256: 005575640c983eb640b257807f2a51bfe9909b784d7548c1c67d65c4da5bc524
 - path: evidence/cd_dotdot_downgrade.rb
   case: ATTACK-001
   sha256: eace1a6d7f4efdb02b45750b453507468c91387fa2543e5da1419e426b57f9e8
 - path: evidence/guard-rerun.txt
   case: ATTACK-001
-  sha256: 1f904a7f74db7fadb155868d63b645cb5cc79b723830a25ffde58b709b3a44f2
+  sha256: 2ed325c4a39b246e40b5625e4e768d8597b63bf5784ca4ea35610b7f8ffc5ca4
 - path: evidence/guard_rerun.rb
   case: ATTACK-001
   sha256: 21549edfc57eff73c7ff215e9aa3eb8494fdbf70aeb6a20a6dd9d64aff207cc0
+- path: evidence/rem3-attack.txt
+  case: ATTACK-001
+  sha256: 14d298dae36a553b6b708b624c8be9495a02553d036d3932fa4beb735d88cf51
+- path: evidence/rem3_attack.rb
+  case: ATTACK-001
+  sha256: b3c7637eb8d1e27c29e84e76a775ac720cc88b7bae557dbfedd495cd7fc43ec9
 - path: evidence/eval-cap.txt
   case: ATTACK-002
   sha256: 9b7a79049ca260706b9bf0e301593862d733d6e7b214bac2c188a8e2c5e89116
@@ -29,10 +35,10 @@ artifacts:
   sha256: 9ed4dc45aaeb43ddb2984999f7f75ef4bafda006c518a69f2ced242fb430cd6d
 - path: evidence/rerun-eval-waiv-replay.txt
   case: ATTACK-004
-  sha256: 9c5d3342ca553b7147cdd2deb91b2466f54bb0849a39e986de6cee99e9a9ad63
+  sha256: 7307600f3e257b50dc03bae9ecd0c1f674015fef4479298b9c8c7d801b91908a
 - path: evidence/hook-failopen.txt
   case: ATTACK-008
-  sha256: 766b4a88d1ba6b2c73e6863c24f1614c5644e59834f1a12ba59f0227a7f2d5d4
+  sha256: 14fc22103f8fffb517e81f1bcf48c0b6c428b43bf62430cc3018abbf71c99e30
 - path: evidence/hook_failopen.rb
   case: ATTACK-008
   sha256: 1907501e1f25cb8c2c263d1d84f8b1b851cfd1c73af28706f49309b0b6db459b

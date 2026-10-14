@@ -12,22 +12,22 @@ DENIED  Write through symlink to policy: is the guard's own configuration; no sk
 ALLOWED Read through symlink to policy: not denied to implementation
 -- new routes
 DENIED  cd lib then cd ../.ai/policies: names the guard's own configuration; no skill may touch it from the shel
-ALLOWED chained cds with ; and ..: names no path denied to implementation
+DENIED  chained cds with ; and ..: names the guard's own configuration; no skill may touch it from the shel
 DENIED  subshell cd: names the guard's own configuration; no skill may touch it from the shel
 DENIED  pushd: names the guard's own configuration; no skill may touch it from the shel
 DENIED  newline-separated cds: names the guard's own configuration; no skill may touch it from the shel
 DENIED  cd - hop: names the guard's own configuration; no skill may touch it from the shel
 ALLOWED cd via $PWD: names no path denied to implementation
-RAISED  cd via ~+: ArgumentError: user + doesn't exist
+DENIED  cd via ~+: could not be decided (ArgumentError: user + doesn't exist); refusing it
 DENIED  git -C: names protected policy or harness material; no skill may touch it from t
 DENIED  env -C: names protected policy or harness material; no skill may touch it from t
 DENIED  make -C: names protected policy or harness material; no skill may touch it from t
 DENIED  glob in middle of dir: names the guard's own configuration; no skill may touch it from the shel
 DENIED  ? glob: names the guard's own configuration; no skill may touch it from the shel
 DENIED  bracket glob: names the guard's own configuration; no skill may touch it from the shel
-ALLOWED brace expansion: names no path denied to implementation
-ALLOWED brace expansion harness: names no path denied to implementation
-ALLOWED brace expansion split dot-ai: names no path denied to implementation
+DENIED  brace expansion: names the guard's own configuration; no skill may touch it from the shel
+DENIED  brace expansion harness: names protected policy or harness material; no skill may touch it from t
+DENIED  brace expansion split dot-ai: names protected policy or harness material; no skill may touch it from t
 ALLOWED cd with brace: names no path denied to implementation
 ALLOWED cmd subst: names no path denied to implementation
 ALLOWED variable: names no path denied to implementation
@@ -53,7 +53,7 @@ DENIED  write any file in .soft-foundry: is the guard's own configuration; no sk
 DENIED  write .soft-foundry/ trailing slash: is the guard's own configuration; no skill may write it
 DENIED  dot-dot to override: is the guard's own configuration; no skill may write it
 DENIED  absolute path to override: is the guard's own configuration; no skill may write it
-RAISED  NUL byte: ArgumentError: path name contains null byte
+DENIED  NUL byte: could not be decided (ArgumentError: path name contains null byte); refu
 DENIED  MultiEdit policy: is the guard's own configuration; no skill may write it
 DENIED  NotebookEdit policy: is the guard's own configuration; no skill may write it
 DENIED  codex apply_patch policy: is the guard's own configuration; no skill may write it
@@ -62,9 +62,9 @@ DENIED  writes another change's metadata: is not in implementation's write set
 DENIED  outside repo: outside the repository; no skill may write there
 DENIED  case variant: is not in implementation's write set
 DENIED  Read harness case: is in implementation's deny_read set
-ALLOWED Grep tool on harness: tool Grep is not guarded
-ALLOWED Grep tool over whole tree: tool Grep is not guarded
-ALLOWED Glob tool on harness: tool Glob is not guarded
+DENIED  Grep tool on harness: searches inside implementation's deny_read set
+ALLOWED Grep tool over whole tree: searches nothing denied to implementation
+ALLOWED Glob tool on harness: searches nothing denied to implementation
 ALLOWED Read policy (allowed?): not denied to implementation
 -- override handling
 override quoted off: off

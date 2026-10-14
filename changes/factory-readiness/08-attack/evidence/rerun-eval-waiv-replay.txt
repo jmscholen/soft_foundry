@@ -22,11 +22,11 @@ baseline:
   specify: no failing checks
   verify: no failing checks
 after spec edit (no restamp):
-  specify: specification locked: changed since the specification was recorded at 37e29dceff8c: changes/eval-replay/02-specification/specificati
+  specify: specification locked: changed since the specification was recorded at b8df2786320d: changes/eval-replay/02-specification/specificati
   verify: no failing checks
 after restamp of specify handoff:
   specify: no failing checks
-  verify: evidence current: STALE: the specification was re-recorded at 1c4249e41296 after this evidence (handoff recorded at 37e29dceff8c
+  verify: evidence current: STALE: the specification was re-recorded at 07675d7c14ea after this evidence (handoff recorded at b8df2786320d
   implement: no failing checks
 after also restamping verify handoff to HEAD:
   verify: no failing checks
@@ -49,6 +49,7 @@ risk="low" skip=[{"phase"=>"learn", "rationale"=>"x"}] -> pass risk low
 risk="Medium" skip=[{"phase"=>"plan", "rationale"=>"x"}] -> pass risk medium
 risk="low" skip=[{"phase"=>"judge", "rationale"=>"x", "phase "=>"attack"}] -> fail judge is never waived (review and judgment are required of every change)
 ## eval suite
+0
 ✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
 ✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
 ✓ pass eval control-well-formed: verify pass, as expected
@@ -63,8 +64,4 @@ risk="low" skip=[{"phase"=>"judge", "rationale"=>"x", "phase "=>"attack"}] -> fa
 ✓ pass eval secret-shape-in-evidence: verify content clean fail, as expected
 ✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
 ✓ pass eval: 12 passed, 0 failed, 0 errors, 1 skipped
-
-real	0m9.209s
-user	0m2.306s
-sys	0m4.660s
-scratch dirs before/after: 0/0
+0
