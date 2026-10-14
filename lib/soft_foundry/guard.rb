@@ -108,9 +108,15 @@ module SoftFoundry
     # inside the session it is guarding. The environment variable cannot
     # be reached from a tool call (a command's environment ends with the
     # command), so it stays the maintainer's.
-    SELF_PROTECTED = [POLICY, LOCAL, ".claude/settings.json", ".claude/settings.local.json", ".codex/hooks.json"].freeze
+    # Everything under .soft-foundry/ is the guard's own too (the override,
+    # the log, the runtime inventory): no skill needs to touch it.
+    SELF_PROTECTED = [POLICY, ".claude/settings.json", ".claude/settings.local.json", ".codex/hooks.json"].freeze
+    SELF_PROTECTED_DIR = File.dirname(LOCAL)
 
-    def self_protected?(path) = SELF_PROTECTED.include?(path.to_s)
+    def self_protected?(path)
+      p = path.to_s
+      SELF_PROTECTED.include?(p) || p == SELF_PROTECTED_DIR || p.start_with?("#{SELF_PROTECTED_DIR}/")
+    end
 
     def decide_by_skill(tool_name, tool_input)
       record, skill, why = active
@@ -283,13 +289,39 @@ module SoftFoundry
       end
     end
 
-    # A path from the tool call, repository-relative. Paths outside the
+    # A path from the tool call, repository-relative, with symlinks
+    # resolved: a link in a skill's write set that points at the policy
+    # is the policy. The deepest existing ancestor is resolved with
+    # realpath and the rest appended, so a path that does not exist yet
+    # still resolves through a linked directory. Paths outside the
     # repository keep a leading ".." or "/" so the caller can see it.
-    def relative(path)
+    def relative(path, base: @root)
       return nil if path.nil? || path.to_s.strip.empty?
-      abs = File.expand_path(path.to_s, @root)
-      return abs unless abs.start_with?("#{@root}/") || abs == @root
-      abs.delete_prefix("#{@root}/")
+      abs = resolve_links(File.expand_path(path.to_s, base))
+      root = real_root
+      return abs unless abs.start_with?("#{root}/") || abs == root
+      abs.delete_prefix("#{root}/")
+    end
+
+    def real_root
+      @real_root ||= begin
+        File.realpath(@root)
+      rescue SystemCallError
+        @root
+      end
+    end
+
+    def resolve_links(abs)
+      existing = abs
+      rest = []
+      until File.exist?(existing) || File.symlink?(existing) || existing == "/" || existing.empty?
+        rest.unshift(File.basename(existing))
+        existing = File.dirname(existing)
+      end
+      real = File.realpath(existing)
+      rest.empty? ? real : File.join(real, *rest)
+    rescue SystemCallError
+      abs
     end
 
     # A command as text. Codex may send `command` as an array of
@@ -306,18 +338,45 @@ module SoftFoundry
 
     # Tokens of a shell command that name something in the repository:
     # existing files or directories, or path-shaped tokens (containing a
-    # slash or starting with a dot) under the root. Redirections and
-    # quotes are stripped. This is a heuristic, which is why Bash is only
-    # ever checked against deny sets.
+    # slash or starting with a dot) under the root. The command is read
+    # segment by segment (`&&`, `||`, `;`, `|`, newlines) so that a `cd`
+    # moves where later tokens resolve, and once inside a directory every
+    # bare token is a candidate path (a file about to be created has no
+    # slash). A glob is expanded against the tree. Redirections and quotes
+    # are stripped. Still a heuristic (a variable or a command
+    # substitution can hide a name), which is why Bash is checked against
+    # deny sets only and the gate's staleness check backs it.
+    GLOB = /[*?\[]/.freeze
+
     def shell_paths(command)
-      command.split(/[\s;|&()<>]+/).filter_map do |raw|
-        token = raw.gsub(/\A["']+|["']+\z/, "").sub(/\A[<>]+/, "")
-        next if token.empty? || token.start_with?("-") || token.match?(/\A[A-Za-z_][A-Za-z0-9_]*=/)
-        next unless token.include?("/") || token.start_with?(".") || File.exist?(File.join(@root, token))
-        rel = relative(token)
-        next if rel.nil? || rel.start_with?("/") || rel.start_with?("..")
-        rel
-      end.uniq
+      cwd = "" # repository-relative directory the command is in
+      found = []
+      command.split(/\s*(?:&&|\|\||;|\||\n)\s*/).each do |segment|
+        tokens = segment.split(/[\s()<>]+/).filter_map do |raw|
+          token = raw.gsub(/\A["']+|["']+\z/, "").sub(/\A[<>]+/, "")
+          next if token.empty? || token.start_with?("-") || token.match?(/\A[A-Za-z_][A-Za-z0-9_]*=/)
+          token
+        end
+        next if tokens.empty?
+        base = cwd.empty? ? @root : File.join(@root, cwd)
+        tokens.each_with_index do |token, i|
+          candidate = !cwd.empty? || token.include?("/") || token.start_with?(".") || File.exist?(File.join(base, token))
+          next unless candidate
+          names = token.match?(GLOB) ? Dir.glob(token, File::FNM_DOTMATCH, base: base).reject { |g| %w[. ..].include?(File.basename(g)) } : []
+          names = [token] if names.empty?
+          names.each do |name|
+            rel = relative(name, base: base)
+            next if rel.nil? || rel.start_with?("/") || rel.start_with?("..")
+            found << rel
+          end
+          # `cd DIR` (or pushd) moves the rest of the command.
+          if i.positive? && %w[cd pushd].include?(tokens[i - 1])
+            target = relative(token, base: base)
+            cwd = target.nil? || target.start_with?("/") || target.start_with?("..") ? cwd : target
+          end
+        end
+      end
+      found.uniq
     end
   end
 end

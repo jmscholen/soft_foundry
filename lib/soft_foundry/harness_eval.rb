@@ -35,6 +35,7 @@ module SoftFoundry
     OUTCOMES = %w[pass fail].freeze
     STATUSES = %w[intake in_progress exploring awaiting_human].freeze
     MAX_FILES = 200
+    MAX_FILE_BYTES = 65_536
     FILE_KEYS = [%w[record files], %w[record later_files], %w[repository files], %w[application files]].freeze
 
     # Tokens a case's file contents may carry. ${COMMIT} is the commit the
@@ -122,6 +123,7 @@ module SoftFoundry
           count += 1
           problems << "#{outer}.#{inner}: '#{rel}' is not a safe relative path" unless safe_path?(rel)
           problems << "#{outer}.#{inner}: '#{rel}' content must be text" unless content.is_a?(String)
+          problems << "#{outer}.#{inner}: '#{rel}' is #{content.bytesize} bytes; a case file holds at most #{MAX_FILE_BYTES} bytes" if content.is_a?(String) && content.bytesize > MAX_FILE_BYTES
         end
       end
       problems << "a case may write at most #{MAX_FILES} files (#{count})" if count > MAX_FILES
