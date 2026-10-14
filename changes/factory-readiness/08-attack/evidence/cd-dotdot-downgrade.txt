@@ -1,0 +1,10 @@
+mode before: block
+exit 0 ALLOWED: cd lib && cd .. && cd .ai/policies && sed -i s/block/warn/ enforcement
+    ran it in the scratch repository; guard mode now: warn
+exit 0 ALLOWED: cd lib; cd ..; cd .ai; cd policies; sed -i s/block/warn/ enforcement.y
+    ran it in the scratch repository; guard mode now: warn
+exit 0 ALLOWED: cd lib && cd .. && cd .ai && cat harness-evals/README.md
+exit 0 ALLOWED: cd lib && cd .. && cd .ai && ls harness-evals
+exit 2 refused: cd lib && cd ../.ai/policies && sed -i s/block/warn/ enforcement.yml
+    ✗ fail guard: Bash .ai/policies/enforcement.yml names the guard's own configurat
+exit 0 ALLOWED: cd lib && cd .. && cat .ai/harness-evals/README.md

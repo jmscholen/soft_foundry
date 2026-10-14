@@ -1,36 +1,38 @@
----
-commit_sha: ba15a5639122b302648a126806113fc470741d86
+commit_sha: fe9e40d0a820eba58770daa593d4c9a7a26ea206
 artifacts:
-- path: evidence/guard-decisions.txt
+- path: evidence/cd-dotdot-downgrade.txt
   case: ATTACK-001
-  sha256: 411a5b63881786e9453d2e2d0eb55ec6bc5bc640ed31b4a74c9802bf5d250a4e
-- path: evidence/guard-bypass-and-downgrade.txt
+  sha256: 250914dfbddb5df9f898e98c6dfe9264a70a50709e600578c1d61115e953f848
+- path: evidence/cd_dotdot_downgrade.rb
   case: ATTACK-001
-  sha256: 53ef6d9af2dcb215303f33be57802e1c57ad68ffa1240ca99970e823cef49eb5
-- path: evidence/guard_atk.rb
+  sha256: eace1a6d7f4efdb02b45750b453507468c91387fa2543e5da1419e426b57f9e8
+- path: evidence/guard-rerun.txt
   case: ATTACK-001
-  sha256: a18e634c76a8f33f36c48a2fb3ee0c9bc76625e7c76ffe978423a85e16a5cf3d
-- path: evidence/guard2.rb
+  sha256: 1f904a7f74db7fadb155868d63b645cb5cc79b723830a25ffde58b709b3a44f2
+- path: evidence/guard_rerun.rb
   case: ATTACK-001
-  sha256: a90c5c3a39959003519916758659680fbef0ef036a9d41d05b7a2ce658ba531a
-- path: evidence/eval-case-paths.txt
+  sha256: 21549edfc57eff73c7ff215e9aa3eb8494fdbf70aeb6a20a6dd9d64aff207cc0
+- path: evidence/eval-cap.txt
   case: ATTACK-002
-  sha256: 359e8aee4570b4ac832a5b8e1b3a7b68926a8271b3cda2de34ac2bb41904bae7
+  sha256: 9b7a79049ca260706b9bf0e301593862d733d6e7b214bac2c188a8e2c5e89116
+- path: evidence/eval_cap.rb
+  case: ATTACK-002
+  sha256: b1fb9ab1164d952eed8c8be35a096943e8b456a1581b9aabe232bc2db8852ff1
 - path: evidence/eval_atk.rb
   case: ATTACK-002
   sha256: 21b9585e8337c9e17991bcb1218c2e8bef21c30ca4975c4490f21297d9dc2c17
-- path: evidence/waivers-matrix.txt
-  case: ATTACK-004
-  sha256: 92da39b4b72a6beec895d884757a6e108d03a2ab97a8cab5807d226976136841
 - path: evidence/waiv.rb
   case: ATTACK-004
   sha256: e436c90fcc161f59d53176f9305048a2031ae239fa39c40803b8a28e6bcd8ccc
-- path: evidence/spec-replay-and-close.txt
-  case: ATTACK-005
-  sha256: 10309df222dab16c541e0a49e675aecf703fbc0c064bb52f655bd11435b6a2c5
 - path: evidence/replay.rb
   case: ATTACK-005
   sha256: 9ed4dc45aaeb43ddb2984999f7f75ef4bafda006c518a69f2ced242fb430cd6d
-- path: evidence/eval-suite-output.txt
-  case: ATTACK-007
-  sha256: 4a3fdfcc3eef491ca8a4c7a1e32053bdc121f6b9e27484d232f48c4902c4726d
+- path: evidence/rerun-eval-waiv-replay.txt
+  case: ATTACK-004
+  sha256: 9c5d3342ca553b7147cdd2deb91b2466f54bb0849a39e986de6cee99e9a9ad63
+- path: evidence/hook-failopen.txt
+  case: ATTACK-008
+  sha256: 766b4a88d1ba6b2c73e6863c24f1614c5644e59834f1a12ba59f0227a7f2d5d4
+- path: evidence/hook_failopen.rb
+  case: ATTACK-008
+  sha256: 1907501e1f25cb8c2c263d1d84f8b1b851cfd1c73af28706f49309b0b6db459b

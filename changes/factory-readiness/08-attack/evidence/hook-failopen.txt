@@ -1,0 +1,7 @@
+control, names the file plainly:        exit 2 (BLOCKS the call) ✗ fail guard: Bash .ai/policies/enforcement.yml names the guard's own configuration; no sk
+tilde-plus token in the command:        exit 1 (non-blocking error: the call proceeds) soft-foundry: user + doesn't exist
+tilde-user token in the command:        exit 1 (non-blocking error: the call proceeds) soft-foundry: user nosuchuser doesn't exist
+NUL byte in a Write path:               exit 1 (non-blocking error: the call proceeds) soft-foundry: path name contains null byte
+NUL byte in a Bash command:             exit 1 (non-blocking error: the call proceeds) soft-foundry: path name contains null byte
+tilde-user then policy name (one cmd):  exit 2 (BLOCKS the call) ✗ fail guard: Bash .ai/policies/enforcement.yml names the guard's own configuration; no sk
+malformed stdin:                        exit 2
