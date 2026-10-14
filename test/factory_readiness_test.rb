@@ -345,3 +345,67 @@ class GuardBlockModeTest < Minitest::Test
     end
   end
 end
+
+# REM-001 (from 06-verification's notes): under block mode the evidence
+# skills could not run tests or the tool, because the guard refused any
+# shell command naming a deny_write path even when the skill may read it;
+# and a stale complete phase could not be rerun by `phase run`.
+class GuardShellNamingTest < Minitest::Test
+  include FoundryFixture
+
+  def with_phase(phase)
+    with_fixture_repo do |dir|
+      sh(dir, "git", "checkout", "-qb", "change/s1")
+      cli(dir, "change", "new", "s1")
+      meta = File.join(dir, "changes", "s1", "metadata.yml")
+      File.write(meta, SoftFoundry.read_text(meta).sub(/^status: intake.*$/, "status: in_progress").sub(/^current_phase: intake.*$/, "current_phase: #{phase}"))
+      commit_all(dir, "record")
+      yield SoftFoundry::Guard.new(dir)
+    end
+  end
+
+  def bash(guard, command) = guard.decide("Bash", { "command" => command })
+
+  def test_a_skill_may_name_in_a_shell_command_what_it_may_read
+    with_phase("verify") do |guard|
+      assert_equal :allow, bash(guard, "ruby -Ilib -Itest test/app_test.rb").outcome
+      assert_equal :allow, bash(guard, "ruby -Ilib exe/soft-foundry gate verify").outcome
+      assert_equal :allow, bash(guard, "cat .ai/rules/testing.md").outcome
+      d = bash(guard, "cat .ai/harness-evals/README.md")
+      assert d.violation?, "deny_read still refuses"
+      d = bash(guard, "sed -i s/x/y/ .ai/policies/budget.yml")
+      assert d.violation?, "protected policy is refused whatever the read set says"
+      assert bash(guard, "echo off > .soft-foundry/enforcement.yml").violation?
+    end
+    with_phase("implement") do |guard|
+      assert_equal :allow, bash(guard, "cat .ai/rules/ruby.md").outcome, "implementation reads the rules it works under"
+      assert bash(guard, "rm -rf .ai/policies").violation?
+      assert bash(guard, "cat .ai/harness-evals/cases/x.yml").violation?
+    end
+    with_phase("review") do |guard|
+      assert_equal :allow, bash(guard, "ruby -Ilib -Itest test/gate_test.rb").outcome
+      assert_equal :allow, bash(guard, "git diff main -- lib/soft_foundry/gate.rb").outcome
+    end
+  end
+
+  def test_a_stale_complete_phase_may_be_rerun_by_phase_run
+    with_fixture_repo do |dir|
+      sh(dir, "git", "checkout", "-qb", "change/s2")
+      cli(dir, "change", "new", "s2")
+      plane = SoftFoundry::ControlPlane.new(dir)
+      record = SoftFoundry::ChangeRecord.new(dir, "s2", control_plane: plane)
+      commit_all(dir, "record")
+      plane.phases.take(7).each { |p| complete_phase!(record, p.id, sha: head(dir)) } # intake..verify
+      commit_all(dir, "through verification")
+      runner = SoftFoundry::PhaseRunner.new(dir, plane: plane, git: SoftFoundry::Git.new(dir), record: record)
+      assert_includes runner.refusal(plane.phase("verify")), "already complete"
+
+      File.write(File.join(dir, "lib", "app.rb"), "puts 2\n")
+      commit_all(dir, "code changed after verification")
+      assert_nil runner.refusal(plane.phase("verify")), "stale evidence may be redone"
+      code, out = cli(dir, "phase", "run", "verify", "--dry-run")
+      assert_equal 0, code, out
+      assert_includes out, "would run verify of s2"
+    end
+  end
+end
