@@ -1,11 +1,71 @@
 threats:
   - id: THREAT-001
-    requirements: [REQ-001]
-    category: authorization   # authentication | authorization | isolation | injection | xss | csrf | ssrf | file | secrets | replay | concurrency | resource_exhaustion | dependency | infrastructure
-    attacker: TBD
-    goal: TBD
-    vector: TBD
-    impact: TBD
-    likelihood: TBD
+    requirements: [REQ-FR-004]
+    category: authorization
+    attacker: an implementing agent session, or content it read and acted on
+    goal: turn the guard off or weaken it from inside a guarded session
+    vector: write the machine-local override (.soft-foundry/enforcement.yml), the policy (.ai/policies/enforcement.yml), or remove the hook entry from .claude/settings.json, .claude/settings.local.json, or .codex/hooks.json, with an Edit/Write tool or a shell command naming the file
+    impact: every later tool call in the session, and in later sessions on that checkout, is unchecked while the record still says block mode
+    likelihood: low for an honest session; certain for a steered one once it knows the file names
     mitigation: MIT-001
+    attack_case_required: true
+  - id: THREAT-002
+    requirements: [REQ-FR-005, REQ-FR-006]
+    category: file
+    attacker: whoever can open a pull request that adds or edits a case under .ai/harness-evals/
+    goal: make `eval` write outside the scratch repository, or plant instructions a live session will read
+    vector: a case whose record.files, repository.files, or application.files key is absolute or contains "..", or whose content carries an instruction-override phrase for the reviewer session
+    impact: a file written into the host repository (or the maintainer's home) by a command that promised a scratch repository; a steered live review that reports what the planter wants
+    likelihood: low; a case is reviewed like any control-plane file
+    mitigation: MIT-002
+    attack_case_required: true
+  - id: THREAT-003
+    requirements: [REQ-FR-005]
+    category: authorization
+    attacker: an implementing agent session
+    goal: read the eval cases to tailor the work to them, or edit a case so the suite passes
+    vector: Read or Edit under .ai/harness-evals/ from the implementation skill; a shell command that cats or rewrites a case
+    impact: the suite measures the gate against cases the implementer wrote or saw; `eval` passes without meaning
+    likelihood: medium; the directory is named in the prompt's skill files
+    mitigation: MIT-003
+    attack_case_required: true
+  - id: THREAT-004
+    requirements: [REQ-FR-007]
+    category: authorization
+    attacker: an agent or person filling metadata.yml
+    goal: close a change without a judgment, or waive a required phase, by choosing the risk or spelling
+    vector: skipped_phases naming judge or review; risk left blank, written in capitals, or set to low on a change that touches policy or infrastructure; a waiver with a one-word rationale
+    impact: a record reaches `closed` with no verdict and no review, as 25 of 30 did
+    likelihood: high; it is the established habit
+    mitigation: MIT-004
+    attack_case_required: true
+  - id: THREAT-005
+    requirements: [REQ-FR-002]
+    category: replay
+    attacker: an agent working the hardening phases
+    goal: change acceptance criteria after evidence was produced and keep the evidence current
+    vector: edit 02-specification/ after verification, then re-stamp the specify handoff's commit_sha to HEAD so `specification locked` passes
+    impact: verification, evaluation, attack, review, and judgment stand against criteria that no longer exist
+    likelihood: medium; it is one edit to a handoff
+    mitigation: MIT-005
+    attack_case_required: true
+  - id: THREAT-006
+    requirements: [REQ-FR-005, REQ-FR-006]
+    category: resource_exhaustion
+    attacker: a mistaken or hostile invocation, or a case whose gate raises
+    goal: leave scratch repositories behind, or run live sessions without bound
+    vector: an exception inside a case; `eval --live` over every case on every run; a case with hundreds of files
+    impact: temp space filled; model spend without bound; `ci` slowed
+    likelihood: low
+    mitigation: MIT-006
+    attack_case_required: true
+  - id: THREAT-007
+    requirements: [REQ-FR-005, REQ-FR-009]
+    category: secrets
+    attacker: a case author, or a reviewer reading eval output
+    goal: have a planted secret shape reach the host's evidence or a log
+    vector: a case that plants an AWS-shaped key to prove the content-clean check; its content echoed by `eval` output or copied into this record's evidence
+    impact: a secret-shaped string in a committed file trips the scan, or a real one is normalized as acceptable
+    likelihood: medium; the shipped suite needs exactly such a case
+    mitigation: MIT-007
     attack_case_required: true

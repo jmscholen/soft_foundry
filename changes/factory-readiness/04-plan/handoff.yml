@@ -1,24 +1,23 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 04-plan
 skill: planning
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: '097fe26b3b70648035fb6fa415fafdc75c402e3c'
+started_at: '2026-10-14T15:03:59Z'
+completed_at: '2026-10-14T15:03:59Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- implementation.md
+- testing.md
+- rollout.md
+- rollback.md
+blocking: []
+findings: []
 next: implement
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: Performed by the interactive session. Eight ordered steps, each a RED/GREEN
+  pair; control-plane and documentation edits are recorded as deviations because no
+  skill may write them.
+executed_by:

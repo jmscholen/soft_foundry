@@ -10,7 +10,7 @@ type: feature
 risk: medium
 track: gated            # gated | iterative (.ai/workflow.yml tracks:); set by `change new --track`
 status: intake          # intake | exploring | in_progress | awaiting_human | judged | closed
-current_phase: threat_model
+current_phase: implement
 created_at: 2026-10-14T14:49:13Z
 surfaces:
   application: true
