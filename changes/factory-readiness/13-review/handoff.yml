@@ -1,24 +1,87 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 13-review
 skill: review
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: a9fac32d0c0e2d8951ee09ed0a5c9a8102c34637
+started_at: '2026-10-14T19:30:24Z'
+completed_at: '2026-10-14T19:55:00Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- functional.md
+- architecture.md
+- security.md
+- accessibility.md
+- policy-conformance.md
+- infrastructure.md
+- operations.md
+- consolidated.md
+blocking: []
+findings:
+- id: REV-001
+  severity: major
+  summary: Documentation and installation owed by REM-001 to REM-006 are not applied
+    (README guard section, enforcement.yml header, this repository's hook settings);
+    doctor does not detect a missing PostToolUse entry.
+  failure: An existing repository that does not rerun `hooks install --claude` runs
+    without the post-call restore and the Grep/Glob guard while believing it is in
+    block mode; in this repository the restore is inactive until the maintainer reruns
+    it.
+- id: REV-002
+  severity: major
+  summary: Same-user routes past the post-call restore (detached writer, policy and
+    baseline rewritten together, weak policy committed with baseline deleted) remain;
+    accepted residual in REM-005, needs an explicit judgment decision.
+  failure: A steered session with a shell sets warn through a variable-spelled detached
+    write; the next call baselines warn and a Write to the policy is allowed with
+    a warning (ATK-F10, evidence/rem6-attack.txt).
+- id: REV-003
+  severity: minor
+  summary: Root-wide reads reach the eval cases (ATK-F9, accepted).
+- id: REV-004
+  severity: minor
+  summary: PostToolUse on a failing Bash call was never exercised; the restore may
+    be deferred to the next successful shell call.
+- id: REV-005
+  severity: minor
+  summary: Guard code is in the implementer's write set when dogfooding (ATK-F12).
+- id: REV-006
+  severity: minor
+  summary: Rails profile records testing as ruby, not rspec (EVAL-F2).
+- id: REV-007
+  severity: minor
+  summary: Default live eval on claude fails without shell arguments after --, and
+    README does not say so (EVAL-F1).
+- id: REV-008
+  severity: minor
+  summary: commit_sha in a handoff is self-attested (ATK-F3).
+- id: REV-009
+  severity: minor
+  summary: Accessibility go-live advisory, WCAG 2.2 SC 3.3.3 - the live eval permission
+    failure gives no suggested next step.
+- id: REV-010
+  severity: minor
+  summary: README understates the guard's protection (block mode, post-call restore).
+- id: REV-011
+  severity: minor
+  summary: A maintainer edit within 30 minutes of an interrupted shell call is reverted
+    at the next shell call.
 next: judge
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: 'No blocking findings. Did not rerun the 8.5-minute suite: no application or
+  test code changed after verification commit 50a4506/ac3e8cf; its 568-run result
+  is relied on. Review ran in the Bash guard under block mode and could not name .claude/settings.json
+  or .ai/policies/enforcement.yml from the shell, so those were checked with Grep/Read.
+  12-observability is pending, not waived; judgment should note it. Policy surface
+  not declared; no policy text changes owed.'
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-14T19:30:24Z'
+  finished_at: '2026-10-14T19:39:15Z'
+  exit_status: 0
+  previous_phase: attack
+  session_id: ca12452d-861d-483c-97ea-e3c47d94c788
+  cwd: "/home/user/soft_foundry"
