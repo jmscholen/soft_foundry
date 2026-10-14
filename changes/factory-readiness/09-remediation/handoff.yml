@@ -2,9 +2,9 @@
 phase: '09-remediation'
 skill: remediation
 status: complete
-commit_sha: d5805b3a78e69469ddc8f188f4fb846f79881bfa
+commit_sha: 6f6440f1df3b2b2aba89422cc6692c129c511b92
 started_at: '2026-10-14T16:11:30Z'
-completed_at: '2026-10-14T18:04:06Z'
+completed_at: '2026-10-14T18:37:01Z'
 resolved_model:
   profile: coding_high
   provider: anthropic
@@ -14,13 +14,14 @@ outputs:
 blocking: []
 findings: []
 next: verify
-notes: 'REM-001 (from verification), REM-002 and REM-003 (from the first two attacks),
-  and REM-004 (from the third), all performed by the interactive session under the
-  remediation skill with the guard in block mode. REM-004 changes the control: the
-  guard''s own configuration is baselined before each tool call and restored after
-  a shell command, since a name-based shell check can always be spelled around; further
-  spellings are accepted as residual with that control in place. README and policy
-  text edits and a rerun of hooks install are owed and cannot be made from any skill;
-  listed in summary.md for the maintainer. Verification, evaluation, and attack are
-  stale and rerun through phase run.'
+notes: REM-001 (from verification), REM-002 and REM-003 (from the first two attacks),
+  REM-004 (from the third), and REM-005 (from the fourth), all performed by the interactive
+  session under the remediation skill with the guard in block mode. REM-004 changed
+  the control to a post-call restore; REM-005 hardened it against overlapping calls
+  and symlinks; further same-user routes (detached processes, a single command tampering
+  baseline and policy together, a committed weak policy) are the OS-sandbox residual
+  the repository already accepted, and the remediation loop closes here by decision.
+  README and policy text edits and a rerun of hooks install are owed and cannot be
+  made from any skill; listed in summary.md for the maintainer. Verification, evaluation,
+  and attack are stale and rerun through phase run.
 executed_by:
