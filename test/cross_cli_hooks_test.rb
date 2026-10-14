@@ -118,10 +118,10 @@ class CrossCliHooksTest < Minitest::Test
   def test_doctor_reports_one_guard_line_covering_both_hosts
     with_fixture_repo do |dir|
       _, out = cli(dir, "doctor")
-      assert_match(/^✗ fail guard hook \(claude: not installed, codex: not installed; mode: warn, /, out)
+      assert_match(/^✗ fail guard hook \(claude: not installed, codex: not installed; mode: block, /, out)
       cli(dir, "hooks", "install", "--codex")
       _, out = cli(dir, "doctor")
-      assert_match(/^✓ pass guard hook \(claude: not installed, codex: installed; mode: warn, /, out)
+      assert_match(/^✓ pass guard hook \(claude: not installed, codex: installed; mode: block, /, out)
       cli(dir, "hooks", "install", "--claude")
       _, out = cli(dir, "doctor")
       assert_match(/^✓ pass guard hook \(claude: installed, codex: installed; mode: warn, /, out)

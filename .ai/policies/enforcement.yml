@@ -12,9 +12,12 @@ version: 1
 #   block  refuse the call (the hook exits 2 with the reason)
 #   off    say nothing
 #
-# The mode is a repository policy here; a machine may override it in
+# The mode is a repository policy here, block since 0.21.0: a violation is
+# refused, not reported. A maintainer's machine may override it in
 # .soft-foundry/enforcement.yml (same shape, gitignored) or with the
-# SOFT_FOUNDRY_GUARD environment variable, which wins over both.
+# SOFT_FOUNDRY_GUARD environment variable, which wins over both; neither
+# can be written from inside a guarded session, because the guard
+# refuses writes to its own configuration from every skill.
 #
 # Edit, Write, MultiEdit, and NotebookEdit are checked against the write
 # and deny_write sets; Read against deny_read only, since read lists are
@@ -23,4 +26,4 @@ version: 1
 # denied path and passes everything else. A deny that the guard cannot
 # see remains policy the agent must honor, as AGENTS.md says.
 guard:
-  mode: warn
+  mode: block

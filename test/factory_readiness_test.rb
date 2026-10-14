@@ -318,7 +318,7 @@ class GuardBlockModeTest < Minitest::Test
         end
         assert guard.decide("Bash", { "command" => "printf 'guard: {mode: off}' > .soft-foundry/enforcement.yml" }).violation?
         assert guard.decide("Bash", { "command" => "rm .claude/settings.json" }).violation?
-        assert_equal :allow, guard.decide("Bash", { "command" => "cat .ai/README.md" }).outcome
+        assert_equal :allow, guard.decide("Bash", { "command" => "cat README.md" }).outcome
       end
     end
   end

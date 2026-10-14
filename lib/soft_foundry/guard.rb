@@ -101,6 +101,17 @@ module SoftFoundry
       narrow_for_panel(tool_name, tool_input, decision)
     end
 
+    # The guard's own configuration: the policy, the machine-local override,
+    # and the hook entries that make it run. No skill may write any of
+    # them, whatever its sets say, and a shell command that names one is
+    # refused; otherwise a steered session could turn the guard off from
+    # inside the session it is guarding. The environment variable cannot
+    # be reached from a tool call (a command's environment ends with the
+    # command), so it stays the maintainer's.
+    SELF_PROTECTED = [POLICY, LOCAL, ".claude/settings.json", ".claude/settings.local.json", ".codex/hooks.json"].freeze
+
+    def self_protected?(path) = SELF_PROTECTED.include?(path.to_s)
+
     def decide_by_skill(tool_name, tool_input)
       record, skill, why = active
       return Decision.new(outcome: :allow, reason: why, skill: nil, paths: []) unless skill
@@ -119,6 +130,8 @@ module SoftFoundry
         return Decision.new(outcome: :allow, reason: "no file path in the tool call", skill: skill.name, paths: []) if paths.empty?
         outside = paths.select { |p| p.start_with?("..") || p.start_with?("/") }
         return violation(skill, outside, "outside the repository; no skill may write there") unless outside.empty?
+        own = paths.select { |p| self_protected?(p) }
+        return violation(skill, own, "is the guard's own configuration; no skill may write it") unless own.empty?
         denied = paths.select { |p| ControlPlane.match_any?(p, sets[:deny_write]) }
         return violation(skill, denied, "is in #{skill.name}'s deny_write set") unless denied.empty?
         unlisted = paths.reject { |p| ControlPlane.match_any?(p, sets[:write]) }
@@ -131,6 +144,8 @@ module SoftFoundry
         Decision.new(outcome: :allow, reason: "not denied to #{skill.name}", skill: skill.name, paths: [path])
       when *SHELL_TOOLS
         touched = shell_paths(command_text(tool_input["command"]))
+        own = touched.select { |p| self_protected?(p) }
+        return violation(skill, own, "names the guard's own configuration; no skill may touch it from the shell") unless own.empty?
         denied = touched.select { |p| ControlPlane.match_any?(p, sets[:deny_write]) || ControlPlane.match_any?(p, sets[:deny_read]) }
         return violation(skill, denied, "names a path #{skill.name} is denied (Bash is checked against deny sets only)") unless denied.empty?
         Decision.new(outcome: :allow, reason: "names no path denied to #{skill.name}", skill: skill.name, paths: touched)

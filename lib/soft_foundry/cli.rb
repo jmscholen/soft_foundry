@@ -1036,7 +1036,7 @@ module SoftFoundry
       guard.log(decision, mode: mode, tool_name: tool)
       where = decision.paths.empty? ? tool : "#{tool} #{decision.paths.join(', ')}"
       if mode == "block"
-        @err.puts "✗ fail guard: #{where} #{decision.reason}; the #{decision.skill} skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)"
+        @err.puts "✗ fail guard: #{where} #{decision.reason}; the #{decision.skill} skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is documented in README.md)"
         2
       else
         @err.puts "! warn guard: #{where} #{decision.reason}; the #{decision.skill} skill's permissions.yml does not allow it (mode: warn, logged to #{Guard::LOG})"
