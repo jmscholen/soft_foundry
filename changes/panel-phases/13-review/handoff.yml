@@ -1,0 +1,130 @@
+---
+phase: 13-review
+skill: review
+status: complete
+commit_sha: 661b454458508391ba341fea32c5bcb6668d20e8
+started_at: '2026-10-08T15:05:04Z'
+completed_at: '2026-10-08T15:25:16Z'
+resolved_model:
+  profile: reasoning_high
+  provider: xAI
+  model: grok-4.7
+outputs:
+- functional.md
+- architecture.md
+- security.md
+- accessibility.md
+- policy-conformance.md
+- infrastructure.md
+- operations.md
+- consolidated.md
+blocking: []
+findings:
+- id: REV-SEC-011
+  severity: major
+  summary: A member can list the shared temp directory, copy the other draft, change
+    one byte, and the panel still completes as agreed.
+  failure: 'Independent stage, grok-1. Both soft-foundry-panel-* directories already
+    exist under the system temp directory before either member writes. grok-1 reads
+    the other draft.md and writes those bytes plus one newline. Exit 0, panel.outcome
+    agreed, panel.failures empty, status complete. The stored drafts differ only by
+    that newline.
+
+    '
+- id: REV-SEC-012
+  severity: major
+  summary: A detached child can change a tracked file after the handoff already says
+    agreed. spawn_panel waits only for the direct child.
+  failure: 'Consensus member double-forks with Process.setsid and, once handoff.yml
+    contains outcome agreed, writes lib/app.rb as "puts :planted". Exit 0, panel recorded
+    passes, panel.failures empty, status complete. After the command returns, lib/app.rb
+    is that text.
+
+    '
+- id: REV-SEC-013
+  severity: major
+  summary: An argument-stage write of an executable .git/hooks/pre-commit is invisible
+    to git ls-files, and the panel completes as agreed.
+  failure: 'Argument stage, claude-1, writes an executable .git/hooks/pre-commit.
+    git ls-files -co --exclude-standard does not list it. Exit 0, outcome agreed,
+    failures empty, status complete, and the hook is still that script. The next git
+    commit runs it.
+
+    '
+- id: REV-SEC-014
+  severity: major
+  summary: A gitignored .soft-foundry/enforcement.yml is invisible to the snapshot.
+    Quoted mode off turns the guard off for later sessions.
+  failure: 'Argument stage writes .soft-foundry/enforcement.yml. git check-ignore
+    matches .gitignore, git ls-files does not list it, and the panel exits 0 with
+    outcome agreed, failures empty, and status complete, file still present. Guard.mode
+    returns off when that file''s YAML mode is the quoted string off. Later guard
+    calls on the checkout are silent and allow the call. Unquoted off is a YAML boolean
+    and is ignored; the quoted form is not.
+
+    '
+- id: REV-SEC-015
+  severity: major
+  summary: A caught write is left on disk. The next panel run treats it as the baseline
+    and completes as agreed.
+  failure: 'Argument stage writes lib/app.rb as "puts :planted". That run exits 1
+    and names the file. The bytes stay. A blocked phase is not refused, so a second
+    panel whose members never touch lib/app.rb exits 0, outcome agreed, failures empty,
+    status complete, and lib/app.rb is still that text.
+
+    '
+- id: REV-SEC-016
+  severity: minor
+  summary: A detected handoff plant is merged, not replaced, so the blocked handoff
+    still carries the attacker's findings.
+- id: REV-FUN-007
+  severity: minor
+  summary: An agree line is not held to one sentence. Both members can append the
+    same paragraph and the panel agrees.
+- id: REV-FUN-008
+  severity: minor
+  summary: Deleting ARGUMENT.md raises Errno::ENOENT. The CLI prints a soft-foundry
+    path error with no fail word, and the handoff stays pending.
+- id: REV-FUN-009
+  severity: minor
+  summary: A consensus-stage stray write blocks the run but leaves panel.outcome as
+    agreed or split, not failed.
+- id: REV-FUN-002
+  severity: minor
+  summary: "--shell-arg is covered by a test that shares GREEN commit d1cf0d6 and
+    has no RED commit of its own."
+- id: REV-ARCH-001
+  severity: minor
+  summary: Gate.checks_for lists panel recorded for every panel phase. evaluate runs
+    it only when a complete handoff has a panel block.
+- id: REV-ARCH-002
+  severity: minor
+  summary: Control-plane and README writes are outside the implementation write set.
+    Accepted because REQ-PN-001, REQ-PN-005, and REQ-PN-010 require them.
+next: judge
+notes: 'Fourth review, after REM-003, at 661b454 (panel code 4f3b2da). Closed and
+  reproduced in a throwaway repository: REV-SEC-007, REV-SEC-008 for a synchronous
+  git-visible write, REV-SEC-009 for byte-identical drafts, REV-SEC-010, and REV-FUN-006.
+  REV-SEC-011 is the temp-directory residual REM-003 asked judgment to accept; it
+  was reproduced and is not called closed. REV-SEC-012, REV-SEC-013, REV-SEC-014,
+  and REV-SEC-015 are holes in the snapshot itself. No application, test, infrastructure,
+  or earlier-phase file was modified. The full verification suite was not re-run;
+  06-verification at this commit records it passing on this tree. Accessibility and
+  policy results are go-live advisories. No policy text change is owed. No blocking
+  findings; majors are for judgment. Provider xAI, not the Anthropic provider that
+  implemented and remediated. Permissions followed as policy; this session did not
+  show a guard refusal, so the write boundary was observed by the agent rather than
+  enforced in-process. The skipped specification leaves the expected accessibility
+  advisory that no accessibility requirement was recorded.
+
+  '
+executed_by:
+  runner: soft-foundry phase run
+  shell: grok
+  fresh_context: true
+  started_at: '2026-10-08T15:05:04Z'
+  finished_at: '2026-10-08T15:25:49Z'
+  exit_status: 0
+  previous_phase: attack
+  session_id: bba3d348-fd37-403d-a565-3b7af9291205
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

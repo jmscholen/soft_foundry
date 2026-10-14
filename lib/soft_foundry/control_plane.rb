@@ -37,6 +37,13 @@ module SoftFoundry
       end
     end
 
+    # The phases `phase run --panel` may run, in lifecycle order. Names that
+    # are not lifecycle phases are dropped here; `check` reports them.
+    def panel_phases
+      ids = Array(workflow["panel_phases"]).map(&:to_s)
+      phases.select { |p| ids.include?(p.id) }
+    end
+
     def phase(key)
       phases.find { |p| p.id == key || p.output == key }
     end

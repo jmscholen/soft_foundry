@@ -27,6 +27,7 @@ require_relative "snapshot"
 require_relative "ui/server"
 require_relative "processes"
 require_relative "session_ledger"
+require_relative "panel"
 
 module SoftFoundry
   class CLI
@@ -35,7 +36,7 @@ module SoftFoundry
     EXIT_CONFLICTS = 3
     EXIT_INTERNAL = 4
 
-    def initialize(argv, out: $stdout, err: $stderr, input: $stdin, root: Dir.pwd, source: nil, updater: nil, pr_discharge: nil, shell: nil, runner: nil, ui_server: nil, processes: nil)
+    def initialize(argv, out: $stdout, err: $stderr, input: $stdin, root: Dir.pwd, source: nil, updater: nil, pr_discharge: nil, shell: nil, runner: nil, ui_server: nil, processes: nil, panel_launcher: nil)
       @argv = argv.dup
       @out = out
       @err = err
@@ -45,6 +46,7 @@ module SoftFoundry
       @updater = updater
       @pr_discharge = pr_discharge
       @shell = shell
+      @panel_launcher = panel_launcher
       @runner = runner
       @ui_server = ui_server
       @processes = processes
@@ -825,10 +827,13 @@ module SoftFoundry
     # session, stamped with how it ran, gated when it returns.
     def phase
       sub = @argv.shift
-      raise ArgumentError, "Usage: soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex|grok] [--dry-run] [-- shell args...]" unless sub == "run"
-      target = @argv.shift or raise ArgumentError, "Usage: soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex|grok] [--dry-run] [-- shell args...]"
+      raise ArgumentError, "Usage: soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex|grok | --panel SHELL,SHELL[,...] [--max-rounds N] [--shell-arg SHELL=ARG]...] [--dry-run] [-- shell args...]" unless sub == "run"
+      target = @argv.shift or raise ArgumentError, "Usage: soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex|grok | --panel SHELL,SHELL[,...] [--max-rounds N] [--shell-arg SHELL=ARG]...] [--dry-run] [-- shell args...]"
       slug = option("--change") || current_slug
       chosen = option("--shell")
+      panel_spec = option("--panel")
+      rounds_given = option("--max-rounds")
+      shell_arg_values = options("--shell-arg")
       dry_run = flag("--dry-run")
       extra = []
       if (i = @argv.index("--"))
@@ -839,6 +844,10 @@ module SoftFoundry
 
       record = load_record(slug)
       phase = plane.phase(target) or raise TargetError, "unknown phase '#{target}'; lifecycle phases: #{plane.phases.map(&:id).join(', ')}"
+      if panel_spec || rounds_given || !shell_arg_values.empty?
+        raise TargetError, "--max-rounds and --shell-arg apply only with --panel" unless panel_spec
+        return panel_run(record, phase, panel_spec, rounds_given, chosen, extra, dry_run, shell_arg_values)
+      end
       runner = PhaseRunner.new(@root, plane: plane, git: git, record: record)
       if (why = runner.refusal(phase))
         @err.puts "#{slug}: cannot run #{phase.id}: #{why}"
@@ -886,6 +895,107 @@ module SoftFoundry
       print_advisories(record)
       return EXIT_TARGET unless status.zero?
       result.failed? ? 2 : 0
+    end
+
+    # `phase run <phase> --panel SHELL,SHELL`: the phase as a panel.
+    def panel_run(record, phase, spec, rounds_given, chosen, extra, dry_run, shell_arg_values = [])
+      refuse = ->(why) { @err.puts "✗ fail panel: #{record.slug}: cannot run #{phase.id} as a panel: #{why}"; EXIT_TARGET }
+      return refuse.call("--panel and --shell cannot be given together; the panel names its shells") if chosen
+      unless plane.panel_phases.include?(phase)
+        return refuse.call("#{phase.id} is not a panel phase (panel_phases in .ai/workflow.yml: #{plane.panel_phases.map(&:id).join(', ')})")
+      end
+      rounds = rounds_given ? Integer(rounds_given, exception: false) : Panel::DEFAULT_ROUNDS
+      return refuse.call("--max-rounds takes a whole number from 1 to #{Panel::MAX_ROUNDS}") unless rounds&.between?(1, Panel::MAX_ROUNDS)
+      members = begin
+        Panel.members(spec)
+      rescue ArgumentError => e
+        return refuse.call(e.message)
+      end
+      shell_args = begin
+        Panel.shell_args(shell_arg_values)
+      rescue ArgumentError => e
+        return refuse.call(e.message)
+      end
+      runner = PhaseRunner.new(@root, plane: plane, git: git, record: record)
+      if (why = runner.refusal(phase))
+        return refuse.call(why)
+      end
+      panel = Panel.new(@root, plane: plane, record: record, phase: phase, members: members, max_rounds: rounds, extra: extra, shell_args: shell_args)
+      @out.puts "panel: #{members.map { |m| "#{m.name} (#{m.shell}, #{m.provider})" }.join(', ')}"
+      @out.puts "panel: at most #{rounds} argument #{rounds == 1 ? 'round' : 'rounds'}; at most #{panel.max_sessions} sessions; the first member writes the consensus"
+      if dry_run
+        panel.plan_launches.each do |l|
+          @out.puts "would run #{l.member} #{l.stage} with: #{l.executable} #{l.args.map { |a| a == l.prompt ? '<prompt>' : Shellwords.escape(a) }.join(' ')}"
+        end
+        panel.cleanup
+        return 0
+      end
+      # Every member's shell must be found before any member starts.
+      unless @panel_launcher
+        members.map(&:shell).uniq.each do |s|
+          Shell.resolve(s)
+        rescue RuntimeError => e
+          panel.cleanup
+          return refuse.call(e.message)
+        end
+      end
+
+      members.map(&:shell).uniq.each { |s| billing_notice(shell: s) }
+      started = Time.now.utc
+      meta_path = File.join(record.dir, "metadata.yml")
+      meta = record.metadata
+      previous = meta["current_phase"]
+      unless previous == phase.id
+        meta["current_phase"] = phase.id
+        File.write(meta_path, YAML.dump(meta))
+      end
+      @out.puts "running #{phase.id} of #{record.slug} as a panel; drafts in #{relative(panel.dir)}"
+      @out.flush
+      @err.flush
+      outcome = panel.run(@panel_launcher || method(:spawn_panel), say: ->(line) { @out.puts line }, warn: ->(line) { @err.puts line })
+      handoff_path = record.handoff_path(phase)
+      h = record.handoff(phase) || {}
+      h["panel"] = panel.block(outcome)
+      h["executed_by"] = { "runner" => "soft-foundry phase run --panel", "shell" => members.first.shell, "fresh_context" => true,
+                           "started_at" => started.iso8601, "finished_at" => Time.now.utc.iso8601,
+                           "exit_status" => outcome.consensus_status || 1,
+                           "previous_phase" => previous, "session_id" => members.first.session_id, "cwd" => @root }
+      unless outcome.failures.empty?
+        h["status"] = "blocked"
+        h["blocking"] = Array(h["blocking"]) + outcome.failures.map { |f| "panel failed: #{f}" }
+      end
+      if outcome.outcome == "split" && outcome.failures.empty?
+        h["status"] = "blocked"
+        blocking = Array(h["blocking"])
+        blocking << "panel split: the panel did not agree after #{outcome.rounds} rounds; a person decides between the positions in #{phase.output}/panel/ARGUMENT.md" unless blocking.any? { |b| b.to_s.start_with?("panel split") }
+        h["blocking"] = blocking
+      end
+      File.write(handoff_path, YAML.dump(h))
+      if outcome.outcome == "split" && outcome.failures.empty?
+        meta = record.metadata
+        meta["status"] = "awaiting_human"
+        File.write(meta_path, YAML.dump(meta))
+        @err.puts "! warn panel: split after #{outcome.rounds} #{outcome.rounds == 1 ? 'round' : 'rounds'}; the change is parked at awaiting_human until a person records the decision under human_decisions (boundary: panel split)"
+      end
+      outcome.failures.each { |f| @err.puts "✗ fail panel: #{f}" }
+      result = Gate.new(record, git: git).evaluate(phase)
+      print_result(result)
+      print_advisories(record)
+      return EXIT_TARGET if outcome.outcome != "agreed" || !outcome.failures.empty?
+      result.failed? ? 2 : 0
+    end
+
+    # Starts each launch as a child process with its panel environment, all
+    # at once, and waits for every one. Output is the member's own.
+    def spawn_panel(launches)
+      executables = launches.map { |l| Shell.resolve(l.executable) }
+      pids = launches.zip(executables).map do |l, executable|
+        Process.spawn(l.env, executable, *l.args, chdir: @root)
+      end
+      pids.map do |pid|
+        Process.wait(pid)
+        $?.exitstatus || 1
+      end
     end
 
     # Runs the coding shell as a child with inherited stdio, in the
@@ -1244,6 +1354,11 @@ module SoftFoundry
                                                   gates the phase when the session returns. Without --shell,
                                                   review and judge pick an installed shell on a different
                                                   provider from implementation and remediation
+          soft-foundry phase run <phase> --panel SHELL,SHELL[,...] [--max-rounds N] [--shell-arg SHELL=ARG]... [--dry-run]
+                                                  run a panel phase (panel_phases in .ai/workflow.yml) as two
+                                                  to four agents: independent drafts, turns in ARGUMENT.md
+                                                  until they agree, then one consensus output; a split parks
+                                                  the change at awaiting_human
           soft-foundry budget status [--change SLUG]
                                                   show billing mode and compare recorded spend against
                                                   .ai/policies/budget.yml (no budget on a subscription)

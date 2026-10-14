@@ -1,0 +1,30 @@
+---
+commit_sha: 4f3b2dadb445605f059bc1ff942d0de183d35044
+artifacts:
+- path: evidence/tests.log
+  produced_by: full suite
+  sha256: 4be3a4cf548ff783175f46388c855b2b94f38af5c4977591bf1e307d70421cd6
+- path: evidence/red-at-553030c.log
+  produced_by: panel tests at the first RED commit
+  sha256: 33323c9971b89cd1203e486a3b6b85fc7ff95ad10802e17091350ad41e9635fb
+- path: evidence/red-at-2ca6ff2.log
+  produced_by: panel tests at the remediation RED commit
+  sha256: 86a4e9b11c11c0ffe3f1c6b5001cf202d2e3704f9bb72aed42246830270fa1dd
+- path: evidence/red-at-f638ea4.log
+  produced_by: panel tests at the --add-dir RED commit
+  sha256: a8061077d9f06bec0e9a80cf792c892b535972dbcb7a64c011de4c0bfc76092b
+- path: evidence/check.log
+  produced_by: soft-foundry check
+  sha256: cf65eec86015409511e1d045d8d7f1decc81271a24c39f5a0c3d7b1a63e83857
+- path: evidence/syntax-warnings.log
+  produced_by: ruby -wc
+  sha256: 78f00d54e0d50a395822fc564e0fbf04bcd20c1d57b0e169f3edd95f90006365
+- path: evidence/scan-against-self.log
+  produced_by: soft-foundry scan
+  sha256: a1d096689615b5020d1bb58002f53b7a7629def96385a97bf79dc3f0ec0a6c5d
+- path: evidence/red-at-f69d6f2.log
+  produced_by: panel tests at the REM-002 RED commit
+  sha256: 17123b116ce95b273b3a69606122919063be4e7bca2a326c6d942188a85c8ffd
+- path: evidence/red-at-d7dca1a.log
+  produced_by: panel tests at the REM-003 RED commit
+  sha256: 59323374ce436f93a19d92c2ad666ce283581c128c03cc0f7cf66f976cba5e8f

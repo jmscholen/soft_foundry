@@ -1,0 +1,10 @@
+---
+commit_sha: 4f3b2dadb445605f059bc1ff942d0de183d35044
+artifacts:
+- path: evidence/live-panel-transcript.log
+  produced_by: 'live panel: Claude Code and Grok on a scratch specification phase
+    (second run, after REM-001)'
+  sha256: 68e67360b512698004cc0b23dfa16c2714f07b2fb7aa506d9d771dae928126ec
+- path: evidence/live-ARGUMENT.md
+  produced_by: the ARGUMENT.md the live panel wrote
+  sha256: cde1fa7b5a318a84c7005dfe13f881c5acd4614e474ebaae810ab316c48d0901
