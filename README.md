@@ -79,7 +79,11 @@ soft-foundry gate verify              # evaluate one phase's completion gate
 soft-foundry gate all --change <slug>
 ```
 
-A gate passes only when the phase's required files exist with no `TBD` placeholders, the handoff is valid, nothing is blocking, the predecessor phase is complete, and commit-bound evidence is not stale. Evidence is stale when any file in the `APP`, `TESTS`, or `INFRA` path groups changed after the recorded commit, measured on the record's own branch while that branch exists (so a change stacked on another change's branch does not stale the earlier record) and on the worktree otherwise. See `.ai/schemas.md`.
+A gate passes only when the phase's required files exist with no `TBD` placeholders, the handoff is valid, nothing is blocking, the predecessor phase is complete, and commit-bound evidence is not stale. Evidence is stale when any file in the `APP`, `TESTS`, or `INFRA` path groups changed after the recorded commit, measured on the record's own branch while that branch exists (so a change stacked on another change's branch does not stale the earlier record) and on the worktree otherwise, and also when the specification was re-recorded after the evidence (its criteria are no longer the criteria). See `.ai/schemas.md`.
+
+The specification is locked once recorded: on the gated track from the commit that recorded the completed specify phase (the newest commit touching its handoff while it says complete), on the iterative track from `change vet`. The gate's `specification locked` check fails on any later change under `02-specification/`, committed or not; a requirement change is made by rerunning the specification phase, after which every commit-bound phase is stale and is redone against the new criteria.
+
+What a change may waive is bound to its declared risk. `.ai/workflow.yml` `waivable_by_risk` lists the phases a change of each risk may name in `skipped_phases` (shipped: low may waive discover, specify, threat_model, plan, attack, and learn; medium only discover and plan; high nothing). A phase not listed for the risk is required; an unclassified risk waives nothing but the globally optional phases; review and judgment are never waived, and `check` refuses a rule that names them. The gate reports this as `waivers permitted` on the first phase, so every `change status` and `ci` shows it, and `change close` refuses a record whose judgment is not complete (`--force` is the person's explicit decision to close without one).
 
 `soft-foundry change status [slug] --json` prints the same state as data: every gate with each check's outcome and detail, the advisories, the recorded timeline, and the spend ledger, with the same exit code as the text form. `soft-foundry change list --json` prints every record with one cell per phase; closed records report what their handoffs recorded and are not gated again. Both carry `"version": 1` and are not yet a stable contract.
 
@@ -119,7 +123,7 @@ soft-foundry doctor                            # reports which hosts have the ho
 
 The guard itself is host-neutral: it reads a JSON tool call on stdin and exits 2 to refuse. Claude Code and Codex share the hook file shape and the `PreToolUse` event. Codex names its shell tool `Bash` too, may send `command` as an array, and reports file edits as `apply_patch` (or under the `Edit`/`Write` aliases) with the patch text in `command`; the guard reads every path the patch adds, updates, deletes, or moves to and checks each against the write sets. Codex runs a project hook only after a person reviews and trusts it with `/hooks`. Grok (checked against 1.0.30) runs the Claude Code entry from `.claude/settings.json`, but only in a folder it trusts (`/hooks-trust` or `--trust`), and sends its own tool names: `write` and `search_replace` are checked as writes, `read_file` (path in `target_file`) as a read, and `run_terminal_command` as a shell command. `phase run --shell grok` reminds you of the trust step.
 
-The mode is declared in `.ai/policies/enforcement.yml` (`warn` by default: report the violation, let the call through, log it to the machine-local `.soft-foundry/guard.log`; `block`: refuse it; `off`). A machine can override it in `.soft-foundry/enforcement.yml` or with `SOFT_FOUNDRY_GUARD=warn|block|off`, which wins over both. Outside a change branch, or once a change is closed, nothing is guarded.
+The mode is declared in `.ai/policies/enforcement.yml`: `block` by default since 0.21.0 (refuse the call: the hook exits 2 with the reason, and the refusal is logged to the machine-local `.soft-foundry/guard.log`); `warn` (report the violation, let the call through, log it); `off`. A maintainer's machine can override it in `.soft-foundry/enforcement.yml` or with `SOFT_FOUNDRY_GUARD=warn|block|off`, which wins over both. Neither can be reached from inside a guarded session: the guard treats its own configuration (`.ai/policies/enforcement.yml`, `.soft-foundry/enforcement.yml`, and the hook entries in `.claude/settings.json`, `.claude/settings.local.json`, and `.codex/hooks.json`) as denied to every skill, for the write tools and for any shell command that names one, and a command's environment ends with the command. Outside a change branch, or once a change is closed, nothing is guarded. `doctor` and `hooks install` print the mode in effect and where it comes from.
 
 What is checked: Edit, Write, MultiEdit, NotebookEdit (and Grok's `write` and `search_replace`) against the write and deny_write sets; Read (`read_file`) against deny_read only; Bash (`run_terminal_command`) against the deny sets only, because the guard cannot know what a command writes, so it refuses a command that names a denied path and passes everything else. A restriction the guard cannot see is still policy the agent must honor, as `AGENTS.md` says. Every refusal or warning names the tool, the path, the skill, and the mode:
 
@@ -203,7 +207,7 @@ If a named phase's provider is not recorded, the known ones are still avoided an
 
 **Findings name the failure they prevent.** Every review finding states the concrete input or state and the wrong result it leads to. In the review handoff, every finding above `minor` (whatever its severity word) carries it as `failure:`, and the gate's `findings explained` check fails without it; a finding that cannot name one is minor. Asking for defensive additions (validation, rescues, or nil checks for states the code cannot reach) is not blocking or major unless the reviewer names the input that reaches the state.
 
-A completed review or judgment whose handoff carries no `executed_by` from the runner gets an advisory: it was performed by whatever session was already open, and separation of duties rests on the handoff's notes. If the guard hook is not installed, `phase run` says so before launching, since the session's tool calls would then be checked by nothing.
+Every phase whose skill declares `evidence: commit_bound` (verification, evaluation, attack, review, judgment) prefers a fresh session the same way: `soft-foundry phase run verify`, `evaluate`, or `attack` works like `review` and `judge`. A completed one whose handoff carries no `executed_by` from the runner gets an advisory on every gate run: it was performed by whatever session was already open, most likely the one that implemented the change, and separation of duties rests on the handoff's notes. If the guard hook is not installed, `phase run` says so before launching, since the session's tool calls would then be checked by nothing.
 
 The session ID lets you get back into a phase run's session (`soft-foundry resume <change> <phase>`). Claude Code and Grok are handed one up front (`--session-id`, `-s`); Codex picks its own, so the runner takes it from the session ledger when the session hook is installed (see "Finding and resuming sessions"), and leaves it null otherwise.
 
@@ -232,7 +236,7 @@ Panels are allowed for the phases in `panel_phases` in `.ai/workflow.yml` (speci
 
 The lifecycle above is a stage-gate process: intent, specification, threat model, and plan before code, evidence bound from the first commit. That is the right shape for assurance and the wrong shape for shaping a feature with a person by trying it. `.ai/workflow.yml` therefore declares two tracks that share the same phases and the same gate:
 
-- **`gated`** runs every phase in lifecycle order. The specification locks when its phase completes. This is the repository default here.
+- **`gated`** runs every phase in lifecycle order. The specification locks at the commit that records its completed phase. This is the repository default here.
 - **`iterative`** starts with an **exploring** stage. The agent iterates with the person, deploys only to the development environment recorded in `.ai/repository.yml`, keeps `02-specification/` as a living draft, and appends each round to `changes/<slug>/exploration/iterations.yml`. Nothing from that stage is evidence, and the gate refuses to let any phase from implementation onward be complete while the change is exploring. When the person accepts the feature, `change vet` records who and at which commit; the specification is locked there, and the phases from implementation onward apply exactly as on the gated track. Discover, threat model, and plan are not required before implementation on this track (a change may still run them).
 
 ```bash
@@ -249,7 +253,7 @@ The exploring stage's skill is `.ai/skills/exploration/`. `check` verifies that 
 
 ### Closing a change record
 
-A merged change's record has to be marked `closed`, or `soft-foundry ci` fails once that record has actually reached judgment: an un-closed record stays "live" to the gate checker, so a later edit to a path group its evidence covers will read as making that evidence stale.
+A merged change's record has to be marked `closed`, or `soft-foundry ci` fails once that record has actually reached judgment: an un-closed record stays "live" to the gate checker, so a later edit to a path group its evidence covers will read as making that evidence stale. A record closes only with a completed judgment (`.ai/workflow.yml` `rules.final_judgment_required`); `--force` closes one without, as the person's recorded decision.
 
 ```bash
 soft-foundry change close <slug>                    # refuses unless the judged commit is merged
@@ -290,6 +294,26 @@ advisory: 2 issues to address before my-change goes live (informational, does no
 When the review finds that the policy text itself must change for the code to be honest, that is a legal commitment under `.ai/policies/human-boundaries.yml`: the change is parked with `status: awaiting_human` until a person decides, and the decision is recorded under `human_decisions` in `metadata.yml`. Level 5 of the maturity model requires the standard to be in force.
 
 Every line `soft-foundry` prints carries its outcome as a word (`pass`, `fail`, `warn`, `skip`, `created`, `conflict`) so the output means the same thing in a screen reader, a CI log, or a terminal that cannot render the glyph next to it.
+
+### Proving the gate: harness evals
+
+A gate that has never refused anything has unknown power. `.ai/harness-evals/cases/` holds executable cases that measure the control plane itself, and `soft-foundry eval` runs them:
+
+```sh
+soft-foundry eval                                   # every gate case; one status line each, then a summary; exit 0 only if all pass
+soft-foundry eval --case judgment-waived --json     # some cases, as data
+soft-foundry eval --live --shell claude             # also the live cases, each in a fresh session through `phase run`
+```
+
+A **gate case** plants a defective change record in a scratch git repository carrying this repository's control plane (a review finding with no failure named, evidence left stale by a code change, a placeholder in a result, an invisible character, a secret-shaped canary, a RED commit that is the GREEN commit, a waived judgment, an attack waived at medium risk, an implementation recorded while exploring, a requirement edited after the lock, a handoff complete with a blocking condition) and asserts which gate check refuses it; a well-formed control must pass. The shipped suite runs in about ten seconds, `ci` runs it after the control-plane lint, and it ships with the control plane, so an application repository proves its installed gate with the same command. A **live case** plants a defect in a scratch application and a record that claims it is fine, runs the case's phase (review, in the shipped case) in a fresh session on the shell you name, and passes when the session's findings name the defect; a miss is recorded as the result, with the shell and the model the session wrote. Live cases run only with `--live` and need a logged-in shell.
+
+```
+✓ pass eval judgment-waived: intake waivers permitted fail, as expected
+- skip eval review-finds-planted-defect: live case; run `soft-foundry eval --live --shell claude|codex|grok --case review-finds-planted-defect`
+✓ pass eval: 12 passed, 0 failed, 0 errors, 1 skipped
+```
+
+Every skill is denied `.ai/harness-evals/` (read and write), so the agents being measured cannot see or tailor the cases, and `eval` prints ids and outcomes, never case content. `soft-foundry check` lints every case; `.ai/harness-evals/README.md` describes the case format and the tokens (`${COMMIT}`, `${APP_FILE}`, secret-shaped and invisible canaries the runner builds so that no case file carries one). Scratch repositories live under the system temp directory and are removed when the case ends, exceptions included; a live session runs as you in that directory with the host's own permission mode, which is the same limit `phase run` has.
 
 ## Updating
 

@@ -1,0 +1,56 @@
+# at ac3e8cfe995929ce40d334636e750d4625deffe9
+$ guard Edit app
+exit 0
+$ guard Edit spec abs
+exit 0
+$ guard Write migrate
+exit 0
+$ guard Bash rspec
+exit 0
+$ guard Grep app
+exit 0
+$ guard Edit rules
+✗ fail guard: Edit .ai/rules/rails.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: blo
+exit 2
+$ guard Edit verification results
+✗ fail guard: Edit changes/refund-cap/06-verification/results.md is in implementation's deny_write set; the implementation skill's permissions.yml d
+exit 2
+$ guard Read harness-evals
+✗ fail guard: Read .ai/harness-evals/README.md is in implementation's deny_read set; the implementation skill's permissions.yml does not allow it (m
+exit 2
+$ guard Bash sed enforcement
+✗ fail guard: Bash .ai/policies/enforcement.yml names the guard's own configuration; no skill may touch it from the shell; the implementation skill'
+exit 2
+$ guard Write claude settings
+✗ fail guard: Write .claude/settings.json is the guard's own configuration; no skill may write it; the implementation skill's permissions.yml does n
+exit 2
+$ guard cd then relative edit
+✗ fail guard: Bash .ai/policies/enforcement.yml names the guard's own configuration; no skill may touch it from the shell; the implementation skill'
+exit 2
+$ guard chained cd ..
+✗ fail guard: Bash .ai/policies/enforcement.yml names the guard's own configuration; no skill may touch it from the shell; the implementation skill'
+exit 2
+$ guard brace
+✗ fail guard: Bash .ai/policies/enforcement.yml names the guard's own configuration; no skill may touch it from the shell; the implementation skill'
+exit 2
+$ guard tilde user
+✗ fail guard: Bash could not be decided (ArgumentError: user nosuchuserxyz doesn't exist); refusing it; the guard refuses what it cannot decide (mod
+exit 2
+$ guard NUL
+✗ fail guard: Bash could not be decided (ArgumentError: string contains null byte); refusing it; the guard refuses what it cannot decide (mode: bloc
+exit 2
+$ guard Grep harness-evals
+✗ fail guard: Grep .ai/harness-evals searches inside implementation's deny_read set; the implementation skill's permissions.yml does not allow it (m
+exit 2
+$ guard Glob harness-evals
+✗ fail guard: Glob .ai/harness-evals searches inside implementation's deny_read set; the implementation skill's permissions.yml does not allow it (m
+exit 2
+$ guard Edit symlink to policy
+✗ fail guard: Edit .ai/policies/enforcement.yml is the guard's own configuration; no skill may write it; the implementation skill's permissions.yml 
+exit 2
+$ guard Write .soft-foundry
+✗ fail guard: Write .soft-foundry/guard-baseline.yml is the guard's own configuration; no skill may write it; the implementation skill's permissions
+exit 2
+$ warn override
+! warn guard: Edit .ai/rules/rails.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: warn,
+exit 0

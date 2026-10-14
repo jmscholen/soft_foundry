@@ -1,0 +1,26 @@
+# at ac3e8cfe995929ce40d334636e750d4625deffe9: init (LANG unset), check, change new, eval; fresh Rails scratch repository
+$ init --no-onboard: summary created 200, exit 0
+$ check: control plane 16 phases
+$ change new refund-cap: created changes/refund-cap with 16 phase directories; track gated
+metadata: accessibility: true   # set by change new: user-facing framework detected (rails)
+.ai/repository.yml frameworks detected
+✓ pass control plane: 16 phases, 17 skills, no errors
+  frameworks:
+  - rails
+  databases: []
+  testing:
+  - ruby
+infrastructure:
+14:  testing:
+15-  - ruby
+16-infrastructure:
+17-  detected: []
+--
+74:  testing.strategy_detected:
+✓ pass eval secret-shape-in-evidence: verify content clean fail, as expected
+✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
+✓ pass eval: 12 passed, 0 failed, 0 errors, 1 skipped
+     12       "outcome": "pass",
+      1       "outcome": "skip",
+      1   "version": 1,
+✓ pass guard hook (claude: installed, codex: not installed; mode: block, repository policy (.ai/policies/enforcement.yml))

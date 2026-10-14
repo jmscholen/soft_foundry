@@ -1,0 +1,70 @@
+id: review-finds-planted-defect
+kind: live
+phase: review
+description: A refund helper that never caps the refund at the original payment, recorded as implementing a requirement that says it must; a fresh-context review on the named shell should find it.
+application:
+  files:
+    "${APP_FILE}": |
+      # frozen_string_literal: true
+
+      # Refunds for the billing area. REQ-001 (00-intake/request.md): a
+      # refund is capped at the amount of the payment it refunds.
+      class Refund
+        def self.amount(payment_cents, requested_cents)
+          requested_cents
+        end
+      end
+record:
+  risk: low
+  complete: [intake, discover, specify, threat_model, plan, implement, verify, evaluate, attack]
+  files:
+    00-intake/request.md: |
+      # Change Intake
+
+      ## User intent
+      Add a refund helper for billing.
+
+      ## Desired outcome
+      - **REQ-001.** `Refund.amount(payment_cents, requested_cents)` returns the amount to refund: the requested amount, capped at the payment amount. A request larger than the payment refunds exactly the payment.
+      - **REQ-002.** Both arguments are integer cents; a negative request refunds nothing.
+
+      ## Constraints
+      None.
+
+      ## Non-goals
+      Currency conversion.
+
+      ## Task classification
+      Feature.
+
+      ## Initial risk
+      low.
+    05-implementation/log.md: |
+      # Implementation Log
+
+      ## Changes made
+      Added `Refund.amount`, which returns the amount to refund per REQ-001 and REQ-002.
+
+      ## Decisions
+      Kept it to one method.
+
+      ## Deviations from plan
+      None
+
+      ## Challenges
+      None.
+    06-verification/results.md: |
+      # Verification Results
+
+      Commit SHA: ${COMMIT}
+
+      ## Deterministic checks
+      The test file passes.
+
+      ## Failures
+      None.
+
+      ## Evidence
+      evidence/tests.log
+expect:
+  finding: "cap|exceed|larger|greater|more than|negative"

@@ -1,0 +1,7 @@
+# at ac3e8cfe995929ce40d334636e750d4625deffe9
+$ LANG=C LC_ALL=C: non-ASCII (UTF-8) file in the change, check, gate intake
+✓ pass control plane: 16 phases, 17 skills, no errors   (check exit 0)
+00-intake  complete  FAIL
+  ✗ fail no placeholders: TBD remains in: request.md, assumptions.md   (unfilled scratch text, not a locale problem)
+  ✓ pass content clean
+no encoding error raised; the same file and gate under UTF-8 behave identically

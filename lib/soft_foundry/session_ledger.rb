@@ -6,6 +6,7 @@ require "yaml"
 require "date"
 require "fileutils"
 require "shellwords"
+require_relative "text"
 require_relative "errors"
 require_relative "git"
 require_relative "content_scan"
@@ -145,7 +146,7 @@ module SoftFoundry
       File.open("#{@path}.lock", File::RDWR | File::CREAT | File::NOFOLLOW, 0o600) do |lock|
         lock.flock(File::LOCK_EX)
         raise TargetError, "#{@path} is a symlink; refusing to write through it" if File.symlink?(@path)
-        lines = File.file?(@path) ? File.readlines(@path, chomp: true).reject(&:empty?).map { |l| parse(l) } : []
+        lines = File.file?(@path) ? SoftFoundry.read_text(@path).lines(chomp: true).reject(&:empty?).map { |l| parse(l) } : []
         result = yield lines
         tmp = "#{@path}.#{Process.pid}.tmp"
         File.open(tmp, File::WRONLY | File::CREAT | File::TRUNC | File::NOFOLLOW, 0o600) do |f|

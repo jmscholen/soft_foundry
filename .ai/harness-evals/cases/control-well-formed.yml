@@ -1,0 +1,9 @@
+id: control-well-formed
+kind: gate
+description: A well-formed record completed through verification, bound to its commit, with nothing planted, passes the verification gate. The control that proves the suite is not failing everything.
+record:
+  risk: low
+  complete: [intake, discover, specify, threat_model, plan, implement, verify]
+expect:
+  phase: verify
+  outcome: pass

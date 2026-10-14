@@ -61,35 +61,37 @@ class CLIChangeCloseTest < Minitest::Test
     end
   end
 
-  # This repo's own real, lightweight changes (self-update, maturity-report,
-  # observability-standard-dashboard, change-close-command itself) routinely
-  # skip discover/specify/threat_model/plan/attack/review/judge/learn with a
-  # recorded rationale rather than completing them - the maintainer's own
-  # merge decision stands in for judgment. finished_commit_sha must treat
-  # that as "reached the end of its lifecycle" too, using the last phase
-  # that actually did complete (here, evaluate). Regression: an earlier
-  # build of this check required the literal judge/learn phase to be
-  # complete, which refused to close every change of this exact shape -
-  # including, on first real use, change-close-command's own record.
-  def test_close_succeeds_for_a_lightweight_change_that_skips_to_the_maintainers_merge
+  # This repo's own early changes routinely waived judgment with a recorded
+  # rationale ("the maintainer's merge is the judgment point") and closed.
+  # Since changes/factory-readiness (REQ-FR-007) a change is complete only
+  # with a final judgment: a low-risk change may still waive the phases
+  # its risk allows, but judgment is never a waived end, and `change close`
+  # refuses without it unless --force says the person decided otherwise.
+  def test_close_refuses_a_lightweight_change_that_waived_judgment_unless_forced
     with_fixture_repo do |dir|
       sh(dir, "git", "checkout", "-qb", "change/lite1")
       cli(dir, "change", "new", "lite1", "--title", "x")
       record = SoftFoundry::ChangeRecord.new(dir, "lite1", control_plane: SoftFoundry::ControlPlane.new(dir))
       commit_all(dir, "record lite1")
       sha = head(dir)
-      %w[intake implement verify evaluate].each { |id| complete_phase!(record, id, sha: sha) }
-      skipped = %w[discover specify threat_model plan attack review judge learn].map { |p| {"phase" => p, "rationale" => "maintainer's merge is the judgment point"} }
+      %w[intake implement verify evaluate review].each { |id| complete_phase!(record, id, sha: sha) }
+      skipped = %w[discover specify threat_model plan attack learn].map { |p| {"phase" => p, "rationale" => "low risk"} }
       m = YAML.safe_load_file(record.dir + "/metadata.yml", permitted_classes: [Time, Date])
+      m["risk"] = "low"
       m["skipped_phases"] = skipped
       File.write(record.dir + "/metadata.yml", YAML.dump(m))
-      commit_all(dir, "complete lite1 through evaluation, skip the rest")
+      commit_all(dir, "complete lite1 through review, waive what low risk may")
 
       sh(dir, "git", "checkout", "-q", "main")
       sh(dir, "git", "merge", "-q", "--no-ff", "change/lite1", "-m", "merge lite1")
 
-      assert record.reached_lifecycle_end?
+      refute record.reached_lifecycle_end?
       code, out = cli(dir, "change", "close", "lite1")
+      assert_equal 1, code, out
+      assert_includes out, "14-judgment is pending"
+      refute_equal "closed", record.metadata["status"]
+
+      code, out = cli(dir, "change", "close", "lite1", "--force")
       assert_equal 0, code, out
       assert_equal "closed", record.metadata["status"]
     end

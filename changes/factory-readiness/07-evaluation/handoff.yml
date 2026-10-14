@@ -1,0 +1,67 @@
+---
+phase: 07-evaluation
+skill: evaluation
+status: complete
+commit_sha: ac3e8cfe995929ce40d334636e750d4625deffe9
+started_at: '2026-10-14T18:55:49Z'
+completed_at: '2026-10-14T20:20:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- evaluation-plan.md
+- journeys.yml
+- results.md
+- evidence/manifest.yml
+blocking: []
+findings:
+- id: EVAL-F1
+  severity: minor
+  summary: Live eval on claude with no shell arguments fails (0 findings recorded)
+    because the unattended session cannot write 13-review; it passes with -- --allowedTools
+    ... --permission-mode acceptEdits. README.md does not say so.
+  failure: eval --live --shell claude --case review-finds-planted-defect, run as documented,
+    reports fail and exits 2 although the reviewer found the planted defect (reproduced
+    at ac3e8cf).
+- id: EVAL-F2
+  severity: minor
+  summary: Rails profile records testing entry ruby, not an rspec-named entry; REQ-FR-008
+    wording says rspec-style testing.
+- id: EVAL-F3
+  severity: minor
+  summary: AC-FR-002, 003, 004, 012, 013 and the positive side of AC-FR-006 were not
+    exercised as user journeys (blocked, covered by verification); this skill cannot
+    read the harness-evals README so that part of AC-FR-021 is unjudged.
+- id: EVAL-F5
+  severity: minor
+  summary: README guard section does not describe the Grep/Glob matcher, cd/glob/symlink/brace
+    handling, the PostToolUse post-call check (guard --after, shell-only baseline,
+    young-baseline rule, tamper log), or that existing repositories rerun hooks install
+    --claude; owed in 09-remediation.
+- id: EVAL-F6
+  severity: minor
+  summary: The planted-case eval journeys (reversed expectation, malformed YAML, unknown
+    check, oversize case) were not re-run at this commit because this skill is denied
+    harness-evals; eval code is unchanged since 9307b23. Verification at HEAD owns
+    them.
+next: attack
+notes: 'Re-run at ac3e8cf because the earlier evaluation (bound to 85e9a77) went stale
+  when REM-006 changed the guard and hooks. EVAL-F7 (major at 85e9a77) is closed:
+  Scenarios A, B and corrected C pass, and in-call tamper, overlap and symlink still
+  restore and refuse. Journeys run by hand against the real CLI in a fresh scratch
+  Rails repository under the session scratchpad. Live eval run twice at HEAD (first
+  run failed on the default invocation, second passed). Not exercised by hand: invalid
+  UTF-8 scrubbing, eval cases whose gate raises, planted eval cases, fake-shell live
+  case, positive fresh-context advisory, Codex hooks - covered by verification. executed_by
+  was left as the runner wrote it.'
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-14T19:22:29Z'
+  finished_at: '2026-10-14T19:28:12Z'
+  exit_status: 0
+  previous_phase: verify
+  session_id: 1fc84b95-c3c5-42d1-a8d9-0320906644a4
+  cwd: "/home/user/soft_foundry"

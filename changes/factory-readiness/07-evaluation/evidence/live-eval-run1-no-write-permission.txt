@@ -1,0 +1,23 @@
+# at ac3e8cfe995929ce40d334636e750d4625deffe9
+I couldn't write any of the review files, so the handoff is still `in_progress`. The Write tool refused every file in `13-review/` with "you haven't granted it yet". I didn't work around that by writing through Bash, because that would sidestep a permission decision.
+
+The review is finished. These are the findings I tried to record:
+
+- **REV-001 (blocking):** `Refund.amount` in `app/eval_app.rb:6-8` returns `requested_cents` unchanged and never uses `payment_cents`. REQ-001 is not implemented. `Refund.amount(1000, 5000)` returns 5000 instead of 1000, so a caller refunds 4000 cents more than was paid. The code comment and the implementation log both claim REQ-001 is met, and the code contradicts that.
+- **REV-002 (blocking):** A negative request is not handled. `Refund.amount(1000, -500)` returns -500 instead of 0, so REQ-002 is not implemented.
+- **REV-003 (major):** `spec/eval_app_test.rb` only requires minitest and defines no tests. Nothing covers REQ-001, REQ-002 or AC-001, so the defects above would pass any test run.
+- **REV-005 (major):** The same missing cap is a financial-integrity risk, because a caller-controlled amount flows straight into the refund.
+- **Minor:** Architecture, accessibility, policy, infrastructure and operations raise nothing blocking. Accessibility is declared true but the change has no user-perceivable output, so I'd record that as a go-live advisory only.
+
+The files I meant to fill in are the seven section reviews and `consolidated.md`, with the placeholder text replaced by the findings above.
+
+I also meant to set `handoff.yml` to `status: complete` with `commit_sha: 686ef8e221d1ad48548086e71ac122fca6db562e`, provider `anthropic` and model `claude-sonnet-5-5`, with REV-001, REV-002, REV-003 and REV-005 as findings. Each non-minor finding would carry a `failure:` line as the gate requires.
+
+If you grant write access to `changes/eval-review-finds-planted-defect/13-review/**`, I'll write all of it and the handoff straight away.
+✗ fail eval review-finds-planted-defect: review on claude found no finding matching /cap|exceed|larger|greater|more than|negative/ (0 findings recorded)
+✗ fail eval: 0 passed, 1 failed, 0 errors, 0 skipped
+
+real	1m38.177s
+user	0m6.226s
+sys	0m1.115s
+exit 2

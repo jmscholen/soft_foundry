@@ -1,0 +1,65 @@
+# at ac3e8cfe995929ce40d334636e750d4625deffe9
+# Re-run at ac3e8cf (after REM-006), fresh scratch Rails repository
+== Scenario A: Edit precedes, maintainer edits policy in own shell, then Bash
+pre(Edit) exit 2
+✗ fail guard: Edit app/models/user.rb is in intake's deny_write set; the intake skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is documented in README.md)
+guard.log
+init.lock
+$ maintainer set mode warn
+pre(Bash) exit 0
+after exit 0
+29:  mode: warn
+== Scenario B: Read/Grep/Glob precede, then hooks uninstall --claude, then Bash
+pre(Read) exit 0
+pre(Grep) exit 0
+pre(Glob) exit 0
+guard.log
+init.lock
+removed guard hook from .claude/settings.json
+uninstall exit 0
+pre(Bash) exit 0
+after exit 0
+settings.json
+✗ fail guard hook (claude: not installed, codex: not installed; mode: block, repository policy (.ai/policies/enforcement.yml)); install with `soft-foundry hooks install --claude` or `--codex`
+guard mode: block (repository policy (.ai/policies/enforcement.yml))
+== Scenario B2: stale baseline from interrupted Bash, then hooks install/uninstall clears it
+pre(Bash) exit 0
+guard-baseline.yml
+guard.log
+init.lock
+removed guard hook from .claude/settings.json
+guard.log
+init.lock
+guard mode: block (repository policy (.ai/policies/enforcement.yml))
+== Scenario C: Bash-only, edit between calls stands
+pre(Bash) exit 0
+after exit 0
+pre(Bash) exit 0
+✗ fail guard: .ai/policies/enforcement.yml changed during the tool call and was restored to the state before it (tamper logged to .soft-foundry/guard.log; mode: block)
+after exit 2
+29:  mode: block
+== Scenario D: tamper inside a Bash call is still restored and refused
+pre(Bash) exit 0
+✗ fail guard: .ai/policies/enforcement.yml changed during the tool call and was restored to the state before it (tamper logged to .soft-foundry/guard.log; mode: block)
+after exit 2
+29:  mode: block
+== Scenario E: symlinked settings mid-call
+pre(Bash) exit 0
+✗ fail guard: .claude/settings.json changed during the tool call and was restored to the state before it (tamper logged to .soft-foundry/guard.log; mode: block)
+after exit 2
+regular file
+{"hooks":{}}
+identical
+== Scenario C (corrected): Bash call completes; maintainer edits between calls (after the check, before the next pre); next Bash call
+pre(Bash) exit 0
+after exit 0
+$ maintainer set mode warn between calls
+pre(Bash) exit 0
+after exit 0
+29:  mode: warn
+== Scenario C2: the shell's pre-call ran, an Edit call (non-Bash) overlaps, maintainer edits mid-Bash? (tamper still caught)
+pre(Bash) exit 0
+pre(Read) exit 0
+✗ fail guard: .ai/policies/enforcement.yml changed during the tool call and was restored to the state before it (tamper logged to .soft-foundry/guard.log; mode: block)
+after exit 2
+29:  mode: block

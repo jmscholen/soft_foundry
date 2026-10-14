@@ -40,7 +40,7 @@ module SoftFoundry
 
       # The text Soft Foundry owns inside a target's AGENTS.md.
       def agents_interior
-        body = File.read(File.join(root, "AGENTS.md"))
+        body = SoftFoundry.read_text(File.join(root, "AGENTS.md"))
         if body.include?(BEGIN_MARKER) && body.include?(END_MARKER)
           body[(body.index(BEGIN_MARKER) + BEGIN_MARKER.length)...body.index(END_MARKER)].strip
         else
@@ -57,7 +57,10 @@ module SoftFoundry
         raise InternalError.new("packaged entry traverses directories: #{rel}", component: "package") if rel.split("/").include?("..")
         return nil unless File.file?(abs)
         return nil if EXCLUDED.include?(rel)
-        return nil if rel.start_with?(".ai/harness-evals/") && rel != ".ai/harness-evals/README.md"
+        # The harness evals ship (README and cases) so an installed control
+        # plane can prove its own gate with `soft-foundry eval`; anything
+        # else under harness-evals/ is this repository's own.
+        return nil if rel.start_with?(".ai/harness-evals/") && rel != ".ai/harness-evals/README.md" && !rel.start_with?(".ai/harness-evals/cases/")
         Entry.new(path: rel, bytes: File.binread(abs))
       end
 

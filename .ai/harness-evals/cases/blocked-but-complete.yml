@@ -1,0 +1,13 @@
+id: blocked-but-complete
+kind: gate
+description: A verification handoff marked complete while its blocking list still names an unresolved condition fails the no blocking conditions check.
+record:
+  risk: low
+  complete: [intake, discover, specify, threat_model, plan, implement, verify]
+  handoff:
+    verify:
+      blocking: ["CHECK-001 failed and was not rerun"]
+expect:
+  phase: verify
+  check: no blocking conditions
+  outcome: fail

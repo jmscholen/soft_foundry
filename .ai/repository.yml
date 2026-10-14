@@ -1,142 +1,238 @@
 version: 1
 
 # Committed repository capability profile. Populated by repository discovery
-# for change init-command at commit cc348f93f3d265af3f92f7fa7d0b09cbbf8a520a. Evidence is repository-relative
-# and contains no credentials or machine-local provider state.
+# for change init-command at commit cc348f93f3d265af3f92f7fa7d0b09cbbf8a520a and
+# brought current by changes/factory-readiness/01-discovery. Evidence is
+# repository-relative and contains no credentials or machine-local provider
+# state. The maturity block is computed by ControlPlane#score_maturity from the
+# capabilities below, never written by hand.
 
 repository:
   assessed: true
-  assessed_at: "2026-09-09T15:35:27Z"
-  commit_sha: cc348f93f3d265af3f92f7fa7d0b09cbbf8a520a
-  assessed_by: changes/init-command/01-discovery
-
+  assessed_at: '2026-10-14T14:56:30Z'
+  commit_sha: 7f6de0d58b756ae126ad79120cc71b694e386157
+  assessed_by: changes/factory-readiness/01-discovery
 paths:
   APP:
-    - lib/**
-    - exe/**
+  - lib/**
+  - exe/**
   TESTS:
-    - test/**
-
+  - test/**
 technology:
-  languages: [ruby]
+  languages:
+  - ruby
   frameworks: []
   databases: []
-  testing: [minitest, rake]
-
+  testing:
+  - minitest
+  - rake
 infrastructure:
-  detected: [github-actions]
+  detected:
+  - github-actions
   iac:
     tools: []
-  deployment_targets: [github-releases]
-
+  deployment_targets:
+  - github-releases
 environments:
   development:
     status: PASS
     data: synthetic
-    how: "bundle exec ruby -Ilib exe/soft-foundry <command> against a throwaway repository (see test/test_helper.rb with_fixture_repo); no deployed service exists"
-    rationale: Library gem; the development environment is a local checkout run against a scratch repository.
-
+    how: bundle exec ruby -Ilib exe/soft-foundry <command> against a throwaway repository
+      (see test/test_helper.rb with_fixture_repo); no deployed service exists
+    rationale: Library gem; the development environment is a local checkout run against
+      a scratch repository.
 policies:
   privacy:
     status: NOT_APPLICABLE
-    rationale: Library gem with no users' data; the only outbound calls are provider model listings and the RubyGems version check, documented in README.md, and nothing about a person is transmitted. Once the optional session hook is installed (`soft-foundry hooks install --sessions`), the user's own machine keeps a local index of their coding sessions in ~/.soft-foundry/sessions.jsonl (folders, branches, and prompt excerpts with secret shapes masked), readable only by that user and never sent anywhere; README.md documents it.
+    rationale: Library gem with no users' data; the only outbound calls are provider
+      model listings and the RubyGems version check, documented in README.md, and
+      nothing about a person is transmitted. Once the optional session hook is installed
+      (`soft-foundry hooks install --sessions`), the user's own machine keeps a local
+      index of their coding sessions in ~/.soft-foundry/sessions.jsonl (folders, branches,
+      and prompt excerpts with secret shapes masked), readable only by that user and
+      never sent anywhere; README.md documents it.
   security:
     status: NOT_APPLICABLE
-    rationale: "Maintainer decision (2026-09-15, changes/security-policy-not-applicable): Soft Foundry is a developer tool, not a service that collects or processes user information, so no published security policy is owed. No SECURITY.md exists; vulnerability reports go through the public GitHub repository's issues."
+    rationale: 'Maintainer decision (2026-09-15, changes/security-policy-not-applicable):
+      Soft Foundry is a developer tool, not a service that collects or processes user
+      information, so no published security policy is owed. No SECURITY.md exists;
+      vulnerability reports go through the public GitHub repository''s issues.'
   terms:
     status: NOT_APPLICABLE
     rationale: No service is offered; the gem is distributed under its RubyGems listing.
-
 capabilities:
   repository.git_detected:
     status: PASS
-    evidence: [.git]
+    evidence:
+    - ".git"
   repository.agent_bootstrap:
     status: PASS
-    evidence: [AGENTS.md, .ai/README.md]
+    evidence:
+    - AGENTS.md
+    - ".ai/README.md"
   repository.execution_path_known:
     status: PASS
-    evidence: [README.md, Rakefile, .github/workflows/ci.yml]
+    evidence:
+    - README.md
+    - Rakefile
+    - ".github/workflows/ci.yml"
   architecture.documented_or_discoverable:
     status: PASS
-    evidence: [README.md, .ai/README.md]
+    evidence:
+    - README.md
+    - ".ai/README.md"
   coding_standards.defined:
     status: PASS
-    evidence: [.ai/rules]
+    evidence:
+    - ".ai/rules"
   technology.languages_detected:
     status: PASS
-    evidence: [soft_foundry.gemspec, Gemfile]
+    evidence:
+    - soft_foundry.gemspec
+    - Gemfile
   technology.frameworks_detected:
     status: PASS
-    evidence: [soft_foundry.gemspec]
+    evidence:
+    - soft_foundry.gemspec
     rationale: Plain Ruby gem; absence of an application framework is established.
   infrastructure.detected_or_not_applicable:
     status: NOT_APPLICABLE
-    evidence: [.github/workflows/ci.yml]
+    evidence:
+    - ".github/workflows/ci.yml"
     rationale: Library gem with no deployed service; CI is the only automation.
   testing.strategy_detected:
     status: PASS
-    evidence: [test, Rakefile]
+    evidence:
+    - test
+    - Rakefile
   change.intake_required:
     status: PASS
-    evidence: [.ai/workflow.yml, lib/soft_foundry/gate.rb]
+    evidence:
+    - ".ai/workflow.yml"
+    - lib/soft_foundry/gate.rb
   change.specification_required:
     status: PASS
-    evidence: [.ai/workflow.yml, .ai/skills/specification]
+    evidence:
+    - ".ai/workflow.yml"
+    - ".ai/skills/specification"
   change.acceptance_criteria_required:
     status: PASS
-    evidence: [.ai/skills/specification/template/acceptance-criteria.yml]
+    evidence:
+    - ".ai/skills/specification/template/acceptance-criteria.yml"
   change.provenance_enabled:
     status: PASS
-    evidence: [changes, lib/soft_foundry/change_record.rb]
+    evidence:
+    - changes
+    - lib/soft_foundry/change_record.rb
   change.acceptance_criteria_locking:
     status: PARTIAL
-    evidence: [.ai/skills/evaluation/permissions.yml, lib/soft_foundry/gate.rb]
-    findings: [deterministic_only_on_the_iterative_track_from_the_vetted_commit]
-    rationale: On the iterative track the gate fails the specification phase when anything under 02-specification changed since `change vet`; on the gated track downstream skills are denied writes to the specification but the gate does not detect edits.
+    evidence:
+    - ".ai/skills/evaluation/permissions.yml"
+    - lib/soft_foundry/gate.rb
+    findings:
+    - deterministic_only_on_the_iterative_track_from_the_vetted_commit
+    rationale: On the iterative track the gate fails the specification phase when
+      anything under 02-specification changed since `change vet`; on the gated track
+      downstream skills are denied writes to the specification but the gate does not
+      detect edits.
   verification.automated_tests:
     status: PASS
-    evidence: [test, .github/workflows/ci.yml]
+    evidence:
+    - test
+    - ".github/workflows/ci.yml"
   verification.gate:
     status: PASS
-    evidence: [lib/soft_foundry/gate.rb]
+    evidence:
+    - lib/soft_foundry/gate.rb
   evaluation.user_journey_gate:
-    status: PARTIAL
-    evidence: [.ai/skills/evaluation]
-    findings: [no_evaluation_phase_has_run_yet]
+    status: PASS
+    evidence:
+    - ".ai/skills/evaluation"
+    - lib/soft_foundry/gate.rb
+    - changes/cross-provider-review/07-evaluation
+    - changes/panel-phases/07-evaluation
+    rationale: The evaluation phase has completed in 29 records with journeys mapped
+      to criteria and commit-bound evidence the gate checks for staleness; advisories
+      name missing accessibility observations.
   evidence.commit_binding:
     status: PASS
-    evidence: [lib/soft_foundry/gate.rb, .ai/schemas.md]
+    evidence:
+    - lib/soft_foundry/gate.rb
+    - ".ai/schemas.md"
   evidence.failed_results_retained:
     status: PARTIAL
-    evidence: [.ai/policies/skill-permissions.yml, lib/soft_foundry/gate.rb, .ai/rules/testing.md]
-    findings: [red_commit_evidence_enforced_by_the_gate_other_failed_results_policy_only]
-    rationale: A failing test's commit is retained as red_commit on the verification check and the gate verifies it precedes the verified commit and holds the test; retention of every other failed result (a failed scan, a failed journey) remains the anti-fudging policy, unenforced.
+    evidence:
+    - ".ai/policies/skill-permissions.yml"
+    - lib/soft_foundry/gate.rb
+    - ".ai/rules/testing.md"
+    findings:
+    - red_commit_evidence_enforced_by_the_gate_other_failed_results_policy_only
+    rationale: A failing test's commit is retained as red_commit on the verification
+      check and the gate verifies it precedes the verified commit and holds the test;
+      retention of every other failed result (a failed scan, a failed journey) remains
+      the anti-fudging policy, unenforced.
   governance.risk_classification:
     status: PARTIAL
-    evidence: [.ai/templates/change/metadata.yml, .ai/workflow.yml, lib/soft_foundry/gate.rb]
-    findings: [risk_forces_the_lifecycle_track_but_does_not_otherwise_select_required_phases]
-    rationale: A high risk change is forced onto the gated track (tracks.forced_by_risk) and the gate reports a conflict; within a track, risk does not yet add or remove phases.
+    evidence:
+    - ".ai/templates/change/metadata.yml"
+    - ".ai/workflow.yml"
+    - lib/soft_foundry/gate.rb
+    findings:
+    - risk_forces_the_lifecycle_track_but_does_not_otherwise_select_required_phases
+    rationale: A high risk change is forced onto the gated track (tracks.forced_by_risk)
+      and the gate reports a conflict; within a track, risk does not yet add or remove
+      phases.
   governance.skill_permissions:
     status: PASS
-    evidence: [.ai/skills, lib/soft_foundry/check.rb, lib/soft_foundry/guard.rb, .ai/policies/enforcement.yml]
-    rationale: Every skill declares its read/write sets, check lints them, and `soft-foundry guard` enforces them at runtime as a Claude Code PreToolUse hook (`hooks install --claude`); the mode (warn or block) is repository policy with a machine-local override, and doctor reports whether the hook is installed on this machine. Bash is checked against deny sets only.
+    evidence:
+    - ".ai/skills"
+    - lib/soft_foundry/check.rb
+    - lib/soft_foundry/guard.rb
+    - ".ai/policies/enforcement.yml"
+    rationale: Every skill declares its read/write sets, check lints them, and `soft-foundry
+      guard` enforces them at runtime as a Claude Code PreToolUse hook (`hooks install
+      --claude`); the mode (warn or block) is repository policy with a machine-local
+      override, and doctor reports whether the hook is installed on this machine.
+      Bash is checked against deny sets only.
   governance.human_boundaries:
-    status: PARTIAL
-    evidence: [.ai/policies/human-boundaries.yml]
-    findings: [no_awaiting_human_mechanism]
+    status: PASS
+    evidence:
+    - ".ai/policies/human-boundaries.yml"
+    - lib/soft_foundry/advisory.rb
+    - changes/panel-phases/metadata.yml
+    rationale: 'status: awaiting_human parks a change on a boundary decision and human_decisions
+      in metadata.yml records who decided what; panel-phases recorded a residual-risk
+      acceptance that way.'
   governance.separation_of_duties:
     status: PASS
-    evidence: [.ai/skills, lib/soft_foundry/guard.rb, lib/soft_foundry/phase_runner.rb, lib/soft_foundry/advisory.rb]
-    rationale: Implementation is denied every evidence directory by permissions the guard enforces at runtime; `soft-foundry phase run` executes review and judgment in a fresh session with only that skill in the prompt and records executed_by; a review or judgment completed without it is advised on every gate run.
+    evidence:
+    - ".ai/skills"
+    - lib/soft_foundry/guard.rb
+    - lib/soft_foundry/phase_runner.rb
+    - lib/soft_foundry/advisory.rb
+    rationale: Implementation is denied every evidence directory by permissions the
+      guard enforces at runtime; `soft-foundry phase run` executes review and judgment
+      in a fresh session with only that skill in the prompt and records executed_by;
+      a review or judgment completed without it is advised on every gate run.
   security.threat_modeling:
-    status: PARTIAL
-    evidence: [.ai/skills/threat-modeling]
-    findings: [no_threat_model_phase_has_run_yet]
+    status: PASS
+    evidence:
+    - ".ai/skills/threat-modeling"
+    - changes/panel-phases/03-threat-model
+    - changes/session-ledger/03-threat-model
+    rationale: The threat-model phase has completed in 7 records with threats mapped
+      to requirements and mitigations; most records waived it with a rationale, which
+      this change's waiver rule now limits by risk.
   security.adversarial_validation:
-    status: PARTIAL
-    evidence: [.ai/skills/adversarial-testing]
-    findings: [no_attack_phase_has_run_yet]
+    status: PASS
+    evidence:
+    - ".ai/skills/adversarial-testing"
+    - changes/panel-phases/08-attack
+    - changes/cross-provider-review/08-attack
+    rationale: The attack phase has completed in 9 records against a declared authorization
+      envelope and found violations that remediation fixed (FIND-ATK-001 in cross-provider-review).
+      It has run only in the implementing session; this change's fresh-context advisory
+      names that.
   observability.failure_detection:
     status: NOT_APPLICABLE
     rationale: No production service; the CLI fails loudly with a non-zero exit code.
@@ -149,67 +245,99 @@ capabilities:
   observability.alerting:
     status: NOT_APPLICABLE
     rationale: No production service.
+  observability.standard_dashboard:
+    status: NOT_APPLICABLE
+    evidence:
+    - ".ai/repository.yml"
+    rationale: No infrastructure as code is present in or owned by this repository
+      (infrastructure.iac.tools is empty); per .ai/maturity.yml assessment_rules the
+      capability is NOT_APPLICABLE only in that case.
   accessibility.standard_in_force:
     status: PASS
-    evidence: [.ai/rules/accessibility.md, .ai/skills/review/completion.yml, lib/soft_foundry/advisory.rb]
-    rationale: WCAG 2.2 AA for UI plus CLI/log output rules; review must fill accessibility.md and gate/status/ci/close print go-live advisories against it.
+    evidence:
+    - ".ai/rules/accessibility.md"
+    - ".ai/skills/review/completion.yml"
+    - lib/soft_foundry/advisory.rb
+    rationale: WCAG 2.2 AA for UI plus CLI/log output rules; review must fill accessibility.md
+      and gate/status/ci/close print go-live advisories against it.
   policy_conformance.standard_in_force:
     status: PASS
-    evidence: [.ai/rules/policy-conformance.md, .ai/skills/review/completion.yml, lib/soft_foundry/advisory.rb]
-    rationale: Review must fill policy-conformance.md against the policies block above, and gate/status/ci/close print go-live advisories against it.
+    evidence:
+    - ".ai/rules/policy-conformance.md"
+    - ".ai/skills/review/completion.yml"
+    - lib/soft_foundry/advisory.rb
+    rationale: Review must fill policy-conformance.md against the policies block above,
+      and gate/status/ci/close print go-live advisories against it.
   judgment.final_gate:
     status: PARTIAL
-    evidence: [.ai/skills/final-judgment, lib/soft_foundry/gate.rb]
-    findings: [no_judgment_has_run_yet]
+    evidence:
+    - ".ai/skills/final-judgment"
+    - lib/soft_foundry/gate.rb
+    - lib/soft_foundry/change_record.rb
+    - changes/panel-phases/14-judgment
+    findings:
+    - judgment_completed_in_5_of_30_closed_records_the_rest_waived_it_through_skipped_phases
+    rationale: A judgment artifact with one of the four verdicts exists and the gate
+      checks it, but ChangeRecord#reached_lifecycle_end? lets a change close with
+      judge in skipped_phases, so rules.final_judgment_required in .ai/workflow.yml
+      is not enforced. This change makes judge and review unwaivable and change close
+      refuse without a completed judgment.
   harness.benchmark_suite:
     status: MISSING
-    evidence: [.ai/harness-evals/README.md]
+    evidence:
+    - ".ai/harness-evals/README.md"
+    rationale: At this discovery commit .ai/harness-evals/ holds only a README; proposed
+      evals in changes/*/15-learning/proposed-evals.md are never executed. This change
+      adds executable cases and `soft-foundry eval`.
   harness.model_evaluation:
     status: MISSING
+    rationale: No case runs a fresh-context phase against a planted defect and records
+      the shell and model that found or missed it. This change adds live cases run
+      on request.
   harness.workflow_evaluation:
     status: MISSING
+    rationale: No case plants a defective record and asserts which gate check refuses
+      it. This change adds them.
   harness.regression_detection:
     status: MISSING
+    rationale: ci runs the test suite and every open record's gates but no harness
+      eval. This change makes ci run the deterministic evals.
   learning.finding_capture:
     status: PASS
-    evidence: [.ai/skills/learning/template/instincts.yml, lib/soft_foundry/gate.rb, changes/learning-instincts/15-learning/instincts.yml]
-    rationale: The learning phase writes instincts (trigger, action, confidence, evidence) that the gate validates; changes/learning-instincts is the first record whose learning phase completed with them.
+    evidence:
+    - ".ai/skills/learning/template/instincts.yml"
+    - lib/soft_foundry/gate.rb
+    - changes/learning-instincts/15-learning/instincts.yml
+    rationale: The learning phase writes instincts (trigger, action, confidence, evidence)
+      that the gate validates; changes/learning-instincts is the first record whose
+      learning phase completed with them.
   learning.feedback_loop:
     status: PASS
-    evidence: [lib/soft_foundry/learning.rb, .ai/policies/learning.yml, .ai/rules/learned.md]
-    rationale: "`soft-foundry learn promote` is the governance path: it copies instincts at or above the policy threshold into .ai/rules/learned.md with provenance and refuses outside a change record on a change branch."
+    evidence:
+    - lib/soft_foundry/learning.rb
+    - ".ai/policies/learning.yml"
+    - ".ai/rules/learned.md"
+    rationale: "`soft-foundry learn promote` is the governance path: it copies instincts
+      at or above the policy threshold into .ai/rules/learned.md with provenance and
+      refuses outside a change record on a change branch."
   learning.regression_creation:
     status: MISSING
-    findings: [no_mechanism_turns_a_finding_into_a_regression_test]
+    findings:
+    - no_mechanism_turns_a_finding_into_a_regression_test
   learning.standards_feedback:
     status: PASS
-    evidence: [.ai/rules/learned.md, .ai/skills/implementation/skill.yml, .ai/skills/exploration/skill.yml]
-    rationale: Promoted instincts are loaded by implementation and exploration as a baseline rule file.
+    evidence:
+    - ".ai/rules/learned.md"
+    - ".ai/skills/implementation/skill.yml"
+    - ".ai/skills/exploration/skill.yml"
+    rationale: Promoted instincts are loaded by implementation and exploration as
+      a baseline rule file.
   learning.workflow_feedback:
     status: MISSING
-
 maturity:
   current_level: 2
   current_id: contextualized
   gaps:
-    - level: 3
-      capability: change.acceptance_criteria_locking
-      status: PARTIAL
-    - level: 4
-      capability: evaluation.user_journey_gate
-      status: PARTIAL
-    - level: 4
-      capability: evidence.failed_results_retained
-      status: PARTIAL
-    - level: 5
-      capability: governance.skill_permissions
-      status: PARTIAL
-    - level: 5
-      capability: governance.human_boundaries
-      status: PARTIAL
-    - level: 6
-      capability: harness.benchmark_suite
-      status: MISSING
-    - level: 7
-      capability: learning.feedback_loop
-      status: MISSING
+  - level: 3
+    capability: change.acceptance_criteria_locking
+    status: PARTIAL

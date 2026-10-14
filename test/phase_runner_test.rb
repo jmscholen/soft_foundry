@@ -128,8 +128,9 @@ class PhaseRunnerTest < Minitest::Test
       assert_equal launches.first.session_id, executed["session_id"]
       assert_equal File.realpath(dir), File.realpath(executed["cwd"])
 
-      # A review run this way carries no fresh-context advisory.
-      notices = SoftFoundry::Advisory.new(record).notices.select { |n| n.message.include?("fresh-context") }
+      # A review run this way carries no fresh-context advisory (the
+      # evidence phases the fixture completed in session still do).
+      notices = SoftFoundry::Advisory.new(record).notices.select { |n| n.area == "review" && n.message.include?("fresh-context") }
       assert_empty notices
     end
   end

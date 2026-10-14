@@ -1,0 +1,22 @@
+---
+phase: 00-intake
+skill: intake
+status: complete
+commit_sha: 0bd0260f26f97d52a0278f8ecb9507d6f142ad29
+started_at: '2026-10-14T14:52:31Z'
+completed_at: '2026-10-14T14:52:31Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- request.md
+- assumptions.md
+blocking: []
+findings: []
+next: discover
+notes: 'Performed by the interactive session that will also implement the change.
+  The specification phase is not skipped: this intake states outcomes in prose and
+  02-specification assigns the stable REQ-FR ids. Risk medium: the guard default and
+  the specification lock change what every future change is held to.'
+executed_by:

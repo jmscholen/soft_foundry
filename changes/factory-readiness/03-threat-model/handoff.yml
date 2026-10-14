@@ -1,0 +1,24 @@
+---
+phase: 03-threat-model
+skill: threat-modeling
+status: complete
+commit_sha: '097fe26b3b70648035fb6fa415fafdc75c402e3c'
+started_at: '2026-10-14T15:03:59Z'
+completed_at: '2026-10-14T15:03:59Z'
+resolved_model:
+  profile: adversarial_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- attack-surface.md
+- trust-boundaries.md
+- threats.yml
+- mitigations.md
+blocking: []
+findings: []
+next: plan
+notes: Performed by the interactive session. THREAT-001..007 with MIT-001..007; every
+  threat requires an attack case (ATTACK-001..007 proposed). MIT-001 (the guard protects
+  its own configuration) is a mitigation the specification did not name; it is implemented
+  under REQ-FR-004 as a strengthening, not a new requirement.
+executed_by:

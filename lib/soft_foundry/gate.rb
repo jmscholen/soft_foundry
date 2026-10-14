@@ -2,6 +2,7 @@
 
 require "yaml"
 require "date"
+require_relative "text"
 require_relative "change_record"
 require_relative "learning"
 require_relative "panel"
@@ -32,6 +33,7 @@ module SoftFoundry
       "blocking recorded" => "A blocked phase names what is blocking it.",
       "handoff identity" => "The handoff names this phase and the skill the workflow assigns to it.",
       "track permitted" => "The change's track is defined, has an exploring stage if the change is exploring, and is the one its risk forces.",
+      "waivers permitted" => "Every phase in skipped_phases is optional or one the change's declared risk may waive (.ai/workflow.yml waivable_by_risk); review and judgment are never waived.",
       "not exploring" => "No phase from implementation onward is complete while the change is still exploring.",
       "required files present" => "Every file the skill's completion.yml requires exists.",
       "no placeholders" => "No required file still contains a TBD placeholder.",
@@ -39,8 +41,8 @@ module SoftFoundry
       "commit_sha recorded" => "The handoff is bound to a commit that exists in this repository.",
       "completed_at recorded" => "The handoff records when the phase was completed.",
       "predecessor complete" => "The phase before this one is complete (optional, waived, and track-optional phases are stepped over).",
-      "evidence current" => "No application, test, or infrastructure code changed after the commit this evidence describes.",
-      "specification locked" => "The specification is unchanged since the person vetted the change.",
+      "evidence current" => "No application, test, or infrastructure code changed after the commit this evidence describes, and the specification was not re-recorded after it.",
+      "specification locked" => "The specification is unchanged since it was recorded (the commit that recorded the completed phase, or the vetted commit on an iterative change).",
       "red evidence" => "Each test named with a red_commit existed before the implementation and code changed after it.",
       "instincts valid" => "The instincts the learning phase recorded are well formed.",
       "findings explained" => "Every review finding above minor names the failure it prevents.",
@@ -54,6 +56,7 @@ module SoftFoundry
     def self.checks_for(plane, phase)
       names = ["handoff identity"]
       names << "track permitted" if plane.phases.first == phase
+      names << "waivers permitted" if plane.phases.first == phase
       names << "not exploring" if plane.hardening_phase?(phase)
       names += ["required files present", "no placeholders", "no blocking conditions", "commit_sha recorded", "completed_at recorded", "predecessor complete"]
       names << "evidence current" if plane.skill(phase.skill).commit_bound?
@@ -90,6 +93,7 @@ module SoftFoundry
 
       checks << identity_check(phase, skill, handoff)
       checks << track_check if @plane.phases.first == phase
+      checks << waivers_check if @plane.phases.first == phase
       blocking = Array(handoff["blocking"])
 
       case status
@@ -105,8 +109,8 @@ module SoftFoundry
         checks << commit_check(handoff)
         checks << Check.new("completed_at recorded", handoff["completed_at"] ? :pass : :fail, handoff["completed_at"].to_s)
         checks << predecessor_check(phase)
-        checks << staleness_check(handoff) if skill.commit_bound?
-        checks << specification_lock_check(phase) if phase.id == "specify" && @record.vetted
+        checks << staleness_check(phase, handoff) if skill.commit_bound?
+        checks << specification_lock_check(phase) if phase.id == "specify"
         checks << red_evidence_check(phase, handoff) if phase.id == "verify"
         checks << instincts_check if phase.id == "learn"
         checks << findings_explained_check(handoff) if phase.id == "review"
@@ -135,6 +139,30 @@ module SoftFoundry
         return Check.new("track permitted", :fail, "risk #{risk} forces the #{forced} track (.ai/workflow.yml tracks.forced_by_risk) but the change is on #{name}")
       end
       Check.new("track permitted", :pass, name)
+    end
+
+    # What a change may waive is decided by its declared risk, not by the
+    # rationale: skipped_phases may name a globally optional phase, or one
+    # .ai/workflow.yml waivable_by_risk lists for the risk; review and
+    # judgment never. Reported on the first phase, like the track, so it
+    # shows whenever any work has started. Structure only: the rationale
+    # text is not judged.
+    def waivers_check
+      risk = @record.metadata["risk"].to_s.strip
+      classified = !risk.empty? && !risk.match?(PLACEHOLDER)
+      allowed = @plane.waivable_by_risk(risk)
+      problems = Array(@record.metadata["skipped_phases"]).filter_map do |entry|
+        next unless entry.is_a?(Hash)
+        id = entry["phase"].to_s
+        phase = @plane.phase(id)
+        next "'#{id}' is not a lifecycle phase" unless phase
+        next "#{id} is never waived (review and judgment are required of every change)" if ControlPlane::NEVER_WAIVED.include?(phase.id)
+        next if phase.optional || allowed.include?(phase.id)
+        next "#{id} cannot be waived until the risk is classified (metadata.yml risk: #{risk.empty? ? 'unset' : risk})" unless classified
+        "#{id} cannot be waived at risk #{risk.downcase} (waivable: #{allowed.empty? ? 'none' : allowed.join(', ')}; .ai/workflow.yml waivable_by_risk)"
+      end
+      return Check.new("waivers permitted", :pass, Array(@record.metadata["skipped_phases"]).empty? ? "nothing waived" : "risk #{risk.downcase}") if problems.empty?
+      Check.new("waivers permitted", :fail, problems.join("; "))
     end
 
     # The exploring stage produces a journal, never evidence: nothing from
@@ -187,10 +215,10 @@ module SoftFoundry
       end
       argument = File.join(dir, "panel", "ARGUMENT.md")
       problems << "panel/ARGUMENT.md is missing" unless File.file?(argument)
-      problems << "panel/ARGUMENT.md is empty" if File.file?(argument) && File.read(argument).strip.empty?
+      problems << "panel/ARGUMENT.md is empty" if File.file?(argument) && SoftFoundry.read_text(argument).strip.empty?
       problems << "outcome is '#{panel['outcome']}', not agreed or split" unless %w[agreed split].include?(panel["outcome"].to_s)
       outputs = Dir.glob("**/*", base: dir).reject { |f| f.start_with?("panel/") || f == "handoff.yml" }.map { |f| File.join(dir, f) }.select { |f| File.file?(f) }
-      text = outputs.map { |f| File.read(f) }.join("\n")
+      text = outputs.map { |f| SoftFoundry.read_text(f) }.join("\n")
       members.each { |name| problems << "panel/#{name}/ is not cited in the phase's outputs" unless text.include?("panel/#{name}/") }
       return Check.new("panel recorded", :fail, problems.join("; ")) unless problems.empty?
       Check.new("panel recorded", :pass, "#{members.size} members, #{panel['rounds']} #{panel['rounds'].to_i == 1 ? 'round' : 'rounds'}, #{panel['outcome']}")
@@ -240,11 +268,51 @@ module SoftFoundry
       Check.new("red evidence", :fail, "tests.yml is not valid YAML: #{e.message}")
     end
 
-    # After `change vet`, the specification is what the hardening phases
-    # are checked against, so it may not change; reshaping the feature
-    # goes through `change reopen`. Deterministic acceptance-criteria
-    # locking for the iterative track.
+    # The specification is what every later phase is checked against, so
+    # once recorded it may not change. On a vetted (iterative) change the
+    # lock is the vetted commit and reshaping goes through `change reopen`.
+    # On every other track the lock is the commit that recorded the
+    # completed specification (the newest commit touching its handoff
+    # while that handoff says complete); a later change under
+    # 02-specification/ is a recorded requirement change, made by rerunning
+    # the phase, after which every commit-bound phase is stale (see
+    # staleness_check). Until the completed handoff is committed there is
+    # nothing to lock to, and the check says so without failing.
     def specification_lock_check(phase)
+      return vetted_lock_check(phase) if @record.vetted
+      return Check.new("specification locked", :skip, "no git repository") unless @git.repository?
+      lock = specification_lock_commit(phase)
+      unless lock
+        return Check.new("specification locked", :warn, "not yet locked: the completed specification is not committed; the lock takes effect at the commit that records #{phase.output}/handoff.yml as complete")
+      end
+      prefix = "changes/#{@record.slug}/#{phase.output}/"
+      changed = @git.changed_since(lock).select { |p| p.start_with?(prefix) && p != "#{prefix}handoff.yml" }
+      return Check.new("specification locked", :pass, "locked at #{lock[0, 12]}, the commit that recorded it") if changed.empty?
+      Check.new("specification locked", :fail, "changed since the specification was recorded at #{lock[0, 12]}: #{changed.first(5).join(', ')}#{changed.size > 5 ? ' …' : ''}; a specification change after the lock is a recorded requirement change: rerun the specification phase (its handoff re-binds the lock), after which every commit-bound phase is stale and must be redone against the new criteria")
+    end
+
+    # The commit that recorded the completed specification, or nil when
+    # the phase is not complete or its completed handoff is not committed.
+    def specification_lock_commit(phase = @plane.phase("specify"))
+      phase ? recorded_commit(phase) : nil
+    end
+
+    # The commit that recorded a phase as complete: the newest commit
+    # touching its handoff, provided the handoff says complete there. Nil
+    # while the completed handoff is uncommitted, or the phase is not
+    # complete.
+    def recorded_commit(phase)
+      return nil unless @record.phase_status(phase) == "complete" && @git.repository?
+      rel = "changes/#{@record.slug}/#{phase.output}/handoff.yml"
+      sha = @git.last_commit_for(rel)
+      return nil unless sha
+      data = YAML.safe_load(@git.blob(sha, rel).to_s, permitted_classes: [Time, Date], aliases: true)
+      data.is_a?(Hash) && data["status"] == "complete" ? sha : nil
+    rescue Psych::Exception
+      nil
+    end
+
+    def vetted_lock_check(phase)
       sha = @record.vetted["commit"].to_s
       return Check.new("specification locked", :skip, "no git repository") unless @git.repository?
       return Check.new("specification locked", :fail, "vetted commit '#{sha}' is not a commit in this repository") unless sha.match?(SHA) && @git.commit?(sha)
@@ -269,7 +337,7 @@ module SoftFoundry
     def placeholder_check(phase, skill)
       remaining = skill.required_files.select do |f|
         path = File.join(@record.phase_dir(phase), f)
-        File.file?(path) && File.read(path).match?(PLACEHOLDER)
+        File.file?(path) && SoftFoundry.read_text(path).match?(PLACEHOLDER)
       end
       remaining.empty? ? Check.new("no placeholders", :pass, "") : Check.new("no placeholders", :fail, "TBD remains in: #{remaining.join(', ')}")
     end
@@ -298,7 +366,13 @@ module SoftFoundry
     # earlier record's claim is about the earlier branch. On the record's
     # branch itself (or when its branch is gone) the worktree is the
     # measure, uncommitted edits included, exactly as before.
-    def staleness_check(handoff)
+    #
+    # Evidence is also stale when the specification was re-recorded after
+    # it: the criteria it was checked against are no longer the criteria.
+    # "After" is the order of the commits that recorded the two handoffs
+    # (the specification's lock commit and this phase's handoff commit);
+    # recorded in the same commit, or this phase recorded later, is current.
+    def staleness_check(phase, handoff)
       sha = handoff["commit_sha"].to_s
       return Check.new("evidence current", :skip, "no git repository") unless @git.repository?
       return Check.new("evidence current", :fail, "cannot compare: commit_sha invalid") unless sha.match?(SHA) && @git.commit?(sha)
@@ -306,8 +380,15 @@ module SoftFoundry
       tip = record_branch != @git.branch.to_s ? @git.branch_tip(record_branch) : nil
       changed = (tip ? @git.changed_between(sha, tip) : @git.changed_since(sha)).select { |p| ControlPlane.match_any?(p, @plane.code_globs) }
       where = tip ? " on branch #{record_branch}" : ""
-      return Check.new("evidence current", :pass, "no code changes since #{sha[0, 12]}#{where}") if changed.empty?
-      Check.new("evidence current", :fail, "STALE: code changed since #{sha[0, 12]}#{where}: #{changed.first(5).join(', ')}#{changed.size > 5 ? ' …' : ''}")
+      unless changed.empty?
+        return Check.new("evidence current", :fail, "STALE: code changed since #{sha[0, 12]}#{where}: #{changed.first(5).join(', ')}#{changed.size > 5 ? ' …' : ''}")
+      end
+      lock = @record.vetted ? nil : specification_lock_commit
+      own = lock && recorded_commit(phase)
+      if lock && own && !@git.ancestor?(lock, own)
+        return Check.new("evidence current", :fail, "STALE: the specification was re-recorded at #{lock[0, 12]} after this evidence (handoff recorded at #{own[0, 12]}); rerun this phase against the current criteria")
+      end
+      Check.new("evidence current", :pass, "no code changes since #{sha[0, 12]}#{where}#{lock ? "; specification unchanged since #{lock[0, 12]}" : ''}")
     end
   end
 end

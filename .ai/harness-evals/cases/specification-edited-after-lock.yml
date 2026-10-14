@@ -1,0 +1,12 @@
+id: specification-edited-after-lock
+kind: gate
+description: A requirement edited after the specification was recorded (the lock commit on the gated track) fails the specification locked check.
+record:
+  risk: low
+  complete: [intake, discover, specify, threat_model, plan, implement, verify]
+  later_files:
+    02-specification/requirements.yml: "requirements:\n  - id: REQ-001\n    category: functional\n    statement: changed after the lock\n    rationale: planted\n    source: 00-intake/request.md\n"
+expect:
+  phase: specify
+  check: specification locked
+  outcome: fail
