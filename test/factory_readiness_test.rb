@@ -712,6 +712,39 @@ class GuardTamperTest < Minitest::Test
     end
   end
 
+  # REM-006 (from 07-evaluation, EVAL-F7): only a shell call has a
+  # post-call check, so only a shell call records a baseline; a baseline
+  # left by an Edit or a Read must not revert the maintainer's own edit
+  # before the next shell command. The maintainer's own hook commands
+  # clear any baseline they would otherwise trip.
+  def test_only_a_shell_call_records_a_baseline
+    with_phase do |dir, _guard|
+      policy = File.join(dir, ".ai/policies/enforcement.yml")
+      before = SoftFoundry.read_text(policy)
+      guard_cli(dir, [], { "tool_name" => "Read", "tool_input" => { "file_path" => "README.md" } })
+      guard_cli(dir, [], { "tool_name" => "Edit", "tool_input" => { "file_path" => "lib/app.rb" } })
+      guard_cli(dir, [], { "tool_name" => "Grep", "tool_input" => { "pattern" => "x", "path" => "lib" } })
+      refute File.exist?(File.join(dir, SoftFoundry::Guard::BASELINE)), "no shell call, no baseline"
+      File.write(policy, before.sub("mode: block", "mode: warn")) # the maintainer, between calls
+      assert_equal 0, guard_cli(dir, [], bash_payload).first
+      assert_equal 0, guard_cli(dir, ["--after"], bash_payload).first
+      assert_includes SoftFoundry.read_text(policy), "mode: warn", "the maintainer's edit stands"
+    end
+  end
+
+  def test_hooks_install_and_uninstall_clear_the_baseline
+    with_phase do |dir, _guard|
+      assert_equal 0, guard_cli(dir, [], bash_payload).first
+      assert File.exist?(File.join(dir, SoftFoundry::Guard::BASELINE))
+      assert_equal 0, cli(dir, "hooks", "uninstall", "--claude").first
+      refute File.exist?(File.join(dir, SoftFoundry::Guard::BASELINE))
+      assert_equal 0, guard_cli(dir, ["--after"], bash_payload).first, "nothing to restore after the maintainer's own command"
+      assert_equal 0, guard_cli(dir, [], bash_payload).first
+      assert_equal 0, cli(dir, "hooks", "install", "--claude").first
+      refute File.exist?(File.join(dir, SoftFoundry::Guard::BASELINE))
+    end
+  end
+
   def test_the_restore_never_writes_through_a_symlink
     with_phase do |dir, _guard|
       settings = File.join(dir, ".claude/settings.json")
