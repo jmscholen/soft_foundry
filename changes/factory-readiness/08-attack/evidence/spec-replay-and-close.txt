@@ -1,0 +1,13 @@
+baseline:
+  specify: no failing checks
+  verify: no failing checks
+after spec edit (no restamp):
+  specify: specification locked: changed since the specification was recorded at b2c2998436be: changes/eval-replay/02-specification/specificati
+  verify: no failing checks
+after restamp of specify handoff:
+  specify: no failing checks
+  verify: evidence current: STALE: the specification was re-recorded at 93402739f2ef after this evidence (handoff recorded at b2c2998436be
+  implement: no failing checks
+after also restamping verify handoff to HEAD:
+  verify: no failing checks
+close exit 1: eval-replay: cannot close: 14-judgment is pending; a change is complete only with a final judgment (.ai/workflow.yml rules.final_judgment_required), so run the judge phase (`soft-foundry phase run judge`) or pass --force to close without one

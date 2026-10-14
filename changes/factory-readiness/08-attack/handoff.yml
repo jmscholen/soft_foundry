@@ -1,24 +1,62 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
-phase: 08-attack
+---
+phase: '08-attack'
 skill: adversarial-testing
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: ba15a5639122b302648a126806113fc470741d86
+started_at: '2026-10-14T16:40:18Z'
+completed_at: '2026-10-14T16:45:19Z'
 resolved_model:
   profile: adversarial_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- attack-plan.md
+- cases.yml
+- results.md
+- evidence/manifest.yml
+blocking: []
+findings:
+- id: ATK-F1
+  severity: major
+  summary: Guard self-protection is bypassed from the shell (cd into the config directory
+    then a bare file name, variable or command-substitution indirection) and through
+    a ../ symlink edited with a write tool; the guard was downgraded to warn in a
+    scratch repository.
+  failure: 'Implementation session runs `mkdir -p .soft-foundry && cd .soft-foundry
+    && printf ''guard:\n  mode: warn\n'' > enforcement.yml`; Guard#decide allows it
+    and Guard.mode then returns warn from the machine-local override, so later violations
+    are only reported. Evidence: evidence/guard-bypass-and-downgrade.txt (ATTACK-001,
+    THREAT-001, MIT-001).'
+- id: ATK-F2
+  severity: major
+  summary: Eval case contents are readable from a guarded implementation session through
+    a glob or a cd-relative path.
+  failure: "`cat .ai/harness-*/cases/*` and `cd .ai && ls harness-evals` are allowed
+    by Guard#decide while the full directory spelling is refused, so an implementer
+    can read the cases it must not tailor to (ATTACK-003, THREAT-003, MIT-003). Evidence:
+    evidence/guard-decisions.txt."
+- id: ATK-F3
+  severity: minor
+  summary: 'A handoff''s commit_sha is self-attested: re-stamping it to HEAD by hand
+    defeats the evidence-current staleness check (the specify re-stamp alone is caught).'
+- id: ATK-F4
+  severity: minor
+  summary: 'Unquoted `mode: off` in the machine-local override parses as boolean false
+    and is silently ignored (fails safe to block); a case file has no size cap; SIGKILL
+    cleanup of scratch repositories was not exercised.'
 next: remediate
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: Attacks ran in-process and by CLI against scratch repositories; no network,
+  no live eval, no provider calls. This session ran under the block-mode guard with
+  the adversarial-testing skill, which refused four of its own tool calls that named
+  protected files. Codex and grok hook payloads were not exercised. executed_by left
+  to the runner.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-14T16:40:18Z'
+  finished_at: '2026-10-14T16:45:35Z'
+  exit_status: 0
+  previous_phase: evaluate
+  session_id: 88c6f677-46ed-4d3e-b92b-d49c6bb64f34
+  cwd: "/home/user/soft_foundry"

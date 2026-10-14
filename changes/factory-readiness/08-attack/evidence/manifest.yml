@@ -1,5 +1,36 @@
-commit_sha: TBD
+---
+commit_sha: ba15a5639122b302648a126806113fc470741d86
 artifacts:
-  - path: TBD
-    case: ATTACK-001
-    sha256: TBD
+- path: evidence/guard-decisions.txt
+  case: ATTACK-001
+  sha256: 411a5b63881786e9453d2e2d0eb55ec6bc5bc640ed31b4a74c9802bf5d250a4e
+- path: evidence/guard-bypass-and-downgrade.txt
+  case: ATTACK-001
+  sha256: 53ef6d9af2dcb215303f33be57802e1c57ad68ffa1240ca99970e823cef49eb5
+- path: evidence/guard_atk.rb
+  case: ATTACK-001
+  sha256: a18e634c76a8f33f36c48a2fb3ee0c9bc76625e7c76ffe978423a85e16a5cf3d
+- path: evidence/guard2.rb
+  case: ATTACK-001
+  sha256: a90c5c3a39959003519916758659680fbef0ef036a9d41d05b7a2ce658ba531a
+- path: evidence/eval-case-paths.txt
+  case: ATTACK-002
+  sha256: 359e8aee4570b4ac832a5b8e1b3a7b68926a8271b3cda2de34ac2bb41904bae7
+- path: evidence/eval_atk.rb
+  case: ATTACK-002
+  sha256: 21b9585e8337c9e17991bcb1218c2e8bef21c30ca4975c4490f21297d9dc2c17
+- path: evidence/waivers-matrix.txt
+  case: ATTACK-004
+  sha256: 92da39b4b72a6beec895d884757a6e108d03a2ab97a8cab5807d226976136841
+- path: evidence/waiv.rb
+  case: ATTACK-004
+  sha256: e436c90fcc161f59d53176f9305048a2031ae239fa39c40803b8a28e6bcd8ccc
+- path: evidence/spec-replay-and-close.txt
+  case: ATTACK-005
+  sha256: 10309df222dab16c541e0a49e675aecf703fbc0c064bb52f655bd11435b6a2c5
+- path: evidence/replay.rb
+  case: ATTACK-005
+  sha256: 9ed4dc45aaeb43ddb2984999f7f75ef4bafda006c518a69f2ced242fb430cd6d
+- path: evidence/eval-suite-output.txt
+  case: ATTACK-007
+  sha256: 4a3fdfcc3eef491ca8a4c7a1e32053bdc121f6b9e27484d232f48c4902c4726d

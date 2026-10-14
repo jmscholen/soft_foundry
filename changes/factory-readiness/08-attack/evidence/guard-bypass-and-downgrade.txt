@@ -1,0 +1,9 @@
+ALLOWED: ln -s ../.ai/policies/enforcement.yml lib/e3.yml
+ALLOWED: mkdir -p .soft-foundry && cd .soft-foundry && printf 'guard:
+["block", "repository policy (.ai/policies/enforcement.yml)"]
+true
+Edit via e3 symlink: allow
+--- local override with mode off (unquoted YAML is boolean false):
+["block", "repository policy (.ai/policies/enforcement.yml)"]
+--- override with mode warn written by ruby:
+["warn", "machine-local override (.soft-foundry/enforcement.yml)"]
