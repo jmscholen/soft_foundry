@@ -2,9 +2,9 @@
 phase: '09-remediation'
 skill: remediation
 status: complete
-commit_sha: 186c54b7179dcca6261292e7bb43c560478eb860
+commit_sha: c1fcd98385c025fc96bbd62a61243e0b6066c695
 started_at: '2026-10-14T16:11:30Z'
-completed_at: '2026-10-14T16:11:30Z'
+completed_at: '2026-10-14T16:51:18Z'
 resolved_model:
   profile: coding_high
   provider: anthropic
@@ -14,8 +14,10 @@ outputs:
 blocking: []
 findings: []
 next: verify
-notes: REM-001, performed by the interactive session under the remediation skill with
-  the guard in block mode. Two README/policy text edits are owed and cannot be made
-  from any skill; listed in summary.md for the maintainer. Verification is stale at
-  776b640 and reruns through phase run, as do evaluation and attack.
+notes: REM-001 (from verification) and REM-002 (from attack), both performed by the
+  interactive session under the remediation skill with the guard in block mode. README
+  and policy text edits are owed and cannot be made from any skill; listed in summary.md
+  for the maintainer. Variable and command-substitution indirection in shell commands,
+  and the self-attested commit_sha, are accepted residuals for judgment. Verification,
+  evaluation, and attack are stale and rerun through phase run.
 executed_by:
