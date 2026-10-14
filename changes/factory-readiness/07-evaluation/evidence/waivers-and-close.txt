@@ -15,4 +15,3 @@ advisory: 1 issue to address before refund-cap goes live (informational, does no
   ! warn accessibility: the accessibility review (13-review/accessibility.md) has not run yet
 refund-cap: closed
 exit 0
-(note: the gate on the scratch intake also reports "no placeholders" because the scratch request.md and assumptions.md still carry the template TBD; the waivers permitted line is the one under test)

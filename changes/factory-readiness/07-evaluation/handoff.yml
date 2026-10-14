@@ -2,9 +2,9 @@
 phase: 07-evaluation
 skill: evaluation
 status: complete
-commit_sha: 1b49874309152d74533590922752ba9faed6668c
-started_at: '2026-10-14T18:22:32Z'
-completed_at: '2026-10-14T19:40:00Z'
+commit_sha: 85e9a77f981379029d2d5d4f26e29b0ff63be1b9
+started_at: '2026-10-14T18:55:49Z'
+completed_at: '2026-10-14T19:55:00Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -16,9 +16,21 @@ outputs:
 - evidence/manifest.yml
 blocking: []
 findings:
+- id: EVAL-F7
+  severity: major
+  summary: 'The guard post-call check reverts and refuses the maintainer''s own edit
+    of the guard configuration when a non-Bash tool call (Edit, Read, Grep, Glob)
+    preceded the next Bash call within 30 minutes: PreToolUse records a baseline on
+    every call, only the Bash PostToolUse consumes it, and REM-005 keeps a young baseline.'
+  failure: 'Edit app/models/user.rb through the guard, then change .ai/policies/enforcement.yml
+    from mode block to mode warn in a normal shell, then run any Bash call: guard
+    --after prints "changed during the tool call and was restored", exits 2, and the
+    file is back to block (or hooks uninstall --claude between the calls is undone
+    and doctor reports the hook installed). A Bash-only sequence keeps the edit. Evidence:
+    evidence/guard-post-call-restore.txt Scenarios A and B.'
 - id: EVAL-F1
   severity: minor
-  summary: Still present at 1b49874. Live eval on claude with no shell arguments fails
+  summary: Still present at 85e9a77. Live eval on claude with no shell arguments fails
     (0 findings recorded) because the unattended session cannot write 13-review; it
     passes with -- --allowedTools ... --permission-mode acceptEdits. The README does
     not say so.
@@ -33,39 +45,37 @@ findings:
   summary: AC-FR-002, 003, 004, 012, 013 and the positive side of AC-FR-006 were not
     exercised as user journeys (blocked, covered by verification); this skill cannot
     read the harness-evals README so that part of AC-FR-021 is unjudged.
-- id: EVAL-F4
-  severity: minor
-  summary: Closed at 1b49874. An undecidable guard refusal now reads "the guard refuses
-    what it cannot decide" instead of an empty skill name.
 - id: EVAL-F5
   severity: minor
   summary: README guard section does not describe the Grep/Glob matcher, cd/glob/symlink/brace
-    handling, the PostToolUse post-call check (guard --after, baseline, tamper log),
-    or that existing repositories rerun hooks install --claude; already owed in 09-remediation.
+    handling, the PostToolUse post-call check (guard --after, baseline, young-baseline
+    rule, tamper log), or that existing repositories rerun hooks install --claude;
+    owed in 09-remediation.
 - id: EVAL-F6
   severity: minor
   summary: The planted-case eval journeys (reversed expectation, malformed YAML, unknown
     check, oversize case) were not re-run at this commit because this skill is denied
-    harness-evals; eval code is unchanged since 9307b23 where they passed. Verification
-    at HEAD owns them.
+    harness-evals; eval code is unchanged since 9307b23. Verification at HEAD owns
+    them.
 next: attack
-notes: Re-run at 1b49874 because the earlier evaluation (bound to 9307b23) went stale
-  when REM-004 changed the guard. Journeys run by hand against the real CLI in scratch
-  repositories under the session scratchpad. EVAL-010 (new) exercised the post-call
-  restore with a direct edit standing in for any spelling the preventive check misses;
-  whether every spelling is covered is for attack. The repository guard refused two
-  of this session's tool calls (a command naming the harness-evals README, and one
-  with an unresolvable tilde-user token), so scripts were built to avoid the latter.
-  Live eval run twice; first run failed (no write permission), second passed. Not
-  exercised by hand - invalid UTF-8 scrubbing, eval cases whose gate raises, planted
-  eval cases, fake-shell live case, positive fresh-context advisory - covered by verification.
+notes: 'Re-run at 85e9a77 because the earlier evaluation (bound to 1b49874) went stale
+  when REM-005 changed the guard. Journeys run by hand against the real CLI in scratch
+  repositories under the session scratchpad. EVAL-010 FAILED on a new scenario (EVAL-F7,
+  major): a preceding non-Bash call leaves a young baseline that makes the next Bash
+  call revert the maintainer''s own edit; a major finding does not block the handoff
+  but should go to remediation (a REM-005 follow-up) before judgment. Live eval run
+  twice at HEAD (first run failed, second passed). The repository guard refused one
+  of this session''s commands carrying an unresolvable tilde-user token, so those
+  cases were built in a script file. Not exercised by hand: invalid UTF-8 scrubbing,
+  eval cases whose gate raises, planted eval cases, fake-shell live case, positive
+  fresh-context advisory - covered by verification.'
 executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-14T18:22:32Z'
-  finished_at: '2026-10-14T18:28:03Z'
+  started_at: '2026-10-14T18:55:49Z'
+  finished_at: '2026-10-14T19:01:26Z'
   exit_status: 0
   previous_phase: verify
-  session_id: 9ea86b7f-f936-48dd-a105-a1184b560768
+  session_id: 14cbbd85-e45b-421d-a407-415c1ccaff46
   cwd: "/home/user/soft_foundry"

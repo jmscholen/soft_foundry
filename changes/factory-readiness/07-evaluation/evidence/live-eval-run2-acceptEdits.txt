@@ -1,17 +1,15 @@
-The review found the planted defect: `Refund.amount` in `app/eval_app.rb` returns `requested_cents` as-is and never uses `payment_cents`, so the REQ-001 cap isn't implemented. I haven't run `soft-foundry gate review`, so the record's gate result is unchecked. I did confirm no `TBD` placeholders remain in the review files.
+$ soft-foundry eval --live --shell claude --case review-finds-planted-defect -- --allowedTools "Read Write Edit Glob Grep Bash" --permission-mode acceptEdits
+The review is written and the handoff is marked complete. The review found that `Refund.amount` doesn't implement either requirement. I did not run `soft-foundry gate review`.
 
-The handoff is written with status `complete` at commit `ac76314`, and `blocking` is empty. I recorded the two blocking findings as findings that route to remediation, not as handoff blockers.
+- **No cap (REV-001, blocking):** `app/eval_app.rb:6` returns `requested_cents` unchanged and ignores `payment_cents`. `Refund.amount(1000, 5000)` returns 5000 instead of 1000 (REQ-001). The code comment and the implementation log both claim the cap exists.
+- **Negative request not floored (REV-002, blocking):** `Refund.amount(1000, -200)` returns -200 instead of 0 (REQ-002).
+- **Financial integrity (REV-005, blocking):** the same two gaps let a large requested amount through as an over-refund.
+- **No tests (REV-003, major):** `spec/eval_app_test.rb` has no test cases, so nothing exercises either requirement.
+- **Over-broad surface (REV-006, minor):** the change produces no output a person perceives, so `surfaces.accessibility: true` looks over-broad. I recorded this as an advisory.
 
-- **REV-001, blocking:** `Refund.amount(1000, 5000)` returns 5000 instead of 1000. The code comment and the implementation log both claim the cap exists.
-- **REV-002, blocking:** `Refund.amount(1000, -200)` returns -200 instead of 0, so REQ-002 is also unmet.
-- **REV-003, major:** `spec/eval_app_test.rb` contains only `require 'minitest/autorun'` and no test cases. The verification claim "The test file passes" is therefore empty and would pass for any implementation.
-- **REV-005, major:** the missing cap is also a financial-integrity hole, since `Refund.amount(1000, 1_000_000)` returns 1000000.
-- **REV-009, major:** the verification evidence is placeholder content ("recorded"), and nothing would detect an over-refund in production.
-- **Minor findings:** REV-004 (class naming), REV-006 (no accessibility requirement or rationale in the specification), REV-007 (no published policy documents recorded) and REV-008 (no infrastructure to review). I did not put REV-007 or REV-008 in the handoff `findings`.
+Architecture, infrastructure and policy came out clean. Accessibility conforms because there is no user-perceivable output. The handoff has `blocking: []` (the schema requires it empty on a complete phase), so the blocking findings are in `findings`. I set `next: remediate` rather than `judge`, following the workflow's `on_blocking_findings` transition.
 
-Accessibility is "conforms with advisories", because the change declares `surfaces.accessibility: true` but produces nothing a person perceives or operates. Policy conformance and infrastructure are N/A, since both surfaces are false and I recorded what I examined. Architecture conforms.
-
-Everything is in `changes/eval-review-finds-planted-defect/13-review/`. I touched nothing else.
-✓ pass eval review-finds-planted-defect: review on claude (anthropic/claude-sonnet-5-5) found REV-001, REV-002, REV-005 matching /cap|exceed|larger|greater|more than|negative/
+The handoff records `commit_sha` f44a416 and the model `claude-sonnet-5-5`. The reports are in `changes/eval-review-finds-planted-defect/13-review/`.
+✓ pass eval review-finds-planted-defect: review on claude (anthropic/claude-sonnet-5-5) found REV-001, REV-002, REV-003, REV-005 matching /cap|exceed|larger|greater|more than|negative/
 ✓ pass eval: 1 passed, 0 failed, 0 errors, 0 skipped
 exit 0

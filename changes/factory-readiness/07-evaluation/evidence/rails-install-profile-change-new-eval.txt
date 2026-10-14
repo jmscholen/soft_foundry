@@ -1,38 +1,18 @@
-$ init --no-onboard (LANG unset)
+$ init
+  blocking the next level:
+    - testing.strategy_detected (UNKNOWN)
   full report: .ai/maturity-report.md
   (run with --maturity=deep for a judgment-based assessment)
 summary: created 200, updated 0, skipped 0, conflict 0, forced 0
 exit 0
 $ check
 ✓ pass control plane: 16 phases, 17 skills, no errors
-$ profile
-11:  frameworks:
-12-  - rails
-13-  databases: []
-14:  testing:
-15-  - ruby
-16-infrastructure:
---
-66:  technology.frameworks_detected:
-67-    status: PASS
-68-    evidence:
---
-74:  testing.strategy_detected:
-$ doctor
-✗ fail guard hook (claude: not installed, codex: not installed; mode: block, repository policy (.ai/policies/enforcement.yml)); install with `soft-foundry hooks install --claude` or `--codex`
-$ change new refund-cap
+$ change new
+created changes/refund-cap with 16 phase directories
+branch: change/refund-cap
 track: gated
 billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
          set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
-surfaces:
-  application: false
-  database: false
-  infrastructure: false
-  security: false
-  accessibility: true   # set by change new: user-facing framework detected (rails); .ai/rules/accessibility.md applies
-  observability: false
-  policy: false           # true when the change alters what the application collects, shares, retains, protects, or promises in its privacy policy, security policy, or terms; loads .ai/rules/policy-conformance.md and enables the go-live policy advisories. Set automatically by `change new` when the repository profile records a published policy document.
-
 $ eval
 ✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
 ✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
@@ -49,7 +29,3 @@ $ eval
 ✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
 ✓ pass eval: 12 passed, 0 failed, 0 errors, 1 skipped
 exit 0
-$ eval --json (summary)
-["version", "stable", "results", "summary"]
-1
-{"pass"=>12, "skip"=>1}

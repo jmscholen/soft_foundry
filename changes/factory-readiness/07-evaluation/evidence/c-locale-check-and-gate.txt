@@ -1,21 +1,20 @@
-$ LANG=C LC_ALL=C check
+$ LANG=C LC_ALL=C: place non-ASCII file, check, gate verify
 ✓ pass control plane: 16 phases, 17 skills, no errors
 exit 0
-$ LANG=C LC_ALL=C gate verify
 06-verification  complete  PASS
   ✓ pass handoff identity
   ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 378061e1c2ef1b0eb53623b415161d106a822f82
-  ✓ pass completed_at recorded: 2026-10-14T18:35:00Z
+  ✓ pass commit_sha recorded: 4aca4144d484954e5b301d5421b9f1da585107c5
+  ✓ pass completed_at recorded: 2026-10-14T19:10:00Z
   ✓ pass predecessor complete: 05-implementation
-  ✓ pass evidence current: no code changes since 378061e1c2ef; specification unchanged since b4f1d19b3618
-  ✓ pass red evidence: CHECK-001: 7f4db33 -> 378061e1c2ef (test/factory_readiness_test.rb)
+  ✓ pass evidence current: no code changes since 4aca4144d484; specification unchanged since b4f1d19b3618
+  ✓ pass red evidence: CHECK-001: 7533d7d -> 4aca4144d484 (test/factory_readiness_test.rb)
   ✓ pass content clean
 advisory: 1 issue to address before factory-readiness goes live (informational, does not block the gate)
   ! warn accessibility: the accessibility review (13-review/accessibility.md) has not run yet
 exit 0
-$ change status (fresh_context notice for verify?)
+$ change status
 factory-readiness: Factory readiness: executable harness evals, fresh-context evidence phases, a blocking guard, specification locking on the gated track, UTF-8 file reads, and an application-repository evaluation  [status: intake, phase: evaluate, risk: medium]
 advisory: 1 issue to address before factory-readiness goes live (informational, does not block the gate)

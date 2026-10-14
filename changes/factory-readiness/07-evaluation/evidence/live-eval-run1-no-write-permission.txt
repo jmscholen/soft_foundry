@@ -1,20 +1,15 @@
-I couldn't write the review. Every write under `changes/eval-review-finds-planted-defect/13-review/` was refused with "you haven't granted it yet". That includes `handoff.yml`, so it still says `in_progress` and the gate has nothing to check. I haven't tried to get around the refusal, for example by writing the files through Bash.
+# default invocation, no shell arguments (output truncated to the final lines)
+$ soft-foundry eval --live --shell claude --case review-finds-planted-defect
+I couldn't write any of the review files, so the review is not recorded and `handoff.yml` is still `in_progress`. Every Write call into `changes/eval-review-finds-planted-defect/13-review/` was refused for lack of permission. The skill's `permissions.yml` allows writes there, so I haven't tried to get around the refusal. Once writes are allowed, I can re-issue the same writes.
 
-The review itself is done. It would have been recorded as follows:
+The review itself is done, and it found the planted defect:
 
-- **REV-001 (blocking):** `Refund.amount` in `app/eval_app.rb` returns `requested_cents` unchanged and never caps it at `payment_cents`, which breaks REQ-001. For example, `Refund.amount(1000, 5000)` returns 5000 instead of 1000, an over-refund of 4000 cents.
-- **REV-002 (blocking):** A negative request is returned as is, which breaks REQ-002. For example, `Refund.amount(1000, -250)` returns -250 instead of 0.
-- **REV-003 (major):** `spec/eval_app_test.rb` only requires minitest and defines no tests. The "test file passes" claim in `06-verification/results.md` is therefore empty, and the implementation log wrongly says both requirements are met.
-- **Minor:**
-  - REV-004: `eval_app.rb` is named for the fixture but defines `Refund`.
-  - REV-005: no accessibility requirement is recorded although `surfaces.accessibility` is true.
-  - REV-006: the helper emits no signal on an out-of-range request.
+- **REV-001, blocking:** `Refund.amount` in `app/eval_app.rb:6-8` returns `requested_cents` unchanged and never uses `payment_cents`. `Refund.amount(1000, 5000)` returns 5000, but REQ-001 requires 1000.
+- **REV-002, blocking:** negative requests aren't handled, so REQ-002 is also unimplemented. `Refund.amount(1000, -500)` returns -500, but it should return 0.
+- **REV-003, major:** `spec/eval_app_test.rb` defines no tests. `06-verification/results.md` says "The test file passes" and cites `evidence/tests.log`, which doesn't exist. REV-001 and REV-002 therefore passed verification.
+- **Everything else:** architecture and security show no findings of their own. Accessibility is "conforms" because the code produces no user-perceivable output. Policy, infrastructure and operations are N/A.
 
-Policy conformance and infrastructure would be N/A with a stated reason. Accessibility would conform with advisories, since the helper produces nothing a person perceives or operates.
-
-The handoff would be `status: complete` at commit `0d4024b19ce127370a2bdacffd2669f6dcdcbfdc`, with `anthropic` / `claude-sonnet-5-5` as the resolved model. The blocking findings route to remediate: `next: remediate`, per `on_blocking_findings`. Each finding above minor would carry a `failure:` line.
-
-If you grant write access to the `13-review/` directory, I'll write all eight review files and `handoff.yml`. Otherwise tell me to set the handoff to `blocked` instead, though that write needs the same permission.
+The handoff I would write is `status: complete` at commit `f56542945a0ee69b0a97d7f3e5c0a1e6787d77b6`, with `next: remediate` (the workflow's `on_blocking_findings` route). It lists the three findings, each with a `failure:` line. The model is recorded as anthropic / `claude-sonnet-5-5`.
 ✗ fail eval review-finds-planted-defect: review on claude found no finding matching /cap|exceed|larger|greater|more than|negative/ (0 findings recorded)
 ✗ fail eval: 0 passed, 1 failed, 0 errors, 0 skipped
 exit 2
