@@ -1,26 +1,26 @@
-commit_sha: 9307b23a6a7560d41bea4a1a31eba76c708c348c
+commit_sha: 1b49874309152d74533590922752ba9faed6668c
 artifacts:
   - path: c-locale-check-and-gate.txt
     journey: EVAL-006
-    sha256: 11a47dbc9fb27687dcde02b7c61c77ae8a4a611ce19457830b443ffdda6da3e6
-  - path: eval-clean-and-live-refusals.txt
-    journey: EVAL-001
-    sha256: 270929ab9f073e369f4433355e328440f379b5f943c3fd9cfa92d2b462a612b9
-  - path: eval-failure-modes.txt
+    sha256: e939396794fa67976a0132aa04a2ed544aa1f64a050404467ea18877c85a8cb0
+  - path: eval-live-refusals.txt
     journey: EVAL-003
-    sha256: 3acb701b0a0c25d5b87b013fe9eb2ccfee8e50210560ba5e1ba2c73b581e9320
+    sha256: 15f2e6c07706835091393b4e2125ff6450d80f0fb82cf65323b38bc073618307
+  - path: guard-post-call-restore.txt
+    journey: EVAL-010
+    sha256: 1f2390ec5463e354799523271000420930ae291ac5779a785332d46943c4355b
   - path: live-eval-run1-no-write-permission.txt
     journey: EVAL-004
-    sha256: 55acb7f9d973d19cafcf72030c8e0a6e12d156fab27ee40a0ff0595a006ac9bb
+    sha256: 1d7b3ab455c93b67ff0cb6dedcf283cda6f2b3bb79881351602beda5d0107e6a
   - path: live-eval-run2-acceptEdits.txt
     journey: EVAL-004
-    sha256: 444b17e6e9550450623be56e0668715a22bd32c3b4ecdcbe97a9a52521e686f4
+    sha256: 1139c3f842e7df367ab216dbba6c9dfe4da0b6b0955fffe392bf66331123027a
   - path: rails-guard-decisions.txt
     journey: EVAL-002
-    sha256: 7f7a9730010868e369ed5a719088532e9859acef8f900a43614950e9964da59e
-  - path: rails-install-profile-change-new.txt
+    sha256: cf69e7fe3cb3c0fee620975aa6464d5b29002ac31471d41378cba56288ffff8b
+  - path: rails-install-profile-change-new-eval.txt
     journey: EVAL-001
-    sha256: 6ca4cbbdda1a41ae193b07d6af02dbedf79a652bd526f505720100f0d10e1beb
+    sha256: b1cff95a03afced2e4dd87faec102f888a8209d840160c77c663a3866a3293b7
   - path: waivers-and-close.txt
     journey: EVAL-005
-    sha256: 92b55bcc236e9e9b4012e623d1ad5150b5d0079eb8ae5a7ce10c0c6309f552bd
+    sha256: 5dad88f6c20b3d3d58b2c2edb8670128db526fe6bd07b47510f86660fe80c4e9

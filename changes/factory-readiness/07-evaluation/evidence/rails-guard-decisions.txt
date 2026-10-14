@@ -9,49 +9,43 @@ exit 0
 $ guard Grep on app (allowed)
 exit 0
 $ guard Edit rules file
-✗ fail guard: Edit .ai/rules/rails.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's m
+✗ fail guard: Edit .ai/rules/rails.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is docum
 exit 2
 $ guard Edit verification results
-✗ fail guard: Edit changes/refund-cap/06-verification/results.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforc
+✗ fail guard: Edit changes/refund-cap/06-verification/results.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's mach
 exit 2
 $ guard Read harness-evals readme
-✗ fail guard: Read .ai/harness-evals/README.md is in implementation's deny_read set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a mainta
+✗ fail guard: Read .ai/harness-evals/README.md is in implementation's deny_read set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override 
 exit 2
 $ guard Bash sed -i enforcement
-✗ fail guard: Bash .ai/policies/enforcement.yml names the guard's own configuration; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, 
+✗ fail guard: Bash .ai/policies/enforcement.yml names the guard's own configuration; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; 
 exit 2
 $ guard Write claude settings
-✗ fail guard: Write .claude/settings.json is the guard's own configuration; no skill may write it; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement
+✗ fail guard: Write .claude/settings.json is the guard's own configuration; no skill may write it; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-l
 exit 2
-$ guard REM-002 cd relative edit
-✗ fail guard: Bash .ai/policies/enforcement.yml names the guard's own configuration; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, 
+$ guard cd then relative edit
+✗ fail guard: Bash .ai/policies/enforcement.yml names the guard's own configuration; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; 
 exit 2
-$ guard REM-002 glob
-✗ fail guard: Bash .ai/policies/enforcement.yml names the guard's own configuration; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, 
+$ guard glob
+✗ fail guard: Bash .ai/policies/enforcement.yml names the guard's own configuration; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; 
 exit 2
-$ guard REM-002 symlink
-✗ fail guard: Edit .ai/policies/enforcement.yml is the guard's own configuration; no skill may write it; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enfor
+$ guard chained cd ..
+✗ fail guard: Bash .ai/policies/enforcement.yml names the guard's own configuration; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; 
 exit 2
-$ guard REM-002 .soft-foundry write
-✗ fail guard: Write .soft-foundry/anything.yml is the guard's own configuration; no skill may write it; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforc
+$ guard brace
+✗ fail guard: Bash .ai/policies/enforcement.yml names the guard's own configuration; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; 
 exit 2
-$ guard REM-003 chained cd ..
-✗ fail guard: Bash .ai/policies/enforcement.yml names the guard's own configuration; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, 
+$ guard unresolvable tilde user
+✗ fail guard: Bash could not be decided (ArgumentError: user nosuchuser doesn't exist); refusing it; the guard refuses what it cannot decide (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is do
 exit 2
-$ guard REM-003 brace
-✗ fail guard: Bash .ai/policies/enforcement.yml names the guard's own configuration; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, 
+$ guard NUL byte path
+✗ fail guard: Edit could not be decided (ArgumentError: path name contains null byte); refusing it; the guard refuses what it cannot decide (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is doc
 exit 2
-$ guard REM-003 unresolvable tilde user
-✗ fail guard: Bash could not be decided (ArgumentError: user nosuchuser doesn't exist); refusing it; the  skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a main
+$ guard Grep on harness-evals
+✗ fail guard: Grep .ai/harness-evals searches inside implementation's deny_read set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override 
 exit 2
-$ guard REM-003 NUL byte path
-✗ fail guard: Edit could not be decided (ArgumentError: path name contains null byte); refusing it; the  skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maint
-exit 2
-$ guard REM-003 Grep on harness-evals
-✗ fail guard: Grep .ai/harness-evals searches inside implementation's deny_read set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a mainta
-exit 2
-$ guard REM-003 Glob on harness-evals
-✗ fail guard: Glob .ai/harness-evals, .ai/harness-evals/cases searches inside implementation's deny_read set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/
+$ guard Glob on harness-evals
+✗ fail guard: Glob .ai/harness-evals/cases searches inside implementation's deny_read set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local ove
 exit 2
 --- warn override
 ! warn guard: Edit .ai/rules/rails.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: warn, logged to .soft-foundry/guard.log)

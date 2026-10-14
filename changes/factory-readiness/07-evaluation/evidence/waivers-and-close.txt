@@ -1,18 +1,12 @@
 $ gate intake (risk medium, threat_model waived)
 00-intake  complete  FAIL
   ✗ fail waivers permitted: threat_model cannot be waived at risk medium (waivable: discover, plan; .ai/workflow.yml waivable_by_risk)
-  ✓ pass completed_at recorded: 2026-10-14 10:05:00 UTC
-  ✓ pass predecessor complete: first phase
 $ gate intake (risk medium, judge waived)
 00-intake  complete  FAIL
   ✗ fail waivers permitted: judge is never waived (review and judgment are required of every change)
-  ✓ pass completed_at recorded: 2026-10-14 10:05:00 UTC
-  ✓ pass predecessor complete: first phase
 $ gate intake (risk low, threat_model waived)
-00-intake  complete  PASS
+00-intake  complete  FAIL
   ✓ pass waivers permitted: risk low
-  ✓ pass completed_at recorded: 2026-10-14 10:05:00 UTC
-  ✓ pass predecessor complete: first phase
 $ change close refund-cap
 refund-cap: cannot close: 14-judgment is pending; a change is complete only with a final judgment (.ai/workflow.yml rules.final_judgment_required), so run the judge phase (`soft-foundry phase run judge`) or pass --force to close without one
 exit 1
@@ -21,3 +15,4 @@ advisory: 1 issue to address before refund-cap goes live (informational, does no
   ! warn accessibility: the accessibility review (13-review/accessibility.md) has not run yet
 refund-cap: closed
 exit 0
+(note: the gate on the scratch intake also reports "no placeholders" because the scratch request.md and assumptions.md still carry the template TBD; the waivers permitted line is the one under test)

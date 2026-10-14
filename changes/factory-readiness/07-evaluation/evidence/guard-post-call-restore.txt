@@ -1,0 +1,44 @@
+$ hooks install --claude
+installed guard hook in .claude/settings.json (PreToolUse: Edit|Write|MultiEdit|NotebookEdit|Read|Grep|Glob|Bash)
+installed post-call check in .claude/settings.json (PostToolUse: Bash; restores the guard's own configuration if a command changed it)
+guard mode: block (repository policy (.ai/policies/enforcement.yml))
+exit 0
+$ doctor (guard)
+✓ pass guard hook (claude: installed, codex: not installed; mode: block, repository policy (.ai/policies/enforcement.yml))
+13-    ],
+14:    "PostToolUse": [
+15-      {
+16-        "matcher": "Bash",
+17-        "hooks": [
+18-          {
+19-            "type": "command",
+20-            "command": "# soft-foundry:guard-after\nif [ -x exe/soft-foundry ] && [ -f lib/soft_foundry.rb ]; then ruby -Ilib exe/soft-foundry guard --after;
+$ pre-call guard for a benign Bash call (records the baseline)
+exit 0
+$ (a command spelled to get round the preventive check turns the mode off)
+# The mode is a repository policy here, block since 0.21.0: a violation is
+  mode: off
+$ guard --after
+✗ fail guard: .ai/policies/enforcement.yml changed during the tool call and was restored to the state before it (tamper logged to .soft-foundry/guard.log; mode: block)
+exit 2
+# The mode is a repository policy here, block since 0.21.0: a violation is
+  mode: block
+$ git status of policy
+$ guard log tail
+2026-10-14T18:23:52Z warn Edit skill=implementation paths=.ai/rules/rails.md is in implementation's deny_write set
+2026-10-14T18:24:00Z tamper restored=.ai/policies/enforcement.yml
+$ guard --after with nothing changed
+exit 0
+$ machine-local override added mid-call
+✗ fail guard: .soft-foundry/enforcement.yml changed during the tool call and was restored to the state before it (tamper logged to .soft-foundry/guard.log; mode: block)
+exit 2
+guard-baseline.yml
+guard.log
+init.lock
+$ edit between calls (maintainer own shell) stands as next baseline
+exit 0
+guard:
+  mode: warn
+$ hooks uninstall --claude
+removed guard hook from .claude/settings.json
+0

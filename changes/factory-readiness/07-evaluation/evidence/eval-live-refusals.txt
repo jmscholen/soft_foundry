@@ -1,0 +1,15 @@
+$ eval --case review-finds-planted-defect (no --live)
+- skip eval review-finds-planted-defect: live case; run `soft-foundry eval --live --shell claude|codex|grok --case review-finds-planted-defect`
+✓ pass eval: 0 passed, 0 failed, 0 errors, 1 skipped
+exit 0
+$ eval --live --case review-finds-planted-defect (no --shell)
+✗ error eval review-finds-planted-defect: --live needs --shell claude|codex|grok
+✗ fail eval: 0 passed, 0 failed, 1 error, 0 skipped
+exit 2
+$ eval --live --shell nosuch
+soft-foundry: --shell takes one of claude, codex, grok; got 'nosuch'
+exit 1
+$ eval --case nosuchcase
+✗ error eval nosuchcase: no such case under .ai/harness-evals/cases
+✗ fail eval: 0 passed, 0 failed, 1 error, 0 skipped
+exit 2

@@ -2,9 +2,9 @@
 phase: 07-evaluation
 skill: evaluation
 status: complete
-commit_sha: 9307b23a6a7560d41bea4a1a31eba76c708c348c
-started_at: '2026-10-14T16:35:01Z'
-completed_at: '2026-10-14T19:05:00Z'
+commit_sha: 1b49874309152d74533590922752ba9faed6668c
+started_at: '2026-10-14T18:22:32Z'
+completed_at: '2026-10-14T19:40:00Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -18,7 +18,7 @@ blocking: []
 findings:
 - id: EVAL-F1
   severity: minor
-  summary: Still present at 9307b23. Live eval on claude with no shell arguments fails
+  summary: Still present at 1b49874. Live eval on claude with no shell arguments fails
     (0 findings recorded) because the unattended session cannot write 13-review; it
     passes with -- --allowedTools ... --permission-mode acceptEdits. The README does
     not say so.
@@ -35,29 +35,37 @@ findings:
     read the harness-evals README so that part of AC-FR-021 is unjudged.
 - id: EVAL-F4
   severity: minor
-  summary: A guard refusal for an undecidable call (unresolvable tilde user, NUL byte)
-    reads "the  skill's permissions.yml" with an empty skill name. The refusal (exit
-    2) is correct.
+  summary: Closed at 1b49874. An undecidable guard refusal now reads "the guard refuses
+    what it cannot decide" instead of an empty skill name.
 - id: EVAL-F5
   severity: minor
-  summary: README guard paragraph does not yet describe the Grep/Glob matcher, cd/glob/symlink/brace
-    handling, or that existing repositories rerun hooks install; already owed in 09-remediation.
+  summary: README guard section does not describe the Grep/Glob matcher, cd/glob/symlink/brace
+    handling, the PostToolUse post-call check (guard --after, baseline, tamper log),
+    or that existing repositories rerun hooks install --claude; already owed in 09-remediation.
+- id: EVAL-F6
+  severity: minor
+  summary: The planted-case eval journeys (reversed expectation, malformed YAML, unknown
+    check, oversize case) were not re-run at this commit because this skill is denied
+    harness-evals; eval code is unchanged since 9307b23 where they passed. Verification
+    at HEAD owns them.
 next: attack
-notes: Re-run at 9307b23 because the earlier evaluation (bound to 98b336f) went stale
-  when REM-003 changed the guard. Journeys run by hand against the real CLI in scratch
-  repositories under the session scratchpad; the repository guard refused two of this
-  session's own tool calls (unresolvable tilde-user token, Write outside the repository),
-  so scripts were run through Bash only. Live eval run twice; first run failed (no
-  write permission), second passed. Not exercised by hand - invalid UTF-8 scrubbing,
-  eval case whose gate raises, fake-shell live case, positive fresh-context advisory
-  - covered by verification.
+notes: Re-run at 1b49874 because the earlier evaluation (bound to 9307b23) went stale
+  when REM-004 changed the guard. Journeys run by hand against the real CLI in scratch
+  repositories under the session scratchpad. EVAL-010 (new) exercised the post-call
+  restore with a direct edit standing in for any spelling the preventive check misses;
+  whether every spelling is covered is for attack. The repository guard refused two
+  of this session's tool calls (a command naming the harness-evals README, and one
+  with an unresolvable tilde-user token), so scripts were built to avoid the latter.
+  Live eval run twice; first run failed (no write permission), second passed. Not
+  exercised by hand - invalid UTF-8 scrubbing, eval cases whose gate raises, planted
+  eval cases, fake-shell live case, positive fresh-context advisory - covered by verification.
 executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-14T17:47:00Z'
-  finished_at: '2026-10-14T17:53:01Z'
+  started_at: '2026-10-14T18:22:32Z'
+  finished_at: '2026-10-14T18:28:03Z'
   exit_status: 0
   previous_phase: verify
-  session_id: d077418b-0d6d-48c4-af86-3f786e400bb3
+  session_id: 9ea86b7f-f936-48dd-a105-a1184b560768
   cwd: "/home/user/soft_foundry"

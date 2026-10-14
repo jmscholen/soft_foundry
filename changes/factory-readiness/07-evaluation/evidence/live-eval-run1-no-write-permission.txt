@@ -1,21 +1,20 @@
-$ eval --live --shell claude --case review-finds-planted-defect  (no shell arguments)
-I finished the review but couldn't write any of it. Every write to `changes/eval-review-finds-planted-defect/13-review/` was denied for lack of permission, including the attempt to mark the handoff `blocked`. `handoff.yml` is still `in_progress` with no review files written, so `soft-foundry gate re
+I couldn't write the review. Every write under `changes/eval-review-finds-planted-defect/13-review/` was refused with "you haven't granted it yet". That includes `handoff.yml`, so it still says `in_progress` and the gate has nothing to check. I haven't tried to get around the refusal, for example by writing the files through Bash.
 
-**What I found**
-- **REV-001 (blocking, `lib/eval_app.rb:6-8`):** `Refund.amount` just returns `requested_cents`.
-  - REQ-001 asks for a cap at the payment amount, but `Refund.amount(1000, 5000)` returns 5000 instead of 1000.
-  - REQ-002 says a negative request refunds nothing, but `Refund.amount(1000, -200)` returns -200 instead of 0.
-  - The implementation log claims both requirements are met.
-- **REV-002 (blocking, `test/eval_app_test.rb:1`):** The test file only requires minitest and has no test cases, so the "test file passes" claim in `06-verification/results.md` proves nothing.
-- **REV-003 (major, security):** The missing cap lets a caller over-refund, 4000 cents in the example above. It is fixed by the same change as REV-001.
-- **Other areas:** Architecture conforms. Accessibility, policy, infrastructure and operations are N/A because this change touches no UI, policy, IaC or runtime. `metadata.yml` also declares those surfaces false.
+The review itself is done. It would have been recorded as follows:
 
-**What I'd write once permission is granted**
-- **Review files:** `functional.md`, `architecture.md`, `security.md`, `accessibility.md`, `policy-conformance.md`, `infrastructure.md`, `operations.md` and `consolidated.md`, with the findings above and a `failure:` stated for each.
-- **Handoff:** `status: complete`, `commit_sha: a7f06d104c2b4b0d1418c2fabf521540ee596a7f` (the current HEAD), and `resolved_model` as provider `anthropic`, model `claude-sonnet-5-5`. The findings would be REV-001, REV-002 and REV-003, each with a `failure:`.
-- **Routing:** `next: remediate`, since the review has blocking findings.
+- **REV-001 (blocking):** `Refund.amount` in `app/eval_app.rb` returns `requested_cents` unchanged and never caps it at `payment_cents`, which breaks REQ-001. For example, `Refund.amount(1000, 5000)` returns 5000 instead of 1000, an over-refund of 4000 cents.
+- **REV-002 (blocking):** A negative request is returned as is, which breaks REQ-002. For example, `Refund.amount(1000, -250)` returns -250 instead of 0.
+- **REV-003 (major):** `spec/eval_app_test.rb` only requires minitest and defines no tests. The "test file passes" claim in `06-verification/results.md` is therefore empty, and the implementation log wrongly says both requirements are met.
+- **Minor:**
+  - REV-004: `eval_app.rb` is named for the fixture but defines `Refund`.
+  - REV-005: no accessibility requirement is recorded although `surfaces.accessibility` is true.
+  - REV-006: the helper emits no signal on an out-of-range request.
 
-Grant write access to `13-review/` and I'll write it all. You could also run the phase where the runtime guard allows that path.
+Policy conformance and infrastructure would be N/A with a stated reason. Accessibility would conform with advisories, since the helper produces nothing a person perceives or operates.
+
+The handoff would be `status: complete` at commit `0d4024b19ce127370a2bdacffd2669f6dcdcbfdc`, with `anthropic` / `claude-sonnet-5-5` as the resolved model. The blocking findings route to remediate: `next: remediate`, per `on_blocking_findings`. Each finding above minor would carry a `failure:` line.
+
+If you grant write access to the `13-review/` directory, I'll write all eight review files and `handoff.yml`. Otherwise tell me to set the handoff to `blocked` instead, though that write needs the same permission.
 ✗ fail eval review-finds-planted-defect: review on claude found no finding matching /cap|exceed|larger|greater|more than|negative/ (0 findings recorded)
 ✗ fail eval: 0 passed, 1 failed, 0 errors, 0 skipped
 exit 2

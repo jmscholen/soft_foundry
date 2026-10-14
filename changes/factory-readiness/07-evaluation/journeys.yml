@@ -1,4 +1,4 @@
-commit_sha: 9307b23a6a7560d41bea4a1a31eba76c708c348c
+commit_sha: 1b49874309152d74533590922752ba9faed6668c
 journeys:
   - id: EVAL-001
     criteria: [AC-FR-019, AC-FR-020]
@@ -11,10 +11,10 @@ journeys:
       - Run soft-foundry eval and soft-foundry eval --json in that repository
     assertions:
       - init exits 0 and prints check ok; check passes with 16 phases and 17 skills
-      - the profile records framework rails and a ruby testing entry; doctor reports mode block from the repository policy
+      - the profile records framework rails and a ruby testing entry; doctor reports mode block from the repository policy (and a fail for the hook not yet installed, which `hooks install --claude` then clears)
       - change new declares surfaces.accessibility true citing the detected rails framework
       - eval passes 12, fails 0, errors 0, skips 1 (the live case), exit 0, and the JSON carries version 1 and the same outcomes (12 pass, 1 skip)
-    evidence: [evidence/rails-install-profile-change-new.txt, evidence/eval-clean-and-live-refusals.txt]
+    evidence: [evidence/rails-install-profile-change-new-eval.txt]
     result: pass
   - id: EVAL-002
     criteria: [AC-FR-007, AC-FR-008, AC-FR-019]
@@ -26,9 +26,10 @@ journeys:
       - Pipe REM-002 attempts - a Bash command that cd's into the policies directory and edits the policy by relative name, a Bash command naming the policy by glob, an Edit of a symlink that points at the policy, and a Write under the guard's .soft-foundry directory
       - Pipe REM-003 attempts - cd into a subdirectory, cd .. back to the root, then cd into policies and edit by relative name; a brace-expanded name; a tilde-user token that does not resolve; a path containing a NUL byte; Grep and Glob aimed at the harness-evals directory; Grep on the application directory
       - Pipe a refused Edit again with SOFT_FOUNDRY_GUARD=warn
+      - Read every refusal for an undecidable call (REM-004 changed its wording)
     assertions:
       - the four application and test calls and the Grep on the application directory exit 0 with no output
-      - the five protected calls, the four REM-002 attempts (cd then relative edit, glob, symlink, .soft-foundry write) and the seven REM-003 attempts (chained cd .., brace, unresolvable tilde user, NUL byte, Grep and Glob on harness-evals) exit 2; the unresolvable tilde and NUL calls are reported as could not be decided and refused rather than raising; the symlink is reported as the policy file it resolves to; the five protected calls exit 2 with a fail guard line naming the tool, the path, the skill, mode block, the policy file, and that a machine-local override is documented (it does not name a value)
+      - the five protected calls, the four REM-002 attempts (cd then relative edit, glob, symlink, .soft-foundry write) and the seven REM-003 attempts (chained cd .., brace, unresolvable tilde user, NUL byte, Grep and Glob on harness-evals) exit 2; the unresolvable tilde and NUL calls are reported as could not be decided and refused rather than raising, and now say "the guard refuses what it cannot decide" with no empty skill name (EVAL-F4 closed); the symlink is reported as the policy file it resolves to; the five protected calls exit 2 with a fail guard line naming the tool, the path, the skill, mode block, the policy file, and that a machine-local override is documented (it does not name a value)
       - under SOFT_FOUNDRY_GUARD=warn the same call exits 0 with a warn guard line and mode warn
     evidence: [evidence/rails-guard-decisions.txt]
     result: pass
@@ -38,26 +39,25 @@ journeys:
     starting_state: A scratch repository carrying a copy of this repository's control plane.
     steps:
       - Run eval (see EVAL-001 evidence for the clean run)
-      - Add a case whose expected outcome is reversed and run eval --case on it
-      - Add a case file that is not valid YAML, one naming an unknown check, and one whose embedded file content is 70000 bytes (over the 65536 cap); run check and eval
+      - Run eval --case on a name that does not exist
       - Run the live case without --live, with --live and no --shell, and with --shell naming a shell that is not supported
     assertions:
-      - the reversed case is reported fail with expected and observed outcomes, exit 2
-      - check reports one error per bad file naming the file (the oversize case names the path, 70001 bytes and the 65536 limit); eval reports each as error, continues, and runs the remaining cases (13 passed, 1 failed, 2 errors, 1 skipped)
+      - an unknown case name is reported as error naming the cases directory, exit 2
+      - NOT re-run at this commit - planting a reversed, malformed, unknown-check or oversize case needs the case file format and the harness-evals directory, which this skill is denied; lib code for eval is unchanged since 9307b23 (git diff shows only cli guard, guard.rb, hooks.rb), where those four were run and passed; they are left to verification at HEAD
       - the live case is skip with the command to run it (exit 0); with --live and no --shell it is error naming --shell (exit 2); an unsupported shell is refused with exit 1 and the supported list
-      - every line starts with a status glyph followed by the outcome word at a fixed position
-    evidence: [evidence/eval-failure-modes.txt, evidence/eval-clean-and-live-refusals.txt]
+      - every line starts with a status glyph followed by the outcome word at a fixed position (seen in all transcripts)
+    evidence: [evidence/eval-live-refusals.txt, evidence/rails-install-profile-change-new-eval.txt]
     result: pass
   - id: EVAL-004
     criteria: [AC-FR-015]
     persona: Maintainer running the live harness eval on the installed claude shell
-    starting_state: This repository at HEAD, claude CLI installed, live case review-finds-planted-defect.
+    starting_state: A scratch Rails repository carrying this source tree's control plane (HEAD 1b49874), claude CLI installed, live case review-finds-planted-defect.
     steps:
       - Run eval --live --shell claude --case review-finds-planted-defect with no shell arguments
       - Run it again passing the shell arguments --allowedTools and --permission-mode acceptEdits after --
     assertions:
       - run 1 - the fresh review session found the planted defect (cap not applied, negative not zeroed, empty test file) but could not write 13-review (permission prompts were not granted in the non-interactive session), so the case failed with 0 findings recorded; reported fail, exit 2
-      - run 2 - the review wrote its findings and the case passed, naming the shell claude, the model anthropic/claude-sonnet-5-5, and findings REV-001, REV-002 and REV-003, exit 0
+      - run 2 - the review wrote its findings and the case passed, naming the shell claude, the model anthropic/claude-sonnet-5-5, and findings REV-001, REV-002 and REV-005, exit 0
     evidence: [evidence/live-eval-run1-no-write-permission.txt, evidence/live-eval-run2-acceptEdits.txt]
     result: pass
   - id: EVAL-005
@@ -93,7 +93,7 @@ journeys:
     assertions:
       - help lists eval, eval --live, ci with evals, guard modes; README has the Proving the gate section, the waiver paragraph and the specification-lock paragraph; AGENTS.md and .ai/README.md state waivers by risk and that judgment is never waived; schemas.md describes waivers permitted, specification locked and the fresh-context advisory; VERSION is 0.21.0
       - the harness-evals README could not be read by this skill (denied by permissions) and is not judged here
-      - hooks install --claude now prints a matcher that includes Grep and Glob; the README guard paragraph does not yet say so (owed per REM-003)
+      - hooks install --claude prints a matcher that includes Grep and Glob and a PostToolUse post-call check; a search of README.md finds no mention of guard --after, the post-call check, the Grep/Glob matcher, or rerunning hooks install (owed per REM-003 and REM-004, outside this skill's write set)
       - the documentation does not say that a live eval on claude needs shell arguments for write permission (see finding EVAL-F1)
     evidence: []
     result: pass
@@ -118,3 +118,21 @@ journeys:
       - invalid UTF-8 scrubbing, a mutated specification after lock (the shipped eval case specification-edited-after-lock passed in EVAL-001 and EVAL-003 runs), evidence staleness against a changed specification, an eval case whose gate raises, and a fake-shell live case need planted defects or a fake shell that a user does not create; they are covered by the verification suite (see 06-verification)
     evidence: []
     result: blocked
+  - id: EVAL-010
+    criteria: [AC-FR-007, AC-FR-008]
+    persona: Maintainer who installed the guard on Claude Code, with an implementing agent that changes the guard's configuration by a spelling the preventive check misses (REM-004)
+    starting_state: The scratch Rails repository on change/refund-cap, in_progress at implement, block mode in the repository policy.
+    steps:
+      - Run hooks install --claude and doctor
+      - Pipe a benign Bash call to guard (records the pre-call baseline)
+      - Change .ai/policies/enforcement.yml to mode off directly (standing in for any spelling the preventive check misses), then run guard --after
+      - Repeat with a machine-local override .soft-foundry/enforcement.yml created during the call
+      - Run guard --after after a call that changed nothing; make an edit between calls and run guard then guard --after; run hooks uninstall --claude
+    assertions:
+      - hooks install writes a PreToolUse entry whose matcher includes Grep and Glob and a PostToolUse entry with matcher Bash; doctor then passes the guard line
+      - guard --after after the policy was set to off restores mode block, exits 2, says the file changed during the tool call and was restored, logs a tamper line, and git shows the policy unchanged
+      - the override created during the call is removed and reported the same way, exit 2
+      - a call that changed nothing exits 0 with no output; a change made between calls stands as the next baseline (exit 0, content kept)
+      - hooks uninstall removes both entries
+    evidence: [evidence/guard-post-call-restore.txt]
+    result: pass
