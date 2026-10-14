@@ -2,9 +2,9 @@
 phase: 06-verification
 skill: verification
 status: complete
-commit_sha: 4aca4144d484954e5b301d5421b9f1da585107c5
+commit_sha: 50a45069a586f0ce37d9eb8d59da85ee37f6155d
 started_at: '2026-10-14T18:04:16Z'
-completed_at: '2026-10-14T19:10:00Z'
+completed_at: '2026-10-14T19:22:02Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -15,10 +15,10 @@ outputs:
 - evidence/manifest.yml
 blocking: []
 findings:
-- Re-verification after REM-005 at 4aca414; both suites (default and C locale, run
-  one after another) 566 runs 0 failures, check and eval pass. ci fails only on STALE
+- Re-verification after REM-006 at 50a4506; both suites (default and C locale, run
+  one after another) 568 runs 0 failures, check and eval pass. ci fails only on STALE
   evidence for verify (clears on commit), evaluate and attack, whose code changed
-  in cli.rb, guard.rb and factory_readiness_test.rb.
+  in cli.rb, hooks.rb and factory_readiness_test.rb.
 - The intermittent live-case test failure seen once under concurrent load in an earlier
   verification did not recur; cause never investigated, so treat as possibly flaky
   under load.
@@ -32,9 +32,9 @@ executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-14T18:37:10Z'
-  finished_at: '2026-10-14T18:55:21Z'
+  started_at: '2026-10-14T19:04:22Z'
+  finished_at: '2026-10-14T19:22:12Z'
   exit_status: 0
   previous_phase: remediate
-  session_id: 7aa3664d-58cf-4154-b6df-f07797edd0d0
+  session_id: 1fb9042c-d2dc-4fda-a89e-41e50fe1361f
   cwd: "/home/user/soft_foundry"

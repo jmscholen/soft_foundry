@@ -1,4 +1,4 @@
-commit_sha: 4aca4144d484954e5b301d5421b9f1da585107c5
+commit_sha: 50a45069a586f0ce37d9eb8d59da85ee37f6155d
 checks:
   - id: CHECK-001
     kind: tests
@@ -6,7 +6,7 @@ checks:
     result: pass
     evidence: evidence/test-suite.txt
     criteria: [AC-FR-001, AC-FR-002, AC-FR-003, AC-FR-004, AC-FR-005, AC-FR-006, AC-FR-007, AC-FR-008, AC-FR-009, AC-FR-010, AC-FR-011, AC-FR-012, AC-FR-013, AC-FR-014, AC-FR-016, AC-FR-017, AC-FR-018, AC-FR-019, AC-FR-020]
-    red_commit: 7533d7d
+    red_commit: 9252178
     test_path: test/factory_readiness_test.rb
   - id: CHECK-002
     kind: tests
@@ -31,6 +31,6 @@ checks:
     kind: custom
     command: soft-foundry ci
     result: fail
-    note: exit 2; verify, evaluate and attack fail only as STALE against REM-005 code (cli.rb, guard.rb, factory_readiness_test.rb); verify is stale only until this handoff is committed at the new SHA; no check other than staleness fails
+    note: exit 2; verify, evaluate and attack fail only as STALE against REM-006 code (cli.rb, hooks.rb, factory_readiness_test.rb); verify is stale only until this handoff is committed at the new SHA; no check other than staleness fails
     evidence: evidence/ci.txt
     criteria: [AC-FR-009]
