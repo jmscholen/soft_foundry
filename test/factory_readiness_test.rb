@@ -409,3 +409,84 @@ class GuardShellNamingTest < Minitest::Test
     end
   end
 end
+
+# REM-002 (from 08-attack, ATK-F1 and ATK-F2): the shell heuristic resolved
+# only tokens that spelled a path in full. A `cd` into the directory, a
+# glob, or a symlink reached the guard's own configuration and the eval
+# cases. The guard now follows `cd` within a command, expands globs, and
+# resolves symlinks before deciding; the whole .soft-foundry directory is
+# the guard's own.
+class GuardIndirectionTest < Minitest::Test
+  include FoundryFixture
+
+  def with_phase(phase)
+    with_fixture_repo do |dir|
+      sh(dir, "git", "checkout", "-qb", "change/i1")
+      cli(dir, "change", "new", "i1")
+      meta = File.join(dir, "changes", "i1", "metadata.yml")
+      File.write(meta, SoftFoundry.read_text(meta).sub(/^status: intake.*$/, "status: in_progress").sub(/^current_phase: intake.*$/, "current_phase: #{phase}"))
+      commit_all(dir, "record")
+      yield dir, SoftFoundry::Guard.new(dir)
+    end
+  end
+
+  def bash(guard, command) = guard.decide("Bash", { "command" => command })
+
+  def test_cd_relative_names_are_resolved
+    with_phase("implement") do |_dir, guard|
+      d = bash(guard, "mkdir -p .soft-foundry && cd .soft-foundry && printf 'guard: {mode: warn}' > enforcement.yml")
+      assert d.violation?
+      assert_includes d.reason, "guard's own configuration"
+      assert bash(guard, "cd .soft-foundry; echo x > enforcement.yml").violation?
+      assert bash(guard, "cd .ai && ls harness-evals").violation?
+      assert bash(guard, "cd .ai/harness-evals && cat README.md").violation?
+      assert bash(guard, "cd .ai && cd policies && cat budget.yml").violation?
+      assert_equal :allow, bash(guard, "cd .ai && cat rules/ruby.md").outcome
+      assert_equal :allow, bash(guard, "cd lib && ruby app.rb").outcome
+    end
+  end
+
+  def test_globs_are_expanded_before_deciding
+    with_phase("implement") do |_dir, guard|
+      assert bash(guard, "cat .ai/harness-*/cases/*").violation?
+      assert bash(guard, "cat .ai/harness-ev*").violation?
+      assert bash(guard, "cat .ai/pol*/budget.yml").violation?
+      assert_equal :allow, bash(guard, "ls lib/*.rb").outcome
+      assert_equal :allow, bash(guard, "cat .ai/rules/*.md").outcome
+    end
+  end
+
+  def test_the_guard_configuration_directory_is_its_own
+    with_phase("verify") do |_dir, guard|
+      assert bash(guard, "cat .soft-foundry/guard.log").violation?
+      assert guard.decide("Write", { "file_path" => ".soft-foundry/anything.yml" }).violation?
+      assert guard.decide("Write", { "file_path" => ".soft-foundry/enforcement.yml" }).violation?
+    end
+  end
+
+  def test_symlinks_are_resolved_before_deciding
+    with_phase("implement") do |dir, guard|
+      File.symlink("../.ai/policies/enforcement.yml", File.join(dir, "lib", "x.yml"))
+      d = guard.decide("Edit", { "file_path" => "lib/x.yml" })
+      assert d.violation?, "a link in the write set that points at the policy is the policy"
+      assert_includes d.reason, "guard's own configuration"
+      File.symlink("../.ai", File.join(dir, "lib", "plane"))
+      d = guard.decide("Write", { "file_path" => "lib/plane/rules/ruby.md" })
+      assert d.violation?
+      assert_includes d.reason, "deny_write"
+      assert bash(guard, "cat lib/plane/harness-evals/README.md").violation?
+      assert_equal :allow, guard.decide("Edit", { "file_path" => "lib/app.rb" }).outcome
+    end
+  end
+
+  def test_a_case_file_has_a_size_cap
+    with_fixture_repo do |dir|
+      plane = SoftFoundry::ControlPlane.new(dir)
+      big = { "id" => "big", "kind" => "gate", "description" => "x", "record" => { "files" => { "00-intake/request.md" => "a" * 70_000 } },
+              "expect" => { "phase" => "intake", "outcome" => "pass" } }
+      File.write(File.join(dir, ".ai/harness-evals/cases/big.yml"), YAML.dump(big))
+      problems = SoftFoundry::HarnessEval.lint(dir, plane)
+      assert problems.any? { |p| p.include?("big.yml") && p.include?("bytes") }, problems.inspect
+    end
+  end
+end
