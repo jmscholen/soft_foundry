@@ -1,0 +1,65 @@
+$ gate intake
+00-intake  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass waivers permitted: nothing waived
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 0dd5a2a9a66485ef016015bc9a1259137c03f760
+  ✓ pass completed_at recorded: 2026-10-14T17:05:00Z
+  ✓ pass predecessor complete: first phase
+  ✓ pass content clean
+advisory: 1 issue to address before refund-cap goes live (informational, does not block the gate)
+  ! warn accessibility: the accessibility review (13-review/accessibility.md) has not run yet
+exit 0
+$ eval
+✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
+✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
+✓ pass eval control-well-formed: verify pass, as expected
+✓ pass eval evidence-stale-after-code-change: verify evidence current fail, as expected
+✓ pass eval hardening-while-exploring: implement not exploring fail, as expected
+✓ pass eval invisible-text-in-evidence: verify content clean fail, as expected
+✓ pass eval judgment-waived: intake waivers permitted fail, as expected
+✓ pass eval placeholder-left-in-evidence: verify no placeholders fail, as expected
+✓ pass eval red-commit-is-the-green-commit: verify red evidence fail, as expected
+✓ pass eval review-finding-without-failure: review findings explained fail, as expected
+- skip eval review-finds-planted-defect: live case; run `soft-foundry eval --live --shell claude|codex|grok --case review-finds-planted-defect`
+✓ pass eval secret-shape-in-evidence: verify content clean fail, as expected
+✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
+✓ pass eval: 12 passed, 0 failed, 0 errors, 1 skipped
+exit 0
+$ eval --json
+{
+  "version": 1,
+  "stable": false,
+  "results": [
+    {
+      "id": "attack-waived-at-medium-risk",
+      "kind": "gate",
+      "outcome": "pass",
+      "detail": "intake waivers permitted fail, as expected",
+      "phase": "intake",
+      "check": "waivers permitted",
+      "expected": "fail",
+      "observed": "fail",
+      "shell": null,
+      "model": null,
+      "matched": [
+
+      ]
+    },
+    {
+      "id": "blocked-but-complete",
+      "kind": "gate",
+      "outcome": "pass",
+      "detail": "verify no blocking conditions fail, as expected",
+      "phase": "verify",
+      "check": "no blocking conditions",
+      "expected": "fail",
+      "observed": "fail",
+      "shell": null,
+    
+$ check
+✓ pass control plane: 16 phases, 17 skills, no errors
+exit 0

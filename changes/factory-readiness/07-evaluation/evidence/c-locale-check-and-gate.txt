@@ -1,0 +1,17 @@
+== AC-FR-001 LANG=C status/check with non-ASCII in the record
+✓ pass control plane: 16 phases, 17 skills, no errors
+exit 0
+06-verification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 8ecce2f7fa84ac190d96751ffa630572e6f4c3bd
+  ✓ pass completed_at recorded: 2026-10-14T16:45:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since 8ecce2f7fa84; specification unchanged since b4f1d19b3618
+  ✓ pass red evidence: CHECK-001: 26497a4 -> 8ecce2f7fa84 (test/factory_readiness_test.rb)
+  ✓ pass content clean
+advisory: 1 issue to address before factory-readiness goes live (informational, does not block the gate)
+  ! warn accessibility: the accessibility review (13-review/accessibility.md) has not run yet
+exit 0

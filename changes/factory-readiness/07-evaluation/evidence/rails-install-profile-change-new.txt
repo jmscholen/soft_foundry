@@ -1,0 +1,48 @@
+$ init (exit via second line)
+root: /tmp/claude-0/ev/rails
+check: ok
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+maturity: already assessed (--reassess to force a fresh run); showing the existing report
+maturity: level 2 (contextualized) — 11/11 capabilities satisfied
+  blocking the next level:
+    - change.intake_required (UNKNOWN)
+    - change.specification_required (UNKNOWN)
+    - change.acceptance_criteria_required (UNKNOWN)
+    - change.provenance_enabled (UNKNOWN)
+    - change.acceptance_criteria_locking (UNKNOWN)
+  full report: .ai/maturity-report.md
+summary: created 0, updated 0, skipped 200, conflict 0, forced 0
+exit 0
+$ check
+✓ pass control plane: 16 phases, 17 skills, no errors
+exit 0
+$ profile
+10:  - ruby
+11:  frameworks:
+12:  - rails
+14:  testing:
+15:  - ruby
+65:    - 'detected: ruby'
+66:  technology.frameworks_detected:
+69:    - 'detected: rails'
+74:  testing.strategy_detected:
+77:    - ruby
+$ doctor
+✗ fail guard hook (claude: not installed, codex: not installed; mode: block, repository policy (.ai/policies/enforcement.yml)); install with `soft-foundry hooks install --claude` or `--codex`
+$ change new
+created changes/refund-cap with 16 phase directories
+branch: change/refund-cap
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+13:surfaces:
+14-  application: false
+15-  database: false
+16-  infrastructure: false
+17-  security: false
+18-  accessibility: true   # set by change new: user-facing framework detected (rails); .ai/rules/accessibility.md applies
+19-  observability: false
+20-  policy: false           # true when the change alters what the application collects, shares, retains, protects, or promises in its privacy policy, security policy, or terms; loads .ai/rules/policy-conformance.md and enables the go-live policy advisories. Set automatically by `change new` when the repository profile records a published policy document.
+21-

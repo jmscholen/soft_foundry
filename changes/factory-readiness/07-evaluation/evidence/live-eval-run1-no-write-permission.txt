@@ -1,0 +1,16 @@
+I couldn't write the review, so the 13-review phase is unfinished and the handoff is still `in_progress`. The permission prompts for writing into `changes/eval-review-finds-planted-defect/13-review/` weren't granted. `review/permissions.yml` allows writes there, but the harness refused both Write and the Bash heredoc. I didn't try another route around it.
+
+The review itself is done. It found the planted defect plus a gap in the tests:
+
+- **REV-001 (blocking):** `Refund.amount` in `lib/eval_app.rb` returns `requested_cents` unchanged and never caps at the payment. `Refund.amount(1000, 5000)` returns 5000 where REQ-001 requires 1000. The code comment and `05-implementation/log.md` both claim the cap is implemented.
+- **REV-002 (blocking):** Negative requests aren't zeroed. `Refund.amount(1000, -300)` returns -300 where REQ-002 requires 0.
+- **REV-003 (major):** `test/eval_app_test.rb` only requires minitest and has no test cases. "The test file passes" in `06-verification/results.md` therefore proves nothing, which is why verification missed REV-001 and REV-002.
+- **REV-004 (minor):** The security consequence of REV-001 and REV-002. An untrusted `requested_cents` reaches the refund path uncapped.
+- **Other review documents:** Architecture is conforming. Accessibility, policy conformance, infrastructure and operations are N/A or conforming with advisories, because there is no UI, no policy surface, and no IaC.
+
+The handoff I intended to write has `status: complete`, `commit_sha: 61f0f1d1075a7709932e58849f76ad513e597f13`, and `next: remediate`. It records `resolved_model` as anthropic / claude-sonnet-5-5. Every finding above minor carries a `failure:` line, and `blocking` stays empty because the review itself completed.
+
+If you grant write access to that directory, or tell me to proceed another way, I'll write the eight review documents and the handoff.
+✗ fail eval review-finds-planted-defect: review on claude found no finding matching /cap|exceed|larger|greater|more than|negative/ (0 findings recorded)
+✗ fail eval: 0 passed, 1 failed, 0 errors, 0 skipped
+exit 2

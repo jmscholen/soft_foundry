@@ -1,0 +1,24 @@
+== AC-FR-010 expectation reversed
+✗ fail eval reversed-case: expected intake waivers permitted pass, observed fail (judge is never waived (review and judgment are required of every change))
+✗ fail eval: 0 passed, 1 failed, 0 errors, 0 skipped
+exit 2
+== AC-FR-011 malformed + unknown check
+✗ error harness eval .ai/harness-evals/cases/broken.yml: not valid YAML: (<unknown>): did not find expected ',' or ']' while parsing a flow sequence at line 1 column 5
+✗ error harness eval .ai/harness-evals/cases/unknown-check.yml: expect.check 'no such check' is not a gate check (handoff present, handoff status, phase pending, phase in progress, blocking recorded, handoff identity, track permitted, waivers permitted, not exploring, required files present, no placeholders, no blocking conditions, commit_sha recorded, completed_at recorded, predecessor complete, evidence current, specification locked, red evidence, instincts valid, findings explained, panel recorded, content clean)
+✗ fail control plane: 2 error(s)
+check exit 2
+✗ error eval broken: not valid YAML: (<unknown>): did not find expected ',' or ']' while parsing a flow sequence at line 1 column 5
+✗ fail eval reversed-case: expected intake waivers permitted pass, observed fail (judge is never waived (review and judgment are required of every change))
+- skip eval review-finds-planted-defect: live case; run `soft-foundry eval --live --shell claude|codex|grok --case review-finds-planted-defect`
+✗ error eval unknown-check: expect.check 'no such check' is not a gate check (handoff present, handoff status, phase pending, phase in progress, blocking recorded, handoff identity, track permitted, waivers permitted, not exploring, required files present, no placeholders, no blocking conditions, commit_sha recorded, completed_at recorded, predecessor complete, evidence current, specification locked, red evidence, instincts valid, findings explained, panel recorded, content clean)
+✗ fail eval: 12 passed, 1 failed, 2 errors, 1 skipped
+eval exit 2
+== AC-FR-014 live without --live / without --shell / non-zero shell
+- skip eval review-finds-planted-defect: live case; run `soft-foundry eval --live --shell claude|codex|grok --case review-finds-planted-defect`
+✓ pass eval: 0 passed, 0 failed, 0 errors, 1 skipped
+exit 0
+✗ error eval review-finds-planted-defect: --live needs --shell claude|codex|grok
+✗ fail eval: 0 passed, 0 failed, 1 error, 0 skipped
+exit 2
+soft-foundry: --shell takes one of claude, codex, grok; got 'failshell'
+exit 1

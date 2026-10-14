@@ -1,16 +1,19 @@
 # Evaluation Plan
 
 ## Intent being proven
-TBD
+The maintainer of an application repository can install Soft Foundry, open a change, and rely on the guard, the gate, the waiver rule and the executable harness evals, and the live eval of a fresh-context review works on the installed claude shell. There is no graphical UI; the user-facing surface is command-line output, so journeys are run by hand against the real CLI from this source tree (ruby -I lib exe/soft-foundry), outside the unit-test harness.
 
 ## Personas
-TBD
+- Maintainer of a Rails-shaped application repository (init, check, change new, eval, change close).
+- Implementing agent under the implementation skill (guard decisions).
+- Maintainer on a machine with the C locale.
 
 ## Journeys
-For each journey record: EVAL ID, requirement IDs, starting state, steps, assertions, evidence, result.
+EVAL-001 Rails repository lifecycle (AC-FR-019, AC-FR-020). EVAL-002 guard decisions in block and warn mode (AC-FR-007, AC-FR-008, AC-FR-019). EVAL-003 harness eval failure modes (AC-FR-009, 010, 011, 014, 020). EVAL-004 live eval on claude (AC-FR-015). EVAL-005 waivers and change close (AC-FR-016, 017, 018). EVAL-006 C locale (AC-FR-001, AC-FR-005). EVAL-007 documentation against behaviour (AC-FR-021). EVAL-008 fresh-context advisory, negative side (AC-FR-006). EVAL-009 criteria that need planted defects (AC-FR-002, 003, 004, 012, 013), blocked here and left to verification.
+Starting state, steps, assertions, evidence and result for each are in journeys.yml. Scratch repositories were built under the session scratchpad, not in this repository, so no application or record outside 07-evaluation was changed.
 
 ## UI walkthrough evidence
-Capture screenshots or equivalent browser evidence at meaningful state transitions.
+No graphical UI exists or changed. Evidence is the verbatim terminal transcripts under evidence/, hashed in evidence/manifest.yml.
 
 ## Accessibility interaction
-Applicable whenever `surfaces.accessibility` is true (see `.ai/rules/accessibility.md`): keyboard-only operation, focus order and visible focus, error identification, and screen-reader readable output or names. Record what was exercised and the result; N/A must say why nothing a person perceives or operates changed.
+surfaces.accessibility is true because the output of command-line commands is perceived by a person. Exercised: every new line in the transcripts (eval, gate, check, change close, guard, doctor) carries a status glyph and then its outcome word (pass, fail, skip, error, warn) at the start of the line, so it reads without color; eval --json carries the same outcomes as data; no command prompted (all ran with stdin closed or piped); failures say what to do next (change close names 14-judgment, the judge command and --force; eval without --shell names the flag; a malformed case names the file). Keyboard-only operation is inherent because there is no pointing device surface; focus order and screen-reader names do not apply to plain text output. Not exercised with a screen reader.
