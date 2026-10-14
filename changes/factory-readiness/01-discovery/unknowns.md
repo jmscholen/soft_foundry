@@ -2,4 +2,8 @@
 
 | Unknown | Impact if wrong | How to resolve | Blocking? |
 | --- | --- | --- | --- |
-| TBD | TBD | TBD | yes / no |
+| Whether `claude -p` in this environment can run tools (Bash, Write) without an interactive permission prompt, which `phase run` and the live evals need | Evidence phases run in the interactive session instead, with the advisory saying so; live evals are recorded `blocked` with the reason | `phase run verify --dry-run`, then one real run; pass `-- --permission-mode acceptEdits` or an allowed-tools list if the default refuses | no |
+| Whether flipping the guard to `block` refuses tool calls this change's own later phases need (the implementation skill cannot write `README.md` or `.ai/`) | Edits are refused mid-change; the documented machine-local override (`.soft-foundry/enforcement.yml`, gitignored) is the way round, recorded as a deviation | Make control-plane edits before the flip; record every override use in `05-implementation/deviations.md` | no |
+| Which existing tests assume the guard warns (mode `warn`) by reading the policy file from the fixture copy of `.ai/` | Those tests fail after the flip and must be updated to the new default, or to set the mode explicitly | Run the suite after the flip; a test about warn mode sets `SOFT_FOUNDRY_GUARD=warn` or writes the local override | no |
+| Whether a Rails-shaped fixture exposes a layout the path groups miss (for example `app/javascript`, `config/credentials`) | The application-repository test passes without proving much | The test asserts the guard's decision on representative paths in each group, including a secret-shaped one | no |
+| Whether any open record other than this one would fail the new waiver rule or the judgment requirement | `ci` fails on `main` after merge | `ci` is run at verification; only closed records exist besides this one, and closed records are not gated | no |

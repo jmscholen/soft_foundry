@@ -1,22 +1,39 @@
 # Repository Context
 
 ## Discovered
-TBD
+- Ruby gem `soft_foundry` 0.20.0 at `main` 0bd0260 (after #48 merged panel mode). Standard library only; minitest under `test/` (481 runs at 0.19.0, 515 at 0.20.0 per #47); executable `exe/soft-foundry`; CI `.github/workflows/ci.yml` runs `rake test` then `rake ci` on `ubuntu-latest`, Ruby 3.3. Layout unchanged since `changes/panel-phases`.
+- Locale: the suite has 5 errors under a C locale (`ArgumentError: invalid byte sequence in US-ASCII`) in `Gate#placeholder_check` (`lib/soft_foundry/gate.rb:243`, `File.read(path).match?`) and four `test/ui_assets_test.rb` tests that `gsub`/`match?` the UI assets. `lib/soft_foundry/content_scan.rb:99` already reads with `File.binread(...).force_encoding("UTF-8")`; fifteen other `File.read` calls in `lib/` rely on `Encoding.default_external`. Confirmed: the same two files pass under `LANG=C.UTF-8` (23 runs, 0 errors). Nothing sets `Encoding.default_external` in `exe/`, `lib/`, or `test/test_helper.rb`.
+- Records: 30 closed, all `status: closed`. Judgment (`14-judgment`) is `complete` in 5 (init-command, cross-provider-review, panel-phases, session-id-quoting, session-ledger); 25 closed with `judge` in `skipped_phases`, each with a one-line rationale. Review is `complete` in 22. Every closed record waived at least `discover`, `specify`, and `plan` except init-command and session-ledger; 20 waived `attack`. `ChangeRecord#reached_lifecycle_end?` treats a waived phase as finished, so `change close` and `ci` accept a record whose judgment never ran, although `.ai/workflow.yml` declares `rules.final_judgment_required: true` and `AGENTS.md` rule 11 says never to declare a change complete without a judgment artifact. Nothing reads `final_judgment_required`.
+- Waivers: `skipped_phases` accepts any phase with any non-empty rationale (`ChangeRecord#skipped_with_rationale`); risk does not constrain it. `.ai/repository.yml` already records this as `governance.risk_classification: PARTIAL` ("risk forces the lifecycle track but does not otherwise select required phases").
+- Fresh context: `Advisory#fresh_context_notices` covers `review` and `judge` only. Verification, evaluation, and attack handoffs carry `executed_by: null` in every record, including panel-phases and cross-provider-review, whose judgments say so in their residual-risk sections. `PhaseRunner` can run any phase; nothing prefers it for the evidence phases.
+- Guard: `.ai/policies/enforcement.yml` `guard.mode: warn`; `Guard.mode` resolves `SOFT_FOUNDRY_GUARD`, then `.soft-foundry/enforcement.yml`, then the policy, then `warn`. The hook is installed in `.claude/settings.json` and `.codex/hooks.json`. The packaged `.ai/` (gemspec `spec.files` includes `.ai/**/*`) carries the policy, so `init` installs `warn` into every application repository today.
+- Specification lock: `Gate#specification_lock_check` runs only when `@record.vetted` (iterative track). On the gated track `02-specification/` is denied to downstream skills by permissions but a change there after the specify phase completes is not detected. `Gate#staleness_check` compares `APP`, `TESTS`, and `INFRA` only.
+- Harness evals: `.ai/harness-evals/README.md` is the only file. `HARNESS_EVALS` is a protected path group every skill must `deny_read`; `Check#check_permissions` enforces that. `changes/*/15-learning/proposed-evals.md` holds proposals (init-command has a detailed one for `effective_predecessor`); nothing executes them. `.ai/maturity.yml` level 6 (`harness.benchmark_suite`, `harness.model_evaluation`, `harness.workflow_evaluation`, `harness.regression_detection`) is MISSING in the profile.
+- Coding shells in this environment: `claude` 2.1.299 on `PATH` at `/opt/node22/bin/claude`, and `claude -p` answers a headless prompt (checked live: exit 0). `codex` and `grok` are not installed. `.ai/runtime/models.yml` maps every profile to an empty list.
+- Application-shaped targets: `MaturityScan` detects `rails` from `config/application.rb` or `rails` in the `Gemfile`, testing from `spec/**/*_spec.rb` or `test/**/*_test.rb`; default `APP` is `app/** lib/** config/** db/** exe/**`, `TESTS` is `spec/** test/**`. `ChangeRecord#declare_surfaces!` sets `surfaces.accessibility: true` when the profile records a UI framework (`Advisory::UI_FRAMEWORKS`). No test exercises `init` → `change new` → guard → gate → `check` on a Rails-shaped repository end to end; `test/cli_init_test.rb` and `test/installer_test.rb` install into a `lib/app.rb` target.
+- Profile: `.ai/repository.yml` assessed 2026-09-09 at cc348f9 by `changes/init-command/01-discovery`. Rescoring the recorded capabilities with `ControlPlane#score_maturity` gives level 2 with one gap, `change.acceptance_criteria_locking: PARTIAL`, which is still true. Findings that are no longer true: `evaluation.user_journey_gate` ("no evaluation phase has run yet"; 29 have), `governance.human_boundaries` ("no awaiting_human mechanism"; `status: awaiting_human` and `human_decisions` exist and panel-phases used them), `security.threat_modeling` ("no threat model phase has run yet"; 7 have), `security.adversarial_validation` ("no attack phase has run yet"; 9 have), `judgment.final_gate` ("no judgment has run yet"; 5 have). `observability.standard_dashboard` is absent from the profile although level 5 requires it; the rule in `.ai/maturity.yml` makes it NOT_APPLICABLE only when no infrastructure as code is present, which is this repository's case (`infrastructure.iac.tools: []`).
+- GitHub: one Codex review bot comments on pull requests (no findings on #48); no branch protection or CODEOWNERS is visible from the repository; #47 merged into `change/close-cross-provider-review` rather than `main`, and #48 carried it to `main` with `change close --force`.
 
 ## Inferred
-TBD
+- The honest maturity level after this change is 3, not higher: `evidence.failed_results_retained` stays PARTIAL by the model's own rule (only the RED commit is verified retained), and it gates level 4. Level 6 capabilities become satisfiable once an executable suite exists, but the scoring rule is contiguous, so they do not raise the level until levels 4 and 5 are met.
+- `rules.final_judgment_required` was meant to be enforced by the gate or by `change close`; the waiver path predates it and was never reconciled.
+- The eval runner should reuse the test suite's fixture approach (`FoundryFixture#with_fixture_repo`: a scratch git repository carrying a copy of `.ai/`) rather than invent one, so that what the suite proves and what an application repository can prove are the same mechanism.
 
 ## Defined by repository policy
-TBD
+- `.ai/policies/skill-permissions.yml`: `.ai/policies/**` and `.ai/harness-evals/**` are protected from every write set; `implementation_cannot_grade_itself`; `evidence_producers_cannot_repair_the_subject_under_test`.
+- `.ai/policies/human-boundaries.yml`: changes that intentionally weaken required controls need a person. Flipping the guard to `block` strengthens a control; adding risk-bound waiver limits strengthens one.
+- `.ai/rules/testing.md`: failing test committed first, named as `red_commit`.
+- `.ai/rules/accessibility.md`: every output line states its outcome as a word.
+- `.ai/rules/security.md` and `content-scan.yml`: evidence never carries a real secret; a planted shape is a canary and is exempted in policy, never by editing evidence.
 
 ## Published policies
-TBD: the privacy policy, security policy, and terms the application publishes, with path or URL, or MISSING with how absence was established; mirrored under `policies:` in `.ai/repository.yml`.
+Unchanged: `.ai/repository.yml` records privacy, security, and terms as `NOT_APPLICABLE` with rationale (developer tool; no service; the session ledger is local only). This change adds no outbound call and stores nothing new about a person: `soft-foundry eval` writes scratch repositories under the system temp directory and deletes them. The statuses and rationales stand; this discovery leaves them as they are.
 
 ## Unknown
-TBD
+See `unknowns.md`.
 
 ## Affected components
-TBD
+See `affected-components.md`.
 
 ## Dependencies
-TBD
+See `dependencies.md`.

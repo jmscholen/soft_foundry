@@ -1,24 +1,28 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 01-discovery
 skill: repository-discovery
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 7f6de0d58b756ae126ad79120cc71b694e386157
+started_at: '2026-10-14T14:57:37Z'
+completed_at: '2026-10-14T14:57:37Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- repository-context.md
+- affected-components.md
+- dependencies.md
+- unknowns.md
+blocking: []
+findings: []
 next: specify
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: 'Performed by the interactive session. Wrote .ai/repository.yml (the one control-plane
+  file this skill may write): five findings that were no longer true replaced with
+  evidence, judgment.final_gate kept PARTIAL with the real finding (5 of 30 closed
+  records completed a judgment; 25 waived it), observability.standard_dashboard added
+  as NOT_APPLICABLE per the maturity rule, maturity rescored by ControlPlane#score_maturity
+  (level 2; the one level-3 gap is the gated-track specification lock this change
+  adds). The profile diff is large because YAML.dump writes block lists where the
+  old file used flow lists; no capability was removed.'
+executed_by:
