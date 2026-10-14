@@ -29,6 +29,7 @@ require_relative "ui/server"
 require_relative "processes"
 require_relative "session_ledger"
 require_relative "panel"
+require_relative "harness_eval"
 
 module SoftFoundry
   class CLI
@@ -67,6 +68,7 @@ module SoftFoundry
       when "budget" then budget
       when "gate" then gate
       when "ci" then ci
+      when "eval" then eval_command
       when "hooks" then hooks
       when "guard" then guard
       when "phase" then phase
@@ -681,8 +683,65 @@ module SoftFoundry
       results.any?(&:failed?) ? 2 : 0
     end
 
+    # `eval [--live] [--shell S] [--case ID]... [--json] [-- shell args]`:
+    # the harness evals under .ai/harness-evals/cases/. One status line per
+    # case, then a summary; exit 0 only when every run case passed. Live
+    # cases are skipped unless --live names a shell.
+    def eval_command
+      live = flag("--live")
+      json = flag("--json")
+      shell = option("--shell")
+      ids = options("--case")
+      extra = []
+      if (i = @argv.index("--"))
+        extra = @argv[(i + 1)..]
+        @argv = @argv[0...i]
+      end
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+      if shell && !PhaseRunner::SHELLS.key?(shell)
+        raise TargetError, "--shell takes one of #{PhaseRunner::SHELLS.keys.join(', ')}; got '#{shell}'"
+      end
+      results = HarnessEval::Runner.new(@root, plane: plane).run(ids: ids, live: live, shell: shell, extra: extra, shell_runner: @runner) do |r|
+        @out.puts eval_line(r) unless json
+        @out.flush
+      end
+      counts = eval_counts(results)
+      if json
+        @out.puts JSON.pretty_generate("version" => 1, "stable" => false, "results" => results.map(&:to_h), "summary" => counts)
+      else
+        @out.puts eval_summary(counts)
+      end
+      counts["failed"].zero? && counts["errors"].zero? ? 0 : 2
+    end
+
+    def eval_line(result)
+      mark = { "pass" => "✓ pass", "fail" => "✗ fail", "error" => "✗ error", "skip" => "- skip" }.fetch(result.outcome)
+      "#{mark} eval #{result.id}: #{result.detail}"
+    end
+
+    def eval_counts(results)
+      { "passed" => results.count { |r| r.outcome == "pass" }, "failed" => results.count { |r| r.outcome == "fail" },
+        "errors" => results.count { |r| r.outcome == "error" }, "skipped" => results.count { |r| r.outcome == "skip" } }
+    end
+
+    def eval_summary(counts)
+      ok = counts["failed"].zero? && counts["errors"].zero?
+      "#{ok ? '✓ pass' : '✗ fail'} eval: #{counts['passed']} passed, #{counts['failed']} failed, #{counts['errors']} #{counts['errors'] == 1 ? 'error' : 'errors'}, #{counts['skipped']} skipped"
+    end
+
     def ci
       code = check
+      # The deterministic harness evals: does this control plane's gate
+      # still refuse the defects the cases plant? Live cases need a shell
+      # and are not run here.
+      results = HarnessEval::Runner.new(@root, plane: plane).run(live: false) do |r|
+        @out.puts eval_line(r) unless r.outcome == "skip"
+      end
+      counts = eval_counts(results)
+      unless results.empty?
+        @out.puts eval_summary(counts)
+        code = 2 unless counts["failed"].zero? && counts["errors"].zero?
+      end
       list_changes.each do |slug|
         record = load_record(slug)
         if record.metadata["status"] == "closed"
@@ -1398,7 +1457,17 @@ module SoftFoundry
           soft-foundry session log --shell claude|codex|grok
                                                   the session hook itself: records the prompt payload on stdin
                                                   in ~/.soft-foundry/sessions.jsonl; prints nothing, always exits 0
-          soft-foundry ci                         check + gate every change record (used by CI and pre-commit)
+          soft-foundry eval [--case ID]... [--json]
+                                                  run the harness evals in .ai/harness-evals/cases/: each gate
+                                                  case plants a defective change record in a scratch repository
+                                                  carrying this control plane and asserts which gate check
+                                                  refuses it; one status line per case, then a summary
+          soft-foundry eval --live --shell claude|codex|grok [--case ID]... [-- args...]
+                                                  also run the live cases: plant a defect in a scratch
+                                                  application and run the case's phase in a fresh session
+                                                  through `phase run`, passing when its findings name the defect
+          soft-foundry ci                         check + harness evals (gate cases) + gate every change record
+                                                  (used by CI and pre-commit)
           soft-foundry hooks install              install the pre-commit hook
           soft-foundry hooks install --claude [--local] | --codex
                                                   install the PreToolUse guard into .claude/settings.json

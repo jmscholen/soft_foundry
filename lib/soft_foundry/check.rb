@@ -3,6 +3,7 @@
 require "yaml"
 require_relative "guard"
 require_relative "content_scan"
+require_relative "harness_eval"
 
 module SoftFoundry
   # Lints the `.ai/` control plane itself: every phase has a skill, every skill
@@ -26,6 +27,7 @@ module SoftFoundry
       findings.concat(check_transitions)
       findings.concat(check_tracks)
       findings.concat(check_waivers)
+      findings.concat(check_harness_evals)
       findings.concat(check_panel_phases)
       findings.concat(check_enforcement)
       findings.concat(check_content)
@@ -34,6 +36,12 @@ module SoftFoundry
     end
 
     private
+
+    # Every harness eval case parses and names real phases and checks, so
+    # `eval` never finds out at run time.
+    def check_harness_evals
+      HarnessEval.lint(@plane.root, @plane).map { |problem| Finding.new(:error, "harness eval #{problem}") }
+    end
 
     # The waiver rule names lifecycle phases only, and never the phases no
     # risk may waive.

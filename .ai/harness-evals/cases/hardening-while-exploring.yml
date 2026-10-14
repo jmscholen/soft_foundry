@@ -1,0 +1,12 @@
+id: hardening-while-exploring
+kind: gate
+description: On the iterative track, an implementation recorded complete while the change is still exploring fails the not exploring check; the exploring stage produces a journal, never evidence.
+record:
+  risk: low
+  track: iterative
+  status: exploring
+  complete: [intake, implement]
+expect:
+  phase: implement
+  check: not exploring
+  outcome: fail

@@ -1,0 +1,12 @@
+id: invisible-text-in-evidence
+kind: gate
+description: A zero-width character hidden in a verification result (text a person cannot see) fails the content clean check.
+record:
+  risk: low
+  complete: [intake, discover, specify, threat_model, plan, implement, verify]
+  later_files:
+    06-verification/results.md: "# Verification Results\n\nCommit SHA: ${COMMIT}\n\nAll checks pass${INVISIBLE_ZWSP}.\n"
+expect:
+  phase: verify
+  check: content clean
+  outcome: fail
