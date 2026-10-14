@@ -572,3 +572,111 @@ class GuardFailClosedTest < Minitest::Test
     assert_includes SoftFoundry::Hooks::GUARD_MATCHER, "Glob"
   end
 end
+
+# REM-004 (from the third 08-attack, ATK-F8): a name-based shell check can
+# always be spelled around, so the guard also watches its own configuration
+# across every tool call: a PreToolUse baseline, and a PostToolUse check
+# that restores any of those files changed during the call and refuses.
+class GuardTamperTest < Minitest::Test
+  include FoundryFixture
+
+  def with_phase(phase = "implement")
+    with_fixture_repo do |dir|
+      sh(dir, "git", "checkout", "-qb", "change/t1")
+      cli(dir, "change", "new", "t1")
+      meta = File.join(dir, "changes", "t1", "metadata.yml")
+      File.write(meta, SoftFoundry.read_text(meta).sub(/^status: intake.*$/, "status: in_progress").sub(/^current_phase: intake.*$/, "current_phase: #{phase}"))
+      commit_all(dir, "record")
+      yield dir, SoftFoundry::Guard.new(dir)
+    end
+  end
+
+  def guard_cli(dir, args, payload, env: {})
+    out = StringIO.new
+    err = StringIO.new
+    code = nil
+    with_env({ "SOFT_FOUNDRY_GUARD" => nil }.merge(env)) do
+      code = SoftFoundry::CLI.new(["guard", *args], out: out, err: err, input: StringIO.new(JSON.generate(payload)), root: dir).run
+    end
+    [code, out.string + err.string]
+  end
+
+  def bash_payload = { "tool_name" => "Bash", "tool_input" => { "command" => "echo hi" } }
+
+  def test_a_change_to_the_guards_configuration_during_a_tool_call_is_restored_and_refused
+    with_phase do |dir, _guard|
+      policy = File.join(dir, ".ai/policies/enforcement.yml")
+      override = File.join(dir, ".soft-foundry/enforcement.yml")
+      before = SoftFoundry.read_text(policy)
+      assert_equal 0, guard_cli(dir, [], bash_payload).first, "the pre-call check records a baseline and allows the call"
+      # The call (spelled however it likes) downgrades the guard.
+      File.write(policy, before.sub("mode: block", "mode: warn"))
+      FileUtils.mkdir_p(File.dirname(override))
+      File.write(override, "guard:\n  mode: warn\n")
+      code, out = guard_cli(dir, ["--after"], bash_payload)
+      assert_equal 2, code, out
+      assert_includes out, "✗ fail guard:"
+      assert_includes out, "changed during the tool call"
+      assert_includes out, "restored"
+      assert_equal before, SoftFoundry.read_text(policy), "the policy is back"
+      refute File.exist?(override), "an override that did not exist before the call is removed"
+      assert_equal "block", SoftFoundry::Guard.mode(dir, env: {}).first
+      log = SoftFoundry.read_text(File.join(dir, ".soft-foundry/guard.log"))
+      assert_includes log, "tamper"
+    end
+  end
+
+  def test_a_change_made_between_tool_calls_is_the_maintainers_and_stands
+    with_phase do |dir, _guard|
+      override = File.join(dir, ".soft-foundry/enforcement.yml")
+      FileUtils.mkdir_p(File.dirname(override))
+      File.write(override, "guard:\n  mode: warn\n") # the maintainer, in their own shell, before the next call
+      assert_equal 0, guard_cli(dir, [], bash_payload).first
+      code, out = guard_cli(dir, ["--after"], bash_payload)
+      assert_equal 0, code, out
+      assert File.exist?(override)
+      assert_equal "warn", SoftFoundry::Guard.mode(dir, env: {}).first
+    end
+  end
+
+  def test_a_missing_baseline_after_a_call_restores_from_git_and_refuses
+    with_phase do |dir, _guard|
+      policy = File.join(dir, ".ai/policies/enforcement.yml")
+      before = SoftFoundry.read_text(policy)
+      assert_equal 0, guard_cli(dir, [], bash_payload).first
+      FileUtils.rm_rf(File.join(dir, ".soft-foundry"))
+      File.write(policy, before.sub("mode: block", "mode: off"))
+      code, out = guard_cli(dir, ["--after"], bash_payload)
+      assert_equal 2, code, out
+      assert_includes out, "baseline"
+      assert_equal before, SoftFoundry.read_text(policy), "the committed policy is the fallback baseline"
+    end
+  end
+
+  def test_hooks_install_wires_the_post_call_check_and_uninstall_removes_both
+    with_fixture_repo do |dir|
+      code, out = cli(dir, "hooks", "install", "--claude")
+      assert_equal 0, code, out
+      assert_includes out, "PostToolUse"
+      data = JSON.parse(SoftFoundry.read_text(File.join(dir, ".claude/settings.json")))
+      post = data.dig("hooks", "PostToolUse")
+      assert_equal 1, post.size
+      assert_equal "Bash", post.first["matcher"]
+      assert_includes post.first.dig("hooks", 0, "command"), "guard --after"
+      2.times { cli(dir, "hooks", "install", "--claude") }
+      assert_equal 1, JSON.parse(SoftFoundry.read_text(File.join(dir, ".claude/settings.json"))).dig("hooks", "PostToolUse").size, "idempotent"
+      assert_equal 0, cli(dir, "hooks", "uninstall", "--claude").first
+      data = JSON.parse(SoftFoundry.read_text(File.join(dir, ".claude/settings.json")))
+      assert_nil data.dig("hooks", "PostToolUse")
+      assert_nil data.dig("hooks", "PreToolUse")
+    end
+  end
+
+  def test_an_undecidable_refusal_names_no_skill
+    with_phase do |dir, _guard|
+      _, out = guard_cli(dir, [], { "tool_name" => "Bash", "tool_input" => { "command" => "cat ~nosuchuser/x" } })
+      refute_includes out, "the  skill"
+      assert_includes out, "could not be decided"
+    end
+  end
+end
