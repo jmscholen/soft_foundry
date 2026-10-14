@@ -1,4 +1,4 @@
-commit_sha: 776b64080523aa25e272a40b6d892035546e2a48
+commit_sha: 8ecce2f7fa84ac190d96751ffa630572e6f4c3bd
 checks:
   - id: CHECK-001
     kind: tests
