@@ -1,4 +1,4 @@
-commit_sha: 4330cf41cbb37e5afc7d00b275d1e1bfae77f8a1
+commit_sha: 378061e1c2ef1b0eb53623b415161d106a822f82
 checks:
   - id: CHECK-001
     kind: tests
@@ -6,7 +6,7 @@ checks:
     result: pass
     evidence: evidence/test-suite.txt
     criteria: [AC-FR-001, AC-FR-002, AC-FR-003, AC-FR-004, AC-FR-005, AC-FR-006, AC-FR-007, AC-FR-008, AC-FR-009, AC-FR-010, AC-FR-011, AC-FR-012, AC-FR-013, AC-FR-014, AC-FR-016, AC-FR-017, AC-FR-018, AC-FR-019, AC-FR-020]
-    red_commit: 78a1b35
+    red_commit: 7f4db33
     test_path: test/factory_readiness_test.rb
   - id: CHECK-002
     kind: tests
@@ -14,7 +14,7 @@ checks:
     result: pass
     evidence: evidence/test-suite-c-locale.txt
     criteria: [AC-FR-001]
-    note: run alone after the default-locale suite, not concurrently
+    note: run after the default-locale suite, not concurrently with it
   - id: CHECK-003
     kind: static_analysis
     command: soft-foundry check
@@ -31,6 +31,6 @@ checks:
     kind: custom
     command: soft-foundry ci
     result: fail
-    note: exit 2; verify (bound to the earlier commit when ci ran, before this handoff was rebound), evaluate and attack fail as STALE against REM-003 code (cli.rb, guard.rb, hooks.rb, factory_readiness_test.rb); no check other than staleness fails
+    note: exit 2; evaluate and attack fail as STALE against REM-004 code (cli.rb, guard.rb, hooks.rb, factory_readiness_test.rb); no check other than staleness fails
     evidence: evidence/ci.txt
     criteria: [AC-FR-009]

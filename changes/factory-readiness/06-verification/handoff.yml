@@ -2,9 +2,9 @@
 phase: 06-verification
 skill: verification
 status: complete
-commit_sha: 4330cf41cbb37e5afc7d00b275d1e1bfae77f8a1
-started_at: '2026-10-14T16:51:28Z'
-completed_at: '2026-10-14T17:48:00Z'
+commit_sha: 378061e1c2ef1b0eb53623b415161d106a822f82
+started_at: '2026-10-14T18:04:16Z'
+completed_at: '2026-10-14T18:35:00Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -15,26 +15,26 @@ outputs:
 - evidence/manifest.yml
 blocking: []
 findings:
-- Re-verification after REM-003 at 4330cf4; both suites (default and C locale, run
-  one after another) 558 runs 0 failures, check and eval pass. ci fails only on STALE
-  evidence for verify (until this handoff is gated), evaluate and attack, whose code
-  changed in cli.rb, guard.rb, hooks.rb and factory_readiness_test.rb.
-- The intermittent live-case test failure seen once under concurrent load in the previous
+- Re-verification after REM-004 at 378061e; both suites (default and C locale, run
+  one after another) 563 runs 0 failures, check and eval pass. ci fails only on STALE
+  evidence for evaluate and attack, whose code changed in cli.rb, guard.rb, hooks.rb
+  and factory_readiness_test.rb.
+- The intermittent live-case test failure seen once under concurrent load in an earlier
   verification did not recur; cause never investigated, so treat as possibly flaky
   under load.
 - AC-FR-015, the application-repository journey transcript, and documentation/accessibility
   review remain for later phases.
 next: evaluate
 notes: rake/bundler not used; the suite files were loaded directly with ruby (same
-  minitest files). Each suite run takes about 8.5 minutes. A first attempt was cut
-  off by a tool time limit during the C-locale suite and that suite was rerun in full.
+  minitest files). Each suite run takes about 8.5 minutes. check and eval ran while
+  the first suite was running; the two suites did not overlap.
 executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-14T17:26:05Z'
-  finished_at: '2026-10-14T17:46:35Z'
+  started_at: '2026-10-14T18:04:16Z'
+  finished_at: '2026-10-14T18:22:10Z'
   exit_status: 0
   previous_phase: remediate
-  session_id: a92a7814-f0e7-44b1-956c-86d8eb7b5e13
+  session_id: 790ef1e9-4443-4463-a55e-30257b249ae2
   cwd: "/home/user/soft_foundry"

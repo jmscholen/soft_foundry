@@ -1,11 +1,11 @@
-commit_sha: 4330cf41cbb37e5afc7d00b275d1e1bfae77f8a1
+commit_sha: 378061e1c2ef1b0eb53623b415161d106a822f82
 artifacts:
   - path: test-suite.txt
     produced_by: ruby -Ilib -Itest (every test file loaded, minitest), default locale
-    sha256: c62df5c35052cfb9e3bf566ad6d09d6ed9bfca47277fc5ed8fd2dbc43f2db84a
+    sha256: caeab8e8b317b406dd15ac6670be2d7663ba9b9a69a88b569f3598c05600b98b
   - path: test-suite-c-locale.txt
     produced_by: same suite under LANG=C LC_ALL=C
-    sha256: e922c1815965776edf91e2a1a653493b28d51914d79979c420a07e0693c3bd38
+    sha256: 8c2bd0371003c55e9ba4fbe8ae5bd08811a64f94cf9df483ca9fd65a357ba13c
   - path: check.txt
     produced_by: soft-foundry check
     sha256: f0cc91f46a6435afba747c4c46342051398613f85a6ec6958d80700e7053b6b9
@@ -14,4 +14,4 @@ artifacts:
     sha256: 43c40d30394d04e19bf3de385ad4a0399d6dba8a1e8b2b5085d959bb671ff3bf
   - path: ci.txt
     produced_by: soft-foundry ci
-    sha256: 7410a6979fa3cc5707b626152a712676be9fe92b0741291ce2f3ec13af270828
+    sha256: ff6aa3ed3cc9503e3b087274db2c3fab92e20195c6bb90a2221639bcbd320262
