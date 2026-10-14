@@ -64,3 +64,71 @@ class Utf8ReadsTest < Minitest::Test
     end
   end
 end
+
+# REQ-FR-002: the specification is locked on the gated track from the
+# commit that recorded it, and evidence produced before a specification
+# rerun is stale.
+class GatedSpecificationLockTest < Minitest::Test
+  include FoundryFixture
+
+  def with_change
+    with_fixture_repo do |dir|
+      sh(dir, "git", "checkout", "-qb", "change/c2")
+      plane = SoftFoundry::ControlPlane.new(dir)
+      record = SoftFoundry::ChangeRecord.create(dir, "c2", control_plane: plane, branch: "change/c2")
+      commit_all(dir, "scaffold c2")
+      yield dir, plane, record, SoftFoundry::Gate.new(record, git: SoftFoundry::Git.new(dir))
+    end
+  end
+
+  def check(gate, phase, name) = gate.evaluate(phase).checks.find { |c| c.name == name }
+
+  def test_specification_is_locked_from_the_commit_that_recorded_it
+    with_change do |dir, plane, record, gate|
+      %w[intake discover specify].each { |p| complete_phase!(record, p, sha: head(dir)) }
+      commit_all(dir, "specified")
+      lock = head(dir)
+      c = check(gate, "specify", "specification locked")
+      assert_equal :pass, c.outcome, c.detail
+      assert_includes c.detail, lock[0, 12]
+
+      File.write(File.join(record.phase_dir(plane.phase("specify")), "requirements.yml"), "requirements: []\n")
+      c = check(gate, "specify", "specification locked")
+      assert_equal :fail, c.outcome
+      assert_includes c.detail, "requirements.yml"
+      assert_includes c.detail, "rerun the specification phase"
+      assert gate.evaluate("specify").failed?
+
+      commit_all(dir, "edit the spec after the lock")
+      assert_equal :fail, check(gate, "specify", "specification locked").outcome, "a committed edit is still an edit after the lock"
+    end
+  end
+
+  def test_an_uncommitted_specification_is_not_locked_yet
+    with_change do |dir, _plane, record, gate|
+      %w[intake discover specify].each { |p| complete_phase!(record, p, sha: head(dir)) }
+      c = check(gate, "specify", "specification locked")
+      assert_equal :warn, c.outcome
+      assert_includes c.detail, "not yet locked"
+      refute gate.evaluate("specify").failed?
+    end
+  end
+
+  def test_evidence_recorded_before_a_specification_rerun_is_stale
+    with_change do |dir, plane, record, gate|
+      plane.phases.take(7).each { |p| complete_phase!(record, p.id, sha: head(dir)) } # intake..verify
+      commit_all(dir, "through verification")
+      refute gate.evaluate("verify").stale?, "evidence recorded with the specification in the same commit is current"
+      assert_equal :pass, check(gate, "specify", "specification locked").outcome
+
+      File.write(File.join(record.phase_dir(plane.phase("specify")), "requirements.yml"), "requirements: []\n")
+      complete_phase!(record, "specify", sha: head(dir))
+      commit_all(dir, "re-record the specification")
+      assert_equal :pass, check(gate, "specify", "specification locked").outcome, "the rerun re-binds the lock"
+      c = check(gate, "verify", "evidence current")
+      assert_equal :fail, c.outcome
+      assert_includes c.detail, "specification"
+      assert gate.evaluate("verify").stale?
+    end
+  end
+end
