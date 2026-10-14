@@ -15,13 +15,13 @@ requirements:
 
   - id: REQ-FR-003
     category: operations
-    statement: The fresh-context advisory names every completed phase whose skill declares `evidence: commit_bound` and whose handoff lacks `executed_by.fresh_context: true`, and the verification, evaluation, and adversarial-testing skills state that the phase prefers a fresh session through `phase run`.
+    statement: "The fresh-context advisory names every completed phase whose skill declares `evidence: commit_bound` and whose handoff lacks `executed_by.fresh_context: true`, and the verification, evaluation, and adversarial-testing skills state that the phase prefers a fresh session through `phase run`."
     rationale: Verification, evaluation, and attack have run in the implementing session in every record; the record should say so on every gate run, as it already does for review and judgment.
     source: 00-intake/request.md
 
   - id: REQ-FR-004
     category: security
-    statement: The packaged `.ai/policies/enforcement.yml` declares `guard.mode: block`; `hooks install` and `doctor` print the mode in effect and its source; a block-mode refusal names the tool, path, skill, mode, and policy file and says a machine-local override exists.
+    statement: "The packaged `.ai/policies/enforcement.yml` declares `guard.mode: block`; `hooks install` and `doctor` print the mode in effect and its source; a block-mode refusal names the tool, path, skill, mode, and policy file and says a machine-local override exists."
     rationale: A guard that warns and allows is a report, not a control; application repositories should start with the control on.
     source: 00-intake/request.md
 

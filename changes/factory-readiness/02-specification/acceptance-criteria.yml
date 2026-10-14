@@ -30,7 +30,7 @@ criteria:
     requirements: [REQ-FR-002]
     given: a gated-track change whose specify phase is complete and whose specification is unchanged
     when: the gate runs
-    then: `specification locked` passes naming the specify commit, and the vetted-track behaviour is unchanged
+    then: "`specification locked` passes naming the specify commit, and the vetted-track behaviour is unchanged"
     verified_by: []
   - id: AC-FR-006
     requirements: [REQ-FR-003]
@@ -42,7 +42,7 @@ criteria:
     requirements: [REQ-FR-004]
     given: a repository freshly installed by `soft-foundry init`
     when: a tool call under the implementation skill names a denied path
-    then: the guard exits 2 with a `fail guard:` line naming the tool, path, skill, `mode: block`, and the policy file, and `doctor` and `hooks install` print `mode: block (repository policy ...)`
+    then: "the guard exits 2 with a `fail guard:` line naming the tool, path, skill, `mode: block`, and the policy file, and `doctor` and `hooks install` print `mode: block (repository policy ...)`"
     verified_by: []
   - id: AC-FR-008
     requirements: [REQ-FR-004]
@@ -53,61 +53,61 @@ criteria:
   - id: AC-FR-009
     requirements: [REQ-FR-005]
     given: the shipped cases
-    when: `soft-foundry eval` runs in this repository
+    when: "`soft-foundry eval` runs in this repository"
     then: every gate case passes, the output has one line per case and a summary, the exit code is 0, and `--json` carries the same outcomes
     verified_by: []
   - id: AC-FR-010
     requirements: [REQ-FR-005]
     given: a case expecting a check to fail that the gate instead passes (or the reverse)
-    when: `soft-foundry eval` runs it
+    when: "`soft-foundry eval` runs it"
     then: the case is reported fail with the expected and observed outcomes and the exit code is 2
     verified_by: []
   - id: AC-FR-011
     requirements: [REQ-FR-005]
     given: a case file that does not parse or names an unknown check
-    when: `check` and `eval` run
-    then: `check` reports an error naming the file and `eval` reports the case as error and continues
+    when: "`check` and `eval` run"
+    then: "`check` reports an error naming the file and `eval` reports the case as error and continues"
     verified_by: []
   - id: AC-FR-012
     requirements: [REQ-FR-005]
     given: a case whose gate run raises
-    when: `eval` runs it
+    when: "`eval` runs it"
     then: the case is reported error with the exception message and the scratch repository is removed
     verified_by: []
   - id: AC-FR-013
     requirements: [REQ-FR-006]
     given: a live case and `--live --shell <shell>` with a fake shell that writes a finding matching the pattern
-    when: `eval` runs it
+    when: "`eval` runs it"
     then: the case passes and the line names the shell, the resolved model, and the matched finding ids
     verified_by: []
   - id: AC-FR-014
     requirements: [REQ-FR-006]
     given: a live case without --live, or with --live and no --shell, or with a shell that exits non-zero
-    when: `eval` runs it
+    when: "`eval` runs it"
     then: it is reported skip (with the command to run it), error (naming --shell), or error (with the exit status) respectively, and only the errors fail the run
     verified_by: []
   - id: AC-FR-015
     requirements: [REQ-FR-006]
     given: the shipped live case and the `claude` shell installed here
-    when: `eval --live --shell claude` runs it
+    when: "`eval --live --shell claude` runs it"
     then: the fresh-context review's findings match the planted defect, or the miss is recorded as the eval's result; either way the result is in this record's evaluation evidence
     verified_by: []
   - id: AC-FR-016
     requirements: [REQ-FR-007]
     given: a medium-risk change whose skipped_phases names threat_model, or any change whose skipped_phases names judge or review
     when: the gate runs on the first phase
-    then: `waivers permitted` fails naming the phase and the rule, and a low-risk change waiving threat_model passes
+    then: "`waivers permitted` fails naming the phase and the rule, and a low-risk change waiving threat_model passes"
     verified_by: []
   - id: AC-FR-017
     requirements: [REQ-FR-007]
     given: a change whose judge phase is not complete
-    when: `change close` runs without --force
+    when: "`change close` runs without --force"
     then: it refuses with exit 1 naming 14-judgment, and `--force` still closes
     verified_by: []
   - id: AC-FR-018
     requirements: [REQ-FR-007]
     given: a control plane whose waivable_by_risk names `judge` or an unknown phase
-    when: `check` runs
+    when: "`check` runs"
     then: it reports an error naming the rule
     verified_by: []
   - id: AC-FR-019
