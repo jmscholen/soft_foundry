@@ -38,6 +38,7 @@ module SoftFoundry
     WRITE_TOOLS = %w[Edit Write MultiEdit NotebookEdit write search_replace].freeze
     PATCH_TOOLS = %w[apply_patch].freeze # Codex file edits; also reported under Edit/Write with the patch in `command`
     READ_TOOLS = %w[Read read_file].freeze
+    SEARCH_TOOLS = %w[Grep Glob].freeze
     SHELL_TOOLS = %w[Bash run_terminal_command].freeze
     PATCH_HEADER = /\A\*\*\* (?:Add File|Update File|Delete File|Move to): (.+?)\s*\z/.freeze
 
@@ -99,6 +100,11 @@ module SoftFoundry
       decision = decide_by_skill(tool_name, tool_input)
       return decision if decision.violation?
       narrow_for_panel(tool_name, tool_input, decision)
+    rescue StandardError => e
+      # A call the guard cannot evaluate (a `~user` that does not exist, a
+      # NUL byte, an unreadable record) is refused, never let through: a
+      # guard that fails open is no guard.
+      Decision.new(outcome: :violation, reason: "could not be decided (#{e.class}: #{e.message.to_s.lines.first.to_s.strip[0, 120]}); refusing it", skill: nil, paths: [])
     end
 
     # The guard's own configuration: the policy, the machine-local override,
@@ -148,6 +154,21 @@ module SoftFoundry
         return Decision.new(outcome: :allow, reason: "no file path in the tool call", skill: skill.name, paths: []) unless path
         return violation(skill, [path], "is in #{skill.name}'s deny_read set") if ControlPlane.match_any?(path, sets[:deny_read])
         Decision.new(outcome: :allow, reason: "not denied to #{skill.name}", skill: skill.name, paths: [path])
+      when *SEARCH_TOOLS
+        # Grep and Glob read whatever is under their path (the pattern's
+        # static prefix for Glob); a search rooted inside a deny_read path
+        # is refused. A search from the root or any wider directory is
+        # the documented limit of a guard that cannot filter results.
+        named = [tool_input["path"]].compact.map(&:to_s)
+        pattern = tool_input["pattern"].to_s
+        if tool_name == "Glob" && !pattern.empty?
+          static = pattern.split("/").take_while { |part| !part.match?(GLOB) }.join("/")
+          named << (tool_input["path"] ? File.join(tool_input["path"].to_s, static) : static) unless static.empty?
+        end
+        paths = named.filter_map { |p| relative(p) }
+        denied = paths.select { |p| ControlPlane.match_any?(p, sets[:deny_read]) }
+        return violation(skill, denied, "searches inside #{skill.name}'s deny_read set") unless denied.empty?
+        Decision.new(outcome: :allow, reason: "searches nothing denied to #{skill.name}", skill: skill.name, paths: paths)
       when *SHELL_TOOLS
         # A shell command may name what the skill may read (it runs tests,
         # the tool, and git over them), never what it may not read, and
@@ -299,7 +320,8 @@ module SoftFoundry
       return nil if path.nil? || path.to_s.strip.empty?
       abs = resolve_links(File.expand_path(path.to_s, base))
       root = real_root
-      return abs unless abs.start_with?("#{root}/") || abs == root
+      return "" if abs == root
+      return abs unless abs.start_with?("#{root}/")
       abs.delete_prefix("#{root}/")
     end
 
@@ -346,10 +368,10 @@ module SoftFoundry
     # are stripped. Still a heuristic (a variable or a command
     # substitution can hide a name), which is why Bash is checked against
     # deny sets only and the gate's staleness check backs it.
-    GLOB = /[*?\[]/.freeze
+    GLOB = /[*?\[{]/.freeze
 
     def shell_paths(command)
-      cwd = "" # repository-relative directory the command is in
+      cwd = "" # repository-relative directory the command is in; nil once it has left the root
       found = []
       command.split(/\s*(?:&&|\|\||;|\||\n)\s*/).each do |segment|
         tokens = segment.split(/[\s()<>]+/).filter_map do |raw|
@@ -358,22 +380,26 @@ module SoftFoundry
           token
         end
         next if tokens.empty?
-        base = cwd.empty? ? @root : File.join(@root, cwd)
+        base = cwd && (cwd.empty? ? real_root : File.join(real_root, cwd))
         tokens.each_with_index do |token, i|
-          candidate = !cwd.empty? || token.include?("/") || token.start_with?(".") || File.exist?(File.join(base, token))
+          candidate = if base.nil?
+                        token.start_with?("/", "~") # outside the root only an absolute path can reach back in
+                      else
+                        !cwd.empty? || token.include?("/") || token.start_with?(".", "~") || File.exist?(File.join(base, token))
+                      end
           next unless candidate
-          names = token.match?(GLOB) ? Dir.glob(token, File::FNM_DOTMATCH, base: base).reject { |g| %w[. ..].include?(File.basename(g)) } : []
+          names = token.match?(GLOB) ? Dir.glob(token, File::FNM_DOTMATCH | File::FNM_EXTGLOB, base: base || real_root).reject { |g| %w[. ..].include?(File.basename(g)) } : []
           names = [token] if names.empty?
           names.each do |name|
-            rel = relative(name, base: base)
+            rel = relative(name, base: base || real_root)
             next if rel.nil? || rel.start_with?("/") || rel.start_with?("..")
             found << rel
           end
-          # `cd DIR` (or pushd) moves the rest of the command.
-          if i.positive? && %w[cd pushd].include?(tokens[i - 1])
-            target = relative(token, base: base)
-            cwd = target.nil? || target.start_with?("/") || target.start_with?("..") ? cwd : target
-          end
+          # `cd DIR` (or pushd) moves the rest of the command: back to the
+          # root ("" after `cd ..`), elsewhere inside it, or out of it (nil).
+          next unless i.positive? && %w[cd pushd].include?(tokens[i - 1])
+          target = relative(token, base: base || real_root)
+          cwd = target.nil? || target.start_with?("/") || target.start_with?("..") ? nil : target
         end
       end
       found.uniq

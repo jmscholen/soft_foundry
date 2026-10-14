@@ -48,7 +48,7 @@ module SoftFoundry
     # it; every other key and hook in the file is kept byte for byte in
     # meaning, if not in formatting.
     GUARD_ID = "soft-foundry:guard"
-    GUARD_MATCHER = "Edit|Write|MultiEdit|NotebookEdit|Read|Bash"
+    GUARD_MATCHER = "Edit|Write|MultiEdit|NotebookEdit|Read|Grep|Glob|Bash"
     GUARD_COMMAND = "# #{GUARD_ID}\nif [ -x exe/soft-foundry ] && [ -f lib/soft_foundry.rb ]; then ruby -Ilib exe/soft-foundry guard; elif command -v soft-foundry >/dev/null 2>&1; then soft-foundry guard; fi"
 
     def self.claude_settings_path(root, local: false)

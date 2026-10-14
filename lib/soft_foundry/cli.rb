@@ -1090,7 +1090,12 @@ module SoftFoundry
       tool = payload["tool_name"].to_s
       input = payload["tool_input"].is_a?(Hash) ? payload["tool_input"] : {}
       guard = Guard.new(@root, plane: plane, git: git)
-      decision = guard.decide(tool, input)
+      decision = begin
+        guard.decide(tool, input)
+      rescue StandardError => e
+        # Fail closed: whatever stops the guard from deciding is a refusal in block mode.
+        Guard::Decision.new(outcome: :violation, reason: "could not be decided (#{e.class}); refusing it", skill: nil, paths: [])
+      end
       return 0 unless decision.violation?
       guard.log(decision, mode: mode, tool_name: tool)
       where = decision.paths.empty? ? tool : "#{tool} #{decision.paths.join(', ')}"
