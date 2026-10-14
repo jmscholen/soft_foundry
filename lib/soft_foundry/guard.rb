@@ -143,9 +143,17 @@ module SoftFoundry
       end
     end
 
-    def record_baseline!
+    # A baseline younger than this is kept rather than rewritten: a second
+    # tool call that overlaps the first must not record the first call's
+    # tamper as the new normal. A check consumes the baseline; one this
+    # old was left by an interrupted call and is refreshed.
+    BASELINE_MAX_AGE = 1800
+
+    def record_baseline!(now: Time.now)
       path = File.join(@root, BASELINE)
+      return false if File.file?(path) && !File.symlink?(path) && now - File.mtime(path) < BASELINE_MAX_AGE
       FileUtils.mkdir_p(File.dirname(path))
+      File.delete(path) if File.symlink?(path)
       File.write(path, YAML.dump("version" => 1, "files" => own_contents))
       true
     rescue SystemCallError
@@ -167,14 +175,18 @@ module SoftFoundry
         next if current[rel] == expected
         next if missing && rel == POLICY && expected.nil? # nothing committed to restore from
         abs = File.join(@root, rel)
+        # Never write through a link: a settings file replaced by a link to
+        # something else is removed as a link and restored as a file.
+        File.delete(abs) if File.symlink?(abs)
         if expected.nil?
-          File.delete(abs) if File.exist?(abs) || File.symlink?(abs)
+          File.delete(abs) if File.exist?(abs)
         else
           FileUtils.mkdir_p(File.dirname(abs))
           File.write(abs, expected)
         end
         restored << rel
       end
+      File.delete(path) if File.file?(path) || File.symlink?(path)
       unless restored.empty? && !missing
         log_line("#{now.utc.iso8601} tamper restored=#{restored.join(',')}#{missing ? ' (no baseline; committed policy used)' : ''}")
       end

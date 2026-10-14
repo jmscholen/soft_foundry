@@ -1122,7 +1122,9 @@ module SoftFoundry
       @input.read
       result = guard.check_after!
       mode, = Guard.mode(@root)
-      return 0 if result.restored.empty? && !result.missing_baseline
+      # Nothing to restore is quiet, baseline or not: an overlapping call's
+      # check may have consumed the baseline already.
+      return 0 if result.restored.empty?
       what = result.restored.empty? ? "nothing changed" : "#{result.restored.join(', ')} changed during the tool call and #{result.restored.size == 1 ? 'was' : 'were'} restored to the state before it"
       note = result.missing_baseline ? "; the pre-call baseline was missing, so the committed policy was used and the machine-local override removed" : ""
       if mode == "block"
