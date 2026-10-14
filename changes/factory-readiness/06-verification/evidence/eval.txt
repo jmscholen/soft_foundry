@@ -12,3 +12,4 @@
 ✓ pass eval secret-shape-in-evidence: verify content clean fail, as expected
 ✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
 ✓ pass eval: 12 passed, 0 failed, 0 errors, 1 skipped
+exit 0

@@ -2,9 +2,9 @@
 phase: 06-verification
 skill: verification
 status: complete
-commit_sha: 8ecce2f7fa84ac190d96751ffa630572e6f4c3bd
-started_at: '2026-10-14T16:11:40Z'
-completed_at: '2026-10-14T16:45:00Z'
+commit_sha: 474926820805f938e6ce6b320630167a08569b4e
+started_at: '2026-10-14T16:51:28Z'
+completed_at: '2026-10-14T17:09:39Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -15,20 +15,25 @@ outputs:
 - evidence/manifest.yml
 blocking: []
 findings:
-- Re-verification after REM-001 at 8ecce2f; suite 549 runs 0 failures under both locales,
-  check and eval pass; AC-FR-015, the application-repository journey transcript, and
-  documentation/accessibility review remain for later phases.
+- Re-verification after REM-002 at 4749268; suite 554 runs 0 failures under default
+  locale, check and eval pass. The C-locale suite had one intermittent failure when
+  run concurrently with the other suite (harness_eval_test.rb:194, live-case test),
+  preserved in evidence/test-suite-c-locale-parallel-failed.txt; it passed alone twice
+  and in a full solo C-locale rerun, cause not investigated, so treat as possibly
+  flaky under load.
+- Evaluate and attack evidence are stale against REM-002 code (guard.rb, harness_eval.rb,
+  factory_readiness_test.rb) until rerun; AC-FR-015, the application-repository journey
+  transcript, and documentation/accessibility review remain for later phases.
 next: evaluate
-notes: Guard in block mode now permits shell commands naming test and exe paths (REM-001);
-  rake/bundler still unavailable, so the suite files were loaded directly with ruby.
-  Recorded in results.md.
+notes: rake/bundler not used; the suite files were loaded directly with ruby (same
+  minitest files). Each suite run takes about 8 minutes.
 executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-14T16:11:40Z'
-  finished_at: '2026-10-14T16:34:38Z'
+  started_at: '2026-10-14T16:51:28Z'
+  finished_at: '2026-10-14T17:10:12Z'
   exit_status: 0
   previous_phase: remediate
-  session_id: e98f54c2-20c6-496c-b36c-940ab011a474
+  session_id: 419a1e2a-a802-42a0-a909-5c7a6e7517bb
   cwd: "/home/user/soft_foundry"

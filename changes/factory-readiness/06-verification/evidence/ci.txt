@@ -90,19 +90,39 @@ change factory-readiness
   ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 8ecce2f7fa84ac190d96751ffa630572e6f4c3bd
-  ✓ pass completed_at recorded: 2026-10-14T16:45:00Z
+  ✓ pass commit_sha recorded: 474926820805f938e6ce6b320630167a08569b4e
+  ✓ pass completed_at recorded: 2026-10-14T17:09:39Z
   ✓ pass predecessor complete: 05-implementation
-  ✓ pass evidence current: no code changes since 8ecce2f7fa84; specification unchanged since b4f1d19b3618
-  ✓ pass red evidence: CHECK-001: 26497a4 -> 8ecce2f7fa84 (test/factory_readiness_test.rb)
+  ✓ pass evidence current: no code changes since 474926820805; specification unchanged since b4f1d19b3618
+  ✓ pass red evidence: CHECK-001: bce5413 -> 474926820805 (test/factory_readiness_test.rb)
+  ✓ pass content clean
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: fcf79eb1ef75fe47a8b3f0c267f02ef4abd1ce47
+  ✓ pass completed_at recorded: 2026-10-14T17:40:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✗ fail evidence current: STALE: code changed since fcf79eb1ef75: lib/soft_foundry/guard.rb, lib/soft_foundry/harness_eval.rb, test/factory_readiness_test.rb
+  ✓ pass content clean
+08-attack  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: attack-plan.md, cases.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: ba15a5639122b302648a126806113fc470741d86
+  ✓ pass completed_at recorded: 2026-10-14T16:45:19Z
+  ✓ pass predecessor complete: 07-evaluation
+  ✗ fail evidence current: STALE: code changed since ba15a5639122: lib/soft_foundry/guard.rb, lib/soft_foundry/harness_eval.rb, test/factory_readiness_test.rb
   ✓ pass content clean
 09-remediation  complete  PASS
   ✓ pass handoff identity
   ✓ pass required files present: summary.md, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 186c54b7179dcca6261292e7bb43c560478eb860
-  ✓ pass completed_at recorded: 2026-10-14T16:11:30Z
+  ✓ pass commit_sha recorded: c1fcd98385c025fc96bbd62a61243e0b6066c695
+  ✓ pass completed_at recorded: 2026-10-14T16:51:18Z
   ✓ pass predecessor complete: 05-implementation
   ✓ pass content clean
 advisory: 1 issue to address before factory-readiness goes live (informational, does not block the gate)
@@ -156,4 +176,5 @@ change update-release-asset-name (closed, skipped)
 
 change upstream-failure-reporting (closed, skipped)
 
-✓ ci passed
+✗ ci failed
+exit 2
