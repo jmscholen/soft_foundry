@@ -1,22 +1,33 @@
-commit_judged: TBD
+commit_judged: f18691e9065818dee2929bfa5eb8b7f82c26aefd
 phases:
   - phase: 06-verification
-    commit_sha: TBD
-    current: TBD   # true when commit_sha matches the judged commit for all code paths
-    result: TBD
+    commit_sha: 50a45069a586f0ce37d9eb8d59da85ee37f6155d
+    current: true   # no non-record file differs between this commit and the judged commit
+    result: pass (568 runs, 0 failures)
   - phase: 07-evaluation
-    commit_sha: TBD
-    current: TBD
-    result: TBD
+    commit_sha: ac3e8cfe995929ce40d334636e750d4625deffe9
+    current: true   # no non-record file differs between this commit and the judged commit
+    result: pass (no behavioural failure; minor findings open)
   - phase: 08-attack
-    commit_sha: TBD
-    current: TBD
-    result: TBD
+    commit_sha: 9806b2b413f6da385dfe0b9ff276e892901c55bc
+    current: true   # no non-record file differs between this commit and the judged commit
+    result: pass with accepted residual (ATK-F10, F12, F9, F3)
   - phase: 13-review
-    commit_sha: TBD
-    current: TBD
-    result: TBD
-unresolved_findings: []
+    commit_sha: a9fac32d0c0e2d8951ee09ed0a5c9a8102c34637
+    current: true   # no non-record file differs between this commit and the judged commit
+    result: no blocking findings; REV-001, REV-002 major open
+unresolved_findings:
+  - {id: REV-001, severity: major, disposition: open, owner: maintainer, note: README/enforcement.yml text and hooks install rerun owed}
+  - {id: REV-002, severity: major, disposition: accepted_residual, note: same-user routes past post-call restore, accepted by judgment}
+  - {id: REV-003, severity: minor, disposition: accepted_residual}
+  - {id: REV-004, severity: minor, disposition: open}
+  - {id: REV-005, severity: minor, disposition: accepted_residual}
+  - {id: REV-006, severity: minor, disposition: open}
+  - {id: REV-007, severity: minor, disposition: open}
+  - {id: REV-008, severity: minor, disposition: accepted_residual}
+  - {id: REV-009, severity: minor, disposition: open}
+  - {id: REV-010, severity: minor, disposition: open}
+  - {id: REV-011, severity: minor, disposition: open}
 # Acceptance criteria or judgment conditions left unsatisfied pending a
 # real-world event (production observation, etc.) rather than more
 # repository evidence, e.g.:
