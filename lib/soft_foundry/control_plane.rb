@@ -79,6 +79,27 @@ module SoftFoundry
     def rules = workflow.fetch("rules", {})
     def judgments = Array(workflow["judgments"])
 
+    # Phases no declared risk may waive through skipped_phases: review
+    # looks at the work from outside it and judgment is the verdict.
+    NEVER_WAIVED = %w[review judge].freeze
+
+    # The lifecycle phases a change of the given risk may name in its
+    # skipped_phases (.ai/workflow.yml waivable_by_risk). A risk that is
+    # unset, a placeholder, or not declared may waive nothing; NEVER_WAIVED
+    # phases are dropped here whatever the rule says (`check` reports them).
+    def waivable_by_risk(risk)
+      raw = workflow["waivable_by_risk"]
+      return [] unless raw.is_a?(Hash)
+      key = risk.to_s.strip.downcase
+      return [] if key.empty?
+      Array(raw[key]).map(&:to_s).reject { |id| NEVER_WAIVED.include?(id) }
+    end
+
+    def waivable_rule_raw
+      raw = workflow["waivable_by_risk"]
+      raw.is_a?(Hash) ? raw : {}
+    end
+
     # A lifecycle track (.ai/workflow.yml tracks:). `exploring` tracks carry
     # a stage before the lifecycle's hardening phases, worked by `skill`
     # into `changes/<slug>/<output>/`; `vet_requires` names the phases that

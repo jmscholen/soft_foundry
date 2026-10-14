@@ -438,6 +438,10 @@ module SoftFoundry
       end
 
       unless force
+        if (judged = record.judgment_status) != "complete"
+          @err.puts "#{slug}: cannot close: 14-judgment is #{judged || 'missing'}; a change is complete only with a final judgment (.ai/workflow.yml rules.final_judgment_required), so run the judge phase (`soft-foundry phase run judge`) or pass --force to close without one"
+          return EXIT_TARGET
+        end
         branch = git.repository? ? git.default_branch : nil
         sha = record.finished_commit_sha
         if sha.nil?

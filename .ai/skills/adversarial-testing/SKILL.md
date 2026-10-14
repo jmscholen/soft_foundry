@@ -25,3 +25,6 @@ The harness owns authorization and scope. The model is responsible for adversari
 ATTACK is broader than penetration testing. It attempts to disprove implementation assumptions across security, authorization, reliability, concurrency, integrity, resource abuse, malformed inputs, dependency failures, retry behavior, and operational boundaries.
 
 EVALUATION asks whether legitimate behavior succeeds. ATTACK asks whether illegitimate behavior can succeed or intended behavior can be broken.
+
+
+This phase prefers a fresh session: `soft-foundry phase run attack` starts one with only this skill in its prompt and records `executed_by` in the handoff; an attack completed by the session that implemented the change is advised on every gate run.

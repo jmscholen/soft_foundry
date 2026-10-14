@@ -162,16 +162,24 @@ module SoftFoundry
       [Notice.new("verification", "no check in 06-verification/tests.yml records a red_commit, so the failing-test-first evidence .ai/rules/testing.md asks for is not demonstrable for this #{@record.metadata['type']}")]
     end
 
-    # Review and judgment exist to look at the work from outside it. A
-    # completed review or judgment whose handoff carries no executed_by
-    # from `phase run` was performed by whatever session was already
-    # open, most likely the one that implemented the change; say so.
+    # Evidence exists to look at the work from outside it. A completed
+    # phase whose skill declares `evidence: commit_bound` (verification,
+    # evaluation, attack, review, judgment) and whose handoff carries no
+    # executed_by from `phase run` was performed by whatever session was
+    # already open, most likely the one that implemented the change; say
+    # so, every time the record is gated.
+    FRESH_CONTEXT_LABELS = {
+      "verify" => ["verification", "verification"], "evaluate" => ["evaluation", "evaluation"],
+      "attack" => ["attack", "adversarial testing"], "review" => ["review", "independent review"],
+      "judge" => ["judgment", "final judgment"]
+    }.freeze
+
     def fresh_context_notices
-      [["review", "review", "independent review"], ["judge", "judgment", "final judgment"]].filter_map do |id, area, label|
-        phase = @plane.phase(id)
-        next unless phase && @record.phase_status(phase) == "complete"
+      @plane.phases.filter_map do |phase|
+        next unless @plane.skill(phase.skill).commit_bound? && @record.phase_status(phase) == "complete"
         executed = @record.handoff(phase)["executed_by"]
         next if executed.is_a?(Hash) && executed["fresh_context"] == true
+        area, label = FRESH_CONTEXT_LABELS.fetch(phase.id) { [phase.id.tr("_", " "), phase.id.tr("_", " ")] }
         Notice.new(area, "#{label} (#{phase.output}) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes")
       end
     end

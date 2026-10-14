@@ -25,6 +25,7 @@ module SoftFoundry
       findings.concat(check_path_groups)
       findings.concat(check_transitions)
       findings.concat(check_tracks)
+      findings.concat(check_waivers)
       findings.concat(check_panel_phases)
       findings.concat(check_enforcement)
       findings.concat(check_content)
@@ -33,6 +34,23 @@ module SoftFoundry
     end
 
     private
+
+    # The waiver rule names lifecycle phases only, and never the phases no
+    # risk may waive.
+    def check_waivers
+      raw = @plane.workflow["waivable_by_risk"]
+      return [] if raw.nil?
+      return [Finding.new(:error, "workflow: waivable_by_risk must be a mapping from risk to a list of phases")] unless raw.is_a?(Hash)
+      raw.flat_map do |risk, ids|
+        Array(ids).filter_map do |id|
+          if ControlPlane::NEVER_WAIVED.include?(id.to_s)
+            Finding.new(:error, "workflow: waivable_by_risk #{risk} names '#{id}', which no risk may waive")
+          elsif !@plane.phase(id.to_s)
+            Finding.new(:error, "workflow: waivable_by_risk #{risk} names '#{id}', which is not a lifecycle phase")
+          end
+        end
+      end
+    end
 
     # A panel never writes code, and only lifecycle phases can be panelled.
     def check_panel_phases

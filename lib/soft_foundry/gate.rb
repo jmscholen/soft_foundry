@@ -33,6 +33,7 @@ module SoftFoundry
       "blocking recorded" => "A blocked phase names what is blocking it.",
       "handoff identity" => "The handoff names this phase and the skill the workflow assigns to it.",
       "track permitted" => "The change's track is defined, has an exploring stage if the change is exploring, and is the one its risk forces.",
+      "waivers permitted" => "Every phase in skipped_phases is optional or one the change's declared risk may waive (.ai/workflow.yml waivable_by_risk); review and judgment are never waived.",
       "not exploring" => "No phase from implementation onward is complete while the change is still exploring.",
       "required files present" => "Every file the skill's completion.yml requires exists.",
       "no placeholders" => "No required file still contains a TBD placeholder.",
@@ -55,6 +56,7 @@ module SoftFoundry
     def self.checks_for(plane, phase)
       names = ["handoff identity"]
       names << "track permitted" if plane.phases.first == phase
+      names << "waivers permitted" if plane.phases.first == phase
       names << "not exploring" if plane.hardening_phase?(phase)
       names += ["required files present", "no placeholders", "no blocking conditions", "commit_sha recorded", "completed_at recorded", "predecessor complete"]
       names << "evidence current" if plane.skill(phase.skill).commit_bound?
@@ -91,6 +93,7 @@ module SoftFoundry
 
       checks << identity_check(phase, skill, handoff)
       checks << track_check if @plane.phases.first == phase
+      checks << waivers_check if @plane.phases.first == phase
       blocking = Array(handoff["blocking"])
 
       case status
@@ -136,6 +139,30 @@ module SoftFoundry
         return Check.new("track permitted", :fail, "risk #{risk} forces the #{forced} track (.ai/workflow.yml tracks.forced_by_risk) but the change is on #{name}")
       end
       Check.new("track permitted", :pass, name)
+    end
+
+    # What a change may waive is decided by its declared risk, not by the
+    # rationale: skipped_phases may name a globally optional phase, or one
+    # .ai/workflow.yml waivable_by_risk lists for the risk; review and
+    # judgment never. Reported on the first phase, like the track, so it
+    # shows whenever any work has started. Structure only: the rationale
+    # text is not judged.
+    def waivers_check
+      risk = @record.metadata["risk"].to_s.strip
+      classified = !risk.empty? && !risk.match?(PLACEHOLDER)
+      allowed = @plane.waivable_by_risk(risk)
+      problems = Array(@record.metadata["skipped_phases"]).filter_map do |entry|
+        next unless entry.is_a?(Hash)
+        id = entry["phase"].to_s
+        phase = @plane.phase(id)
+        next "'#{id}' is not a lifecycle phase" unless phase
+        next "#{id} is never waived (review and judgment are required of every change)" if ControlPlane::NEVER_WAIVED.include?(phase.id)
+        next if phase.optional || allowed.include?(phase.id)
+        next "#{id} cannot be waived until the risk is classified (metadata.yml risk: #{risk.empty? ? 'unset' : risk})" unless classified
+        "#{id} cannot be waived at risk #{risk.downcase} (waivable: #{allowed.empty? ? 'none' : allowed.join(', ')}; .ai/workflow.yml waivable_by_risk)"
+      end
+      return Check.new("waivers permitted", :pass, Array(@record.metadata["skipped_phases"]).empty? ? "nothing waived" : "risk #{risk.downcase}") if problems.empty?
+      Check.new("waivers permitted", :fail, problems.join("; "))
     end
 
     # The exploring stage produces a journal, never evidence: nothing from
@@ -267,7 +294,15 @@ module SoftFoundry
     # The commit that recorded the completed specification, or nil when
     # the phase is not complete or its completed handoff is not committed.
     def specification_lock_commit(phase = @plane.phase("specify"))
-      return nil unless phase && @record.phase_status(phase) == "complete" && @git.repository?
+      phase ? recorded_commit(phase) : nil
+    end
+
+    # The commit that recorded a phase as complete: the newest commit
+    # touching its handoff, provided the handoff says complete there. Nil
+    # while the completed handoff is uncommitted, or the phase is not
+    # complete.
+    def recorded_commit(phase)
+      return nil unless @record.phase_status(phase) == "complete" && @git.repository?
       rel = "changes/#{@record.slug}/#{phase.output}/handoff.yml"
       sha = @git.last_commit_for(rel)
       return nil unless sha
@@ -349,7 +384,7 @@ module SoftFoundry
         return Check.new("evidence current", :fail, "STALE: code changed since #{sha[0, 12]}#{where}: #{changed.first(5).join(', ')}#{changed.size > 5 ? ' …' : ''}")
       end
       lock = @record.vetted ? nil : specification_lock_commit
-      own = lock && @git.last_commit_for("changes/#{@record.slug}/#{phase.output}/handoff.yml")
+      own = lock && recorded_commit(phase)
       if lock && own && !@git.ancestor?(lock, own)
         return Check.new("evidence current", :fail, "STALE: the specification was re-recorded at #{lock[0, 12]} after this evidence (handoff recorded at #{own[0, 12]}); rerun this phase against the current criteria")
       end
