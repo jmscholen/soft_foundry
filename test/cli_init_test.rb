@@ -27,7 +27,8 @@ class CLIInitTest < Minitest::Test
       # install is assessed, not left at the pristine unassessed template.
       # See changes/maturity-onboarding/.
       assert_equal true, YAML.safe_load_file(File.join(dir, ".ai/repository.yml")).dig("repository", "assessed")
-      assert_equal ["README.md"], Dir.children(File.join(dir, ".ai/harness-evals"))
+      assert_equal %w[README.md cases], Dir.children(File.join(dir, ".ai/harness-evals")).sort
+      refute_empty Dir.glob("*.yml", base: File.join(dir, ".ai/harness-evals/cases"))
       assert_includes out, "check: ok"
       ascii = out.gsub(/[^ -~\n]/, "")
       assert_match(/^created +\.ai\/workflow\.yml/, ascii)

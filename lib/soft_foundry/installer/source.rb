@@ -57,7 +57,10 @@ module SoftFoundry
         raise InternalError.new("packaged entry traverses directories: #{rel}", component: "package") if rel.split("/").include?("..")
         return nil unless File.file?(abs)
         return nil if EXCLUDED.include?(rel)
-        return nil if rel.start_with?(".ai/harness-evals/") && rel != ".ai/harness-evals/README.md"
+        # The harness evals ship (README and cases) so an installed control
+        # plane can prove its own gate with `soft-foundry eval`; anything
+        # else under harness-evals/ is this repository's own.
+        return nil if rel.start_with?(".ai/harness-evals/") && rel != ".ai/harness-evals/README.md" && !rel.start_with?(".ai/harness-evals/cases/")
         Entry.new(path: rel, bytes: File.binread(abs))
       end
 
