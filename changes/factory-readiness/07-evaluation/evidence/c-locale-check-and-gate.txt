@@ -3,7 +3,16 @@ $ LANG=C LC_ALL=C check
 exit 0
 $ LANG=C LC_ALL=C gate verify
 06-verification  complete  PASS
-  ✓ pass evidence current: no code changes since 474926820805; specification unchanged since b4f1d19b3618
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 4330cf41cbb37e5afc7d00b275d1e1bfae77f8a1
+  ✓ pass completed_at recorded: 2026-10-14T17:48:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since 4330cf41cbb3; specification unchanged since b4f1d19b3618
+  ✓ pass red evidence: CHECK-001: 78a1b35 -> 4330cf41cbb3 (test/factory_readiness_test.rb)
+  ✓ pass content clean
+advisory: 1 issue to address before factory-readiness goes live (informational, does not block the gate)
+  ! warn accessibility: the accessibility review (13-review/accessibility.md) has not run yet
 exit 0
-$ change status
-factory-readiness: Factory readiness: executable harness evals, fresh-context evidence phases, a blocking guard, specification locking on the gated track, UTF-8 file reads, and an application-repository evaluation  [status: intake, phase: evaluate, risk: medium]

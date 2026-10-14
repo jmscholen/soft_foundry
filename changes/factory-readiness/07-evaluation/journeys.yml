@@ -1,4 +1,4 @@
-commit_sha: 98b336fb932e6ce49436bb40277d89c477dece78
+commit_sha: 9307b23a6a7560d41bea4a1a31eba76c708c348c
 journeys:
   - id: EVAL-001
     criteria: [AC-FR-019, AC-FR-020]
@@ -13,7 +13,7 @@ journeys:
       - init exits 0 and prints check ok; check passes with 16 phases and 17 skills
       - the profile records framework rails and a ruby testing entry; doctor reports mode block from the repository policy
       - change new declares surfaces.accessibility true citing the detected rails framework
-      - eval passes 12, fails 0, errors 0, skips 1 (the live case), exit 0, and the JSON carries version 1 and the same outcomes
+      - eval passes 12, fails 0, errors 0, skips 1 (the live case), exit 0, and the JSON carries version 1 and the same outcomes (12 pass, 1 skip)
     evidence: [evidence/rails-install-profile-change-new.txt, evidence/eval-clean-and-live-refusals.txt]
     result: pass
   - id: EVAL-002
@@ -24,10 +24,11 @@ journeys:
       - Pipe guard tool calls on stdin - Edit app/models/user.rb, Edit spec/models/user_spec.rb (absolute path), Write db/migrate/..., Bash bundle exec rspec spec/models
       - Pipe Edit of a rules file, Edit of the change's verification results, Read of the harness-evals README, a Bash command naming the enforcement policy, and a Write to the host settings file
       - Pipe REM-002 attempts - a Bash command that cd's into the policies directory and edits the policy by relative name, a Bash command naming the policy by glob, an Edit of a symlink that points at the policy, and a Write under the guard's .soft-foundry directory
+      - Pipe REM-003 attempts - cd into a subdirectory, cd .. back to the root, then cd into policies and edit by relative name; a brace-expanded name; a tilde-user token that does not resolve; a path containing a NUL byte; Grep and Glob aimed at the harness-evals directory; Grep on the application directory
       - Pipe a refused Edit again with SOFT_FOUNDRY_GUARD=warn
     assertions:
-      - the four application and test calls exit 0 with no output
-      - the five protected calls and the four REM-002 attempts (cd then relative edit, glob, symlink, .soft-foundry write) exit 2; the symlink is reported as the policy file it resolves to; the five protected calls exit 2 with a fail guard line naming the tool, the path, the skill, mode block, the policy file, and that a machine-local override is documented (it does not name a value)
+      - the four application and test calls and the Grep on the application directory exit 0 with no output
+      - the five protected calls, the four REM-002 attempts (cd then relative edit, glob, symlink, .soft-foundry write) and the seven REM-003 attempts (chained cd .., brace, unresolvable tilde user, NUL byte, Grep and Glob on harness-evals) exit 2; the unresolvable tilde and NUL calls are reported as could not be decided and refused rather than raising; the symlink is reported as the policy file it resolves to; the five protected calls exit 2 with a fail guard line naming the tool, the path, the skill, mode block, the policy file, and that a machine-local override is documented (it does not name a value)
       - under SOFT_FOUNDRY_GUARD=warn the same call exits 0 with a warn guard line and mode warn
     evidence: [evidence/rails-guard-decisions.txt]
     result: pass
@@ -56,7 +57,7 @@ journeys:
       - Run it again passing the shell arguments --allowedTools and --permission-mode acceptEdits after --
     assertions:
       - run 1 - the fresh review session found the planted defect (cap not applied, negative not zeroed, empty test file) but could not write 13-review (permission prompts were not granted in the non-interactive session), so the case failed with 0 findings recorded; reported fail, exit 2
-      - run 2 - the review wrote its findings and the case passed, naming the shell claude, the model anthropic/claude-sonnet-5-5, and findings REV-001, REV-002, REV-005 and REV-003, exit 0
+      - run 2 - the review wrote its findings and the case passed, naming the shell claude, the model anthropic/claude-sonnet-5-5, and findings REV-001, REV-002 and REV-003, exit 0
     evidence: [evidence/live-eval-run1-no-write-permission.txt, evidence/live-eval-run2-acceptEdits.txt]
     result: pass
   - id: EVAL-005
@@ -92,7 +93,8 @@ journeys:
     assertions:
       - help lists eval, eval --live, ci with evals, guard modes; README has the Proving the gate section, the waiver paragraph and the specification-lock paragraph; AGENTS.md and .ai/README.md state waivers by risk and that judgment is never waived; schemas.md describes waivers permitted, specification locked and the fresh-context advisory; VERSION is 0.21.0
       - the harness-evals README could not be read by this skill (denied by permissions) and is not judged here
-      - the documentation does not say that a live eval on claude needs shell arguments for write permission (see finding EVAL-F2)
+      - hooks install --claude now prints a matcher that includes Grep and Glob; the README guard paragraph does not yet say so (owed per REM-003)
+      - the documentation does not say that a live eval on claude needs shell arguments for write permission (see finding EVAL-F1)
     evidence: []
     result: pass
   - id: EVAL-008

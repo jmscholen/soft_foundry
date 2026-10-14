@@ -1,16 +1,21 @@
-$ eval --live --shell claude --case review-finds-planted-defect
-I couldn't write any of the review files. Every `Write` into `13-review/` was denied for lack of permission, and an earlier heredoc attempt through Bash was also refused. I haven't tried another route around the denials, so `13-review/` still holds the unfilled templates and the handoff is still `in_progress`.
+$ eval --live --shell claude --case review-finds-planted-defect  (no shell arguments)
+I finished the review but couldn't write any of it. Every write to `changes/eval-review-finds-planted-defect/13-review/` was denied for lack of permission, including the attempt to mark the handoff `blocked`. `handoff.yml` is still `in_progress` with no review files written, so `soft-foundry gate re
 
-The review itself is done. These are the findings, bound to HEAD `026d31f7e4c2a179ae4c2dcd8b57a7ff42a83eba`:
+**What I found**
+- **REV-001 (blocking, `lib/eval_app.rb:6-8`):** `Refund.amount` just returns `requested_cents`.
+  - REQ-001 asks for a cap at the payment amount, but `Refund.amount(1000, 5000)` returns 5000 instead of 1000.
+  - REQ-002 says a negative request refunds nothing, but `Refund.amount(1000, -200)` returns -200 instead of 0.
+  - The implementation log claims both requirements are met.
+- **REV-002 (blocking, `test/eval_app_test.rb:1`):** The test file only requires minitest and has no test cases, so the "test file passes" claim in `06-verification/results.md` proves nothing.
+- **REV-003 (major, security):** The missing cap lets a caller over-refund, 4000 cents in the example above. It is fixed by the same change as REV-001.
+- **Other areas:** Architecture conforms. Accessibility, policy, infrastructure and operations are N/A because this change touches no UI, policy, IaC or runtime. `metadata.yml` also declares those surfaces false.
 
-- **REV-001 (blocking):** `Refund.amount` in `app/eval_app.rb:6-8` returns `requested_cents` and never reads `payment_cents`. `Refund.amount(1000, 5000)` returns 5000 where REQ-001 requires 1000, so a caller can refund more than was paid.
-- **REV-002 (blocking):** A negative request is returned as is. `Refund.amount(1000, -200)` returns -200 where REQ-002 requires 0.
-- **REV-003 (major):** `spec/eval_app_test.rb` only requires minitest and defines no tests. Verification's "The test file passes" is therefore vacuous, which is how both defects got through.
-- **REV-004 (minor):** The specification has no accessibility requirement, and doesn't state that nothing a person perceives is produced. `surfaces.accessibility` is true, but the change is a pure integer method.
-- **Other lenses:** Architecture and operations conform. Security conforms with advisories; the over-refund is recorded once, as REV-001. Infrastructure and policy are N/A, because nothing was added or touched in either.
-- **Routing:** The handoff would set `next: remediate`, since there are blocking findings.
+**What I'd write once permission is granted**
+- **Review files:** `functional.md`, `architecture.md`, `security.md`, `accessibility.md`, `policy-conformance.md`, `infrastructure.md`, `operations.md` and `consolidated.md`, with the findings above and a `failure:` stated for each.
+- **Handoff:** `status: complete`, `commit_sha: a7f06d104c2b4b0d1418c2fabf521540ee596a7f` (the current HEAD), and `resolved_model` as provider `anthropic`, model `claude-sonnet-5-5`. The findings would be REV-001, REV-002 and REV-003, each with a `failure:`.
+- **Routing:** `next: remediate`, since the review has blocking findings.
 
-To finish, either grant write access to `changes/eval-review-finds-planted-defect/13-review/**`, which the skill's `permissions.yml` already allows, or tell me how you want the files written. I'll then write the eight review files and the handoff exactly as above. I'll also correct the handoff's `completed_at`, because the `17:20:00Z` I drafted was a placeholder.
+Grant write access to `13-review/` and I'll write it all. You could also run the phase where the runtime guard allows that path.
 ✗ fail eval review-finds-planted-defect: review on claude found no finding matching /cap|exceed|larger|greater|more than|negative/ (0 findings recorded)
 ✗ fail eval: 0 passed, 1 failed, 0 errors, 0 skipped
 exit 2

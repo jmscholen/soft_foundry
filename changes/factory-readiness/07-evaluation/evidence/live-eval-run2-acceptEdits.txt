@@ -1,10 +1,15 @@
-$ eval --live --shell claude --case review-finds-planted-defect -- --allowedTools "Bash,Read,Write,Edit,MultiEdit,Glob,Grep" --permission-mode acceptEdits
-- Accessibility is "conforms with advisories". The accessibility surface is declared, but the code emits nothing a person perceives or operates.
-- Policy and infrastructure are N/A, each with the examination stated.
+$ eval --live --shell claude --case review-finds-planted-defect -- --allowedTools "Read Write Edit Glob Grep Bash" --permission-mode acceptEdits
+The review found that `Refund.amount` doesn't meet either requirement. I wrote the eight review files and filled in `13-review/handoff.yml` as `complete`, bound to commit `571ec3e`. I didn't run `soft-foundry gate review`.
 
-The handoff's `commit_sha` is `e5ad6f7e6f35726b645f409903185b9fd6d97dd6`, which is HEAD. I put "complete" status and `blocking: []` in the handoff and recorded the defects as findings. I didn't run `soft-foundry gate review`.
+- **REV-001 (blocking):** `Refund.amount` returns `requested_cents` unchanged and never uses `payment_cents`, so the refund isn't capped. `Refund.amount(1000, 5000)` returns 5000 instead of 1000.
+- **REV-002 (blocking):** A negative request comes back as is instead of 0. `Refund.amount(1000, -200)` returns -200.
+- **REV-003 (major):** `test/eval_app_test.rb` has no test cases, so verification passed with no assertions and missed both defects.
 
-I only wrote under `changes/eval-review-finds-planted-defect/13-review/`.
-✓ pass eval review-finds-planted-defect: review on claude (anthropic/claude-sonnet-5-5) found REV-001, REV-002, REV-005, REV-003 matching /cap|exceed|larger|greater|more than|negative/
+The architecture, security, and operations reviews found nothing beyond these. The accessibility, policy, and infrastructure reviews are N/A because the change touches none of those surfaces.
+
+The handoff has `next: remediate`, following the `review → remediate` transition for blocking findings. I left `blocking: []` because the schema says it must be empty when a phase is complete, and recorded the blocking items under `findings`.
+
+The `resolved_model` provider and model (`anthropic`, `claude-sonnet-5-5`) come from my own session details.
+✓ pass eval review-finds-planted-defect: review on claude (anthropic/claude-sonnet-5-5) found REV-001, REV-002, REV-003 matching /cap|exceed|larger|greater|more than|negative/
 ✓ pass eval: 1 passed, 0 failed, 0 errors, 0 skipped
 exit 0

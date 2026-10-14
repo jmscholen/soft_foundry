@@ -1,11 +1,23 @@
-$ init
-    - change.intake_required (UNKNOWN)
-    - change.specification_required (UNKNOWN)
-    - change.acceptance_criteria_required (UNKNOWN)
-    - change.provenance_enabled (UNKNOWN)
-    - change.acceptance_criteria_locking (UNKNOWN)
-  full report: .ai/maturity-report.md
-  (run with --maturity=deep for a judgment-based assessment)
-summary: created 200, updated 0, skipped 0, conflict 0, forced 0
-exit 0
-$ check, profile, doctor, change new: check pass 16 phases 17 skills; profile framework rails, testing ruby; doctor mode block from repository policy; change new surfaces.accessibility true (rails detected); gate intake in ev6
+$ init --no-onboard (LANG unset) in a Rails-shaped repository: exit 0, "summary: created 200, updated 0, skipped 0, conflict 0, forced 0"
+$ check
+✓ pass control plane: 16 phases, 17 skills, no errors
+$ profile (.ai/repository.yml)
+  frameworks:
+  - rails
+  databases: []
+  testing:
+  - ruby
+infrastructure:
+$ doctor (guard lines)
+✓ pass guard hook (claude: installed, codex: not installed; mode: block, repository policy (.ai/policies/enforcement.yml))
+$ change new refund-cap
+00-intake
+01-discovery
+02-specification
+surfaces:
+  application: false
+  database: false
+  infrastructure: false
+  security: false
+  accessibility: true
+  observability: false

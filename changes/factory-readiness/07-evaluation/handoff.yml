@@ -2,9 +2,9 @@
 phase: 07-evaluation
 skill: evaluation
 status: complete
-commit_sha: 98b336fb932e6ce49436bb40277d89c477dece78
+commit_sha: 9307b23a6a7560d41bea4a1a31eba76c708c348c
 started_at: '2026-10-14T16:35:01Z'
-completed_at: '2026-10-14T18:20:00Z'
+completed_at: '2026-10-14T19:05:00Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -18,7 +18,7 @@ blocking: []
 findings:
 - id: EVAL-F1
   severity: minor
-  summary: Still present at 98b336f. Live eval on claude with no shell arguments fails
+  summary: Still present at 9307b23. Live eval on claude with no shell arguments fails
     (0 findings recorded) because the unattended session cannot write 13-review; it
     passes with -- --allowedTools ... --permission-mode acceptEdits. The README does
     not say so.
@@ -26,29 +26,38 @@ findings:
     reports fail and exits 2 although the reviewer found the planted defect.
 - id: EVAL-F2
   severity: minor
-  summary: Rails profile records testing entry 'ruby', not an rspec-named entry; REQ-FR-008
+  summary: Rails profile records testing entry ruby, not an rspec-named entry; REQ-FR-008
     wording says rspec-style testing.
 - id: EVAL-F3
   severity: minor
   summary: AC-FR-002, 003, 004, 012, 013 and the positive side of AC-FR-006 were not
     exercised as user journeys (blocked, covered by verification); this skill cannot
     read the harness-evals README so that part of AC-FR-021 is unjudged.
+- id: EVAL-F4
+  severity: minor
+  summary: A guard refusal for an undecidable call (unresolvable tilde user, NUL byte)
+    reads "the  skill's permissions.yml" with an empty skill name. The refusal (exit
+    2) is correct.
+- id: EVAL-F5
+  severity: minor
+  summary: README guard paragraph does not yet describe the Grep/Glob matcher, cd/glob/symlink/brace
+    handling, or that existing repositories rerun hooks install; already owed in 09-remediation.
 next: attack
-notes: Re-run at 98b336f because the earlier evaluation (bound to fcf79eb) went stale
-  when REM-002 changed the guard and the eval case-size limit. Journeys run by hand
-  against the real CLI in scratch repositories under the session scratchpad; the guard
-  refused this session's own glob over the harness-evals directory, so case-file work
-  was done in a scratch copy. Live eval run twice; first run failed (no write permission),
-  second passed (see results.md). Not exercised by hand - invalid UTF-8 scrubbing,
+notes: Re-run at 9307b23 because the earlier evaluation (bound to 98b336f) went stale
+  when REM-003 changed the guard. Journeys run by hand against the real CLI in scratch
+  repositories under the session scratchpad; the repository guard refused two of this
+  session's own tool calls (unresolvable tilde-user token, Write outside the repository),
+  so scripts were run through Bash only. Live eval run twice; first run failed (no
+  write permission), second passed. Not exercised by hand - invalid UTF-8 scrubbing,
   eval case whose gate raises, fake-shell live case, positive fresh-context advisory
   - covered by verification.
 executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-14T17:10:58Z'
-  finished_at: '2026-10-14T17:16:25Z'
+  started_at: '2026-10-14T17:47:00Z'
+  finished_at: '2026-10-14T17:53:01Z'
   exit_status: 0
   previous_phase: verify
-  session_id: 25351b48-0bf2-4bb3-82e9-4a36d604aa48
+  session_id: d077418b-0d6d-48c4-af86-3f786e400bb3
   cwd: "/home/user/soft_foundry"
