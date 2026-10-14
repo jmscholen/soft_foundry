@@ -3,6 +3,7 @@
 require "fileutils"
 require "time"
 require "yaml"
+require_relative "text"
 require_relative "advisory"
 
 module SoftFoundry
@@ -230,7 +231,7 @@ module SoftFoundry
     # (YAML.dump would drop them).
     def declare_surfaces!
       path = File.join(dir, "metadata.yml")
-      body = File.read(path)
+      body = SoftFoundry.read_text(path)
       updated = body
       frameworks = Advisory.ui_frameworks(control_plane)
       unless frameworks.empty?
@@ -266,7 +267,7 @@ module SoftFoundry
     # scalar: plain when that round-trips, quoted otherwise (a title with
     # ": " in it, for instance, would otherwise yield an unreadable file).
     def write_template(src, dst, vars)
-      body = File.read(src).gsub(/\$\{([A-Z_]+)\}/) do
+      body = SoftFoundry.read_text(src).gsub(/\$\{([A-Z_]+)\}/) do
         name = Regexp.last_match(1)
         vars.key?(name) ? yaml_scalar(vars[name]) : "${#{name}}"
       end

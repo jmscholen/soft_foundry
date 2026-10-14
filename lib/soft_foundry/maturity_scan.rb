@@ -3,6 +3,7 @@
 require "json"
 require "time"
 require "yaml"
+require_relative "text"
 require_relative "safe_write"
 
 module SoftFoundry
@@ -221,7 +222,7 @@ module SoftFoundry
 
     def content_includes?(rel, needle)
       path = File.join(root, rel)
-      File.file?(path) && File.read(path).include?(needle)
+      File.file?(path) && SoftFoundry.read_text(path).include?(needle)
     rescue StandardError
       false
     end
@@ -229,7 +230,7 @@ module SoftFoundry
     def package_json
       path = File.join(root, "package.json")
       return nil unless File.file?(path)
-      JSON.parse(File.read(path))
+      JSON.parse(SoftFoundry.read_text(path))
     rescue JSON::ParserError, StandardError
       nil
     end

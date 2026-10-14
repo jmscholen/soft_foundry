@@ -2,6 +2,7 @@
 
 require "fileutils"
 require "json"
+require_relative "text"
 require_relative "errors"
 require_relative "safe_write"
 
@@ -32,7 +33,7 @@ module SoftFoundry
       raise "#{root} is not a git repository" unless File.directory?(File.join(root, ".git"))
       FileUtils.mkdir_p(hooks_dir)
       path = File.join(hooks_dir, "pre-commit")
-      if File.exist?(path) && !File.read(path).include?(MARKER)
+      if File.exist?(path) && !SoftFoundry.read_text(path).include?(MARKER)
         raise "#{path} already exists and was not installed by soft-foundry; merge `soft-foundry ci` into it manually"
       end
       File.write(path, SCRIPT)
@@ -182,7 +183,7 @@ module SoftFoundry
         [:installed, path, shell]
       end
       session_skill_paths(home).each_value do |path|
-        if File.exist?(path) && !File.read(path).include?(SESSIONS_ID)
+        if File.exist?(path) && !SoftFoundry.read_text(path).include?(SESSIONS_ID)
           report << [:skipped, path, "not written by soft-foundry"]
           next
         end
@@ -212,7 +213,7 @@ module SoftFoundry
         [:removed, path, shell]
       end
       session_skill_paths(home).each_value do |path|
-        next unless File.file?(path) && !File.symlink?(path) && File.read(path).include?(SESSIONS_ID)
+        next unless File.file?(path) && !File.symlink?(path) && SoftFoundry.read_text(path).include?(SESSIONS_ID)
         File.delete(path)
         Dir.rmdir(File.dirname(path)) if Dir.empty?(File.dirname(path))
         removed << [:skill, path, nil]
@@ -238,7 +239,7 @@ module SoftFoundry
     def self.read_settings(path)
       return {} unless File.exist?(path) || File.symlink?(path)
       raise TargetError, "#{path} is a symlink; refusing to write through it" if File.symlink?(path)
-      data = JSON.parse(File.read(path))
+      data = JSON.parse(SoftFoundry.read_text(path))
       raise TargetError, "#{path}: expected a JSON object" unless data.is_a?(Hash)
       data
     rescue JSON::ParserError => e

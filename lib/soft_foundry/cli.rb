@@ -2,6 +2,7 @@
 
 require "json"
 require "yaml"
+require_relative "text"
 require_relative "onboarding"
 require_relative "shell"
 require_relative "git"
@@ -259,7 +260,7 @@ module SoftFoundry
         ".ai/paths.yml" => File.exist?(File.join(@root, ".ai/paths.yml")),
         "control plane check" => plane.present? && Check.new(plane).run.none? { |f| f.level == :error },
         ".ai/manifest.yml" => File.exist?(File.join(@root, Manifest::PATH)),
-        "pre-commit hook" => File.exist?(File.join(@root, ".git/hooks/pre-commit")) && File.read(File.join(@root, ".git/hooks/pre-commit")).include?(Hooks::MARKER),
+        "pre-commit hook" => File.exist?(File.join(@root, ".git/hooks/pre-commit")) && SoftFoundry.read_text(File.join(@root, ".git/hooks/pre-commit")).include?(Hooks::MARKER),
         "guard hook" => !Hooks.claude_installed?(@root).nil? || !Hooks.codex_installed?(@root).nil?,
         "local runtime" => File.exist?(File.join(@root, ".soft-foundry/runtime.yml"))
       }

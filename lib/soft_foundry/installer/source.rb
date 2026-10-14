@@ -40,7 +40,7 @@ module SoftFoundry
 
       # The text Soft Foundry owns inside a target's AGENTS.md.
       def agents_interior
-        body = File.read(File.join(root, "AGENTS.md"))
+        body = SoftFoundry.read_text(File.join(root, "AGENTS.md"))
         if body.include?(BEGIN_MARKER) && body.include?(END_MARKER)
           body[(body.index(BEGIN_MARKER) + BEGIN_MARKER.length)...body.index(END_MARKER)].strip
         else

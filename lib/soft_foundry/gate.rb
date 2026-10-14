@@ -2,6 +2,7 @@
 
 require "yaml"
 require "date"
+require_relative "text"
 require_relative "change_record"
 require_relative "learning"
 require_relative "panel"
@@ -187,10 +188,10 @@ module SoftFoundry
       end
       argument = File.join(dir, "panel", "ARGUMENT.md")
       problems << "panel/ARGUMENT.md is missing" unless File.file?(argument)
-      problems << "panel/ARGUMENT.md is empty" if File.file?(argument) && File.read(argument).strip.empty?
+      problems << "panel/ARGUMENT.md is empty" if File.file?(argument) && SoftFoundry.read_text(argument).strip.empty?
       problems << "outcome is '#{panel['outcome']}', not agreed or split" unless %w[agreed split].include?(panel["outcome"].to_s)
       outputs = Dir.glob("**/*", base: dir).reject { |f| f.start_with?("panel/") || f == "handoff.yml" }.map { |f| File.join(dir, f) }.select { |f| File.file?(f) }
-      text = outputs.map { |f| File.read(f) }.join("\n")
+      text = outputs.map { |f| SoftFoundry.read_text(f) }.join("\n")
       members.each { |name| problems << "panel/#{name}/ is not cited in the phase's outputs" unless text.include?("panel/#{name}/") }
       return Check.new("panel recorded", :fail, problems.join("; ")) unless problems.empty?
       Check.new("panel recorded", :pass, "#{members.size} members, #{panel['rounds']} #{panel['rounds'].to_i == 1 ? 'round' : 'rounds'}, #{panel['outcome']}")
@@ -269,7 +270,7 @@ module SoftFoundry
     def placeholder_check(phase, skill)
       remaining = skill.required_files.select do |f|
         path = File.join(@record.phase_dir(phase), f)
-        File.file?(path) && File.read(path).match?(PLACEHOLDER)
+        File.file?(path) && SoftFoundry.read_text(path).match?(PLACEHOLDER)
       end
       remaining.empty? ? Check.new("no placeholders", :pass, "") : Check.new("no placeholders", :fail, "TBD remains in: #{remaining.join(', ')}")
     end

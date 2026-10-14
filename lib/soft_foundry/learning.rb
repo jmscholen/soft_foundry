@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "yaml"
+require_relative "text"
 require_relative "control_plane"
 require_relative "change_record"
 require_relative "safe_write"
@@ -96,7 +97,7 @@ module SoftFoundry
     def promoted_ids(root)
       path = File.join(root, RULES)
       return [] unless File.file?(path)
-      File.read(path).scan(/^## (\S+)\s*$/).flatten
+      SoftFoundry.read_text(path).scan(/^## (\S+)\s*$/).flatten
     end
 
     def section(instinct)
@@ -114,7 +115,7 @@ module SoftFoundry
     # header if absent. The caller decides which; this only writes.
     def promote!(root, instincts)
       path = File.join(root, RULES)
-      body = File.file?(path) ? File.read(path) : HEADER
+      body = File.file?(path) ? SoftFoundry.read_text(path) : HEADER
       body = body.rstrip + "\n" + instincts.map { |i| section(i) }.join
       SafeWrite.ensure_directory!(File.dirname(path))
       SafeWrite.write(path, body)
