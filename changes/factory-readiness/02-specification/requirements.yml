@@ -1,8 +1,62 @@
 # Implementation-independent requirements. IDs are stable and referenced by
 # acceptance criteria, tests, evaluation journeys, and attack cases.
 requirements:
-  - id: REQ-001
-    category: functional   # functional | accessibility | security | policy | data | failure | performance | operations | infrastructure | observability
-    statement: TBD
-    rationale: TBD
+  - id: REQ-FR-001
+    category: failure
+    statement: Every file the library reads for content is decoded as UTF-8 regardless of the process locale, and a file that is not valid UTF-8 is scrubbed rather than crashing the command; the test suite passes under LANG=C.
+    rationale: The suite had 5 errors under a C locale and the gate crashed on this change's own discovery files in a C-locale container; CI passed only because the runner is UTF-8.
+    source: 00-intake/request.md
+
+  - id: REQ-FR-002
+    category: functional
+    statement: On a track without an exploring stage, the specification is locked from the specify phase's commit_sha; the gate's `specification locked` check fails on any later change under 02-specification/, and every commit-bound phase's `evidence current` check fails when 02-specification/ changed after that phase's commit_sha. The vetted (iterative) path is unchanged.
+    rationale: change.acceptance_criteria_locking is PARTIAL because the lock exists only after `change vet`; evidence produced against earlier criteria must not stay current when the criteria change.
+    source: 00-intake/request.md
+
+  - id: REQ-FR-003
+    category: operations
+    statement: The fresh-context advisory names every completed phase whose skill declares `evidence: commit_bound` and whose handoff lacks `executed_by.fresh_context: true`, and the verification, evaluation, and adversarial-testing skills state that the phase prefers a fresh session through `phase run`.
+    rationale: Verification, evaluation, and attack have run in the implementing session in every record; the record should say so on every gate run, as it already does for review and judgment.
+    source: 00-intake/request.md
+
+  - id: REQ-FR-004
+    category: security
+    statement: The packaged `.ai/policies/enforcement.yml` declares `guard.mode: block`; `hooks install` and `doctor` print the mode in effect and its source; a block-mode refusal names the tool, path, skill, mode, and policy file and says a machine-local override exists.
+    rationale: A guard that warns and allows is a report, not a control; application repositories should start with the control on.
+    source: 00-intake/request.md
+
+  - id: REQ-FR-005
+    category: functional
+    statement: "`.ai/harness-evals/cases/<id>.yml` declares deterministic cases that plant a change record (and optionally a repository change) in a scratch repository carrying this repository's control plane and assert which gate check passes or fails; `soft-foundry eval [--json] [--case ID]...` runs them, prints one status line per case and one summary, exits 0 only when every run case passed, and `ci` runs them; the shipped suite holds at least nine planted defects and one well-formed control."
+    rationale: Nothing has ever measured whether the gate refuses a defective record; the suite is the first measurement and ships with the control plane so an application repository can repeat it.
+    source: 00-intake/request.md
+
+  - id: REQ-FR-006
+    category: functional
+    statement: "A case with `kind: live` plants application files and a record, and `soft-foundry eval --live --shell <shell>` runs `phase run <phase> --shell <shell>` in the scratch repository and passes when the phase's handoff findings or Markdown match `expect.finding`; the output records the shell and the resolved model; without `--live` the case is reported skip; a non-zero session exit or a failing gate is reported error and counts as a failure."
+    rationale: A planted defect found or missed by a fresh-context reviewer, recorded with the shell and model, is the first model-level measurement; it must be opt-in because it needs a shell and a login.
+    source: 00-intake/request.md
+
+  - id: REQ-FR-007
+    category: functional
+    statement: "`.ai/workflow.yml` declares `waivable_by_risk`; the gate's first-phase check `waivers permitted` fails a skipped_phases entry that is not globally optional and not waivable for the change's declared risk, and always fails `review` or `judge`; an undeclared risk waives only optional phases; `check` fails a control plane whose rule names an unknown phase or review or judge; `change close` refuses without a completed judgment unless --force."
+    rationale: 25 of 30 closed records waived judgment with a sentence although rules.final_judgment_required is true; a gate that never says no is one that rarely runs.
+    source: 01-discovery/repository-context.md
+
+  - id: REQ-FR-008
+    category: functional
+    statement: A test and a recorded journey take a Rails-shaped repository through init, profile assessment, change new, check, guard decisions under the implementation skill (allow app and spec writes; refuse .ai/, evidence, harness-eval reads, and a shell command naming policy), a passing intake gate, and a passing eval using the installed control plane, with block mode installed.
+    rationale: The lifecycle has only ever governed this repository; the maintainer's target is Rails.
+    source: 00-intake/request.md
+
+  - id: REQ-FR-009
+    category: accessibility
+    statement: Every new output line carries its outcome as a word at a fixed position, is readable without color or glyph, and `eval --json` carries the same facts as data; error messages say what to do next; nothing prompts.
+    rationale: .ai/rules/accessibility.md, command-line output rules.
+    source: .ai/rules/accessibility.md
+
+  - id: REQ-FR-010
+    category: operations
+    statement: README, `soft-foundry help`, .ai/schemas.md, .ai/README.md, AGENTS.md, and .ai/harness-evals/README.md describe eval (both kinds), block mode, the gated-track lock, waivers by risk and the judgment requirement, and the wider fresh-context advisory; SoftFoundry::VERSION is 0.21.0.
+    rationale: The control plane is read as instructions; what the tool enforces must be what the text says.
     source: 00-intake/request.md

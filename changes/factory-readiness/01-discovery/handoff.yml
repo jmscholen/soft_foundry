@@ -2,9 +2,9 @@
 phase: 01-discovery
 skill: repository-discovery
 status: complete
-commit_sha: 7f6de0d58b756ae126ad79120cc71b694e386157
+commit_sha: 1a26bacdf7d7b13ce6dc78ca0c39cb1b3ac27ab9
 started_at: '2026-10-14T14:57:37Z'
-completed_at: '2026-10-14T14:57:37Z'
+completed_at: '2026-10-14T15:00:13Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -24,5 +24,9 @@ notes: 'Performed by the interactive session. Wrote .ai/repository.yml (the one 
   as NOT_APPLICABLE per the maturity rule, maturity rescored by ControlPlane#score_maturity
   (level 2; the one level-3 gap is the gated-track specification lock this change
   adds). The profile diff is large because YAML.dump writes block lists where the
-  old file used flow lists; no capability was removed.'
+  old file used flow lists; no capability was removed. The first gate run crashed
+  with ''invalid byte sequence in US-ASCII'' in this C-locale container on the arrow
+  character in repository-context.md: the live reproduction of REQ-FR-001. The second
+  run, under a UTF-8 locale, flagged a literal mention of the placeholder word in
+  dependencies.md; reworded and re-bound here.'
 executed_by:
