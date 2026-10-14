@@ -2,9 +2,9 @@
 phase: 05-implementation
 skill: implementation
 status: complete
-commit_sha: 531a641d4e4f592c35df4644bd06e022804ab41b
+commit_sha: bc10931700ac6f6ad3a7260ed9789f4d22859d91
 started_at: '2026-10-14T15:37:14Z'
-completed_at: '2026-10-14T15:37:14Z'
+completed_at: '2026-10-14T15:45:38Z'
 resolved_model:
   profile: coding_high
   provider: anthropic
@@ -19,7 +19,11 @@ next: verify
 notes: Performed by the interactive session. Seven RED/GREEN pairs plus a documentation
   commit; see log.md for the commit table and deviations.md for the control-plane
   writes (made under the documented machine-local override, removed before the evidence
-  phases) and the three rewritten tests. Verification, evaluation, and attack are
-  to run through soft-foundry phase run in fresh claude sessions; the outcome of that
-  attempt is recorded in their handoffs.
+  phases) and the three rewritten tests. Re-bound once after the full suite under
+  a C locale showed three failures (two red-green tests scoping the verification advisory,
+  one track-less control plane whose lint refused the iterative-track eval case);
+  fixed in the commit this handoff now names. The guard hook ran in this session in
+  block mode after the override was removed and refused one shell command that named
+  a control-plane file (a live refusal, recorded in evaluation). Verification, evaluation,
+  and attack are to run through soft-foundry phase run in fresh claude sessions.
 executed_by:
