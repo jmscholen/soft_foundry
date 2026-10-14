@@ -2,9 +2,9 @@
 phase: '09-remediation'
 skill: remediation
 status: complete
-commit_sha: 6f6440f1df3b2b2aba89422cc6692c129c511b92
+commit_sha: b0bb9016249e63fe4d3a5af1283135fc06ec4941
 started_at: '2026-10-14T16:11:30Z'
-completed_at: '2026-10-14T18:37:01Z'
+completed_at: '2026-10-14T19:04:14Z'
 resolved_model:
   profile: coding_high
   provider: anthropic
@@ -14,14 +14,14 @@ outputs:
 blocking: []
 findings: []
 next: verify
-notes: REM-001 (from verification), REM-002 and REM-003 (from the first two attacks),
-  REM-004 (from the third), and REM-005 (from the fourth), all performed by the interactive
-  session under the remediation skill with the guard in block mode. REM-004 changed
-  the control to a post-call restore; REM-005 hardened it against overlapping calls
-  and symlinks; further same-user routes (detached processes, a single command tampering
-  baseline and policy together, a committed weak policy) are the OS-sandbox residual
-  the repository already accepted, and the remediation loop closes here by decision.
-  README and policy text edits and a rerun of hooks install are owed and cannot be
-  made from any skill; listed in summary.md for the maintainer. Verification, evaluation,
-  and attack are stale and rerun through phase run.
+notes: 'REM-001 through REM-006, all performed by the interactive session under the
+  remediation skill with the guard in block mode: REM-001 from verification, REM-002
+  to REM-005 from four attack rounds, REM-006 from the evaluation after REM-005 (the
+  post-call check reverted a maintainer''s own edit). The guard''s own configuration
+  is now baselined around shell calls only and restored after them; further same-user
+  routes are the OS-sandbox residual the repository already accepted, and the remediation
+  loop closes here by decision. README and policy text edits and a rerun of hooks
+  install are owed and cannot be made from any skill; listed in summary.md for the
+  maintainer. Verification, evaluation, and attack are stale and rerun through phase
+  run.'
 executed_by:
