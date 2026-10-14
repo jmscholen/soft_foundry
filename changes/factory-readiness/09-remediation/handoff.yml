@@ -2,9 +2,9 @@
 phase: '09-remediation'
 skill: remediation
 status: complete
-commit_sha: 021e78c57f7f519146035f9a6476c350f6aaf8bd
+commit_sha: d5805b3a78e69469ddc8f188f4fb846f79881bfa
 started_at: '2026-10-14T16:11:30Z'
-completed_at: '2026-10-14T17:25:57Z'
+completed_at: '2026-10-14T18:04:06Z'
 resolved_model:
   profile: coding_high
   provider: anthropic
@@ -14,11 +14,13 @@ outputs:
 blocking: []
 findings: []
 next: verify
-notes: REM-001 (from verification), REM-002 (from the first attack), and REM-003 (from
-  the second attack), all performed by the interactive session under the remediation
-  skill with the guard in block mode. README and policy text edits, and a rerun of
-  hooks install for the wider matcher, are owed and cannot be made from any skill;
-  listed in summary.md for the maintainer. Root-wide searches, variable and command-substitution
-  indirection, and the self-attested commit_sha are accepted residuals for judgment.
-  Verification, evaluation, and attack are stale and rerun through phase run.
+notes: 'REM-001 (from verification), REM-002 and REM-003 (from the first two attacks),
+  and REM-004 (from the third), all performed by the interactive session under the
+  remediation skill with the guard in block mode. REM-004 changes the control: the
+  guard''s own configuration is baselined before each tool call and restored after
+  a shell command, since a name-based shell check can always be spelled around; further
+  spellings are accepted as residual with that control in place. README and policy
+  text edits and a rerun of hooks install are owed and cannot be made from any skill;
+  listed in summary.md for the maintainer. Verification, evaluation, and attack are
+  stale and rerun through phase run.'
 executed_by:
