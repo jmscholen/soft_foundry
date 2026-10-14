@@ -1093,9 +1093,11 @@ module SoftFoundry
         @err.puts "#{mode == 'block' ? '✗ fail' : '! warn'} guard: could not read the tool call from stdin#{mode == 'block' ? '; refusing it' : ''}"
         return mode == "block" ? 2 : 0
       end
-      guard.record_baseline!
       tool = payload["tool_name"].to_s
       input = payload["tool_input"].is_a?(Hash) ? payload["tool_input"] : {}
+      # Only a shell call has a post-call check, so only a shell call
+      # records the baseline that check restores to.
+      guard.record_baseline! if Guard::SHELL_TOOLS.include?(tool)
       decision = begin
         guard.decide(tool, input)
       rescue StandardError => e

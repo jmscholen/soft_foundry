@@ -5,6 +5,7 @@ require "json"
 require_relative "text"
 require_relative "errors"
 require_relative "safe_write"
+require_relative "guard"
 
 module SoftFoundry
   # Installs the hooks Soft Foundry relies on: a git pre-commit hook that
@@ -65,10 +66,20 @@ module SoftFoundry
 
     def self.codex_hooks_path(root) = File.join(root, ".codex", "hooks.json")
 
-    def self.install_claude(root, local: false) = install_into(claude_settings_path(root, local: local), GUARD_MATCHER, after: true)
-    def self.uninstall_claude(root, local: false) = uninstall_from(claude_settings_path(root, local: local))
-    def self.install_codex(root) = install_into(codex_hooks_path(root), CODEX_GUARD_MATCHER)
-    def self.uninstall_codex(root) = uninstall_from(codex_hooks_path(root))
+    def self.install_claude(root, local: false) = clearing_baseline(root) { install_into(claude_settings_path(root, local: local), GUARD_MATCHER, after: true) }
+    def self.uninstall_claude(root, local: false) = clearing_baseline(root) { uninstall_from(claude_settings_path(root, local: local)) }
+    def self.install_codex(root) = clearing_baseline(root) { install_into(codex_hooks_path(root), CODEX_GUARD_MATCHER) }
+    def self.uninstall_codex(root) = clearing_baseline(root) { uninstall_from(codex_hooks_path(root)) }
+
+    # These are the maintainer's own changes to the guard's configuration:
+    # a baseline left by an interrupted shell command must not undo them
+    # at the next post-call check.
+    def self.clearing_baseline(root)
+      result = yield
+      baseline = File.join(root, Guard::BASELINE)
+      File.delete(baseline) if File.file?(baseline) || File.symlink?(baseline)
+      result
+    end
 
     # The post-call half (Claude Code only): after a shell command, restore
     # the guard's own configuration if the command changed it.
