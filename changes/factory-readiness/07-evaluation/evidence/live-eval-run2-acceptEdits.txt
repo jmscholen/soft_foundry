@@ -1,15 +1,23 @@
-$ soft-foundry eval --live --shell claude --case review-finds-planted-defect -- --allowedTools "Read Write Edit Glob Grep Bash" --permission-mode acceptEdits
-The review is written and the handoff is marked complete. The review found that `Refund.amount` doesn't implement either requirement. I did not run `soft-foundry gate review`.
+# at ac3e8cfe995929ce40d334636e750d4625deffe9
+The review is written and `13-review/handoff.yml` is complete, but the change doesn't pass review: it has two blocking defects. I haven't run `soft-foundry gate review`.
 
-- **No cap (REV-001, blocking):** `app/eval_app.rb:6` returns `requested_cents` unchanged and ignores `payment_cents`. `Refund.amount(1000, 5000)` returns 5000 instead of 1000 (REQ-001). The code comment and the implementation log both claim the cap exists.
-- **Negative request not floored (REV-002, blocking):** `Refund.amount(1000, -200)` returns -200 instead of 0 (REQ-002).
-- **Financial integrity (REV-005, blocking):** the same two gaps let a large requested amount through as an over-refund.
-- **No tests (REV-003, major):** `spec/eval_app_test.rb` has no test cases, so nothing exercises either requirement.
-- **Over-broad surface (REV-006, minor):** the change produces no output a person perceives, so `surfaces.accessibility: true` looks over-broad. I recorded this as an advisory.
+`Refund.amount` in `app/eval_app.rb` just returns `requested_cents`, so neither requirement is implemented. The code comment and the implementation log both claim REQ-001 is done.
 
-Architecture, infrastructure and policy came out clean. Accessibility conforms because there is no user-perceivable output. The handoff has `blocking: []` (the schema requires it empty on a complete phase), so the blocking findings are in `findings`. I set `next: remediate` rather than `judge`, following the workflow's `on_blocking_findings` transition.
+- **REV-001, blocking:** there is no cap at the payment amount. `Refund.amount(1000, 5000)` returns 5000 instead of 1000.
+- **REV-002, blocking:** a negative request isn't zeroed. `Refund.amount(1000, -200)` returns -200 instead of 0.
+- **REV-003, major:** `spec/eval_app_test.rb` contains no tests, so verification's "the test file passes" proves nothing.
+- **REV-004, major:** the security consequence of REV-001. A caller-supplied `requested_cents` of 10,000,000 on a 1000-cent payment comes back as 10,000,000.
+- **REV-005, minor:** nothing signals when a request exceeds the payment. This only matters once the cap exists.
 
-The handoff records `commit_sha` f44a416 and the model `claude-sonnet-5-5`. The reports are in `changes/eval-review-finds-planted-defect/13-review/`.
+The handoff routes to `remediate`, following the `on_blocking_findings` transition in `workflow.yml`. `blocking:` is empty because the review itself finished. The two blocking defects are recorded under `findings`.
+
+Architecture and accessibility came out as conforms, and operations as conforms with advisories. Policy conformance and infrastructure are N/A with a stated reason.
+
+I recorded the model as anthropic / claude-sonnet-5-5 and `commit_sha` as ef19458. I left `executed_by` as the runner wrote it. `finished_at` and `exit_status` inside it are still empty.
 ✓ pass eval review-finds-planted-defect: review on claude (anthropic/claude-sonnet-5-5) found REV-001, REV-002, REV-003, REV-005 matching /cap|exceed|larger|greater|more than|negative/
 ✓ pass eval: 1 passed, 0 failed, 0 errors, 0 skipped
+
+real	0m49.355s
+user	0m4.046s
+sys	0m0.929s
 exit 0

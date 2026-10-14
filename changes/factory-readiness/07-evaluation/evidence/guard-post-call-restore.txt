@@ -1,90 +1,65 @@
-== Scenario A: a non-Bash call (Edit) precedes; PostToolUse matches Bash only, so nothing consumes its baseline
-pre(Edit) exit 0
-guard-baseline.yml
-$ maintainer edits the policy in their own shell between calls (mode block -> warn)
+# at ac3e8cfe995929ce40d334636e750d4625deffe9
+# Re-run at ac3e8cf (after REM-006), fresh scratch Rails repository
+== Scenario A: Edit precedes, maintainer edits policy in own shell, then Bash
+pre(Edit) exit 2
+✗ fail guard: Edit app/models/user.rb is in intake's deny_write set; the intake skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is documented in README.md)
+guard.log
+init.lock
+$ maintainer set mode warn
 pre(Bash) exit 0
-$ guard --after (next Bash call, nothing run by the agent touched the file)
-✗ fail guard: .ai/policies/enforcement.yml changed during the tool call and was restored to the state before it (tamper logged to .soft-foundry/guard.log; mode: block)
-exit 2
-29:  mode: block
-== Scenario B: same, but the maintainer runs hooks install between calls
-pre(Edit) exit 0
+after exit 0
+29:  mode: warn
+== Scenario B: Read/Grep/Glob precede, then hooks uninstall --claude, then Bash
+pre(Read) exit 0
+pre(Grep) exit 0
+pre(Glob) exit 0
+guard.log
+init.lock
 removed guard hook from .claude/settings.json
+uninstall exit 0
+pre(Bash) exit 0
+after exit 0
 settings.json
-pre(Bash) exit 0
-$ guard --after (next Bash call)
-✗ fail guard: .claude/settings.json changed during the tool call and was restored to the state before it (tamper logged to .soft-foundry/guard.log; mode: block)
-exit 2
-settings.json
-✓ pass guard hook (claude: installed, codex: not installed; mode: block, repository policy (.ai/policies/enforcement.yml))
-== Scenario C: Bash-only sequence (the case EVAL-010 covered): edit between calls stands
-pre(Bash) exit 0
-$ guard --after (clean)
-exit 0
-pre(Bash) exit 0
-$ guard --after (after edit between calls)
-exit 0
-29:  mode: warn
-== Scenario D: settings.json swapped for a symlink mid-call
-pre(Bash) exit 0
-$ guard --after (symlink)
-✗ fail guard: .claude/settings.json changed during the tool call and was restored to the state before it (tamper logged to .soft-foundry/guard.log; mode: block)
-exit 2
-settings.json is a regular file
-evil target: {"hooks":{}}
-settings restored identical
-# Earlier run in the same scratch repository (guard-decision runs left a young baseline behind, which is what Scenario A below isolates):
-$ hooks install --claude
-installed guard hook in .claude/settings.json (PreToolUse: Edit|Write|MultiEdit|NotebookEdit|Read|Grep|Glob|Bash)
-installed post-call check in .claude/settings.json (PostToolUse: Bash; restores the guard's own configuration if a command changed it)
+✗ fail guard hook (claude: not installed, codex: not installed; mode: block, repository policy (.ai/policies/enforcement.yml)); install with `soft-foundry hooks install --claude` or `--codex`
 guard mode: block (repository policy (.ai/policies/enforcement.yml))
-exit 0
-$ doctor guard
-✓ pass guard hook (claude: installed, codex: not installed; mode: block, repository policy (.ai/policies/enforcement.yml))
-$ pre-call (baseline)
-exit 0
+== Scenario B2: stale baseline from interrupted Bash, then hooks install/uninstall clears it
+pre(Bash) exit 0
 guard-baseline.yml
 guard.log
 init.lock
-$ policy set to off during call
-$ guard --after (policy tamper)
-✗ fail guard: .ai/policies/enforcement.yml, .claude/settings.json changed during the tool call and were restored to the state before it (tamper logged to .soft-foundry/guard.log; mode: block)
-exit 2
-29:  mode: block
-(git status above: empty = unchanged)
-$ baseline consumed?
+removed guard hook from .claude/settings.json
 guard.log
 init.lock
-$ nothing changed, no baseline (REM-005 quiet)
-$ guard --after (no change)
-exit 0
-$ overlap: call A pre, A tampers, call B pre, B after, A after
-$ guard --after (B (first check))
+guard mode: block (repository policy (.ai/policies/enforcement.yml))
+== Scenario C: Bash-only, edit between calls stands
+pre(Bash) exit 0
+after exit 0
+pre(Bash) exit 0
 ✗ fail guard: .ai/policies/enforcement.yml changed during the tool call and was restored to the state before it (tamper logged to .soft-foundry/guard.log; mode: block)
-exit 2
+after exit 2
 29:  mode: block
-$ guard --after (A (second check))
-exit 0
-$ override created mid-call
-$ guard --after (override)
-✗ fail guard: .soft-foundry/enforcement.yml changed during the tool call and was restored to the state before it (tamper logged to .soft-foundry/guard.log; mode: block)
-exit 2
-guard.log
-init.lock
-$ settings.json replaced by symlink mid-call
-cp: cannot stat '.claude/settings.json': No such file or directory
-rm: cannot remove '.claude/settings.json': No such file or directory
-$ guard --after (symlink)
-exit 0
-STILL SYMLINK
+== Scenario D: tamper inside a Bash call is still restored and refused
+pre(Bash) exit 0
+✗ fail guard: .ai/policies/enforcement.yml changed during the tool call and was restored to the state before it (tamper logged to .soft-foundry/guard.log; mode: block)
+after exit 2
+29:  mode: block
+== Scenario E: symlinked settings mid-call
+pre(Bash) exit 0
+✗ fail guard: .claude/settings.json changed during the tool call and was restored to the state before it (tamper logged to .soft-foundry/guard.log; mode: block)
+after exit 2
+regular file
 {"hooks":{}}
-diff: /tmp/claude-0/-home-user-soft-foundry/14cbbd85-e45b-421d-a407-415c1ccaff46/scratchpad/settings.keep: No such file or directory
-$ edit between calls stands
-$ guard --after (clean)
-exit 0
-$ guard --after (after edit between calls)
-exit 0
+identical
+== Scenario C (corrected): Bash call completes; maintainer edits between calls (after the check, before the next pre); next Bash call
+pre(Bash) exit 0
+after exit 0
+$ maintainer set mode warn between calls
+pre(Bash) exit 0
+after exit 0
 29:  mode: warn
-$ hooks uninstall --claude
-soft-foundry: /tmp/claude-0/-home-user-soft-foundry/14cbbd85-e45b-421d-a407-415c1ccaff46/scratchpad/rails/.claude/settings.json is a symlink; refusing to write through it
-exit 1
+== Scenario C2: the shell's pre-call ran, an Edit call (non-Bash) overlaps, maintainer edits mid-Bash? (tamper still caught)
+pre(Bash) exit 0
+pre(Read) exit 0
+✗ fail guard: .ai/policies/enforcement.yml changed during the tool call and was restored to the state before it (tamper logged to .soft-foundry/guard.log; mode: block)
+after exit 2
+29:  mode: block

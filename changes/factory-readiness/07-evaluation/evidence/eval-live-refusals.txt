@@ -1,14 +1,27 @@
+# at ac3e8cfe995929ce40d334636e750d4625deffe9
 $ eval --case nonexistent
-✗ error eval nonexistent-case: no such case under .ai/harness-evals/cases
+✗ error eval nonexistent: no such case under .ai/harness-evals/cases
 ✗ fail eval: 0 passed, 0 failed, 1 error, 0 skipped
 exit 2
-$ eval --case review-finds-planted-defect (no --live)
+$ eval --case review-finds-planted-defect
 - skip eval review-finds-planted-defect: live case; run `soft-foundry eval --live --shell claude|codex|grok --case review-finds-planted-defect`
 ✓ pass eval: 0 passed, 0 failed, 0 errors, 1 skipped
 exit 0
-$ eval --live (no --shell)
+$ eval --live
+✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
+✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
+✓ pass eval control-well-formed: verify pass, as expected
+✓ pass eval evidence-stale-after-code-change: verify evidence current fail, as expected
+✓ pass eval hardening-while-exploring: implement not exploring fail, as expected
+✓ pass eval invisible-text-in-evidence: verify content clean fail, as expected
+✓ pass eval judgment-waived: intake waivers permitted fail, as expected
+✓ pass eval placeholder-left-in-evidence: verify no placeholders fail, as expected
+✓ pass eval red-commit-is-the-green-commit: verify red evidence fail, as expected
+✓ pass eval review-finding-without-failure: review findings explained fail, as expected
 ✗ error eval review-finds-planted-defect: --live needs --shell claude|codex|grok
-✗ fail eval: 0 passed, 0 failed, 1 error, 0 skipped
+✓ pass eval secret-shape-in-evidence: verify content clean fail, as expected
+✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
+✗ fail eval: 12 passed, 0 failed, 1 error, 0 skipped
 exit 2
 $ eval --live --shell bogus
 soft-foundry: --shell takes one of claude, codex, grok; got 'bogus'

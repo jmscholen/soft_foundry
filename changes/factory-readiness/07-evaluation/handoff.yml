@@ -2,9 +2,9 @@
 phase: 07-evaluation
 skill: evaluation
 status: complete
-commit_sha: 85e9a77f981379029d2d5d4f26e29b0ff63be1b9
+commit_sha: ac3e8cfe995929ce40d334636e750d4625deffe9
 started_at: '2026-10-14T18:55:49Z'
-completed_at: '2026-10-14T19:55:00Z'
+completed_at: '2026-10-14T20:20:00Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -16,26 +16,14 @@ outputs:
 - evidence/manifest.yml
 blocking: []
 findings:
-- id: EVAL-F7
-  severity: major
-  summary: 'The guard post-call check reverts and refuses the maintainer''s own edit
-    of the guard configuration when a non-Bash tool call (Edit, Read, Grep, Glob)
-    preceded the next Bash call within 30 minutes: PreToolUse records a baseline on
-    every call, only the Bash PostToolUse consumes it, and REM-005 keeps a young baseline.'
-  failure: 'Edit app/models/user.rb through the guard, then change .ai/policies/enforcement.yml
-    from mode block to mode warn in a normal shell, then run any Bash call: guard
-    --after prints "changed during the tool call and was restored", exits 2, and the
-    file is back to block (or hooks uninstall --claude between the calls is undone
-    and doctor reports the hook installed). A Bash-only sequence keeps the edit. Evidence:
-    evidence/guard-post-call-restore.txt Scenarios A and B.'
 - id: EVAL-F1
   severity: minor
-  summary: Still present at 85e9a77. Live eval on claude with no shell arguments fails
-    (0 findings recorded) because the unattended session cannot write 13-review; it
-    passes with -- --allowedTools ... --permission-mode acceptEdits. The README does
-    not say so.
+  summary: Live eval on claude with no shell arguments fails (0 findings recorded)
+    because the unattended session cannot write 13-review; it passes with -- --allowedTools
+    ... --permission-mode acceptEdits. README.md does not say so.
   failure: eval --live --shell claude --case review-finds-planted-defect, run as documented,
-    reports fail and exits 2 although the reviewer found the planted defect.
+    reports fail and exits 2 although the reviewer found the planted defect (reproduced
+    at ac3e8cf).
 - id: EVAL-F2
   severity: minor
   summary: Rails profile records testing entry ruby, not an rspec-named entry; REQ-FR-008
@@ -48,9 +36,9 @@ findings:
 - id: EVAL-F5
   severity: minor
   summary: README guard section does not describe the Grep/Glob matcher, cd/glob/symlink/brace
-    handling, the PostToolUse post-call check (guard --after, baseline, young-baseline
-    rule, tamper log), or that existing repositories rerun hooks install --claude;
-    owed in 09-remediation.
+    handling, the PostToolUse post-call check (guard --after, shell-only baseline,
+    young-baseline rule, tamper log), or that existing repositories rerun hooks install
+    --claude; owed in 09-remediation.
 - id: EVAL-F6
   severity: minor
   summary: The planted-case eval journeys (reversed expectation, malformed YAML, unknown
@@ -58,24 +46,22 @@ findings:
     harness-evals; eval code is unchanged since 9307b23. Verification at HEAD owns
     them.
 next: attack
-notes: 'Re-run at 85e9a77 because the earlier evaluation (bound to 1b49874) went stale
-  when REM-005 changed the guard. Journeys run by hand against the real CLI in scratch
-  repositories under the session scratchpad. EVAL-010 FAILED on a new scenario (EVAL-F7,
-  major): a preceding non-Bash call leaves a young baseline that makes the next Bash
-  call revert the maintainer''s own edit; a major finding does not block the handoff
-  but should go to remediation (a REM-005 follow-up) before judgment. Live eval run
-  twice at HEAD (first run failed, second passed). The repository guard refused one
-  of this session''s commands carrying an unresolvable tilde-user token, so those
-  cases were built in a script file. Not exercised by hand: invalid UTF-8 scrubbing,
-  eval cases whose gate raises, planted eval cases, fake-shell live case, positive
-  fresh-context advisory - covered by verification.'
+notes: 'Re-run at ac3e8cf because the earlier evaluation (bound to 85e9a77) went stale
+  when REM-006 changed the guard and hooks. EVAL-F7 (major at 85e9a77) is closed:
+  Scenarios A, B and corrected C pass, and in-call tamper, overlap and symlink still
+  restore and refuse. Journeys run by hand against the real CLI in a fresh scratch
+  Rails repository under the session scratchpad. Live eval run twice at HEAD (first
+  run failed on the default invocation, second passed). Not exercised by hand: invalid
+  UTF-8 scrubbing, eval cases whose gate raises, planted eval cases, fake-shell live
+  case, positive fresh-context advisory, Codex hooks - covered by verification. executed_by
+  was left as the runner wrote it.'
 executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-14T18:55:49Z'
-  finished_at: '2026-10-14T19:01:26Z'
+  started_at: '2026-10-14T19:22:29Z'
+  finished_at: '2026-10-14T19:28:12Z'
   exit_status: 0
   previous_phase: verify
-  session_id: 14cbbd85-e45b-421d-a407-415c1ccaff46
+  session_id: 1fc84b95-c3c5-42d1-a8d9-0320906644a4
   cwd: "/home/user/soft_foundry"

@@ -1,3 +1,22 @@
+# at ac3e8cfe995929ce40d334636e750d4625deffe9
+$ gate intake (risk medium, threat_model waived)
+00-intake  pending  SKIP
+$ gate intake (risk medium, judge waived)
+00-intake  pending  SKIP
+$ gate intake (risk low, threat_model waived)
+00-intake  pending  SKIP
+$ change close refund-cap
+refund-cap: cannot close: 14-judgment is pending; a change is complete only with a final judgment (.ai/workflow.yml rules.final_judgment_required), so run the judge phase (`soft-foundry phase run judge`) or pass --force to close without one
+exit 1
+$ change close refund-cap --force
+advisory: 1 issue to address before refund-cap goes live (informational, does not block the gate)
+  ! warn accessibility: the accessibility review (13-review/accessibility.md) has not run yet
+refund-cap: closed
+exit 0
+$ LANG=C LC_ALL=C: non-ASCII file, check
+✓ pass control plane: 16 phases, 17 skills, no errors
+exit 0
+00-intake  pending  SKIP
 $ gate intake (risk medium, threat_model waived)
 00-intake  complete  FAIL
   ✗ fail waivers permitted: threat_model cannot be waived at risk medium (waivable: discover, plan; .ai/workflow.yml waivable_by_risk)
@@ -7,11 +26,7 @@ $ gate intake (risk medium, judge waived)
 $ gate intake (risk low, threat_model waived)
 00-intake  complete  FAIL
   ✓ pass waivers permitted: risk low
-$ change close refund-cap
-refund-cap: cannot close: 14-judgment is pending; a change is complete only with a final judgment (.ai/workflow.yml rules.final_judgment_required), so run the judge phase (`soft-foundry phase run judge`) or pass --force to close without one
-exit 1
-$ change close refund-cap --force
-advisory: 1 issue to address before refund-cap goes live (informational, does not block the gate)
-  ! warn accessibility: the accessibility review (13-review/accessibility.md) has not run yet
-refund-cap: closed
-exit 0
+$ LANG=C LC_ALL=C gate intake with non-ASCII file
+00-intake  complete  FAIL
+  ✗ fail no placeholders: TBD remains in: request.md, assumptions.md
+  ✓ pass content clean

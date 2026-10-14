@@ -1,31 +1,26 @@
-$ init
-  blocking the next level:
-    - testing.strategy_detected (UNKNOWN)
-  full report: .ai/maturity-report.md
-  (run with --maturity=deep for a judgment-based assessment)
-summary: created 200, updated 0, skipped 0, conflict 0, forced 0
-exit 0
-$ check
+# at ac3e8cfe995929ce40d334636e750d4625deffe9: init (LANG unset), check, change new, eval; fresh Rails scratch repository
+$ init --no-onboard: summary created 200, exit 0
+$ check: control plane 16 phases
+$ change new refund-cap: created changes/refund-cap with 16 phase directories; track gated
+metadata: accessibility: true   # set by change new: user-facing framework detected (rails)
+.ai/repository.yml frameworks detected
 ✓ pass control plane: 16 phases, 17 skills, no errors
-$ change new
-created changes/refund-cap with 16 phase directories
-branch: change/refund-cap
-track: gated
-billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
-         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
-$ eval
-✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
-✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
-✓ pass eval control-well-formed: verify pass, as expected
-✓ pass eval evidence-stale-after-code-change: verify evidence current fail, as expected
-✓ pass eval hardening-while-exploring: implement not exploring fail, as expected
-✓ pass eval invisible-text-in-evidence: verify content clean fail, as expected
-✓ pass eval judgment-waived: intake waivers permitted fail, as expected
-✓ pass eval placeholder-left-in-evidence: verify no placeholders fail, as expected
-✓ pass eval red-commit-is-the-green-commit: verify red evidence fail, as expected
-✓ pass eval review-finding-without-failure: review findings explained fail, as expected
-- skip eval review-finds-planted-defect: live case; run `soft-foundry eval --live --shell claude|codex|grok --case review-finds-planted-defect`
+  frameworks:
+  - rails
+  databases: []
+  testing:
+  - ruby
+infrastructure:
+14:  testing:
+15-  - ruby
+16-infrastructure:
+17-  detected: []
+--
+74:  testing.strategy_detected:
 ✓ pass eval secret-shape-in-evidence: verify content clean fail, as expected
 ✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
 ✓ pass eval: 12 passed, 0 failed, 0 errors, 1 skipped
-exit 0
+     12       "outcome": "pass",
+      1       "outcome": "skip",
+      1   "version": 1,
+✓ pass guard hook (claude: installed, codex: not installed; mode: block, repository policy (.ai/policies/enforcement.yml))

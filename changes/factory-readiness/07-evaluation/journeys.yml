@@ -1,4 +1,4 @@
-commit_sha: 85e9a77f981379029d2d5d4f26e29b0ff63be1b9
+commit_sha: ac3e8cfe995929ce40d334636e750d4625deffe9
 journeys:
 - id: EVAL-001
   criteria:
@@ -84,9 +84,9 @@ journeys:
   assertions:
   - an unknown case name is reported as error naming the cases directory, exit 2
   - 'the planted-case parts (reversed, malformed, unknown-check, oversize) were NOT
-    re-run at 85e9a77: planting them needs the case-file format and the harness-evals
+    re-run at ac3e8cf: planting them needs the case-file format and the harness-evals
     directory, which this skill is denied; eval code is unchanged since 9307b23 (git
-    diff 1b49874..HEAD touches only cli.rb and guard.rb); left to verification at
+    diff 85e9a77..HEAD touches only cli.rb guard and hooks.rb); left to verification at
     HEAD'
   - the live case is skip with the command to run it (exit 0); with --live and no
     --shell it is error naming --shell (exit 2); an unsupported shell is refused with
@@ -102,7 +102,7 @@ journeys:
   - AC-FR-015
   persona: Maintainer running the live harness eval on the installed claude shell
   starting_state: A scratch Rails repository carrying this source tree's control plane
-    (HEAD 1b49874), claude CLI installed, live case review-finds-planted-defect.
+    (HEAD ac3e8cf), claude CLI installed, live case review-finds-planted-defect.
   steps:
   - Run eval --live --shell claude --case review-finds-planted-defect with no shell
     arguments
@@ -250,14 +250,14 @@ journeys:
     restore is quiet'
   - 'PASS: Bash-only sequence - an edit made between calls stands (mode warn kept,
     exit 0)'
-  - 'FAIL (EVAL-F7): when any non-Bash tool call (here Edit) precedes within 30 minutes,
-    its baseline is never consumed (nothing runs after it), so the next Bash call
-    keeps the stale baseline; the maintainer''s own edit of enforcement.yml (block
-    to warn) is then reverted and reported as changed during the tool call, exit 2,
-    with a tamper log line. In Scenario B the maintainer''s hooks uninstall is undone
-    the same way (doctor reports the hook installed again). An earlier attempt showed
-    the same stale baseline deleting .claude/settings.json, because the baseline predated
-    the file'
+  - 'PASS (REM-006, EVAL-F7 closed): Scenario A - after an Edit-tool call (which now records
+    no baseline) the maintainer''s edit of enforcement.yml (block to warn) stands; the next
+    Bash call and its guard --after exit 0 and the file keeps mode warn. Scenario B - after
+    Read, Grep and Glob calls, hooks uninstall --claude stands (doctor reports the hook not
+    installed); an interrupted Bash call''s baseline is cleared by hooks install and uninstall'
+  - 'PASS: Scenario C (corrected) - after a completed Bash call, an edit made before the next
+    pre-call stands (mode warn, exit 0); a tamper made while a Bash call was in flight with a
+    Read call overlapping is still restored and refused, exit 2'
   evidence:
   - evidence/guard-post-call-restore.txt
-  result: fail
+  result: pass
