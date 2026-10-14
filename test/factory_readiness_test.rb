@@ -679,4 +679,54 @@ class GuardTamperTest < Minitest::Test
       assert_includes out, "could not be decided"
     end
   end
+
+  # REM-005 (from the fourth 08-attack, ATK-F10 in part and ATK-F11): a
+  # second, overlapping tool call must not re-baseline over a tamper the
+  # first call made, and the restore must never write through a symlink.
+  def test_an_overlapping_call_keeps_the_first_baseline_until_a_check_consumes_it
+    with_phase do |dir, _guard|
+      policy = File.join(dir, ".ai/policies/enforcement.yml")
+      before = SoftFoundry.read_text(policy)
+      assert_equal 0, guard_cli(dir, [], bash_payload).first      # call 1 begins
+      File.write(policy, before.sub("mode: block", "mode: warn")) # call 1 tampers
+      assert_equal 0, guard_cli(dir, [], bash_payload).first      # call 2 begins while call 1 runs
+      code, = guard_cli(dir, ["--after"], bash_payload)           # call 1 ends
+      assert_equal 2, code
+      assert_equal before, SoftFoundry.read_text(policy), "restored from the baseline call 1 recorded, not the one call 2 saw"
+      refute File.exist?(File.join(dir, SoftFoundry::Guard::BASELINE)), "a check consumes the baseline"
+      assert_equal 0, guard_cli(dir, ["--after"], bash_payload).first, "call 2 ends with nothing changed and no baseline, and is quiet"
+    end
+  end
+
+  def test_a_stale_baseline_from_an_interrupted_call_is_refreshed
+    with_phase do |dir, _guard|
+      assert_equal 0, guard_cli(dir, [], bash_payload).first
+      path = File.join(dir, SoftFoundry::Guard::BASELINE)
+      old = Time.now - (SoftFoundry::Guard::BASELINE_MAX_AGE + 60)
+      File.utime(old, old, path)
+      override = File.join(dir, ".soft-foundry/enforcement.yml")
+      File.write(override, "guard:\n  mode: warn\n") # the maintainer, between calls
+      assert_equal 0, guard_cli(dir, [], bash_payload).first, "a fresh baseline is taken"
+      assert_equal 0, guard_cli(dir, ["--after"], bash_payload).first
+      assert File.exist?(override), "the maintainer's change between calls stands"
+    end
+  end
+
+  def test_the_restore_never_writes_through_a_symlink
+    with_phase do |dir, _guard|
+      settings = File.join(dir, ".claude/settings.json")
+      FileUtils.mkdir_p(File.dirname(settings))
+      File.write(settings, JSON.generate("hooks" => {}))
+      target = File.join(dir, "lib", "app.rb")
+      app_before = SoftFoundry.read_text(target)
+      assert_equal 0, guard_cli(dir, [], bash_payload).first
+      File.delete(settings)
+      File.symlink(target, settings) # the call replaces the settings file with a link to code
+      code, = guard_cli(dir, ["--after"], bash_payload)
+      assert_equal 2, code
+      refute File.symlink?(settings), "the link is removed"
+      assert_equal JSON.generate("hooks" => {}), SoftFoundry.read_text(settings), "the settings file is restored as a file"
+      assert_equal app_before, SoftFoundry.read_text(target), "nothing was written through the link"
+    end
+  end
 end
