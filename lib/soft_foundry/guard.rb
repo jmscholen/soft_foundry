@@ -143,11 +143,22 @@ module SoftFoundry
         return violation(skill, [path], "is in #{skill.name}'s deny_read set") if ControlPlane.match_any?(path, sets[:deny_read])
         Decision.new(outcome: :allow, reason: "not denied to #{skill.name}", skill: skill.name, paths: [path])
       when *SHELL_TOOLS
+        # A shell command may name what the skill may read (it runs tests,
+        # the tool, and git over them), never what it may not read, and
+        # never protected policy or harness material or the guard's own
+        # configuration, whatever its read set says. The guard cannot know
+        # what a command writes; a write to a readable deny_write path is
+        # visible to the gate's staleness check and to review.
         touched = shell_paths(command_text(tool_input["command"]))
         own = touched.select { |p| self_protected?(p) }
         return violation(skill, own, "names the guard's own configuration; no skill may touch it from the shell") unless own.empty?
-        denied = touched.select { |p| ControlPlane.match_any?(p, sets[:deny_write]) || ControlPlane.match_any?(p, sets[:deny_read]) }
-        return violation(skill, denied, "names a path #{skill.name} is denied (Bash is checked against deny sets only)") unless denied.empty?
+        guarded = touched.select { |p| ControlPlane.match_any?(p, @plane.protected_patterns) }
+        return violation(skill, guarded, "names protected policy or harness material; no skill may touch it from the shell") unless guarded.empty?
+        denied = touched.select do |p|
+          ControlPlane.match_any?(p, sets[:deny_read]) ||
+            (ControlPlane.match_any?(p, sets[:deny_write]) && !ControlPlane.match_any?(p, sets[:read]))
+        end
+        return violation(skill, denied, "names a path #{skill.name} may neither read nor write (a shell command may name what the skill may read)") unless denied.empty?
         Decision.new(outcome: :allow, reason: "names no path denied to #{skill.name}", skill: skill.name, paths: touched)
       else
         Decision.new(outcome: :allow, reason: "tool #{tool_name} is not guarded", skill: skill.name, paths: [])

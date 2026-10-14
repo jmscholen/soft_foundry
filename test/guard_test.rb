@@ -174,7 +174,7 @@ class GuardTest < Minitest::Test
       assert_includes out, "✗ fail guard: Edit .ai/rules/ruby.md is in implementation's deny_write set"
       code, out = guard_cli(dir, bash("rm -rf .ai/policies"), env: { "SOFT_FOUNDRY_GUARD" => "block" })
       assert_equal 2, code
-      assert_includes out, "Bash .ai/policies names a path implementation is denied"
+      assert_includes out, "Bash .ai/policies names protected policy or harness material"
       assert_equal 0, guard_cli(dir, bash("bundle exec rake test"), env: { "SOFT_FOUNDRY_GUARD" => "block" }).first
     end
   end

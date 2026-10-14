@@ -93,7 +93,11 @@ module SoftFoundry
       return "change #{@record.slug} is exploring; the exploring stage is worked with the person, not by a runner (run `change vet` first)" if @record.exploring?
       status = @record.metadata["status"].to_s
       return "change #{@record.slug} is #{status}" if %w[closed judged].include?(status)
-      return "#{phase.output} is already complete; rerun it only after the work it rests on has changed (the gate will say when it is stale)" if @record.phase_status(phase) == "complete"
+      # A complete phase is rerun only once the work it rests on has
+      # changed, which the gate reports as stale evidence.
+      if @record.phase_status(phase) == "complete" && !Gate.new(@record, git: @git).evaluate(phase).stale?
+        return "#{phase.output} is already complete; rerun it only after the work it rests on has changed (the gate will say when it is stale)"
+      end
       prev = @plane.effective_predecessor(phase, skip: ->(p) { @record.skippable?(p) }) { |p| @record.phase_status(p) }
       if prev && @record.phase_status(prev) != "complete"
         return "#{phase.output} cannot start: its predecessor #{prev.output} is #{@record.phase_status(prev) || 'missing'}"
