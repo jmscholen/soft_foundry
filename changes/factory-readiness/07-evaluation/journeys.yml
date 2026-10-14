@@ -1,4 +1,4 @@
-commit_sha: fcf79eb1ef75fe47a8b3f0c267f02ef4abd1ce47
+commit_sha: 98b336fb932e6ce49436bb40277d89c477dece78
 journeys:
   - id: EVAL-001
     criteria: [AC-FR-019, AC-FR-020]
@@ -8,15 +8,13 @@ journeys:
       - Run soft-foundry init --no-onboard from this repository's source with LANG unset
       - Run soft-foundry check and read the profile .ai/repository.yml
       - Commit, branch change/refund-cap, run soft-foundry change new refund-cap
-      - Classify the change in metadata.yml, fill the intake files and handoff, run soft-foundry gate intake
       - Run soft-foundry eval and soft-foundry eval --json in that repository
     assertions:
       - init exits 0 and prints check ok; check passes with 16 phases and 17 skills
       - the profile records framework rails and a ruby testing entry; doctor reports mode block from the repository policy
       - change new declares surfaces.accessibility true citing the detected rails framework
-      - gate intake passes including waivers permitted and track permitted
       - eval passes 12, fails 0, errors 0, skips 1 (the live case), exit 0, and the JSON carries version 1 and the same outcomes
-    evidence: [evidence/rails-install-profile-change-new.txt, evidence/rails-intake-gate-and-eval.txt]
+    evidence: [evidence/rails-install-profile-change-new.txt, evidence/eval-clean-and-live-refusals.txt]
     result: pass
   - id: EVAL-002
     criteria: [AC-FR-007, AC-FR-008, AC-FR-019]
@@ -25,10 +23,11 @@ journeys:
     steps:
       - Pipe guard tool calls on stdin - Edit app/models/user.rb, Edit spec/models/user_spec.rb (absolute path), Write db/migrate/..., Bash bundle exec rspec spec/models
       - Pipe Edit of a rules file, Edit of the change's verification results, Read of the harness-evals README, a Bash command naming the enforcement policy, and a Write to the host settings file
+      - Pipe REM-002 attempts - a Bash command that cd's into the policies directory and edits the policy by relative name, a Bash command naming the policy by glob, an Edit of a symlink that points at the policy, and a Write under the guard's .soft-foundry directory
       - Pipe a refused Edit again with SOFT_FOUNDRY_GUARD=warn
     assertions:
       - the four application and test calls exit 0 with no output
-      - the five protected calls exit 2 with a fail guard line naming the tool, the path, the skill, mode block, the policy file, and that a machine-local override is documented (it does not name a value)
+      - the five protected calls and the four REM-002 attempts (cd then relative edit, glob, symlink, .soft-foundry write) exit 2; the symlink is reported as the policy file it resolves to; the five protected calls exit 2 with a fail guard line naming the tool, the path, the skill, mode block, the policy file, and that a machine-local override is documented (it does not name a value)
       - under SOFT_FOUNDRY_GUARD=warn the same call exits 0 with a warn guard line and mode warn
     evidence: [evidence/rails-guard-decisions.txt]
     result: pass
@@ -39,14 +38,14 @@ journeys:
     steps:
       - Run eval (see EVAL-001 evidence for the clean run)
       - Add a case whose expected outcome is reversed and run eval --case on it
-      - Add a case file that is not valid YAML and one naming an unknown check; run check and eval
+      - Add a case file that is not valid YAML, one naming an unknown check, and one whose embedded file content is 70000 bytes (over the 65536 cap); run check and eval
       - Run the live case without --live, with --live and no --shell, and with --shell naming a shell that is not supported
     assertions:
       - the reversed case is reported fail with expected and observed outcomes, exit 2
-      - check reports one error per bad file naming the file; eval reports each as error, continues, and runs the remaining cases
+      - check reports one error per bad file naming the file (the oversize case names the path, 70001 bytes and the 65536 limit); eval reports each as error, continues, and runs the remaining cases (13 passed, 1 failed, 2 errors, 1 skipped)
       - the live case is skip with the command to run it (exit 0); with --live and no --shell it is error naming --shell (exit 2); an unsupported shell is refused with exit 1 and the supported list
       - every line starts with a status glyph followed by the outcome word at a fixed position
-    evidence: [evidence/eval-failure-modes.txt, evidence/rails-intake-gate-and-eval.txt]
+    evidence: [evidence/eval-failure-modes.txt, evidence/eval-clean-and-live-refusals.txt]
     result: pass
   - id: EVAL-004
     criteria: [AC-FR-015]
@@ -56,22 +55,21 @@ journeys:
       - Run eval --live --shell claude --case review-finds-planted-defect with no shell arguments
       - Run it again passing the shell arguments --allowedTools and --permission-mode acceptEdits after --
     assertions:
-      - run 1 - the fresh review session found the planted defect (cap not applied, negative not zeroed) but could not write 13-review (permission prompts were not granted in the non-interactive session), so the case failed with 0 findings recorded; reported fail, exit 2
-      - run 2 - the review wrote its findings and the case passed, naming the shell claude, the model anthropic/claude-sonnet-5-5, and findings REV-001 and REV-002, exit 0
+      - run 1 - the fresh review session found the planted defect (cap not applied, negative not zeroed, empty test file) but could not write 13-review (permission prompts were not granted in the non-interactive session), so the case failed with 0 findings recorded; reported fail, exit 2
+      - run 2 - the review wrote its findings and the case passed, naming the shell claude, the model anthropic/claude-sonnet-5-5, and findings REV-001, REV-002, REV-005 and REV-003, exit 0
     evidence: [evidence/live-eval-run1-no-write-permission.txt, evidence/live-eval-run2-acceptEdits.txt]
     result: pass
   - id: EVAL-005
     criteria: [AC-FR-016, AC-FR-017, AC-FR-018]
     persona: Maintainer declaring risk and waivers
-    starting_state: The scratch Rails repository with a change opened at medium risk.
+    starting_state: The scratch Rails repository with a change opened at medium risk and a complete intake handoff.
     steps:
       - Name threat_model in skipped_phases at medium risk and run gate intake; then name judge; then set risk low and name threat_model
       - Run change close without --force and then with --force
-      - Edit the copied workflow so waivable_by_risk medium names judge and run check
     assertions:
       - medium plus threat_model fails waivers permitted naming the phase, the risk, the waivable list and the file; judge fails with the never-waived rule; low plus threat_model passes
       - close without --force exits 1 naming 14-judgment, the judge command and --force; with --force it closes
-      - check fails naming waivable_by_risk medium and judge
+      - low plus threat_model reports waivers permitted pass; the waivable_by_risk rule refusing review and judgment in check was not re-exercised at this commit (covered by the verification suite)
     evidence: [evidence/waivers-and-close.txt]
     result: pass
   - id: EVAL-006
@@ -115,6 +113,6 @@ journeys:
     steps:
       - Not exercised as a user journey in this phase
     assertions:
-      - invalid UTF-8 scrubbing, a mutated specification after lock (the shipped eval case specification-edited-after-lock passed in EVAL-001 and EVAL-003 runs), evidence staleness against a changed specification, an eval case whose gate raises, and a fake-shell live case need planted defects or a fake shell that a user does not create; they are covered by the verification suite (549 runs, 0 failures)
+      - invalid UTF-8 scrubbing, a mutated specification after lock (the shipped eval case specification-edited-after-lock passed in EVAL-001 and EVAL-003 runs), evidence staleness against a changed specification, an eval case whose gate raises, and a fake-shell live case need planted defects or a fake shell that a user does not create; they are covered by the verification suite (see 06-verification)
     evidence: []
     result: blocked

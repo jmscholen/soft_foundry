@@ -1,18 +1,3 @@
-$ gate intake
-00-intake  complete  PASS
-  ✓ pass handoff identity
-  ✓ pass track permitted: gated
-  ✓ pass waivers permitted: nothing waived
-  ✓ pass required files present: request.md, assumptions.md, handoff.yml
-  ✓ pass no placeholders
-  ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 0dd5a2a9a66485ef016015bc9a1259137c03f760
-  ✓ pass completed_at recorded: 2026-10-14T17:05:00Z
-  ✓ pass predecessor complete: first phase
-  ✓ pass content clean
-advisory: 1 issue to address before refund-cap goes live (informational, does not block the gate)
-  ! warn accessibility: the accessibility review (13-review/accessibility.md) has not run yet
-exit 0
 $ eval
 ✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
 ✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
@@ -29,7 +14,7 @@ $ eval
 ✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
 ✓ pass eval: 12 passed, 0 failed, 0 errors, 1 skipped
 exit 0
-$ eval --json
+$ eval --json (head)
 {
   "version": 1,
   "stable": false,
@@ -38,28 +23,14 @@ $ eval --json
       "id": "attack-waived-at-medium-risk",
       "kind": "gate",
       "outcome": "pass",
-      "detail": "intake waivers permitted fail, as expected",
-      "phase": "intake",
-      "check": "waivers permitted",
-      "expected": "fail",
-      "observed": "fail",
-      "shell": null,
-      "model": null,
-      "matched": [
-
-      ]
-    },
-    {
-      "id": "blocked-but-complete",
-      "kind": "gate",
-      "outcome": "pass",
-      "detail": "verify no blocking conditions fail, as expected",
-      "phase": "verify",
-      "check": "no blocking conditions",
-      "expected": "fail",
-      "observed": "fail",
-      "shell": null,
-    
-$ check
-✓ pass control plane: 16 phases, 17 skills, no errors
-exit 0
+12
+$ eval --live (no shell)
+✗ error eval review-finds-planted-defect: --live needs --shell claude|codex|grok
+✗ fail eval: 0 passed, 0 failed, 1 error, 0 skipped
+exit 2
+$ eval --live --shell bogus
+soft-foundry: --shell takes one of claude, codex, grok; got 'bogus'
+exit 1
+attack-waived-at-medium-risk.yml
+blocked-but-complete.yml
+control-well-formed.yml

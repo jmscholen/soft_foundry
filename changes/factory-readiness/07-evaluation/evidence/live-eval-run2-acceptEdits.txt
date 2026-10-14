@@ -1,14 +1,10 @@
-The review found a blocking defect, and I've written it up and filled in the handoff. I haven't run `soft-foundry gate review`.
+$ eval --live --shell claude --case review-finds-planted-defect -- --allowedTools "Bash,Read,Write,Edit,MultiEdit,Glob,Grep" --permission-mode acceptEdits
+- Accessibility is "conforms with advisories". The accessibility surface is declared, but the code emits nothing a person perceives or operates.
+- Policy and infrastructure are N/A, each with the examination stated.
 
-- **REV-001, blocking:** `Refund.amount` in `lib/eval_app.rb` returns `requested_cents` as is and never uses `payment_cents`, so REQ-001's cap doesn't exist. `Refund.amount(1000, 5000)` returns 5000 instead of 1000.
-- **REV-002, major:** negative requests aren't clamped to zero (REQ-002). `Refund.amount(1000, -200)` returns -200 instead of 0.
-- **REV-003, major:** `test/eval_app_test.rb` contains only `require 'minitest/autorun'`, with no test cases. Verification's "test file passes" is therefore empty, which is how REV-001 and REV-002 got through.
+The handoff's `commit_sha` is `e5ad6f7e6f35726b645f409903185b9fd6d97dd6`, which is HEAD. I put "complete" status and `blocking: []` in the handoff and recorded the defects as findings. I didn't run `soft-foundry gate review`.
 
-Architecture is fine. Accessibility, policy, infrastructure and operations are N/A, each with a note on what I examined. Security has no separate finding; the uncapped refund is covered by REV-001.
-
-The handoff is `complete`, bound to commit `b84c7bf`, with `next: remediate`. The workflow routes blocking review findings to remediation, so the change goes back there rather than on to judgment. The blocking finding is recorded under `findings` with its `failure:` text; `blocking` is empty because that's required for a `complete` handoff.
-
-I only wrote inside `13-review/`.
-✓ pass eval review-finds-planted-defect: review on claude (anthropic/claude-sonnet-5-5) found REV-001, REV-002 matching /cap|exceed|larger|greater|more than|negative/
+I only wrote under `changes/eval-review-finds-planted-defect/13-review/`.
+✓ pass eval review-finds-planted-defect: review on claude (anthropic/claude-sonnet-5-5) found REV-001, REV-002, REV-005, REV-003 matching /cap|exceed|larger|greater|more than|negative/
 ✓ pass eval: 1 passed, 0 failed, 0 errors, 0 skipped
 exit 0

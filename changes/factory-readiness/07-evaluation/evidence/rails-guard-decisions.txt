@@ -1,25 +1,37 @@
 $ guard Edit app/models/user.rb
 exit 0
-$ guard Edit /tmp/claude-0/ev/rails/spec/models/user_spec.rb
+$ guard Edit absolute spec path
 exit 0
-$ guard Write db/migrate/20260101000000_add_refunds.rb
+$ guard Write db/migrate
 exit 0
-$ guard Bash bundle exec rspec spec/models
+$ guard Bash bundle exec rspec
 exit 0
-$ guard Edit .ai/rules/rails.md
-✗ fail guard: Edit .ai/rules/rails.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, <enforcement policy>; a maintainer's machine-local override is documented in README.md)
+$ guard Edit rules file
+✗ fail guard: Edit .ai/rules/rails.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is docum
 exit 2
-$ guard Edit changes/refund-cap/06-verification/results.md
-✗ fail guard: Edit changes/refund-cap/06-verification/results.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, <enforcement policy>; a maintainer's machine-local override is documented in README.md)
+$ guard Edit verification results
+✗ fail guard: Edit changes/refund-cap/06-verification/results.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's mach
 exit 2
-$ guard Read <harness-evals readme>
-✗ fail guard: Read <harness-evals readme> is in implementation's deny_read set; the implementation skill's permissions.yml does not allow it (mode: block, <enforcement policy>; a maintainer's machine-local override is documented in README.md)
+$ guard Read harness-evals readme
+✗ fail guard: Read .ai/harness-evals/README.md is in implementation's deny_read set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override 
 exit 2
-$ guard Bash sed -i s/block/off/ <enforcement policy>
-✗ fail guard: Bash <enforcement policy> names the guard's own configuration; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, <enforcement policy>; a maintainer's machine-local override is documented in README.md)
+$ guard Bash sed -i on enforcement policy
+✗ fail guard: Bash .ai/policies/enforcement.yml names the guard's own configuration; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; 
 exit 2
-$ guard Write <claude settings>
-✗ fail guard: Write <claude settings> is the guard's own configuration; no skill may write it; the implementation skill's permissions.yml does not allow it (mode: block, <enforcement policy>; a maintainer's machine-local override is documented in README.md)
+$ guard Write claude settings
+✗ fail guard: Write .claude/settings.json is the guard's own configuration; no skill may write it; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-l
+exit 2
+$ guard REM-002 cd then relative policy edit
+✗ fail guard: Bash .ai/policies/enforcement.yml names the guard's own configuration; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; 
+exit 2
+$ guard REM-002 glob over policies
+✗ fail guard: Bash .ai/policies/enforcement.yml names the guard's own configuration; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; 
+exit 2
+$ guard REM-002 symlink to policy
+✗ fail guard: Edit .ai/policies/enforcement.yml is the guard's own configuration; no skill may write it; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's mac
+exit 2
+$ guard REM-002 .soft-foundry file
+✗ fail guard: Write .soft-foundry/anything.yml is the guard's own configuration; no skill may write it; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's mach
 exit 2
 --- warn override
 ! warn guard: Edit .ai/rules/rails.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: warn, logged to .soft-foundry/guard.log)

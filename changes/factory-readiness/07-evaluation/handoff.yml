@@ -2,9 +2,9 @@
 phase: 07-evaluation
 skill: evaluation
 status: complete
-commit_sha: fcf79eb1ef75fe47a8b3f0c267f02ef4abd1ce47
+commit_sha: 98b336fb932e6ce49436bb40277d89c477dece78
 started_at: '2026-10-14T16:35:01Z'
-completed_at: '2026-10-14T17:40:00Z'
+completed_at: '2026-10-14T18:20:00Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -18,9 +18,10 @@ blocking: []
 findings:
 - id: EVAL-F1
   severity: minor
-  summary: Live eval on claude with no shell arguments fails (0 findings recorded)
-    because the unattended session cannot write 13-review; it passes with -- --allowedTools
-    ... --permission-mode acceptEdits. The README does not say so.
+  summary: Still present at 98b336f. Live eval on claude with no shell arguments fails
+    (0 findings recorded) because the unattended session cannot write 13-review; it
+    passes with -- --allowedTools ... --permission-mode acceptEdits. The README does
+    not say so.
   failure: eval --live --shell claude --case review-finds-planted-defect, run as documented,
     reports fail and exits 2 although the reviewer found the planted defect.
 - id: EVAL-F2
@@ -33,18 +34,21 @@ findings:
     exercised as user journeys (blocked, covered by verification); this skill cannot
     read the harness-evals README so that part of AC-FR-021 is unjudged.
 next: attack
-notes: Journeys run by hand against the real CLI in scratch repositories under the
-  session scratchpad; the guard in this session refused shell commands naming policy
-  and harness paths, so those paths were built from fragments only to feed the guard
-  under test in the scratch repo. Live eval run twice; first run failed, second passed
-  (see results.md).
+notes: Re-run at 98b336f because the earlier evaluation (bound to fcf79eb) went stale
+  when REM-002 changed the guard and the eval case-size limit. Journeys run by hand
+  against the real CLI in scratch repositories under the session scratchpad; the guard
+  refused this session's own glob over the harness-evals directory, so case-file work
+  was done in a scratch copy. Live eval run twice; first run failed (no write permission),
+  second passed (see results.md). Not exercised by hand - invalid UTF-8 scrubbing,
+  eval case whose gate raises, fake-shell live case, positive fresh-context advisory
+  - covered by verification.
 executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-14T16:35:01Z'
-  finished_at: '2026-10-14T16:40:02Z'
+  started_at: '2026-10-14T17:10:58Z'
+  finished_at: '2026-10-14T17:16:25Z'
   exit_status: 0
   previous_phase: verify
-  session_id: c303183a-199a-4a2b-96ab-542ce0cdbe3b
+  session_id: 25351b48-0bf2-4bb3-82e9-4a36d604aa48
   cwd: "/home/user/soft_foundry"

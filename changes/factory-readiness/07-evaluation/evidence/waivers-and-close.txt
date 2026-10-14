@@ -1,18 +1,15 @@
-== AC-FR-016 medium waiving threat_model
-  - phase: threat_model
-    rationale: no new surface
-# - phase: threat_model
-#   rationale: (template placeholder)
+$ gate intake (risk medium, threat_model waived)
+00-intake  complete  FAIL
   ✗ fail waivers permitted: threat_model cannot be waived at risk medium (waivable: discover, plan; .ai/workflow.yml waivable_by_risk)
-exit 2
+$ gate intake (medium, judge waived)
   ✗ fail waivers permitted: judge is never waived (review and judgment are required of every change)
--- low risk
+$ gate intake (low, threat_model waived)
   ✓ pass waivers permitted: risk low
-== AC-FR-017 change close without judge
+$ change close refund-cap
 refund-cap: cannot close: 14-judgment is pending; a change is complete only with a final judgment (.ai/workflow.yml rules.final_judgment_required), so run the judge phase (`soft-foundry phase run judge`) or pass --force to close without one
 exit 1
-== AC-FR-018 waivable_by_risk names judge
-106:  medium: [discover, plan, judge]
-✗ error workflow: waivable_by_risk medium names 'judge', which no risk may waive
-✗ fail control plane: 1 error(s)
-exit 2
+$ change close refund-cap --force
+advisory: 1 issue to address before refund-cap goes live (informational, does not block the gate)
+  ! warn accessibility: the accessibility review (13-review/accessibility.md) has not run yet
+refund-cap: closed
+exit 0

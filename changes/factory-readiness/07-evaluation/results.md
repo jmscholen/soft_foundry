@@ -1,13 +1,15 @@
 # Evaluation Results
 
-Commit SHA: fcf79eb1ef75fe47a8b3f0c267f02ef4abd1ce47
+Re-run at HEAD after remediation REM-002 (the guard now follows cd, expands globs, resolves symlinks and owns .soft-foundry; case files have a size cap). The earlier evaluation was bound to fcf79eb and went stale; every journey below was run again at this commit in fresh scratch repositories.
+
+Commit SHA: 98b336fb932e6ce49436bb40277d89c477dece78
 
 ## Journey outcomes
 | Journey | Criteria | Result | Evidence |
 | --- | --- | --- | --- |
-| EVAL-001 | AC-FR-019, AC-FR-020 | pass | evidence/rails-install-profile-change-new.txt, evidence/rails-intake-gate-and-eval.txt |
+| EVAL-001 | AC-FR-019, AC-FR-020 | pass | evidence/rails-install-profile-change-new.txt, evidence/eval-clean-and-live-refusals.txt |
 | EVAL-002 | AC-FR-007, AC-FR-008, AC-FR-019 | pass | evidence/rails-guard-decisions.txt |
-| EVAL-003 | AC-FR-009, AC-FR-010, AC-FR-011, AC-FR-014 (partly), AC-FR-020 | pass | evidence/eval-failure-modes.txt |
+| EVAL-003 | AC-FR-009, AC-FR-010, AC-FR-011, AC-FR-014 (partly), AC-FR-020 | pass | evidence/eval-failure-modes.txt, evidence/eval-clean-and-live-refusals.txt |
 | EVAL-004 | AC-FR-015 | pass on the second run, fail on the first | evidence/live-eval-run1-no-write-permission.txt, evidence/live-eval-run2-acceptEdits.txt |
 | EVAL-005 | AC-FR-016, AC-FR-017, AC-FR-018 | pass | evidence/waivers-and-close.txt |
 | EVAL-006 | AC-FR-001, AC-FR-005 | pass | evidence/c-locale-check-and-gate.txt |
@@ -17,7 +19,7 @@ Commit SHA: fcf79eb1ef75fe47a8b3f0c267f02ef4abd1ce47
 
 ## Failures
 - EVAL-004 run 1 FAILED. `soft-foundry eval --live --shell claude --case review-finds-planted-defect` with no shell arguments: the fresh review session identified the planted defect and a test gap (REV-001 refund not capped, REV-002 negative not zeroed, REV-003 empty test file) but its writes into 13-review were refused because a non-interactive claude -p session cannot answer permission prompts, so no findings were recorded and the case failed ("0 findings recorded", exit 2). This is the eval's result for AC-FR-015 on a default invocation, and it is not a miss by the reviewer.
-- EVAL-004 run 2, same case with `-- --allowedTools "Bash,Read,Write,Edit,MultiEdit,Glob,Grep" --permission-mode acceptEdits`: PASS, the session recorded REV-001 and REV-002 matching the pattern (shell claude, anthropic/claude-sonnet-5-5, exit 0). The scratch repository was removed after each run.
+- EVAL-004 run 2, same case with `-- --allowedTools "Bash,Read,Write,Edit,MultiEdit,Glob,Grep" --permission-mode acceptEdits`: PASS, the session recorded REV-001, REV-002, REV-005 and REV-003 matching the pattern (shell claude, anthropic/claude-sonnet-5-5, exit 0). The scratch repository was removed after each run.
 
 ## Observations
 - EVAL-F1 (minor): the Rails profile records the testing entry `ruby`, not an rspec-named entry; the specification (REQ-FR-008) speaks of "rspec-style testing". The shipped test asserts `ruby`, so test and behaviour agree; the wording differs.
