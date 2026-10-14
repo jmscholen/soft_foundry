@@ -1,7 +1,0 @@
-65536 bytes: loaded
-65537 bytes: CaseError: repository.files: 'a.txt' is 65537 bytes; a case file holds at most 65536 bytes
-65537 bytes in a block scalar: CaseError: repository.files: 'a.txt' is 65538 bytes; a case file holds at most 65536 bytes
-YAML alias amplification: loaded
-200 files of 64 KiB (12.5 MB total): loaded
-a/b and a/./b (same file twice): loaded
-non-string content (list): CaseError: repository.files: 'a.txt' content must be text

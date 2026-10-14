@@ -1,7 +1,0 @@
-control, names the file plainly:        exit 2 (BLOCKS the call) ✗ fail guard: Bash .ai/policies/enforcement.yml names the guard's own configuration; no sk
-tilde-plus token in the command:        exit 2 (BLOCKS the call) ✗ fail guard: Bash could not be decided (ArgumentError: user + doesn't exist); refusing it
-tilde-user token in the command:        exit 2 (BLOCKS the call) ✗ fail guard: Bash could not be decided (ArgumentError: user nosuchuser doesn't exist); re
-NUL byte in a Write path:               exit 2 (BLOCKS the call) ✗ fail guard: Write could not be decided (ArgumentError: path name contains null byte); re
-NUL byte in a Bash command:             exit 2 (BLOCKS the call) ✗ fail guard: Bash could not be decided (ArgumentError: path name contains null byte); ref
-tilde-user then policy name (one cmd):  exit 2 (BLOCKS the call) ✗ fail guard: Bash could not be decided (ArgumentError: user zzz doesn't exist); refusing 
-malformed stdin:                        exit 2
