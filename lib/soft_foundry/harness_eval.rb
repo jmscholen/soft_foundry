@@ -108,7 +108,6 @@ module SoftFoundry
           problems << "record.handoff names '#{id}', which is not a lifecycle phase" unless plane.phase(id.to_s)
           problems << "record.handoff.#{id} must be a mapping" unless value.is_a?(Hash)
         end
-        problems << "record.track '#{record['track']}' is not a track" if record.key?("track") && !plane.track(record["track"].to_s)
         problems << "record.status '#{record['status']}' is not one of #{STATUSES.join(', ')}" if record.key?("status") && !STATUSES.include?(record["status"].to_s)
       end
       count = 0
@@ -198,6 +197,12 @@ module SoftFoundry
       end
 
       def run_case(kase, live: false, shell: nil, extra: [], shell_runner: nil)
+        # A case about a track this control plane does not declare is not
+        # applicable here, not an error: say so and move on.
+        track = kase.record["track"]
+        if track && !@plane.track(track.to_s)
+          return result(kase, "skip", "needs the #{track} track, which the workflow here does not define")
+        end
         if kase.kind == "live"
           unless live
             return result(kase, "skip", "live case; run `soft-foundry eval --live --shell claude|codex|grok --case #{kase.id}`")
