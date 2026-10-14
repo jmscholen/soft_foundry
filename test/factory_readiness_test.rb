@@ -272,3 +272,76 @@ class WaiversByRiskTest < Minitest::Test
     end
   end
 end
+
+# REQ-FR-004 and MIT-001: the packaged policy is block mode, and the guard
+# refuses writes to its own configuration from every skill.
+class GuardBlockModeTest < Minitest::Test
+  include FoundryFixture
+
+  def with_change(phase: "implement")
+    with_fixture_repo do |dir|
+      sh(dir, "git", "checkout", "-qb", "change/g1")
+      cli(dir, "change", "new", "g1")
+      meta = File.join(dir, "changes", "g1", "metadata.yml")
+      File.write(meta, SoftFoundry.read_text(meta).sub(/^status: intake.*$/, "status: in_progress").sub(/^current_phase: intake.*$/, "current_phase: #{phase}"))
+      commit_all(dir, "record")
+      yield dir, SoftFoundry::Guard.new(dir)
+    end
+  end
+
+  def guard_cli(dir, payload, env: {})
+    out = StringIO.new
+    err = StringIO.new
+    code = nil
+    with_env({ "SOFT_FOUNDRY_GUARD" => nil }.merge(env)) do
+      code = SoftFoundry::CLI.new(["guard"], out: out, err: err, input: StringIO.new(JSON.generate(payload)), root: dir).run
+    end
+    [code, out.string + err.string]
+  end
+
+  SELF = %w[.soft-foundry/enforcement.yml .ai/policies/enforcement.yml .claude/settings.json .claude/settings.local.json .codex/hooks.json].freeze
+
+  def test_the_packaged_policy_is_block_mode
+    with_fixture_repo do |dir|
+      assert_equal ["block", "repository policy (.ai/policies/enforcement.yml)"], SoftFoundry::Guard.mode(dir, env: {})
+    end
+  end
+
+  def test_the_guards_own_configuration_is_denied_to_every_skill
+    %w[implement review].each do |phase|
+      with_change(phase: phase) do |dir, guard|
+        SELF.each do |path|
+          d = guard.decide("Edit", { "file_path" => path })
+          assert d.violation?, "#{phase}: Edit #{path}"
+          assert_includes d.reason, "guard's own configuration"
+          assert guard.decide("Write", { "file_path" => File.join(dir, path) }).violation?, "#{phase}: Write #{path}"
+        end
+        assert guard.decide("Bash", { "command" => "printf 'guard: {mode: off}' > .soft-foundry/enforcement.yml" }).violation?
+        assert guard.decide("Bash", { "command" => "rm .claude/settings.json" }).violation?
+        assert_equal :allow, guard.decide("Bash", { "command" => "cat .ai/README.md" }).outcome
+      end
+    end
+  end
+
+  def test_a_block_mode_refusal_names_the_override_without_prescribing_it
+    with_change do |dir, _guard|
+      code, out = guard_cli(dir, { "tool_name" => "Edit", "tool_input" => { "file_path" => ".ai/rules/ruby.md" } })
+      assert_equal 2, code, out
+      assert_includes out, "✗ fail guard: Edit .ai/rules/ruby.md"
+      assert_includes out, "mode: block"
+      assert_includes out, "machine-local override"
+      refute_includes out, "mode: off"
+      code, = guard_cli(dir, { "tool_name" => "Edit", "tool_input" => { "file_path" => ".ai/rules/ruby.md" } }, env: { "SOFT_FOUNDRY_GUARD" => "warn" })
+      assert_equal 0, code, "the environment still wins"
+    end
+  end
+
+  def test_doctor_and_hooks_install_report_block_mode
+    with_fixture_repo do |dir|
+      _, out = cli(dir, "hooks", "install", "--claude")
+      assert_includes out, "guard mode: block (repository policy (.ai/policies/enforcement.yml))"
+      _, out = cli(dir, "doctor")
+      assert_includes out, "mode: block, repository policy (.ai/policies/enforcement.yml)"
+    end
+  end
+end
