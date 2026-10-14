@@ -1,7 +1,7 @@
 # Attack Plan
 
 ## Intent to challenge
-MIT-001 says the guard protects its own configuration from every skill. After REM-004 that claim rests on a detective and corrective control: `guard` (PreToolUse) records the contents of the policy, the machine-local override and the hook files in `.soft-foundry/guard-baseline.yml`; `guard --after` (PostToolUse, Bash only) restores any that changed and refuses. This fourth attack, at commit 0ed5e0a, judges that control as a control, as REM-004 asks, rather than enumerating more spellings the preventive check misses. Other mitigations (MIT-002 to MIT-007) are untouched by REM-004 (its diff is guard.rb, cli.rb, hooks.rb); they are re-checked only through the eval suite and carried forward from the third attack, and the record says so.
+MIT-001 says the guard protects its own configuration from every skill. After REM-004 that claim rests on a detective and corrective control: `guard` (PreToolUse) records the contents of the policy, the machine-local override and the hook files in `.soft-foundry/guard-baseline.yml`; `guard --after` (PostToolUse, Bash only) restores any that changed and refuses. This fifth attack, at commit 9806b2b (after REM-005 and REM-006), reruns the fourth attack's script to confirm the two fixes (overlapping calls, symlink restore) and to judge which routes remain, as REM-005 asks. Other mitigations (MIT-002 to MIT-007) are untouched by REM-004 to REM-006 (lib diff since 0ed5e0a: guard.rb, cli.rb, hooks.rb only); they are re-checked only through the eval suite and carried forward from the third attack, and the record says so.
 
 ## Threats mapped
 | Case | Threat | Mitigation attacked |

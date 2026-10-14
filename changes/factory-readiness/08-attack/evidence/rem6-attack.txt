@@ -18,11 +18,11 @@ B1 mode after the detached write: warn
 B1 next call's pre exit 0 (re-baselines from current files)
 B1 next post exit 0; mode now warn; policy still tampered: true
 B1 later Write to the policy: exit 0 (! warn guard: Write .ai/policies/enforcement.yml i)
-B2 overlapping calls: A's post exit 0, mode warn, config restored false
+B2 overlapping calls: A's post exit 2, mode block, config restored true
 B3 pre exit 0
 B3 poisoned baseline: post exit 0, mode warn, restored false | 
-B3b weak policy committed, baseline deleted: post exit 0, mode warn | ! warn guard: nothing changed; the pre-call baseline was mis
-B4 symlink in place of the hook settings: post exit 2; protected file budget.yml overwritten by the guard: true
+B3b weak policy committed, baseline deleted: post exit 0, mode warn | 
+B4 symlink in place of the hook settings: post exit 2; protected file budget.yml overwritten by the guard: false
 B5 PostToolUse matcher: n/a; a non-Bash tool that changes a file is not post-checked
 B6 Write to lib/soft_foundry/guard.rb in an implementation session: exit 0 ()
 B6 after the edited guard code is loaded, Write to the policy: exit 0 (); edit applied: true

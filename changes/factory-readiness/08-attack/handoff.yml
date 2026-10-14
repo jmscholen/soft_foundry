@@ -2,9 +2,9 @@
 phase: '08-attack'
 skill: adversarial-testing
 status: complete
-commit_sha: 0ed5e0a476ff9b0b28483e531875098000b1d6c8
-started_at: '2026-10-14T18:28:20Z'
-completed_at: '2026-10-14T18:32:13Z'
+commit_sha: 9806b2b413f6da385dfe0b9ff276e892901c55bc
+started_at: '2026-10-14T19:28:32Z'
+completed_at: '2026-10-14T19:40:00Z'
 resolved_model:
   profile: adversarial_high
   provider: anthropic
@@ -18,30 +18,24 @@ blocking: []
 findings:
 - id: ATK-F10
   severity: major
-  summary: 'The REM-004 post-call restore can be defeated: the baseline is re-recorded
-    from the current files on every call, restore runs only after Bash, and the baseline
-    is a writable file.'
-  failure: 'In a scratch repository, with a variable-spelled command the pre-check
-    allows: a detached process writing after the post hook, overlapping calls, a command
-    that rewrites guard-baseline.yml together with the policy, and a weak policy committed
-    with the baseline deleted each left Guard.mode at warn with nothing restored;
-    a later Write to the policy was allowed with a warning (evidence/rem4-attack.txt,
-    ATTACK-002, MIT-001). Single synchronous tampers of all five configuration files
-    were restored (ATTACK-001).'
-- id: ATK-F11
-  severity: minor
-  summary: The restore writes through a symlink, so it overwrites a protected file
-    the session could not write.
-  failure: With .claude/settings.json replaced by a symlink to a policy file, guard
-    --after wrote the settings content through the link and the policy file changed
-    (evidence/rem4-attack.txt, B4, ATTACK-002).
+  summary: 'Remaining routes past the post-call restore: a detached process writing
+    after the check, one command rewriting the policy and the baseline together, and
+    a weak policy committed with the baseline deleted. Overlapping calls are fixed
+    (REM-005).'
+  failure: 'In a scratch repository with a variable-spelled command the pre-check
+    allows: the detached write left Guard.mode at warn and a later Write to the policy
+    was allowed with a warning (B1); the combined policy and baseline rewrite (B3)
+    and the committed weak policy with the baseline deleted (B3b) left mode warn with
+    nothing restored (evidence/rem6-attack.txt, ATTACK-002, MIT-001). Accepted as
+    residual in REM-005 (same-user agent with a shell, no OS sandbox); reported for
+    judgment.'
 - id: ATK-F12
   severity: minor
-  summary: The guard code under lib/ is in the implementation write set, so the guarded
-    session can edit the guard; only review and staleness see it afterwards.
+  summary: The guard code under lib/ is in the implementation write set in this repository,
+    so the guarded session can edit the guard; only review and staleness see it afterwards.
   failure: Write to lib/soft_foundry/guard.rb was allowed (exit 0); with decide edited
-    to allow everything, a Write to the policy was allowed with no message (evidence/rem4-attack.txt,
-    B6, ATTACK-002). By design in this repository; reported for judgment.
+    to allow everything, a Write to the policy was allowed with no message (evidence/rem6-attack.txt,
+    B6, ATTACK-002). Dogfooding only, accepted in REM-005.
 - id: ATK-F9
   severity: minor
   summary: Read side (eval cases through root-wide search or unresolved spellings)
@@ -50,27 +44,32 @@ findings:
   severity: minor
   summary: A handoff commit_sha is self-attested (accepted residual, REM-002); carried
     forward, not re-run.
-next: remediate
-notes: Fourth attack, at 0ed5e0a after REM-004, judging the detective control as REM-004
-  asked. It holds for synchronous single-command tampers of all five configuration
-  files (ATTACK-001). It fails for detached, overlapping, baseline-rewriting and commit-then-delete-baseline
-  routes (ATK-F10), and the restore itself follows symlinks (ATK-F11). ATTACK-003,
-  004, 005 and 008 are carried forward from the third attack, not re-run, because
-  REM-004 touched only guard.rb, cli.rb and hooks.rb; the eval suite was rerun (12
-  passed, 1 skipped, no leftover scratch). Overlap was simulated by calling hooks
-  in order; host concurrency not established. This repository own .claude/settings.json
-  lacks the PostToolUse entry, so the restore was exercised by calling guard --after
-  directly. Scratch repositories under the system temp directory, no network, no provider,
-  no live eval, real eval cases not read. Older evidence files from the third attack
-  were removed from evidence/ because they describe aa54650; they remain in git history.
-  executed_by left to the runner.
+confirmed_fixed:
+- ATK-F11 (restore writes through a symlink; fixed by REM-005, B4 no longer overwrites
+  the protected file)
+- overlapping-call re-baselining (part of ATK-F10; fixed by REM-005, B2 restored with
+  exit 2)
+next: judge
+notes: Fifth attack, at 9806b2b after REM-005 and REM-006. Reran the fourth attack's
+  script (evidence/rem4_attack.rb) unchanged and the eval suite (12 passed, 0 failed,
+  1 skipped, no leftover scratch directory). Eleven single-command tampers restored
+  (ATTACK-001); overlap and symlink fixes confirmed; detached, baseline-rewrite and
+  commit-then-delete routes remain and are accepted residual per REM-005 (ATK-F10
+  remainder, ATK-F12). Findings are residual rather than new, so next is judge; the
+  maintainer may instead choose remediate. ATTACK-003, 004, 005 and 008 carried forward
+  (lib diff since the third attack is guard.rb, cli.rb, hooks.rb only). Overlap simulated
+  by calling hooks in order; host concurrency not established. REM-006's maintainer-edit
+  behaviour not re-attacked. Scratch repositories under the system temp directory,
+  none left; no network, no provider, no live eval; real eval cases not read. The
+  earlier rem4-attack.txt evidence was removed because it described 0ed5e0a. executed_by
+  left to the runner.
 executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-14T18:28:20Z'
-  finished_at: '2026-10-14T18:32:24Z'
+  started_at: '2026-10-14T19:28:32Z'
+  finished_at: '2026-10-14T19:30:05Z'
   exit_status: 0
   previous_phase: evaluate
-  session_id: 5d669c51-45a2-4e57-9dba-3a8c062e9075
+  session_id: 6fbd5c1a-f98d-44e3-999f-1af689de224a
   cwd: "/home/user/soft_foundry"
