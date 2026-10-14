@@ -132,3 +132,143 @@ class GatedSpecificationLockTest < Minitest::Test
     end
   end
 end
+
+# REQ-FR-003: every commit-bound phase completed without `phase run` is
+# advised, not only review and judgment.
+class FreshContextAdvisoryTest < Minitest::Test
+  include FoundryFixture
+
+  def fresh_context!(record, phase_id)
+    phase = record.control_plane.phase(phase_id)
+    h = record.handoff(phase)
+    h["executed_by"] = { "runner" => "soft-foundry phase run", "shell" => "claude", "fresh_context" => true }
+    File.write(record.handoff_path(phase), YAML.dump(h))
+  end
+
+  def test_verification_evaluation_and_attack_completed_in_session_are_advised
+    with_fixture_repo do |dir|
+      plane = SoftFoundry::ControlPlane.new(dir)
+      record = SoftFoundry::ChangeRecord.create(dir, "c3", control_plane: plane)
+      plane.phases.take(9).each { |p| complete_phase!(record, p.id, sha: head(dir)) } # intake..attack
+      notices = SoftFoundry::Advisory.new(record).notices.select { |n| n.message.include?("without `soft-foundry phase run`") }
+      assert_equal %w[verification evaluation attack], notices.map(&:area)
+      assert_includes notices[0].message, "06-verification"
+      assert_includes notices[2].message, "08-attack"
+
+      fresh_context!(record, "verify")
+      notices = SoftFoundry::Advisory.new(record).notices.select { |n| n.message.include?("without `soft-foundry phase run`") }
+      assert_equal %w[evaluation attack], notices.map(&:area)
+    end
+  end
+
+  def test_the_evidence_skills_say_they_prefer_a_fresh_session
+    %w[verification evaluation adversarial-testing].each do |skill|
+      text = SoftFoundry.read_text(File.join(REPO_ROOT, ".ai/skills", skill, "SKILL.md"))
+      assert_includes text, "phase run", skill
+    end
+  end
+end
+
+# REQ-FR-007: which phases a change may waive depends on its declared
+# risk; review and judgment are never waived; a change closes only with a
+# judgment.
+class WaiversByRiskTest < Minitest::Test
+  include FoundryFixture
+
+  def with_waivers(risk, skipped)
+    with_fixture_repo do |dir|
+      plane = SoftFoundry::ControlPlane.new(dir)
+      record = SoftFoundry::ChangeRecord.create(dir, "w1", control_plane: plane)
+      path = File.join(record.dir, "metadata.yml")
+      m = YAML.safe_load_file(path, permitted_classes: [Time, Date])
+      m["risk"] = risk
+      m["skipped_phases"] = skipped.map { |p| { "phase" => p, "rationale" => "harness test" } }
+      File.write(path, YAML.dump(m))
+      complete_phase!(record, "intake", sha: head(dir))
+      result = SoftFoundry::Gate.new(record, git: SoftFoundry::Git.new(dir)).evaluate("intake")
+      yield result.checks.find { |c| c.name == "waivers permitted" }, result
+    end
+  end
+
+  def test_the_repository_declares_what_each_risk_may_waive
+    plane = SoftFoundry::ControlPlane.new(REPO_ROOT)
+    assert_equal %w[discover specify threat_model plan attack learn], plane.waivable_by_risk("low")
+    assert_equal %w[discover plan], plane.waivable_by_risk("medium")
+    assert_equal [], plane.waivable_by_risk("high")
+    assert_equal [], plane.waivable_by_risk("TBD")
+    assert_equal [], plane.waivable_by_risk(nil)
+  end
+
+  def test_a_waiver_the_risk_allows_passes_and_one_it_does_not_fails
+    with_waivers("low", %w[threat_model attack]) do |check, result|
+      assert_equal :pass, check.outcome, check.detail
+      refute result.failed?
+    end
+    with_waivers("medium", %w[threat_model]) do |check, result|
+      assert_equal :fail, check.outcome
+      assert_includes check.detail, "threat_model"
+      assert_includes check.detail, "medium"
+      assert result.failed?
+    end
+    with_waivers("Low", %w[plan]) { |check, _| assert_equal :pass, check.outcome, "risk is matched case-insensitively" }
+  end
+
+  def test_review_and_judgment_are_never_waived
+    with_waivers("low", %w[judge]) do |check, _|
+      assert_equal :fail, check.outcome
+      assert_includes check.detail, "judge"
+      assert_includes check.detail, "never"
+    end
+    with_waivers("high", %w[review]) { |check, _| assert_equal :fail, check.outcome }
+  end
+
+  def test_an_unclassified_risk_waives_only_optional_phases
+    with_waivers("TBD", %w[discover]) do |check, _|
+      assert_equal :fail, check.outcome
+      assert_includes check.detail, "risk"
+    end
+    with_waivers("TBD", %w[document]) { |check, _| assert_equal :pass, check.outcome }
+    with_waivers("medium", []) { |check, _| assert_equal :pass, check.outcome }
+  end
+
+  def test_check_rejects_a_waiver_rule_naming_judge_review_or_an_unknown_phase
+    with_fixture_repo do |dir|
+      path = File.join(dir, ".ai/workflow.yml")
+      wf = YAML.safe_load_file(path)
+      wf["waivable_by_risk"] = { "low" => %w[judge nowhere], "medium" => [] }
+      File.write(path, YAML.dump(wf))
+      messages = SoftFoundry::Check.new(SoftFoundry::ControlPlane.new(dir)).run.select { |f| f.level == :error }.map(&:message)
+      assert messages.any? { |m| m.include?("waivable_by_risk") && m.include?("judge") }, messages.inspect
+      assert messages.any? { |m| m.include?("waivable_by_risk") && m.include?("nowhere") }, messages.inspect
+    end
+  end
+
+  def test_change_close_refuses_without_a_completed_judgment_unless_forced
+    with_fixture_repo do |dir|
+      sh(dir, "git", "checkout", "-qb", "change/w2")
+      cli(dir, "change", "new", "w2", "--title", "x")
+      record = SoftFoundry::ChangeRecord.new(dir, "w2", control_plane: SoftFoundry::ControlPlane.new(dir))
+      path = File.join(record.dir, "metadata.yml")
+      m = YAML.safe_load_file(path, permitted_classes: [Time, Date])
+      m["risk"] = "low"
+      m["skipped_phases"] = %w[discover specify threat_model plan attack learn].map { |p| { "phase" => p, "rationale" => "low risk" } }
+      File.write(path, YAML.dump(m))
+      commit_all(dir, "record w2")
+      %w[intake implement verify evaluate review].each { |id| complete_phase!(record, id, sha: head(dir)) }
+      commit_all(dir, "through review")
+      sh(dir, "git", "checkout", "-q", "main")
+      sh(dir, "git", "merge", "-q", "--no-ff", "change/w2", "-m", "merge w2")
+
+      refute record.reached_lifecycle_end?, "judgment is never a waived end"
+      code, out = cli(dir, "change", "close", "w2")
+      assert_equal 1, code, out
+      assert_includes out, "14-judgment"
+      assert_includes out, "--force"
+      refute_equal "closed", record.metadata["status"]
+
+      code, out = cli(dir, "change", "close", "w2", "--force")
+      assert_equal 0, code, out
+      assert_equal "closed", record.metadata["status"]
+    end
+  end
+end
