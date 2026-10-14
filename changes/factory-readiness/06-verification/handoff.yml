@@ -2,9 +2,9 @@
 phase: 06-verification
 skill: verification
 status: complete
-commit_sha: 474926820805f938e6ce6b320630167a08569b4e
+commit_sha: 4330cf41cbb37e5afc7d00b275d1e1bfae77f8a1
 started_at: '2026-10-14T16:51:28Z'
-completed_at: '2026-10-14T17:09:39Z'
+completed_at: '2026-10-14T17:48:00Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -15,25 +15,26 @@ outputs:
 - evidence/manifest.yml
 blocking: []
 findings:
-- Re-verification after REM-002 at 4749268; suite 554 runs 0 failures under default
-  locale, check and eval pass. The C-locale suite had one intermittent failure when
-  run concurrently with the other suite (harness_eval_test.rb:194, live-case test),
-  preserved in evidence/test-suite-c-locale-parallel-failed.txt; it passed alone twice
-  and in a full solo C-locale rerun, cause not investigated, so treat as possibly
-  flaky under load.
-- Evaluate and attack evidence are stale against REM-002 code (guard.rb, harness_eval.rb,
-  factory_readiness_test.rb) until rerun; AC-FR-015, the application-repository journey
-  transcript, and documentation/accessibility review remain for later phases.
+- Re-verification after REM-003 at 4330cf4; both suites (default and C locale, run
+  one after another) 558 runs 0 failures, check and eval pass. ci fails only on STALE
+  evidence for verify (until this handoff is gated), evaluate and attack, whose code
+  changed in cli.rb, guard.rb, hooks.rb and factory_readiness_test.rb.
+- The intermittent live-case test failure seen once under concurrent load in the previous
+  verification did not recur; cause never investigated, so treat as possibly flaky
+  under load.
+- AC-FR-015, the application-repository journey transcript, and documentation/accessibility
+  review remain for later phases.
 next: evaluate
 notes: rake/bundler not used; the suite files were loaded directly with ruby (same
-  minitest files). Each suite run takes about 8 minutes.
+  minitest files). Each suite run takes about 8.5 minutes. A first attempt was cut
+  off by a tool time limit during the C-locale suite and that suite was rerun in full.
 executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-14T16:51:28Z'
-  finished_at: '2026-10-14T17:10:12Z'
+  started_at: '2026-10-14T17:26:05Z'
+  finished_at: '2026-10-14T17:46:35Z'
   exit_status: 0
   previous_phase: remediate
-  session_id: 419a1e2a-a802-42a0-a909-5c7a6e7517bb
+  session_id: a92a7814-f0e7-44b1-956c-86d8eb7b5e13
   cwd: "/home/user/soft_foundry"

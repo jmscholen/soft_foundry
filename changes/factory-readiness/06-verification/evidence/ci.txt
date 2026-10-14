@@ -85,7 +85,7 @@ change factory-readiness
   ✓ pass completed_at recorded: 2026-10-14T15:45:38Z
   ✓ pass predecessor complete: 04-plan
   ✓ pass content clean
-06-verification  complete  PASS
+06-verification  complete  FAIL
   ✓ pass handoff identity
   ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
   ✓ pass no placeholders
@@ -93,7 +93,7 @@ change factory-readiness
   ✓ pass commit_sha recorded: 474926820805f938e6ce6b320630167a08569b4e
   ✓ pass completed_at recorded: 2026-10-14T17:09:39Z
   ✓ pass predecessor complete: 05-implementation
-  ✓ pass evidence current: no code changes since 474926820805; specification unchanged since b4f1d19b3618
+  ✗ fail evidence current: STALE: code changed since 474926820805: lib/soft_foundry/cli.rb, lib/soft_foundry/guard.rb, lib/soft_foundry/hooks.rb, test/factory_readiness_test.rb
   ✓ pass red evidence: CHECK-001: bce5413 -> 474926820805 (test/factory_readiness_test.rb)
   ✓ pass content clean
 07-evaluation  complete  FAIL
@@ -101,28 +101,28 @@ change factory-readiness
   ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: fcf79eb1ef75fe47a8b3f0c267f02ef4abd1ce47
-  ✓ pass completed_at recorded: 2026-10-14T17:40:00Z
+  ✓ pass commit_sha recorded: 98b336fb932e6ce49436bb40277d89c477dece78
+  ✓ pass completed_at recorded: 2026-10-14T18:20:00Z
   ✓ pass predecessor complete: 06-verification
-  ✗ fail evidence current: STALE: code changed since fcf79eb1ef75: lib/soft_foundry/guard.rb, lib/soft_foundry/harness_eval.rb, test/factory_readiness_test.rb
+  ✗ fail evidence current: STALE: code changed since 98b336fb932e: lib/soft_foundry/cli.rb, lib/soft_foundry/guard.rb, lib/soft_foundry/hooks.rb, test/factory_readiness_test.rb
   ✓ pass content clean
 08-attack  complete  FAIL
   ✓ pass handoff identity
   ✓ pass required files present: attack-plan.md, cases.yml, results.md, evidence/manifest.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: ba15a5639122b302648a126806113fc470741d86
-  ✓ pass completed_at recorded: 2026-10-14T16:45:19Z
+  ✓ pass commit_sha recorded: fe9e40d0a820eba58770daa593d4c9a7a26ea206
+  ✓ pass completed_at recorded: 2026-10-14T17:20:25Z
   ✓ pass predecessor complete: 07-evaluation
-  ✗ fail evidence current: STALE: code changed since ba15a5639122: lib/soft_foundry/guard.rb, lib/soft_foundry/harness_eval.rb, test/factory_readiness_test.rb
+  ✗ fail evidence current: STALE: code changed since fe9e40d0a820: lib/soft_foundry/cli.rb, lib/soft_foundry/guard.rb, lib/soft_foundry/hooks.rb, test/factory_readiness_test.rb
   ✓ pass content clean
 09-remediation  complete  PASS
   ✓ pass handoff identity
   ✓ pass required files present: summary.md, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: c1fcd98385c025fc96bbd62a61243e0b6066c695
-  ✓ pass completed_at recorded: 2026-10-14T16:51:18Z
+  ✓ pass commit_sha recorded: 021e78c57f7f519146035f9a6476c350f6aaf8bd
+  ✓ pass completed_at recorded: 2026-10-14T17:25:57Z
   ✓ pass predecessor complete: 05-implementation
   ✓ pass content clean
 advisory: 1 issue to address before factory-readiness goes live (informational, does not block the gate)

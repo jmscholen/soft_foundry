@@ -1,27 +1,23 @@
 # Verification Results
 
-Commit SHA: 474926820805f938e6ce6b320630167a08569b4e
+Commit SHA: 4330cf41cbb37e5afc7d00b275d1e1bfae77f8a1
 
-Re-verification after remediation REM-002 (guard follows cd, expands globs, resolves symlinks, owns its whole configuration directory; eval case files have a size cap). The earlier evidence, bound to 8ecce2f, was stale and has been replaced.
+Re-verification after remediation REM-003 (guard follows cd back to the root, expands braces, refuses what it cannot resolve instead of raising, guards Grep and Glob by path). The earlier evidence, bound to 4749268, was stale and has been replaced.
 
 ## Deterministic checks
-- CHECK-001 full suite (default locale): 554 runs, 3760 assertions, 0 failures, 0 errors, 0 skips (pass).
-- CHECK-002 same suite under LANG=C LC_ALL=C: 554 runs, 3760 assertions, 0 failures, 0 errors, 0 skips (pass, second run; see Failures).
+- CHECK-001 full suite (default locale): 558 runs, 3796 assertions, 0 failures, 0 errors, 0 skips (pass).
+- CHECK-002 same suite under LANG=C LC_ALL=C: 558 runs, 3796 assertions, 0 failures, 0 errors, 0 skips (pass).
 - CHECK-003 soft-foundry check: 16 phases, 17 skills, no errors (pass).
 - CHECK-004 soft-foundry eval: 12 passed, 0 failed, 0 errors, 1 skipped (pass; the skipped case is the live review case, which needs --live and is for evaluation).
-- CHECK-005 soft-foundry ci: exit 2 (fail), because the evaluate and attack evidence are stale; the verify phase passes in that run. See below.
+- CHECK-005 soft-foundry ci: exit 2 (fail). The only failing lines are `evidence current` for verify (this phase's records still named the earlier commit when ci ran), evaluate and attack: STALE, code changed in lib/soft_foundry/cli.rb, guard.rb, hooks.rb and test/factory_readiness_test.rb. Evaluate and attack stay stale until those phases rerun.
 
 ## Failures
-- First C-locale run, made concurrently with the default-locale suite on the same machine, had 1 failure: HarnessEvalTest#test_a_live_case_passes_when_the_fresh_session_names_the_planted_defect (test/harness_eval_test.rb:194, expected exit 0, got 1). Preserved unedited in evidence/test-suite-c-locale-parallel-failed.txt. The test passed twice when run alone under the C locale, and the whole suite then passed under the C locale when run alone (evidence/test-suite-c-locale.txt). I did not investigate the cause; it appeared once under parallel load and did not reproduce, so it is recorded as an unexplained intermittent failure, not as resolved. Later phases should treat that test as potentially flaky under load.
-- No other failures. Nothing was skipped except the live eval case above.
-
-CHECK-005: a first ci run, made before this phase's records were rebound, exited 2 only because the verify, evaluate, and attack evidence were still bound to earlier commits (STALE: code changed in guard.rb, harness_eval.rb, factory_readiness_test.rb). The verify staleness is resolved by this re-verification; evaluate and attack evidence stay stale until those phases are rerun. evidence/ci.txt is the ci run made after the rebind and shows what remains.
+- CHECK-005 as above. Nothing else failed and nothing was skipped except the live eval case.
+- The two suites ran one after another, not concurrently. The previous verification's one intermittent failure (harness_eval_test.rb:194, live-case test) was seen only when two suites ran at the same time; it did not occur in either run here, but its cause was never investigated, so it is not shown to be fixed. A first attempt at this run was cut off by a tool time limit during the C-locale suite; the default-locale result from that attempt (completed, exit 0) is the one recorded, and the C-locale suite was rerun in full.
 
 ## Evidence
-See evidence/manifest.yml (sha256 per artifact). red_commit bce5413 is the RED commit for test/factory_readiness_test.rb (REM-002); earlier RED commits 26497a4 and d5940c2 touch the same file.
+See evidence/manifest.yml (sha256 per artifact). red_commit 78a1b35 is the RED commit for test/factory_readiness_test.rb (REM-003); earlier RED commits touch the same file.
 
 ## Notes
-- Each suite run takes about 8 minutes. rake/bundler was not used; the suite files were loaded directly with ruby (same minitest files). soft-foundry ran as ruby -Ilib exe/soft-foundry.
+- Each suite run takes about 8.5 minutes. rake/bundler was not used; the suite files were loaded directly with ruby (same minitest files). soft-foundry ran as ruby -Ilib exe/soft-foundry.
 - AC-FR-015 (live eval on claude), the AC-FR-019 journey transcript, AC-FR-021 (user documentation) and accessibility are for evaluation/review, not covered here.
-
-Evidence generated for a different implementation commit is stale.
