@@ -490,3 +490,85 @@ class GuardIndirectionTest < Minitest::Test
     end
   end
 end
+
+# REM-003 (from the second 08-attack, ATK-F5, ATK-F6, part of ATK-F7): the
+# guard did not follow `cd ..` back to the root, raised (and so failed
+# open) on a `~user`, `~+`, or NUL-bearing token, ignored brace expansion,
+# and left the Grep and Glob tools unguarded.
+class GuardFailClosedTest < Minitest::Test
+  include FoundryFixture
+
+  def with_phase(phase)
+    with_fixture_repo do |dir|
+      sh(dir, "git", "checkout", "-qb", "change/f1")
+      cli(dir, "change", "new", "f1")
+      meta = File.join(dir, "changes", "f1", "metadata.yml")
+      File.write(meta, SoftFoundry.read_text(meta).sub(/^status: intake.*$/, "status: in_progress").sub(/^current_phase: intake.*$/, "current_phase: #{phase}"))
+      commit_all(dir, "record")
+      yield dir, SoftFoundry::Guard.new(dir)
+    end
+  end
+
+  def bash(guard, command) = guard.decide("Bash", { "command" => command })
+
+  def guard_cli(dir, payload, env: {})
+    out = StringIO.new
+    err = StringIO.new
+    code = nil
+    with_env({ "SOFT_FOUNDRY_GUARD" => nil }.merge(env)) do
+      code = SoftFoundry::CLI.new(["guard"], out: out, err: err, input: StringIO.new(JSON.generate(payload)), root: dir).run
+    end
+    [code, out.string + err.string]
+  end
+
+  def test_cd_back_to_the_root_and_beyond_is_followed
+    with_phase("implement") do |_dir, guard|
+      assert bash(guard, "cd lib && cd .. && cd .ai/policies && sed -i s/block/warn/ enforcement.yml").violation?
+      assert bash(guard, "cd lib && cd ../.ai && cat harness-evals/README.md").violation?
+      assert bash(guard, "cd lib && cd .. && cat .ai/harness-evals/README.md").violation?
+      assert_equal :allow, bash(guard, "cd lib && cd .. && cat README.md").outcome
+      assert_equal :allow, bash(guard, "cd lib && cd ../lib && ruby app.rb").outcome
+      assert bash(guard, "cd /tmp && cat #{File.join(guard.send(:real_root), '.ai/policies/budget.yml')}").violation?, "an absolute path after leaving the root is still seen"
+    end
+  end
+
+  def test_brace_expansion_is_followed
+    with_phase("implement") do |_dir, guard|
+      assert bash(guard, "cat .ai/{policies,rules}/budget.yml").violation?
+      assert bash(guard, "ls .ai/harness-{evals,x}").violation?
+      assert_equal :allow, bash(guard, "cat .ai/rules/{ruby,git}.md").outcome
+    end
+  end
+
+  def test_a_token_the_guard_cannot_resolve_is_refused_not_raised
+    with_phase("implement") do |dir, guard|
+      ["echo ~nosuchuser/x > .ai/policies/enforcement.yml", "cat ~+/x", "cat a\u0000b"].each do |command|
+        d = bash(guard, command)
+        assert d.violation?, command.inspect
+        assert_includes d.reason, "could not be decided"
+      end
+      d = guard.decide("Edit", { "file_path" => "lib/a\u0000b.rb" })
+      assert d.violation?
+      code, out = guard_cli(dir, { "tool_name" => "Bash", "tool_input" => { "command" => "cat ~nosuchuser/x" } })
+      assert_equal 2, code, "block mode refuses what it cannot decide"
+      assert_includes out, "✗ fail guard:"
+      code, out = guard_cli(dir, { "tool_name" => "Bash", "tool_input" => { "command" => "cat ~nosuchuser/x" } }, env: { "SOFT_FOUNDRY_GUARD" => "warn" })
+      assert_equal 0, code
+      assert_includes out, "! warn guard:"
+    end
+  end
+
+  def test_grep_and_glob_are_guarded_by_path
+    with_phase("implement") do |_dir, guard|
+      assert guard.decide("Grep", { "pattern" => "x", "path" => ".ai/harness-evals" }).violation?
+      assert guard.decide("Grep", { "pattern" => "x", "path" => ".ai/harness-evals/cases/a.yml" }).violation?
+      assert guard.decide("Glob", { "pattern" => ".ai/harness-evals/**/*.yml" }).violation?
+      assert guard.decide("Glob", { "pattern" => "**/*.yml", "path" => ".ai/harness-evals/cases" }).violation?
+      assert_equal :allow, guard.decide("Grep", { "pattern" => "x", "path" => "lib" }).outcome
+      assert_equal :allow, guard.decide("Glob", { "pattern" => "lib/**/*.rb" }).outcome
+      assert_equal :allow, guard.decide("Grep", { "pattern" => "x" }).outcome, "a search from the root is the documented limit, not a refusal"
+    end
+    assert_includes SoftFoundry::Hooks::GUARD_MATCHER, "Grep"
+    assert_includes SoftFoundry::Hooks::GUARD_MATCHER, "Glob"
+  end
+end
