@@ -778,6 +778,7 @@ module SoftFoundry
           if claude
             path = Hooks.install_claude(@root, local: local)
             @out.puts "installed guard hook in #{relative(path)} (PreToolUse: #{Hooks::GUARD_MATCHER})"
+            @out.puts "installed post-call check in #{relative(path)} (PostToolUse: #{Hooks::GUARD_AFTER_MATCHER}; restores the guard's own configuration if a command changed it)"
           end
           if codex
             path = Hooks.install_codex(@root)
@@ -1076,8 +1077,13 @@ module SoftFoundry
     # to refuse, exit 0 to allow. In warn mode a violation is reported on
     # stderr and allowed. Every violation is appended to the guard log.
     def guard
+      after = flag("--after")
+      # The post-call check restores first and reads the mode afterwards,
+      # since the change it undoes may be to the mode itself.
+      return guard_after(Guard.new(@root, plane: plane, git: git)) if after
       mode, = Guard.mode(@root)
       return 0 if mode == "off"
+      guard = Guard.new(@root, plane: plane, git: git)
       payload = begin
         JSON.parse(@input.read.to_s)
       rescue JSON::ParserError
@@ -1087,9 +1093,9 @@ module SoftFoundry
         @err.puts "#{mode == 'block' ? '✗ fail' : '! warn'} guard: could not read the tool call from stdin#{mode == 'block' ? '; refusing it' : ''}"
         return mode == "block" ? 2 : 0
       end
+      guard.record_baseline!
       tool = payload["tool_name"].to_s
       input = payload["tool_input"].is_a?(Hash) ? payload["tool_input"] : {}
-      guard = Guard.new(@root, plane: plane, git: git)
       decision = begin
         guard.decide(tool, input)
       rescue StandardError => e
@@ -1099,11 +1105,31 @@ module SoftFoundry
       return 0 unless decision.violation?
       guard.log(decision, mode: mode, tool_name: tool)
       where = decision.paths.empty? ? tool : "#{tool} #{decision.paths.join(', ')}"
+      because = decision.skill ? "the #{decision.skill} skill's permissions.yml does not allow it" : "the guard refuses what it cannot decide"
       if mode == "block"
-        @err.puts "✗ fail guard: #{where} #{decision.reason}; the #{decision.skill} skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is documented in README.md)"
+        @err.puts "✗ fail guard: #{where} #{decision.reason}; #{because} (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is documented in README.md)"
         2
       else
-        @err.puts "! warn guard: #{where} #{decision.reason}; the #{decision.skill} skill's permissions.yml does not allow it (mode: warn, logged to #{Guard::LOG})"
+        @err.puts "! warn guard: #{where} #{decision.reason}; #{because} (mode: warn, logged to #{Guard::LOG})"
+        0
+      end
+    end
+
+    # `guard --after`, the PostToolUse half: anything in the guard's own
+    # configuration that changed during the tool call is restored and
+    # reported; nothing is read from the payload.
+    def guard_after(guard)
+      @input.read
+      result = guard.check_after!
+      mode, = Guard.mode(@root)
+      return 0 if result.restored.empty? && !result.missing_baseline
+      what = result.restored.empty? ? "nothing changed" : "#{result.restored.join(', ')} changed during the tool call and #{result.restored.size == 1 ? 'was' : 'were'} restored to the state before it"
+      note = result.missing_baseline ? "; the pre-call baseline was missing, so the committed policy was used and the machine-local override removed" : ""
+      if mode == "block"
+        @err.puts "✗ fail guard: #{what}#{note} (tamper logged to #{Guard::LOG}; mode: block)"
+        2
+      else
+        @err.puts "! warn guard: #{what}#{note} (tamper logged to #{Guard::LOG}; mode: warn)"
         0
       end
     end

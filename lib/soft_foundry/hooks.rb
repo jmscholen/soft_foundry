@@ -65,18 +65,29 @@ module SoftFoundry
 
     def self.codex_hooks_path(root) = File.join(root, ".codex", "hooks.json")
 
-    def self.install_claude(root, local: false) = install_into(claude_settings_path(root, local: local), GUARD_MATCHER)
+    def self.install_claude(root, local: false) = install_into(claude_settings_path(root, local: local), GUARD_MATCHER, after: true)
     def self.uninstall_claude(root, local: false) = uninstall_from(claude_settings_path(root, local: local))
     def self.install_codex(root) = install_into(codex_hooks_path(root), CODEX_GUARD_MATCHER)
     def self.uninstall_codex(root) = uninstall_from(codex_hooks_path(root))
 
-    def self.install_into(path, matcher)
+    # The post-call half (Claude Code only): after a shell command, restore
+    # the guard's own configuration if the command changed it.
+    GUARD_AFTER_ID = "soft-foundry:guard-after"
+    GUARD_AFTER_MATCHER = "Bash"
+    GUARD_AFTER_COMMAND = "# #{GUARD_AFTER_ID}\nif [ -x exe/soft-foundry ] && [ -f lib/soft_foundry.rb ]; then ruby -Ilib exe/soft-foundry guard --after; elif command -v soft-foundry >/dev/null 2>&1; then soft-foundry guard --after; fi"
+
+    def self.install_into(path, matcher, after: false)
       settings = read_settings(path)
       hooks = (settings["hooks"] ||= {})
       raise TargetError, "#{path}: hooks is not an object" unless hooks.is_a?(Hash)
       entries = Array(hooks["PreToolUse"]).reject { |e| guard_entry?(e) }
       entries << { "matcher" => matcher, "hooks" => [{ "type" => "command", "command" => GUARD_COMMAND }] }
       hooks["PreToolUse"] = entries
+      if after
+        post = Array(hooks["PostToolUse"]).reject { |e| guard_entry?(e) }
+        post << { "matcher" => GUARD_AFTER_MATCHER, "hooks" => [{ "type" => "command", "command" => GUARD_AFTER_COMMAND }] }
+        hooks["PostToolUse"] = post
+      end
       write_settings(path, settings)
       path
     end
@@ -85,11 +96,16 @@ module SoftFoundry
       return nil unless File.file?(path)
       settings = read_settings(path)
       hooks = settings["hooks"]
-      return nil unless hooks.is_a?(Hash) && hooks["PreToolUse"].is_a?(Array)
-      before = hooks["PreToolUse"].size
-      hooks["PreToolUse"] = hooks["PreToolUse"].reject { |e| guard_entry?(e) }
-      return nil if hooks["PreToolUse"].size == before
-      hooks.delete("PreToolUse") if hooks["PreToolUse"].empty?
+      return nil unless hooks.is_a?(Hash)
+      removed = false
+      %w[PreToolUse PostToolUse].each do |event|
+        next unless hooks[event].is_a?(Array)
+        kept = hooks[event].reject { |e| guard_entry?(e) }
+        removed ||= kept.size != hooks[event].size
+        hooks[event] = kept
+        hooks.delete(event) if kept.empty?
+      end
+      return nil unless removed
       settings.delete("hooks") if hooks.empty?
       write_settings(path, settings)
       path

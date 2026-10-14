@@ -124,6 +124,63 @@ module SoftFoundry
       SELF_PROTECTED.include?(p) || p == SELF_PROTECTED_DIR || p.start_with?("#{SELF_PROTECTED_DIR}/")
     end
 
+    # A shell command can always be spelled so that no token names a file,
+    # so the guard also watches its own configuration across every tool
+    # call: `record_baseline!` (PreToolUse) keeps the contents of these
+    # files; `check_after!` (PostToolUse, after a shell command) restores
+    # any that changed during the call and reports it. A change made
+    # between calls, in the maintainer's own shell, is simply the next
+    # baseline. Without a baseline (removed during the same call), the
+    # committed policy is the fallback and the override is removed.
+    OWN_FILES = [POLICY, LOCAL, ".claude/settings.json", ".claude/settings.local.json", ".codex/hooks.json"].freeze
+    BASELINE = ".soft-foundry/guard-baseline.yml"
+    After = Data.define(:restored, :missing_baseline)
+
+    def own_contents
+      OWN_FILES.to_h do |rel|
+        abs = File.join(@root, rel)
+        [rel, File.file?(abs) && !File.symlink?(abs) ? File.binread(abs).force_encoding(Encoding::UTF_8).scrub : nil]
+      end
+    end
+
+    def record_baseline!
+      path = File.join(@root, BASELINE)
+      FileUtils.mkdir_p(File.dirname(path))
+      File.write(path, YAML.dump("version" => 1, "files" => own_contents))
+      true
+    rescue SystemCallError
+      false
+    end
+
+    def check_after!(now: Time.now)
+      path = File.join(@root, BASELINE)
+      baseline = File.file?(path) ? (YAML.safe_load(SoftFoundry.read_text(path)) || {})["files"] : nil
+      missing = !baseline.is_a?(Hash)
+      if missing
+        committed = @git.repository? ? @git.blob("HEAD", POLICY) : nil
+        baseline = { POLICY => committed, LOCAL => nil }
+      end
+      restored = []
+      current = own_contents
+      baseline.each do |rel, expected|
+        next unless OWN_FILES.include?(rel)
+        next if current[rel] == expected
+        next if missing && rel == POLICY && expected.nil? # nothing committed to restore from
+        abs = File.join(@root, rel)
+        if expected.nil?
+          File.delete(abs) if File.exist?(abs) || File.symlink?(abs)
+        else
+          FileUtils.mkdir_p(File.dirname(abs))
+          File.write(abs, expected)
+        end
+        restored << rel
+      end
+      unless restored.empty? && !missing
+        log_line("#{now.utc.iso8601} tamper restored=#{restored.join(',')}#{missing ? ' (no baseline; committed policy used)' : ''}")
+      end
+      After.new(restored: restored, missing_baseline: missing)
+    end
+
     def decide_by_skill(tool_name, tool_input)
       record, skill, why = active
       return Decision.new(outcome: :allow, reason: why, skill: nil, paths: []) unless skill
@@ -195,11 +252,13 @@ module SoftFoundry
     # Appends a non-allow decision to the machine-local log. Never raises:
     # a guard that cannot log must still answer.
     def log(decision, mode:, tool_name:, now: Time.now)
+      log_line("#{now.utc.iso8601} #{mode} #{tool_name} skill=#{decision.skill} paths=#{decision.paths.join(',')} #{decision.reason}")
+    end
+
+    def log_line(line)
       path = File.join(@root, LOG)
       FileUtils.mkdir_p(File.dirname(path))
-      File.open(path, "a") do |f|
-        f.puts "#{now.utc.iso8601} #{mode} #{tool_name} skill=#{decision.skill} paths=#{decision.paths.join(',')} #{decision.reason}"
-      end
+      File.open(path, "a") { |f| f.puts line }
     rescue SystemCallError
       nil
     end
