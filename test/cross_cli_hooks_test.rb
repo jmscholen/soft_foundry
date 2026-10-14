@@ -124,7 +124,7 @@ class CrossCliHooksTest < Minitest::Test
       assert_match(/^✓ pass guard hook \(claude: not installed, codex: installed; mode: block, /, out)
       cli(dir, "hooks", "install", "--claude")
       _, out = cli(dir, "doctor")
-      assert_match(/^✓ pass guard hook \(claude: installed, codex: installed; mode: warn, /, out)
+      assert_match(/^✓ pass guard hook \(claude: installed, codex: installed; mode: block, /, out)
     end
   end
 
