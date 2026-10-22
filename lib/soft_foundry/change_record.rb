@@ -5,6 +5,7 @@ require "time"
 require "yaml"
 require_relative "text"
 require_relative "advisory"
+require_relative "declarations"
 
 module SoftFoundry
   # A durable `changes/<slug>/` record initialized from control-plane templates.
@@ -13,12 +14,13 @@ module SoftFoundry
 
     attr_reader :root, :slug, :control_plane
 
-    def self.create(root, slug, control_plane:, title: nil, branch: nil, worktree: nil, track: nil, now: Time.now)
+    def self.create(root, slug, control_plane:, title: nil, branch: nil, worktree: nil, track: nil, scope: nil, now: Time.now)
       record = new(root, slug, control_plane: control_plane)
       raise "change record already exists: #{record.dir}" if record.exists?
       track ||= control_plane.default_track
       raise ArgumentError, "unknown track '#{track}'; .ai/workflow.yml defines: #{control_plane.track_names.join(', ')}" unless control_plane.track(track)
       record.send(:scaffold, title: title || slug, branch: branch || slug, worktree: worktree || root, track: track, now: now)
+      record.send(:declare_scope!, scope) if scope&.any?
       record
     end
 
@@ -49,6 +51,38 @@ module SoftFoundry
     def track = (metadata["track"] || control_plane.default_track).to_s
     def track_definition = control_plane.track(track)
     def exploring? = metadata["status"].to_s == "exploring"
+
+    # The path globs this change declares as its own (`scope:` in
+    # metadata.yml). Empty when absent, empty, or not a list of strings,
+    # which is whole-repository scope.
+    def scope
+      list = metadata["scope"]
+      list.is_a?(Array) && list.all?(String) ? list : []
+    end
+
+    # A declared scope that cannot claim paths: present but not a
+    # well-formed list. `check` names the problem.
+    def scope_malformed?
+      raw = metadata["scope"]
+      !raw.nil? && raw != [] && !Declarations.claimable?(raw)
+    end
+
+    def closed? = metadata["status"].to_s == "closed"
+
+    # The commit that recorded a phase as complete: the newest commit
+    # touching its handoff, provided the handoff says complete there. Nil
+    # while the completed handoff is uncommitted, or the phase is not
+    # complete.
+    def recorded_commit(phase, git:)
+      return nil unless phase_status(phase) == "complete" && git.repository?
+      rel = "changes/#{slug}/#{phase.output}/handoff.yml"
+      sha = git.last_commit_for(rel)
+      return nil unless sha
+      data = YAML.safe_load(git.blob(sha, rel).to_s, permitted_classes: [Time, Date], aliases: true)
+      data.is_a?(Hash) && data["status"] == "complete" ? sha : nil
+    rescue Psych::Exception
+      nil
+    end
 
     # The person's recorded acceptance on an exploring track, or nil.
     def vetted
@@ -225,6 +259,17 @@ module SoftFoundry
                        "PHASE" => phase.output, "SKILL" => skill.name, "PROFILE" => skill.profile.to_s,
                        "NEXT" => next_phase_id(phase))
       end
+    end
+
+    # The scope given to `change new --scope`, as a text edit so the
+    # template's comments survive: replaces a `scope:` entry the template
+    # carries, or appends one.
+    def declare_scope!(globs)
+      path = File.join(dir, "metadata.yml")
+      block = YAML.dump("scope" => globs).delete_prefix("---\n")
+      body = SoftFoundry.read_text(path)
+      body = body.match?(/^scope:/) ? body.sub(/^scope:.*\n(?:[ \t]+- .*\n)*/) { block } : "#{body.chomp}\n#{block}"
+      File.write(path, body)
     end
 
     # A repository whose profile records a user-facing framework renders

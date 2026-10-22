@@ -7,6 +7,9 @@ require_relative "change_record"
 require_relative "learning"
 require_relative "panel"
 require_relative "content_scan"
+require_relative "scope"
+require_relative "sizing"
+require_relative "full_suite"
 
 module SoftFoundry
   # Deterministic completion gate for one lifecycle phase of a change record.
@@ -21,6 +24,8 @@ module SoftFoundry
     end
 
     SHA = /\A[0-9a-f]{7,40}\z/
+    SIZE_CHECK = "check size matches diff"
+    FULL_SUITE_CHECK = "full-suite run recorded (record check, not a test result)"
     PLACEHOLDER = /\bTBD\b/
 
     # What each check establishes, for anything that explains a gate to a
@@ -44,6 +49,8 @@ module SoftFoundry
       "evidence current" => "No application, test, or infrastructure code changed after the commit this evidence describes, and the specification was not re-recorded after it.",
       "specification locked" => "The specification is unchanged since it was recorded (the commit that recorded the completed phase, or the vetted commit on an iterative change).",
       "red evidence" => "Each test named with a red_commit existed before the implementation and code changed after it.",
+      SIZE_CHECK => "The check size recorded in tests.yml is not smaller than the size computed from the diff and the declared scope, shared core and access-control globs.",
+      FULL_SUITE_CHECK => "A full-suite run recorded in tests.yml (or cited from another record) names the tree of the evidence commit, with a recorded outcome of passed. A record check: Soft Foundry never runs the suite, and a pass here is not a test result.",
       "instincts valid" => "The instincts the learning phase recorded are well formed.",
       "findings explained" => "Every review finding above minor names the failure it prevents.",
       "panel recorded" => "A phase run as a panel has a draft per member, a non-empty ARGUMENT.md, an outcome, and every draft cited in its outputs.",
@@ -61,7 +68,7 @@ module SoftFoundry
       names += ["required files present", "no placeholders", "no blocking conditions", "commit_sha recorded", "completed_at recorded", "predecessor complete"]
       names << "evidence current" if plane.skill(phase.skill).commit_bound?
       names << "specification locked" if phase.id == "specify"
-      names << "red evidence" if phase.id == "verify"
+      names += ["red evidence", SIZE_CHECK, FULL_SUITE_CHECK] if phase.id == "verify"
       names << "instincts valid" if phase.id == "learn"
       names << "findings explained" if phase.id == "review"
       names << "panel recorded" if plane.panel_phases.include?(phase)
@@ -112,6 +119,7 @@ module SoftFoundry
         checks << staleness_check(phase, handoff) if skill.commit_bound?
         checks << specification_lock_check(phase) if phase.id == "specify"
         checks << red_evidence_check(phase, handoff) if phase.id == "verify"
+        checks.concat(scoped_verification_checks(phase, handoff)) if phase.id == "verify"
         checks << instincts_check if phase.id == "learn"
         checks << findings_explained_check(handoff) if phase.id == "review"
         checks << panel_check(phase, handoff) if handoff["panel"].is_a?(Hash)
@@ -297,20 +305,9 @@ module SoftFoundry
       phase ? recorded_commit(phase) : nil
     end
 
-    # The commit that recorded a phase as complete: the newest commit
-    # touching its handoff, provided the handoff says complete there. Nil
-    # while the completed handoff is uncommitted, or the phase is not
-    # complete.
-    def recorded_commit(phase)
-      return nil unless @record.phase_status(phase) == "complete" && @git.repository?
-      rel = "changes/#{@record.slug}/#{phase.output}/handoff.yml"
-      sha = @git.last_commit_for(rel)
-      return nil unless sha
-      data = YAML.safe_load(@git.blob(sha, rel).to_s, permitted_classes: [Time, Date], aliases: true)
-      data.is_a?(Hash) && data["status"] == "complete" ? sha : nil
-    rescue Psych::Exception
-      nil
-    end
+    # The commit that recorded a phase as complete, or nil (see
+    # ChangeRecord#recorded_commit).
+    def recorded_commit(phase) = @record.recorded_commit(phase, git: @git)
 
     def vetted_lock_check(phase)
       sha = @record.vetted["commit"].to_s
@@ -376,19 +373,89 @@ module SoftFoundry
       sha = handoff["commit_sha"].to_s
       return Check.new("evidence current", :skip, "no git repository") unless @git.repository?
       return Check.new("evidence current", :fail, "cannot compare: commit_sha invalid") unless sha.match?(SHA) && @git.commit?(sha)
+      tip = Scope.tip_for(@record, @git)
       record_branch = @record.metadata.dig("git", "branch").to_s
-      tip = record_branch != @git.branch.to_s ? @git.branch_tip(record_branch) : nil
-      changed = (tip ? @git.changed_between(sha, tip) : @git.changed_since(sha)).select { |p| ControlPlane.match_any?(p, @plane.code_globs) }
       where = tip ? " on branch #{record_branch}" : ""
-      unless changed.empty?
-        return Check.new("evidence current", :fail, "STALE: code changed since #{sha[0, 12]}#{where}: #{changed.first(5).join(', ')}#{changed.size > 5 ? ' …' : ''}")
+      scope = Scope.new(@record, git: @git)
+      scope_note = ""
+      if scope.scoped?
+        measured = scope.measure(sha)
+        return Check.new("evidence current", :fail, scoped_stale_detail(sha, measured)) if measured.stale?
+        scope_note = "\nscope: #{measured.applied}"
+      else
+        changed = (tip ? @git.changed_between(sha, tip) : @git.changed_since(sha)).select { |p| ControlPlane.match_any?(p, @plane.code_globs) }
+        unless changed.empty?
+          return Check.new("evidence current", :fail, "STALE: code changed since #{sha[0, 12]}#{where}: #{changed.first(5).join(', ')}#{changed.size > 5 ? ' …' : ''}")
+        end
       end
       lock = @record.vetted ? nil : specification_lock_commit
       own = lock && recorded_commit(phase)
       if lock && own && !@git.ancestor?(lock, own)
         return Check.new("evidence current", :fail, "STALE: the specification was re-recorded at #{lock[0, 12]} after this evidence (handoff recorded at #{own[0, 12]}); rerun this phase against the current criteria")
       end
-      Check.new("evidence current", :pass, "no code changes since #{sha[0, 12]}#{where}#{lock ? "; specification unchanged since #{lock[0, 12]}" : ''}")
+      Check.new("evidence current", :pass, "no code changes since #{sha[0, 12]}#{where}#{lock ? "; specification unchanged since #{lock[0, 12]}" : ''}#{scope_note}")
+    end
+
+    # The stale detail for a scoped record: the cause on the first line,
+    # then one fact per line (the applied scope, and each causing path with
+    # its reason), so each can be found by its prefix.
+    def scoped_stale_detail(sha, measured)
+      return "STALE: cannot tell what changed since #{sha[0, 12]}: #{measured.error}; check the commit and branch\nscope: #{measured.applied}" if measured.error
+      paths = measured.reasons.map(&:path)
+      head = "STALE: code changed since #{sha[0, 12]}#{measured.where} for this scope: #{paths.first(5).join(', ')}#{paths.size > 5 ? ' (and more)' : ''}"
+      ([head, "scope: #{measured.applied}"] + measured.reasons.map { |e| "reason: #{e.to_line}" }).join("\n")
+    end
+
+    # The two checks scoped verification adds to verification: the recorded
+    # size against the size computed from the diff, and the recorded full
+    # suite run. An unscoped record is whole-repository: nothing is asked
+    # of it unless it records a run, which is then checked like any other.
+    def scoped_verification_checks(phase, handoff)
+      scope = Scope.new(@record, git: @git)
+      tests = tests_yml(phase)
+      block = tests.is_a?(Hash) ? tests["full_suite"] : nil
+      return [Check.new(SIZE_CHECK, :skip, "no git repository"), full_suite_check(handoff, block, nil, false)] unless @git.repository?
+      unless scope.scoped?
+        return [Check.new(SIZE_CHECK, :skip, "no scope declared: the whole repository is sized at the largest size"), full_suite_check(handoff, block, nil, false)]
+      end
+      computed, size_check = computed_size_check(tests)
+      [size_check, full_suite_check(handoff, block, computed, true)]
+    end
+
+    def tests_yml(phase)
+      path = File.join(@record.phase_dir(phase), "tests.yml")
+      return nil unless File.file?(path)
+      YAML.safe_load_file(path, permitted_classes: [Time, Date], aliases: true) || {}
+    rescue Psych::Exception
+      nil
+    end
+
+    # [computed Sizing::Result or nil, the size check].
+    def computed_size_check(tests)
+      sizing = Sizing.new(@record, git: @git)
+      computed = sizing.compute("verify")
+      recorded = tests.is_a?(Hash) ? tests["size"].to_s : ""
+      because = computed.reasons.first(3).join("; ")
+      if recorded.empty?
+        return [computed, Check.new(SIZE_CHECK, :fail, "no size is recorded in tests.yml; computed size is #{computed.size} (#{because}); record `size: #{computed.size}` and run those checks")]
+      end
+      recorded_rank = sizing.rank("verify", recorded)
+      unless recorded_rank
+        return [computed, Check.new(SIZE_CHECK, :fail, "recorded size '#{recorded}' is not one of #{sizing.sizes('verify').join(', ')}; record the computed size #{computed.size}")]
+      end
+      if recorded_rank < sizing.rank("verify", computed.size)
+        return [computed, Check.new(SIZE_CHECK, :fail, "recorded size #{recorded} is smaller than computed size #{computed.size} (#{because}); run the checks for #{computed.size} and record it")]
+      end
+      [computed, Check.new(SIZE_CHECK, :pass, "recorded #{recorded}, computed #{computed.size}, scope #{computed.applied}")]
+    rescue TargetError, GitError => e
+      [nil, Check.new(SIZE_CHECK, :fail, "cannot compute the size: #{e.message}")]
+    end
+
+    def full_suite_check(handoff, block, computed, scoped)
+      required = scoped && (computed.nil? || computed.size == Sizing.policy_sizes(@plane).fetch("verify").last)
+      owed = scoped ? "none recorded; the full run is still owed before merge (record it in tests.yml, or cite another record's run)" : "none recorded; no scope is declared, so nothing is asked of this record"
+      result = FullSuite.new(@record, git: @git).evaluate(block, evidence_sha: handoff["commit_sha"].to_s, required: required, owed_note: owed)
+      Check.new(FULL_SUITE_CHECK, result.outcome, result.detail)
     end
   end
 end

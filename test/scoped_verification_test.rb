@@ -44,7 +44,7 @@ class ScopedVerificationTest < Minitest::Test
   end
 
   # A record on main with phases up to `through` complete at one commit.
-  def make_record(dir, slug, scope: nil, status: nil, through: 7)
+  def make_record(dir, slug, scope: nil, status: nil, through: 7, evidence: nil)
     cli(dir, "change", "new", slug)
     edit_metadata(dir, slug) do |m|
       m["scope"] = scope unless scope.nil?
@@ -52,7 +52,7 @@ class ScopedVerificationTest < Minitest::Test
     end
     record = SoftFoundry::ChangeRecord.new(dir, slug, control_plane: plane(dir))
     commit_all(dir, "record #{slug}")
-    sha = head(dir)
+    sha = evidence || head(dir)
     plane(dir).phases.take(through).each { |p| complete_phase!(record, p.id, sha: sha) }
     commit_all(dir, "#{slug} phases complete") if through.positive?
     record
@@ -180,7 +180,8 @@ class ScopedVerificationTest < Minitest::Test
         assert_includes c.detail, "STALE: code changed since"
         assert_includes c.detail, "lib/a/f.rb"
       end
-      assert_equal current(gate(none, dir)).detail, current(gate(empty, dir)).detail
+      detail = ->(record) { current(gate(record, dir)).detail.gsub(/\b[0-9a-f]{12}\b/, "SHA") }
+      assert_equal detail.call(none), detail.call(empty)
     end
   end
 
@@ -335,6 +336,9 @@ class ScopedVerificationTest < Minitest::Test
       a = make_record(dir, "a", scope: %w[lib/a/**])
       make_record(dir, "b", scope: %w[lib/b/**])
       commit_code(dir, "lib/b/f.rb")
+      # b's commit lies on this branch too, so a's diff is not wholly in scope: the full suite is owed
+      run = { "tree" => evidence_tree(a, dir), "command" => "bin/rails test", "outcome" => "passed" }
+      write_tests_yml(a, "commit_sha" => head(dir), "size" => "full_at_verify", "full_suite" => run)
       code, out = cli(dir, "change", "status", "a")
       assert_equal 0, code, out
       assert_includes out, "scope: lib/a/**"
@@ -342,15 +346,16 @@ class ScopedVerificationTest < Minitest::Test
       snap = SoftFoundry::Snapshot.new(dir, plane: plane(dir), git: git(dir), index: SoftFoundry::ChangeIndex.new(dir, plane: plane(dir), git: git(dir)))
       refute snap.change("a")["stale"]
       assert_equal %w[lib/a/**], snap.change("a")["scope"]
-      runner = SoftFoundry::PhaseRunner.new(plane(dir), git: git(dir), record: a)
+      runner = SoftFoundry::PhaseRunner.new(dir, plane: plane(dir), git: git(dir), record: a)
       assert_includes runner.refusal(plane(dir).phase("verify")), "already complete"
     end
   end
 
-  def test_there_is_one_staleness_implementation
-    sources = Dir[File.join(REPO_ROOT, "lib", "soft_foundry", "*.rb")]
-    deciders = sources.select { |f| File.read(f).include?("STALE: code changed") }
-    assert_equal %w[gate.rb scope.rb].sort, deciders.map { |f| File.basename(f) }.sort - %w[]
+  def test_consumers_hold_no_staleness_logic_of_their_own
+    %w[phase_runner.rb snapshot.rb cli.rb advisory.rb].each do |file|
+      source = File.read(File.join(REPO_ROOT, "lib", "soft_foundry", file))
+      refute_includes source, "code changed since", "#{file} must read the gate's result, not decide staleness"
+    end
   end
 
   # --- sizing (AC-011, AC-013, AC-014, AC-019) ---------------------------
@@ -429,7 +434,6 @@ class ScopedVerificationTest < Minitest::Test
       sh(dir, "git", "checkout", "-qb", "change/a")
       sized_record(dir, "a", scope: %w[lib/a/**])
       commit_code(dir, "lib/a/f.rb")
-      sh(dir, "git", "checkout", "-q", "main")
       sh(dir, "git", "checkout", "-qb", "change/b")
       commit_code(dir, "lib/other/f.rb")
       _, out = size(dir, "a", "--phase", "verify")
@@ -561,7 +565,7 @@ class ScopedVerificationTest < Minitest::Test
   def test_a_citation_is_accepted_only_when_the_cited_record_names_this_tree
     with_repo do |dir|
       a = make_record(dir, "a", scope: %w[lib/a/**])
-      b = make_record(dir, "b", scope: %w[lib/b/**])
+      b = make_record(dir, "b", scope: %w[lib/b/**], evidence: a.handoff(plane(dir).phase("verify"))["commit_sha"])
       run = { "tree" => evidence_tree(a, dir), "command" => "bin/rails test", "outcome" => "passed" }
       write_tests_yml(a, "commit_sha" => head(dir), "full_suite" => run)
       c = full_suite(b, dir, { "cite" => "a" })
@@ -581,7 +585,7 @@ class ScopedVerificationTest < Minitest::Test
   def test_a_citation_is_refused_for_self_chains_and_hostile_names
     with_repo do |dir|
       a = make_record(dir, "a", scope: %w[lib/a/**])
-      b = make_record(dir, "b", scope: %w[lib/b/**])
+      b = make_record(dir, "b", scope: %w[lib/b/**], evidence: a.handoff(plane(dir).phase("verify"))["commit_sha"])
       run = { "tree" => evidence_tree(a, dir), "command" => "x", "outcome" => "passed" }
       assert_equal :fail, full_suite(a, dir, { "cite" => "a" }).outcome
       write_tests_yml(a, "commit_sha" => head(dir), "full_suite" => { "cite" => "b" })
@@ -596,7 +600,7 @@ class ScopedVerificationTest < Minitest::Test
   def test_a_dirty_code_path_refuses_a_citation
     with_repo do |dir|
       a = make_record(dir, "a", scope: %w[lib/a/**])
-      b = make_record(dir, "b", scope: %w[lib/b/**])
+      b = make_record(dir, "b", scope: %w[lib/b/**], evidence: a.handoff(plane(dir).phase("verify"))["commit_sha"])
       write_tests_yml(a, "commit_sha" => head(dir), "full_suite" => { "tree" => evidence_tree(a, dir), "command" => "x", "outcome" => "passed" })
       commit_all(dir, "record a's run")
       touch(dir, "lib/b/f.rb", "dirty\n")

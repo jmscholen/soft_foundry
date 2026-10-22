@@ -246,6 +246,13 @@ module SoftFoundry
       %w[APP TESTS INFRA].flat_map { |g| path_groups.fetch(g, []) }
     end
 
+    # Path globs the repository declares in its profile (.ai/repository.yml)
+    # for scoped verification: the shared core every change depends on, and
+    # the access-control paths. Empty when absent or not a list of strings;
+    # `check` reports a malformed declaration.
+    def shared_core = declared_globs("shared_core")
+    def access_control = declared_globs("access_control")
+
     # Expands one permission pattern into concrete globs.
     def expand(pattern, change: "CHANGE")
       if (m = pattern.match(/\A\$\{([A-Z_]+)\}\z/))
@@ -270,11 +277,24 @@ module SoftFoundry
       File.fnmatch(glob, path, File::FNM_PATHNAME | File::FNM_DOTMATCH | File::FNM_EXTGLOB)
     end
 
+    # A directory path (trailing slash, as git reports an ignored or
+    # untracked directory) overlaps a glob when the glob's literal prefix
+    # lies beneath it or it lies beneath that prefix: it may hold a match.
+    def self.overlaps?(dir, glob)
+      prefix = glob[/\A[^*?\[{]*/]
+      prefix.start_with?(dir) || dir.start_with?(prefix)
+    end
+
     def self.match_any?(path, globs)
       globs.any? { |g| match?(path, g) }
     end
 
     private
+
+    def declared_globs(key)
+      list = repository_profile[key]
+      list.is_a?(Array) ? list.select { |g| g.is_a?(String) } : []
+    end
 
     def load_yaml(path)
       YAML.safe_load_file(path, aliases: true) || {}

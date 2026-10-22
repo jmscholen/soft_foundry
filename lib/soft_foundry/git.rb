@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require "open3"
+require_relative "errors"
+require_relative "control_plane"
 
 module SoftFoundry
   # Thin wrapper over the git CLI for the few facts the harness needs.
@@ -84,6 +86,56 @@ module SoftFoundry
       ok ? out.lines(chomp: true).uniq.sort : []
     end
 
+    # Paths changed between `sha` and `tip` (a commit hash), or between `sha`
+    # and HEAD plus every uncommitted, untracked and ignored path when there
+    # is no tip. Unlike changed_since and changed_between, a git failure
+    # raises GitError: an unanswered question is never "nothing changed".
+    def diff_paths(sha, tip = nil)
+      sha = hash!(sha)
+      tip = tip.nil? ? "HEAD" : hash!(tip)
+      out, ok = run("diff", "--name-only", "-z", sha, tip, "--")
+      raise GitError, "git could not diff #{sha[0, 12]} against #{tip == 'HEAD' ? 'HEAD' : tip[0, 12]}" unless ok
+      committed = out.split("\0")
+      (tip == "HEAD" ? committed + status_entries : committed).uniq.sort
+    end
+
+    # The tree hash of commit `sha`: equal trees are byte-identical tracked
+    # content. Raises GitError when `sha` is not a hash or has no tree.
+    def tree_of(sha)
+      sha = hash!(sha)
+      out, ok = run("rev-parse", "--verify", "--quiet", "#{sha}^{tree}")
+      raise GitError, "git has no tree for #{sha[0, 12]}" unless ok && !out.strip.empty?
+      out.strip
+    end
+
+    # The contents of `path` at commit `sha`: nil when the path is absent
+    # there, GitError when git cannot read the commit or the file.
+    def blob!(sha, path)
+      sha = hash!(sha)
+      raise GitError, "#{sha[0, 12]} is not a commit in this repository" unless commit?(sha)
+      return nil unless file_at?(sha, path)
+      out, ok = run("show", "#{sha}:#{path}")
+      raise GitError, "git could not read #{path} at #{sha[0, 12]}" unless ok
+      out
+    end
+
+    # Every tracked path (the index, so staged files count). GitError when
+    # git fails.
+    def tracked_files
+      out, ok = run("ls-files", "-z")
+      raise GitError, "git could not list the tracked files" unless ok
+      out.split("\0")
+    end
+
+    # Modified, staged, untracked and ignored paths that match `globs`. An
+    # ignored or untracked directory is reported with a trailing slash and
+    # counts when any glob could match beneath it. GitError when git fails.
+    def code_dirty_paths(globs)
+      status_entries.select do |path|
+        path.end_with?("/") ? globs.any? { |g| ControlPlane.overlaps?(path, g) } : ControlPlane.match_any?(path, globs)
+      end.sort
+    end
+
     # The newest commit that touched `path`, or nil when no commit has.
     def last_commit_for(path)
       out, ok = run("log", "-1", "--format=%H", "--", path)
@@ -117,6 +169,27 @@ module SoftFoundry
     end
 
     private
+
+    def hash!(sha)
+      value = sha.to_s
+      raise GitError, "'#{value[0, 40]}' is not a commit hash" unless value.match?(/\A[0-9a-f]{7,40}\z/)
+      value
+    end
+
+    # `git status` paths, NUL-separated so unusual names survive; the old
+    # name of a rename or copy is skipped. Raises GitError when git fails.
+    def status_entries
+      out, ok = run("status", "--porcelain", "-z", "--untracked-files=all", "--ignored=matching")
+      raise GitError, "git could not read the worktree status" unless ok
+      entries = []
+      tokens = out.split("\0")
+      until tokens.empty?
+        token = tokens.shift
+        entries << token[3..].to_s
+        tokens.shift if token[0].match?(/[RC]/) || token[1].to_s.match?(/[RC]/)
+      end
+      entries
+    end
 
     def ref?(name)
       _, ok = run("show-ref", "--verify", "--quiet", name)
