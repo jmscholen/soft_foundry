@@ -10,7 +10,7 @@ type: feature
 risk: high
 track: gated
 status: intake
-current_phase: threat_model
+current_phase: plan
 created_at: 2026-10-22 13:45:52.000000000 Z
 surfaces:
   application: true

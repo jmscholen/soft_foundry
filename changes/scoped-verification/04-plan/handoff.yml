@@ -1,24 +1,49 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 04-plan
 skill: planning
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 97aa421955bd33e17cefea89c29c0ec20657da3b
+started_at: '2026-10-22T13:53:39Z'
+completed_at: '2026-10-22T14:10:00Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- implementation.md
+- testing.md
+- rollout.md
+- rollback.md
+blocking: []
+findings:
+- id: PLAN-001
+  severity: major
+  summary: Git#changed_since and
+- id: PLAN-002
+  severity: minor
+  summary: Records claim paths only when active and well-formed (closed or malformed
+    claim nothing); the spec was silent, decided in planning per MIT-003.
+- id: PLAN-003
+  severity: minor
+  summary: Declaration files load with a no-alias safe loader, while the existing
+    control-plane loader allows aliases; do not reuse it for new declarations.
+- id: PLAN-004
+  severity: minor
+  summary: Ignored directories appear in git status with a trailing slash; the dirty-worktree
+    reuse refusal treats prefix overlap with a code glob as dirty.
+- id: PLAN-005
+  severity: minor
+  summary: Harness-eval cases and the real my_ai repository were not readable in planning;
+    implementation owns the cases and the fixtures model the Rails shape generically.
 next: implement
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: ''
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-22T13:53:39Z'
+  finished_at: '2026-10-22T13:55:41Z'
+  exit_status: 0
+  previous_phase: threat_model
+  session_id: 7957d224-4633-4dc1-8ead-b7fb5650919b
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"
