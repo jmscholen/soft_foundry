@@ -1,4 +1,16 @@
 commit_sha: TBD
+# Optional. The check size computed by `soft-foundry change size --phase verify`.
+# A scoped change must record a size at least as large as the computed one.
+# size: TBD
+# Optional full-suite run, keyed by the git tree hash of the evidence commit
+# (`git rev-parse <commit_sha>^{tree}`), or a citation of another record's run
+# for the same tree. This is a record: Soft Foundry never runs the suite.
+# full_suite:
+#   tree: TBD
+#   command: TBD
+#   outcome: passed
+# full_suite:
+#   cite: <slug of another change record>
 checks:
   - id: CHECK-001
     kind: tests   # tests | lint | static_analysis | security_scan | iac_validate | migration_check | custom

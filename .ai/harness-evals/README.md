@@ -34,6 +34,11 @@ record:                       # the planted change record
     06-verification/tests.yml: "..."
   commit: true                # false leaves the record uncommitted
   later_files:                # files written into the record after the commit (uncommitted edits)
+  scope: ["${APP_FILE}"]       # optional; the record's scope globs
+  siblings:                   # optional; other active records that claim paths
+    - {slug: eval-sibling, scope: ["${APP_FILE}"]}
+profile:                      # optional; repository keys written into the scratch .ai/repository.yml
+  shared_core: ["${APP_FILE}"]
     02-specification/requirements.yml: "..."
 repository:                   # files written into the scratch repository after the record is complete
   files:

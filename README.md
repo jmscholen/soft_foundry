@@ -295,6 +295,15 @@ When the review finds that the policy text itself must change for the code to be
 
 Every line `soft-foundry` prints carries its outcome as a word (`pass`, `fail`, `warn`, `skip`, `created`, `conflict`) so the output means the same thing in a screen reader, a CI log, or a terminal that cannot render the glyph next to it.
 
+### Scoped verification: re-run only what a change can affect
+
+By default any code change makes every record's commit-bound evidence stale and every verify re-run everything. A change can narrow that:
+
+- **Scope.** `scope:` in a record's `metadata.yml` (`change new <slug> --scope GLOB`) lists the paths the change owns. Its evidence goes stale only when a changed code file is in that scope, in the repository's `shared_core` (globs in `.ai/repository.yml`, for example the base controller, the user model, auth), or claimed by no active record. Code inside another active record's scope does not stale it. A record with no scope behaves exactly as before.
+- **Sizing.** `soft-foundry change size [slug] --phase verify|evaluate|attack` computes the check size from the diff and `.ai/policies/check-sizing.yml`: targeted checks plus one full run before merge, or the full suite at verify when shared core is touched or the change is unscoped; evaluate and attack run the touched doors plus a smoke test, and sweep every route only when a changed path matches the repository's `access_control` globs or no declaration exists. The gate refuses evidence that records a smaller size than the diff computes.
+- **Full-suite reuse.** `06-verification/tests.yml` may record a `full_suite:` run keyed by the evidence commit's tree hash, or cite another record's run on the same tree, so identical code is not re-tested for each record. A passing check shows a recorded run names this tree with a recorded outcome, not that the suite passed; Soft Foundry never runs your tests.
+- Editing a declaration (scope, `shared_core`, `access_control`, the sizing policy) after the evidence commit stales the evidence, so a narrowed declaration cannot launder an old change. A git failure while measuring reads as stale, never as unchanged.
+
 ### Proving the gate: harness evals
 
 A gate that has never refused anything has unknown power. `.ai/harness-evals/cases/` holds executable cases that measure the control plane itself, and `soft-foundry eval` runs them:

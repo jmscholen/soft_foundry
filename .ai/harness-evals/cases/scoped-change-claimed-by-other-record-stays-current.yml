@@ -1,0 +1,17 @@
+id: scoped-change-claimed-by-other-record-stays-current
+kind: gate
+description: A code change inside another active record's scope does not stale this record. This is the overtesting the scope exists to remove, and the control for the cases that must still fail.
+record:
+  risk: low
+  scope: ["docs-only/**"]
+  siblings:
+    - slug: eval-sibling
+      scope: ["${APP_FILE}"]
+  complete: [intake, discover, specify, threat_model, plan, implement, verify]
+repository:
+  files:
+    "${APP_FILE}": "puts 2\n"
+expect:
+  phase: verify
+  check: evidence current
+  outcome: pass

@@ -1,0 +1,14 @@
+# Check sizing, computed from the diff and the declared globs; never judged by hand.
+# Names are listed smallest first. `soft-foundry change size` prints the computed
+# size and the paths that caused it; the verification gate refuses a recorded
+# size smaller than the computed one.
+#
+# verify: the smaller size only when the record declares a scope and every
+#   changed code path is inside it (none in the shared core, none outside it).
+# evaluate, attack: the smaller size only when the record declares a scope, the
+#   repository declares access_control globs, and no changed path matches them.
+# Absence of a declaration never reduces checking.
+sizes:
+  verify: [targeted_plus_full_before_merge, full_at_verify]
+  evaluate: [touched_doors_plus_smoke, full_route_sweep]
+  attack: [touched_doors_plus_smoke, full_route_sweep]
