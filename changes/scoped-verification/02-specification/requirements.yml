@@ -2,7 +2,132 @@
 # acceptance criteria, tests, evaluation journeys, and attack cases.
 requirements:
   - id: REQ-001
-    category: functional   # functional | accessibility | security | policy | data | failure | performance | operations | infrastructure | observability
-    statement: TBD
-    rationale: TBD
-    source: 00-intake/request.md
+    category: functional
+    statement: A change record may declare a scope, a list of path globs, in its own metadata. A record with no scope, or an empty one, has whole-repository scope.
+    rationale: Evidence staleness must be decided per change, and the declaration must be explicit and reviewable in the record.
+    source: 00-intake/request.md (Desired outcome 1, assumptions)
+  - id: REQ-002
+    category: functional
+    statement: A repository may declare a shared core, a list of path globs, in its repository profile. A changed path that matches the shared core makes every record's commit-bound evidence stale, whatever that record's scope.
+    rationale: Shared code (base controllers, user model, auth) affects every change; the declaration belongs to the repository, never to Soft Foundry.
+    source: 00-intake/request.md (Desired outcome 1, Constraints)
+  - id: REQ-003
+    category: functional
+    statement: For a record with a declared scope, commit-bound evidence is stale for code reasons only when a changed code path matches that record's scope or the shared core, or matches no record's declared scope and no shared core (an unclaimed code path). A changed code path claimed only by another record's scope does not stale this record.
+    rationale: An isolated change must stale only its own evidence, while code that no change claims must never leave evidence silently current.
+    source: 00-intake/request.md (Desired outcome 1); 01-discovery/unknowns.md (unclaimed paths)
+  - id: REQ-004
+    category: functional
+    statement: For a record with no declared scope, staleness is decided exactly as before this change, so existing records, repositories and tests are unaffected.
+    rationale: Backward compatibility; the safe default is the current whole-repository rule.
+    source: 00-intake/request.md (Constraints)
+  - id: REQ-005
+    category: functional
+    statement: The other staleness causes are unchanged and unscoped, including re-recording the specification after the evidence, and the stacked-branch measurement against the record's own branch tip.
+    rationale: Scoping must narrow only the code-path filter, not the lock-commit rule or the base of the diff.
+    source: 01-discovery/repository-context.md; DISC-001
+  - id: REQ-006
+    category: functional
+    statement: Verification evidence may record a full-suite run keyed by a git tree hash, with the command, the outcome and the tree hash of the evidence commit. A verification may instead cite a full-suite run recorded by another change record, instead of running the suite again.
+    rationale: One identical tree needs one 11.5-minute run; reuse is a recorded, citable fact, not an execution by Soft Foundry.
+    source: 00-intake/request.md (Desired outcome 2)
+  - id: REQ-007
+    category: functional
+    statement: A cited full-suite run is accepted only when the cited record exists, its recorded tree hash equals the tree hash of the citing evidence commit, its outcome is recorded as passed, and no code path is dirty in the worktree. Otherwise the check fails and says what to do (run the suite and record it).
+    rationale: Tree hash equality means byte-identical tracked content; a dirty worktree is outside that identity and must not be able to reuse a result.
+    source: 01-discovery/unknowns.md; DISC-002
+  - id: REQ-008
+    category: functional
+    statement: Soft Foundry never executes the application's test suite. Reuse is a structural check that a recorded run names the right tree and a recorded outcome; no output, document or status may say or imply that a passing gate proves the suite passed.
+    rationale: The gate is structural, not content judgment; honesty about what it proves.
+    source: 00-intake/request.md (Constraints); DISC-002
+  - id: REQ-009
+    category: functional
+    statement: A policy file under the policies directory defines check sizing. For a change whose diff lies wholly inside its declared scope, verify runs targeted checks plus one full-suite run before merge. For a change whose diff touches the shared core or any path outside its declared scope, verify runs the full suite at verify. The size is computed from the diff against the repository-declared globs, never judged by hand.
+    rationale: Check size must be deterministic and reproducible from the diff.
+    source: 00-intake/request.md (Desired outcome 3)
+  - id: REQ-010
+    category: functional
+    statement: Evaluate and attack size is the touched doors plus a sign-in and app-wide smoke test, with a full route sweep only when the diff touches a path matching the repository's declared access-control globs. When no access-control globs are declared, the size is the full sweep. When no scope is declared, every size is full.
+    rationale: A full sweep is skipped only when the repository has said which paths are access control and none changed; absence of a declaration never reduces checks.
+    source: 00-intake/request.md (Desired outcome 3); 01-discovery/unknowns.md
+  - id: REQ-011
+    category: functional
+    statement: A command reports the computed size for a record (verify, evaluate, attack) and the reason (which changed paths triggered it), using the same diff base as staleness, including the stacked-branch tip. The gate refuses verification evidence that records a smaller check size than the computed one.
+    rationale: Sizing "computed from the diff" must be observable and enforced structurally.
+    source: 00-intake/request.md (Desired outcome 3); 01-discovery/unknowns.md
+  - id: REQ-012
+    category: failure
+    statement: No existing check may be dropped as a side effect. Targeted sizing never removes a check whose acceptance criterion is in the record, and the one full-suite run before merge remains required for every scoped change.
+    rationale: No check that found a real bug may be dropped.
+    source: 00-intake/request.md (Constraints)
+  - id: REQ-013
+    category: security
+    statement: A change, after the evidence's commit, to the record's declared scope, to the repository's shared core, or to its access-control globs makes that record's commit-bound evidence stale, even though those files are not code paths.
+    rationale: Otherwise narrowing a declaration after the fact would let stale evidence pass, the named high-risk failure.
+    source: 00-intake/request.md (Initial risk); DISC-003
+  - id: REQ-014
+    category: security
+    statement: The structure check refuses a malformed or blind declaration of scope, shared core or access-control globs. It refuses a glob that is empty, absolute, contains a parent-directory segment, or matches no tracked file, and it refuses a shared core glob that matches no path within the code path groups.
+    rationale: A misdeclared core silently lets stale evidence pass; this mirrors the existing protection for path-group overrides.
+    source: DISC-003
+  - id: REQ-015
+    category: security
+    statement: Path declarations are matched only as path globs against repository-relative git paths. Soft Foundry never infers shared core, scope or access control from file content, and never executes anything named in them.
+    rationale: Path-based declarations are auditable; content inference is not.
+    source: 01-discovery/unknowns.md (access control)
+  - id: REQ-016
+    category: failure
+    statement: When git cannot answer (unknown commit, missing tree, unreadable branch), the scoped checks fail closed: the evidence is reported stale or the check fails with a message naming the cause, never current.
+    rationale: Unknown state must not read as fresh.
+    source: 00-intake/request.md (Initial risk)
+  - id: REQ-017
+    category: failure
+    statement: A tree-hash miss after a squash or rebase merge (the tree differs from the recorded one) results in a failed reuse check and a rerun of the suite, never a skip.
+    rationale: A miss costs time, not safety.
+    source: 01-discovery/unknowns.md
+  - id: REQ-018
+    category: operations
+    statement: The advisory output warns when the diff touches paths outside the declared scope, or touches the shared core while the verification records no full-suite run, and when a declared scope matches no changed file after the work is done.
+    rationale: A scope the diff exceeds, or a core change without a full run, must be visible before the change goes live without blocking lifecycle advancement.
+    source: 01-discovery/affected-components.md (Advisory)
+  - id: REQ-019
+    category: operations
+    statement: Consumers of the staleness result (phase runner refusal, status, the browser view) follow the scoped result with no logic of their own: a phase whose evidence is current for its scope is not rerun and is not shown stale.
+    rationale: One decision, many readers.
+    source: 01-discovery/dependencies.md
+  - id: REQ-020
+    category: observability
+    statement: When evidence is stale or a size is computed, the output states the applied scope (declared or whole repository), the changed paths that caused it, and for each the reason (in scope, shared core, unclaimed, declaration changed, access control). Status shows the declared scope.
+    rationale: A narrowed rule must be explainable to the person reviewing it.
+    source: field report; DISC-004
+  - id: REQ-021
+    category: accessibility
+    statement: All new command output follows the command-line rules of the accessibility standard (WCAG 2.2 AA as applied to CLI output): every outcome is a word (pass, fail, warn, skip, stale), one fact per line with a stable searchable prefix, meaning survives stripping color and non-ASCII characters, no interactive prompts (scope and sizing are flags and files), and error messages name what went wrong and what to do next. New or changed Markdown reports use a real heading hierarchy.
+    rationale: Agents, CI logs and screen readers consume the same bytes (3.3.1, 3.3.3, 1.3.1, 1.4.1 as applied).
+    source: .ai/rules/accessibility.md; metadata surfaces.accessibility
+  - id: REQ-022
+    category: accessibility
+    statement: Where the browser view shows a record's staleness or scope, the information is conveyed in text, not by color alone, and remains navigable by keyboard as the existing view is.
+    rationale: 1.4.1 Use of Color, 2.1.1 Keyboard, 4.1.2 Name, Role, Value.
+    source: .ai/rules/accessibility.md
+  - id: REQ-023
+    category: data
+    statement: New fields are optional and documented with their schema: the metadata scope field, the repository shared-core and access-control keys, the full-suite fields in the verification record, and the new policy file. Templates, the structure check, harness evals and the control-plane documents are changed together.
+    rationale: Control-plane changes keep templates, check, evals and docs in step.
+    source: 00-intake/request.md (Constraints)
+  - id: REQ-024
+    category: performance
+    statement: Scoped staleness and sizing add a bounded number of git invocations per gate run, independent of the number of changed files, and no process runs the application's tests.
+    rationale: The change exists to save time; the gate must not become the slow part.
+    source: 00-intake/request.md (User intent)
+  - id: REQ-025
+    category: infrastructure
+    statement: No deployed infrastructure, database, service or runtime dependency is introduced. The gem's own CI (tests and gating every record) runs the new checks unchanged.
+    rationale: Library and CLI only; Ruby standard library and git.
+    source: 01-discovery/dependencies.md
+  - id: REQ-026
+    category: policy
+    statement: This change does not alter what Soft Foundry collects, shares, retains, protects or promises under any published privacy policy, security policy or terms, none of which exist (each recorded NOT_APPLICABLE), so no policy clause is affected.
+    rationale: surfaces.policy is false; stated for traceability under the policy-conformance rule.
+    source: 01-discovery/repository-context.md (Published policies)
