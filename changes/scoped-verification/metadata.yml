@@ -1,15 +1,17 @@
+---
 change:
   id: scoped-verification
-  title: "Scoped verification: per-change staleness scope with a shared core, full-suite results cached by tree hash, and check sizing by policy"
+  title: 'Scoped verification: per-change staleness scope with a shared core, full-suite
+    results cached by tree hash, and check sizing by policy'
 git:
-  worktree: /Users/jscholen-iou/dev/soft_foundry
+  worktree: "/Users/jscholen-iou/dev/soft_foundry"
   branch: change/scoped-verification
 type: feature
 risk: high
-track: gated            # gated | iterative (.ai/workflow.yml tracks:); set by `change new --track`
-status: intake          # intake | exploring | in_progress | awaiting_human | judged | closed
-current_phase: intake
-created_at: 2026-10-22T13:45:52Z
+track: gated
+status: intake
+current_phase: discover
+created_at: 2026-10-22 13:45:52.000000000 Z
 surfaces:
   application: true
   database: false
@@ -17,36 +19,8 @@ surfaces:
   security: true
   accessibility: true
   observability: false
-  policy: false           # true when the change alters what the application collects, shares, retains, protects, or promises in its privacy policy, security policy, or terms; loads .ai/rules/policy-conformance.md and enables the go-live policy advisories. Set automatically by `change new` when the repository profile records a published policy document.
-
-# Human-boundary decisions this change required (.ai/policies/human-boundaries.yml),
-# each recorded once a person made it. While a decision the review says is owed
-# has no entry here, the change is parked with status: awaiting_human.
+  policy: false
 human_decisions: []
-# - boundary: legal commitment
-#   subject: privacy policy, clause 4 (third-party analytics recipient)
-#   decided_by: TBD
-#   decided_at: TBD
-#   decision: approved | declined
-
-# Iterative track only. `soft-foundry change vet` records the person's
-# acceptance of the explored feature and the commit the specification
-# locked at; from then on the phases from implement onward apply as on the
-# gated track. `change reopen` clears it, resets those phases to pending,
-# and appends the reopening here so the history stays in the record.
-vetted: null
-# vetted:
-#   at: 2026-09-16T00:00:00Z
-#   by: name
-#   commit: sha
+vetted:
 reopenings: []
-# - at: 2026-09-16T00:00:00Z
-#   from_commit: sha the change had been vetted at
-#   reason: why the person sent it back to exploring
-
-# Phases the harness would otherwise require, deliberately not run for
-# this change, each with a non-empty rationale. An entry with an empty
-# rationale does not count as a skip - the phase stays required.
 skipped_phases: []
-# - phase: threat_model
-#   rationale: TBD
