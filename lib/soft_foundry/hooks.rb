@@ -2,8 +2,10 @@
 
 require "fileutils"
 require "json"
+require_relative "text"
 require_relative "errors"
 require_relative "safe_write"
+require_relative "guard"
 
 module SoftFoundry
   # Installs the hooks Soft Foundry relies on: a git pre-commit hook that
@@ -32,7 +34,7 @@ module SoftFoundry
       raise "#{root} is not a git repository" unless File.directory?(File.join(root, ".git"))
       FileUtils.mkdir_p(hooks_dir)
       path = File.join(hooks_dir, "pre-commit")
-      if File.exist?(path) && !File.read(path).include?(MARKER)
+      if File.exist?(path) && !SoftFoundry.read_text(path).include?(MARKER)
         raise "#{path} already exists and was not installed by soft-foundry; merge `soft-foundry ci` into it manually"
       end
       File.write(path, SCRIPT)
@@ -47,7 +49,7 @@ module SoftFoundry
     # it; every other key and hook in the file is kept byte for byte in
     # meaning, if not in formatting.
     GUARD_ID = "soft-foundry:guard"
-    GUARD_MATCHER = "Edit|Write|MultiEdit|NotebookEdit|Read|Bash"
+    GUARD_MATCHER = "Edit|Write|MultiEdit|NotebookEdit|Read|Grep|Glob|Bash"
     GUARD_COMMAND = "# #{GUARD_ID}\nif [ -x exe/soft-foundry ] && [ -f lib/soft_foundry.rb ]; then ruby -Ilib exe/soft-foundry guard; elif command -v soft-foundry >/dev/null 2>&1; then soft-foundry guard; fi"
 
     def self.claude_settings_path(root, local: false)
@@ -64,18 +66,39 @@ module SoftFoundry
 
     def self.codex_hooks_path(root) = File.join(root, ".codex", "hooks.json")
 
-    def self.install_claude(root, local: false) = install_into(claude_settings_path(root, local: local), GUARD_MATCHER)
-    def self.uninstall_claude(root, local: false) = uninstall_from(claude_settings_path(root, local: local))
-    def self.install_codex(root) = install_into(codex_hooks_path(root), CODEX_GUARD_MATCHER)
-    def self.uninstall_codex(root) = uninstall_from(codex_hooks_path(root))
+    def self.install_claude(root, local: false) = clearing_baseline(root) { install_into(claude_settings_path(root, local: local), GUARD_MATCHER, after: true) }
+    def self.uninstall_claude(root, local: false) = clearing_baseline(root) { uninstall_from(claude_settings_path(root, local: local)) }
+    def self.install_codex(root) = clearing_baseline(root) { install_into(codex_hooks_path(root), CODEX_GUARD_MATCHER) }
+    def self.uninstall_codex(root) = clearing_baseline(root) { uninstall_from(codex_hooks_path(root)) }
 
-    def self.install_into(path, matcher)
+    # These are the maintainer's own changes to the guard's configuration:
+    # a baseline left by an interrupted shell command must not undo them
+    # at the next post-call check.
+    def self.clearing_baseline(root)
+      result = yield
+      baseline = File.join(root, Guard::BASELINE)
+      File.delete(baseline) if File.file?(baseline) || File.symlink?(baseline)
+      result
+    end
+
+    # The post-call half (Claude Code only): after a shell command, restore
+    # the guard's own configuration if the command changed it.
+    GUARD_AFTER_ID = "soft-foundry:guard-after"
+    GUARD_AFTER_MATCHER = "Bash"
+    GUARD_AFTER_COMMAND = "# #{GUARD_AFTER_ID}\nif [ -x exe/soft-foundry ] && [ -f lib/soft_foundry.rb ]; then ruby -Ilib exe/soft-foundry guard --after; elif command -v soft-foundry >/dev/null 2>&1; then soft-foundry guard --after; fi"
+
+    def self.install_into(path, matcher, after: false)
       settings = read_settings(path)
       hooks = (settings["hooks"] ||= {})
       raise TargetError, "#{path}: hooks is not an object" unless hooks.is_a?(Hash)
       entries = Array(hooks["PreToolUse"]).reject { |e| guard_entry?(e) }
       entries << { "matcher" => matcher, "hooks" => [{ "type" => "command", "command" => GUARD_COMMAND }] }
       hooks["PreToolUse"] = entries
+      if after
+        post = Array(hooks["PostToolUse"]).reject { |e| guard_entry?(e) }
+        post << { "matcher" => GUARD_AFTER_MATCHER, "hooks" => [{ "type" => "command", "command" => GUARD_AFTER_COMMAND }] }
+        hooks["PostToolUse"] = post
+      end
       write_settings(path, settings)
       path
     end
@@ -84,11 +107,16 @@ module SoftFoundry
       return nil unless File.file?(path)
       settings = read_settings(path)
       hooks = settings["hooks"]
-      return nil unless hooks.is_a?(Hash) && hooks["PreToolUse"].is_a?(Array)
-      before = hooks["PreToolUse"].size
-      hooks["PreToolUse"] = hooks["PreToolUse"].reject { |e| guard_entry?(e) }
-      return nil if hooks["PreToolUse"].size == before
-      hooks.delete("PreToolUse") if hooks["PreToolUse"].empty?
+      return nil unless hooks.is_a?(Hash)
+      removed = false
+      %w[PreToolUse PostToolUse].each do |event|
+        next unless hooks[event].is_a?(Array)
+        kept = hooks[event].reject { |e| guard_entry?(e) }
+        removed ||= kept.size != hooks[event].size
+        hooks[event] = kept
+        hooks.delete(event) if kept.empty?
+      end
+      return nil unless removed
       settings.delete("hooks") if hooks.empty?
       write_settings(path, settings)
       path
@@ -182,7 +210,7 @@ module SoftFoundry
         [:installed, path, shell]
       end
       session_skill_paths(home).each_value do |path|
-        if File.exist?(path) && !File.read(path).include?(SESSIONS_ID)
+        if File.exist?(path) && !SoftFoundry.read_text(path).include?(SESSIONS_ID)
           report << [:skipped, path, "not written by soft-foundry"]
           next
         end
@@ -212,7 +240,7 @@ module SoftFoundry
         [:removed, path, shell]
       end
       session_skill_paths(home).each_value do |path|
-        next unless File.file?(path) && !File.symlink?(path) && File.read(path).include?(SESSIONS_ID)
+        next unless File.file?(path) && !File.symlink?(path) && SoftFoundry.read_text(path).include?(SESSIONS_ID)
         File.delete(path)
         Dir.rmdir(File.dirname(path)) if Dir.empty?(File.dirname(path))
         removed << [:skill, path, nil]
@@ -238,7 +266,7 @@ module SoftFoundry
     def self.read_settings(path)
       return {} unless File.exist?(path) || File.symlink?(path)
       raise TargetError, "#{path} is a symlink; refusing to write through it" if File.symlink?(path)
-      data = JSON.parse(File.read(path))
+      data = JSON.parse(SoftFoundry.read_text(path))
       raise TargetError, "#{path}: expected a JSON object" unless data.is_a?(Hash)
       data
     rescue JSON::ParserError => e

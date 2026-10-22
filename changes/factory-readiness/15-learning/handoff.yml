@@ -1,0 +1,23 @@
+---
+phase: 15-learning
+skill: learning
+status: complete
+commit_sha: f75b74007ec09becac8fe9c7d2c8e51f6bc41bdb
+started_at: '2026-10-14T19:43:13Z'
+completed_at: '2026-10-14T19:43:13Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- findings.md
+- proposed-rules.md
+- proposed-evals.md
+- instincts.yml
+blocking: []
+findings: []
+next: done
+notes: Performed by the interactive session. Eight instincts; five proposed rule changes
+  (the owed README and policy text among them); five proposed harness evals, including
+  a guard case kind that would ship this record's attack scripts as cases.
+executed_by:

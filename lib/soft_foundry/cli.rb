@@ -2,6 +2,7 @@
 
 require "json"
 require "yaml"
+require_relative "text"
 require_relative "onboarding"
 require_relative "shell"
 require_relative "git"
@@ -28,6 +29,7 @@ require_relative "ui/server"
 require_relative "processes"
 require_relative "session_ledger"
 require_relative "panel"
+require_relative "harness_eval"
 
 module SoftFoundry
   class CLI
@@ -66,6 +68,7 @@ module SoftFoundry
       when "budget" then budget
       when "gate" then gate
       when "ci" then ci
+      when "eval" then eval_command
       when "hooks" then hooks
       when "guard" then guard
       when "phase" then phase
@@ -259,7 +262,7 @@ module SoftFoundry
         ".ai/paths.yml" => File.exist?(File.join(@root, ".ai/paths.yml")),
         "control plane check" => plane.present? && Check.new(plane).run.none? { |f| f.level == :error },
         ".ai/manifest.yml" => File.exist?(File.join(@root, Manifest::PATH)),
-        "pre-commit hook" => File.exist?(File.join(@root, ".git/hooks/pre-commit")) && File.read(File.join(@root, ".git/hooks/pre-commit")).include?(Hooks::MARKER),
+        "pre-commit hook" => File.exist?(File.join(@root, ".git/hooks/pre-commit")) && SoftFoundry.read_text(File.join(@root, ".git/hooks/pre-commit")).include?(Hooks::MARKER),
         "guard hook" => !Hooks.claude_installed?(@root).nil? || !Hooks.codex_installed?(@root).nil?,
         "local runtime" => File.exist?(File.join(@root, ".soft-foundry/runtime.yml"))
       }
@@ -437,6 +440,10 @@ module SoftFoundry
       end
 
       unless force
+        if (judged = record.judgment_status) != "complete"
+          @err.puts "#{slug}: cannot close: 14-judgment is #{judged || 'missing'}; a change is complete only with a final judgment (.ai/workflow.yml rules.final_judgment_required), so run the judge phase (`soft-foundry phase run judge`) or pass --force to close without one"
+          return EXIT_TARGET
+        end
         branch = git.repository? ? git.default_branch : nil
         sha = record.finished_commit_sha
         if sha.nil?
@@ -676,8 +683,65 @@ module SoftFoundry
       results.any?(&:failed?) ? 2 : 0
     end
 
+    # `eval [--live] [--shell S] [--case ID]... [--json] [-- shell args]`:
+    # the harness evals under .ai/harness-evals/cases/. One status line per
+    # case, then a summary; exit 0 only when every run case passed. Live
+    # cases are skipped unless --live names a shell.
+    def eval_command
+      live = flag("--live")
+      json = flag("--json")
+      shell = option("--shell")
+      ids = options("--case")
+      extra = []
+      if (i = @argv.index("--"))
+        extra = @argv[(i + 1)..]
+        @argv = @argv[0...i]
+      end
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+      if shell && !PhaseRunner::SHELLS.key?(shell)
+        raise TargetError, "--shell takes one of #{PhaseRunner::SHELLS.keys.join(', ')}; got '#{shell}'"
+      end
+      results = HarnessEval::Runner.new(@root, plane: plane).run(ids: ids, live: live, shell: shell, extra: extra, shell_runner: @runner) do |r|
+        @out.puts eval_line(r) unless json
+        @out.flush
+      end
+      counts = eval_counts(results)
+      if json
+        @out.puts JSON.pretty_generate("version" => 1, "stable" => false, "results" => results.map(&:to_h), "summary" => counts)
+      else
+        @out.puts eval_summary(counts)
+      end
+      counts["failed"].zero? && counts["errors"].zero? ? 0 : 2
+    end
+
+    def eval_line(result)
+      mark = { "pass" => "✓ pass", "fail" => "✗ fail", "error" => "✗ error", "skip" => "- skip" }.fetch(result.outcome)
+      "#{mark} eval #{result.id}: #{result.detail}"
+    end
+
+    def eval_counts(results)
+      { "passed" => results.count { |r| r.outcome == "pass" }, "failed" => results.count { |r| r.outcome == "fail" },
+        "errors" => results.count { |r| r.outcome == "error" }, "skipped" => results.count { |r| r.outcome == "skip" } }
+    end
+
+    def eval_summary(counts)
+      ok = counts["failed"].zero? && counts["errors"].zero?
+      "#{ok ? '✓ pass' : '✗ fail'} eval: #{counts['passed']} passed, #{counts['failed']} failed, #{counts['errors']} #{counts['errors'] == 1 ? 'error' : 'errors'}, #{counts['skipped']} skipped"
+    end
+
     def ci
       code = check
+      # The deterministic harness evals: does this control plane's gate
+      # still refuse the defects the cases plant? Live cases need a shell
+      # and are not run here.
+      results = HarnessEval::Runner.new(@root, plane: plane).run(live: false) do |r|
+        @out.puts eval_line(r) unless r.outcome == "skip"
+      end
+      counts = eval_counts(results)
+      unless results.empty?
+        @out.puts eval_summary(counts)
+        code = 2 unless counts["failed"].zero? && counts["errors"].zero?
+      end
       list_changes.each do |slug|
         record = load_record(slug)
         if record.metadata["status"] == "closed"
@@ -714,6 +778,7 @@ module SoftFoundry
           if claude
             path = Hooks.install_claude(@root, local: local)
             @out.puts "installed guard hook in #{relative(path)} (PreToolUse: #{Hooks::GUARD_MATCHER})"
+            @out.puts "installed post-call check in #{relative(path)} (PostToolUse: #{Hooks::GUARD_AFTER_MATCHER}; restores the guard's own configuration if a command changed it)"
           end
           if codex
             path = Hooks.install_codex(@root)
@@ -1012,8 +1077,13 @@ module SoftFoundry
     # to refuse, exit 0 to allow. In warn mode a violation is reported on
     # stderr and allowed. Every violation is appended to the guard log.
     def guard
+      after = flag("--after")
+      # The post-call check restores first and reads the mode afterwards,
+      # since the change it undoes may be to the mode itself.
+      return guard_after(Guard.new(@root, plane: plane, git: git)) if after
       mode, = Guard.mode(@root)
       return 0 if mode == "off"
+      guard = Guard.new(@root, plane: plane, git: git)
       payload = begin
         JSON.parse(@input.read.to_s)
       rescue JSON::ParserError
@@ -1025,16 +1095,45 @@ module SoftFoundry
       end
       tool = payload["tool_name"].to_s
       input = payload["tool_input"].is_a?(Hash) ? payload["tool_input"] : {}
-      guard = Guard.new(@root, plane: plane, git: git)
-      decision = guard.decide(tool, input)
+      # Only a shell call has a post-call check, so only a shell call
+      # records the baseline that check restores to.
+      guard.record_baseline! if Guard::SHELL_TOOLS.include?(tool)
+      decision = begin
+        guard.decide(tool, input)
+      rescue StandardError => e
+        # Fail closed: whatever stops the guard from deciding is a refusal in block mode.
+        Guard::Decision.new(outcome: :violation, reason: "could not be decided (#{e.class}); refusing it", skill: nil, paths: [])
+      end
       return 0 unless decision.violation?
       guard.log(decision, mode: mode, tool_name: tool)
       where = decision.paths.empty? ? tool : "#{tool} #{decision.paths.join(', ')}"
+      because = decision.skill ? "the #{decision.skill} skill's permissions.yml does not allow it" : "the guard refuses what it cannot decide"
       if mode == "block"
-        @err.puts "✗ fail guard: #{where} #{decision.reason}; the #{decision.skill} skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml)"
+        @err.puts "✗ fail guard: #{where} #{decision.reason}; #{because} (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is documented in README.md)"
         2
       else
-        @err.puts "! warn guard: #{where} #{decision.reason}; the #{decision.skill} skill's permissions.yml does not allow it (mode: warn, logged to #{Guard::LOG})"
+        @err.puts "! warn guard: #{where} #{decision.reason}; #{because} (mode: warn, logged to #{Guard::LOG})"
+        0
+      end
+    end
+
+    # `guard --after`, the PostToolUse half: anything in the guard's own
+    # configuration that changed during the tool call is restored and
+    # reported; nothing is read from the payload.
+    def guard_after(guard)
+      @input.read
+      result = guard.check_after!
+      mode, = Guard.mode(@root)
+      # Nothing to restore is quiet, baseline or not: an overlapping call's
+      # check may have consumed the baseline already.
+      return 0 if result.restored.empty?
+      what = result.restored.empty? ? "nothing changed" : "#{result.restored.join(', ')} changed during the tool call and #{result.restored.size == 1 ? 'was' : 'were'} restored to the state before it"
+      note = result.missing_baseline ? "; the pre-call baseline was missing, so the committed policy was used and the machine-local override removed" : ""
+      if mode == "block"
+        @err.puts "✗ fail guard: #{what}#{note} (tamper logged to #{Guard::LOG}; mode: block)"
+        2
+      else
+        @err.puts "! warn guard: #{what}#{note} (tamper logged to #{Guard::LOG}; mode: warn)"
         0
       end
     end
@@ -1393,7 +1492,17 @@ module SoftFoundry
           soft-foundry session log --shell claude|codex|grok
                                                   the session hook itself: records the prompt payload on stdin
                                                   in ~/.soft-foundry/sessions.jsonl; prints nothing, always exits 0
-          soft-foundry ci                         check + gate every change record (used by CI and pre-commit)
+          soft-foundry eval [--case ID]... [--json]
+                                                  run the harness evals in .ai/harness-evals/cases/: each gate
+                                                  case plants a defective change record in a scratch repository
+                                                  carrying this control plane and asserts which gate check
+                                                  refuses it; one status line per case, then a summary
+          soft-foundry eval --live --shell claude|codex|grok [--case ID]... [-- args...]
+                                                  also run the live cases: plant a defect in a scratch
+                                                  application and run the case's phase in a fresh session
+                                                  through `phase run`, passing when its findings name the defect
+          soft-foundry ci                         check + harness evals (gate cases) + gate every change record
+                                                  (used by CI and pre-commit)
           soft-foundry hooks install              install the pre-commit hook
           soft-foundry hooks install --claude [--local] | --codex
                                                   install the PreToolUse guard into .claude/settings.json

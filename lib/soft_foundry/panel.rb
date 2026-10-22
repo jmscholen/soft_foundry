@@ -7,6 +7,7 @@ require "securerandom"
 require "tmpdir"
 require "digest"
 require "open3"
+require_relative "text"
 require_relative "control_plane"
 require_relative "change_record"
 require_relative "phase_provider"
@@ -152,7 +153,7 @@ module SoftFoundry
         spoiled = false
         @members.each do |m|
           snap = repository_snapshot
-          text_before = File.read(argument_path)
+          text_before = SoftFoundry.read_text(argument_path)
           status = launcher.call([argument_launch(m, round)]).first.to_i
           notes << "#{m.name} exited #{status} in round #{round}" unless status.zero?
           stray = changed_files(snap) - [argument_rel]
@@ -160,7 +161,7 @@ module SoftFoundry
             failures << "files changed during the argument (round #{round}, #{m.name}): #{stray.join(', ')}"
             return failed.call(round)
           end
-          text_after = File.exist?(argument_path) ? File.read(argument_path) : ""
+          text_after = File.exist?(argument_path) ? SoftFoundry.read_text(argument_path) : ""
           if text_after.start_with?(text_before)
             lines[m.name] = status.zero? ? self.class.agree_line(text_after[text_before.size..]) : nil
           else

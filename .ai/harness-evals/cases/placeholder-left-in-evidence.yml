@@ -1,0 +1,12 @@
+id: placeholder-left-in-evidence
+kind: gate
+description: A verification that still carries the template placeholder word in a required file is not complete.
+record:
+  risk: low
+  complete: [intake, discover, specify, threat_model, plan, implement, verify]
+  later_files:
+    06-verification/results.md: "# Verification Results\n\nCommit SHA: ${COMMIT}\n\n## Deterministic checks\nTBD\n"
+expect:
+  phase: verify
+  check: no placeholders
+  outcome: fail

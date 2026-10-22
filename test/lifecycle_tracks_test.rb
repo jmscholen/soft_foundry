@@ -314,15 +314,24 @@ class LifecycleTracksTest < Minitest::Test
     end
   end
 
-  def test_the_gated_track_has_no_specification_lock_check
+  # Since changes/factory-readiness (REQ-FR-002) the gated track locks the
+  # specification too, at the commit that recorded it rather than at a
+  # vet; the lock check is on every track, with the gated wording.
+  def test_the_gated_track_locks_the_specification_at_the_commit_that_recorded_it
     with_fixture_repo do |dir|
       cli(dir, "change", "new", "g1")
       record = SoftFoundry::ChangeRecord.new(dir, "g1", control_plane: SoftFoundry::ControlPlane.new(dir))
       complete_phase!(record, "intake", sha: head(dir))
       complete_phase!(record, "discover", sha: head(dir))
       complete_phase!(record, "specify", sha: head(dir))
-      names = SoftFoundry::Gate.new(record, git: SoftFoundry::Git.new(dir)).evaluate("specify").checks.map(&:name)
-      refute_includes names, "specification locked"
+      gate = SoftFoundry::Gate.new(record, git: SoftFoundry::Git.new(dir))
+      lock = gate.evaluate("specify").checks.find { |c| c.name == "specification locked" }
+      assert_equal :warn, lock.outcome, "uncommitted: nothing to lock to yet"
+      commit_all(dir, "record g1")
+      lock = gate.evaluate("specify").checks.find { |c| c.name == "specification locked" }
+      assert_equal :pass, lock.outcome
+      assert_includes lock.detail, "the commit that recorded it"
+      refute_includes lock.detail, "vet"
     end
   end
 

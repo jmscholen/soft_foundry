@@ -1,0 +1,16 @@
+id: review-finding-without-failure
+kind: gate
+description: A review that records a major finding with no failure named (no concrete input and wrong result) must fail the findings explained check.
+record:
+  risk: low
+  complete: [intake, discover, specify, threat_model, plan, implement, verify, evaluate, attack, review]
+  handoff:
+    review:
+      findings:
+        - id: REV-001
+          severity: major
+          summary: planted finding with no failure
+expect:
+  phase: review
+  check: findings explained
+  outcome: fail

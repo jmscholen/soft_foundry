@@ -94,6 +94,18 @@ rules:
 # parks the change at awaiting_human (.ai/policies/human-boundaries.yml).
 panel_phases: [specify, threat_model, plan, remediate, review]
 
+# Which lifecycle phases a change of each declared risk may name in its
+# skipped_phases (each entry still needs a non-empty rationale). A phase
+# not listed for the risk is required; a change whose risk is unset or
+# unknown may waive nothing but the globally optional phases. Review and
+# judgment are never waived, whatever is written here (`check` refuses
+# it): a change is complete only with a final judgment. The gate reports
+# the result as `waivers permitted` on the first phase.
+waivable_by_risk:
+  low: [discover, specify, threat_model, plan, attack, learn]
+  medium: [discover, plan]
+  high: []
+
 judgments:
   - APPROVED
   - APPROVED_WITH_RESIDUAL_RISK

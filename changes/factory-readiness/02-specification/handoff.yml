@@ -1,0 +1,28 @@
+---
+phase: 02-specification
+skill: specification
+status: complete
+commit_sha: '097fe26b3b70648035fb6fa415fafdc75c402e3c'
+started_at: '2026-10-14T15:00:13Z'
+completed_at: '2026-10-14T15:03:58Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- specification.md
+- requirements.yml
+- acceptance-criteria.yml
+- readiness.md
+blocking: []
+findings: []
+next: threat_model
+notes: 'Performed by the interactive session. REQ-FR-001..010 and AC-FR-001..021.
+  The accessibility requirement is REQ-FR-009 (the change declares an accessibility
+  surface: CLI output). surfaces.policy is false and the specification says why nothing
+  the published policies cover changes. Re-bound once: the first commit''s requirements.yml
+  and acceptance-criteria.yml did not parse (a scalar starting with a backtick, a
+  scalar containing a colon-space), which the gate does not check but the advisory
+  read as ''no accessibility requirement''; quoted and re-bound before any later phase
+  started.'
+executed_by:

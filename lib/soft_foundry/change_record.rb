@@ -3,6 +3,7 @@
 require "fileutils"
 require "time"
 require "yaml"
+require_relative "text"
 require_relative "advisory"
 
 module SoftFoundry
@@ -97,17 +98,22 @@ module SoftFoundry
     # legitimate reason (globally optional, or explicitly named in this
     # change's own skipped_phases with a non-empty rationale) - i.e.
     # nothing required is just sitting unaddressed. Mirrors the same
-    # skip-aware logic Gate's predecessor_check already uses, because
-    # this repo's own real changes (self-update, maturity-report,
-    # observability-standard-dashboard, this one) routinely skip
-    # discover/specify/threat_model/plan/attack/review/judge/learn with
-    # rationale rather than completing them - "reached judgment" would
-    # wrongly refuse to close every one of them.
+    # skip-aware logic Gate's predecessor_check uses, with one exception:
+    # judgment is never a waived end. A change is complete only with a
+    # final judgment artifact (.ai/workflow.yml rules.final_judgment_required,
+    # AGENTS.md rule 11); whether a waiver was permitted at all is the
+    # gate's `waivers permitted` check.
     def reached_lifecycle_end?
       control_plane.phases.all? do |phase|
         status = phase_status(phase)
-        status == "complete" || (status == "pending" && skippable?(phase))
+        status == "complete" || (status == "pending" && skippable?(phase) && phase.id != "judge")
       end
+    end
+
+    # The judgment phase's recorded status, for the close refusal.
+    def judgment_status
+      judge = control_plane.phase("judge")
+      judge ? phase_status(judge) : nil
     end
 
     # The commit that represents this change's *finished* work, or nil if
@@ -230,7 +236,7 @@ module SoftFoundry
     # (YAML.dump would drop them).
     def declare_surfaces!
       path = File.join(dir, "metadata.yml")
-      body = File.read(path)
+      body = SoftFoundry.read_text(path)
       updated = body
       frameworks = Advisory.ui_frameworks(control_plane)
       unless frameworks.empty?
@@ -266,7 +272,7 @@ module SoftFoundry
     # scalar: plain when that round-trips, quoted otherwise (a title with
     # ": " in it, for instance, would otherwise yield an unreadable file).
     def write_template(src, dst, vars)
-      body = File.read(src).gsub(/\$\{([A-Z_]+)\}/) do
+      body = SoftFoundry.read_text(src).gsub(/\$\{([A-Z_]+)\}/) do
         name = Regexp.last_match(1)
         vars.key?(name) ? yaml_scalar(vars[name]) : "${#{name}}"
       end

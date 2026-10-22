@@ -131,7 +131,10 @@ class RedGreenTest < Minitest::Test
       write_check!(record, plane, {})
       check = red_check(dir, record)
       assert_equal :skip, check.outcome
-      notices = SoftFoundry::Advisory.new(record).notices.select { |n| n.area == "verification" }
+      # The verification area also carries the fresh-context notice for a
+      # phase completed in session (factory-readiness, REQ-FR-003); the
+      # red-evidence notice is the one under test here.
+      notices = red_notices(record)
       assert_equal 1, notices.size, notices.inspect
       assert_includes notices.first.message, "no check in 06-verification/tests.yml records a red_commit"
     end
@@ -139,12 +142,16 @@ class RedGreenTest < Minitest::Test
 
   def test_red_evidence_present_or_a_docs_change_is_not_advised
     with_red_green do |dir, _plane, record, _red, _green|
-      assert_empty SoftFoundry::Advisory.new(record).notices.select { |n| n.area == "verification" }
+      assert_empty red_notices(record)
     end
     with_red_green({}, type: "docs") do |dir, plane, record, _red, _green|
       write_check!(record, plane, {})
-      assert_empty SoftFoundry::Advisory.new(record).notices.select { |n| n.area == "verification" }
+      assert_empty red_notices(record)
     end
+  end
+
+  def red_notices(record)
+    SoftFoundry::Advisory.new(record).notices.select { |n| n.area == "verification" && n.message.include?("red_commit") }
   end
 
   def test_a_pending_verification_is_not_advised

@@ -1,0 +1,40 @@
+---
+phase: 06-verification
+skill: verification
+status: complete
+commit_sha: 50a45069a586f0ce37d9eb8d59da85ee37f6155d
+started_at: '2026-10-14T18:04:16Z'
+completed_at: '2026-10-14T19:22:02Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- results.md
+- tests.yml
+- evidence/manifest.yml
+blocking: []
+findings:
+- Re-verification after REM-006 at 50a4506; both suites (default and C locale, run
+  one after another) 568 runs 0 failures, check and eval pass. ci fails only on STALE
+  evidence for verify (clears on commit), evaluate and attack, whose code changed
+  in cli.rb, hooks.rb and factory_readiness_test.rb.
+- The intermittent live-case test failure seen once under concurrent load in an earlier
+  verification did not recur; cause never investigated, so treat as possibly flaky
+  under load.
+- AC-FR-015, the application-repository journey transcript, and documentation/accessibility
+  review remain for later phases.
+next: evaluate
+notes: rake/bundler not used; the suite files were loaded directly with ruby (same
+  minitest files). Each suite run takes about 8.5 minutes. check and eval ran while
+  the first suite was running; the two suites did not overlap.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-14T19:04:22Z'
+  finished_at: '2026-10-14T19:22:12Z'
+  exit_status: 0
+  previous_phase: remediate
+  session_id: 1fb9042c-d2dc-4fda-a89e-41e50fe1361f
+  cwd: "/home/user/soft_foundry"

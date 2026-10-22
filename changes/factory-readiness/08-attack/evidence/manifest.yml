@@ -1,0 +1,11 @@
+commit_sha: 9806b2b413f6da385dfe0b9ff276e892901c55bc
+artifacts:
+- path: evidence/rem4_attack.rb
+  case: ATTACK-001
+  sha256: 1cdaec35318d4910a1ae34012ea07eae08609264bce524730400c78eb5c5b9df
+- path: evidence/rem6-attack.txt
+  case: ATTACK-001
+  sha256: 76a3bfae603466cd2b78e3d44a82b6c51c4306e66f7cabe93b8c0a34196a96f6
+- path: evidence/eval-rerun.txt
+  case: ATTACK-006
+  sha256: 4a3fdfcc3eef491ca8a4c7a1e32053bdc121f6b9e27484d232f48c4902c4726d

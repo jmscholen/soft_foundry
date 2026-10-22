@@ -1,0 +1,11 @@
+id: judgment-waived
+kind: gate
+description: A change that names judge in skipped_phases, whatever its risk or rationale, fails the waivers permitted check; a change is complete only with a final judgment.
+record:
+  risk: low
+  complete: [intake]
+  skipped: [judge]
+expect:
+  phase: intake
+  check: waivers permitted
+  outcome: fail

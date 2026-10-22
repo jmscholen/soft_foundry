@@ -8,7 +8,7 @@ require_relative "test_helper"
 class UIAssetsTest < Minitest::Test
   ASSETS = File.expand_path("../lib/soft_foundry/ui/assets", __dir__)
 
-  def asset(name) = File.read(File.join(ASSETS, name))
+  def asset(name) = SoftFoundry.read_text(File.join(ASSETS, name))
 
   # Record text reaches the page as data. No API that parses a string as
   # markup or code may appear in the script at all.

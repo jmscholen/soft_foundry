@@ -1,0 +1,22 @@
+id: red-commit-is-the-green-commit
+kind: gate
+description: A verification check that names the verified commit itself as its red_commit claims a failing test that never preceded the implementation; the red evidence check refuses it.
+record:
+  risk: low
+  complete: [intake, discover, specify, threat_model, plan, implement, verify]
+  files:
+    06-verification/tests.yml: |
+      commit_sha: ${COMMIT}
+      checks:
+        - id: CHECK-001
+          kind: tests
+          command: ruby -Itest test/eval_app_test.rb
+          result: pass
+          evidence: evidence/tests.log
+          criteria: [AC-001]
+          red_commit: ${COMMIT}
+          test_path: test/eval_app_test.rb
+expect:
+  phase: verify
+  check: red evidence
+  outcome: fail

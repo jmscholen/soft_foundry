@@ -1,0 +1,130 @@
+# Each criterion must be testable and map to at least one requirement.
+# Criteria are locked once specification completes; changing them requires a
+# recorded requirement change, never a downstream edit.
+criteria:
+  - id: AC-FR-001
+    requirements: [REQ-FR-001]
+    given: the process locale is C (LANG and LC_ALL unset) and a record file contains a non-ASCII character
+    when: the gate, the advisory, the scan, and the UI asset tests run
+    then: no command raises an encoding error and the full suite passes
+    verified_by: []
+  - id: AC-FR-002
+    requirements: [REQ-FR-001]
+    given: a required phase file holds bytes that are not valid UTF-8
+    when: the gate's placeholder check reads it
+    then: the check completes with the invalid bytes scrubbed and reports the file normally
+    verified_by: []
+  - id: AC-FR-003
+    requirements: [REQ-FR-002]
+    given: a gated-track change whose specify phase is complete at commit S
+    when: a file under 02-specification/ is edited after S (committed or not)
+    then: gate specify fails the `specification locked` check naming the file and saying to rerun the specification phase
+    verified_by: []
+  - id: AC-FR-004
+    requirements: [REQ-FR-002]
+    given: the same change with verification complete at commit V after S
+    when: 02-specification/ changes after V
+    then: gate verify fails `evidence current` naming the specification path
+    verified_by: []
+  - id: AC-FR-005
+    requirements: [REQ-FR-002]
+    given: a gated-track change whose specify phase is complete and whose specification is unchanged
+    when: the gate runs
+    then: "`specification locked` passes naming the specify commit, and the vetted-track behaviour is unchanged"
+    verified_by: []
+  - id: AC-FR-006
+    requirements: [REQ-FR-003]
+    given: a change whose verification, evaluation, or attack handoff is complete with executed_by null
+    when: advisories are printed
+    then: one notice per such phase says it was completed without `soft-foundry phase run`, and a phase with executed_by.fresh_context true draws none
+    verified_by: []
+  - id: AC-FR-007
+    requirements: [REQ-FR-004]
+    given: a repository freshly installed by `soft-foundry init`
+    when: a tool call under the implementation skill names a denied path
+    then: "the guard exits 2 with a `fail guard:` line naming the tool, path, skill, `mode: block`, and the policy file, and `doctor` and `hooks install` print `mode: block (repository policy ...)`"
+    verified_by: []
+  - id: AC-FR-008
+    requirements: [REQ-FR-004]
+    given: SOFT_FOUNDRY_GUARD=warn in the environment or a machine-local override
+    when: the same tool call is made
+    then: the call is allowed with a `warn guard:` line, as today
+    verified_by: []
+  - id: AC-FR-009
+    requirements: [REQ-FR-005]
+    given: the shipped cases
+    when: "`soft-foundry eval` runs in this repository"
+    then: every gate case passes, the output has one line per case and a summary, the exit code is 0, and `--json` carries the same outcomes
+    verified_by: []
+  - id: AC-FR-010
+    requirements: [REQ-FR-005]
+    given: a case expecting a check to fail that the gate instead passes (or the reverse)
+    when: "`soft-foundry eval` runs it"
+    then: the case is reported fail with the expected and observed outcomes and the exit code is 2
+    verified_by: []
+  - id: AC-FR-011
+    requirements: [REQ-FR-005]
+    given: a case file that does not parse or names an unknown check
+    when: "`check` and `eval` run"
+    then: "`check` reports an error naming the file and `eval` reports the case as error and continues"
+    verified_by: []
+  - id: AC-FR-012
+    requirements: [REQ-FR-005]
+    given: a case whose gate run raises
+    when: "`eval` runs it"
+    then: the case is reported error with the exception message and the scratch repository is removed
+    verified_by: []
+  - id: AC-FR-013
+    requirements: [REQ-FR-006]
+    given: a live case and `--live --shell <shell>` with a fake shell that writes a finding matching the pattern
+    when: "`eval` runs it"
+    then: the case passes and the line names the shell, the resolved model, and the matched finding ids
+    verified_by: []
+  - id: AC-FR-014
+    requirements: [REQ-FR-006]
+    given: a live case without --live, or with --live and no --shell, or with a shell that exits non-zero
+    when: "`eval` runs it"
+    then: it is reported skip (with the command to run it), error (naming --shell), or error (with the exit status) respectively, and only the errors fail the run
+    verified_by: []
+  - id: AC-FR-015
+    requirements: [REQ-FR-006]
+    given: the shipped live case and the `claude` shell installed here
+    when: "`eval --live --shell claude` runs it"
+    then: the fresh-context review's findings match the planted defect, or the miss is recorded as the eval's result; either way the result is in this record's evaluation evidence
+    verified_by: []
+  - id: AC-FR-016
+    requirements: [REQ-FR-007]
+    given: a medium-risk change whose skipped_phases names threat_model, or any change whose skipped_phases names judge or review
+    when: the gate runs on the first phase
+    then: "`waivers permitted` fails naming the phase and the rule, and a low-risk change waiving threat_model passes"
+    verified_by: []
+  - id: AC-FR-017
+    requirements: [REQ-FR-007]
+    given: a change whose judge phase is not complete
+    when: "`change close` runs without --force"
+    then: it refuses with exit 1 naming 14-judgment, and `--force` still closes
+    verified_by: []
+  - id: AC-FR-018
+    requirements: [REQ-FR-007]
+    given: a control plane whose waivable_by_risk names `judge` or an unknown phase
+    when: "`check` runs"
+    then: it reports an error naming the rule
+    verified_by: []
+  - id: AC-FR-019
+    requirements: [REQ-FR-008]
+    given: a Rails-shaped repository
+    when: init, change new, check, guard decisions, gate intake, and eval run there
+    then: every assertion in REQ-FR-008 holds and the transcript is recorded as evaluation evidence
+    verified_by: []
+  - id: AC-FR-020
+    requirements: [REQ-FR-009]
+    given: every new line this change prints
+    when: read as text with no color or glyph
+    then: its outcome word is present at a fixed position and the JSON form carries the same outcome
+    verified_by: []
+  - id: AC-FR-021
+    requirements: [REQ-FR-010]
+    given: README, help, schemas, AGENTS.md, .ai/README.md, and the harness-evals README
+    when: read against the code
+    then: each described behaviour exists and VERSION is 0.21.0
+    verified_by: []

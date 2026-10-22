@@ -1,0 +1,11 @@
+id: attack-waived-at-medium-risk
+kind: gate
+description: A medium-risk change may not waive the attack phase (.ai/workflow.yml waivable_by_risk); the waivers permitted check refuses it.
+record:
+  risk: medium
+  complete: [intake]
+  skipped: [attack]
+expect:
+  phase: intake
+  check: waivers permitted
+  outcome: fail

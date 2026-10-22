@@ -1,0 +1,39 @@
+---
+phase: 14-judgment
+skill: final-judgment
+status: complete
+commit_sha: f18691e9065818dee2929bfa5eb8b7f82c26aefd
+started_at: '2026-10-14T19:39:47Z'
+completed_at: '2026-10-14T20:30:00Z'
+resolved_model:
+  profile: judgment_high
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- final.md
+- residual-risk.md
+- evidence.yml
+blocking: []
+findings:
+- id: JUDG-001
+  severity: major
+  summary: 'REV-001 is an open condition of approval: README guard section, enforcement.yml
+    header, and hooks install --claude rerun are owed to the maintainer before merge.'
+- id: JUDG-002
+  severity: minor
+  summary: 10-user-documentation, 11-faq-index and 12-observability are pending, not
+    waived; the learn phase and maintainer should note it.
+next: learn
+notes: Outcome APPROVED_WITH_RESIDUAL_RISK. Code identical between 50a4506 and HEAD
+  f18691e, so all evidence is current. soft-foundry CLI was not on PATH, so gate state
+  was not queried; judged from the records. executed_by left to the runner.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-14T19:39:47Z'
+  finished_at: '2026-10-14T19:40:43Z'
+  exit_status: 0
+  previous_phase: review
+  session_id: 91e5dd7c-7a48-46e3-8217-5974fffe342b
+  cwd: "/home/user/soft_foundry"

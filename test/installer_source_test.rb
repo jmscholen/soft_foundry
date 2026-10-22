@@ -13,7 +13,8 @@ class InstallerSourceTest < Minitest::Test
     assert_includes paths, "changes/README.md"
     assert_includes paths, "docs/user/README.md"
     refute_includes paths, ".ai/manifest.yml"
-    assert_empty paths.select { |p| p.start_with?(".ai/harness-evals/") && p != ".ai/harness-evals/README.md" }
+    assert_empty paths.select { |p| p.start_with?(".ai/harness-evals/") && p != ".ai/harness-evals/README.md" && !p.start_with?(".ai/harness-evals/cases/") }, "only the README and the cases ship"
+    assert paths.any? { |p| p.start_with?(".ai/harness-evals/cases/") && p.end_with?(".yml") }, "the eval cases ship with the control plane"
     template = File.binread(File.join(REPO_ROOT, ".ai/templates/repository.yml"))
     assert_equal template, source.entries.find { |e| e.path == ".ai/repository.yml" }.bytes
     assert_includes YAML.safe_load(template).dig("repository", "assessed").to_s, "false"

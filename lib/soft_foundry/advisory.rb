@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative "text"
 require_relative "control_plane"
 require_relative "phase_provider"
 
@@ -161,16 +162,24 @@ module SoftFoundry
       [Notice.new("verification", "no check in 06-verification/tests.yml records a red_commit, so the failing-test-first evidence .ai/rules/testing.md asks for is not demonstrable for this #{@record.metadata['type']}")]
     end
 
-    # Review and judgment exist to look at the work from outside it. A
-    # completed review or judgment whose handoff carries no executed_by
-    # from `phase run` was performed by whatever session was already
-    # open, most likely the one that implemented the change; say so.
+    # Evidence exists to look at the work from outside it. A completed
+    # phase whose skill declares `evidence: commit_bound` (verification,
+    # evaluation, attack, review, judgment) and whose handoff carries no
+    # executed_by from `phase run` was performed by whatever session was
+    # already open, most likely the one that implemented the change; say
+    # so, every time the record is gated.
+    FRESH_CONTEXT_LABELS = {
+      "verify" => ["verification", "verification"], "evaluate" => ["evaluation", "evaluation"],
+      "attack" => ["attack", "adversarial testing"], "review" => ["review", "independent review"],
+      "judge" => ["judgment", "final judgment"]
+    }.freeze
+
     def fresh_context_notices
-      [["review", "review", "independent review"], ["judge", "judgment", "final judgment"]].filter_map do |id, area, label|
-        phase = @plane.phase(id)
-        next unless phase && @record.phase_status(phase) == "complete"
+      @plane.phases.filter_map do |phase|
+        next unless @plane.skill(phase.skill).commit_bound? && @record.phase_status(phase) == "complete"
         executed = @record.handoff(phase)["executed_by"]
         next if executed.is_a?(Hash) && executed["fresh_context"] == true
+        area, label = FRESH_CONTEXT_LABELS.fetch(phase.id) { [phase.id.tr("_", " "), phase.id.tr("_", " ")] }
         Notice.new(area, "#{label} (#{phase.output}) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes")
       end
     end
@@ -271,7 +280,7 @@ module SoftFoundry
       return [Notice.new("accessibility", "the accessibility review (13-review/accessibility.md) has not run yet")] unless status == "complete"
       path = File.join(@record.phase_dir(phase), "accessibility.md")
       return [Notice.new("accessibility", "13-review/accessibility.md is missing")] unless File.file?(path)
-      body = File.read(path)
+      body = SoftFoundry.read_text(path)
       conformance = section_body(path, "Conformance").to_s
       if body.match?(PLACEHOLDER)
         [Notice.new("accessibility", "13-review/accessibility.md still contains TBD placeholders")]
@@ -292,7 +301,7 @@ module SoftFoundry
       return [Notice.new("policy", "the policy-conformance review (13-review/policy-conformance.md) has not run yet")] unless status == "complete"
       path = File.join(@record.phase_dir(phase), "policy-conformance.md")
       return [Notice.new("policy", "13-review/policy-conformance.md is missing")] unless File.file?(path)
-      return [Notice.new("policy", "13-review/policy-conformance.md still contains TBD placeholders")] if File.read(path).match?(PLACEHOLDER)
+      return [Notice.new("policy", "13-review/policy-conformance.md still contains TBD placeholders")] if SoftFoundry.read_text(path).match?(PLACEHOLDER)
       notices = []
       if section_body(path, "Conformance").to_s.match?(NOT_APPLICABLE)
         notices << Notice.new("policy", "13-review/policy-conformance.md declares conformance N/A although the change declares a policy surface")
@@ -320,7 +329,7 @@ module SoftFoundry
     # when the file or heading is absent.
     def section_body(path, heading)
       return nil unless File.file?(path)
-      lines = File.read(path).lines
+      lines = SoftFoundry.read_text(path).lines
       start = lines.index { |l| l.strip == "## #{heading}" }
       return nil unless start
       body = lines[(start + 1)..].take_while { |l| !l.start_with?("## ") }

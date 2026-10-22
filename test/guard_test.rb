@@ -131,12 +131,12 @@ class GuardTest < Minitest::Test
 
   def test_mode_comes_from_env_then_local_override_then_policy_then_default
     with_fixture_repo do |dir|
-      assert_equal ["warn", "repository policy (.ai/policies/enforcement.yml)"], SoftFoundry::Guard.mode(dir, env: {})
+      assert_equal ["block", "repository policy (.ai/policies/enforcement.yml)"], SoftFoundry::Guard.mode(dir, env: {})
       File.delete(File.join(dir, ".ai/policies/enforcement.yml"))
       assert_equal ["warn", "default"], SoftFoundry::Guard.mode(dir, env: {})
       FileUtils.mkdir_p(File.join(dir, ".soft-foundry"))
       File.write(File.join(dir, ".soft-foundry/enforcement.yml"), YAML.dump("guard" => { "mode" => "block" }))
-      assert_equal "block", SoftFoundry::Guard.mode(dir, env: {}).first
+      assert_equal ["block", "machine-local override (.soft-foundry/enforcement.yml)"], SoftFoundry::Guard.mode(dir, env: {})
       assert_equal "off", SoftFoundry::Guard.mode(dir, env: { "SOFT_FOUNDRY_GUARD" => "off" }).first
       assert_equal "block", SoftFoundry::Guard.mode(dir, env: { "SOFT_FOUNDRY_GUARD" => "bogus" }).first, "an unknown value is ignored"
     end
@@ -152,16 +152,16 @@ class GuardTest < Minitest::Test
 
   # --- the hook command --------------------------------------------------------
 
-  def test_guard_command_warns_and_allows_by_default_and_logs_the_violation
+  def test_guard_command_warns_and_allows_in_warn_mode_and_logs_the_violation
     with_implementing_change do |dir, _guard|
-      code, out = guard_cli(dir, edit(".ai/rules/ruby.md"))
+      code, out = guard_cli(dir, edit(".ai/rules/ruby.md"), env: { "SOFT_FOUNDRY_GUARD" => "warn" })
       assert_equal 0, code
       assert_includes out, "! warn guard: Edit .ai/rules/ruby.md is in implementation's deny_write set"
       assert_includes out, "mode: warn"
       log = File.read(File.join(dir, ".soft-foundry/guard.log"))
       assert_includes log, "warn Edit skill=implementation paths=.ai/rules/ruby.md"
 
-      code, out = guard_cli(dir, edit("lib/app.rb"))
+      code, out = guard_cli(dir, edit("lib/app.rb"), env: { "SOFT_FOUNDRY_GUARD" => "warn" })
       assert_equal 0, code
       assert_empty out, "an allowed call is silent"
     end
@@ -174,7 +174,7 @@ class GuardTest < Minitest::Test
       assert_includes out, "✗ fail guard: Edit .ai/rules/ruby.md is in implementation's deny_write set"
       code, out = guard_cli(dir, bash("rm -rf .ai/policies"), env: { "SOFT_FOUNDRY_GUARD" => "block" })
       assert_equal 2, code
-      assert_includes out, "Bash .ai/policies names a path implementation is denied"
+      assert_includes out, "Bash .ai/policies names protected policy or harness material"
       assert_equal 0, guard_cli(dir, bash("bundle exec rake test"), env: { "SOFT_FOUNDRY_GUARD" => "block" }).first
     end
   end
@@ -204,7 +204,7 @@ class GuardTest < Minitest::Test
       code, out = cli(dir, "hooks", "install", "--claude")
       assert_equal 0, code, out
       assert_includes out, "installed guard hook in .claude/settings.json"
-      assert_includes out, "guard mode: warn"
+      assert_includes out, "guard mode: block"
       2.times { assert_equal 0, cli(dir, "hooks", "install", "--claude").first }
 
       data = JSON.parse(File.read(settings))
@@ -248,10 +248,10 @@ class GuardTest < Minitest::Test
   def test_doctor_reports_the_guard_hook_and_mode
     with_fixture_repo do |dir|
       _, out = cli(dir, "doctor")
-      assert_includes out, "✗ fail guard hook (claude: not installed, codex: not installed; mode: warn, repository policy (.ai/policies/enforcement.yml)); install with `soft-foundry hooks install --claude` or `--codex`"
+      assert_includes out, "✗ fail guard hook (claude: not installed, codex: not installed; mode: block, repository policy (.ai/policies/enforcement.yml)); install with `soft-foundry hooks install --claude` or `--codex`"
       cli(dir, "hooks", "install", "--claude")
       _, out = cli(dir, "doctor")
-      assert_includes out, "✓ pass guard hook (claude: installed, codex: not installed; mode: warn"
+      assert_includes out, "✓ pass guard hook (claude: installed, codex: not installed; mode: block"
     end
   end
   # --- Grok ---------------------------------------------------------------------

@@ -1,0 +1,23 @@
+---
+phase: 04-plan
+skill: planning
+status: complete
+commit_sha: '097fe26b3b70648035fb6fa415fafdc75c402e3c'
+started_at: '2026-10-14T15:03:59Z'
+completed_at: '2026-10-14T15:03:59Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- implementation.md
+- testing.md
+- rollout.md
+- rollback.md
+blocking: []
+findings: []
+next: implement
+notes: Performed by the interactive session. Eight ordered steps, each a RED/GREEN
+  pair; control-plane and documentation edits are recorded as deviations because no
+  skill may write them.
+executed_by:
