@@ -1,24 +1,48 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 03-threat-model
 skill: threat-modeling
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 3ef23549bb4013c24f0c885e7f1a64c931cb49d9
+started_at: '2026-10-22T13:51:25Z'
+completed_at: '2026-10-22T13:53:30Z'
 resolved_model:
   profile: adversarial_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- changes/scoped-verification/03-threat-model/attack-surface.md
+- changes/scoped-verification/03-threat-model/trust-boundaries.md
+- changes/scoped-verification/03-threat-model/threats.yml
+- changes/scoped-verification/03-threat-model/mitigations.md
+blocking: []
+findings:
+- 12 threats (THREAT-001..012), 11 requiring attack cases AC-X1..X10 (+ XSS case for
+  THREAT-012); mitigations MIT-001..012.
+- 'Plan: define which records count as claiming a path (MIT-003): only active, well-formed
+  records; closed or abandoned records must not suppress staleness for others. Spec
+  is silent; decide and test.'
+- 'Plan: citation must be depth one, slug validated against the record-name pattern
+  and resolved under changes/ only, no self or cyclic citation (MIT-004, MIT-009).'
+- 'Plan: declaration-change staleness must compare against the declaration as of the
+  evidence commit, including the sizing policy file (MIT-001).'
+- 'Plan: confirm the glob matcher cannot backtrack catastrophically, and that every
+  git call checks exit status rather than treating empty output as no change (MIT-007,
+  MIT-010).'
+- 'Residual risks, accepted: the recorded outcome text is a claim by the recording
+  session and is judged by review, not the gate; ignored files that alter behaviour
+  sit outside the tree hash; overlapping active scopes are surfaced by output and
+  advisory, not refused.'
+- 'Attack phase: realise AC-X1..X10 as repository fixtures; verification should cover
+  the browser view escaping of globs (THREAT-012).'
 next: plan
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: ''
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-22T13:51:25Z'
+  finished_at: '2026-10-22T13:53:29Z'
+  exit_status: 0
+  previous_phase: specify
+  session_id: 5b09d3b1-fa6a-4adf-91ce-82e31b52e6cf
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"
