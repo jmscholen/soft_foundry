@@ -1,10 +1,10 @@
 ---
 phase: '08-attack'
 skill: adversarial-testing
-status: pending
-commit_sha: 53341d576b69b6f708f2fb6786b497bc00c3a0d7
+status: complete
+commit_sha: def00544e7709e1e8264c585a296d302144c9a65
 started_at: '2026-10-23T01:18:30Z'
-completed_at: '2026-10-23T02:05:00Z'
+completed_at: '2026-10-23T02:06:58Z'
 resolved_model:
   profile: adversarial_high
   provider: anthropic
@@ -21,66 +21,59 @@ outputs:
 - changes/scoped-verification/08-attack/evidence/transcript2.txt
 blocking: []
 findings:
-- id: ATTACK-F-001
-  severity: moderate
-  case: ATTACK-013
-  summary: Changed paths come from git diff --name-only, which collapses a rename
-    to its destination. Moving access-control code out of access_control leaves the
-    attack size at touched_doors_plus_smoke, and a record scoped to the source path
-    stays "evidence current" after its file is renamed into another record's scope
-    (a plain delete stales it).
-  failure_prevented: stale evidence passing the gate and a smoke-only attack after
-    access-control code moved; read the diff without rename detection and test a rename.
-- id: ATTACK-F-002
+- id: ATTACK-F-006
   severity: moderate
   case: ATTACK-014
-  summary: Editing metadata git.branch to an existing branch that lacks the change
-    makes stale evidence current (scoped and unscoped), and with a recorded size and
-    run of the evidence tree the whole verify gate passes. The edit is not among the
-    declarations REQ-013 stales on.
-  failure_prevented: stale evidence passing the gate; treat a post-evidence edit of
-    git.branch as a stale cause or require the recorded branch to contain the evidence
-    commit and be reachable from HEAD.
+  summary: 'The remediation of ATTACK-F-002 is partial: a recorded git.branch that
+    is not checked out must contain the evidence commit, but a branch at the evidence
+    commit (an ancestor of HEAD) satisfies that. Repointing git.branch to it makes
+    later code changes invisible, scoped and unscoped, and with a recorded size and
+    a run of the evidence tree the whole verify gate passes.'
+  failure_prevented: stale evidence passing the gate; measure at HEAD unless the recorded
+    branch is HEAD's own branch or descends from HEAD, or treat a post-evidence edit
+    of git.branch as a stale cause.
 - id: ATTACK-F-003
   severity: moderate
   case: ATTACK-015
-  summary: An active record declaring ** claims every path, so another record's evidence
-    stays current after unrelated code lands and the verify gate passes in full; only
-    a non-blocking advisory reports it, and any status other than closed counts as
-    active. Accepted residual in MIT-003, reported for review and judgment.
-  failure_prevented: stale evidence passing the gate through a leftover wide record;
-    consider refusing an over-broad sibling scope or releasing abandoned records.
-- id: ATTACK-F-004
-  severity: minor
-  case: ATTACK-016
-  summary: A full-suite citation slug is not compared exactly on a case-insensitive
-    filesystem (ALPHA resolves to alpha); the cited run is still tree-checked, so
-    no forged result passes.
-  failure_prevented: ambiguous citation targets; require the resolved directory name
-    to equal the slug.
+  summary: 'Unchanged after remediation: an active record declaring ** claims every
+    path, so another record''s evidence stays current after unrelated code lands and
+    the verify gate passes in full; only a non-blocking advisory reports it. Accepted
+    residual of MIT-003, for review and judgment.'
+  failure_prevented: stale evidence passing through a leftover wide record; consider
+    refusing an over-broad sibling scope or releasing abandoned records.
 - id: ATTACK-F-005
   severity: minor
   case: ATTACK-006
-  summary: Recorded size is gated for verification only, so a smaller size in evaluation
-    or attack evidence is not refused (as REQ-011 specifies), and the size line prints
-    an empty reason list "()" when a declaration edit or an unknown commit is the
-    cause.
-  failure_prevented: none beyond clarity; recorded as residual.
+  summary: Recorded size is gated for verification only; a smaller size in evaluation
+    or attack evidence is not refused (REQ-011 as specified). Residual.
+  failure_prevented: none beyond clarity.
+- id: ATTACK-F-001
+  severity: info
+  case: ATTACK-013
+  summary: 'Verified fixed: renames list both sides; the source path stales its record
+    and raises attack size to full_route_sweep.'
+  failure_prevented: n/a
+- id: ATTACK-F-004
+  severity: info
+  case: ATTACK-016
+  summary: 'Verified fixed: a citation slug must equal the directory name exactly.'
+  failure_prevented: n/a
 next: remediate
-notes: 'Local, ephemeral, synthetic: all attacks ran against throwaway git repositories
-  in the system temp directory, loopback only for the ui server; the real repository
-  was not modified. The runtime guard blocked one shell command that named a protected
-  policy path; the policy file was read with the Read tool instead (allowed by permissions.yml),
-  and driver files were written with the Write tool. No provider refusal. Size full_route_sweep,
-  computed by change size --phase attack. Not exercised: a real browser, concurrency
-  of a gate run against a commit, Windows paths.'
+notes: 'Rerun after remediation. Local, ephemeral, synthetic: attacks ran against
+  throwaway git repositories in the system temp directory (loopback only for the ui
+  server); the real repository was not modified. The checkout''s code was run with
+  ruby -Ilib because the installed soft-foundry binary predates the change. Provider
+  keys unset for the driver run. Size full_route_sweep from change size --phase attack.
+  No provider refusal. Not exercised: a real browser, concurrency of a gate run against
+  a commit, Windows paths. cases.yml was invalid YAML (unquoted colons) and was quoted.
+  The run''s commit is HEAD with the runner''s own handoff and metadata edits uncommitted.'
 executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-23T01:18:30Z'
-  finished_at: '2026-10-23T01:26:41Z'
+  started_at: '2026-10-23T02:03:07Z'
+  finished_at: '2026-10-23T02:07:05Z'
   exit_status: 0
   previous_phase: evaluate
-  session_id: 128ace4d-8f17-4755-943d-d6fc136fa5aa
+  session_id: 302e32a4-ca62-40ea-b424-1b2bda076dfb
   cwd: "/Users/jscholen-iou/dev/soft_foundry"

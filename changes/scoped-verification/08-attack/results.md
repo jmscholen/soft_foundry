@@ -1,8 +1,8 @@
 # Attack Results
 
-Commit SHA: 53341d576b69b6f708f2fb6786b497bc00c3a0d7
+Commit SHA: def00544e7709e1e8264c585a296d302144c9a65
 
-Size: `full_route_sweep` (`soft-foundry change size scoped-verification --phase attack`; this record declares no scope, so the whole repository is sized full). Code paths were clean (only this change's handoff and metadata, edited by the runner, were modified). Evidence: `evidence/attack.rb`, `evidence/attack2.rb` and `evidence/attack_lib.rb` drive the real CLI (`ruby -Ilib exe/soft-foundry`) against throwaway repositories; the output is `evidence/transcript.txt` and `evidence/transcript2.txt`.
+Size: `full_route_sweep` (`ruby -Ilib exe/soft-foundry change size --phase attack`, the checkout's own code since the installed binary predates the change; this record declares no scope, so the whole repository is sized full). Code paths were clean (only this change's handoff and metadata, edited by the runner, were modified). This is the rerun after remediation (f94fba6, 327a895): the same drivers were run against the remediated checkout and the transcripts replaced. Evidence: `evidence/attack.rb`, `evidence/attack2.rb` and `evidence/attack_lib.rb` drive the real CLI (`ruby -Ilib exe/soft-foundry`) against throwaway repositories; the output is `evidence/transcript.txt` and `evidence/transcript2.txt`.
 
 ## Authorization envelope
 Local, ephemeral, synthetic data, loopback only, no destructive action outside the temp directories; see `cases.yml` and `attack-plan.md`. No provider refusal occurred.
@@ -23,15 +23,20 @@ Transcript headings in the drivers use their own numbering; this table maps case
 | ATTACK-009 resource exhaustion | THREAT-010 | denied | transcript.txt |
 | ATTACK-010 structural pass read as proof | THREAT-011 | denied | transcript.txt |
 | ATTACK-011 markup and the browser view | THREAT-012 | denied | transcript2.txt |
-| ATTACK-013 rename out of an access-control or claimed path | THREAT-006 | violated | transcript2.txt |
-| ATTACK-014 repoint git.branch to hide staleness | THREAT-001 | violated | transcript2.txt |
+| ATTACK-013 rename out of an access-control or claimed path | THREAT-006 | denied (fixed) | transcript2.txt |
+| ATTACK-014 repoint git.branch to hide staleness | THREAT-001 | violated (variant remains) | transcript2.txt |
 | ATTACK-015 active record with ** hides cross-record change | THREAT-003 | violated | transcript2.txt |
-| ATTACK-016 case-folded citation slug | THREAT-009 | violated | transcript2.txt |
+| ATTACK-016 case-folded citation slug | THREAT-009 | denied (fixed) | transcript2.txt |
 
 There is no ATTACK-012: it was the first browser attempt and is folded into ATTACK-011.
 
+## Rerun after remediation
+ATTACK-013 and ATTACK-016 are denied now: the diff lists both sides of a rename (the source path stales its record and raises the attack size to full_route_sweep), and a citation slug must equal the directory name. ATTACK-014 is only partly fixed (below). ATTACK-015 is unchanged, the accepted residual. Confirmed: a path claimed by another record no longer enlarges a record's verify size, and the size line names a cause when no path is one. No regression was found in ATTACK-001 to 011 (transcript differences are those intended changes and the changed wording).
+
 ## Violations found
-Four, none repaired here (this phase reports).
+Original findings with current status. ATTACK-013 and ATTACK-016 were fixed and verified; ATTACK-014 (variant) and ATTACK-015 remain open. None repaired here (this phase reports).
+
+New finding ATTACK-F-006 (moderate, the ATTACK-014 variant): the remediation requires a recorded `git.branch` that is not checked out to contain the evidence commit. A branch created at, or behind HEAD after, the evidence commit satisfies that, so repointing `git.branch` to such an ancestor still hides later code changes, for scoped and unscoped records, and with a recorded size and a run of the evidence tree the whole `gate verify` passes (transcript2.txt, ATTACK-014). Fix direction: measure at the checked-out HEAD whenever the recorded branch is not HEAD's own branch, or require the recorded branch tip to equal or descend from HEAD, or treat an edit of `git.branch` after the evidence commit as a stale cause.
 
 ATTACK-013 (moderate). The tool lists changed paths with `git diff --name-only`, which collapses a rename to its destination (`lib/a/moved.rb`) and omits the source (`lib/auth/f.rb`; `--no-renames` lists both). Consequences shown: (a) `change size --phase attack` for a record scoped to `lib/a/**` stays `touched_doors_plus_smoke` after access-control code was moved out of `lib/auth/**`; (b) a record scoped to `lib/auth/**` keeps "evidence current" PASS after its file is renamed into another record's scope; a plain delete stales it. A session can then record `full_at_verify` and a run of the evidence tree and the whole gate passes. Affects sizing (REQ-011, MIT-006) and staleness (REQ-003, THREAT-001's goal). Fix direction for remediation: read the diff without rename detection, and add a test with a rename.
 

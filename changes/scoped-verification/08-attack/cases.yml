@@ -1,6 +1,6 @@
-commit_sha: 53341d576b69b6f708f2fb6786b497bc00c3a0d7
+commit_sha: def00544e7709e1e8264c585a296d302144c9a65
 authorization_envelope:
-  target: soft-foundry CLI at the commit above (scoped-verification: scope, shared core, full-suite record, check sizing, advisories, browser view data)
+  target: "soft-foundry CLI at the commit above (scoped-verification: scope, shared core, full-suite record, check sizing, advisories, browser view data)"
   environment: ephemeral   # throwaway git repositories under the system temp directory; synthetic files
   authorized_by: maintainer, by running soft-foundry phase run attack on their own machine
   allowed_surfaces:
@@ -98,7 +98,7 @@ cases:
       - commit_sha unknown, a tree hash, abbreviated, HEAD, option-shaped, a range, empty, an integer, a tag name, upper case
       - metadata branch that does not exist; branch names that look like options or ref expressions; shallow clone without the evidence commit; directory that is not a repository
     expected_safe_behavior: each fails closed with the cause named; no option reaches git
-    observed: every bad commit_sha failed on "commit_sha recorded" and "evidence current: cannot compare"; the option-shaped value created no file; a non-existent branch fell back to the checked-out worktree and went stale; shallow clone failed closed; non-repository refused. A branch that EXISTS but lacks the change is accepted (ATTACK-014)
+    observed: "every bad commit_sha failed on \"commit_sha recorded\" and \"evidence current: cannot compare\"; the option-shaped value created no file; a non-existent branch fell back to the checked-out worktree and went stale; shallow clone failed closed; non-repository refused. A branch that EXISTS but lacks the change is accepted (ATTACK-014)"
     result: denied
     evidence: [evidence/transcript.txt]
   - id: ATTACK-008
@@ -145,7 +145,7 @@ cases:
       - start soft-foundry ui on loopback; call /api/change with a valid, wrong and absent token and with a traversal slug
       - search app.js for unsafe DOM sinks
     expected_safe_behavior: markup stays data; wrong or absent token refused; traversal refused; the view shows the state in words
-    observed: scope returned as a JSON string with content type application/json, nosniff and a CSP of script-src 'self'; wrong and absent token returned 401; traversal returned 404; verify gate state "stale" in words; app.js has no innerHTML, insertAdjacentHTML, document.write, outerHTML or eval and renders scope with textContent. Not driven: a real browser rendering the page
+    observed: "scope returned as a JSON string with content type application/json, nosniff and a CSP of script-src 'self'; wrong and absent token returned 401; traversal returned 404; verify gate state \"stale\" in words; app.js has no innerHTML, insertAdjacentHTML, document.write, outerHTML or eval and renders scope with textContent. Not driven: a real browser rendering the page"
     result: denied
     evidence: [evidence/transcript2.txt]
   - id: ATTACK-013
@@ -156,9 +156,9 @@ cases:
       - git mv lib/auth/f.rb lib/a/moved.rb (access_control is lib/auth/**), then change size --phase attack for a record scoped to lib/a/**
       - record scoped to lib/auth/** whose file is renamed into another record's scope, then gate verify
       - control: the same file deleted
-    expected_safe_behavior: the removal from lib/auth counts as a change there: attack size is the full route sweep and the lib/auth record is stale
-    observed: git diff --name-only reports only the rename destination, so lib/auth/f.rb is not among the changed paths. Attack size stayed touched_doors_plus_smoke ("no changed path matches the access-control globs"). The lib/auth record's "evidence current" PASSED after its file moved away (only the size check, which an attacker satisfies by recording full_at_verify and a run of the evidence tree, failed). The plain delete correctly staled
-    result: violated
+    expected_safe_behavior: "the removal from lib/auth counts as a change there: attack size is the full route sweep and the lib/auth record is stale"
+    observed: "retried after remediation: the diff now lists both sides of the rename (lib/a/moved.rb and lib/auth/f.rb). Attack size for the lib/a/** record is full_route_sweep (reason lib/auth/f.rb: access control); the lib/auth/** record is STALE after the rename (as after a plain delete), for scoped and unscoped records"
+    result: denied
     evidence: [evidence/transcript2.txt]
   - id: ATTACK-014
     threat: THREAT-001
@@ -169,7 +169,7 @@ cases:
       - set metadata git.branch to old-tip (scoped and unscoped records)
       - add a correct recorded size and a run of the evidence tree
     expected_safe_behavior: the branch value does not decide whether code that changed counts; or changing it is a stale cause
-    observed: both records flipped from STALE to "pass evidence current ... on branch old-tip"; with a correct size and run recorded the whole verify gate reported PASS for a record whose code changed after the evidence. The same happens for an unscoped record, so the stacked-branch measurement predates this change, but this change adds the scoped path and the sizing diff base that rely on it and does not mention git.branch among the declarations REQ-013 guards
+    observed: "retried after remediation: a branch that does not contain the evidence commit now fails closed, but the attack branch old-tip was created AT the evidence commit, so it contains it and is accepted: both scoped and unscoped records flipped from STALE to 'evidence current ... on branch old-tip', and with a correct recorded size and a run of the evidence tree the whole verify gate reported PASS for a record whose code changed (lib/a/x.rb) after the evidence. The remediation closes only the variant where the recorded branch lacks the evidence commit; a branch that is an ancestor of HEAD still hides later changes"
     result: violated
     evidence: [evidence/transcript2.txt]
   - id: ATTACK-015
@@ -181,7 +181,7 @@ cases:
       - b records size full_at_verify (what the gate demands) and a passed run of its evidence tree
       - repeat with wide closed; repeat with wide's status set to abandoned
     expected_safe_behavior: b goes stale, or the gate refuses until the overlap is resolved
-    observed: with wide active the entire verify gate PASSED for b although lib/other changed after its evidence; closing wide staled b. A status of abandoned still counts as active, so wide keeps claiming. The only signal is a non-blocking advisory (overlap with active record wide; diff touches paths outside scope), which the specification and MIT-003 accept as a reviewer judgment
+    observed: "retried after remediation: unchanged. With wide (**) active the entire verify gate PASSED for b although lib/other changed after its evidence; closing wide staled b. An abandoned wide still claims, though b's size now demands the targeted-plus-full size (a claimed path no longer enlarges size). Only a non-blocking advisory reports the overlap; accepted residual of MIT-003"
     result: violated
     evidence: [evidence/transcript2.txt]
   - id: ATTACK-016
@@ -191,6 +191,6 @@ cases:
     steps:
       - cite ALPHA where the record is alpha, on a case-insensitive filesystem (macOS default)
     expected_safe_behavior: the slug must match a record name exactly, or the citation is refused
-    observed: the citation resolved to alpha's tests.yml and passed (cites ALPHA). The cited run is real, so no forged result is accepted, but the name check is not exact on a case-insensitive filesystem
-    result: violated
+    observed: "retried after remediation: citing ALPHA where the record is alpha on a case-insensitive filesystem now fails: cited record 'ALPHA' has no verification record"
+    result: denied
     evidence: [evidence/transcript2.txt]
