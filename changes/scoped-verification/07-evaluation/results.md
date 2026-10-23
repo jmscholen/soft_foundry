@@ -1,6 +1,6 @@
 # Evaluation Results
 
-Commit SHA: 916ff15e93211bfaf81d18cf254a590b65f74e3f
+Commit SHA: ea50ad589eb0ac2d3a61a5899b1ad9d23029757d
 
 Size: `full_route_sweep` (`soft-foundry change size --phase evaluate`; this record declares no scope, so the whole repository is sized full). Evidence is the real checkout driven through `evidence/journeys.rb` and `evidence/journeys2.rb`; the transcripts are `evidence/transcript.txt` and `evidence/transcript2.txt`. Code paths were clean (only the runner's metadata edits to this change's handoff and metadata were dirty).
 
@@ -31,5 +31,7 @@ Not exercised by hand: a rename journey (remediation's rename and branch-tip cha
 ## Accessibility observations
 CLI: with NO_COLOR=1 and stdin not a terminal, no command prompted. After removing 112 non-ASCII glyphs, 164 outcome words (pass, fail, skip, warn) and 57 prefixed fact lines (`scope:`, `reason:`, `base:`, `size:`, `phase:`) remain; error messages name the next step (for example "declare a path that exists or remove it", "run the full suite on this tree and record it in tests.yml"). Browser: scope is rendered as the text `Scope: <globs>` and gate state as words (`Stale`, `Fail`, `Pass`) in `app.js` and returned as words by `/api/change`. Not exercised: keyboard-only operation, focus order and screen-reader names of the browser page, because no browser was driven here; the accessibility review must cover them.
 
-## Rerun at 916ff15
+## Rerun at ea50ad5 (after REV-001/REV-002 remediation)
 Both drivers were run again unchanged against HEAD 916ff15 (after the ATTACK-F-006 remediation of `git.branch` repoint). Normalised for session ids and ports the transcripts match the 2fdd159 run line for line, so EVAL-001 to EVAL-013 hold. The `git.branch` repoint case itself was not driven as a journey here; the regression test added in the remediation covers it and verification ran it.
+
+Rerun at ea50ad5: the drivers were run unchanged (hashes in evidence/manifest.yml unchanged for the .rb files) against HEAD ea50ad5, which adds the REV-001/REV-002 changes to lib/soft_foundry/gate.rb and scope.rb and to the shipped sizing policy. Compared with the 916ff15 transcripts with commit and tree hashes masked, outcomes, exit codes and message wording are identical, so EVAL-001 to EVAL-013 hold; no journey failed. Journeys were not extended to the specific REV-001/REV-002 cases; those are covered by the regression tests verification ran, and I did not drive them by hand. Browser, keyboard and screen-reader checks remain unexercised (EVAL-F-002).
