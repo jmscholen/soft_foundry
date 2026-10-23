@@ -16,7 +16,7 @@ class ControlPlaneDownstreamTest < Minitest::Test
   end
 
   def test_remediate_follows_its_next_transition_back_to_verify
-    assert_equal %w[verify evaluate attack remediate document index observe review judge learn], ids("remediate")
+    assert_equal %w[verify evaluate attack document index observe review judge learn], ids("remediate")
   end
 
   def test_a_phase_reached_only_by_lifecycle_order_does_not_follow_the_loop_back

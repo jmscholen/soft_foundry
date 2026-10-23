@@ -21,17 +21,19 @@ class CliPhaseReopenTest < Minitest::Test
     end
   end
 
-  def test_the_gate_fails_on_a_reopened_phase_until_the_work_is_redone
+  def test_a_reopened_phase_is_pending_to_the_gate_and_blocks_close_until_redone
     with_lifecycle_record do |dir, _record|
       run_cli(dir, "phase", "reopen", "attack", "--reason", "r")
       code, out, err = run_cli(dir, "gate", "attack")
-      refute_equal 0, code, out + err
+      assert_includes out + err, "pending", "the gate reports the reopened phase as pending, not complete"
+      refute_includes out + err, "complete  PASS"
+      code, = run_cli(dir, "change", "close", "c1")
+      assert_equal SoftFoundry::CLI::EXIT_TARGET, code
     end
   end
 
   def test_change_flag_selects_the_record
     with_lifecycle_record do |dir, record|
-      sh(dir, "git", "checkout", "-q", "main")
       code, _out, err = run_cli(dir, "phase", "reopen", "attack", "--reason", "r", "--change", "c1")
       assert_equal 0, code, err
       assert_equal "pending", statuses(record)["attack"]

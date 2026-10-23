@@ -30,6 +30,7 @@ require_relative "processes"
 require_relative "session_ledger"
 require_relative "panel"
 require_relative "harness_eval"
+require_relative "phase_reopen"
 
 module SoftFoundry
   class CLI
@@ -917,12 +918,39 @@ module SoftFoundry
       end
     end
 
+    PHASE_RUN_USAGE = "soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex|grok | --panel SHELL,SHELL[,...] [--max-rounds N] [--shell-arg SHELL=ARG]...] [--dry-run] [-- shell args...]"
+    PHASE_REOPEN_USAGE = "soft-foundry phase reopen <phase> --reason TEXT [--change SLUG]"
+    PHASE_USAGE = "#{PHASE_RUN_USAGE}\n       #{PHASE_REOPEN_USAGE}"
+
+    # `phase reopen <phase> --reason TEXT`: reset the phase and everything
+    # downstream so each can be run again. State only; no evidence is touched.
+    def phase_reopen
+      target = @argv.shift or raise ArgumentError, "Usage: #{PHASE_REOPEN_USAGE}"
+      slug = option("--change") || current_slug
+      reason = option("--reason")
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+      raise ArgumentError, "--reason is required: say why the phase is being reopened (it is kept in the record)" if reason.nil?
+
+      record = load_record(slug)
+      phase = plane.phase(target) or raise TargetError, "unknown phase '#{target}'; lifecycle phases: #{plane.phases.map(&:id).join(', ')}"
+      result = PhaseReopen.new(@root, plane: plane, git: git, record: record).call(phase, reason: reason)
+      print_reopen(result)
+      0
+    end
+
+    def print_reopen(result, automatic: nil)
+      label = automatic ? "automatic: #{automatic}" : "manual"
+      @out.puts "phase reopen: reopened #{result.phase.id} (#{label})"
+      result.reset.each { |p| @out.puts "phase reopen: reset #{p.id}" }
+    end
+
     # `phase run <phase>`: one lifecycle phase in a fresh coding-shell
     # session, stamped with how it ran, gated when it returns.
     def phase
       sub = @argv.shift
-      raise ArgumentError, "Usage: soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex|grok | --panel SHELL,SHELL[,...] [--max-rounds N] [--shell-arg SHELL=ARG]...] [--dry-run] [-- shell args...]" unless sub == "run"
-      target = @argv.shift or raise ArgumentError, "Usage: soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex|grok | --panel SHELL,SHELL[,...] [--max-rounds N] [--shell-arg SHELL=ARG]...] [--dry-run] [-- shell args...]"
+      return phase_reopen if sub == "reopen"
+      raise ArgumentError, "Usage: #{PHASE_USAGE}" unless sub == "run"
+      target = @argv.shift or raise ArgumentError, "Usage: #{PHASE_USAGE}"
       slug = option("--change") || current_slug
       chosen = option("--shell")
       panel_spec = option("--panel")
