@@ -971,10 +971,12 @@ module SoftFoundry
         return panel_run(record, phase, panel_spec, rounds_given, chosen, extra, dry_run, shell_arg_values)
       end
       runner = PhaseRunner.new(@root, plane: plane, git: git, record: record)
-      if (why = runner.refusal(phase))
+      if (why = runner.refusal(phase, allow_stale: true))
         @err.puts "#{slug}: cannot run #{phase.id}: #{why}"
         return EXIT_TARGET
       end
+      stale = runner.stale_complete?(phase)
+      stale_sha = stale ? record.handoff(phase)["commit_sha"].to_s[0, 7] : nil
       # Without --shell, a phase whose skill prefers a different provider
       # from the phases that wrote the code gets one; the line says why.
       shell_name = chosen
@@ -996,6 +998,10 @@ module SoftFoundry
         @err.puts "! warn guard: grok runs the guard hook from .claude/settings.json only in a folder it trusts (/hooks-trust or --trust)"
       end
       if dry_run
+        if stale
+          @out.puts "phase reopen: would reopen #{phase.id} (automatic: evidence stale at #{stale_sha})"
+          ([phase] + plane.downstream(phase)).sort_by { |p| plane.phases.index(p) }.select { |p| record.phase_status(p) != "pending" }.each { |p| @out.puts "phase reopen: would reset #{p.id}" }
+        end
         @out.puts "would run #{phase.id} of #{slug} with: #{launch.executable} #{launch.args.map { |a| a == launch.prompt ? '<prompt>' : Shellwords.escape(a) }.join(' ')}"
         @out.puts "--- prompt ---"
         @out.puts launch.prompt
@@ -1003,6 +1009,10 @@ module SoftFoundry
       end
 
       billing_notice(shell: shell_name)
+      if stale
+        result = PhaseReopen.new(@root, plane: plane, git: git, record: record).call(phase, reason: runner.stale_reason(phase), source: "auto")
+        print_reopen(result, automatic: "evidence stale at #{stale_sha}")
+      end
       runner.begin!(phase, launch)
       @out.puts "running #{phase.id} of #{slug} in a fresh #{shell_name} session (#{plane.skill(phase.skill).name} skill); executed_by recorded in #{relative(record.handoff_path(phase))}"
       @out.flush

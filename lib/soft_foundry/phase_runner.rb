@@ -89,13 +89,17 @@ module SoftFoundry
 
     # Why the phase cannot be run now, or nil. Everything here is also
     # what the gate would say afterwards; checking first saves a session.
-    def refusal(phase)
+    #
+    # With `allow_stale`, a phase that is complete but whose evidence the
+    # gate reports stale passes the "already complete" refusal only (the
+    # caller reopens it); every other refusal still applies.
+    def refusal(phase, allow_stale: false)
       return "change #{@record.slug} is exploring; the exploring stage is worked with the person, not by a runner (run `change vet` first)" if @record.exploring?
       status = @record.metadata["status"].to_s
-      return "change #{@record.slug} is #{status}" if %w[closed judged].include?(status)
+      return "change #{@record.slug} is #{status}" if %w[closed released judged].include?(status)
       # A complete phase is rerun only once the work it rests on has
       # changed, which the gate reports as stale evidence.
-      if @record.phase_status(phase) == "complete" && !Gate.new(@record, git: @git).evaluate(phase).stale?
+      if @record.phase_status(phase) == "complete" && !(allow_stale && stale_complete?(phase))
         return "#{phase.output} is already complete; rerun it only after the work it rests on has changed (the gate will say when it is stale)"
       end
       prev = @plane.effective_predecessor(phase, skip: ->(p) { @record.skippable?(p) }) { |p| @record.phase_status(p) }
@@ -103,6 +107,17 @@ module SoftFoundry
         return "#{phase.output} cannot start: its predecessor #{prev.output} is #{@record.phase_status(prev) || 'missing'}"
       end
       nil
+    end
+
+    # The phase is complete and the gate's "evidence current" check fails.
+    def stale_complete?(phase)
+      @record.phase_status(phase) == "complete" && Gate.new(@record, git: @git).evaluate(phase).stale?
+    end
+
+    # Why a stale phase is being reopened, for the history entry.
+    def stale_reason(phase)
+      sha = @record.handoff(phase)&.fetch("commit_sha", nil).to_s
+      "gate check 'evidence current' failed: #{phase.output} is stale, its evidence describes #{sha[0, 7]} and application, test, or infrastructure code has changed since"
     end
 
     # The instructions the fresh session receives. Deliberately short: it
