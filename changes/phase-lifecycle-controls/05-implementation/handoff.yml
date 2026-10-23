@@ -1,24 +1,79 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 05-implementation
 skill: implementation
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: d2050f61e44b44d5d9dd825c354cf7a520da4bf6
+started_at: '2026-10-23T18:10:38Z'
+completed_at: '2026-10-23T18:58:00Z'
 resolved_model:
   profile: coding_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- changes/phase-lifecycle-controls/05-implementation/log.md
+- changes/phase-lifecycle-controls/05-implementation/decisions.md
+- changes/phase-lifecycle-controls/05-implementation/deviations.md
+- changes/phase-lifecycle-controls/05-implementation/owed-control-plane-and-docs.md
+- lib/soft_foundry/record_lock.rb
+- lib/soft_foundry/phase_reopen.rb
+- lib/soft_foundry/parallel_run.rb
+- lib/soft_foundry/release.rb
+- test/record_lock_test.rb
+- test/phase_reopen_test.rb
+- test/phase_run_parallel_test.rb
+- test/release_state_test.rb
+blocking: []
+findings:
+- id: IMPL-001
+  severity: major
+  summary: 'The control plane, docs, README and harness-eval cases (plan step 8) are
+    not written because the implementation skill may not write them (deviation D1;
+    exact text in owed-control-plane-and-docs.md). Until .ai/workflow.yml carries
+    isolated_phases: [evaluate, attack], phase run --parallel refuses. A maintainer
+    must apply it before the change closes; AC-045 (harness cases), AC-050 and the
+    shipped-list half of AC-018 cannot be verified until then.'
+- id: IMPL-002
+  severity: major
+  summary: 'Session marker (SOFT_FOUNDRY_PHASE) is an environment variable: a session
+    can unset it in a shell and then run phase reopen, change release or change discharge.
+    This is a guard against accident, not a sandbox (PLAN-001, TM-001). Attack should
+    run PAC-01; docs must say so (owed-control-plane-and-docs.md).'
+- id: IMPL-003
+  severity: minor
+  summary: 'REQ-012 and ps: --env values are masked in the soft-foundry process title
+    after argument parsing, but a window of microseconds before that and the shell
+    history still hold the typed value (D6). Evaluate should check ps during a run
+    and attack should look for any other path a value could leave the child environment.'
+- id: IMPL-004
+  severity: minor
+  summary: 'Judgment-carried items and change close (PLAN-002): change close on a
+    released record treats discharged carried items as the judgment confirmation (labelled
+    change discharge), so there is one owed list and no second --confirm. Review should
+    check this path in cli.rb change_close, including --force, which skips the open-items
+    check but not the judgment confirmation.'
+- id: IMPL-005
+  severity: minor
+  summary: 'Reset semantics (D2): downstream follows only next transitions from the
+    reopened phase, so conditional loops never widen a reset and downstream(judge)
+    is [learn]. AC-014 holds as pending-and-close-refused, not as a failing gate (D3).
+    Review should confirm both readings.'
+- id: IMPL-006
+  severity: minor
+  summary: 'Verification note: the suite takes about ten minutes (781 runs at the
+    last full run, keys unset, all passing; check and eval pass). The red commits
+    are 053562b, 8e3c940, 320322a, ed4d4be, b04c813, 31d72d1, 044f2b9, each followed
+    by its green commit. Timing assertions (AC-034) run real stub processes and need
+    an unloaded machine.'
 next: verify
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: Shell guard (PreToolUse) was active in this session in block mode. No existing
+  test file was edited. The runner writes executed_by; it was not touched.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-23T18:10:38Z'
+  finished_at: '2026-10-23T18:57:12Z'
+  exit_status: 0
+  previous_phase: plan
+  session_id: 1aa7b3e8-4a02-46b8-8a61-a285f0e6df2e
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"
