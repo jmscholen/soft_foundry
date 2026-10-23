@@ -1,14 +1,14 @@
-commit_sha: 327a89518ea66b5b1d46fc3227c3fbdee4b8a43f
+commit_sha: 2294f861cb4d1d8d5ff0bc054f62a03c277f4763
 size: full_at_verify   # computed by `soft-foundry change size`: no scope declared, whole-repository scope is sized full
 full_suite:
-  tree: 6835f391a7d9efd4b6108aa7c8a78d41ad53256f   # git rev-parse HEAD^{tree}
+  tree: baf599520e439abcedd57f93262d7bd2ad80cf3a   # git rev-parse HEAD^{tree}
   command: bundle exec rake test (provider API keys unset)
   outcome: passed
 checks:
   - id: CHECK-001
     kind: tests
     command: bundle exec rake test   # full suite, provider keys unset
-    result: pass   # 631 runs, 4373 assertions, 0 failures, 0 errors, 0 skips
+    result: pass   # 632 runs, 4393 assertions, 0 failures, 0 errors, 0 skips
     evidence: evidence/rake-test.txt
     criteria: [AC-001, AC-002, AC-003, AC-004, AC-005, AC-006, AC-007, AC-008, AC-009, AC-010, AC-011, AC-012, AC-013, AC-014, AC-015, AC-016, AC-017, AC-018, AC-019, AC-020, AC-021, AC-022]
     red_commit: 8287d58

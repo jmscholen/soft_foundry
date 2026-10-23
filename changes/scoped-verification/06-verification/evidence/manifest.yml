@@ -1,14 +1,14 @@
-commit_sha: 327a89518ea66b5b1d46fc3227c3fbdee4b8a43f
+commit_sha: 2294f861cb4d1d8d5ff0bc054f62a03c277f4763
 artifacts:
   - path: evidence/rake-test.txt
     produced_by: bundle exec rake test
-    sha256: 029db7ee9627e0935f0978e43d1eb70080ca83024c3577140e4a530abede7ca2
+    sha256: 0d94a4a82acce6d2228f0227e6b9eb9c277dde26985143744577c6f57d04f2cd
   - path: evidence/check.txt
     produced_by: ruby -Ilib exe/soft-foundry check
     sha256: 2be6498003ac7633f001dde7fb6c82d20d270c7515d869ca3f7276b8c1f3730e
   - path: evidence/ci.txt
     produced_by: ruby -Ilib exe/soft-foundry ci
-    sha256: 88c856239b35b7bb926b53d47e23e4cfeb4708e4b1e1f329dd615d3bf3738b89
+    sha256: 367a76ff3928f051a0daeb4dee091fb76a70629ffc02a33b978f31d05ae2f762
   - path: evidence/eval.txt
     produced_by: ruby -Ilib exe/soft-foundry eval
     sha256: 5e94609d014ddc58a21fb5ce4b7ce7cb9eb59e837b85ced8fe8e802433389009

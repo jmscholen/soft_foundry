@@ -1,10 +1,10 @@
 ---
 phase: 06-verification
 skill: verification
-status: pending
-commit_sha: 327a89518ea66b5b1d46fc3227c3fbdee4b8a43f
+status: complete
+commit_sha: 2294f861cb4d1d8d5ff0bc054f62a03c277f4763
 started_at: '2026-10-23T01:01:59Z'
-completed_at: '2026-10-23T02:20:00Z'
+completed_at: '2026-10-23T03:30:00Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -21,10 +21,11 @@ blocking: []
 findings:
 - id: VER-001
   severity: minor
-  summary: Rerun at 327a895 (adds the size --phase slug fix, RED 2ecd7da, GREEN 327a895).
-    Full suite 631 runs, 4373 assertions, 0 failures, recorded under full_suite for
-    tree 6835f39 (size full_at_verify); check, ci and eval pass (18 passed, 1 live
-    case skipped). RED commit 8287d58 for the main test file is unchanged.
+  summary: Rerun at 2294f86 (adds the ATTACK-F-006 remediation, a git.branch edit
+    after the evidence commit is a stale cause). Full suite 632 runs, 4393 assertions,
+    0 failures, recorded under full_suite for tree baf5995 (size full_at_verify);
+    check, ci and eval pass (18 passed, 1 live case skipped). RED commit 8287d58 for
+    the main test file is unchanged.
 - id: VER-002
   severity: minor
   summary: DEV-001 is resolved by commit 73298e6 (policy, templates, docs, six harness-eval
@@ -47,9 +48,9 @@ executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-23T01:53:05Z'
-  finished_at: '2026-10-23T02:01:15Z'
+  started_at: '2026-10-23T03:07:07Z'
+  finished_at: '2026-10-23T03:15:12Z'
   exit_status: 0
-  previous_phase: verify
-  session_id: 533a4d32-e1e3-4d8b-b487-ca3faa5508e0
+  previous_phase: remediate
+  session_id: cb73b140-18c1-4494-859b-0aabba39345a
   cwd: "/Users/jscholen-iou/dev/soft_foundry"
