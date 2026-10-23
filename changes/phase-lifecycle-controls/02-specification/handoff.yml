@@ -1,24 +1,60 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 02-specification
 skill: specification
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: '0019e26e6d700366138b104bfdbd13ffd03c9ba1'
+started_at: '2026-10-23T18:02:12Z'
+completed_at: '2026-10-23T18:06:00Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- changes/phase-lifecycle-controls/02-specification/specification.md
+- changes/phase-lifecycle-controls/02-specification/requirements.yml
+- changes/phase-lifecycle-controls/02-specification/acceptance-criteria.yml
+- changes/phase-lifecycle-controls/02-specification/readiness.md
+blocking: []
+findings:
+- id: SPEC-001
+  severity: major
+  summary: The guard resolves the active skill from a per-session environment marker
+    (REQ-013). Threat model must examine an agent shadowing or spoofing the marker
+    inside a Bash command, and the strict handling of unknown or non-isolated values.
+- id: SPEC-002
+  severity: major
+  summary: phase reopen, change release, and change discharge must refuse inside a
+    phase-run session (REQ-007, REQ-018); the refusal rests on the same marker, so
+    threat model and plan should treat the marker as a trust boundary.
+- id: SPEC-003
+  severity: major
+  summary: 'released is a possible skip route around close. Mitigations specified:
+    approving judgment required, at least one item, undischarged judgment items carried
+    over, ci still fails neither-closed-nor-released (REQ-018, REQ-020). Attack phase
+    should try each.'
+- id: SPEC-004
+  severity: minor
+  summary: Planning decides the lock mechanism, marker variable name, how the guard
+    learns the isolated list, and how parallel evidence is committed (the runner does
+    not commit). Planning must also read .ai/harness-evals/cases and .ai/policies,
+    which this phase could not (DISC-005).
+- id: SPEC-005
+  severity: minor
+  summary: Bash is checked against deny sets only; the guard refused a lib/ read in
+    this phase, so specification relies on discovery's account of lib/ and did not
+    re-verify it. Planning should confirm the cited behaviors against code.
 next: threat_model
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: Specification written without reading lib/ (guard denied it for this skill);
+  code behavior is taken from discovery. surfaces.policy is false and the specification
+  states why no policy requirement exists. Accessibility requirements REQ-024 and
+  REQ-025 satisfy surfaces.accessibility.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-23T18:02:12Z'
+  finished_at: '2026-10-23T18:05:58Z'
+  exit_status: 0
+  previous_phase: discover
+  session_id: 9b48047b-df96-4437-98c9-99941de521dc
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

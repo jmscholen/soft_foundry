@@ -3,8 +3,308 @@
 # recorded requirement change, never a downstream edit.
 criteria:
   - id: AC-001
-    requirements: [REQ-001]
-    given: TBD
-    when: TBD
-    then: TBD
+    requirements: [REQ-001, REQ-002]
+    given: a gated-track record with verify, evaluate, attack, review complete and judge pending
+    when: "`soft-foundry phase reopen evaluate --reason 'fixture changed'` is run"
+    then: evaluate, attack, and review handoffs are pending, verify and implement stay complete, the exit status is 0, and the output lists the phases reset one per line
     verified_by: []   # test names, EVAL IDs, or ATTACK IDs, filled by later phases
+  - id: AC-002
+    requirements: [REQ-002]
+    given: a record with remediate complete and verify through judge complete
+    when: "`phase reopen remediate --reason r` is run"
+    then: remediate, verify, evaluate, attack, review, and judge are all pending (the remediate-to-verify transition is followed), and phases before remediate are untouched
+    verified_by: []
+  - id: AC-003
+    requirements: [REQ-002]
+    given: a record where optional phases document and index were never run (pending) and are waived
+    when: "`phase reopen attack --reason r` is run"
+    then: the output reports only phases that were actually reset, and the pending phases are not rewritten (their handoff files are byte-identical)
+    verified_by: []
+  - id: AC-004
+    requirements: [REQ-003]
+    given: a reset phase directory containing evidence files
+    when: a reopen resets it
+    then: every file in the phase directory other than handoff.yml is byte-identical before and after, the handoff has status pending with commit_sha, completed_at, executed_by, and outputs cleared, and no file outside the affected handoffs and metadata.yml differs (git diff names only those)
+    verified_by: []
+  - id: AC-005
+    requirements: [REQ-004]
+    given: a record that already has a `reopenings` entry from `change reopen`
+    when: "`phase reopen` runs"
+    then: "`reopenings` is unchanged, `phase_reopenings` gains one entry with at, phase, reset, from_commit, reason, source manual, and previous (status, commit_sha, completed_at, session_id per reset phase)"
+    verified_by: []
+  - id: AC-006
+    requirements: [REQ-004, REQ-023]
+    given: a record created before this change with no `phase_reopenings` key
+    when: "`soft-foundry check` and `change status` are run"
+    then: both succeed with the same results as before
+    verified_by: []
+  - id: AC-007
+    requirements: [REQ-005]
+    given: a complete commit-bound phase whose gate fails only "evidence current" because code changed
+    when: "`phase run <phase>` is run with a stub shell"
+    then: the phase and its downstream are reset first with a phase_reopenings entry of source auto naming the failed check and stale commit, a line states what was reset, and the stub session then runs the phase
+    verified_by: []
+  - id: AC-008
+    requirements: [REQ-005]
+    given: a complete phase whose evidence is current
+    when: "`phase run <phase>` is run"
+    then: it is refused as today, no handoff or metadata.yml bytes change, and no history entry is added
+    verified_by: []
+  - id: AC-009
+    requirements: [REQ-005, REQ-006]
+    given: a stale complete phase whose predecessor is not complete
+    when: "`phase run <phase>` is run"
+    then: the run is refused for the predecessor and nothing is reset
+    verified_by: []
+  - id: AC-010
+    requirements: [REQ-006]
+    given: a judged record
+    when: the judge phase is reopened
+    then: status is in_progress and current_phase is judge; for a record with status intake, status is unchanged
+    verified_by: []
+  - id: AC-011
+    requirements: [REQ-001, REQ-022]
+    given: records with status closed, released, exploring, and awaiting_human
+    when: "`phase reopen` is run on each"
+    then: each is refused with a message naming the status and what to do, and no file changes
+    verified_by: []
+  - id: AC-012
+    requirements: [REQ-007, REQ-022]
+    given: an empty reason, a reason of 501 characters, and a reason containing a control character
+    when: "`phase reopen` is run with each"
+    then: each is refused and nothing is written
+    verified_by: []
+  - id: AC-013
+    requirements: [REQ-007]
+    given: the runner's phase-session marker is set in the environment
+    when: "`phase reopen`, `change release`, or `change discharge` is run"
+    then: each is refused with no write, while a runner-initiated auto-reopen before session start succeeds
+    verified_by: []
+  - id: AC-014
+    requirements: [REQ-007]
+    given: a reopened phase
+    when: its gate is run before the work is redone
+    then: the gate fails (pending phase, not complete); no command in this change marks a phase complete or edits an evidence file
+    verified_by: []
+  - id: AC-015
+    requirements: [REQ-008]
+    given: a gated record past specification
+    when: specify is reopened with a reason
+    then: specify and everything downstream are pending, the history entry exists, and `change close` refuses until all are re-completed with passing gates
+    verified_by: []
+  - id: AC-016
+    requirements: [REQ-022]
+    given: a phase and its entire downstream already pending
+    when: "`phase reopen` is run on it"
+    then: it is refused with "nothing to reset" and nothing is written
+    verified_by: []
+  - id: AC-017
+    requirements: [REQ-022]
+    given: a failure injected between the handoff resets and the metadata write
+    when: a reopen is attempted
+    then: after the failure the record is either entirely unchanged or entirely reset with its history entry, and every YAML file parses
+    verified_by: []
+  - id: AC-018
+    requirements: [REQ-009]
+    given: workflow.yml with isolated_phases naming implement, review, judge, or an unknown id
+    when: "`soft-foundry check` is run"
+    then: it fails naming the offending id; with the shipped list (evaluate, attack) it passes
+    verified_by: []
+  - id: AC-019
+    requirements: [REQ-010]
+    given: two isolated phases with satisfied preconditions and stub shells that each sleep and write their own directory
+    when: "`phase run evaluate attack --parallel` is run"
+    then: both sessions run concurrently, each handoff ends complete or reports its own status, and the invoked sessions are fresh contexts with only their own skill
+    verified_by: []
+  - id: AC-020
+    requirements: [REQ-010, REQ-022]
+    given: a parallel request naming a non-isolated phase, a duplicate phase, or a phase a single run would refuse
+    when: "`phase run ... --parallel` is run"
+    then: it is refused before any session starts and no file changes
+    verified_by: []
+  - id: AC-021
+    requirements: [REQ-010]
+    given: attack whose predecessor evaluate is pending and verify is complete
+    when: both are named in one parallel run
+    then: the run is accepted; named alone, attack is refused for its incomplete predecessor
+    verified_by: []
+  - id: AC-022
+    requirements: [REQ-011]
+    given: "`--env DATABASE_URL=db_{phase}`"
+    when: a parallel run of evaluate and attack starts
+    then: the evaluate session's environment holds db_evaluate and the attack session's holds db_attack; a name starting SOFT_FOUNDRY_ or violating the pattern is refused
+    verified_by: []
+  - id: AC-023
+    requirements: [REQ-011]
+    given: a parallel run with no --env
+    when: it starts
+    then: a line beginning `warn:` says isolation is the adopter's responsibility, and the run proceeds
+    verified_by: []
+  - id: AC-024
+    requirements: [REQ-012]
+    given: an --env value containing a distinctive secret string
+    when: a run completes or fails
+    then: the string appears in no file under changes/, no stdout or stderr line, no `ps` output, and no error message
+    verified_by: []
+  - id: AC-025
+    requirements: [REQ-013]
+    given: two concurrent sessions carrying markers evaluate and attack while metadata.yml current_phase says something else
+    when: each attempts a write permitted only to the other's skill
+    then: the guard reports or refuses each according to its own marker's skill, not current_phase
+    verified_by: []
+  - id: AC-026
+    requirements: [REQ-013]
+    given: a marker naming an unknown phase, or implement during a parallel run
+    when: the guard evaluates a tool call
+    then: it records a violation handled per enforcement.yml and does not fall back silently
+    verified_by: []
+  - id: AC-027
+    requirements: [REQ-013, REQ-023]
+    given: a single-phase run with no marker beyond the runner's own, and an interactive session with none
+    when: the guard resolves the active skill
+    then: results match the pre-change behavior (existing guard and panel tests pass unmodified)
+    verified_by: []
+  - id: AC-028
+    requirements: [REQ-014]
+    given: a parallel run in which both sessions finish within the same instant, repeated at least 20 times
+    when: it completes
+    then: metadata.yml and every handoff parse, both phases' statuses are recorded, and no update is lost
+    verified_by: []
+  - id: AC-029
+    requirements: [REQ-014]
+    given: a lock held by another process for more than 10 seconds
+    when: the runner needs to update the record
+    then: it fails naming the lock and what to do, without writing
+    verified_by: []
+  - id: AC-030
+    requirements: [REQ-014]
+    given: both parallel phases complete
+    when: the run ends
+    then: current_phase is the first lifecycle phase not complete
+    verified_by: []
+  - id: AC-031
+    requirements: [REQ-015]
+    given: a parallel run where one session exits non-zero and the other succeeds
+    when: the run ends
+    then: "output has one `phase <id>: pass` or `phase <id>: fail` line per phase, the surviving session ran to completion, and the exit status is non-zero"
+    verified_by: []
+  - id: AC-032
+    requirements: [REQ-015]
+    given: a parallel run
+    when: the sessions finish with HEAD unchanged
+    then: both handoffs carry the same commit_sha equal to the start HEAD and the runner made no commit; if a stub session commits, a `warn:` line is printed and the exit status is non-zero
+    verified_by: []
+  - id: AC-033
+    requirements: [REQ-015]
+    given: a parallel run in progress
+    when: the run is interrupted
+    then: every child process receives the signal and none remains running
+    verified_by: []
+  - id: AC-034
+    requirements: [REQ-016]
+    given: two stub sessions that each take 2 seconds
+    when: run with --parallel
+    then: total wall-clock is under 3 seconds; `phase reopen` on a full-lifecycle record takes under 1 second
+    verified_by: []
+  - id: AC-035
+    requirements: [REQ-017]
+    given: a record at lifecycle end with an APPROVED judgment
+    when: "`change release --item GOLIVE-1='switch flag on'` is run"
+    then: status is released and the release block holds at, commit, and the item; the change need not be merged
+    verified_by: []
+  - id: AC-036
+    requirements: [REQ-017, REQ-018]
+    given: no items, a duplicate id, a malformed id, an empty description, and a 501-character description
+    when: "`change release` is run with each"
+    then: each is refused and nothing is written
+    verified_by: []
+  - id: AC-037
+    requirements: [REQ-018]
+    given: judgments that are missing, incomplete, BLOCKED, or REJECTED
+    when: "`change release --item X=y` is run"
+    then: each is refused naming the judgment problem
+    verified_by: []
+  - id: AC-038
+    requirements: [REQ-018]
+    given: judgment evidence with undischarged items U-1 and U-2
+    when: release is run with a different item only
+    then: the release block contains U-1 and U-2 as open items in addition, with their own ids, and no second list exists
+    verified_by: []
+  - id: AC-039
+    requirements: [REQ-018, REQ-020]
+    given: a merged change that is in_progress or judged
+    when: "`soft-foundry ci` is run"
+    then: it fails as today telling the person to close or release
+    verified_by: []
+  - id: AC-040
+    requirements: [REQ-020]
+    given: a merged released change with two open items
+    when: "`soft-foundry ci` is run"
+    then: "it exits 0, prints `released: <slug>: 2 open item(s): ID, ID`, and prints an advisory; with every item discharged but status still released it fails with \"run `soft-foundry change close`\""
+    verified_by: []
+  - id: AC-041
+    requirements: [REQ-020]
+    given: a released record whose release block is missing, empty, or malformed
+    when: "`soft-foundry check` is run"
+    then: it fails naming the record and the defect
+    verified_by: []
+  - id: AC-042
+    requirements: [REQ-019]
+    given: a released record with open items A and B
+    when: "`change discharge A --note n` is run, then `change close`"
+    then: A is recorded discharged with time, commit, and note; close is refused naming B; after discharging B close succeeds and status is closed; discharging an unknown or already discharged item, or on a non-released record, is refused
+    verified_by: []
+  - id: AC-043
+    requirements: [REQ-019, REQ-023]
+    given: a non-released record
+    when: "`change close` is run"
+    then: behavior and output match the pre-change tests, including --force and --confirm
+    verified_by: []
+  - id: AC-044
+    requirements: [REQ-021]
+    given: a released record on a branch that also has an open change
+    when: gate, scope check, snapshot, board, ps, and learn promote run
+    then: the released record is not gate-evaluated for staleness, claims no scope, appears as released with its open-item count and not as closed, and cannot be run, reopened, or re-released
+    verified_by: []
+  - id: AC-045
+    requirements: [REQ-021, REQ-027]
+    given: a harness-eval case planting a record with status released
+    when: "`soft-foundry eval` runs"
+    then: the planted status is accepted and the case reaches its expected check
+    verified_by: []
+  - id: AC-046
+    requirements: [REQ-024]
+    given: output of every new command in success and failure cases, piped (non-TTY) and with NO_COLOR set
+    when: it is captured
+    then: it contains no escape sequence or non-ASCII character needed for meaning, each outcome is a word, lines use the stable prefixes, and no command prompts on stdin
+    verified_by: []
+  - id: AC-047
+    requirements: [REQ-024]
+    given: each refusal path in AC-011, AC-012, AC-020, AC-036, AC-037
+    when: its message is read
+    then: it states what went wrong and the next action
+    verified_by: []
+  - id: AC-048
+    requirements: [REQ-025]
+    given: the UI served with a released record
+    when: inspected in the page source
+    then: the state shows the text "released" and the item count, open items are in a list or table with header cells, and no state is conveyed by color alone
+    verified_by: []
+  - id: AC-049
+    requirements: [REQ-026]
+    given: a record with a phase reopen, an auto reopen, a release, and a discharge
+    when: the snapshot timeline and `change status` are read
+    then: phase reopens appear with reason, reset phases, and commit distinct from "reopened for exploring", auto reopens are labelled automatic, and release and discharge events and open items are shown
+    verified_by: []
+  - id: AC-050
+    requirements: [REQ-027]
+    given: the finished change
+    when: "`soft-foundry check` is run and the docs and usage text are read"
+    then: check passes; workflow.yml, the metadata template, schemas.md, .ai/README.md, README.md, docs/user/, the usage text, and the `ps` table all name phase reopen, --parallel/--env, release, and discharge
+    verified_by: []
+  - id: AC-051
+    requirements: [REQ-023]
+    given: the full existing test suite
+    when: it runs with provider keys unset
+    then: it passes with no existing expectation edited
+    verified_by: []

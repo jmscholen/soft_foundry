@@ -1,8 +1,325 @@
 # Implementation-independent requirements. IDs are stable and referenced by
 # acceptance criteria, tests, evaluation journeys, and attack cases.
 requirements:
+  # ---- Phase reopen (request outcome 1) ----
   - id: REQ-001
-    category: functional   # functional | accessibility | security | policy | data | failure | performance | operations | infrastructure | observability
-    statement: TBD
-    rationale: TBD
-    source: 00-intake/request.md
+    category: functional
+    statement: >-
+      `soft-foundry phase reopen <phase> --reason TEXT` resets the named phase
+      and every downstream phase so each can be run again, on any track, for a
+      record whose status is intake, in_progress, or judged. On the iterative
+      track it is refused while the record is exploring (the person uses
+      `change reopen`). The command prompts for nothing; every decision is a flag.
+    rationale: Today only the iterative-only, wipe-everything `change reopen` exists, so people hand-edit handoffs.
+    source: 00-intake/request.md (desired outcome 1)
+  - id: REQ-002
+    category: functional
+    statement: >-
+      "Downstream" of phase P is every lifecycle phase after P in lifecycle
+      order (optional, loop, and waived phases included), plus every phase
+      reachable from P or from those phases through `transitions` edges, taken
+      to a fixed point. Reopening `remediate` therefore also resets verify,
+      evaluate, attack, review, and judge. Phases already `pending` are left
+      untouched and are not reported as reset.
+    rationale: Resetting too little leaves stale evidence passing; too much discards valid evidence (DISC unknowns).
+    source: 01-discovery/unknowns.md; .ai/workflow.yml transitions
+  - id: REQ-003
+    category: data
+    statement: >-
+      Resetting a phase sets its handoff `status` to `pending`, clears
+      `commit_sha`, `completed_at`, `executed_by`, and `outputs`, appends a note
+      naming the reopen, and leaves every evidence file in the phase directory
+      byte-for-byte unchanged. No file outside the affected handoffs and
+      `metadata.yml` is written, and no application, test, or control-plane
+      file is touched.
+    rationale: Reopening resets state, it never edits or deletes evidence (intake constraint).
+    source: 00-intake/assumptions.md; request.md constraints
+  - id: REQ-004
+    category: data
+    statement: >-
+      Each reopen appends one entry to a new `metadata.yml` list
+      `phase_reopenings` with `at`, `phase`, `reset` (the phase ids actually
+      reset), `from_commit` (HEAD at the time), `reason`, `source`
+      (`manual` or `auto`), and `previous` (for each reset phase: its prior
+      status, `commit_sha`, `completed_at`, and `executed_by.session_id`). The
+      existing `reopenings` list keeps its meaning (return to exploring) and is
+      neither read nor written by `phase reopen`; a record with no
+      `phase_reopenings` key is valid.
+    rationale: DISC-002; reusing `reopenings` would mislabel history and confuse `change reopen` and the timeline.
+    source: 01-discovery/findings DISC-002
+  - id: REQ-005
+    category: functional
+    statement: >-
+      When `phase run <phase>` finds the phase `complete` and its gate reports
+      the "evidence current" check failed (stale), it performs a reopen of that
+      phase with source `auto` and a reason that names the failed check and the
+      stale commit, prints a line stating what was reset, and then runs the
+      phase. A `complete` phase whose evidence is current is still refused, as
+      are phases the run already refuses for other reasons (closed, released,
+      judged, exploring, incomplete predecessor); in those cases nothing is reset.
+    rationale: Stale phases cannot be re-run today without hand-editing the handoff.
+    source: 00-intake/request.md (desired outcome 1)
+  - id: REQ-006
+    category: functional
+    statement: >-
+      After a reopen the record's `current_phase` is the reopened phase and a
+      `judged` status becomes `in_progress`; any other permitted status is unchanged. The reopened phase's own predecessor
+      requirement is unchanged: a phase whose predecessor is not complete still
+      cannot be run.
+    rationale: The record must point where the work resumes without bypassing ordering.
+    source: derived from workflow.yml gate rules
+  - id: REQ-007
+    category: security
+    statement: >-
+      A reopen cannot be used to forge or launder evidence: it changes only
+      state through the tool, always carries a non-empty reason (at most 500
+      characters, no control characters) and the reopened commit, never writes
+      evidence files, never marks any phase `complete`, and does not alter
+      `implementation_may_not_grade_itself`, `final_judgment_required`, any
+      skill's requirements, or the rule that a failed or stale gate is fixed by
+      redoing the work. `phase reopen` is refused when invoked from inside a
+      phase-run session (the runner's session marker is present), so a phase
+      cannot reset another phase's handoff; the runner's own auto-reopen runs
+      before the session starts and is not subject to that refusal.
+    rationale: A reset path is a way to make a failing record look fresh; it must leave a trace and stay out of agents' hands.
+    source: request.md constraints; unknowns "forged evidence"
+  - id: REQ-008
+    category: functional
+    statement: >-
+      Reopening a phase that is the specification, or earlier, is permitted on
+      the gated track and is the recorded requirement change for a locked
+      specification: it appears in `phase_reopenings`, and every phase from the
+      reopened one onward must be re-completed with passing gates before the
+      change can close.
+    rationale: Locked criteria may change only through a recorded requirement change.
+    source: 02-specification/acceptance-criteria.yml header
+
+  # ---- Parallel isolated runs (request outcome 2) ----
+  - id: REQ-009
+    category: functional
+    statement: >-
+      `.ai/workflow.yml` declares a list `isolated_phases` (initially evaluate
+      and attack). `soft-foundry check` fails if the list names anything but
+      lifecycle phases, or names implement, review, judge, or any phase that
+      writes application code; the list is read from the workflow, never
+      hard-coded in the CLI.
+    rationale: "Intake assumption: the workflow declares which phases are isolated, not Ruby."
+    source: 00-intake/assumptions.md
+  - id: REQ-010
+    category: functional
+    statement: >-
+      `soft-foundry phase run <phase> <phase>... --parallel` (two or more
+      phases) runs those phases concurrently, each in its own fresh session with
+      only its own skill, exactly as a single `phase run` would. It is refused,
+      with nothing started and nothing written, if any named phase is not in
+      `isolated_phases`, a phase is named twice, or any phase would be refused
+      by a single `phase run` (stale-reopen aside, REQ-005 applies per phase).
+      A named phase whose lifecycle predecessor is another named phase counts as
+      satisfied for starting, provided that predecessor's own predecessor is
+      complete; the gate for the later phase still requires its predecessor
+      complete when the gate is run.
+    rationale: Evaluate and attack already use private state and need not run one after another; attack's predecessor is evaluate.
+    source: 00-intake/request.md (desired outcome 2)
+  - id: REQ-011
+    category: functional
+    statement: >-
+      `phase run` accepts repeatable `--env NAME=VALUE`; in a parallel run any
+      `{phase}` in VALUE is replaced by the phase id, giving each session a
+      distinct value, and the variable is passed through to that session's
+      environment. Soft Foundry never creates, validates, or tears down the
+      resource a value names. A parallel run given no `--env` still runs and
+      prints a `warn:` line saying isolation is the adopter's responsibility.
+      Names must match `[A-Z_][A-Z0-9_]*` and may not begin `SOFT_FOUNDRY_`.
+    rationale: Generic mechanism; no Rails or database knowledge in the tool (intake constraint).
+    source: 00-intake/request.md constraints
+  - id: REQ-012
+    category: security
+    statement: >-
+      Values passed with `--env` are never written to the change record,
+      handoffs, command output, `ps` output, or error messages; only variable
+      names may appear.
+    rationale: A value such as a database URL commonly embeds credentials.
+    source: threat reasoning on request outcome 2
+  - id: REQ-013
+    category: security
+    statement: >-
+      Each session started by `phase run` is told its own phase by a marker in
+      its environment, and the permission guard resolves the active skill from
+      that marker when present, falling back to the record's `current_phase`
+      only when absent. Two concurrent sessions are therefore each checked
+      against their own skill's permissions regardless of what `current_phase`
+      holds. A marker naming a phase outside `isolated_phases` during a parallel
+      run, or an unknown phase, is a guard violation handled per
+      `enforcement.yml`, never silently ignored. Single-phase runs behave as before.
+    rationale: DISC-001; the guard reads one shared current_phase that concurrent runs would race on.
+    source: 01-discovery/findings DISC-001
+  - id: REQ-014
+    category: data
+    statement: >-
+      Concurrent runs cannot corrupt or lose updates to `metadata.yml` or a
+      handoff: record updates by the runner are serialised under a lock (wait
+      bounded at 10 seconds, then fail naming the lock) and written atomically,
+      so any interruption leaves parseable YAML containing either the old or the
+      new content. After a parallel run `current_phase` is the first lifecycle
+      phase not complete.
+    rationale: begin!/finish! rewrite metadata.yml without a lock today.
+    source: 01-discovery/repository-context.md
+  - id: REQ-015
+    category: functional
+    statement: >-
+      In a parallel run every phase records `commit_sha` equal to the HEAD at
+      the moment the run was accepted (identical across the phases), the runner
+      tells each session not to commit, and the runner does not commit. When
+      every session has exited it prints one line per phase
+      (`phase <id>: pass|fail`), and exits non-zero if any phase's session
+      failed. One session failing does not stop the others; interrupting the run
+      signals every child. If HEAD differs from the start HEAD when the sessions
+      finish, the run prints a `warn:` line and exits non-zero.
+    rationale: Sessions share one worktree; evidence of two phases must bind to one commit or the commit-bound gate reports stale.
+    source: 01-discovery/unknowns.md ("Parallel results and commits")
+  - id: REQ-016
+    category: performance
+    statement: >-
+      Wall-clock time of a parallel run of N phases is bounded by the slowest
+      session plus runner overhead under one second, not by the sum of the
+      sessions; `phase reopen` completes in under one second on a record with
+      the full lifecycle.
+    rationale: The point of the feature is not waiting for isolated phases in sequence.
+    source: 00-intake/request.md (desired outcome 2)
+
+  # ---- Released state (request outcome 3) ----
+  - id: REQ-017
+    category: functional
+    statement: >-
+      `soft-foundry change release --item ID=DESCRIPTION [--item ...]` sets
+      `status: released` and records in `metadata.yml` a `release` block with
+      `at`, `commit`, and `items`, each item `{id, description}` (plus
+      `discharged_at` and `discharge_note` once discharged). It is accepted only
+      when the lifecycle end is reached, the final judgment is complete and is
+      APPROVED or APPROVED_WITH_RESIDUAL_RISK, at least one item is given, ids
+      are unique and match `[A-Z0-9][A-Z0-9-]*`, and descriptions are non-empty
+      (at most 500 characters, no control characters). It does not require the
+      change to be merged.
+    rationale: A merged change must be closed or ci fails on main; release records what is still owed.
+    source: 00-intake/request.md (desired outcome 3)
+  - id: REQ-018
+    category: security
+    statement: >-
+      `released` cannot become a way to skip closing or judgment: release is
+      refused without a complete, approving final judgment; refused with zero
+      items; refused for a `closed`, `exploring`, or already `released` record;
+      every `undischarged` item in the judgment evidence is carried into the
+      release as an open item under its own id (so there is one still-owed list,
+      not two); `release` and `discharge` are refused inside a phase-run
+      session; and `ci` still fails a merged change that is neither `closed`
+      nor `released`. `closed` remains the only end state.
+    rationale: Intake constraint; DISC-004.
+    source: request.md constraints; DISC-004
+  - id: REQ-019
+    category: functional
+    statement: >-
+      `soft-foundry change discharge ITEM-ID --note TEXT` marks one open item
+      discharged with the time, commit, and note; it is refused for an unknown or
+      already discharged item and for a record that is not `released`.
+      `change close` on a `released` record is refused (naming the open items)
+      until every item is discharged, `--force` overriding as it does today; on
+      any other record `change close` behaves as before.
+    rationale: Gives a defined path from released to closed.
+    source: unknowns "what discharges a released item"
+  - id: REQ-020
+    category: functional
+    statement: >-
+      `ci` handles a merged change by status: `closed` is skipped as today;
+      `released` with at least one open item passes, printing
+      `released: <slug>: N open item(s): ID, ID` and an advisory that stays until
+      closed; `released` with no open items (all discharged) fails with a
+      message to run `change close`; any other status fails as today. A
+      `released` record with a missing, empty, or malformed `release` block
+      fails `check`.
+    rationale: Keep main green without --no-verify while the record shows what is owed.
+    source: 00-intake/request.md (desired outcome 3)
+  - id: REQ-021
+    category: functional
+    statement: >-
+      Every consumer that special-cases `closed` makes a defined choice for
+      `released`: the gate and `ci` do not re-evaluate commit-bound evidence of a
+      released record (as for closed); `scope` claims no files for it; `snapshot`,
+      the board, `ps`, and the UI show it as released with its open-item count,
+      never as closed and never hidden; `learn` treats it as finished; the guard
+      and runner resolve no active skill and refuse `phase run`, `phase reopen`,
+      and a new release for it; harness-eval planted records may carry the status.
+    rationale: DISC-003; each consumer needs a deliberate decision.
+    source: 01-discovery/findings DISC-003
+
+  # ---- Cross-cutting ----
+  - id: REQ-022
+    category: failure
+    statement: >-
+      Failures are explicit and leave the record valid. `phase reopen`: unknown
+      phase, missing/empty/over-long reason, closed/released/exploring/
+      awaiting_human record, a phase and its whole downstream already pending
+      ("nothing to reset"), or invocation inside a phase-run session are refused
+      with no write; the reset and its history entry are applied together or not
+      at all. `phase run --parallel`: any pre-flight refusal starts nothing; a
+      missing shell executable fails that phase only, the rest continue and the
+      exit status is non-zero. `change release`/`discharge`: every refusal
+      writes nothing. Each error names what went wrong and what to do next.
+    rationale: Half-applied resets or releases are the failure that lets stale evidence pass quietly.
+    source: request.md risk statement
+  - id: REQ-023
+    category: functional
+    statement: >-
+      Existing behavior is unchanged: records without the new keys load and
+      pass `check`; `change reopen`, `change vet`, and `change close` on
+      non-released records, single-phase `phase run`, the gate's staleness
+      meaning, and the panel machinery behave as before, and the existing test
+      suite passes without edits to its expectations.
+    rationale: "Existing records, the iterative track's change reopen, and change close behave as before."
+    source: request.md constraints
+  - id: REQ-024
+    category: accessibility
+    statement: >-
+      All new command output follows `.ai/rules/accessibility.md` command-line
+      rules (WCAG-aligned for CLI): each outcome is a word (`reopened`,
+      `reset`, `pass`, `fail`, `warn`, `released`, `discharged`), never a glyph or
+      color alone; one fact per line behind a stable searchable prefix (`phase
+      reopen:`, `phase <id>:`, `parallel:`, `released:`, `advisory:`); no ANSI
+      unless TTY and NO_COLOR unset; no prompts; errors say what happened and
+      what to do next; meaning survives stripping escapes and non-ASCII.
+    rationale: Agents, CI logs, and screen readers consume the same bytes (surfaces.accessibility is true).
+    source: .ai/rules/accessibility.md
+  - id: REQ-025
+    category: accessibility
+    statement: >-
+      Where the UI and generated reports show a released record, the state is
+      conveyed by the text "released" and the open-item count (WCAG 1.4.1 Use of
+      Color, 1.3.1 Info and Relationships, 4.1.2 Name, Role, Value), open items
+      are listed as text in a real list or table with header cells, and
+      contrast of any new styling meets 1.4.3 / 1.4.11. Documentation for the new
+      commands uses a real heading hierarchy and descriptive link text.
+    rationale: UI open/closed counts exist today and must not encode released by color alone.
+    source: .ai/rules/accessibility.md
+  - id: REQ-026
+    category: observability
+    statement: >-
+      Every reopen, release, and discharge is observable after the fact: the
+      snapshot timeline shows phase reopens (reason, reset phases, commit)
+      distinctly from "reopened for exploring", and shows release and discharge
+      events; `change status` and `ci` list a released record's open items;
+      auto-reopens are labelled as automatic in output and history. No metrics
+      infrastructure is added (no deployed service).
+    rationale: Silent resets are the risk; the record must show them.
+    source: request.md risk statement
+  - id: REQ-027
+    category: operations
+    statement: >-
+      The control plane and docs move together: `.ai/workflow.yml`
+      (`isolated_phases`), the `metadata.yml` template and `.ai/schemas.md`
+      (status vocabulary, `phase_reopenings`, `release`), `.ai/README.md`,
+      `check` (new validations and the release-block lint), harness evals (STATUSES
+      admits released; gate cases that plant a malformed release block and a
+      non-isolated parallel request; a live case for stale auto-reopen), the CLI
+      usage text, the `ps` command table, `README.md`, and `docs/user/` all
+      describe the new commands. `check` passes on the finished change.
+    rationale: Intake constraint; the process must stay self-consistent.
+    source: request.md constraints; affected-components.md
