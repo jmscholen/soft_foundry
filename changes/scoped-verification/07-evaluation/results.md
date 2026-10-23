@@ -1,6 +1,6 @@
 # Evaluation Results
 
-Commit SHA: 2fdd159b3204ebb9d32ea1413db153318eda592a
+Commit SHA: 916ff15e93211bfaf81d18cf254a590b65f74e3f
 
 Size: `full_route_sweep` (`soft-foundry change size --phase evaluate`; this record declares no scope, so the whole repository is sized full). Evidence is the real checkout driven through `evidence/journeys.rb` and `evidence/journeys2.rb`; the transcripts are `evidence/transcript.txt` and `evidence/transcript2.txt`. Code paths were clean (only the runner's metadata edits to this change's handoff and metadata were dirty).
 
@@ -19,7 +19,7 @@ Size: `full_route_sweep` (`soft-foundry change size --phase evaluate`; this reco
 | EVAL-010 advisories print without blocking; phase run refuses a current record | AC-017 | pass | transcript.txt, transcript2.txt |
 | EVAL-011 NO_COLOR, ASCII-stripped, fact-per-line output | AC-019 | pass | transcript.txt |
 | EVAL-012 browser data shows scope and state words | AC-020 | pass (data route and script source only) | transcript2.txt |
-| EVAL-013 status of a current scoped record when another record's code lands | AC-018 | pass (failed before remediation; repaired at this commit) | transcript2.txt |
+| EVAL-013 status of a current scoped record when another record's code lands | AC-018 | pass (failed before remediation; still repaired at this commit) | transcript2.txt |
 
 AC-006 (specification re-record cause, stacked-branch base) and AC-021/AC-022 (suite, evals, dependency, git-call count) were not re-exercised by hand: verification ran them (625 runs, check, ci, evals) and evaluation did not repeat them. AC-006 is not claimed here.
 
@@ -30,3 +30,6 @@ Not exercised by hand: a rename journey (remediation's rename and branch-tip cha
 
 ## Accessibility observations
 CLI: with NO_COLOR=1 and stdin not a terminal, no command prompted. After removing 112 non-ASCII glyphs, 164 outcome words (pass, fail, skip, warn) and 57 prefixed fact lines (`scope:`, `reason:`, `base:`, `size:`, `phase:`) remain; error messages name the next step (for example "declare a path that exists or remove it", "run the full suite on this tree and record it in tests.yml"). Browser: scope is rendered as the text `Scope: <globs>` and gate state as words (`Stale`, `Fail`, `Pass`) in `app.js` and returned as words by `/api/change`. Not exercised: keyboard-only operation, focus order and screen-reader names of the browser page, because no browser was driven here; the accessibility review must cover them.
+
+## Rerun at 916ff15
+Both drivers were run again unchanged against HEAD 916ff15 (after the ATTACK-F-006 remediation of `git.branch` repoint). Normalised for session ids and ports the transcripts match the 2fdd159 run line for line, so EVAL-001 to EVAL-013 hold. The `git.branch` repoint case itself was not driven as a journey here; the regression test added in the remediation covers it and verification ran it.

@@ -1,4 +1,4 @@
-commit_sha: 2fdd159b3204ebb9d32ea1413db153318eda592a
+commit_sha: 916ff15e93211bfaf81d18cf254a590b65f74e3f
 size: full_route_sweep   # soft-foundry change size --phase evaluate: no scope declared on this record
 journeys:
   - id: EVAL-001
@@ -104,4 +104,4 @@ journeys:
     steps: [land code under lib/b/ (claimed by B), gate verify a, change status a, phase run verify --dry-run for a]
     assertions: ["evidence current still passes; check size matches diff still passes (computed targeted_plus_full_before_merge, scope lib/a/**); an advisory names lib/b/new.rb as outside the scope; status shows 06-verification complete ok; phase run refuses to rerun a"]
     evidence: [evidence/transcript2.txt]
-    result: pass   # EVAL-F-001 of the earlier run is repaired at this commit
+    result: pass   # EVAL-F-001 of the earlier run is still repaired at this commit

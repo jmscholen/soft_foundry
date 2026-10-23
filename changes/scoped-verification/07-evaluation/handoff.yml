@@ -1,10 +1,10 @@
 ---
 phase: 07-evaluation
 skill: evaluation
-status: pending
-commit_sha: 2fdd159b3204ebb9d32ea1413db153318eda592a
+status: complete
+commit_sha: 916ff15e93211bfaf81d18cf254a590b65f74e3f
 started_at: '2026-10-23T01:12:26Z'
-completed_at: '2026-10-23T02:20:00Z'
+completed_at: '2026-10-23T03:16:12Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -22,9 +22,9 @@ blocking: []
 findings:
 - id: EVAL-F-001
   severity: moderate
-  summary: Rerun at 2fdd159 after remediation. The earlier finding (a claimed path
-    made a current scoped record fail its size check and status) no longer reproduces;
-    EVAL-013 passes.
+  summary: Rerun at 916ff15 after ATTACK-F-006 remediation. The earlier finding (a
+    claimed path made a current scoped record fail its size check and status) no longer
+    reproduces; EVAL-013 passes.
 - id: EVAL-F-002
   severity: minor
   summary: No browser was driven. Scope and state words were checked through /api/change
@@ -48,9 +48,9 @@ executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-23T02:01:32Z'
-  finished_at: '2026-10-23T02:02:49Z'
+  started_at: '2026-10-23T03:15:20Z'
+  finished_at: '2026-10-23T03:16:16Z'
   exit_status: 0
   previous_phase: verify
-  session_id: 03ae7f98-a2b8-49c9-966a-3fdc2fb586f8
+  session_id: f95012fd-9f20-4d97-93c3-325928cfdf19
   cwd: "/Users/jscholen-iou/dev/soft_foundry"
