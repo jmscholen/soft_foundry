@@ -1,28 +1,21 @@
-# Remediation
+# Remediation (round 2)
 
 ## Finding references
-Repaired: ATTACK-F-001 (rename collapsed to its destination), ATTACK-F-002 (git.branch repointed to hide staleness), EVAL-F-001 (path claimed by another record enlarged this record's verify size and failed its status), ATTACK-F-004 (case-folded citation slug), EVAL-F-002 (empty reason list in the size line).
-Not repaired, by decision: ATTACK-F-003 (an active record declaring `**`; the accepted residual of MIT-003, an advisory by specification, for review and judgment to weigh) and ATTACK-F-005 (recorded size is gated for verification only, which REQ-011 specifies; the empty-list wording part is repaired under EVAL-F-002). EVAL-F-003 and EVAL-F-004 are observations for the accessibility review, not defects.
+Repaired: ATTACK-F-006 (the ATTACK-014 variant: `git.branch` repointed to an ancestor of HEAD that still contains the evidence commit hides later code changes, scoped and unscoped).
+Carried from round 1, unchanged: ATTACK-F-001, ATTACK-F-002, ATTACK-F-004, EVAL-F-001, EVAL-F-002 repaired earlier and verified fixed by attack; ATTACK-F-003 (an active `**` scope) and ATTACK-F-005 (size gated at verify only) stay as specified, for review and judgment to weigh.
 
 ## Root cause
-- ATTACK-F-001: `git diff --name-only` applies rename detection and lists only a rename's destination, so the source path never reached staleness or sizing.
-- ATTACK-F-002: the measure used the recorded `git.branch` tip without checking that the tip contains the evidence commit, so a branch lacking the change measured "no change".
-- EVAL-F-001: sizing at verify treated every entry not in scope as a reason for the larger size, including paths claimed by another record, which staleness already leaves to that record.
-- ATTACK-F-004: the cited slug was joined to a path, and a case-insensitive filesystem resolved a different spelling to the same directory.
-- EVAL-F-002: the message built its cause only from path reasons.
+The round 1 repair only required a non-checked-out recorded branch to contain the evidence commit. A branch created at the evidence commit (behind HEAD) satisfies that, and "after" was then measured on that tip, so every later change was invisible. A branch behind HEAD is also the legitimate stacked-branch case, so ancestry alone cannot tell the two apart; what differs is that the declaration was edited after the evidence.
 
 ## Changes made
-- `lib/soft_foundry/git.rb`: every `diff --name-only` uses `--no-renames` (changed_since, changed_between, diff_paths), so both sides of a rename are listed.
-- `lib/soft_foundry/scope.rb`, `lib/soft_foundry/gate.rb`: a recorded branch that is not checked out and does not contain the evidence commit fails closed (scoped: measure error; unscoped: a STALE evidence-current failure) naming `git.branch` as the fix.
-- `lib/soft_foundry/sizing.rb`: paths claimed by another record no longer enlarge the verify size.
-- `lib/soft_foundry/full_suite.rb`: a citation resolves only when the slug equals the directory name exactly.
-- `lib/soft_foundry/gate.rb`: the size failure names a cause when no path is one.
-- `test/scoped_verification_test.rb`: five regression tests (rename lists both sides; rename out of scope stales; branch lacking the evidence is stale for scoped and unscoped records; claimed path does not enlarge size; citation slug case). Full suite with provider keys unset: 630 runs, 4370 assertions, 0 failures. `soft-foundry check` passes.
+- `lib/soft_foundry/scope.rb`: `Scope.branch_edit(record, git, sha)` compares `git.branch` in the record's `metadata.yml` at the evidence commit with the current file. A difference is a stale cause, `declaration changed: git.branch`. A branch not recorded at the evidence commit is not an edit unless it now names an existing branch other than the checked-out one. `measure` adds it as a declaration entry, so scoped staleness and sizing both see it.
+- `lib/soft_foundry/gate.rb`: an unscoped record also goes stale on that edit.
+- `test/scoped_verification_test.rb`: regression test (a branch created behind HEAD, later code change, scoped and unscoped records both stale). Full suite with provider keys unset: 632 runs, 4393 assertions, 0 failures. `soft-foundry check` passes.
 
 No expected outcome or other phase's evidence was edited.
 
 ## Evidence invalidated
-All commit-bound evidence of verification (06), evaluation (07) and attack (08) is stale: `lib/` changed after their commit_sha values (the gate reports it). The tests.yml full-suite record for 06 names the old tree and must be re-recorded.
+Verification (06), evaluation (07) and attack (08) evidence is stale: `lib/` changed after their commit_sha values. The tests.yml full-suite record for 06 names the old tree and must be re-recorded.
 
 ## Required reruns
-Verification, evaluation and attack (all three, per `transitions`), then review and judgment. Attack should retry ATTACK-013, 014 and 016 and the EVAL-013 journey.
+Verification, evaluation and attack (per `transitions`), then review and judgment. Attack should retry ATTACK-014 with a branch at the evidence commit, and the stacked-branch case.

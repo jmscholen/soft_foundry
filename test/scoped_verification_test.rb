@@ -632,6 +632,20 @@ class ScopedVerificationTest < Minitest::Test
     end
   end
 
+  def test_a_recorded_branch_behind_head_does_not_hide_later_changes
+    with_repo do |dir|
+      a = make_record(dir, "a", scope: %w[lib/a/**])
+      b = make_record(dir, "b")
+      sh(dir, "git", "branch", "behind")
+      commit_code(dir, "lib/a/f.rb")
+      [a, b].each do |r|
+        edit_metadata(dir, r.slug) { |m| m["git"] = (m["git"] || {}).merge("branch" => "behind") }
+        c = current(gate(SoftFoundry::ChangeRecord.new(dir, r.slug, control_plane: plane(dir)), dir))
+        assert_equal :fail, c.outcome, "#{r.slug}: #{c.detail}"
+      end
+    end
+  end
+
   def test_a_path_claimed_by_another_record_does_not_enlarge_the_size
     with_repo do |dir|
       sh(dir, "git", "checkout", "-qb", "change/a")

@@ -1,46 +1,49 @@
 ---
 phase: '09-remediation'
 skill: remediation
-status: pending
-commit_sha: ad1a385
+status: complete
+commit_sha: e6c5eb7
 started_at: '2026-10-23T01:27:01Z'
-completed_at: '2026-10-23T02:40:00Z'
+completed_at: '2026-10-23T03:10:00Z'
 resolved_model:
   profile: coding_high
   provider: anthropic
   model: claude-sonnet-5-5
 outputs:
 - summary.md
+- lib/soft_foundry/scope.rb
+- lib/soft_foundry/gate.rb
+- test/scoped_verification_test.rb
 blocking: []
 findings:
-- id: REM-001
-  severity: minor
-  summary: Repaired ATTACK-F-001, ATTACK-F-002, ATTACK-F-004, EVAL-F-001 and EVAL-F-002
-    in lib/ with five regression tests; the full suite passes (630 runs, 0 failures).
-    Verification, evaluation and attack must rerun on the new commit.
+- id: REM-004
+  severity: moderate
+  summary: Repaired ATTACK-F-006 - an edit of git.branch after the evidence commit
+    is now a stale cause for scoped and unscoped records, so repointing it to an ancestor
+    of HEAD no longer hides later code changes. One regression test added; full suite
+    632 runs, 0 failures. Verification, evaluation and attack must rerun.
 - id: REM-002
   severity: moderate
   summary: ATTACK-F-003 (an active record declaring ** hides cross-record staleness)
-    is deliberately not repaired; it is the MIT-003 residual and the gate only advises.
-    Review and judgment should weigh it, or a person should decide to refuse over-broad
-    sibling scopes.
+    is deliberately not repaired; it is the MIT-003 residual. Review and judgment
+    should weigh it.
 - id: REM-003
   severity: minor
   summary: ATTACK-F-005 stays as specified (recorded size gated at verify only). EVAL-F-003
     and EVAL-F-004 are for the accessibility review.
 next: verify
-notes: 'The code and test changes are staged but NOT committed: the pre-commit hook
-  runs soft-foundry ci, which fails because the verify, evaluate and attack evidence
-  is now stale (the intended effect of this phase). The hook was not bypassed. commit_sha
-  is the HEAD at which the tree was edited; the runner or a person must commit the
-  staged paths. Provider keys were unset for the suite run.'
+notes: 'The code and test changes are uncommitted: the pre-commit hook runs soft-foundry
+  ci, which fails while verify, evaluate and attack evidence is stale (the intended
+  effect). The hook was not bypassed. commit_sha is the HEAD at which the tree was
+  edited; the runner or a person must commit the changed paths. Provider keys were
+  unset for the suite run.'
 executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-23T01:27:01Z'
-  finished_at: '2026-10-23T01:41:01Z'
+  started_at: '2026-10-23T02:35:37Z'
+  finished_at: '2026-10-23T03:05:53Z'
   exit_status: 0
   previous_phase: attack
-  session_id: 97a03fd9-9ee9-43f1-9e75-340ea724bd85
+  session_id: 8fcca74c-6088-4182-a6eb-1a678c765867
   cwd: "/Users/jscholen-iou/dev/soft_foundry"

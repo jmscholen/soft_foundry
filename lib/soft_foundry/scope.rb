@@ -52,6 +52,26 @@ module SoftFoundry
       branch != git.branch.to_s ? git.branch_tip(branch) : nil
     end
 
+    # Non-nil when the record's `git.branch` now differs from what it was at
+    # `sha`: repointing the branch changes which commit "after" is measured
+    # on, so it stales the evidence like any other declaration edit.
+    def self.branch_edit(record, git, sha)
+      meta = "changes/#{record.slug}/metadata.yml"
+      read = lambda do |text|
+        data = text.nil? ? {} : YAML.safe_load(text, permitted_classes: [Time, Date], aliases: false)
+        data.is_a?(Hash) && data["git"].is_a?(Hash) ? data["git"]["branch"].to_s : ""
+      end
+      file = File.join(record.root, meta)
+      before = read.call(git.blob!(sha, meta))
+      now = read.call(File.file?(file) ? File.read(file) : nil)
+      # A branch never recorded at `sha` is not an edit unless it now names
+      # an existing branch other than the checked-out one (the measure).
+      return nil if before == now || (before.empty? && (now == git.branch.to_s || git.branch_tip(now).nil?))
+      "declaration changed: git.branch"
+    rescue GitError, Psych::Exception => e
+      "declaration changed: git.branch (unreadable: #{e.message})"
+    end
+
     def initialize(record, git:)
       @record = record
       @plane = record.control_plane
@@ -82,7 +102,11 @@ module SoftFoundry
       paths = @git.diff_paths(sha, tip)
       code = paths.select { |p| ControlPlane.match_any?(p, @plane.code_globs) }
       entries = code.map { |path| classify(path) }
-      entries.concat(declaration_changes(sha, tip, paths)) if declarations
+      if declarations
+        entries.concat(declaration_changes(sha, tip, paths))
+        edit = self.class.branch_edit(@record, @git, sha)
+        entries << Entry.new("changes/#{@record.slug}/metadata.yml", edit, nil) if edit
+      end
       Result.new(applied: applied, entries: entries, paths: paths, where: where, error: nil)
     rescue GitError, Psych::Exception => e
       Result.new(applied: applied, entries: [], paths: [], where: "", error: e.message)

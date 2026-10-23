@@ -381,6 +381,9 @@ module SoftFoundry
       if tip && !@git.ancestor?(sha, tip)
         return Check.new("evidence current", :fail, "STALE: branch #{record_branch} does not contain the evidence commit #{sha[0, 12]}; correct git.branch in metadata.yml")
       end
+      if !scope.scoped? && (edit = Scope.branch_edit(@record, @git, sha))
+        return Check.new("evidence current", :fail, "STALE: #{edit} since #{sha[0, 12]}; rerun this phase")
+      end
       if scope.scoped?
         measured = scope.measure(sha)
         return Check.new("evidence current", :fail, scoped_stale_detail(sha, measured)) if measured.stale?
