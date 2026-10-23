@@ -1,7 +1,7 @@
 ---
 phase: '09-remediation'
 skill: remediation
-status: complete
+status: pending
 commit_sha: e6c5eb7
 started_at: '2026-10-23T01:27:01Z'
 completed_at: '2026-10-23T03:10:00Z'
