@@ -1,24 +1,66 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 14-judgment
 skill: final-judgment
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 604120cff228371bd4dad01b5dbe8354c6219227
+started_at: '2026-10-23T16:56:14Z'
+completed_at: '2026-10-23T17:06:20Z'
 resolved_model:
   profile: judgment_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: xAI
+  model: grok-4.7
+outputs:
+- final.md
+- residual-risk.md
+- evidence.yml
+blocking: []
+findings:
+- id: JUDGE-001
+  severity: info
+  summary: Outcome APPROVED_WITH_RESIDUAL_RISK at 604120c. Required phases pass and
+    the commit-bound ones are current for that commit. Documentation, FAQ index, and
+    observability are pending and optional. Nothing is undischarged.
+- id: JUDGE-002
+  severity: major
+  failure: Record git.branch frozen before the ref exists, complete the phases, create
+    frozen at the phases-complete commit, then commit lib/a/x.rb on the checked-out
+    branch. gate verify exits 0 for scope lib/a/** and for an unscoped record (ATTACK-019,
+    ATTACK-020).
+  summary: REV-001 is accepted, not sent back, and not marked repaired. REQ-003 and
+    REQ-004 do not hold for that procedure. The owed follow-up records, at the evidence
+    commit, that the named ref did not resolve. The maintainer recorded the acceptance
+    in direction.md at 604120c.
+- id: JUDGE-003
+  severity: major
+  failure: Active record wide with scope ** and record b scoped lib/b/**. Commit lib/other/x.rb.
+    gate verify --change b exits 0. Closing wide makes the same change stale. Status
+    abandoned still claims (ATTACK-015).
+  summary: REV-003 is accepted. It is the claimed-path rule in REQ-003 applied to
+    an unbounded active scope, which MIT-003 left to judgment.
+- id: JUDGE-004
+  severity: minor
+  summary: 'Also carried: REV-004 (scalar git crashes, exit 1), REV-006 (a stack cut
+    from the evidence tip reports the lower record stale), ATTACK-F-005 (size is refused
+    only at verification, in specification), EVAL-F-002 (no browser driven; accessibility
+    review conformed from source), VER-001 (unrelated suite flake, rerun passed),
+    REC-001 (requirements.yml does not parse, so the accessibility advisory cannot
+    see REQ-021 and REQ-022).'
 next: learn
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: Fresh-context judgment under final-judgment permissions, treated as policy.
+  Read the change record, the gate output, the attack transcripts for ATTACK-019,
+  ATTACK-020, and ATTACK-021, and tip_for. Did not re-run the suite or the attack
+  drivers, did not edit any other phase, did not change requirements, did not open
+  harness evals, and did not run phase run. Review next is remediate because REV-001
+  is blocking; this judgment accepts that finding, so the change goes to learn. No
+  APP, TESTS, or INFRA diff from fb0bff7 to HEAD. Uncommitted files are this phase
+  and the runner metadata update.
+executed_by:
+  runner: soft-foundry phase run
+  shell: grok
+  fresh_context: true
+  started_at: '2026-10-23T16:56:14Z'
+  finished_at: '2026-10-23T17:06:19Z'
+  exit_status: 0
+  previous_phase: review
+  session_id: 71bc105f-c67f-49e0-a459-f5de8be78428
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

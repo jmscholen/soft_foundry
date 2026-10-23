@@ -1,30 +1,115 @@
-commit_judged: TBD
+commit_judged: 604120cff228371bd4dad01b5dbe8354c6219227
 phases:
+  - phase: 00-intake
+    commit_sha: e7ee9a19b9a54b48cbf2a9951e82acfa2c790c32
+    current: true
+    result: complete
+    note: "Gate passes. Not commit-bound. Risk high, track gated, no skipped phases."
+  - phase: 01-discovery
+    commit_sha: fb74c5fe01085f14c06bc29154b64f68d42da009
+    current: true
+    result: complete
+    note: "Gate passes. DISC-001 through DISC-004 were taken into the specification and the threat model."
+  - phase: 02-specification
+    commit_sha: 4b06125c587184a4c7d0599c8a9f8dc314fb3a2b
+    current: true
+    result: complete
+    note: "Gate passes. Locked at 3ef23549bb40. requirements.yml does not parse (REQ-016 colon); see unresolved REC-001. REQ-009's locked sentence is superseded for claimed paths only."
+  - phase: 03-threat-model
+    commit_sha: 3ef23549bb4013c24f0c885e7f1a64c931cb49d9
+    current: true
+    result: complete
+    note: "Gate passes. THREAT-001 stays open on the decoy-branch vector (REV-001). MIT-003's remaining risk is REV-003."
+  - phase: 04-plan
+    commit_sha: 97aa421955bd33e17cefea89c29c0ec20657da3b
+    current: true
+    result: complete
+    note: "Gate passes. Not commit-bound."
+  - phase: 05-implementation
+    commit_sha: 0c20c8f60384d746086ccefcce0dd914eafbeb76
+    current: false
+    result: complete
+    note: "Gate passes. Not commit-bound. lib and test changed after this commit in the remediation at 84b9035. Verification at fb0bff7 covers that code. No APP, TESTS, or INFRA diff from fb0bff7 to the judged commit."
   - phase: 06-verification
-    commit_sha: TBD
-    current: TBD   # true when commit_sha matches the judged commit for all code paths
-    result: TBD
+    commit_sha: fb0bff73d47b9d0931cc34b6cf6f823e7d0e852a
+    current: true
+    result: complete
+    note: "Gate passes, evidence current, red evidence CHECK-001 8287d58, full-suite record on tree 537d8d15a7e3 outcome passed. Size check skipped because this record declares no scope; tests.yml records full_at_verify. Run 1 of the suite failed one unrelated process test; run 2 passed. Both logs kept."
   - phase: 07-evaluation
-    commit_sha: TBD
-    current: TBD
-    result: TBD
+    commit_sha: ea50ad589eb0ac2d3a61a5899b1ad9d23029757d
+    current: true
+    result: complete
+    note: "Gate passes, evidence current. EVAL-001 through EVAL-013 pass. No browser was driven (EVAL-F-002)."
   - phase: 08-attack
-    commit_sha: TBD
-    current: TBD
-    result: TBD
+    commit_sha: 7ca42a176a3a79baa30e58063dcaeabe1908661a
+    current: true
+    result: complete
+    note: "Gate passes, evidence current. Third rerun. ATTACK-019 and ATTACK-020 still exit 0. ATTACK-015 still exits 0. ATTACK-017, ATTACK-014, and ATTACK-021 behave as the remediation states."
+  - phase: 09-remediation
+    commit_sha: 4692c50be5ee35c3beb28a9b084dba1a97cc34b6
+    current: false
+    result: complete
+    note: "Gate passes. Not commit-bound. The handoff sha is the commit before the code landed; the code is in 84b9035, which verification, evaluation, attack, and review re-checked. The summary says the phases-complete-commit hole was not repaired."
+  - phase: 10-user-documentation
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Optional, not started, not waived. The README is the user-facing contract, including the three known limits."
+  - phase: 11-faq-index
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Optional, not started, not waived. No separate FAQ. The README carries the operator-facing limits."
+  - phase: 12-observability
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Optional, not started. surfaces.observability is false. No deployed service. Gate and status text are the signal, and they follow the residuals."
   - phase: 13-review
-    commit_sha: TBD
-    current: TBD
-    result: TBD
-unresolved_findings: []
-# Acceptance criteria or judgment conditions left unsatisfied pending a
-# real-world event (production observation, etc.) rather than more
-# repository evidence, e.g.:
-#   - id: AC-060
-#     description: each fix observed corrected on production
-# `soft-foundry change close` refuses to close this change while any id
-# here lacks a human confirmation - via --confirm ID, or a PR comment
-# reading "CONFIRMED: <id>" (see `soft-foundry change request-discharge`)
-# - and then moves it into `discharged` with the confirmation source.
+    commit_sha: 8575131b467d81c15b6773696225499aa576c29e
+    current: true
+    result: complete
+    note: "Gate passes, evidence current, two findings above minor name their failure. REV-001 is blocking and the handoff next is remediate. This judgment accepts it instead of returning. Accessibility conforms. Policy and infrastructure are N/A."
+unresolved_findings:
+  - id: REV-001
+    severity: blocking
+    phase: 13-review
+    disposition: acceptable_residual_risk
+    summary: "git.branch named before the ref exists, then created at a commit that strictly follows the evidence commit, hides later code on the checked-out branch. gate verify exits 0 for scoped and unscoped records (ATTACK-019, ATTACK-020, transcript3.txt, transcript4.txt). Accepted in direction.md. Mitigation owed in residual-risk.md."
+  - id: REV-003
+    severity: major
+    phase: 13-review
+    disposition: acceptable_residual_risk
+    summary: "An active sibling scoped ** claims every path, so another record's verify gate exits 0 after unrelated code (ATTACK-015). Any status other than closed still claims. Accepted in direction.md."
+  - id: REV-004
+    severity: minor
+    phase: 13-review
+    disposition: acceptable_residual_risk
+    summary: "A string git: value crashes gate verify with String does not have #dig method, exit 1 (ATTACK-018). Fails closed. Accepted in direction.md."
+  - id: REV-006
+    severity: minor
+    phase: 13-review
+    disposition: acceptable_residual_risk
+    summary: "A recorded branch whose tip equals the evidence commit is measured at HEAD, so a stack cut from that tip reports the lower record stale. Accepted in direction.md. Not restated as its own README sentence."
+  - id: ATTACK-F-005
+    severity: minor
+    phase: 08-attack
+    disposition: in_specification
+    summary: "Recorded size is refused only at verification (REQ-011). README limit 3 states it."
+  - id: EVAL-F-002
+    severity: minor
+    phase: 07-evaluation
+    disposition: covered_by_review
+    summary: "No browser, keyboard pass, or screen reader was driven. Accessibility review conformed from app.js, app.css, the CLI, and the evaluation transcripts."
+  - id: VER-001
+    severity: minor
+    phase: 06-verification
+    disposition: unrelated_rerun_passed
+    summary: "Full-suite run 1 failed ProcessesTest#test_finds_a_real_running_process. Run 2 on the same tree passed. The failed log is kept. Not a defect in this diff."
+  - id: REC-001
+    severity: minor
+    phase: 14-judgment
+    disposition: acceptable_residual_risk
+    summary: "02-specification/requirements.yml does not parse. The advisory reports a missing accessibility category because the loader sees no requirements. REQ-021 and REQ-022 are tagged category accessibility in the file."
 undischarged: []
 discharged: []
