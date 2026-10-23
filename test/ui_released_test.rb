@@ -78,7 +78,7 @@ class UIReleasedTest < Minitest::Test
   def test_released_is_not_conveyed_by_colour_alone
     # A flag with words, and a section heading; colour is only a second signal.
     assert_match(/flags\.push\(\["Released: /, script)
-    assert_match(/Released \(/, script)
+    assert_match(/boardSection\("Released"/, script)
   end
 
   def test_new_styling_uses_the_existing_tone_tokens

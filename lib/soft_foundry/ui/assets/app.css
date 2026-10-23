@@ -206,6 +206,10 @@ table.spend { border-collapse: collapse; font-size: 0.9375rem; background: var(-
   .timeline li { grid-template-columns: 1fr; gap: 0; }
 }
 
+table.release-items { border-collapse: collapse; font-size: 0.9375rem; background: var(--surface); min-width: 32rem; }
+.release-items th, .release-items td { padding: 0.45rem 0.9rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+.release-items thead th { font-weight: 400; color: var(--steel); }
+
 /* Running processes */
 table.procs { min-width: 46rem; width: 100%; }
 .procs th, .procs td { text-align: left; vertical-align: top; }

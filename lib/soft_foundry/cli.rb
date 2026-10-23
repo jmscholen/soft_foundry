@@ -437,6 +437,10 @@ module SoftFoundry
         @err.puts "#{slug}: is closed; a merged change is reshaped by a new change, not by reopening this record"
         return EXIT_TARGET
       end
+      if record.released?
+        @err.puts "#{slug}: is released; discharge its open items with `soft-foundry change discharge` and close it, or reshape the feature in a new change"
+        return EXIT_TARGET
+      end
       reset = record.reopen!(reason: reason)
       @out.puts "#{slug}: reopened for exploring (#{reason})"
       @out.puts(reset.empty? ? "  no hardening phase had started" : "  reset to pending, outputs kept: #{reset.join(', ')}")
@@ -593,6 +597,10 @@ module SoftFoundry
       @out.puts "#{slug}: #{meta.dig('change', 'title')}  [status: #{meta['status']}, phase: #{meta['current_phase']}, risk: #{meta['risk']}]"
       @out.puts "  #{track_line(record)}"
       @out.puts "  scope: #{record.scope.join(', ')}" unless record.scope.empty?
+      if record.released?
+        open = record.open_release_items
+        @out.puts "  released: #{slug}: #{open.size} open item(s)#{open.empty? ? '' : ": #{open.map { |i| i['id'] }.join(', ')}"}"
+      end
       results = Gate.new(record, git: git).evaluate_all
       results.each { |r| @out.puts format("  %-22s %-12s %s", r.phase.output, r.status, summarize(r)) }
       print_advisories(record)
@@ -975,8 +983,8 @@ module SoftFoundry
           return EXIT_TARGET
         end
         record = load_record(slug)
-        if record.metadata["status"].to_s == "closed"
-          @err.puts "✗ fail learn promote: change #{slug} is closed; open a new change for the promotion"
+        if record.finished?
+          @err.puts "✗ fail learn promote: change #{slug} is #{record.metadata['status']}; open a new change for the promotion"
           return EXIT_TARGET
         end
         already = Learning.promoted_ids(@root)
@@ -1718,10 +1726,20 @@ module SoftFoundry
           soft-foundry change reopen <slug> --reason TEXT
                                                   iterative track: send a vetted change back to exploring,
                                                   resetting every phase from implementation onward
+          soft-foundry change release [slug] --item ID=DESCRIPTION [--item ...]
+                                                  a finished change judged APPROVED or APPROVED_WITH_RESIDUAL_RISK
+                                                  that still owes real-world confirmations: status released,
+                                                  each owed item recorded (judgment undischarged items are
+                                                  carried); `ci` passes a merged released change while items
+                                                  are open
+          soft-foundry change discharge ITEM-ID --note TEXT [--change SLUG]
+                                                  record one open release item as confirmed, with time,
+                                                  commit, and note
           soft-foundry change close <slug> [--pr N] [--confirm ID]... [--force]
                                                   mark a merged change's lifecycle closed; refuses if
                                                   unmerged, or if an undischarged item lacks a --confirm ID
-                                                  or a PR comment reading "CONFIRMED: <id>"
+                                                  or a PR comment reading "CONFIRMED: <id>"; a released
+                                                  change also needs every release item discharged
           soft-foundry change request-discharge <slug> --pr N
                                                   post a PR comment asking a human to confirm each
                                                   undischarged acceptance criterion
@@ -1743,6 +1761,20 @@ module SoftFoundry
                                                   gates the phase when the session returns. Without --shell,
                                                   review and judge pick an installed shell on a different
                                                   provider from implementation and remediation
+          soft-foundry phase run <phase> <phase>... --parallel [--env NAME=VALUE]... [--shell ...] [--dry-run]
+                                                  run isolated_phases (.ai/workflow.yml, for example evaluate
+                                                  and attack) at once, each in its own fresh session; {phase} in
+                                                  an --env value becomes the phase id, so each session can have
+                                                  its own database or port (isolating what they share is the
+                                                  adopter's job); one line per phase, nothing is committed
+          soft-foundry phase run <phase> --env NAME=VALUE ...
+                                                  --env also applies to a single phase: the variable is in that
+                                                  session's environment only, and its value is never printed
+          soft-foundry phase reopen <phase> --reason TEXT [--change SLUG]
+                                                  reset the phase and everything downstream to pending so each
+                                                  can be run again (any track); evidence files are kept and the
+                                                  reset is recorded in phase_reopenings. A stale complete phase
+                                                  given to `phase run` is reopened automatically
           soft-foundry phase run <phase> --panel SHELL,SHELL[,...] [--max-rounds N] [--shell-arg SHELL=ARG]... [--dry-run]
                                                   run a panel phase (panel_phases in .ai/workflow.yml) as two
                                                   to four agents: independent drafts, turns in ARGUMENT.md

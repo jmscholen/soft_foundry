@@ -32,7 +32,7 @@ class ReleasedConsumersTest < Minitest::Test
       scope = SoftFoundry::Scope.new(other, git: SoftFoundry::Git.new(dir))
       assert_equal ["c1"], scope.claimants("lib/app.rb")
       released_record(dir, record)
-      assert_equal [], scope.claimants("lib/app.rb")
+      assert_equal [], SoftFoundry::Scope.new(other, git: SoftFoundry::Git.new(dir)).claimants("lib/app.rb")
     end
   end
 

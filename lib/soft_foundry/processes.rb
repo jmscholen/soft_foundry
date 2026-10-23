@@ -25,11 +25,11 @@ module SoftFoundry
   class Processes
     COMMANDS = %w[init onboard models doctor check change budget gate ci hooks guard phase learn scan update ui ps shell session sessions resume].freeze
     SUBCOMMANDS = {
-      "change" => %w[new status list vet reopen close request-discharge],
+      "change" => %w[new status list vet reopen release discharge close request-discharge],
       "budget" => %w[status record threshold],
       "hooks" => %w[install uninstall],
       "learn" => %w[list promote],
-      "phase" => %w[run]
+      "phase" => %w[run reopen]
     }.freeze
     # Commands that act on one change, so the branch names it when the
     # command line does not.
@@ -264,7 +264,7 @@ module SoftFoundry
 
     def runs_in(root, index, plane, slug, list)
       record = index.record(slug)
-      return [] if record.metadata["status"] == "closed"
+      return [] if record.finished?
       plane.phases.filter_map do |phase|
         by = record.handoff(phase)&.fetch("executed_by", nil)
         next unless by.is_a?(Hash) && by["started_at"] && by["finished_at"].nil?

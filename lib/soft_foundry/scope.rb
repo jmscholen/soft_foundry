@@ -148,8 +148,8 @@ module SoftFoundry
       a.start_with?(b) || b.start_with?(a)
     end
 
-    # [slug, scope] for each other record that is active (not closed) and
-    # has a well-formed scope. A closed or malformed record claims nothing,
+    # [slug, scope] for each other record that is active (not closed or
+    # released) and has a well-formed scope. A finished or malformed record claims nothing,
     # so it can never hide a stale path. Read from disk once per decision.
     def siblings
       @siblings ||= Dir.glob(File.join(@record.root, "changes", "*", "metadata.yml")).sort.filter_map do |file|
@@ -157,7 +157,7 @@ module SoftFoundry
         next if slug == @record.slug
         other = ChangeRecord.new(@record.root, slug, control_plane: @plane)
         raw = other.metadata["scope"]
-        next if other.closed? || !Declarations.claimable?(raw)
+        next if other.finished? || !Declarations.claimable?(raw)
         [slug, raw]
       rescue Psych::Exception, SystemCallError, ArgumentError
         nil
