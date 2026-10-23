@@ -1,0 +1,9 @@
+# Direction from the maintainer for this remediation round
+
+Scope of this round: REV-001 and REV-002 only. REV-003 (an active sibling scoped to `**`), REV-004 and REV-005 are not part of this round.
+
+Principle: Soft Foundry applying its process to itself is separate from the process it ships to other repositories. Fix shipped behaviour for adopters on its own terms. Do not shape it around how this repository's own records happen to be configured (this repository declares no scope, shared_core or access_control). Test the declared-scope paths, which are the adopter case, with regression tests.
+
+REV-001 (blocking): a recorded `git.branch` must not let later code changes go unmeasured. Measure at the checked-out HEAD unless the recorded branch is HEAD's own branch, or its tip equals or descends from HEAD. The stacked-branch case (a record whose own branch is legitimately behind HEAD while another change's branch is checked out) must keep working: the earlier attempt that required descent from HEAD broke it, so handle both, with a regression test for each. Cover ATTACK-017, ATTACK-019 and the scoped variant, and the case where the branch is created later at the evidence commit.
+
+REV-002 (major): decided by the maintainer. A code path claimed by another active record's scope does NOT raise this record's verify size; that is the intended behaviour and the point of per-change scope. Keep the behaviour. The shipped wording must say so; the maintainer will correct `.ai/policies/check-sizing.yml` and the README sizing paragraph, which this phase cannot write. Your job: keep the behaviour, add or keep a regression test that fixes it, and record in the summary that REQ-009's text ("a diff outside the declared scope is the full suite") is superseded for claimed paths, an unclaimed path still sizing full. Do not edit the locked specification.
