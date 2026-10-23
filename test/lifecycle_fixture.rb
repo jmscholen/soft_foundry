@@ -55,3 +55,31 @@ module LifecycleFixture
     Dir.glob("#{sub}/**/*", File::FNM_DOTMATCH, base: dir).select { |f| File.file?(File.join(dir, f)) }.to_h { |f| [f, File.binread(File.join(dir, f))] }
   end
 end
+
+# A record that reached the end of its lifecycle: every required phase
+# complete, the final judgment saying `outcome`, optional judgment items
+# still undischarged, optionally merged into main.
+module FinishedFixture
+  include LifecycleFixture
+
+  ALL_REQUIRED = (LifecycleFixture::LIFECYCLE + %w[learn]).freeze
+
+  def with_finished_record(slug = "c1", outcome: "APPROVED", undischarged: [], merge: false, status: "in_progress")
+    with_lifecycle_record(slug, complete: [], status: status, current_phase: "learn") do |dir, record|
+      ALL_REQUIRED.each { |id| complete_phase!(record, id, sha: head(dir)) }
+      final = File.join(record.phase_dir(record.control_plane.phase("judge")), "final.md")
+      File.write(final, File.read(final).sub(/^## Outcome\n.*$/, "## Outcome\n#{outcome}"))
+      unless undischarged.empty?
+        data = record.judgment_evidence
+        data["undischarged"] = undischarged.map { |id| { "id" => id, "description" => "observe #{id} in production" } }
+        File.write(record.judgment_evidence_path, YAML.dump(data))
+      end
+      commit_all(dir, "finish #{slug}")
+      if merge
+        sh(dir, "git", "checkout", "-q", "main")
+        sh(dir, "git", "merge", "-q", "--no-ff", "change/#{slug}", "-m", "merge #{slug}")
+      end
+      yield dir, record
+    end
+  end
+end
