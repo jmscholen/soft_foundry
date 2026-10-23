@@ -320,7 +320,7 @@ module SoftFoundry
       when "request-discharge"
         change_request_discharge(@argv.shift)
       when "size"
-        change_size(@argv.shift)
+        change_size(@argv.first.to_s.start_with?("-") ? nil : @argv.shift)
       when "vet"
         change_vet(@argv.shift)
       when "reopen"
