@@ -1,24 +1,56 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 04-plan
 skill: planning
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 529db493a01274ed8c6e6512525401b4aa49f109
+started_at: '2026-10-23T18:07:42Z'
+completed_at: '2026-10-23T18:20:00Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- changes/phase-lifecycle-controls/04-plan/implementation.md
+- changes/phase-lifecycle-controls/04-plan/testing.md
+- changes/phase-lifecycle-controls/04-plan/rollout.md
+- changes/phase-lifecycle-controls/04-plan/rollback.md
+blocking: []
+findings:
+- id: PLAN-001
+  severity: major
+  summary: Marker (SOFT_FOUNDRY_PHASE) is an environment variable a session can unset;
+    the refusal is a guard against accident, not a sandbox (TM-001). Docs and deviations.md
+    must state it; attack runs PAC-01.
+- id: PLAN-002
+  severity: major
+  summary: Carried judgment undischarged items vs the existing change close discharge
+    path (cli.rb change_close) is the subtlest interplay; implementation reads it
+    first and logs any deviation. Review should check there is one owed list and no
+    double confirm.
+- id: PLAN-003
+  severity: minor
+  summary: Harness-eval cases were not readable in this phase (HARNESS_EVALS denied);
+    implementation learns the case format from existing cases and adds gate cases
+    plus a live stale auto-reopen case.
+- id: PLAN-004
+  severity: minor
+  summary: In a parallel run reopen only named phases still complete and stale in
+    lifecycle order, since reopening evaluate already resets attack; reopening attack
+    again would hit nothing to reset.
+- id: PLAN-005
+  severity: minor
+  summary: Atomic multi-file reset stages all temps then renames, metadata first;
+    residual is a crash between renames, visible via the history entry. Verification
+    should test staging-failure injection.
 next: implement
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: ''
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-23T18:07:42Z'
+  finished_at: '2026-10-23T18:10:30Z'
+  exit_status: 0
+  previous_phase: threat_model
+  session_id: 872680cf-ceb0-427e-b9b2-f993aa572312
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"
