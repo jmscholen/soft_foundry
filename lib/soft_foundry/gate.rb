@@ -373,7 +373,7 @@ module SoftFoundry
       sha = handoff["commit_sha"].to_s
       return Check.new("evidence current", :skip, "no git repository") unless @git.repository?
       return Check.new("evidence current", :fail, "cannot compare: commit_sha invalid") unless sha.match?(SHA) && @git.commit?(sha)
-      tip = Scope.tip_for(@record, @git)
+      tip = Scope.tip_for(@record, @git, sha)
       record_branch = @record.metadata.dig("git", "branch").to_s
       where = tip ? " on branch #{record_branch}" : ""
       scope = Scope.new(@record, git: @git)

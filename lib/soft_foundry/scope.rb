@@ -42,14 +42,24 @@ module SoftFoundry
     PROFILE = ".ai/repository.yml"
     POLICY = ".ai/policies/check-sizing.yml"
 
-    # The commit a record's branch points at when that branch exists and is
-    # not the one checked out; nil when the checked-out worktree is the
-    # measure. "After" is measured on the record's own branch: a change
-    # stacked on another change's branch covers its own code with its own
-    # record.
-    def self.tip_for(record, git)
+    # The commit a record's branch points at when "after" is measured there
+    # rather than at the checked-out HEAD; nil when HEAD is the measure.
+    # HEAD is the measure unless the recorded branch is HEAD's own, or its
+    # tip equals or descends from HEAD, or it is a branch the record really
+    # lives on: one whose tip strictly descends from the evidence commit
+    # `sha` (the commit recording the handoff always follows it). A branch
+    # at, behind or off the evidence commit, such as one created later at
+    # that commit, cannot have recorded this evidence, and measuring on its
+    # tip would leave later code unseen. A change stacked under another
+    # keeps its own branch as the measure; code above it is the other
+    # change's record to cover.
+    def self.tip_for(record, git, sha)
       branch = record.metadata.dig("git", "branch").to_s
-      branch != git.branch.to_s ? git.branch_tip(branch) : nil
+      return nil if branch == git.branch.to_s
+      tip = git.branch_tip(branch)
+      return nil unless tip
+      return tip if tip == git.head_sha || git.ancestor?(git.head_sha, tip)
+      tip != sha && git.ancestor?(sha, tip) ? tip : nil
     end
 
     # Non-nil when the record's `git.branch` now differs from what it was at
@@ -96,7 +106,7 @@ module SoftFoundry
     # shared core, the access-control globs or the sizing policy counts
     # too. Any git failure is reported as an error, never as no change.
     def measure(sha, declarations: true)
-      tip = self.class.tip_for(@record, @git)
+      tip = self.class.tip_for(@record, @git, sha)
       where = tip ? " on branch #{@record.metadata.dig('git', 'branch')}" : ""
       raise GitError, "branch #{@record.metadata.dig('git', 'branch')} does not contain the evidence commit #{sha[0, 12]}; correct git.branch in metadata.yml" if tip && !@git.ancestor?(sha, tip)
       paths = @git.diff_paths(sha, tip)

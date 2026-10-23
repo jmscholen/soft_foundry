@@ -44,9 +44,10 @@ class ScopedVerificationTest < Minitest::Test
   end
 
   # A record on main with phases up to `through` complete at one commit.
-  def make_record(dir, slug, scope: nil, status: nil, through: 7, evidence: nil)
+  def make_record(dir, slug, scope: nil, status: nil, through: 7, evidence: nil, branch: nil)
     cli(dir, "change", "new", slug)
     edit_metadata(dir, slug) do |m|
+      m["git"] = (m["git"] || {}).merge("branch" => branch) if branch
       m["scope"] = scope unless scope.nil?
       m["status"] = status if status
     end
@@ -433,12 +434,59 @@ class ScopedVerificationTest < Minitest::Test
     with_repo do |dir|
       sh(dir, "git", "checkout", "-qb", "change/a")
       sized_record(dir, "a", scope: %w[lib/a/**])
+      make_record(dir, "b", scope: %w[lib/other/**], through: 5)
       commit_code(dir, "lib/a/f.rb")
       sh(dir, "git", "checkout", "-qb", "change/b")
       commit_code(dir, "lib/other/f.rb")
       _, out = size(dir, "a", "--phase", "verify")
       assert_includes out, "size: targeted_plus_full_before_merge", out
-      refute_includes out, "lib/other/f.rb"
+      refute_includes out, "lib/other/f.rb: unclaimed"
+    end
+  end
+
+  # The stacked case: a's branch is legitimately behind the checked-out
+  # change/b. It holds the commit that recorded a's evidence, so it is the
+  # measure; b's code above it is b's record to cover. A commit on a's own
+  # branch after the evidence still stales it.
+  def test_a_record_stacked_under_another_change_is_measured_on_its_own_branch
+    with_repo do |dir|
+      sh(dir, "git", "checkout", "-qb", "change/a")
+      a = make_record(dir, "a", scope: %w[lib/a/**], branch: "change/a")
+      make_record(dir, "b", scope: %w[lib/b/**])
+      sh(dir, "git", "checkout", "-qb", "change/b")
+      commit_code(dir, "lib/b/f.rb")
+      assert_equal :pass, current(gate(SoftFoundry::ChangeRecord.new(dir, "a", control_plane: plane(dir)), dir)).outcome
+      sh(dir, "git", "checkout", "-q", "change/a")
+      commit_code(dir, "lib/a/f.rb")
+      sh(dir, "git", "checkout", "-q", "change/b")
+      assert_equal :fail, current(gate(SoftFoundry::ChangeRecord.new(dir, "a", control_plane: plane(dir)), dir)).outcome
+    end
+  end
+
+  # ATTACK-017/019: a branch recorded before it exists, then created at the
+  # evidence commit, must not freeze "after" there.
+  def test_a_branch_created_later_at_the_evidence_commit_does_not_hide_later_changes
+    with_repo do |dir|
+      a = make_record(dir, "a", scope: %w[lib/a/**], branch: "later")
+      b = make_record(dir, "b", branch: "later")
+      sh(dir, "git", "branch", "later", a.handoff(plane(dir).phase("verify"))["commit_sha"])
+      commit_code(dir, "lib/a/f.rb")
+      [a, b].each do |r|
+        c = current(gate(SoftFoundry::ChangeRecord.new(dir, r.slug, control_plane: plane(dir)), dir))
+        assert_equal :fail, c.outcome, "#{r.slug}: #{c.detail}"
+      end
+    end
+  end
+
+  def test_a_recorded_branch_ahead_of_head_is_the_measure
+    with_repo do |dir|
+      a = make_record(dir, "a", scope: %w[lib/a/**], branch: "change/a")
+      sh(dir, "git", "checkout", "-qb", "change/a")
+      commit_code(dir, "lib/a/f.rb")
+      sh(dir, "git", "checkout", "-q", "main")
+      c = current(gate(a, dir))
+      assert_equal :fail, c.outcome, c.detail
+      assert_includes c.detail, "on branch change/a"
     end
   end
 
@@ -616,7 +664,7 @@ class ScopedVerificationTest < Minitest::Test
     end
   end
 
-  def test_a_recorded_branch_that_lacks_the_evidence_commit_is_stale_not_current
+  def test_a_recorded_branch_off_head_is_stale_not_current
     with_repo do |dir|
       sh(dir, "git", "checkout", "-qb", "side")
       sh(dir, "git", "checkout", "-q", "-")
@@ -627,7 +675,6 @@ class ScopedVerificationTest < Minitest::Test
         edit_metadata(dir, r.slug) { |m| m["git"] = (m["git"] || {}).merge("branch" => "side") }
         c = current(gate(SoftFoundry::ChangeRecord.new(dir, r.slug, control_plane: plane(dir)), dir))
         assert_equal :fail, c.outcome, "#{r.slug}: #{c.detail}"
-        assert_includes c.detail, "does not contain the evidence commit"
       end
     end
   end
