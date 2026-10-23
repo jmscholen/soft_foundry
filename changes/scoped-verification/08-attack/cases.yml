@@ -1,21 +1,196 @@
-commit_sha: TBD
+commit_sha: 53341d576b69b6f708f2fb6786b497bc00c3a0d7
 authorization_envelope:
-  target: TBD
-  environment: TBD          # local | ephemeral | test | staging | production
-  authorized_by: TBD
-  allowed_surfaces: []
-  prohibited_surfaces: []
-  data_constraints: TBD
-  network_constraints: TBD
+  target: soft-foundry CLI at the commit above (scoped-verification: scope, shared core, full-suite record, check sizing, advisories, browser view data)
+  environment: ephemeral   # throwaway git repositories under the system temp directory; synthetic files
+  authorized_by: maintainer, by running soft-foundry phase run attack on their own machine
+  allowed_surfaces:
+    - soft-foundry check, gate, change size, change status, ui (127.0.0.1, ephemeral port, throwaway repository)
+    - metadata.yml, tests.yml, handoff.yml and repository profile edits inside the throwaway repositories
+    - git history of the throwaway repositories (commit, rename, delete, branch, shallow clone)
+  prohibited_surfaces:
+    - the real working repository's history, records and .ai/ (read only)
+    - any remote, any network host other than loopback, any credential
+  data_constraints: synthetic files only; no real customer or personal data
+  network_constraints: loopback only; no egress
   destructive_actions: prohibited
 cases:
   - id: ATTACK-001
     threat: THREAT-001
-    violation_attempted: TBD
-    starting_privilege: TBD
+    violation_attempted: keep evidence current by editing the declarations after the evidence commit
+    starting_privilege: implementing session (can commit any file) with evidence recorded
     steps:
-      - TBD
-    expected_safe_behavior: TBD
-    observed: TBD
-    result: TBD   # denied | violated | blocked_by_provider | blocked_by_scope
-    evidence: [evidence/TBD]
+      - narrow the record's scope in the same commit that changes code in the dropped path
+      - delete the scope entirely, then change code
+      - remove shared_core, then change a shared-core file
+      - remove access_control; flip the attack sizes in the check-sizing policy
+      - repeat the policy flip against an unscoped record
+    expected_safe_behavior: every declaration edit on a scoped record is a stale cause; an unscoped record keeps its previous behaviour
+    observed: scope, shared_core, access_control and policy edits each reported "declaration changed" and staled the scoped record; an unscoped record stays current after a policy edit, which is the unchanged legacy behaviour (policy is protected from execution skills)
+    result: denied
+    evidence: [evidence/transcript.txt]
+  - id: ATTACK-002
+    threat: THREAT-002
+    violation_attempted: declare a glob that makes staleness never fire, or that is hostile
+    starting_privilege: session or maintainer editing declarations
+    steps:
+      - scope entries that are empty, blank, absolute, contain .., start with a dash, contain a newline or NUL, match nothing, are not strings, are not a list, have seven brace groups, or exceed 300 characters
+      - shared_core matching only docs, matching nothing, containing ..
+      - a blind scope introduced after evidence, checked by the gate
+    expected_safe_behavior: check refuses each with the glob and the fix named; the gate treats a changed declaration as stale
+    observed: all twelve scope shapes and the three shared_core shapes were refused by check with a named fix; the post-evidence blind scope staled the gate. shared_core "**" is accepted (it matches code paths, so it only widens staleness)
+    result: denied
+    evidence: [evidence/transcript.txt]
+  - id: ATTACK-003
+    threat: THREAT-003
+    violation_attempted: suppress staleness through the claimed-by-another-record rule
+    starting_privilege: holder of another record in the repository
+    steps:
+      - a closed record keeps scope ** while an active record covers lib/b; code lands in lib/other
+      - the wide record is active instead
+      - a sibling has a malformed scope; a sibling has unreadable YAML
+      - two records overlap on lib/a
+    expected_safe_behavior: closed and malformed siblings claim nothing; an overlap or a path claimed twice raises an advisory
+    observed: closed, malformed and unreadable siblings claimed nothing and the record went stale; overlap advisories printed. An ACTIVE sibling with ** does claim everything and leaves evidence current (see ATTACK-015)
+    result: denied
+    evidence: [evidence/transcript.txt, evidence/transcript2.txt]
+  - id: ATTACK-004
+    threat: THREAT-004
+    violation_attempted: claim a full-suite pass that did not happen for this tree
+    starting_privilege: implementing session writing tests.yml
+    steps:
+      - type the correct tree, command and outcome without running anything
+      - outcome with other case, trailing space, boolean; tree abbreviated or upper case; full_suite as list or string; cite together with tree
+      - cite self, a loop, a failed run, a depth-two citation, a missing record, hostile slugs (.., dash, slash, newline, dot-prefixed), integer and nil, a symlink to a directory outside the repository
+      - cited tests.yml with a YAML alias and a ruby tag; own tests.yml with an alias
+      - rebind the handoff to a newer commit while tests.yml keeps the old tree; short commit_sha
+    expected_safe_behavior: only a recorded run whose tree equals the evidence commit's tree, with outcome passed, passes; everything else fails with the fix named
+    observed: every variant failed with a named cause except the first, which passes by design (a typed claim naming the right tree; the gate says it is a record, not a test result). The symlink citation failed ("has no verification record"). Replay and short sha failed on tree mismatch
+    result: denied
+    evidence: [evidence/transcript.txt]
+  - id: ATTACK-005
+    threat: THREAT-005
+    violation_attempted: reuse a cited suite result over files the tree hash does not describe
+    starting_privilege: session with a local worktree
+    steps:
+      - cite a run with an untracked, an ignored, a staged-modified, a deleted, a renamed and an oddly named code file present
+      - cite a run with an ignored non-code file (config.local) present
+    expected_safe_behavior: any dirty code path refuses reuse
+    observed: all six code-path variants refused with the dirty path named. An ignored file outside the code groups does not refuse reuse; this is the residual limitation MIT-005 records
+    result: denied
+    evidence: [evidence/transcript.txt]
+  - id: ATTACK-006
+    threat: THREAT-006
+    violation_attempted: run smaller checks than the diff demands
+    starting_privilege: implementing session writing tests.yml and declarations
+    steps:
+      - record targeted size when the shared core changed; omit size; unknown, list-valued and upper-case sizes; full size without a recorded run
+      - scope that omits a touched path; access_control undeclared; touching lib/auth
+      - gate attack with a recorded size smaller than computed
+    expected_safe_behavior: verification evidence recording a smaller or missing size is refused; no declaration sizes full
+    observed: all verification variants refused or sized full as expected. For attack and evaluate the gate has no size check (the specification limits it to verification evidence), so a smaller recorded attack size is not refused. Rename out of an access-control path is a separate violation, ATTACK-013
+    result: denied
+    evidence: [evidence/transcript.txt]
+  - id: ATTACK-007
+    threat: THREAT-007
+    violation_attempted: make a failing git query read as no change
+    starting_privilege: environment controlling git state or a handoff value
+    steps:
+      - commit_sha unknown, a tree hash, abbreviated, HEAD, option-shaped, a range, empty, an integer, a tag name, upper case
+      - metadata branch that does not exist; branch names that look like options or ref expressions; shallow clone without the evidence commit; directory that is not a repository
+    expected_safe_behavior: each fails closed with the cause named; no option reaches git
+    observed: every bad commit_sha failed on "commit_sha recorded" and "evidence current: cannot compare"; the option-shaped value created no file; a non-existent branch fell back to the checked-out worktree and went stale; shallow clone failed closed; non-repository refused. A branch that EXISTS but lacks the change is accepted (ATTACK-014)
+    result: denied
+    evidence: [evidence/transcript.txt]
+  - id: ATTACK-008
+    threat: THREAT-009
+    violation_attempted: reach files or git options outside the intended paths, or crash into a pass
+    starting_privilege: anyone able to supply a slug, --since, --phase or a YAML declaration
+    steps:
+      - change size with slugs containing .., dash, space, newline, $(id), semicolon, 300 characters
+      - --since with --output=, a shell fragment, a range, -p; --phase with .., plan, empty, an embedded option
+      - metadata scope as a YAML alias and as a ruby object tag
+    expected_safe_behavior: invalid input is refused with the fix named; no file is created; no object is instantiated; a parse failure never reads as pass
+    observed: all refused with a message naming the fix; the --output= target was not created; alias and tag metadata failed the gate ("cannot tell what changed") and check ("not valid YAML without aliases")
+    result: denied
+    evidence: [evidence/transcript.txt]
+  - id: ATTACK-009
+    threat: THREAT-010
+    violation_attempted: make the gate slow or unbounded
+    starting_privilege: large diff, many records, hostile globs
+    steps:
+      - 3000 changed files in scope
+      - scope globs with nested wildcards against a path with long segments
+      - 300 sibling records
+    expected_safe_behavior: bounded time independent of file count and record count
+    observed: 1.63 s, 1.67 s and 0.59 s respectively
+    result: denied
+    evidence: [evidence/transcript.txt]
+  - id: ATTACK-010
+    threat: THREAT-011
+    violation_attempted: read a structural pass as proof the suite passed
+    starting_privilege: reader of gate output
+    steps:
+      - record a run with command "false" and outcome passed for the right tree
+      - read gate and status output
+    expected_safe_behavior: output states that the pass is a record, not a test result
+    observed: the gate passes (as the specification says it must) and prints "(a record, not a test result)" on the check name and the result; status output names the scope
+    result: denied
+    evidence: [evidence/transcript.txt]
+  - id: ATTACK-011
+    threat: THREAT-012
+    violation_attempted: script injection or a misleading state in the browser view
+    starting_privilege: author of file names and scope globs
+    steps:
+      - commit files named with <img onerror> and <b> markup; declare one as the scope
+      - start soft-foundry ui on loopback; call /api/change with a valid, wrong and absent token and with a traversal slug
+      - search app.js for unsafe DOM sinks
+    expected_safe_behavior: markup stays data; wrong or absent token refused; traversal refused; the view shows the state in words
+    observed: scope returned as a JSON string with content type application/json, nosniff and a CSP of script-src 'self'; wrong and absent token returned 401; traversal returned 404; verify gate state "stale" in words; app.js has no innerHTML, insertAdjacentHTML, document.write, outerHTML or eval and renders scope with textContent. Not driven: a real browser rendering the page
+    result: denied
+    evidence: [evidence/transcript2.txt]
+  - id: ATTACK-013
+    threat: THREAT-006
+    violation_attempted: move access-control or claimed code out of its path so the removal is not seen
+    starting_privilege: implementing session that can commit a rename
+    steps:
+      - git mv lib/auth/f.rb lib/a/moved.rb (access_control is lib/auth/**), then change size --phase attack for a record scoped to lib/a/**
+      - record scoped to lib/auth/** whose file is renamed into another record's scope, then gate verify
+      - control: the same file deleted
+    expected_safe_behavior: the removal from lib/auth counts as a change there: attack size is the full route sweep and the lib/auth record is stale
+    observed: git diff --name-only reports only the rename destination, so lib/auth/f.rb is not among the changed paths. Attack size stayed touched_doors_plus_smoke ("no changed path matches the access-control globs"). The lib/auth record's "evidence current" PASSED after its file moved away (only the size check, which an attacker satisfies by recording full_at_verify and a run of the evidence tree, failed). The plain delete correctly staled
+    result: violated
+    evidence: [evidence/transcript2.txt]
+  - id: ATTACK-014
+    threat: THREAT-001
+    violation_attempted: make real code changes invisible by repointing the record to an older branch
+    starting_privilege: implementing session editing its own metadata.yml
+    steps:
+      - create branch old-tip at the evidence commit; commit a code change on the checked-out branch
+      - set metadata git.branch to old-tip (scoped and unscoped records)
+      - add a correct recorded size and a run of the evidence tree
+    expected_safe_behavior: the branch value does not decide whether code that changed counts; or changing it is a stale cause
+    observed: both records flipped from STALE to "pass evidence current ... on branch old-tip"; with a correct size and run recorded the whole verify gate reported PASS for a record whose code changed after the evidence. The same happens for an unscoped record, so the stacked-branch measurement predates this change, but this change adds the scoped path and the sizing diff base that rely on it and does not mention git.branch among the declarations REQ-013 guards
+    result: violated
+    evidence: [evidence/transcript2.txt]
+  - id: ATTACK-015
+    threat: THREAT-003
+    violation_attempted: hide a cross-record change behind another active record's wide scope
+    starting_privilege: holder of any record that is not closed
+    steps:
+      - record "wide" declares ** and stays active; record b declares lib/b/**; code lands in lib/other after the evidence
+      - b records size full_at_verify (what the gate demands) and a passed run of its evidence tree
+      - repeat with wide closed; repeat with wide's status set to abandoned
+    expected_safe_behavior: b goes stale, or the gate refuses until the overlap is resolved
+    observed: with wide active the entire verify gate PASSED for b although lib/other changed after its evidence; closing wide staled b. A status of abandoned still counts as active, so wide keeps claiming. The only signal is a non-blocking advisory (overlap with active record wide; diff touches paths outside scope), which the specification and MIT-003 accept as a reviewer judgment
+    result: violated
+    evidence: [evidence/transcript2.txt]
+  - id: ATTACK-016
+    threat: THREAT-009
+    violation_attempted: cite a record under a different spelling of its slug
+    starting_privilege: implementing session writing tests.yml
+    steps:
+      - cite ALPHA where the record is alpha, on a case-insensitive filesystem (macOS default)
+    expected_safe_behavior: the slug must match a record name exactly, or the citation is refused
+    observed: the citation resolved to alpha's tests.yml and passed (cites ALPHA). The cited run is real, so no forged result is accepted, but the name check is not exact on a case-insensitive filesystem
+    result: violated
+    evidence: [evidence/transcript2.txt]

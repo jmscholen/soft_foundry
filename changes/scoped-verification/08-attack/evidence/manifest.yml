@@ -1,5 +1,17 @@
-commit_sha: TBD
+commit_sha: 53341d576b69b6f708f2fb6786b497bc00c3a0d7
 artifacts:
-  - path: TBD
+  - path: evidence/transcript.txt
     case: ATTACK-001
-    sha256: TBD
+    sha256: f04fd9b5e5b9e382056fb3cc8fddf6de62848e18522ab5528630e9fc1366c4e6   # ATTACK-001 to 010 (sections 001-011), output of attack.rb
+  - path: evidence/attack.rb
+    case: ATTACK-001
+    sha256: 5ac92ec5a999462fbf6937bdb20a4f986be62d0b0f665faf5a3d4e535e0073fc   # driver that produced transcript.txt
+  - path: evidence/transcript2.txt
+    case: ATTACK-013
+    sha256: 96036165ed74340776a52a62c1d1693536315b90ec31c7340afb01003e032ac2   # ATTACK-011, 013 to 016, output of attack2.rb
+  - path: evidence/attack2.rb
+    case: ATTACK-013
+    sha256: 02fd8eb2dfd3b81b8711b85696ec72e241f3baae11ca71ad2a13cef2e140a7ec   # driver that produced transcript2.txt
+  - path: evidence/attack_lib.rb
+    case: ATTACK-013
+    sha256: 223b63f6f7142de2632c83ffb8383feccd6ad878dfd19e937fcbd683d7c44f1e   # helpers loaded by attack2.rb
