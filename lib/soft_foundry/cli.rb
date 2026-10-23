@@ -31,6 +31,7 @@ require_relative "session_ledger"
 require_relative "panel"
 require_relative "harness_eval"
 require_relative "phase_reopen"
+require_relative "parallel_run"
 
 module SoftFoundry
   class CLI
@@ -41,6 +42,7 @@ module SoftFoundry
 
     def initialize(argv, out: $stdout, err: $stderr, input: $stdin, root: Dir.pwd, source: nil, updater: nil, pr_discharge: nil, shell: nil, runner: nil, ui_server: nil, processes: nil, panel_launcher: nil)
       @argv = argv.dup
+      @original_argv = argv.dup
       @out = out
       @err = err
       @input = input
@@ -957,12 +959,25 @@ module SoftFoundry
       rounds_given = option("--max-rounds")
       shell_arg_values = options("--shell-arg")
       dry_run = flag("--dry-run")
+      parallel = flag("--parallel")
+      env_specs = options("--env")
+      hide_env_values(env_specs)
       extra = []
       if (i = @argv.index("--"))
         extra = @argv[(i + 1)..]
         @argv = @argv[0...i]
       end
+      # With --parallel the phases are positional: every word left that is not an option.
+      named = [target]
+      if parallel
+        named += @argv.reject { |a| a.start_with?("-") }
+        @argv = @argv.select { |a| a.start_with?("-") }
+      end
       raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+      if parallel
+        panel = panel_spec || rounds_given || !shell_arg_values.empty?
+        return parallel_run(slug, named, env_specs, chosen: chosen, panel: panel, extra: extra, dry_run: dry_run)
+      end
 
       record = load_record(slug)
       phase = plane.phase(target) or raise TargetError, "unknown phase '#{target}'; lifecycle phases: #{plane.phases.map(&:id).join(', ')}"
@@ -985,18 +1000,8 @@ module SoftFoundry
         shell_name = choice.shell
         (choice.line.start_with?("!") ? @err : @out).puts(choice.line) if choice.line
       end
-      launch = runner.launch(phase, shell: shell_name, extra: extra)
-
-      skill_name = plane.skill(phase.skill).name
-      # Grok runs the Claude Code guard entry, and only in a folder it trusts.
-      installer = shell_name == "grok" ? "claude" : shell_name
-      if !PhaseRunner::HOOKED_SHELLS.include?(shell_name)
-        @err.puts "! warn guard: #{shell_name} has no hook mechanism, so the #{skill_name} skill's permissions are policy only for this session"
-      elsif (installer == "claude" && Hooks.claude_installed?(@root).nil?) || (installer == "codex" && Hooks.codex_installed?(@root).nil?)
-        @err.puts "! warn guard: the guard hook is not installed for #{shell_name}, so the session's tool calls will not be checked against the #{skill_name} skill's permissions (`soft-foundry hooks install --#{installer}`)"
-      elsif shell_name == "grok"
-        @err.puts "! warn guard: grok runs the guard hook from .claude/settings.json only in a folder it trusts (/hooks-trust or --trust)"
-      end
+      launch = runner.launch(phase, shell: shell_name, extra: extra, env: ParallelRun.expand(ParallelRun.parse_env(env_specs), phase.id))
+      guard_warning(shell_name, plane.skill(phase.skill).name)
       if dry_run
         if stale
           @out.puts "phase reopen: would reopen #{phase.id} (automatic: evidence stale at #{stale_sha})"
@@ -1027,6 +1032,139 @@ module SoftFoundry
       print_advisories(record)
       return EXIT_TARGET unless status.zero?
       result.failed? ? 2 : 0
+    end
+
+    # An --env value is on this process's command line, which `ps` shows to
+    # every user of the machine. Once the arguments are parsed the title is
+    # rewritten with each value masked (the window before this is
+    # microseconds; shell history is the person's own to manage).
+    def hide_env_values(specs)
+      return if specs.empty?
+      masked = @original_argv.each_with_index.map do |arg, i|
+        previous = i.positive? ? @original_argv[i - 1] : nil
+        previous == "--env" && arg.include?("=") ? "#{arg.partition('=').first}=***" : arg
+      end
+      Process.setproctitle(["soft-foundry", *masked].join(" "))
+    end
+
+    # Says on stderr when the session's tool calls will not be checked
+    # against the skill's permissions.
+    def guard_warning(shell_name, skill_name)
+      # Grok runs the Claude Code guard entry, and only in a folder it trusts.
+      installer = shell_name == "grok" ? "claude" : shell_name
+      if !PhaseRunner::HOOKED_SHELLS.include?(shell_name)
+        @err.puts "! warn guard: #{shell_name} has no hook mechanism, so the #{skill_name} skill's permissions are policy only for this session"
+      elsif (installer == "claude" && Hooks.claude_installed?(@root).nil?) || (installer == "codex" && Hooks.codex_installed?(@root).nil?)
+        @err.puts "! warn guard: the guard hook is not installed for #{shell_name}, so the session's tool calls will not be checked against the #{skill_name} skill's permissions (`soft-foundry hooks install --#{installer}`)"
+      elsif shell_name == "grok"
+        @err.puts "! warn guard: grok runs the guard hook from .claude/settings.json only in a folder it trusts (/hooks-trust or --trust)"
+      end
+    end
+
+    # `phase run <phase> <phase>... --parallel [--env NAME=VALUE]...`: the
+    # isolated phases named, at once, each in its own fresh session. Every
+    # refusal is decided before anything is written or started.
+    def parallel_run(slug, names, env_specs, chosen:, panel:, extra:, dry_run:)
+      refuse = ->(why) { @err.puts "#{slug}: cannot run #{names.join(' ')} in parallel: #{why}"; EXIT_TARGET }
+      return refuse.call("--parallel cannot be combined with --panel, --max-rounds, or --shell-arg; a panel runs one phase with several shells") if panel
+
+      record = load_record(slug)
+      phases = names.map do |n|
+        plane.phases.find { |p| p.id == n } or raise TargetError, "unknown phase '#{n}'; lifecycle phases: #{plane.phases.map(&:id).join(', ')}"
+      end
+      return refuse.call("--parallel needs two or more phases; for one phase run `soft-foundry phase run #{names.first}`") if phases.size < 2
+      dup = phases.find { |p| phases.count(p) > 1 }
+      return refuse.call("#{dup.id} is named twice; name each phase once") if dup
+      isolated = plane.isolated_phases
+      return refuse.call("no isolated_phases declared in .ai/workflow.yml; add the list of phases that write only their own directory (for example evaluate and attack)") if isolated.empty?
+      outside = phases.reject { |p| isolated.include?(p) }
+      unless outside.empty?
+        return refuse.call("#{outside.map(&:id).join(', ')} #{outside.size == 1 ? 'is' : 'are'} not in isolated_phases (.ai/workflow.yml: #{isolated.map(&:id).join(', ')}); only phases that write nothing outside their own directory may run side by side")
+      end
+      env = ParallelRun.parse_env(env_specs)
+      phases = phases.sort_by { |p| plane.phases.index(p) }
+      runner = PhaseRunner.new(@root, plane: plane, git: git, record: record)
+      phases.each do |p|
+        if (why = runner.refusal(p, named: phases))
+          @err.puts "#{slug}: cannot run #{p.id}: #{why}"
+          return EXIT_TARGET
+        end
+      end
+
+      shells = phases.to_h do |p|
+        name = chosen
+        unless name
+          choice = runner.default_shell(p)
+          name = choice.shell
+          (choice.line.start_with?("!") ? @err : @out).puts(choice.line) if choice.line
+        end
+        [p, name]
+      end
+      start_head = git.repository? ? git.head_sha : nil
+      launches = phases.map do |p|
+        runner.launch(p, shell: shells[p], extra: extra, env: ParallelRun.expand(env, p.id).merge(PhaseRunner::PARALLEL_ENV => "1"), parallel_head: start_head)
+      end
+      phases.each { |p| guard_warning(shells[p], plane.skill(p.skill).name) }
+      stale = phases.select { |p| runner.stale_complete?(p) }
+      if env.empty?
+        @err.puts "warn: isolation of what the sessions share (a database, a port, a cache, a file) is the adopter's responsibility, and this run passed no --env; give each session its own with --env NAME=VALUE, using {phase} for a distinct value"
+      end
+
+      if dry_run
+        stale.each { |p| @out.puts "phase reopen: would reopen #{p.id} (automatic: evidence stale at #{record.handoff(p)['commit_sha'].to_s[0, 7]})" }
+        launches.zip(phases).each do |l, p|
+          @out.puts "would run #{p.id} of #{slug} with: #{l.executable} #{l.args.map { |a| a == l.prompt ? '<prompt>' : Shellwords.escape(a) }.join(' ')}"
+        end
+        @out.puts "parallel: would set #{(env.keys + ['SOFT_FOUNDRY_PHASE', 'SOFT_FOUNDRY_PARALLEL']).join(', ')} in each session (values are not shown)"
+        return 0
+      end
+
+      shells.values.uniq.each { |s| billing_notice(shell: s) }
+      # An earlier reopen may already have reset a later named phase, so staleness is read again.
+      phases.each do |p|
+        next unless runner.stale_complete?(p)
+        sha = record.handoff(p)["commit_sha"].to_s[0, 7]
+        result = PhaseReopen.new(@root, plane: plane, git: git, record: record).call(p, reason: runner.stale_reason(p), source: "auto")
+        print_reopen(result, automatic: "evidence stale at #{sha}")
+      end
+      launches.zip(phases).each { |l, p| runner.begin!(p, l) }
+      @out.puts "parallel: running #{phases.map(&:id).join(', ')} of #{slug} at once, each in its own fresh session; executed_by recorded in each handoff"
+      @out.flush
+      @err.flush
+      started = Time.now.utc.iso8601
+      outcomes = ParallelRun.new(@root, runner: @runner).run(launches)
+      ledger = SessionLedger.new(SessionLedger.default_path)
+      failed_start = []
+      outcomes.zip(phases).each do |o, p|
+        learned = o.launch.session_id ? nil : runner.recorded_session(ledger, shell: o.launch.shell, since: started)
+        begin
+          runner.finish!(p, o.status, session_id: learned)
+        rescue StandardError => e
+          failed_start << p
+          @err.puts "phase #{p.id}: could not record the result: #{e.message.lines.first.to_s.strip}"
+        end
+      end
+
+      passed = 0
+      gate_failed = false
+      outcomes.zip(phases).each do |o, p|
+        @out.puts "phase #{p.id}: could not run: #{o.error}" if o.error
+        @out.puts "phase #{p.id}: #{o.launch.shell} exited #{o.status}"
+        result = Gate.new(record, git: git).evaluate(p)
+        print_result(result)
+        gate_failed ||= result.failed?
+        ok = o.status.zero? && !result.failed? && !failed_start.include?(p) && record.phase_status(p) != "blocked"
+        passed += 1 if ok
+        @out.puts "phase #{p.id}: #{ok ? 'pass' : 'fail'}"
+      end
+      @out.puts "parallel: #{phases.size} phases run, #{passed} passed, #{phases.size - passed} failed"
+      moved = git.repository? && start_head && git.head_sha != start_head
+      @err.puts "warn: HEAD moved from #{start_head[0, 7]} to #{git.head_sha[0, 7]} during the run; the phases record #{start_head[0, 7]}, so their evidence is bound to a commit that is no longer HEAD (sessions were told not to commit); inspect the new commits" if moved
+      first_open = plane.phases.find { |p| record.phase_status(p) != "complete" && !(record.phase_status(p) == "pending" && record.skippable?(p)) }
+      record.update_metadata { |m| m["current_phase"] = first_open.id } if first_open
+      print_advisories(record)
+      return EXIT_TARGET if moved || outcomes.any? { |o| !o.status.zero? } || !failed_start.empty?
+      gate_failed ? 2 : 0
     end
 
     # `phase run <phase> --panel SHELL,SHELL`: the phase as a panel.

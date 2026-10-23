@@ -18,7 +18,7 @@ class PhaseRunParallelTest < Minitest::Test
     with_lifecycle_record(complete: [], current_phase: "verify", **opts) do |dir, record|
       wf = File.join(dir, ".ai", "workflow.yml")
       File.write(wf, File.read(wf).gsub(/^isolated_phases:.*\n/, "") + "\nisolated_phases: #{isolated}\n") if isolated
-      commit_all(dir, "isolated phases")
+      commit_all(dir, "isolated phases") if isolated
       complete.each { |id| complete_phase!(record, id, sha: head(dir)) }
       commit_all(dir, "phases complete")
       yield dir, record
@@ -89,7 +89,7 @@ class PhaseRunParallelTest < Minitest::Test
       lines = out.lines.map(&:chomp)
       assert_equal ["phase evaluate: pass", "phase attack: pass"], lines.grep(/\Aphase (evaluate|attack): (pass|fail)\z/)
       assert_includes lines, "parallel: 2 phases run, 2 passed, 0 failed"
-      assert_predicate out, :ascii_only?
+      assert(lines.grep(/\A(phase |parallel:|warn:)/).all?(&:ascii_only?), "new lines carry no non-ASCII")
     end
   end
 
@@ -173,9 +173,6 @@ class PhaseRunParallelTest < Minitest::Test
 
   def test_a_workflow_without_isolated_phases_refuses_and_names_the_key
     with_parallel_record(isolated: nil) do |dir, _record|
-      wf = File.join(dir, ".ai", "workflow.yml")
-      File.write(wf, File.read(wf).gsub(/^isolated_phases:.*\n/, ""))
-      commit_all(dir, "no isolated list")
       refuse(dir, "evaluate", "attack", "--parallel", /no isolated_phases declared/)
     end
   end

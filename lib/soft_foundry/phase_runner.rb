@@ -106,7 +106,11 @@ module SoftFoundry
     # A complete phase whose evidence the gate reports stale is not
     # refused here: `phase run` reopens it (PhaseReopen, source auto) and
     # runs it, after every other refusal has been evaluated.
-    def refusal(phase)
+    #
+    # `named` lists the other phases of a parallel run: a predecessor among
+    # them counts as satisfied for starting when its own predecessor is
+    # complete (the later phase's gate still needs it complete).
+    def refusal(phase, named: [])
       return "change #{@record.slug} is exploring; the exploring stage is worked with the person, not by a runner (run `change vet` first)" if @record.exploring?
       status = @record.metadata["status"].to_s
       return "change #{@record.slug} is #{status}" if %w[closed released judged].include?(status)
@@ -117,6 +121,11 @@ module SoftFoundry
       end
       prev = @plane.effective_predecessor(phase, skip: ->(p) { @record.skippable?(p) }) { |p| @record.phase_status(p) }
       if prev && @record.phase_status(prev) != "complete"
+        if named.include?(prev)
+          root = @plane.effective_predecessor(prev, skip: ->(p) { @record.skippable?(p) }) { |p| @record.phase_status(p) }
+          return nil if root.nil? || @record.phase_status(root) == "complete"
+          return "#{phase.output} cannot start: its predecessor #{prev.output} is run beside it, but that phase's own predecessor #{root.output} is #{@record.phase_status(root) || 'missing'}"
+        end
         return "#{phase.output} cannot start: its predecessor #{prev.output} is #{@record.phase_status(prev) || 'missing'}"
       end
       nil
@@ -136,10 +145,10 @@ module SoftFoundry
     # The instructions the fresh session receives. Deliberately short: it
     # points at the canonical files rather than restating them, and names
     # exactly what may be written.
-    def prompt(phase)
+    def prompt(phase, parallel_head: nil)
       skill = @plane.skill(phase.skill)
       files = ControlPlane::SKILL_FILES.map { |f| ".ai/skills/#{skill.name}/#{f}" }
-      <<~PROMPT.strip
+      base = <<~PROMPT.strip
         You are a fresh-context agent running one lifecycle phase of a Soft Foundry change, and nothing else.
 
         Change: #{@record.slug} (branch #{@record.metadata.dig('git', 'branch')})
@@ -152,12 +161,15 @@ module SoftFoundry
         4. Do not alter any other phase's evidence or handoff, do not weaken requirements to obtain a pass, and do not run `soft-foundry phase run` yourself. If the work cannot be completed, set status blocked with the reason under blocking rather than pretending.
         5. Stop when the handoff is written. `soft-foundry gate #{phase.id}` will be run on your output afterwards.
       PROMPT
+      return base unless parallel_head
+
+      "#{base}\n6. This phase runs beside another in the same worktree. Your commit_sha is #{parallel_head} (the HEAD when the run was accepted; record exactly that value), and do not commit anything: do not run git commit, and leave staging alone. Write only inside changes/#{@record.slug}/#{phase.output}/."
     end
 
-    def launch(phase, shell:, extra: [], env: {})
+    def launch(phase, shell:, extra: [], env: {}, parallel_head: nil)
       builder = SHELLS.fetch(shell) { raise ArgumentError, "unknown shell '#{shell}'; phase run supports #{SHELLS.keys.join(', ')}" }
       id = PRESET_ID.include?(shell) ? SecureRandom.uuid : nil
-      text = prompt(phase)
+      text = prompt(phase, parallel_head: parallel_head)
       Launch.new(shell: shell, executable: shell, args: builder.call(text, extra, id, "#{@record.slug}/#{phase.id}"), prompt: text, session_id: id,
                  env: { PHASE_ENV => phase.id }.merge(env))
     end
