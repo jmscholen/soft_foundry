@@ -1,10 +1,10 @@
 ---
 phase: 06-verification
 skill: verification
-status: pending
-commit_sha: f94fba64204403ebade0d5b0b2ee8fe4b71aad82
+status: complete
+commit_sha: 327a89518ea66b5b1d46fc3227c3fbdee4b8a43f
 started_at: '2026-10-23T01:01:59Z'
-completed_at: '2026-10-23T01:49:32Z'
+completed_at: '2026-10-23T02:20:00Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -21,10 +21,10 @@ blocking: []
 findings:
 - id: VER-001
   severity: minor
-  summary: Rerun after remediation at f94fba6. Full suite 630 runs, 4370 assertions,
-    0 failures, recorded under full_suite for tree 8946fe0 (size full_at_verify);
-    check, ci and eval pass (18 passed, 1 live case skipped). RED commit 8287d58 was
-    confirmed failing earlier (26 failures, 25 errors) and is unchanged.
+  summary: Rerun at 327a895 (adds the size --phase slug fix, RED 2ecd7da, GREEN 327a895).
+    Full suite 631 runs, 4373 assertions, 0 failures, recorded under full_suite for
+    tree 6835f39 (size full_at_verify); check, ci and eval pass (18 passed, 1 live
+    case skipped). RED commit 8287d58 for the main test file is unchanged.
 - id: VER-002
   severity: minor
   summary: DEV-001 is resolved by commit 73298e6 (policy, templates, docs, six harness-eval
@@ -42,15 +42,14 @@ next: evaluate
 notes: Provider keys unset for the suite run (the remaining exported secrets are unrelated
   names). The installed soft-foundry binary predates the size command, so the checkout
   was run with ruby -Ilib exe/soft-foundry. The guard checks Bash against deny sets
-  only. Uncommitted runner edits to metadata.yml and this handoff are the only dirty
-  paths.
+  only. This phase's evidence files and handoff are the only uncommitted paths.
 executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-23T01:41:26Z'
-  finished_at: '2026-10-23T01:49:40Z'
+  started_at: '2026-10-23T01:53:05Z'
+  finished_at: '2026-10-23T02:01:15Z'
   exit_status: 0
-  previous_phase: remediate
-  session_id: 0ed4cf87-c240-4b81-842b-f7097364b61b
+  previous_phase: verify
+  session_id: 533a4d32-e1e3-4d8b-b487-ca3faa5508e0
   cwd: "/Users/jscholen-iou/dev/soft_foundry"
