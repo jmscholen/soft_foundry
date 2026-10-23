@@ -473,6 +473,16 @@ class ScopedVerificationTest < Minitest::Test
     end
   end
 
+  def test_the_size_command_takes_its_phase_option_without_a_slug_on_the_records_branch
+    with_repo do |dir|
+      sized_record(dir, "a", scope: %w[lib/a/**])
+      sh(dir, "git", "checkout", "-qb", "change/a")
+      code, out = cli(dir, "change", "size", "--phase", "verify")
+      assert_equal 0, code, out
+      assert_match(/^phase: verify$/, out)
+    end
+  end
+
   def test_the_size_command_refuses_an_unknown_phase_and_says_the_fix
     with_repo do |dir|
       sized_record(dir, "a", scope: %w[lib/a/**])

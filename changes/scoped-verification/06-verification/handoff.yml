@@ -2,9 +2,9 @@
 phase: 06-verification
 skill: verification
 status: pending
-commit_sha: 73298e69f35fc55adcff6eae61e93a20516dc6c9
+commit_sha: f94fba64204403ebade0d5b0b2ee8fe4b71aad82
 started_at: '2026-10-23T01:01:59Z'
-completed_at: '2026-10-23T01:20:00Z'
+completed_at: '2026-10-23T01:49:32Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -21,9 +21,10 @@ blocking: []
 findings:
 - id: VER-001
   severity: minor
-  summary: Full suite 625 runs, 0 failures, recorded under full_suite for tree 45874e3
-    (size full_at_verify). RED commit 8287d58 confirmed failing (26 failures, 25 errors)
-    in a temporary worktree.
+  summary: Rerun after remediation at f94fba6. Full suite 630 runs, 4370 assertions,
+    0 failures, recorded under full_suite for tree 8946fe0 (size full_at_verify);
+    check, ci and eval pass (18 passed, 1 live case skipped). RED commit 8287d58 was
+    confirmed failing earlier (26 failures, 25 errors) and is unchanged.
 - id: VER-002
   severity: minor
   summary: DEV-001 is resolved by commit 73298e6 (policy, templates, docs, six harness-eval
@@ -47,9 +48,9 @@ executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-23T01:01:59Z'
-  finished_at: '2026-10-23T01:11:56Z'
+  started_at: '2026-10-23T01:41:26Z'
+  finished_at: '2026-10-23T01:49:40Z'
   exit_status: 0
-  previous_phase: implement
-  session_id: 0abd80c9-c1df-4a87-8955-d94e9650a971
+  previous_phase: remediate
+  session_id: 0ed4cf87-c240-4b81-842b-f7097364b61b
   cwd: "/Users/jscholen-iou/dev/soft_foundry"

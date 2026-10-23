@@ -118,6 +118,15 @@ change scoped-verification
 06-verification  in_progress  PASS
   ✓ pass handoff identity
   ! warn phase in progress: not yet gated
+09-remediation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: summary.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: ad1a385
+  ✓ pass completed_at recorded: 2026-10-23T02:40:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass content clean
 advisory: 2 issues to address before scoped-verification goes live (informational, does not block the gate)
   ! warn accessibility: 02-specification/requirements.yml has no requirement with category: accessibility although the change declares an accessibility surface
   ! warn accessibility: the accessibility review (13-review/accessibility.md) has not run yet
