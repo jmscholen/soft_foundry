@@ -34,8 +34,14 @@ module SoftFoundry
 
     # The change's finished work is on the default branch but its record
     # was never closed. `ci` fails on it; `change close` settles it.
+    #
+    # A released record with an open item is deliberately not closed yet:
+    # `ci` passes it and lists what is owed. One with every item discharged
+    # (or a block that names none) has nothing left to wait for.
     def merged_unclosed?(record)
-      return false if record.metadata["status"] == "closed"
+      status = record.metadata["status"]
+      return false if status == "closed"
+      return false if status == "released" && !record.open_release_items.empty?
       sha = record.finished_commit_sha
       !!(default_branch && sha && @git.ancestor?(sha, default_branch))
     end

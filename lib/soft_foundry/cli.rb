@@ -32,6 +32,7 @@ require_relative "panel"
 require_relative "harness_eval"
 require_relative "phase_reopen"
 require_relative "parallel_run"
+require_relative "release"
 
 module SoftFoundry
   class CLI
@@ -328,8 +329,12 @@ module SoftFoundry
         change_vet(@argv.shift)
       when "reopen"
         change_reopen(@argv.shift)
+      when "release"
+        change_release(@argv.first.to_s.start_with?("-") ? nil : @argv.shift)
+      when "discharge"
+        change_discharge
       else
-        @err.puts "Usage: soft-foundry change <new|status|list|size|vet|reopen|close|request-discharge>"
+        @err.puts "Usage: soft-foundry change <new|status|list|size|vet|reopen|release|discharge|close|request-discharge>"
         1
       end
     end
@@ -470,6 +475,18 @@ module SoftFoundry
         return 0
       end
 
+      # A released record is closed once what it owes is discharged. Items
+      # carried from the final judgment are the same conditions `discharge!`
+      # moves, so discharging one here counts as the confirmation.
+      if record.released?
+        open = record.open_release_items
+        if !open.empty? && !force
+          @err.puts "#{slug}: cannot close: released with #{open.size} open item(s) #{open.map { |i| i['id'] }.join(', ')}; discharge each with `soft-foundry change discharge ID --note TEXT`, or pass --force to close anyway"
+          return EXIT_TARGET
+        end
+        confirmed += record.release_items.select { |i| i["from"] == "judgment" && i["discharged_at"] }.map { |i| i["id"].to_s }
+      end
+
       unless force
         if (judged = record.judgment_status) != "complete"
           @err.puts "#{slug}: cannot close: 14-judgment is #{judged || 'missing'}; a change is complete only with a final judgment (.ai/workflow.yml rules.final_judgment_required), so run the judge phase (`soft-foundry phase run judge`) or pass --force to close without one"
@@ -497,7 +514,11 @@ module SoftFoundry
       end
 
       unless undischarged.empty?
-        record.discharge!(undischarged, confirmed_by: pr ? "PR ##{pr} comment" : "explicit --confirm")
+        by = if pr then "PR ##{pr} comment"
+             elsif record.released? then "change discharge"
+             else "explicit --confirm"
+             end
+        record.discharge!(undischarged, confirmed_by: by)
       end
       # Closing is the go-live moment, so anything still owed is said here
       # one last time; it is advice for the person shipping, not a refusal.
@@ -505,6 +526,49 @@ module SoftFoundry
       record.close!
       @out.puts "#{slug}: closed#{undischarged.empty? ? '' : " (discharged: #{undischarged.map { |i| i['id'] }.join(', ')})"}"
       0
+    end
+
+    # `change release [slug] --item ID=DESCRIPTION...`: a finished, approved
+    # change that still owes real-world confirmations. `closed` stays the
+    # only end state; this records what is owed until `change close`.
+    def change_release(slug)
+      items = options("--item")
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+
+      slug ||= current_slug
+      record = load_record(slug)
+      block = Release.new(@root, plane: plane, git: git, record: record).release(items)
+      @out.puts "#{slug}: released"
+      print_release_items(slug, record.open_release_items)
+      @out.puts "released: #{slug}: recorded at #{block['at']}#{block['commit'] ? " (commit #{block['commit'][0, 12]})" : ''}"
+      print_advisories(record)
+      0
+    end
+
+    # `change discharge ID --note TEXT [--change SLUG]`: one open release
+    # item confirmed, with the time, commit, and note.
+    def change_discharge
+      id = @argv.shift
+      raise ArgumentError, "Usage: soft-foundry change discharge ITEM-ID --note TEXT [--change SLUG]" if id.nil? || id.start_with?("-")
+
+      note = option("--note")
+      slug = option("--change") || current_slug
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+      raise ArgumentError, "--note is required: say how #{id} was confirmed (it is kept in the record)" if note.nil?
+
+      record = load_record(slug)
+      open = Release.new(@root, plane: plane, git: git, record: record).discharge(id, note: note)
+      @out.puts "#{slug}: discharged #{id}"
+      print_release_items(slug, open)
+      @out.puts "released: #{slug}: every item is discharged; run `soft-foundry change close #{slug}`" if open.empty?
+      0
+    end
+
+    # One line stating what a released change still owes.
+    def print_release_items(slug, open)
+      return @out.puts("released: #{slug}: 0 open item(s)") if open.empty?
+
+      @out.puts "released: #{slug}: #{open.size} open item(s): #{open.map { |i| i['id'] }.join(', ')}"
     end
 
     def change_request_discharge(slug)
@@ -778,6 +842,25 @@ module SoftFoundry
         record = load_record(slug)
         if record.metadata["status"] == "closed"
           @out.puts "\nchange #{slug} (closed, skipped)"
+          next
+        end
+        if record.released?
+          # Finished and approved, still owing confirmations: commit-bound
+          # evidence is not re-gated (as for closed), and what is owed is listed.
+          @out.puts "\nchange #{slug} (released, not re-gated)"
+          open = record.open_release_items
+          if open.empty?
+            if index.merged_unclosed?(record)
+              @out.puts "  ✗ fail released: #{slug}: no open items remain and it is merged into #{index.default_branch}, but status is still 'released' - run `soft-foundry change close #{slug}`"
+              code = 2
+            else
+              @out.puts "  released: #{slug}: no open items remain; run `soft-foundry change close #{slug}` once it is merged"
+            end
+          else
+            @out.puts "  released: #{slug}: #{open.size} open item(s): #{open.map { |i| i['id'] }.join(', ')}"
+            @out.puts "advisory: #{slug} is released with #{open.size} open item(s) to discharge before it is closed (informational, does not block the gate)"
+            open.each { |i| @out.puts "  ! warn owed #{i['id']}: #{i['description']}" }
+          end
           next
         end
         @out.puts "\nchange #{slug}"

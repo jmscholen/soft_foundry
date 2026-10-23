@@ -174,7 +174,7 @@ class CliChangeReleaseTest < Minitest::Test
       record.update_metadata { |m| m["status"] = "released" }
       code, out = cli(dir, "check")
       assert_equal 2, code, out
-      assert_match(/changes\/c1\/metadata.yml: released record has no release block/, out)
+      assert_match(/changes\/c1\/metadata.yml: released record.s release block is missing/, out)
       record.update_metadata { |m| m["release"] = { "at" => "t", "commit" => "c", "items" => [] } }
       code, out = cli(dir, "check")
       assert_equal 2, code

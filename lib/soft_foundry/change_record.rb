@@ -250,6 +250,20 @@ module SoftFoundry
       reached_lifecycle_end? ? last_commit_sha : nil
     end
 
+    # The final judgment's outcome, read from the Outcome section of
+    # 14-judgment/final.md: the one judgment word (APPROVED, BLOCKED, ...)
+    # the section names. Nil when the file or section is missing, or the
+    # section names none or several (the unfilled template lists them all).
+    def judgment_outcome
+      judge = control_plane.phase("judge")
+      path = judge && File.join(phase_dir(judge), "final.md")
+      return nil unless path && File.file?(path)
+
+      section = SoftFoundry.read_text(path)[/^## Outcome[ \t]*\n(.*?)(?=^## |\z)/m, 1].to_s
+      found = section.scan(/\b[A-Z][A-Z_]{3,}\b/).uniq & control_plane.judgments.map(&:to_s)
+      found.size == 1 ? found.first : nil
+    end
+
     def judgment_evidence_path = File.join(phase_dir(control_plane.phase("judge")), "evidence.yml")
     def judgment_evidence = File.exist?(judgment_evidence_path) ? load(judgment_evidence_path) : {}
 
