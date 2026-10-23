@@ -4,7 +4,9 @@
 # size smaller than the computed one.
 #
 # verify: the smaller size only when the record declares a scope and every
-#   changed code path is inside it (none in the shared core, none outside it).
+#   changed code path is inside it or inside another active record's scope
+#   (that record owns and checks it). Any path in the shared core, or claimed
+#   by no active record, makes it the larger size.
 # evaluate, attack: the smaller size only when the record declares a scope, the
 #   repository declares access_control globs, and no changed path matches them.
 # Absence of a declaration never reduces checking.
