@@ -1,22 +1,38 @@
 # Repository Context
 
 ## Discovered
-TBD
+Soft Foundry is a Ruby gem (`soft_foundry`, minitest + rake, no database, no deployed service) that installs a `.ai/` control plane and a `soft-foundry` CLI into a repository. HEAD c1eb7cf on `change/phase-lifecycle-controls`.
+
+How a phase is reset, run, and a record is finished today, from the code:
+- **Phase run** (`lib/soft_foundry/cli.rb` `phase run`, about l.925-1000; `lib/soft_foundry/phase_runner.rb`). `PhaseRunner#refusal` refuses a phase that is `complete` unless `Gate#evaluate(phase).stale?` (an "evidence current" failure). Nothing resets a stale phase: `begin!` only sets `in_progress` when the handoff is `pending`, so a stale-but-`complete` phase cannot be re-run without hand-editing the handoff. This is the friction item 4 describes. `refusal` also stops on status `closed` or `judged`, on `exploring`, and on an incomplete predecessor.
+- **Reset today** (`change_record.rb` `reopen!`, `cli.rb` `change_reopen`). Iterative-track only (`track_definition.exploring?`); resets every `hardening_phase?` (implement onward) to `pending` (clears `commit_sha`/`completed_at`, appends a note, keeps files), appends `{at, from_commit, reason}` to `metadata.yml` `reopenings`, clears `vetted`, sets `status: exploring`. Refuses a `closed` record. The snapshot timeline (`snapshot.rb`, about l.304) renders `reopenings` as "reopened for exploring". The `reopenings` key therefore already means the exploring return; reusing it for phase reopens would conflate two histories (a specification question).
+- **Execution** (`spawn_shell`, `spawn_panel`, cli.rb about l.1084-1103). `phase run` runs one phase, blocking: `Process.spawn(executable, *args, chdir: @root)` with inherited environment and stdio. `spawn_panel` already spawns several children concurrently with a per-member `l.env`, so a concurrent-spawn-with-environment precedent exists (panel members only, same phase). There is no multi-phase run, no per-run environment passed to a single phase session, and nothing in `workflow.yml` marks a phase as isolated (`panel_phases:` is the only phase list of that kind).
+- **Where concurrent runs write.** Each phase's session writes its own `NN-phase/` directory and handoff; but `PhaseRunner#begin!` and `#finish!` rewrite `metadata.yml` (`current_phase`, read-modify-write via `File.write(YAML.dump(meta))`, no lock), and the guard picks the active skill from `metadata.yml` `current_phase` (`guard.rb` `active`, about l.70-90). Two concurrent phase sessions in one worktree would race on `current_phase`, so the guard could apply the wrong skill's permissions to one of them. Evaluate and attack are both `evidence: commit_bound` and read the code at one commit.
+- **Finished/closed.** `ChangeRecord#close!` sets `status: closed`, `current_phase: done`. `ChangeIndex#merged_unclosed?` is true when status is not `closed` and `finished_commit_sha` (set only when `reached_lifecycle_end?`) is an ancestor of the default branch. `ci` (cli.rb about l.761-795) skips `closed` records ("closed, skipped") and fails a merged-unclosed one with "run `soft-foundry change close`". `change close` requires a complete judgment, the finished commit reachable from the default branch, and confirmation of every `undischarged` item in `14-judgment/evidence.yml` (`--confirm ID`, `--pr`); `--force` overrides. Undischarged acceptance is already a "named items still owed" notion, but it lives in judgment evidence and blocks close; it is not a status.
+- **Status vocabulary.** Documented in the `metadata.yml` template: `intake | exploring | in_progress | awaiting_human | judged | closed`. Code special-cases `closed` in: `ci`, `snapshot.rb` (`summary`, `board_row`: closed rows are not gated and are counted as closed), `processes.rb` (about l.267), `check.rb` (about l.153, scope check ignores closed), `scope.rb` (a closed record claims no scope), `learning.rb`, `guard.rb` and `phase_runner.rb` (`closed`/`judged` mean no active skill and no run), and `cli.rb` `learn promote`. `harness_eval.rb` `STATUSES` limits which statuses a planted record may have. The UI (`lib/soft_foundry/ui/`, `assets/app.js`) renders open/closed counts.
+- **Control-plane surfaces to keep in step** (per the request): `.ai/workflow.yml`, `.ai/templates/change/metadata.yml`, `.ai/schemas.md`, `.ai/README.md`, `check.rb`, harness-eval cases (`.ai/harness-evals/cases/`, denied to this phase and not read), the top-level `README.md` (48K, documents every command), the CLI usage text (cli.rb about l.1454-1491), and the `processes.rb` command table (l.28: `"change" => %w[new status list vet reopen close request-discharge]`; a new `phase reopen` subcommand needs adding to the `phase` entry, which was not inspected further).
+- **Tests.** `test/*_test.rb` (minitest), notably `phase_runner_test.rb`, `lifecycle_tracks_test.rb` (reopen/vet), `cli_change_close_test.rb`, `snapshot_test.rb`, `panel_*_test.rb`, `harness_eval_test.rb`, `application_repo_test.rb`; fixtures via `test_helper.rb` `with_fixture_repo`. CI: `.github/workflows/ci.yml`; `Rakefile` runs the suite.
 
 ## Inferred
-TBD
+- The simplest safe reset for item 4 mirrors `reopen!`'s mechanics (handoff to `pending`, `commit_sha`/`completed_at` cleared, files kept, note appended, history in `metadata.yml`) but is not iterative-specific and does not touch `status`/`vetted`. Which downstream set it resets (everything after the phase in lifecycle order, plus the `transitions` loop edges; any reset reaching `verify` marks verify, evaluate, attack, review, judge stale per the `workflow.yml` comment) is a specification decision.
+- "Evidence is stale" for the auto-reopen in `phase run` is already computable (`Gate#evaluate(phase).stale?`, used by `refusal`); only commit-bound phases can be stale, so auto-reopen would not apply to a non-commit-bound `complete` phase.
+- Parallel runs need (a) a workflow-level declaration of which phases are isolated, (b) a per-run environment value passed through `Process.spawn(env, ...)` as `spawn_panel` does, and (c) a way for each concurrent session to resolve its own active skill, since `metadata.yml` `current_phase` is a single value read by the guard and rewritten by `begin!`. Whether the guard can be told the phase by environment (as panel members are told by `SOFT_FOUNDRY_PANEL_MEMBER`/`_STAGE`) is the key design question; the panel guard path in `guard.rb` is the precedent to read in specification.
+- `released` slots beside `closed`: `closed` is the only terminal status in at least six places (ci, snapshot, processes, scope, check, guard/runner), so each needs a deliberate decision about `released` (gated like an open record, or skipped).
 
 ## Defined by repository policy
-TBD
+- `AGENTS.md` and `.ai/README.md`: lifecycle, gate, anti-fudging. A stale or failed gate is fixed by redoing the work, never by editing the handoff; `implementation_may_not_grade_itself` and `final_judgment_required` are rules in `workflow.yml`. `change close` refuses without a complete judgment.
+- This change is `risk: high`, `track: gated`, no waivers (`waivable_by_risk.high: []`; `forced_by_risk.high: gated`).
+- `.ai/rules/` and `.ai/policies/` are protected from every skill's write set; `check` lints the structure and scans `.ai/` for hostile content, so any new text must pass it.
+- The change alters the shipped process; the intent of the process in other repositories must not change (request constraint), and nothing may be Rails-, database-, or repository-specific.
 
 ## Published policies
-TBD: the privacy policy, security policy, and terms the application publishes, with path or URL, or MISSING with how absence was established; mirrored under `policies:` in `.ai/repository.yml`.
+None published. Mirrored from `.ai/repository.yml` `policies:`: privacy NOT_APPLICABLE (library gem, no user data), security NOT_APPLICABLE (maintainer decision 2026-09-15, no SECURITY.md), terms NOT_APPLICABLE (no service). Re-established at HEAD: `SECURITY.md`, `PRIVACY.md`, `TERMS.md` do not exist, and `docs/` holds only `docs/user/`. `surfaces.policy` is correctly false. `.ai/repository.yml` is unchanged by this phase.
 
 ## Unknown
-TBD
+See `unknowns.md`. Principal items: how concurrent sessions resolve the active skill, the history key name and shape, the `released` item schema and what discharges an item, and how parallel results are committed.
 
 ## Affected components
-TBD
+See `affected-components.md`.
 
 ## Dependencies
-TBD
+See `dependencies.md`.
