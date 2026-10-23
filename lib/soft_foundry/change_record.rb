@@ -4,6 +4,8 @@ require "fileutils"
 require "time"
 require "yaml"
 require_relative "text"
+require_relative "record_lock"
+require_relative "safe_write"
 require_relative "advisory"
 require_relative "declarations"
 
@@ -68,6 +70,91 @@ module SoftFoundry
     end
 
     def closed? = metadata["status"].to_s == "closed"
+    def released? = metadata["status"].to_s == "released"
+
+    # Closed or released: the lifecycle is over, nothing more is run or
+    # gated for commit-bound staleness, and no scope is claimed.
+    def finished? = closed? || released?
+
+    # The release block's items, or [] when absent or malformed (`check`
+    # reports a malformed block).
+    def release_items
+      block = metadata["release"]
+      items = block.is_a?(Hash) ? block["items"] : nil
+      items.is_a?(Array) ? items.select { |i| i.is_a?(Hash) } : []
+    end
+
+    def open_release_items = release_items.reject { |i| i["discharged_at"] }
+
+    # Read-modify-write of metadata.yml under the record lock. The block
+    # receives a fresh read from disk, never a cached copy, so a concurrent
+    # writer's change is not lost; the result is written atomically.
+    def update_metadata
+      RecordLock.synchronize(root, slug) do
+        data = metadata
+        before = Marshal.load(Marshal.dump(data))
+        yield data
+        # An unchanged record is not rewritten, so the template's comments survive.
+        SafeWrite.write(File.join(dir, "metadata.yml"), YAML.dump(data)) unless data == before
+        data
+      end
+    end
+
+    def update_handoff(phase)
+      RecordLock.synchronize(root, slug) do
+        data = handoff(phase) || {}
+        yield data
+        SafeWrite.write(handoff_path(phase), YAML.dump(data))
+        data
+      end
+    end
+
+    # Several files changed together: every new file is staged first, and
+    # only when all staged does any rename happen, metadata.yml first (a
+    # crash between renames then leaves a history entry naming a reset
+    # that is incomplete, which is visible). A staging failure removes
+    # what was staged and leaves the record byte-identical.
+    def transaction
+      RecordLock.synchronize(root, slug) do
+        tx = Transaction.new(self)
+        yield tx
+        tx.commit!
+      end
+    end
+
+    class Transaction
+      def initialize(record)
+        @record = record
+        @metadata_blocks = []
+        @handoff_blocks = {}
+      end
+
+      def metadata(&block) = @metadata_blocks << block
+      def handoff(phase, &block) = (@handoff_blocks[phase] ||= []) << block
+
+      def commit!
+        writes = []
+        unless @metadata_blocks.empty?
+          data = @record.metadata
+          @metadata_blocks.each { |b| b.call(data) }
+          writes << [File.join(@record.dir, "metadata.yml"), YAML.dump(data)]
+        end
+        @handoff_blocks.each do |phase, blocks|
+          data = @record.handoff(phase) || {}
+          blocks.each { |b| b.call(data) }
+          writes << [@record.handoff_path(phase), YAML.dump(data)]
+        end
+        staged = []
+        begin
+          writes.each { |path, bytes| staged << [SafeWrite.stage(path, bytes), path] }
+        rescue StandardError
+          staged.each { |tmp, _| File.unlink(tmp) if File.file?(tmp) && !File.symlink?(tmp) }
+          raise
+        end
+        staged.each { |tmp, path| SafeWrite.commit_staged(tmp, path) }
+        nil
+      end
+    end
 
     # The commit that recorded a phase as complete: the newest commit
     # touching its handoff, provided the handoff says complete there. Nil

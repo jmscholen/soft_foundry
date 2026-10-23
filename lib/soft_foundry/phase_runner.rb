@@ -137,12 +137,10 @@ module SoftFoundry
     # session that dies still leaves the attempt in the record. Also moves
     # current_phase to this phase so the guard applies the right skill.
     def begin!(phase, launch, now: Time.now)
-      path = File.join(@record.dir, "metadata.yml")
-      meta = @record.metadata
-      previous = meta["current_phase"]
-      unless previous == phase.id
+      previous = nil
+      @record.update_metadata do |meta|
+        previous = meta["current_phase"]
         meta["current_phase"] = phase.id
-        File.write(path, YAML.dump(meta))
       end
       stamp_handoff(phase) do |h|
         h["status"] = "in_progress" if h["status"].to_s == "pending"
@@ -186,10 +184,7 @@ module SoftFoundry
     end
 
     def stamp_handoff(phase)
-      path = @record.handoff_path(phase)
-      h = @record.handoff(phase) || {}
-      yield h
-      File.write(path, YAML.dump(h))
+      @record.update_handoff(phase) { |h| yield h }
     end
   end
 end
