@@ -582,6 +582,68 @@ class ScopedVerificationTest < Minitest::Test
     end
   end
 
+  # --- remediation: rename, branch, claimed sizing, citation case -------
+
+  def test_a_rename_lists_both_the_source_and_the_destination
+    with_repo do |dir|
+      base = head(dir)
+      sh(dir, "git", "mv", "lib/auth/f.rb", "lib/a/moved.rb")
+      commit_all(dir, "move")
+      assert_equal %w[lib/a/moved.rb lib/auth/f.rb], git(dir).diff_paths(base, head(dir))
+      assert_equal %w[lib/a/moved.rb lib/auth/f.rb], git(dir).changed_between(base, head(dir))
+    end
+  end
+
+  def test_a_file_renamed_out_of_a_records_scope_stales_it
+    with_repo do |dir|
+      a = make_record(dir, "a", scope: %w[lib/auth/**])
+      make_record(dir, "b", scope: %w[lib/b/**])
+      sh(dir, "git", "mv", "lib/auth/f.rb", "lib/b/moved.rb")
+      commit_all(dir, "move")
+      c = current(gate(a, dir))
+      assert_equal :fail, c.outcome, c.detail
+      assert_includes c.detail, "lib/auth/f.rb: in scope"
+    end
+  end
+
+  def test_a_recorded_branch_that_lacks_the_evidence_commit_is_stale_not_current
+    with_repo do |dir|
+      sh(dir, "git", "checkout", "-qb", "side")
+      sh(dir, "git", "checkout", "-q", "-")
+      a = make_record(dir, "a", scope: %w[lib/a/**])
+      b = make_record(dir, "b")
+      commit_code(dir, "lib/a/f.rb")
+      [a, b].each do |r|
+        edit_metadata(dir, r.slug) { |m| m["git"] = (m["git"] || {}).merge("branch" => "side") }
+        c = current(gate(SoftFoundry::ChangeRecord.new(dir, r.slug, control_plane: plane(dir)), dir))
+        assert_equal :fail, c.outcome, "#{r.slug}: #{c.detail}"
+        assert_includes c.detail, "does not contain the evidence commit"
+      end
+    end
+  end
+
+  def test_a_path_claimed_by_another_record_does_not_enlarge_the_size
+    with_repo do |dir|
+      sh(dir, "git", "checkout", "-qb", "change/a")
+      sized_record(dir, "a", scope: %w[lib/a/**])
+      make_record(dir, "b", scope: %w[lib/b/**])
+      commit_code(dir, "lib/b/new.rb")
+      _, out = size(dir, "a", "--phase", "verify")
+      assert_includes out, "size: targeted_plus_full_before_merge", out
+    end
+  end
+
+  def test_a_citation_slug_must_match_the_directory_name_exactly
+    with_repo do |dir|
+      a = make_record(dir, "alpha", scope: %w[lib/a/**])
+      b = make_record(dir, "b", scope: %w[lib/b/**], evidence: a.handoff(plane(dir).phase("verify"))["commit_sha"])
+      run = { "tree" => evidence_tree(a, dir), "command" => "x", "outcome" => "passed" }
+      write_tests_yml(a, "commit_sha" => head(dir), "full_suite" => run)
+      assert_equal :pass, full_suite(b, dir, { "cite" => "alpha" }).outcome
+      assert_equal :fail, full_suite(b, dir, { "cite" => "ALPHA" }).outcome
+    end
+  end
+
   def test_a_citation_is_refused_for_self_chains_and_hostile_names
     with_repo do |dir|
       a = make_record(dir, "a", scope: %w[lib/a/**])

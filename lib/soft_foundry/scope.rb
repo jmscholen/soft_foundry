@@ -78,6 +78,7 @@ module SoftFoundry
     def measure(sha, declarations: true)
       tip = self.class.tip_for(@record, @git)
       where = tip ? " on branch #{@record.metadata.dig('git', 'branch')}" : ""
+      raise GitError, "branch #{@record.metadata.dig('git', 'branch')} does not contain the evidence commit #{sha[0, 12]}; correct git.branch in metadata.yml" if tip && !@git.ancestor?(sha, tip)
       paths = @git.diff_paths(sha, tip)
       code = paths.select { |p| ControlPlane.match_any?(p, @plane.code_globs) }
       entries = code.map { |path| classify(path) }

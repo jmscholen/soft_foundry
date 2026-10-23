@@ -72,9 +72,12 @@ module SoftFoundry
       ok
     end
 
+    # Every diff here lists with --no-renames: a rename is a delete of the
+    # source and an add of the destination, so neither side can drop out.
+    #
     # Paths changed in commits after `sha`, plus uncommitted and untracked paths.
     def changed_since(sha)
-      committed, ok = run("diff", "--name-only", sha, "HEAD")
+      committed, ok = run("diff", "--name-only", "--no-renames", sha, "HEAD")
       committed = ok ? committed.lines(chomp: true) : []
       (committed + dirty_paths).uniq.sort
     end
@@ -82,7 +85,7 @@ module SoftFoundry
     # Paths changed in commits between `sha` and `tip` (a commit or ref);
     # committed changes only, since another branch's worktree is not ours.
     def changed_between(sha, tip)
-      out, ok = run("diff", "--name-only", sha, tip)
+      out, ok = run("diff", "--name-only", "--no-renames", sha, tip)
       ok ? out.lines(chomp: true).uniq.sort : []
     end
 
@@ -93,7 +96,7 @@ module SoftFoundry
     def diff_paths(sha, tip = nil)
       sha = hash!(sha)
       tip = tip.nil? ? "HEAD" : hash!(tip)
-      out, ok = run("diff", "--name-only", "-z", sha, tip, "--")
+      out, ok = run("diff", "--name-only", "--no-renames", "-z", sha, tip, "--")
       raise GitError, "git could not diff #{sha[0, 12]} against #{tip == 'HEAD' ? 'HEAD' : tip[0, 12]}" unless ok
       committed = out.split("\0")
       (tip == "HEAD" ? committed + status_entries : committed).uniq.sort

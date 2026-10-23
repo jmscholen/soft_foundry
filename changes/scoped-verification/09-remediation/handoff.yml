@@ -1,24 +1,46 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
-phase: 09-remediation
+---
+phase: '09-remediation'
 skill: remediation
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: ad1a385
+started_at: '2026-10-23T01:27:01Z'
+completed_at: '2026-10-23T02:40:00Z'
 resolved_model:
   profile: coding_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- summary.md
+blocking: []
+findings:
+- id: REM-001
+  severity: minor
+  summary: Repaired ATTACK-F-001, ATTACK-F-002, ATTACK-F-004, EVAL-F-001 and EVAL-F-002
+    in lib/ with five regression tests; the full suite passes (630 runs, 0 failures).
+    Verification, evaluation and attack must rerun on the new commit.
+- id: REM-002
+  severity: moderate
+  summary: ATTACK-F-003 (an active record declaring ** hides cross-record staleness)
+    is deliberately not repaired; it is the MIT-003 residual and the gate only advises.
+    Review and judgment should weigh it, or a person should decide to refuse over-broad
+    sibling scopes.
+- id: REM-003
+  severity: minor
+  summary: ATTACK-F-005 stays as specified (recorded size gated at verify only). EVAL-F-003
+    and EVAL-F-004 are for the accessibility review.
 next: verify
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: 'The code and test changes are staged but NOT committed: the pre-commit hook
+  runs soft-foundry ci, which fails because the verify, evaluate and attack evidence
+  is now stale (the intended effect of this phase). The hook was not bypassed. commit_sha
+  is the HEAD at which the tree was edited; the runner or a person must commit the
+  staged paths. Provider keys were unset for the suite run.'
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-23T01:27:01Z'
+  finished_at: '2026-10-23T01:41:01Z'
+  exit_status: 0
+  previous_phase: attack
+  session_id: 97a03fd9-9ee9-43f1-9e75-340ea724bd85
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

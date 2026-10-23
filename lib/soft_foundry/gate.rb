@@ -378,6 +378,9 @@ module SoftFoundry
       where = tip ? " on branch #{record_branch}" : ""
       scope = Scope.new(@record, git: @git)
       scope_note = ""
+      if tip && !@git.ancestor?(sha, tip)
+        return Check.new("evidence current", :fail, "STALE: branch #{record_branch} does not contain the evidence commit #{sha[0, 12]}; correct git.branch in metadata.yml")
+      end
       if scope.scoped?
         measured = scope.measure(sha)
         return Check.new("evidence current", :fail, scoped_stale_detail(sha, measured)) if measured.stale?
@@ -436,6 +439,7 @@ module SoftFoundry
       computed = sizing.compute("verify")
       recorded = tests.is_a?(Hash) ? tests["size"].to_s : ""
       because = computed.reasons.first(3).join("; ")
+      because = "no changed code path is the cause; the diff base or a declaration is" if because.empty?
       if recorded.empty?
         return [computed, Check.new(SIZE_CHECK, :fail, "no size is recorded in tests.yml; computed size is #{computed.size} (#{because}); record `size: #{computed.size}` and run those checks")]
       end

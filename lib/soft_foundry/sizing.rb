@@ -91,7 +91,9 @@ module SoftFoundry
     private
 
     def verify(small, large, base, measured)
-      outside = measured.entries.reject { |e| e.reason == Scope::IN_SCOPE }
+      # A path claimed by another record is that record's business here, as
+      # it is for staleness; it neither stales this record nor enlarges its size.
+      outside = measured.entries.reject { |e| e.reason == Scope::IN_SCOPE || e.reason == Scope::CLAIMED }
       return Result.new(phase: "verify", size: small, applied: measured.applied, base: base, reasons: measured.entries.map(&:to_line)) if outside.empty?
       Result.new(phase: "verify", size: large, applied: measured.applied, base: base, reasons: outside.map(&:to_line))
     end

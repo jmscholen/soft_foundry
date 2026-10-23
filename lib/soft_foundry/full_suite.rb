@@ -87,7 +87,7 @@ module SoftFoundry
       verify = @plane.phase("verify")
       root = File.join(@record.root, "changes")
       file = File.join(root, slug, verify.output, "tests.yml")
-      return nil unless File.file?(file)
+      return nil unless File.file?(file) && Dir.children(root).include?(slug)
       real = File.realpath(file)
       real.start_with?("#{File.realpath(root)}#{File::SEPARATOR}") ? real : nil
     end
