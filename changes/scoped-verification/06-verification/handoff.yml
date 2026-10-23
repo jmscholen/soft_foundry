@@ -1,24 +1,55 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 06-verification
 skill: verification
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 73298e69f35fc55adcff6eae61e93a20516dc6c9
+started_at: '2026-10-23T01:01:59Z'
+completed_at: '2026-10-23T01:20:00Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- results.md
+- tests.yml
+- evidence/manifest.yml
+- evidence/rake-test.txt
+- evidence/check.txt
+- evidence/ci.txt
+- evidence/eval.txt
+blocking: []
+findings:
+- id: VER-001
+  severity: minor
+  summary: Full suite 625 runs, 0 failures, recorded under full_suite for tree 45874e3
+    (size full_at_verify). RED commit 8287d58 confirmed failing (26 failures, 25 errors)
+    in a temporary worktree.
+- id: VER-002
+  severity: minor
+  summary: DEV-001 is resolved by commit 73298e6 (policy, templates, docs, six harness-eval
+    cases); check, ci and eval pass with them. Review should still judge that text
+    against REQ-008 and AC-010.
+- id: VER-003
+  severity: minor
+  summary: Fixtures corrected after RED (DEV-002) and the IMPL-004 sizing reading
+    were not re-judged here; verification only ran them. Review and evaluation should.
+- id: VER-004
+  severity: minor
+  summary: AC-019 and AC-020 (output wording, browser text) are covered by tests only,
+    not exercised by hand; evaluation should run the real commands and the ui page.
 next: evaluate
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: Provider keys unset for the suite run (the remaining exported secrets are unrelated
+  names). The installed soft-foundry binary predates the size command, so the checkout
+  was run with ruby -Ilib exe/soft-foundry. The guard checks Bash against deny sets
+  only. Uncommitted runner edits to metadata.yml and this handoff are the only dirty
+  paths.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-23T01:01:59Z'
+  finished_at: '2026-10-23T01:11:56Z'
+  exit_status: 0
+  previous_phase: implement
+  session_id: 0abd80c9-c1df-4a87-8955-d94e9650a971
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

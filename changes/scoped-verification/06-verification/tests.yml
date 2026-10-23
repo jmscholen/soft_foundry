@@ -1,15 +1,33 @@
-commit_sha: TBD
+commit_sha: 73298e69f35fc55adcff6eae61e93a20516dc6c9
+size: full_at_verify   # computed by `soft-foundry change size`: no scope declared, whole-repository scope is sized full
+full_suite:
+  tree: 45874e339fa6bb8fd63ade0033d4d3c5298e53da   # git rev-parse 73298e69^{tree}
+  command: bundle exec rake test (provider API keys unset)
+  outcome: passed
 checks:
   - id: CHECK-001
-    kind: tests   # tests | lint | static_analysis | security_scan | iac_validate | migration_check | custom
-    command: TBD
-    result: TBD   # pass | fail | error | skipped
-    evidence: evidence/TBD
-    criteria: [AC-001]
-    # Optional, per check: the commit at which this test existed and failed
-    # (RED) and the test file. The gate verifies red_commit is a commit that
-    # precedes commit_sha, holds test_path, and that APP or INFRA code changed
-    # after it. A feature, fix, or refactor with no red_commit on any check is
-    # advised as having no failing-test-first evidence.
-    # red_commit: TBD
-    # test_path: TBD
+    kind: tests
+    command: bundle exec rake test   # full suite, provider keys unset
+    result: pass   # 625 runs, 4353 assertions, 0 failures, 0 errors, 0 skips
+    evidence: evidence/rake-test.txt
+    criteria: [AC-001, AC-002, AC-003, AC-004, AC-005, AC-006, AC-007, AC-008, AC-009, AC-010, AC-011, AC-012, AC-013, AC-014, AC-015, AC-016, AC-017, AC-018, AC-019, AC-020, AC-021, AC-022]
+    red_commit: 8287d58
+    test_path: test/scoped_verification_test.rb
+  - id: CHECK-002
+    kind: static_analysis
+    command: ruby -Ilib exe/soft-foundry check
+    result: pass
+    evidence: evidence/check.txt
+    criteria: [AC-015, AC-021]
+  - id: CHECK-003
+    kind: custom
+    command: ruby -Ilib exe/soft-foundry ci
+    result: pass
+    evidence: evidence/ci.txt
+    criteria: [AC-021]
+  - id: CHECK-004
+    kind: custom
+    command: ruby -Ilib exe/soft-foundry eval   # harness evals, gate cases only (1 live case skipped)
+    result: pass
+    evidence: evidence/eval.txt
+    criteria: [AC-021]
