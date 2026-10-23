@@ -1,15 +1,46 @@
-# Instincts: what this change taught, as reusable one-line triggers with an
-# action, a confidence score, and evidence in this record. `soft-foundry
-# learn list` shows them across every record; `learn promote` copies those
-# at or above the threshold in .ai/policies/learning.yml into
-# .ai/rules/learned.md, and only through a change record on a change
-# branch, never by the change that learned them. An empty list is a valid
-# answer; a malformed entry fails the learning gate.
-instincts: []
-# - id: kebab-case-unique-id
-#   trigger: when ... (the situation an agent will recognise)
-#   action: do ... (one thing, imperative)
-#   confidence: 0.8          # 0.0 to 1.0; promotion threshold is policy
-#   domain: testing          # git | testing | security | review | ...
-#   evidence:
-#     - finding: REV-001     # a finding id, phase, or path in this record
+instincts:
+- id: no-rename-collapse-in-staleness-diffs
+  trigger: when a changed-path list from git decides staleness, check size, or an access-control match
+  action: list the diff with --no-renames so both sides of a rename appear, and add a rename test
+  confidence: 0.85
+  domain: security
+  evidence:
+    - finding: ATTACK-013
+- id: record-resolved-fact-for-measure-selecting-declarations
+  trigger: when a gate takes its measurement base from a value the record's author writes, such as a branch name
+  action: record what the value resolved to at the evidence commit and treat any later difference as a stale cause
+  confidence: 0.8
+  domain: security
+  evidence:
+    - finding: REV-001
+    - finding: ATTACK-F-007
+- id: verify-specification-yaml-parses-before-lock
+  trigger: when finishing a YAML artifact that tooling will load, especially a locked specification
+  action: load it with YAML.safe_load and quote any statement containing a colon followed by a space
+  confidence: 0.85
+  domain: testing
+  evidence:
+    - finding: REC-001
+- id: compare-resolved-slugs-exactly
+  trigger: when a user-supplied slug is resolved to a directory or file on disk
+  action: require the resolved name to equal the slug exactly instead of trusting a case-insensitive lookup
+  confidence: 0.75
+  domain: security
+  evidence:
+    - finding: ATTACK-016
+- id: stacked-fixtures-guard-measure-rule-changes
+  trigger: when changing the rule that picks the commit a staleness check measures against
+  action: run the stacked-branch tests and the full suite before accepting the rule, and keep a regression test for each case the rule must separate
+  confidence: 0.7
+  domain: testing
+  evidence:
+    - finding: REV-001
+    - phase: 09-remediation
+- id: malformed-metadata-fails-with-a-gate-line
+  trigger: when a loader reads a mapping value from metadata.yml or another record file
+  action: rescue a wrong-typed value and report the field name and the next step instead of a Ruby exception
+  confidence: 0.7
+  domain: review
+  evidence:
+    - finding: REV-004
+    - finding: ATTACK-F-008

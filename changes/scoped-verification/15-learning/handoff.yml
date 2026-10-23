@@ -1,24 +1,47 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 15-learning
 skill: learning
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 7e763487222951a8874db084fb1d4c44bd892579
+started_at: '2026-10-23T17:06:42Z'
+completed_at: '2026-10-23T17:08:00Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: Anthropic
+  model: claude-sonnet-5-5
+outputs:
+- findings.md
+- proposed-rules.md
+- proposed-evals.md
+- instincts.yml
+blocking: []
+findings:
+- id: LEARN-001
+  severity: info
+  summary: Six instincts written (confidence 0.7 to 0.85); three are at or above the
+    0.8 promotion threshold and eligible for `learn promote` through a later change
+    record. Not promoted here.
+- id: LEARN-002
+  severity: info
+  summary: Three deterministic checks and five rule changes proposed (YAML parse at
+    lock, resolved-fact recording for measure-selecting declarations, rename-free
+    diffs, exact slug match, typed metadata errors). The ref-resolved-at-evidence
+    mitigation for REV-001 is a product change owed in its own change.
+- id: LEARN-003
+  severity: info
+  summary: Proposed evals were written without reading harness evals (denied to this
+    skill); a maintainer should check them against existing cases.
 next: done
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: Read the change record (judgment, residual risk, attack results, remediation)
+  and wrote only under 15-learning. Did not read harness evals, edit .ai/, or run
+  phase run or promote.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-23T17:06:42Z'
+  finished_at: '2026-10-23T17:08:06Z'
+  exit_status: 0
+  previous_phase: judge
+  session_id: daa55b91-3b27-40eb-98f6-d36eb3ef3d40
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"
