@@ -1,24 +1,93 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 13-review
 skill: review
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 85edc8e85da71c4e55d3336507e688b779b6af5d
+started_at: '2026-10-23T03:21:13Z'
+completed_at: '2026-10-23T03:40:00Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
-next: judge
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+  provider: xai
+  model: grok-4.7
+outputs:
+- functional.md
+- architecture.md
+- security.md
+- accessibility.md
+- policy-conformance.md
+- infrastructure.md
+- operations.md
+- consolidated.md
+blocking: []
+findings:
+- id: REV-001
+  severity: blocking
+  summary: 'A git.branch value stored in the evidence commit is trusted once that
+    branch exists, including when the branch is created afterwards at the phases-complete
+    commit. Later code on the checked-out branch stays outside the measured range,
+    and gate verify exits 0 for scoped and unscoped records (ATTACK-F-007, transcript3.txt
+    ATTACK-019).
+
+    '
+  failure: 'Record git.branch frozen before branch frozen exists, complete the phases
+    on the checked-out branch, create frozen at that commit, then commit lib/a/x.rb
+    on the checked-out branch. gate verify exits 0 and evidence current passes for
+    scope lib/a/** and for an unscoped record.
+
+    '
+- id: REV-002
+  severity: major
+  summary: 'Verify size ignores paths claimed by another active record, so the smaller
+    size is accepted for a diff outside the declared scope. The policy file and REQ-009
+    say that diff is full at verify. Evaluation recorded this as the repaired EVAL-F-001.
+
+    '
+  failure: 'Records A (scope lib/a/**) and B (scope lib/b/**). After A''s plan commit,
+    lib/b/f.rb is committed on A''s branch. change size A --phase verify reports targeted_plus_full_before_merge,
+    and the verify gate accepts that size with the full-suite check skipped.
+
+    '
+- id: REV-003
+  severity: major
+  summary: 'An active sibling scoped ** claims every path, so another record''s evidence
+    stays current and gate verify exits 0 after unrelated code lands. Closing the
+    sibling makes the same change stale. Any status other than closed still claims
+    (ATTACK-015, MIT-003). Judgment needs a recorded acceptance or a tighter claim
+    rule.
+
+    '
+  failure: 'Active record wide with scope ** and record b scoped lib/b/**. Commit
+    lib/other/x.rb. gate verify --change b exits 0 with evidence current pass. The
+    same tree with wide closed fails evidence current, reason unclaimed.
+
+    '
+- id: REV-004
+  severity: minor
+  summary: 'metadata.yml with git set to a string makes gate verify exit 1 with "String
+    does not have #dig method" and no next step (ATTACK-F-008). It does not pass.
+
+    '
+- id: REV-005
+  severity: minor
+  summary: 'The README sizing paragraph omits unclaimed paths as a full-at-verify
+    cause and omits git.branch from the declarations whose edit stales evidence.
+
+    '
+next: remediate
+notes: 'Blocking finding REV-001 returns the change to remediate (workflow on_blocking_findings).
+  No application or test code was edited. The 632-run suite at 2294f86 was not rerun.
+  Implement and remediate recorded provider anthropic; this phase used xai. surfaces.policy
+  is false and no policy text change is owed. Accessibility conforms. Optional phases
+  10, 11, and 12 are still pending. executed_by was left as the runner wrote it.
+
+  '
+executed_by:
+  runner: soft-foundry phase run
+  shell: grok
+  fresh_context: true
+  started_at: '2026-10-23T03:21:13Z'
+  finished_at: '2026-10-23T03:32:54Z'
+  exit_status: 0
+  previous_phase: attack
+  session_id: 9c7f29eb-d169-45ed-ad60-890704218486
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

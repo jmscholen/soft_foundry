@@ -1,12 +1,19 @@
 # Functional Review
 
 ## Scope reviewed
-TBD
+
+Commit `85edc8e85da71c4e55d3336507e688b779b6af5d`. Requirements REQ-001 through REQ-012, REQ-016, REQ-017, REQ-019, REQ-020, and REQ-023, acceptance criteria AC-001 through AC-022, and the plan in `04-plan/implementation.md`. Code read: `lib/soft_foundry/scope.rb`, `sizing.rb`, `full_suite.rb`, `declarations.rb`, `gate.rb`, `git.rb`, `cli.rb`, `check.rb`, and `test/scoped_verification_test.rb`. Evidence read: verification, evaluation, and attack results, including `08-attack/evidence/transcript3.txt` and `transcript2.txt`.
+
+Behavior that matches the specification: an absent or empty scope stays on the legacy whole-repository path (REQ-004); a scoped record goes stale for in-scope, shared-core, and unclaimed code paths and stays current for a path claimed only by another active record (REQ-003); edits after the evidence commit to `scope`, `shared_core`, `access_control`, the sizing policy, and `git.branch` are stale causes (REQ-013, plus the ATTACK-F-006 repair); a recorded full-suite block is accepted only when its tree equals the evidence commit's tree and its outcome is `passed`, and a citation is one level deep, slug-exact, and refused when code paths are dirty (REQ-006, REQ-007, REQ-017); the gate's wording calls that check a record, and README states the same (REQ-008, AC-010); evaluate and attack sizes follow the access-control rules (REQ-010); git failures on the scoped path raise and read as stale (REQ-016); status, the snapshot, and phase-run refusal read `Gate#stale?` (REQ-019); output names the scope and a reason per path (REQ-020).
 
 ## Findings
+
 | ID | Severity | Location | Finding | Failure it prevents | Rule or requirement |
 | --- | --- | --- | --- | --- | --- |
-| REV-TBD | blocking / major / minor | TBD | TBD | TBD: the concrete input or state and the wrong result (required for blocking and major) | TBD |
+| REV-001 | blocking | `lib/soft_foundry/scope.rb` `tip_for`, `branch_edit`; `lib/soft_foundry/gate.rb` unscoped branch | A `git.branch` value already stored in the evidence commit is trusted once that branch exists, including when the branch is created afterwards at the phases-complete commit. Later commits on the checked-out branch are outside the measured range. | Record `git.branch: frozen` before `frozen` exists, complete the phases on the checked-out branch, create `frozen` at that commit, then commit `lib/a/x.rb` on the checked-out branch. `gate verify` exits 0 and `evidence current` passes for a record scoped `lib/a/**` and for an unscoped record (`08-attack/evidence/transcript3.txt`, ATTACK-019). The same shape passes unscoped in ATTACK-017. | REQ-005, REQ-016, the high-risk failure in `02-specification/specification.md` (stale evidence must not pass). THREAT-001. |
+| REV-002 | major | `lib/soft_foundry/sizing.rb` `verify`; `.ai/policies/check-sizing.yml` | Verify size treats a path claimed by another active record as inside the change. The policy file and the plan say the smaller size applies only when every changed code path is inside the record's scope. | Records A (`lib/a/**`) and B (`lib/b/**`). After A's plan commit, `lib/b/f.rb` lands on A's branch. `change size A --phase verify` reports `targeted_plus_full_before_merge`, and the verify gate accepts that size with the full-suite check skipped. `07-evaluation/results.md` records this as the repaired EVAL-F-001. With an active sibling scoped `**`, the size line names `claimed by another record` and tells the operator to record the smaller size (`transcript2.txt`, ATTACK-015). | REQ-009, REQ-011, plan step 6, `.ai/policies/check-sizing.yml` comment. |
+| REV-005 | minor | `README.md` sizing paragraph | The README says a scoped change is full-at-verify when shared core is touched or the change is unscoped. It omits unclaimed paths, and it omits `git.branch` from the declarations whose edit stales evidence. | A reader of that paragraph expects a targeted size for an unclaimed path, and expects a `git.branch` edit to leave evidence current. The tool does the opposite for both. | REQ-020, REQ-023, AC-021. |
 
 ## Conformance
-TBD or N/A with justification
+
+Does not conform. REV-001 lets commit-bound evidence stay current across a later code change. REV-002 computes a smaller verify size than the policy file states for a path outside the record's scope. The rest of REQ-001 through REQ-012, REQ-016, REQ-017, REQ-019, and REQ-020 holds in the tests and in the evaluation journeys EVAL-001 through EVAL-013.

@@ -1,12 +1,21 @@
 # Security Review
 
 ## Scope reviewed
-TBD
+
+`.ai/rules/security.md` and `.ai/rules/errors.md`. Threats THREAT-001 through THREAT-012 and mitigations MIT-001 through MIT-012. Attack results at commit `6a34ac1`, transcripts `transcript.txt`, `transcript2.txt`, and `transcript3.txt`. Remediation summary for ATTACK-F-006 (`2294f86`) and the findings the attack handoff still lists as open.
+
+Denied and holding at this commit: declaration narrowing (ATTACK-001), blind and hostile globs (ATTACK-002), closed or malformed siblings (ATTACK-003), forged citations and self-citation (ATTACK-004), dirty, untracked, and ignored code paths on citation (ATTACK-005), a recorded size smaller than a shared-core or unclaimed diff (ATTACK-006), git failure read as no change on the scoped path (ATTACK-007), slug and YAML injection (ATTACK-008), bounded git calls (ATTACK-009), wording that a pass is a test result (ATTACK-010), markup in the browser data (ATTACK-011), renames listed on both sides (ATTACK-013, fixed), an edit of `git.branch` after the evidence commit (ATTACK-014, fixed in `2294f86`), and a case-folded citation slug (ATTACK-016, fixed).
+
+Accepted by the specification and weighed here, not re-filed: a typed `full_suite` outcome is a claim the gate labels as a record (REQ-008, MIT-004); an ignored file outside the code path groups does not refuse citation (MIT-005); the size gate applies to verification evidence only (REQ-011, ATTACK-F-005); the unscoped path still uses `changed_since`, which returns an empty list when git fails (REQ-004, IMPL-006).
 
 ## Findings
+
 | ID | Severity | Location | Finding | Failure it prevents | Rule or requirement |
 | --- | --- | --- | --- | --- | --- |
-| REV-TBD | blocking / major / minor | TBD | TBD | TBD: the concrete input or state and the wrong result (required for blocking and major) | TBD |
+| REV-001 | blocking | `Scope.tip_for`, `Scope.branch_edit`, `Gate#staleness_check` | ATTACK-F-007 is unrepaired. The ATTACK-F-006 fix compares `git.branch` text at the evidence commit with the worktree. A name recorded before the branch exists is not an edit, and creating the branch at the phases-complete commit makes "after" stop at that tip. | `git.branch: frozen` is committed while `frozen` does not exist; phases complete; `git branch frozen` at that commit; `lib/a/x.rb` is committed on the checked-out branch. `gate verify` exits 0 for scoped and unscoped records (`transcript3.txt`, ATTACK-019). Unscoped ATTACK-017 also exits 0 with `evidence current` pass. Scoped ATTACK-017 fails only because the plan commit is missing from `frozen`, which is incidental. | THREAT-001, MIT-001, REQ-013, REQ-016. `.ai/rules/security.md` (a control is not optional once the threat model names it). `.ai/rules/errors.md` (a fallback must not convert an integrity failure into success). |
+| REV-003 | major | `Scope#siblings`, `Scope#classify` | An active record whose scope is `**` claims every path. Another record's evidence stays current when code outside its own scope changes, and `gate verify` exits 0 once a size and a full-suite block are recorded. Closing that sibling makes the same change stale as unclaimed. Any status other than `closed`, including a leftover record, still claims. | Active record `wide` with `scope: ["**"]`, record `b` scoped `lib/b/**`, then commit `lib/other/x.rb`. `gate verify --change b` exits 0 (`transcript2.txt`, ATTACK-015). The same tree with `wide` closed fails `evidence current` with reason `unclaimed`. | THREAT-003, MIT-003 (explicitly left for this review). REQ-003's unclaimed-path rule is defeated by one wide sibling. |
+| REV-004 | minor | `Scope.tip_for` via `metadata.dig("git", "branch")` | A `git:` value that is a string raises `TypeError` before the gate prints a check. The CLI catches it and exits 1. | `metadata.yml` with `git: "x"` after a code change. `gate verify` prints `soft-foundry: String does not have #dig method` and exits 1 (`transcript3.txt`, ATTACK-018). It does not pass. | `.ai/rules/errors.md` (user-facing errors name what went wrong and what to do). ATTACK-F-008. |
 
 ## Conformance
-TBD or N/A with justification
+
+Does not conform. REV-001 is an open bypass of the control this change exists to provide, and it is blocking. REV-003 is the residual MIT-003 named for this review: the claim rule is implemented as specified, and one active `**` record is enough for stale evidence to pass the whole verify gate with only an overlap advisory. Judgment needs a recorded acceptance of that residual, or the claim rule has to refuse a sibling scope that matches the whole tree and treat abandoned records as released. REV-002 in the functional review is the sizing half of THREAT-006 for paths another record already claims.

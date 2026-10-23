@@ -3,18 +3,27 @@
 Standard: `.ai/rules/policy-conformance.md`. Cite the policy document and clause, or a rule from that file, in every finding.
 
 ## Documents checked
-TBD: the privacy policy, security policy, and terms recorded under `policies:` in `.ai/repository.yml`, each with the path or URL and the version or date examined; or a statement that the application publishes none and that this is itself a go-live gap.
+
+From `policies:` in `.ai/repository.yml`, assessed at commit `fb74c5fe` and current on this branch:
+
+- Privacy: status `NOT_APPLICABLE`. Rationale in the profile: library gem, no users' data; outbound calls are provider model listings and the RubyGems version check; the optional session index stays on the machine in `~/.soft-foundry/sessions.jsonl`. No privacy policy document is published.
+- Security: status `NOT_APPLICABLE`. Maintainer decision recorded in the profile (2026-09-15, `changes/security-policy-not-applicable`). No `SECURITY.md`.
+- Terms: status `NOT_APPLICABLE`. No service; the gem is distributed under its RubyGems listing.
+
+`surfaces.policy` is false. REQ-026 states the same.
 
 ## Scope reviewed
-TBD
+
+The diff from `5abc0e0` to `85edc8e` (library, CLI, tests, control-plane documents, README). Looked for a new collection, recipient, retention change, purpose change, or a change to a published security promise. The new data is repository paths, glob lists, a git tree hash, a recorded test command, and an outcome word, all inside the change record. No new network call, cookie, telemetry event, or log of a person. `session_log` and the session ledger are untouched. The full-suite record stores a command string the operator wrote, which the gate treats as a claim (REQ-008).
 
 ## Findings
-| ID | Severity | Location | Finding | Failure it prevents | Policy clause or rule |
-| --- | --- | --- | --- | --- | --- |
-| REV-TBD | blocking / major / minor | TBD | TBD | TBD: the concrete input or state and the wrong result (required for blocking and major) | TBD |
+
+None.
 
 ## Policy text changes required
-TBD: None, or one line per clause that must be published before this change goes live. Publishing a change to a privacy policy, security policy, or terms is a legal commitment under `.ai/policies/human-boundaries.yml`: park the change with `status: awaiting_human` in `metadata.yml` and record the person's decision under `human_decisions` there.
+
+None.
 
 ## Conformance
-TBD: conforms / conforms with advisories / does not conform / N/A. N/A is valid only when `surfaces.policy` is false and this section says what was examined to conclude the change alters nothing the application collects, shares, retains, protects, or promises.
+
+N/A. `surfaces.policy` is false. The diff alters nothing Soft Foundry collects, shares, retains, protects, or promises: the profile records no published privacy policy, security policy, or terms, each `NOT_APPLICABLE` with a rationale, and the change adds no collection that would make that rationale false (`.ai/rules/policy-conformance.md`, "What the application has promised" and "Changes that engage this standard").
