@@ -1,14 +1,14 @@
-commit_sha: 6a34ac198fc230a898bbd8b1946516734c57c66c
+commit_sha: 7ca42a176a3a79baa30e58063dcaeabe1908661a
 artifacts:
   - path: evidence/transcript.txt
     case: ATTACK-001
-    sha256: c5bc84c1309d7d2137ce8901195dc929f64fabf123dd2c16eca78faf9112ec12   # ATTACK-001 to 010 (second rerun), output of attack.rb
+    sha256: 5711b5f1b08ef40fd980797afb106841ea18dc62b7b9d4cb66fe739eaaaeb3f1   # ATTACK-001 to 010 (third rerun), output of attack.rb
   - path: evidence/attack.rb
     case: ATTACK-001
     sha256: 5ac92ec5a999462fbf6937bdb20a4f986be62d0b0f665faf5a3d4e535e0073fc   # driver that produced transcript.txt
   - path: evidence/transcript2.txt
     case: ATTACK-013
-    sha256: 51971d5e478b6213d617a971995c3b13ffc7175b862ca2892fbe17e75f811917   # ATTACK-011, 013 to 016 (second rerun), output of attack2.rb
+    sha256: a867d6bb85eb662f6c9294294dcff82f6109001242afb3b4b12e3e9c13bf9e8a   # ATTACK-011, 013 to 016 (third rerun), output of attack2.rb
   - path: evidence/attack2.rb
     case: ATTACK-013
     sha256: 02fd8eb2dfd3b81b8711b85696ec72e241f3baae11ca71ad2a13cef2e140a7ec   # driver that produced transcript2.txt
@@ -17,7 +17,13 @@ artifacts:
     sha256: 223b63f6f7142de2632c83ffb8383feccd6ad878dfd19e937fcbd683d7c44f1e   # helpers loaded by attack2.rb and attack3.rb
   - path: evidence/transcript3.txt
     case: ATTACK-017
-    sha256: 9697901ffcf7c86503e59c0e73fac0748fabcdf87fee8f1bf5c0807f75bf7d44   # ATTACK-017 to 019, output of attack3.rb
+    sha256: 010c658adbcc8008e211b482d3aff63bb2d9bd708042c98c8029f34faa3761b7   # ATTACK-017 to 019, output of attack3.rb
   - path: evidence/attack3.rb
     case: ATTACK-017
     sha256: d5d41dcf50b6ddb3e4e4afa01cf027ea357d33a15753672af62291550b9fc0ed   # driver that produced transcript3.txt
+  - path: evidence/transcript4.txt
+    case: ATTACK-020
+    sha256: 1ab8a23b6dd74b205d2349e8a97e43dbcbae51f35f335a5856c2773f60a86f8a   # ATTACK-020 and ATTACK-021, output of attack4.rb
+  - path: evidence/attack4.rb
+    case: ATTACK-020
+    sha256: 1048b19591721c1c088b6b4560dcce9480483352762c67be26cb0566a07a7ffd   # driver that produced transcript4.txt

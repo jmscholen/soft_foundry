@@ -1,4 +1,4 @@
-commit_sha: 6a34ac198fc230a898bbd8b1946516734c57c66c
+commit_sha: 7ca42a176a3a79baa30e58063dcaeabe1908661a
 authorization_envelope:
   target: "soft-foundry CLI at the commit above (scoped-verification: scope, shared core, full-suite record, check sizing, advisories, browser view data)"
   environment: ephemeral   # throwaway git repositories under the system temp directory; synthetic files
@@ -202,8 +202,8 @@ cases:
       - record git.branch frozen in metadata.yml, commit, create branch frozen at that commit, record evidence at it
       - land code on main afterwards; run gate verify (scoped and unscoped record), then with a recorded size and a run of the evidence tree
     expected_safe_behavior: code that changed after the evidence is a stale cause whatever git.branch says
-    observed: "scoped: the gate fails, but only incidentally: sizing takes the plan commit as its base and frozen does not contain it ('cannot compute the size'); evidence current itself passed. unscoped (legacy): verify PASSES with and without a recorded size and run, although lib/a/x.rb changed on main after the evidence"
-    result: violated
+    observed: "rerun after the REV-001 remediation (Scope.tip_for with the evidence commit): a branch created at the evidence commit is not strictly after it, so HEAD is the measure. Scoped and unscoped: evidence current reports STALE (lib/a/x.rb changed after the evidence), with and without a recorded size and run of the evidence tree; the whole verify gate fails. The scoped gate no longer fails only incidentally"
+    result: denied (fixed)
     evidence: [evidence/transcript3.txt]
   - id: ATTACK-019
     threat: THREAT-001
@@ -214,7 +214,7 @@ cases:
       - create branch frozen at the phases-complete commit afterwards; land code on main
       - record the size the gate demands and a run of the evidence tree
     expected_safe_behavior: the gate refuses, or measures the checked-out HEAD
-    observed: "scoped and unscoped records: the whole 06-verification gate reports PASS although lib/a/x.rb changed after the evidence. git.branch is unchanged since the evidence commit (no edit seen), the branch tip contains the evidence commit, and the branch is only behind HEAD"
+    observed: "rerun after the REV-001 remediation: unchanged. Scoped and unscoped: the whole 06-verification gate reports PASS ( evidence current: no code changes since <sha> on branch frozen ) although lib/a/x.rb changed after the evidence. The branch tip is the phases-complete commit, which strictly follows the evidence commit, so the remediation measures on it. The remediation summary records this as an acknowledged residual, indistinguishable by ancestry from a stacked branch"
     result: violated
     evidence: [evidence/transcript3.txt]
   - id: ATTACK-018
@@ -229,3 +229,25 @@ cases:
     observed: "deleting the key is a stale cause and reverting leaves the code change stale; a scalar git value makes gate verify exit 1 with 'String does not have #dig method' (an unhandled error, not a pass)"
     result: denied
     evidence: [evidence/transcript3.txt]
+  - id: ATTACK-020
+    threat: THREAT-001
+    violation_attempted: the ATTACK-019 shape with the scope declared in the evidence commit, aimed at the one step the remediation says it cannot tell from a stacked branch
+    starting_privilege: implementing session that records git.branch before the branch exists and creates it after the phases-complete commit
+    steps:
+      - declare scope lib/a/** and git.branch frozen in the commit that becomes the evidence commit; complete the phases; create branch frozen at the phases-complete commit
+      - land lib/a/x.rb on main afterwards; record the size the gate demands and a run of the evidence tree
+    expected_safe_behavior: evidence goes stale (code changed in scope after the evidence) or the gate refuses
+    observed: the whole 06-verification gate reports PASS (evidence current on branch frozen) although lib/a/x.rb changed in scope after the evidence; same root cause as ATTACK-019
+    result: violated
+    evidence: [evidence/transcript4.txt]
+  - id: ATTACK-021
+    threat: THREAT-001
+    violation_attempted: control for the remediation, not an attack; check the legitimate stacked-branch shape still measures as designed
+    starting_privilege: maintainer with a change stacked under another
+    steps:
+      - record on branch stack (git.branch stack), evidence there; cut branch top above it and commit in-scope code; gate from top
+      - commit in-scope code on stack after top was cut; gate from top again
+    expected_safe_behavior: the record's own branch is the measure (design); code committed on it after the evidence stales the record
+    observed: gate from top passes (in-scope code on top is the other change's to cover, by design); after a commit on stack the record is STALE (lib/a/y.rb on branch stack)
+    result: denied
+    evidence: [evidence/transcript4.txt]

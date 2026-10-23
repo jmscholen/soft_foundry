@@ -7,23 +7,23 @@ $ soft-foundry gate verify --change a
     ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
     ✓ pass no placeholders
     ✓ pass no blocking conditions
-    ✓ pass commit_sha recorded: 820f9603733d1e0f83021a27150cd7e51f3ece58
+    ✓ pass commit_sha recorded: b0bb66abf5b88548d7b1135a5a96d3a21bc544f8
     ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
     ✓ pass predecessor complete: 05-implementation
-    ✓ pass evidence current: no code changes since 820f9603733d on branch frozen; specification unchanged since b382a498f447
+    ✗ fail evidence current: STALE: code changed since b0bb66abf5b8 for this scope: lib/a/x.rb
         scope: lib/a/**
+        reason: lib/a/x.rb: in scope
     - skip red evidence: no check records a red_commit
-    ✗ fail check size matches diff: cannot compute the size: cannot size a: branch frozen does not contain the evidence commit b382a498f447; correct git.branch in metadata.yml; check the commit and branch, or pass --since <commit>
-    ✗ fail full-suite run recorded (record check, not a test result): fail: no full-suite run is recorded and the computed size is the full suite at verify; run the full suite on this tree and record it in tests.yml
+    ✗ fail check size matches diff: no size is recorded in tests.yml; computed size is targeted_plus_full_before_merge (lib/a/x.rb: in scope); record `size: targeted_plus_full_before_merge` and run those checks
+    - skip full-suite run recorded (record check, not a test result): none recorded; the full run is still owed before merge (record it in tests.yml, or cite another record's run)
     ✓ pass content clean
-  advisory: 4 issues to address before a goes live (informational, does not block the gate)
-    ! warn scope: scope lib/a/** could not be measured against the diff: branch frozen does not contain the evidence commit b382a498f447; correct git.branch in metadata.yml
+  advisory: 3 issues to address before a goes live (informational, does not block the gate)
     ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
     ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
     ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
   [exit 2]
-    >> ✓ pass evidence current: no code changes since 820f9603733d on branch frozen; specification unchanged since b382a498f447
-    >> ✗ fail check size matches diff: cannot compute the size: cannot size a: branch frozen does not contain the evidence commit b382a498f447; correct git.branch in metadata.yml; check the commit and branch, or pass --since <commit>
+    >> ✗ fail evidence current: STALE: code changed since b0bb66abf5b8 for this scope: lib/a/x.rb
+    >> ✗ fail check size matches diff: no size is recorded in tests.yml; computed size is targeted_plus_full_before_merge (lib/a/x.rb: in scope); record `size: targeted_plus_full_before_merge` and run those checks
 -- scoped: with recorded size and run, whole gate
 $ soft-foundry gate verify --change a
   06-verification  complete  FAIL
@@ -31,37 +31,37 @@ $ soft-foundry gate verify --change a
     ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
     ✓ pass no placeholders
     ✓ pass no blocking conditions
-    ✓ pass commit_sha recorded: 820f9603733d1e0f83021a27150cd7e51f3ece58
+    ✓ pass commit_sha recorded: b0bb66abf5b88548d7b1135a5a96d3a21bc544f8
     ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
     ✓ pass predecessor complete: 05-implementation
-    ✓ pass evidence current: no code changes since 820f9603733d on branch frozen; specification unchanged since b382a498f447
+    ✗ fail evidence current: STALE: code changed since b0bb66abf5b8 for this scope: lib/a/x.rb
         scope: lib/a/**
+        reason: lib/a/x.rb: in scope
     - skip red evidence: no check records a red_commit
-    ✗ fail check size matches diff: cannot compute the size: cannot size a: branch frozen does not contain the evidence commit b382a498f447; correct git.branch in metadata.yml; check the commit and branch, or pass --since <commit>
-    ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree a529616445f5, outcome passed (a record, not a test result)
+    ✓ pass check size matches diff: recorded targeted_plus_full_before_merge, computed targeted_plus_full_before_merge, scope lib/a/**
+    ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 5e18798385d1, outcome passed (a record, not a test result)
     ✓ pass content clean
-  advisory: 4 issues to address before a goes live (informational, does not block the gate)
-    ! warn scope: scope lib/a/** could not be measured against the diff: branch frozen does not contain the evidence commit b382a498f447; correct git.branch in metadata.yml
+  advisory: 3 issues to address before a goes live (informational, does not block the gate)
     ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
     ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
     ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
   [exit 2]
     >> 06-verification  complete  FAIL
-    >> ✓ pass evidence current: no code changes since 820f9603733d on branch frozen; specification unchanged since b382a498f447
-    >> ✗ fail check size matches diff: cannot compute the size: cannot size a: branch frozen does not contain the evidence commit b382a498f447; correct git.branch in metadata.yml; check the commit and branch, or pass --since <commit>
-    >> ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree a529616445f5, outcome passed (a record, not a test result)
+    >> ✗ fail evidence current: STALE: code changed since b0bb66abf5b8 for this scope: lib/a/x.rb
+    >> ✓ pass check size matches diff: recorded targeted_plus_full_before_merge, computed targeted_plus_full_before_merge, scope lib/a/**
+    >> ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 5e18798385d1, outcome passed (a record, not a test result)
     >> ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
 -- legacy: branch frozen recorded in the evidence commit, branch tip = evidence commit, main moved on
 $ soft-foundry gate verify --change a
-  06-verification  complete  PASS
+  06-verification  complete  FAIL
     ✓ pass handoff identity
     ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
     ✓ pass no placeholders
     ✓ pass no blocking conditions
-    ✓ pass commit_sha recorded: 8cdef07d3920b3804ba77df0c7545b84006129d3
+    ✓ pass commit_sha recorded: 43ee9333c31033c065f04aa54c25d4e300bc1c69
     ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
     ✓ pass predecessor complete: 05-implementation
-    ✓ pass evidence current: no code changes since 8cdef07d3920 on branch frozen; specification unchanged since 0ff7f4c963e9
+    ✗ fail evidence current: STALE: code changed since 43ee9333c310: lib/a/x.rb
     - skip red evidence: no check records a red_commit
     - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
     - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
@@ -70,33 +70,33 @@ $ soft-foundry gate verify --change a
     ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
     ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
     ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
-  [exit 0]
-    >> ✓ pass evidence current: no code changes since 8cdef07d3920 on branch frozen; specification unchanged since 0ff7f4c963e9
+  [exit 2]
+    >> ✗ fail evidence current: STALE: code changed since 43ee9333c310: lib/a/x.rb
     >> - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
 -- legacy: with recorded size and run, whole gate
 $ soft-foundry gate verify --change a
-  06-verification  complete  PASS
+  06-verification  complete  FAIL
     ✓ pass handoff identity
     ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
     ✓ pass no placeholders
     ✓ pass no blocking conditions
-    ✓ pass commit_sha recorded: 8cdef07d3920b3804ba77df0c7545b84006129d3
+    ✓ pass commit_sha recorded: 43ee9333c31033c065f04aa54c25d4e300bc1c69
     ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
     ✓ pass predecessor complete: 05-implementation
-    ✓ pass evidence current: no code changes since 8cdef07d3920 on branch frozen; specification unchanged since 0ff7f4c963e9
+    ✗ fail evidence current: STALE: code changed since 43ee9333c310: lib/a/x.rb
     - skip red evidence: no check records a red_commit
     - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
-    ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 48f7667088a4, outcome passed (a record, not a test result)
+    ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree f87cb262e9f7, outcome passed (a record, not a test result)
     ✓ pass content clean
   advisory: 3 issues to address before a goes live (informational, does not block the gate)
     ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
     ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
     ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
-  [exit 0]
-    >> 06-verification  complete  PASS
-    >> ✓ pass evidence current: no code changes since 8cdef07d3920 on branch frozen; specification unchanged since 0ff7f4c963e9
+  [exit 2]
+    >> 06-verification  complete  FAIL
+    >> ✗ fail evidence current: STALE: code changed since 43ee9333c310: lib/a/x.rb
     >> - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
-    >> ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 48f7667088a4, outcome passed (a record, not a test result)
+    >> ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree f87cb262e9f7, outcome passed (a record, not a test result)
     >> ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
 
 ##### ATTACK-019: git.branch recorded before the branch exists, branch created at the phases-complete commit afterwards (THREAT-001)
@@ -107,25 +107,24 @@ $ soft-foundry gate verify --change a
     ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
     ✓ pass no placeholders
     ✓ pass no blocking conditions
-    ✓ pass commit_sha recorded: c21ff0ad643186531e7d03829e715b4331f8903c
+    ✓ pass commit_sha recorded: 36126c7fa896124647a2cbb9c6b2fad5aa218698
     ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
     ✓ pass predecessor complete: 05-implementation
-    ✓ pass evidence current: no code changes since c21ff0ad6431 on branch frozen; specification unchanged since 430045151d19
+    ✓ pass evidence current: no code changes since 36126c7fa896 on branch frozen; specification unchanged since 86e83693d85d
         scope: lib/a/**
     - skip red evidence: no check records a red_commit
     ✓ pass check size matches diff: recorded targeted_plus_full_before_merge, computed targeted_plus_full_before_merge, scope lib/a/**
-    ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree eece7838b0d7, outcome passed (a record, not a test result)
+    ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 8196ccd9cb47, outcome passed (a record, not a test result)
     ✓ pass content clean
-  advisory: 4 issues to address before a goes live (informational, does not block the gate)
-    ! warn scope: the declared scope lib/a/** matches no changed file after the implementation; fix the scope or the change record
+  advisory: 3 issues to address before a goes live (informational, does not block the gate)
     ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
     ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
     ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
   [exit 0]
     >> 06-verification  complete  PASS
-    >> ✓ pass evidence current: no code changes since c21ff0ad6431 on branch frozen; specification unchanged since 430045151d19
+    >> ✓ pass evidence current: no code changes since 36126c7fa896 on branch frozen; specification unchanged since 86e83693d85d
     >> ✓ pass check size matches diff: recorded targeted_plus_full_before_merge, computed targeted_plus_full_before_merge, scope lib/a/**
-    >> ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree eece7838b0d7, outcome passed (a record, not a test result)
+    >> ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 8196ccd9cb47, outcome passed (a record, not a test result)
     >> ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
 -- legacy: recorded size and run of the evidence tree; branch frozen created afterwards at the phases-complete commit
 $ soft-foundry gate verify --change a
@@ -134,13 +133,13 @@ $ soft-foundry gate verify --change a
     ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
     ✓ pass no placeholders
     ✓ pass no blocking conditions
-    ✓ pass commit_sha recorded: 14e9583082698a8e0f6f9a295c66ec3c40056502
+    ✓ pass commit_sha recorded: f3fa712f6626f0b782da3f8fa13b9c143d773935
     ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
     ✓ pass predecessor complete: 05-implementation
-    ✓ pass evidence current: no code changes since 14e958308269 on branch frozen; specification unchanged since 08124c8a0d08
+    ✓ pass evidence current: no code changes since f3fa712f6626 on branch frozen; specification unchanged since f109c0a6cc52
     - skip red evidence: no check records a red_commit
     - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
-    ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree b66d36ade546, outcome passed (a record, not a test result)
+    ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 9db9519152f3, outcome passed (a record, not a test result)
     ✓ pass content clean
   advisory: 3 issues to address before a goes live (informational, does not block the gate)
     ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
@@ -148,9 +147,9 @@ $ soft-foundry gate verify --change a
     ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
   [exit 0]
     >> 06-verification  complete  PASS
-    >> ✓ pass evidence current: no code changes since 14e958308269 on branch frozen; specification unchanged since 08124c8a0d08
+    >> ✓ pass evidence current: no code changes since f3fa712f6626 on branch frozen; specification unchanged since f109c0a6cc52
     >> - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
-    >> ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree b66d36ade546, outcome passed (a record, not a test result)
+    >> ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 9db9519152f3, outcome passed (a record, not a test result)
     >> ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
 
 ##### ATTACK-018: git.branch edited to the checked-out branch name or blanked after evidence (THREAT-001)
@@ -160,10 +159,10 @@ $ soft-foundry gate verify --change a
     ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
     ✓ pass no placeholders
     ✓ pass no blocking conditions
-    ✓ pass commit_sha recorded: 55b3f1a2af1f39238e17db4f4643e7f4eaa1abff
+    ✓ pass commit_sha recorded: 0a81c905dd69b5ad94c4baa80bd0df1c2c94decd
     ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
     ✓ pass predecessor complete: 05-implementation
-    ✗ fail evidence current: STALE: code changed since 55b3f1a2af1f for this scope: lib/a/x.rb, changes/a/metadata.yml
+    ✗ fail evidence current: STALE: code changed since 0a81c905dd69 for this scope: lib/a/x.rb, changes/a/metadata.yml
         scope: lib/a/**
         reason: lib/a/x.rb: in scope
         reason: changes/a/metadata.yml: declaration changed: git.branch
@@ -176,7 +175,7 @@ $ soft-foundry gate verify --change a
     ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
     ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
   [exit 2]
-    >> ✗ fail evidence current: STALE: code changed since 55b3f1a2af1f for this scope: lib/a/x.rb, changes/a/metadata.yml
+    >> ✗ fail evidence current: STALE: code changed since 0a81c905dd69 for this scope: lib/a/x.rb, changes/a/metadata.yml
 $ soft-foundry gate verify --change a
   soft-foundry: String does not have #dig method
   [exit 1]
@@ -187,10 +186,10 @@ $ soft-foundry gate verify --change a
     ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
     ✓ pass no placeholders
     ✓ pass no blocking conditions
-    ✓ pass commit_sha recorded: a12fb94183da1ade5232327516ffff133837cee1
+    ✓ pass commit_sha recorded: 56b19583bee68cefbf99454d3e3c8481a8cc39f8
     ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
     ✓ pass predecessor complete: 05-implementation
-    ✗ fail evidence current: STALE: code changed since a12fb94183da for this scope: lib/a/x.rb
+    ✗ fail evidence current: STALE: code changed since 56b19583bee6 for this scope: lib/a/x.rb
         scope: lib/a/**
         reason: lib/a/x.rb: in scope
     - skip red evidence: no check records a red_commit
@@ -202,4 +201,4 @@ $ soft-foundry gate verify --change a
     ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
     ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
   [exit 2]
-    >> ✗ fail evidence current: STALE: code changed since a12fb94183da for this scope: lib/a/x.rb
+    >> ✗ fail evidence current: STALE: code changed since 56b19583bee6 for this scope: lib/a/x.rb

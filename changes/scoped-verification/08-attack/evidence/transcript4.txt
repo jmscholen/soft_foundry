@@ -1,0 +1,72 @@
+
+##### ATTACK-020: branch recorded before it exists, created at a commit that strictly follows the evidence, after code landed elsewhere (THREAT-001)
+-- same shape as ATTACK-019 with the scope edited in the evidence commit, the one step the remediation says it cannot tell from a stacked branch
+$ soft-foundry gate verify --change a
+  06-verification  complete  PASS
+    ✓ pass handoff identity
+    ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 2fff7582b4213f69faf6bc99e4932c1e1fa3a244
+    ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
+    ✓ pass predecessor complete: 05-implementation
+    ✓ pass evidence current: no code changes since 2fff7582b421 on branch frozen; specification unchanged since c462bca4f704
+        scope: lib/a/**
+    - skip red evidence: no check records a red_commit
+    ✓ pass check size matches diff: recorded targeted_plus_full_before_merge, computed targeted_plus_full_before_merge, scope lib/a/**
+    ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree fc93387e393c, outcome passed (a record, not a test result)
+    ✓ pass content clean
+  advisory: 3 issues to address before a goes live (informational, does not block the gate)
+    ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  [exit 0]
+    >> 06-verification  complete  PASS
+    >> ✓ pass evidence current: no code changes since 2fff7582b421 on branch frozen; specification unchanged since c462bca4f704
+
+##### ATTACK-021: control: change stacked under another; the record lives on its own branch while HEAD is a branch above it (legitimate)
+-- HEAD is top (above stack); the record's branch tip descends from the evidence commit, so it is the measure: in-scope code on top is not counted (by design: the change above covers its own code)
+$ soft-foundry gate verify --change a
+  06-verification  complete  FAIL
+    ✓ pass handoff identity
+    ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: df1df9972e3d7eb9f43e29ce5e12fd7a4816be7a
+    ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
+    ✓ pass predecessor complete: 05-implementation
+    ✓ pass evidence current: no code changes since df1df9972e3d on branch stack; specification unchanged since c0de7d6ca48d
+        scope: lib/a/**
+    - skip red evidence: no check records a red_commit
+    ✗ fail check size matches diff: no size is recorded in tests.yml; computed size is targeted_plus_full_before_merge (lib/a/x.rb: in scope); record `size: targeted_plus_full_before_merge` and run those checks
+    - skip full-suite run recorded (record check, not a test result): none recorded; the full run is still owed before merge (record it in tests.yml, or cite another record's run)
+    ✓ pass content clean
+  advisory: 3 issues to address before a goes live (informational, does not block the gate)
+    ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  [exit 2]
+    >> ✓ pass evidence current: no code changes since df1df9972e3d on branch stack; specification unchanged since c0de7d6ca48d
+-- stack moved on after top was cut; the record's own branch is the measure and shows the in-scope commit
+$ soft-foundry gate verify --change a
+  06-verification  complete  FAIL
+    ✓ pass handoff identity
+    ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: df1df9972e3d7eb9f43e29ce5e12fd7a4816be7a
+    ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
+    ✓ pass predecessor complete: 05-implementation
+    ✗ fail evidence current: STALE: code changed since df1df9972e3d on branch stack for this scope: lib/a/y.rb
+        scope: lib/a/**
+        reason: lib/a/y.rb: in scope
+    - skip red evidence: no check records a red_commit
+    ✗ fail check size matches diff: no size is recorded in tests.yml; computed size is targeted_plus_full_before_merge (lib/a/y.rb: in scope); record `size: targeted_plus_full_before_merge` and run those checks
+    - skip full-suite run recorded (record check, not a test result): none recorded; the full run is still owed before merge (record it in tests.yml, or cite another record's run)
+    ✓ pass content clean
+  advisory: 3 issues to address before a goes live (informational, does not block the gate)
+    ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  [exit 2]
+    >> ✗ fail evidence current: STALE: code changed since df1df9972e3d on branch stack for this scope: lib/a/y.rb
