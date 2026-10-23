@@ -1,7 +1,7 @@
 # Evaluation Plan
 
 ## Intent being proven
-A maintainer can declare a per-change scope and a repository shared core and get evidence staleness, full-suite reuse and check sizing that follow the declarations, while a record with no declaration behaves exactly as before. A passing gate never claims a suite passed. Size computed by `soft-foundry change size --phase evaluate` for this record: `full_route_sweep` (no scope is declared on this record, so the whole repository is sized full). Every command and the browser data route below was therefore exercised, not only the ones this diff touches.
+A maintainer can declare a per-change scope and a repository shared core and get evidence staleness, full-suite reuse and check sizing that follow the declarations, while a record with no declaration behaves exactly as before. A passing gate never claims a suite passed. This is a rerun at 2fdd159 after remediation; the same drivers were run again and EVAL-013 now expects a pass. Size computed by `soft-foundry change size --phase evaluate` for this record: `full_route_sweep` (no scope is declared on this record, so the whole repository is sized full). Every command and the browser data route below was therefore exercised, not only the ones this diff touches.
 
 ## Personas
 - Maintainer: declares `scope` in `metadata.yml` and `shared_core` / `access_control` in `.ai/repository.yml`, runs `check`, `change size`, `gate`, `change status`.

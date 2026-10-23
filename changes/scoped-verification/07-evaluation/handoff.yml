@@ -1,10 +1,10 @@
 ---
 phase: 07-evaluation
 skill: evaluation
-status: pending
-commit_sha: 1bf54b272eadc61c0770944edabe80f744fd71a3
+status: complete
+commit_sha: 2fdd159b3204ebb9d32ea1413db153318eda592a
 started_at: '2026-10-23T01:12:26Z'
-completed_at: '2026-10-23T01:45:00Z'
+completed_at: '2026-10-23T02:20:00Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -22,28 +22,17 @@ blocking: []
 findings:
 - id: EVAL-F-001
   severity: moderate
-  summary: AC-018 is only half met when two scoped records share a branch. A scoped
-    record with current evidence and a recorded targeted size fails 'check size matches
-    diff' and shows FAIL in change status once code claimed by another record lands,
-    because paths claimed by another record count as outside its scope for sizing.
-  failure: 'Records A (lib/a/**, size targeted, full_suite passed) and B (lib/b/**)
-    on one branch; commit lib/b/new.rb; gate verify --change a reports ''recorded
-    size targeted_plus_full_before_merge is smaller than computed size full_at_verify
-    (lib/b/new.rb: claimed by another record (b))'' and change status a prints ''06-verification
-    complete FAIL: check size matches diff'', although evidence current passes and
-    phase run refuses to rerun it.'
+  summary: Rerun at 2fdd159 after remediation. The earlier finding (a claimed path
+    made a current scoped record fail its size check and status) no longer reproduces;
+    EVAL-013 passes.
 - id: EVAL-F-002
   severity: minor
-  summary: With an evidence commit unknown to git the size failure prints an empty
-    reason list, 'computed size is targeted_plus_full_before_merge ()'. It still fails
-    closed and the cause is named by the commit_sha and evidence current lines.
-- id: EVAL-F-003
-  severity: minor
   summary: No browser was driven. Scope and state words were checked through /api/change
-    and the served app.js source only; keyboard operation, focus order and screen-reader
-    names of the page are unexercised and belong to the accessibility review. AC-006,
-    AC-021 and AC-022 were not re-exercised here (verification ran them).
-- id: EVAL-F-004
+    and the served app.js only; keyboard operation, focus order and screen-reader
+    names of the page belong to the accessibility review. AC-006, AC-021 and AC-022
+    were not re-exercised here, and no rename journey was driven (covered by regression
+    tests verification ran).
+- id: EVAL-F-003
   severity: minor
   summary: This record declares no scope, so evaluate sized full_route_sweep; every
     journey ran in throwaway repositories with a copy of this checkout's .ai/, not
@@ -59,9 +48,9 @@ executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-23T01:12:26Z'
-  finished_at: '2026-10-23T01:18:07Z'
+  started_at: '2026-10-23T02:01:32Z'
+  finished_at: '2026-10-23T02:02:49Z'
   exit_status: 0
   previous_phase: verify
-  session_id: cdc294bb-7c6b-434b-a51b-1b5bf95b283e
+  session_id: 03ae7f98-a2b8-49c9-966a-3fdc2fb586f8
   cwd: "/Users/jscholen-iou/dev/soft_foundry"

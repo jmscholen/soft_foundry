@@ -1,4 +1,4 @@
-commit_sha: 1bf54b272eadc61c0770944edabe80f744fd71a3
+commit_sha: 2fdd159b3204ebb9d32ea1413db153318eda592a
 size: full_route_sweep   # soft-foundry change size --phase evaluate: no scope declared on this record
 journeys:
   - id: EVAL-001
@@ -101,7 +101,7 @@ journeys:
     criteria: [AC-018]
     persona: Maintainer with scoped A and B on one branch
     starting_state: A has recorded size targeted_plus_full_before_merge and a passed full_suite, evidence current
-    steps: [land code under lib/b/ (claimed by B), gate verify a, change status a]
-    assertions: ["evidence current" passes for A and phase run refuses to rerun it, BUT check size matches diff fails (computed full_at_verify, because lib/b/new.rb is outside A's scope) and status prints FAIL: check size matches diff for 06-verification, so status does not show A as green]
+    steps: [land code under lib/b/ (claimed by B), gate verify a, change status a, phase run verify --dry-run for a]
+    assertions: ["evidence current still passes; check size matches diff still passes (computed targeted_plus_full_before_merge, scope lib/a/**); an advisory names lib/b/new.rb as outside the scope; status shows 06-verification complete ok; phase run refuses to rerun a"]
     evidence: [evidence/transcript2.txt]
-    result: fail   # see EVAL-F-001 in results.md
+    result: pass   # EVAL-F-001 of the earlier run is repaired at this commit
