@@ -1,0 +1,14 @@
+# Unknowns
+
+| Unknown | Impact if wrong | How to resolve | Blocking? |
+| --- | --- | --- | --- |
+| Syntax and location of a change's declared scope (metadata `scope:` globs vs a section elsewhere), and whether `change new` can set it | Scope the gate cannot read, or a scope that is easy to widen silently | Specification chooses; assumptions say `metadata.yml` path globs | no |
+| Where shared core and access-control paths are declared (`.ai/repository.yml` key vs a policy file) and how `check` validates them against real files | A misdeclared core silently lets stale evidence pass (the high-risk failure) | Specification; mirror `check_path_groups` blind-spot protection | no |
+| Treatment of files outside every declared glob that match `code_globs`: out of scope for this change, but are they inside another change's scope or no one's? | Evidence could stay current while code in no one's scope changes | Specification: decide whether an unclaimed code path stales all records (safer) or none | no |
+| Dirty worktree and ignored files versus the tree hash (`changed_since` counts dirty paths; `HEAD^{tree}` ignores them) | A reused full-suite result could vouch for a tree that differs from the working copy | Specification: the gate should refuse reuse when the worktree is dirty in code globs | no |
+| Where a full-suite run record lives and how a later verify cites it (inside the first record's `06-verification/`, a repository-level file, or a per-tree file) | Verify on another branch or after merge cannot find the run; or a forged citation passes | Specification; gate can only check tree hash equality, outcome field and that the cited file exists at a commit | no |
+| Whether a squash or rebase merge changes the tree hash a cited run depends on | Reuse misses after merge, costing a rerun but not safety | Specification note; a miss re-runs, never skips | no |
+| How "alters access control" is computed from a diff (paths declared by the repository vs content patterns) | A full route sweep skipped on an access-control change, a real bug dropped | Specification: path-based declaration only; Soft Foundry never infers from content | no |
+| How diff-computed check size interacts with the stacked-branch measure and the record's own branch tip | Wrong base for the diff on a stacked branch | Specification: reuse `branch_tip`/`changed_between` logic | no |
+| Content of `.ai/harness-evals/cases/` and `.ai/policies/` details (shell reads blocked by the guard for this skill; harness evals denied) | New eval or policy duplicates or contradicts an existing one | Implementation and review read them with the appropriate permissions | no |
+| Whether the field report's 11.5-minute figure and the my_ai layout generalise (no my_ai access here) | Scope/shared-core model fits Rails but not other stacks | Specification keeps the model generic path globs, as the constraints require | no |

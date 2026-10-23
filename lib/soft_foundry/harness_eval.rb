@@ -51,7 +51,7 @@ module SoftFoundry
       "${INVISIBLE_ZWSP}" => [0x200B].pack("U")
     }.freeze
 
-    Case = Data.define(:id, :kind, :description, :phase, :record, :repository, :application, :expect, :path)
+    Case = Data.define(:id, :kind, :description, :phase, :record, :repository, :application, :profile, :expect, :path)
     Result = Data.define(:id, :kind, :outcome, :detail, :phase, :check, :expected, :observed, :shell, :model, :matched) do
       def to_h = super.transform_keys(&:to_s)
     end
@@ -71,7 +71,8 @@ module SoftFoundry
       raise CaseError, problems.join("; ") unless problems.empty?
       Case.new(id: data["id"], kind: data["kind"], description: data["description"].to_s, phase: data["phase"].to_s,
                record: data["record"].is_a?(Hash) ? data["record"] : {}, repository: data["repository"].is_a?(Hash) ? data["repository"] : {},
-               application: data["application"].is_a?(Hash) ? data["application"] : {}, expect: data["expect"], path: path)
+               application: data["application"].is_a?(Hash) ? data["application"] : {}, profile: data["profile"].is_a?(Hash) ? data["profile"] : {},
+               expect: data["expect"], path: path)
     rescue Psych::Exception => e
       raise CaseError, "not valid YAML: #{e.message}"
     end
@@ -87,6 +88,11 @@ module SoftFoundry
           ["#{rel}: #{e.message}"]
         end
       end
+    end
+
+    def scope_problems(label, value)
+      return [] if value.is_a?(Array) && value.all? { |g| g.is_a?(String) && !g.strip.empty? }
+      ["#{label} must be a list of path globs"]
     end
 
     # Problems with a case's shape. Structure only, like every lint.
@@ -109,8 +115,25 @@ module SoftFoundry
           problems << "record.handoff names '#{id}', which is not a lifecycle phase" unless plane.phase(id.to_s)
           problems << "record.handoff.#{id} must be a mapping" unless value.is_a?(Hash)
         end
+        problems.concat(scope_problems("record.scope", record["scope"])) if record.key?("scope")
+        if record.key?("siblings")
+          siblings = record["siblings"]
+          if siblings.is_a?(Array)
+            siblings.each_with_index do |sibling, i|
+              if sibling.is_a?(Hash) && sibling["slug"].to_s.match?(/\A[a-z0-9][a-z0-9-]*\z/)
+                problems.concat(scope_problems("record.siblings[#{i}].scope", sibling["scope"]))
+              else
+                problems << "record.siblings[#{i}] must be a mapping with a kebab-case slug"
+              end
+            end
+          else
+            problems << "record.siblings must be a list"
+          end
+        end
         problems << "record.status '#{record['status']}' is not one of #{STATUSES.join(', ')}" if record.key?("status") && !STATUSES.include?(record["status"].to_s)
       end
+      problems << "profile must be a mapping of repository.yml keys to path-glob lists" if data.key?("profile") && !data["profile"].is_a?(Hash)
+      Hash(data["profile"]).each { |key, value| problems.concat(scope_problems("profile.#{key}", value)) }
       count = 0
       FILE_KEYS.each do |outer, inner|
         files = data.dig(outer, inner)
@@ -295,6 +318,7 @@ module SoftFoundry
         app_file = app_file_for(@plane)
         write_file(scratch, app_file, "puts 1\n")
         write_file(scratch, test_file_for(@plane), "require 'minitest/autorun'\n")
+        merge_profile!(scratch, kase.profile, app_file)
         git(scratch, "init", "-q", "-b", "main")
         git(scratch, "config", "user.email", "eval@example.com")
         git(scratch, "config", "user.name", "soft-foundry eval")
@@ -321,8 +345,18 @@ module SoftFoundry
         meta["risk"] = spec.fetch("risk", "low").to_s
         meta["status"] = spec["status"].to_s if spec.key?("status")
         meta["status"] = "in_progress" if meta["status"] == "intake"
+        meta["scope"] = Array(spec["scope"]).map { |g| g == APP_FILE_TOKEN ? app_file : g.to_s } if spec.key?("scope")
         meta["skipped_phases"] = Array(spec["skipped"]).map { |id| { "phase" => id.to_s, "rationale" => "harness eval case #{kase.id}" } }
         File.write(meta_path, YAML.dump(meta))
+        Array(spec["siblings"]).each do |sibling|
+          other = ChangeRecord.create(scratch, sibling["slug"], control_plane: plane, title: sibling["slug"], branch: "change/#{sibling["slug"]}", track: plane.default_track)
+          other_path = File.join(other.dir, "metadata.yml")
+          other_meta = YAML.safe_load_file(other_path, permitted_classes: [Time, Date], aliases: true)
+          other_meta["type"] = "feature"
+          other_meta["status"] = "in_progress"
+          other_meta["scope"] = Array(sibling["scope"]).map { |g| g == APP_FILE_TOKEN ? app_file : g.to_s }
+          File.write(other_path, YAML.dump(other_meta))
+        end
         git(scratch, "add", "-A")
         git(scratch, "commit", "-q", "-m", "record #{slug}")
         bound = git(scratch, "rev-parse", "HEAD").strip
@@ -373,6 +407,16 @@ module SoftFoundry
       end
 
       # A path from a case, resolved under `base`, refused if it escapes.
+      # Declares repository-wide path globs (shared_core, access_control) in
+      # the scratch copy of .ai/repository.yml, so a case can plant them.
+      def merge_profile!(scratch, profile, app_file)
+        return if profile.empty?
+        path = File.join(scratch, ".ai", "repository.yml")
+        data = File.file?(path) ? (YAML.safe_load_file(path, permitted_classes: [Time, Date], aliases: true) || {}) : {}
+        profile.each { |key, globs| data[key.to_s] = Array(globs).map { |g| g == APP_FILE_TOKEN ? app_file : g.to_s } }
+        File.write(path, YAML.dump(data))
+      end
+
       def write_file(base, rel, content, app_file: nil)
         rel = app_file if rel == APP_FILE_TOKEN && app_file
         raise CaseError, "'#{rel}' is not a safe relative path" unless HarnessEval.safe_path?(rel)

@@ -10,6 +10,7 @@ track: ${TRACK}            # gated | iterative (.ai/workflow.yml tracks:); set b
 status: ${STATUS}          # intake | exploring | in_progress | awaiting_human | judged | closed
 current_phase: ${CURRENT_PHASE}
 created_at: ${CREATED_AT}
+scope: []                  # optional path globs this change owns; empty means the whole repository. Evidence goes stale only for code inside this scope or the repository's shared_core, and the checks are sized from the diff (.ai/policies/check-sizing.yml)
 surfaces:
   application: false
   database: false

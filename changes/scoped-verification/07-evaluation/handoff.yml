@@ -1,0 +1,57 @@
+---
+phase: 07-evaluation
+skill: evaluation
+status: complete
+commit_sha: ea50ad589eb0ac2d3a61a5899b1ad9d23029757d
+started_at: '2026-10-23T01:12:26Z'
+completed_at: '2026-10-23T14:30:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- evaluation-plan.md
+- journeys.yml
+- results.md
+- evidence/manifest.yml
+- evidence/journeys.rb
+- evidence/journeys2.rb
+- evidence/transcript.txt
+- evidence/transcript2.txt
+blocking: []
+findings:
+- id: EVAL-F-001
+  severity: moderate
+  summary: Rerun at ea50ad5 after REV-001/REV-002 remediation. All 13 journeys pass;
+    transcripts match the 916ff15 run apart from commit and tree hashes. EVAL-013
+    (claimed path no longer breaks a current scoped record) still passes.
+- id: EVAL-F-002
+  severity: minor
+  summary: No browser was driven. Scope and state words were checked through /api/change
+    and the served app.js only; keyboard operation, focus order and screen-reader
+    names of the page belong to the accessibility review. AC-006, AC-021 and AC-022
+    were not re-exercised here, and no rename journey was driven (covered by regression
+    tests verification ran).
+- id: EVAL-F-003
+  severity: minor
+  summary: This record declares no scope, so evaluate sized full_route_sweep; every
+    journey ran in throwaway repositories with a copy of this checkout's .ai/, not
+    against this repository's own records.
+next: attack
+notes: Journeys were driven with ruby -Ilib exe/soft-foundry (the installed binary
+  predates the size command) in throwaway git repositories under the system temp directory,
+  removed afterwards; the driver scripts are kept under evidence/. The guard checks
+  Bash against deny sets only. Transcripts were regenerated at ea50ad5 from unchanged
+  drivers. Uncommitted runner edits to this handoff and metadata.yml were the only
+  dirty paths in the repository when the evidence was produced; the evidence files
+  in this phase directory are uncommitted until the runner commits.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-23T14:14:12Z'
+  finished_at: '2026-10-23T14:15:24Z'
+  exit_status: 0
+  previous_phase: verify
+  session_id: 4ecef4da-fbae-41e5-b453-f8d39810bfe6
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

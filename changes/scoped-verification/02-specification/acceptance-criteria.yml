@@ -1,0 +1,136 @@
+# Each criterion must be testable and map to at least one requirement.
+# Criteria are locked once specification completes; changing them requires a
+# recorded requirement change, never a downstream edit.
+criteria:
+  - id: AC-001
+    requirements: [REQ-001, REQ-004]
+    given: a record with no scope key, and one with an empty scope list, both with evidence at commit C
+    when: a code path is changed after C and the gate runs
+    then: both report the same stale result as before this change, naming that path
+    verified_by: []
+  - id: AC-002
+    requirements: [REQ-001, REQ-003]
+    given: records A (scope app/a/**) and B (scope app/b/**) with complete commit-bound evidence at C, and a repository with no shared core
+    when: a file under app/a/ is committed after C
+    then: the gate reports A stale with reason in scope, and B current
+    verified_by: []
+  - id: AC-003
+    requirements: [REQ-002]
+    given: the same records and a repository shared core app/base/**
+    when: a file under app/base/ is committed after C
+    then: both A and B are reported stale with reason shared core
+    verified_by: []
+  - id: AC-004
+    requirements: [REQ-003]
+    given: record A with scope app/a/** and no other record claiming app/other/**
+    when: a code file under app/other/ is committed after C
+    then: A is reported stale with reason unclaimed
+    verified_by: []
+  - id: AC-005
+    requirements: [REQ-003]
+    given: record A scoped app/a/** and record B scoped app/b/**
+    when: a code file under app/b/ is committed after A's evidence commit
+    then: A is not stale because of that file
+    verified_by: []
+  - id: AC-006
+    requirements: [REQ-005]
+    given: a scoped record whose evidence is current for code, and the specification re-recorded after that evidence
+    when: the gate runs
+    then: the record is reported stale with the specification cause, and a record on a stacked branch measures against its own branch tip as before
+    verified_by: []
+  - id: AC-007
+    requirements: [REQ-013]
+    given: a scoped record with current evidence at C
+    when: its metadata scope is narrowed after C, or the repository shared core or access-control globs change after C
+    then: the record is reported stale with reason declaration changed
+    verified_by: []
+  - id: AC-008
+    requirements: [REQ-006, REQ-007]
+    given: a verification whose tests.yml records a full-suite run with the evidence commit's tree hash, command and outcome passed
+    when: the gate runs the full-suite check
+    then: the check passes; a recorded tree hash different from the evidence commit's tree, or a missing outcome, fails it with the fix named
+    verified_by: []
+  - id: AC-009
+    requirements: [REQ-006, REQ-007, REQ-017]
+    given: record B citing the full-suite run recorded by record A
+    when: A's tree hash equals B's evidence-commit tree, A's outcome is passed, and the worktree is clean in code paths
+    then: B's full-suite check passes; if the trees differ, A's outcome is not passed, A does not exist, or a code path is dirty, the check fails and says to run and record the suite
+    verified_by: []
+  - id: AC-010
+    requirements: [REQ-008]
+    given: the output and documents of every new check
+    when: read in full
+    then: none states or implies that a passing gate proves the suite passed; the full-suite check names itself a record check
+    verified_by: []
+  - id: AC-011
+    requirements: [REQ-009, REQ-011, REQ-012]
+    given: a scoped record whose diff lies inside its scope, and a second record whose diff touches the shared core
+    when: the size command runs for verify on each
+    then: the first reports targeted plus one full run before merge; the second reports full at verify; each lists the triggering paths
+    verified_by: []
+  - id: AC-012
+    requirements: [REQ-011]
+    given: verification evidence recording size targeted for a record whose computed verify size is full without a recorded full-suite run
+    when: the gate runs
+    then: the gate fails the sizing check naming computed and recorded sizes
+    verified_by: []
+  - id: AC-013
+    requirements: [REQ-010]
+    given: repository access-control globs app/auth/**
+    when: the size command runs for evaluate and attack on a diff that touches app/auth/x versus one that does not
+    then: the first reports full sweep and the second reports touched doors plus smoke; with no access-control globs declared, or no scope declared, it reports full
+    verified_by: []
+  - id: AC-014
+    requirements: [REQ-011, REQ-005]
+    given: a record on a branch that exists but is not checked out
+    when: the size command runs
+    then: the diff is measured to that branch's tip, the same base staleness uses
+    verified_by: []
+  - id: AC-015
+    requirements: [REQ-014, REQ-015]
+    given: declarations that are empty, absolute, contain .., match no tracked file, or place a shared core outside the code path groups
+    when: the structure check runs
+    then: each is refused with fail and a message naming the declaration and the fix; a well-formed declaration passes
+    verified_by: []
+  - id: AC-016
+    requirements: [REQ-016]
+    given: evidence whose commit is unknown to git, or whose recorded branch is unreadable
+    when: staleness or the full-suite check runs
+    then: the evidence is reported stale or the check fails with the cause named, never current
+    verified_by: []
+  - id: AC-017
+    requirements: [REQ-018]
+    given: a scoped record whose diff touches a path outside its scope, one touching the shared core with no recorded full-suite run, and one whose declared scope matches no changed file
+    when: the gate or status prints its advisory
+    then: each prints an advisory line naming the cause, and none blocks the gate
+    verified_by: []
+  - id: AC-018
+    requirements: [REQ-019]
+    given: a scoped record that is complete and current for its scope while another record's code changed
+    when: phase run is asked to rerun it and status is shown
+    then: phase run refuses as not stale and status shows it current
+    verified_by: []
+  - id: AC-019
+    requirements: [REQ-020, REQ-021]
+    given: a stale result and a computed size
+    when: output is captured with NO_COLOR set and non-ASCII stripped
+    then: every outcome is a word, each fact is its own line with a stable prefix, it names the applied scope, the causing paths and reasons, and error messages say what to do next; no command prompts
+    verified_by: []
+  - id: AC-020
+    requirements: [REQ-022]
+    given: the browser view of a scoped record
+    when: its page text is inspected
+    then: scope and staleness appear as text, not by color alone
+    verified_by: []
+  - id: AC-021
+    requirements: [REQ-023, REQ-025, REQ-026]
+    given: the finished change
+    when: soft-foundry check, the full test suite and the harness evals run
+    then: templates, check, evals, the control-plane README and schemas describe the new fields and policy and pass; no new gem dependency exists
+    verified_by: []
+  - id: AC-022
+    requirements: [REQ-024]
+    given: staleness and sizing computed for a diff of 1 changed file and of 1000 changed files
+    when: git invocations are counted
+    then: the counts are equal
+    verified_by: []

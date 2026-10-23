@@ -1,0 +1,12 @@
+# Implementation Decisions
+
+| Decision | Alternatives considered | Reason | Consequence |
+| --- | --- | --- | --- |
+| Diff base for sizing and advisories is the commit that recorded the plan phase, with `--since <commit>` to override | merge-base with the default branch; the verification evidence commit | The plan commit is on the record's own branch, so a stacked branch measures only its own code; the evidence commit would exclude the code being sized | Sizing fails closed with the fix named when the plan is not recorded in a commit |
+| Declaration files are compared only when they appear in the diff; their values are compared at the evidence commit versus now | always read three blobs | Bounded git calls independent of file count, and a comment-only edit does not stale evidence | A declaration edited and reverted between two points is not seen, which is correct |
+| An unscoped record is asked for nothing new: size check and full-suite check skip unless a `full_suite` block is present, which is then validated | require both for every record | REQ-004 and the existing suite | Only scoped records are refused for a missing size or missing full run |
+| A scoped record whose size cannot be computed owes the full run (`required` when computed is nil) | skip the full-suite check | Unknown must not read as small | The size check and the full-suite check both fail naming the cause |
+| `check-sizing.yml` is optional for the code: absent means built-in defaults (the four size names, smallest first), malformed fails closed | require the file | The policy file is a control-plane path this phase may not write; check validates it when it exists | Defaults equal the plan's names; the file still has to be added (deviations.md) |
+| Multi-line check details: first line as before, further lines printed indented, each `scope:` or `reason:` on its own line | one long line | REQ-021, one fact per line with a stable prefix | `print_result` indents continuation lines; snapshot text keeps the newlines |
+| `--scope` on `change new` is written as a text edit of metadata.yml | rewrite with `YAML.dump` | Keeps the template's comments | Replaces a `scope:` entry if a future template carries one |
+| Declarations load with `aliases: false` (profile read through the existing loader, which allows aliases, for the plane's existing keys) | one loader | Plan step 9 for the new files; the profile loader is shared and unchanged | Record scopes and the policy refuse aliases; the profile keys come through the existing loader |

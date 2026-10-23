@@ -1,0 +1,297 @@
+##### J-FULLSUITE: record, cite, mismatch, dirty tree
+-- a records a run with the evidence commit's tree
+$ soft-foundry gate verify --change a
+  06-verification  complete  PASS
+    ✓ pass handoff identity
+    ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 5852db9129133c2799ec7591c1d06312a8223fcf
+    ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
+    ✓ pass predecessor complete: 05-implementation
+    ✓ pass evidence current: no code changes since 5852db912913; specification unchanged since 4c9e257652fa
+        scope: lib/a/**
+    - skip red evidence: no check records a red_commit
+    ✓ pass check size matches diff: recorded targeted_plus_full_before_merge, computed targeted_plus_full_before_merge, scope lib/a/**
+    ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 08a4bb8e1c83, outcome passed (a record, not a test result)
+    ✓ pass content clean
+  advisory: 3 issues to address before a goes live (informational, does not block the gate)
+    ! warn scope: the declared scope lib/a/** matches no changed file after the implementation; fix the scope or the change record
+    ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  [exit 0]
+    >> ✓ pass check size matches diff: recorded targeted_plus_full_before_merge, computed targeted_plus_full_before_merge, scope lib/a/**
+    >> ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 08a4bb8e1c83, outcome passed (a record, not a test result)
+-- a records the wrong tree
+$ soft-foundry gate verify --change a
+  06-verification  complete  FAIL
+    ✓ pass handoff identity
+    ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 5852db9129133c2799ec7591c1d06312a8223fcf
+    ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
+    ✓ pass predecessor complete: 05-implementation
+    ✓ pass evidence current: no code changes since 5852db912913; specification unchanged since 4c9e257652fa
+        scope: lib/a/**
+    - skip red evidence: no check records a red_commit
+    ✓ pass check size matches diff: recorded targeted_plus_full_before_merge, computed targeted_plus_full_before_merge, scope lib/a/**
+    ✗ fail full-suite run recorded (record check, not a test result): fail: full_suite.tree '0000000000000000000000000000000000000000' is not the tree of the evidence commit (08a4bb8e1c83); run the full suite on this tree and record it in tests.yml
+    ✓ pass content clean
+  advisory: 3 issues to address before a goes live (informational, does not block the gate)
+    ! warn scope: the declared scope lib/a/** matches no changed file after the implementation; fix the scope or the change record
+    ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  [exit 2]
+    >> ✗ fail full-suite run recorded (record check, not a test result): fail: full_suite.tree '0000000000000000000000000000000000000000' is not the tree of the evidence commit (08a4bb8e1c83); run the full suite on this tree and record it in tests.yml
+-- a records outcome failed
+$ soft-foundry gate verify --change a
+  06-verification  complete  FAIL
+    ✓ pass handoff identity
+    ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 5852db9129133c2799ec7591c1d06312a8223fcf
+    ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
+    ✓ pass predecessor complete: 05-implementation
+    ✓ pass evidence current: no code changes since 5852db912913; specification unchanged since 4c9e257652fa
+        scope: lib/a/**
+    - skip red evidence: no check records a red_commit
+    ✗ fail check size matches diff: no size is recorded in tests.yml; computed size is targeted_plus_full_before_merge (no changed code path is the cause; the diff base or a declaration is); record `size: targeted_plus_full_before_merge` and run those checks
+    ✗ fail full-suite run recorded (record check, not a test result): fail: full_suite.outcome is 'failed', not passed; run the full suite on this tree and record it in tests.yml
+    ✓ pass content clean
+  advisory: 3 issues to address before a goes live (informational, does not block the gate)
+    ! warn scope: the declared scope lib/a/** matches no changed file after the implementation; fix the scope or the change record
+    ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  [exit 2]
+    >> ✗ fail full-suite run recorded (record check, not a test result): fail: full_suite.outcome is 'failed', not passed; run the full suite on this tree and record it in tests.yml
+-- a records a good run again; b cites a
+$ soft-foundry gate verify --change b
+  06-verification  complete  FAIL
+    ✓ pass handoff identity
+    ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 5852db9129133c2799ec7591c1d06312a8223fcf
+    ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
+    ✓ pass predecessor complete: 05-implementation
+    ✓ pass evidence current: no code changes since 5852db912913; specification unchanged since 4c9e257652fa
+        scope: lib/b/**
+    - skip red evidence: no check records a red_commit
+    ✗ fail check size matches diff: no size is recorded in tests.yml; computed size is targeted_plus_full_before_merge (no changed code path is the cause; the diff base or a declaration is); record `size: targeted_plus_full_before_merge` and run those checks
+    ✓ pass full-suite run recorded (record check, not a test result): cites a: recorded run on tree 08a4bb8e1c83, outcome passed (a record, not a test result)
+    ✓ pass content clean
+  advisory: 3 issues to address before b goes live (informational, does not block the gate)
+    ! warn scope: the declared scope lib/b/** matches no changed file after the implementation; fix the scope or the change record
+    ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  [exit 2]
+    >> ✓ pass full-suite run recorded (record check, not a test result): cites a: recorded run on tree 08a4bb8e1c83, outcome passed (a record, not a test result)
+-- b cites a record that does not exist
+$ soft-foundry gate verify --change b
+  06-verification  complete  FAIL
+    ✓ pass handoff identity
+    ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 5852db9129133c2799ec7591c1d06312a8223fcf
+    ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
+    ✓ pass predecessor complete: 05-implementation
+    ✓ pass evidence current: no code changes since 5852db912913; specification unchanged since 4c9e257652fa
+        scope: lib/b/**
+    - skip red evidence: no check records a red_commit
+    ✗ fail check size matches diff: no size is recorded in tests.yml; computed size is targeted_plus_full_before_merge (no changed code path is the cause; the diff base or a declaration is); record `size: targeted_plus_full_before_merge` and run those checks
+    ✗ fail full-suite run recorded (record check, not a test result): fail: cited record 'nope' has no verification record; run the full suite on this tree and record it in tests.yml
+    ✓ pass content clean
+  advisory: 3 issues to address before b goes live (informational, does not block the gate)
+    ! warn scope: the declared scope lib/b/** matches no changed file after the implementation; fix the scope or the change record
+    ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  [exit 2]
+    >> ✗ fail full-suite run recorded (record check, not a test result): fail: cited record 'nope' has no verification record; run the full suite on this tree and record it in tests.yml
+-- b cites a with a dirty code path
+$ soft-foundry gate verify --change b
+  06-verification  complete  FAIL
+    ✓ pass handoff identity
+    ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 5852db9129133c2799ec7591c1d06312a8223fcf
+    ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
+    ✓ pass predecessor complete: 05-implementation
+    ✓ pass evidence current: no code changes since 5852db912913; specification unchanged since 4c9e257652fa
+        scope: lib/b/**
+    - skip red evidence: no check records a red_commit
+    ✗ fail check size matches diff: no size is recorded in tests.yml; computed size is targeted_plus_full_before_merge (lib/a/dirty.rb: claimed by another record (a)); record `size: targeted_plus_full_before_merge` and run those checks
+    ✗ fail full-suite run recorded (record check, not a test result): fail: code paths are dirty (lib/a/dirty.rb); untracked and ignored files are outside the tree hash, so a dirty worktree cannot reuse a result; run the full suite on this tree and record it in tests.yml
+    ✓ pass content clean
+  advisory: 4 issues to address before b goes live (informational, does not block the gate)
+    ! warn scope: the diff touches paths outside the declared scope lib/b/**: lib/a/dirty.rb; widen the scope or move the change
+    ! warn scope: the declared scope lib/b/** matches no changed file after the implementation; fix the scope or the change record
+    ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  [exit 2]
+    >> ✗ fail full-suite run recorded (record check, not a test result): fail: code paths are dirty (lib/a/dirty.rb); untracked and ignored files are outside the tree hash, so a dirty worktree cannot reuse a result; run the full suite on this tree and record it in tests.yml
+-- b cites a whose evidence tree differs (a's run is on another tree)
+$ soft-foundry gate verify --change b
+  06-verification  complete  FAIL
+    ✓ pass handoff identity
+    ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 5852db9129133c2799ec7591c1d06312a8223fcf
+    ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
+    ✓ pass predecessor complete: 05-implementation
+    ✓ pass evidence current: no code changes since 5852db912913; specification unchanged since 4c9e257652fa
+        scope: lib/b/**
+    - skip red evidence: no check records a red_commit
+    ✗ fail check size matches diff: no size is recorded in tests.yml; computed size is targeted_plus_full_before_merge (no changed code path is the cause; the diff base or a declaration is); record `size: targeted_plus_full_before_merge` and run those checks
+    ✗ fail full-suite run recorded (record check, not a test result): fail: cited run's tree 111111111111 is not this evidence commit's tree 08a4bb8e1c83; run the full suite on this tree and record it in tests.yml
+    ✓ pass content clean
+  advisory: 3 issues to address before b goes live (informational, does not block the gate)
+    ! warn scope: the declared scope lib/b/** matches no changed file after the implementation; fix the scope or the change record
+    ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  [exit 2]
+    >> ✗ fail full-suite run recorded (record check, not a test result): fail: cited run's tree 111111111111 is not this evidence commit's tree 08a4bb8e1c83; run the full suite on this tree and record it in tests.yml
+-- b cites itself / path-shaped slug
+$ soft-foundry gate verify --change b
+  06-verification  complete  FAIL
+    ✓ pass handoff identity
+    ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 5852db9129133c2799ec7591c1d06312a8223fcf
+    ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
+    ✓ pass predecessor complete: 05-implementation
+    ✓ pass evidence current: no code changes since 5852db912913; specification unchanged since 4c9e257652fa
+        scope: lib/b/**
+    - skip red evidence: no check records a red_commit
+    ✗ fail check size matches diff: no size is recorded in tests.yml; computed size is targeted_plus_full_before_merge (no changed code path is the cause; the diff base or a declaration is); record `size: targeted_plus_full_before_merge` and run those checks
+    ✗ fail full-suite run recorded (record check, not a test result): fail: cite '../a' is not a change record name; run the full suite on this tree and record it in tests.yml
+    ✓ pass content clean
+  advisory: 3 issues to address before b goes live (informational, does not block the gate)
+    ! warn scope: the declared scope lib/b/** matches no changed file after the implementation; fix the scope or the change record
+    ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  [exit 2]
+    >> ✗ fail full-suite run recorded (record check, not a test result): fail: cite '../a' is not a change record name; run the full suite on this tree and record it in tests.yml
+
+##### J-CONSUMER: a code change in b's scope leaves a current; phase run refuses, status shows current
+-- before b's code lands: a's verify gate
+$ soft-foundry gate verify --change a
+  06-verification  complete  PASS
+    ✓ pass handoff identity
+    ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: af60af8025cbed0745f9df67e8691d78136b3974
+    ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
+    ✓ pass predecessor complete: 05-implementation
+    ✓ pass evidence current: no code changes since af60af8025cb; specification unchanged since f83a80181f51
+        scope: lib/a/**
+    - skip red evidence: no check records a red_commit
+    ✓ pass check size matches diff: recorded targeted_plus_full_before_merge, computed targeted_plus_full_before_merge, scope lib/a/**
+    ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 428ab08f11ba, outcome passed (a record, not a test result)
+    ✓ pass content clean
+  advisory: 3 issues to address before a goes live (informational, does not block the gate)
+    ! warn scope: the declared scope lib/a/** matches no changed file after the implementation; fix the scope or the change record
+    ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  [exit 0]
+    >> ✓ pass evidence current: no code changes since af60af8025cb; specification unchanged since f83a80181f51
+    >> ✓ pass check size matches diff: recorded targeted_plus_full_before_merge, computed targeted_plus_full_before_merge, scope lib/a/**
+    >> ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 428ab08f11ba, outcome passed (a record, not a test result)
+-- after b's code lands (outside a's scope, claimed by b): a's verify gate
+$ soft-foundry gate verify --change a
+  06-verification  complete  PASS
+    ✓ pass handoff identity
+    ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: af60af8025cbed0745f9df67e8691d78136b3974
+    ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
+    ✓ pass predecessor complete: 05-implementation
+    ✓ pass evidence current: no code changes since af60af8025cb; specification unchanged since f83a80181f51
+        scope: lib/a/**
+    - skip red evidence: no check records a red_commit
+    ✓ pass check size matches diff: recorded targeted_plus_full_before_merge, computed targeted_plus_full_before_merge, scope lib/a/**
+    ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 428ab08f11ba, outcome passed (a record, not a test result)
+    ✓ pass content clean
+  advisory: 4 issues to address before a goes live (informational, does not block the gate)
+    ! warn scope: the diff touches paths outside the declared scope lib/a/**: lib/b/new.rb; widen the scope or move the change
+    ! warn scope: the declared scope lib/a/** matches no changed file after the implementation; fix the scope or the change record
+    ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  [exit 0]
+    >> ✓ pass evidence current: no code changes since af60af8025cb; specification unchanged since f83a80181f51
+    >> ✓ pass check size matches diff: recorded targeted_plus_full_before_merge, computed targeted_plus_full_before_merge, scope lib/a/**
+    >> ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 428ab08f11ba, outcome passed (a record, not a test result)
+$ soft-foundry phase run verify --change a --dry-run
+  a: cannot run verify: 06-verification is already complete; rerun it only after the work it rests on has changed (the gate will say when it is stale)
+  [exit 1]
+$ soft-foundry phase run verify --change b --dry-run
+  ! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the verification skill's permissions (`soft-foundry hooks install --claude`)
+  would run verify of b with: claude -p --session-id 4325fa89-b2a0-4e4c-9c4d-6e89dccf5b1a --name b/verify <prompt>
+  --- prompt ---
+  You are a fresh-context agent running one lifecycle phase of a Soft Foundry change, and nothing else.
+  
+  Change: b (branch main)
+  Phase: verify (changes/b/06-verification/)
+  Skill: verification (profile reasoning_high)
+  
+  1. Read AGENTS.md and .ai/README.md. Then load only this phase's skill contract: .ai/skills/verification/skill.yml, .ai/skills/verification/SKILL.md, .ai/skills/verification/permissions.yml, .ai/skills/verification/requirements.yml, .ai/skills/verification/completion.yml.
+  2. Do the phase's work as the skill describes, reading the earlier phases under changes/b/ that the skill's permissions.yml allows. Write only where that file allows; the runtime guard enforces it where installed and it is policy everywhere else.
+  3. When the work is done, fill changes/b/06-verification/handoff.yml: status complete, commit_sha (the HEAD the outputs describe), completed_at, resolved_model (provider and model actually used), outputs, findings for later phases, and next. Do not edit executed_by; the runner writes it.
+  4. Do not alter any other phase's evidence or handoff, do not weaken requirements to obtain a pass, and do not run `soft-foundry phase run` yourself. If the work cannot be completed, set status blocked with the reason under blocking rather than pretending.
+  5. Stop when the handoff is written. `soft-foundry gate verify` will be run on your output afterwards.
+  [exit 0]
+$ soft-foundry change status a
+  a: a  [status: intake, phase: intake, risk: TBD]
+    track: gated
+    scope: lib/a/**
+    00-intake              pending      
+    01-discovery           complete     FAIL: predecessor complete
+    02-specification       complete     ok
+    03-threat-model        complete     ok
+    04-plan                complete     ok
+    05-implementation      complete     ok
+    06-verification        complete     ok
+    07-evaluation          complete     ok
+    08-attack              pending      
+    09-remediation         pending      
+    10-user-documentation  pending      
+    11-faq-index           pending      
+    12-observability       pending      
+    13-review              pending      
+    14-judgment            pending      
+    15-learning            pending      
+  advisory: 4 issues to address before a goes live (informational, does not block the gate)
+    ! warn scope: the diff touches paths outside the declared scope lib/a/**: lib/b/new.rb; widen the scope or move the change
+    ! warn scope: the declared scope lib/a/** matches no changed file after the implementation; fix the scope or the change record
+    ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  [exit 2]
+    >> scope: lib/a/**
+    >> 06-verification        complete     ok
+    >> ! warn scope: the diff touches paths outside the declared scope lib/a/**: lib/b/new.rb; widen the scope or move the change
+    >> ! warn scope: the declared scope lib/a/** matches no changed file after the implementation; fix the scope or the change record
+    >> ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+
+--- browser view data: scope and staleness as text
+ui url (token elided): http://127.0.0.1:62812/#token=...
+  GET /api/change?slug=a -> 200; scope=["lib/a/**"]; stale=false; gate states=intake=pending discover=fail specify=pass threat_model=pass plan=pass implement=pass verify=pass evaluate=pass attack=pending remediate=pending document=pending index=pending observe=pending review=pending judge=pending learn=pending
+  GET /api/change?slug=b -> 200; scope=["lib/b/**"]; stale=true; gate states=intake=pending discover=fail specify=pass threat_model=pass plan=pass implement=pass verify=stale evaluate=stale attack=pending remediate=pending document=pending index=pending observe=pending review=pending judge=pending learn=pending
+  without token -> 401
+  app.js has 'Scope: ' text label: true; word 'Stale' for stale state: true
+
+##### J-BRANCH: record on a branch that exists but is not checked out
+(main is checked out; branch change/a holds lib/a/y.rb)
+$ soft-foundry change size a --phase verify
+  phase: verify
+  size: targeted_plus_full_before_merge
+  scope: lib/a/**
+  base: 813c4c3ca09dd8a7b6411826445f5a0d4d3baf52
+  reason: lib/a/y.rb: in scope
+  [exit 0]

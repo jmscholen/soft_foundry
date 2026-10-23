@@ -1,0 +1,59 @@
+---
+phase: 01-discovery
+skill: repository-discovery
+status: complete
+commit_sha: fb74c5fe01085f14c06bc29154b64f68d42da009
+started_at: '2026-10-22T13:47:00Z'
+completed_at: '2026-10-22T13:58:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- changes/scoped-verification/01-discovery/repository-context.md
+- changes/scoped-verification/01-discovery/affected-components.md
+- changes/scoped-verification/01-discovery/dependencies.md
+- changes/scoped-verification/01-discovery/unknowns.md
+- ".ai/repository.yml"
+blocking: []
+findings:
+- id: DISC-001
+  severity: high
+  summary: Staleness is decided repo-wide in Gate#staleness_check (gate.rb:375) as
+    changed_since(sha) filtered by APP/TESTS/INFRA globs; scoping must keep the specification
+    re-record cause and the stacked-branch tip logic, and with no declared scope must
+    equal today's result.
+- id: DISC-002
+  severity: high
+  summary: The gate is structural. Tree-hash reuse can check that a cited run names
+    the evidence commit's tree and a recorded outcome, never that the suite passed;
+    the spec and docs must not imply otherwise. A dirty worktree must not be able
+    to reuse a result.
+- id: DISC-003
+  severity: medium
+  summary: Shared core and access-control paths need repository-declared globs validated
+    by check against real files (like check_path_groups), because a misdeclared core
+    silently lets stale evidence pass. Files in code globs claimed by no scope need
+    an explicit rule (safer default - they stale everything).
+- id: DISC-004
+  severity: medium
+  summary: Consumers of Result#stale? (PhaseRunner#refusal, Snapshot, Advisory) and
+    existing tests (gate_test, stacked_branch_test, lifecycle_tracks_test) pin current
+    behaviour; harness-eval gate cases could not be read in discovery (denied) and
+    need new cases from implementation.
+next: specify
+notes: No product code modified. The only write outside the phase directory is .ai/repository.yml
+  (assessed_at, commit_sha, assessed_by refreshed; policies remain NOT_APPLICABLE).
+  The runtime guard blocked shell reads of .ai/policies and harness evals for this
+  skill, so policy file contents and harness eval cases were not inspected; recorded
+  as an unknown.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-22T13:47:00Z'
+  finished_at: '2026-10-22T13:48:44Z'
+  exit_status: 0
+  previous_phase: intake
+  session_id: 447c3ecd-acba-475b-9c04-72de4bcd44cd
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

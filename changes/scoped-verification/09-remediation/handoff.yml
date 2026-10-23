@@ -1,0 +1,53 @@
+---
+phase: '09-remediation'
+skill: remediation
+status: complete
+commit_sha: 4692c50
+started_at: '2026-10-23T13:17:39Z'
+completed_at: '2026-10-23T13:27:00Z'
+resolved_model:
+  profile: coding_high
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- summary.md
+- lib/soft_foundry/scope.rb
+- lib/soft_foundry/gate.rb
+- test/scoped_verification_test.rb
+blocking: []
+findings:
+- id: REM-005
+  severity: major
+  summary: Repaired REV-001 (ATTACK-F-007, ATTACK-017, ATTACK-019). Scope.tip_for
+    measures on the recorded branch only when it is HEAD's own, its tip equals or
+    descends from HEAD, or its tip strictly descends from the evidence commit; so
+    a branch created later at the evidence commit (or off it) no longer hides later
+    code, scoped or unscoped, while a stacked change keeps its own branch as the measure.
+    Residual case, a branch created at the handoff-recording commit with no later
+    git.branch edit is indistinguishable from a stacked branch. Regression tests added
+    for both cases and for a branch ahead of HEAD. Verify, evaluate, attack, review
+    and judgment must rerun.
+- id: REM-006
+  severity: moderate
+  summary: REV-002 kept as the maintainer decided. A path claimed by another active
+    record's scope does not raise this record's verify size; REQ-009 text is superseded
+    for claimed paths (an unclaimed path still sizes full). Regression test exists.
+    The sizing policy file and the README sizing paragraph still carry the old wording
+    and are the maintainer's to correct.
+next: verify
+notes: 'The code and test changes are uncommitted (the pre-commit hook runs soft-foundry
+  ci, which fails while evidence is stale; the hook was not bypassed). commit_sha
+  is the HEAD at which the tree was edited; the runner or a person must commit the
+  changed paths. Provider keys were unset for test runs. Full suite: 635 runs, 4396
+  assertions, 0 failures; soft-foundry check passes. REV-003, REV-004, REV-005 were
+  out of scope this round.'
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-23T13:17:39Z'
+  finished_at: '2026-10-23T13:49:03Z'
+  exit_status: 0
+  previous_phase: review
+  session_id: 4962c314-3f04-4be1-b199-4d9c4929d673
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

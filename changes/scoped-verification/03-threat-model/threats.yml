@@ -1,0 +1,168 @@
+---
+threats:
+- id: THREAT-001
+  requirements:
+  - REQ-013
+  - REQ-003
+  category: authorization
+  attacker: Implementing session, or a careless edit, after evidence is recorded
+  goal: Keep evidence current across a code change that should stale it
+  vector: Edit the record's scope, the profile shared_core or access_control after
+    the evidence commit, narrowing it so the later code change is no longer matched
+  impact: Stale evidence passes the gate; unverified code is judged
+  likelihood: medium
+  mitigation: MIT-001
+  attack_case_required: true
+- id: THREAT-002
+  requirements:
+  - REQ-014
+  - REQ-002
+  - REQ-015
+  category: authorization
+  attacker: Maintainer typo or session editing declarations
+  goal: Make shared-core staleness never fire
+  vector: Shared-core or scope glob that is valid syntax but matches no tracked file,
+    matches only non-code paths, is empty, absolute, or contains ..
+  impact: Core changes silently leave every record current
+  likelihood: medium
+  mitigation: MIT-002
+  attack_case_required: true
+- id: THREAT-003
+  requirements:
+  - REQ-003
+  - REQ-018
+  category: isolation
+  attacker: Record with a broad or leftover scope
+  goal: Suppress staleness in other records through the claimed-versus-unclaimed rule
+  vector: A closed, abandoned or merged-in record declares a wide scope (for example
+    **) so changed paths count as claimed by a record other than the one being verified,
+    and unclaimed-path staleness never applies; or two records overlap and each assumes
+    the other owns a path
+  impact: Cross-record impact hidden; evidence current against code another record
+    changed
+  likelihood: medium
+  mitigation: MIT-003
+  attack_case_required: true
+- id: THREAT-004
+  requirements:
+  - REQ-007
+  - REQ-006
+  - REQ-008
+  category: authorization
+  attacker: Session recording or citing a full-suite run
+  goal: Claim a full-suite pass that did not happen for this tree
+  vector: Type a tree hash or outcome into tests.yml without running the suite; cite
+    a record whose outcome is not passed, whose slug does not exist, or whose tree
+    differs; cite oneself or a loop
+  impact: A failing or never-run suite is treated as passed for the tree
+  likelihood: medium
+  mitigation: MIT-004
+  attack_case_required: true
+- id: THREAT-005
+  requirements:
+  - REQ-007
+  category: isolation
+  attacker: Session with local uncommitted or ignored files
+  goal: Reuse a suite result for behaviour the tree hash does not describe
+  vector: Dirty, untracked or ignored files change what runs while HEAD^{tree} is
+    unchanged
+  impact: Reused result describes different code than the one verified
+  likelihood: medium
+  mitigation: MIT-005
+  attack_case_required: true
+- id: THREAT-006
+  requirements:
+  - REQ-009
+  - REQ-010
+  - REQ-011
+  - REQ-012
+  category: authorization
+  attacker: Session or maintainer wishing to skip work
+  goal: Run smaller checks than the diff demands
+  vector: Record a smaller size in evidence; leave access_control undeclared hoping
+    for a smoke-only reading; declare a scope that omits touched paths; shrink targeted
+    checks so an acceptance criterion has no check
+  impact: Access-control or core regression ships with only smoke coverage
+  likelihood: medium
+  mitigation: MIT-006
+  attack_case_required: true
+- id: THREAT-007
+  requirements:
+  - REQ-016
+  - REQ-005
+  category: dependency
+  attacker: Environment or adversary controlling git state
+  goal: Make a failing git query read as no change
+  vector: Unknown commit_sha, deleted or unreadable branch tip, shallow clone missing
+    the base, missing tree object, git failure with empty output
+  impact: Unknown state read as fresh
+  likelihood: medium
+  mitigation: MIT-007
+  attack_case_required: true
+- id: THREAT-008
+  requirements:
+  - REQ-017
+  - REQ-007
+  category: replay
+  attacker: Merge strategy or reviewer reusing an old result
+  goal: Keep a stale suite result after history rewriting
+  vector: Squash or rebase changes the tree while a recorded hash is replayed; a result
+    recorded for an earlier tree is carried to a later commit
+  impact: Wrong reuse, or silent skip instead of rerun
+  likelihood: low
+  mitigation: MIT-008
+  attack_case_required: true
+- id: THREAT-009
+  requirements:
+  - REQ-015
+  - REQ-014
+  - REQ-023
+  category: injection
+  attacker: Anyone able to write a declaration or a record slug
+  goal: Reach files or git options outside the intended paths
+  vector: Glob or cited slug with .., absolute path, leading dash, newline, NUL or
+    shell metacharacters; YAML anchors or tags in declaration files
+  impact: Read outside changes/, git option injection, or a crash that reads as pass
+  likelihood: low
+  mitigation: MIT-009
+  attack_case_required: true
+- id: THREAT-010
+  requirements:
+  - REQ-024
+  category: resource_exhaustion
+  attacker: Large diff or many records
+  goal: Make the gate slow or unbounded
+  vector: Thousands of changed files, many records, many globs, pathological ** patterns,
+    one git call per path or record
+  impact: Gate slow enough to be bypassed; local CLI hang
+  likelihood: low
+  mitigation: MIT-010
+  attack_case_required: false
+- id: THREAT-011
+  requirements:
+  - REQ-008
+  - REQ-020
+  - REQ-021
+  category: authorization
+  attacker: Reader of gate output
+  goal: Treat a structural pass as proof the suite passed or the size was right
+  vector: Gate prints pass for a cited run; docs or status imply verified; output
+    omits scope, tree hash and reason
+  impact: Overconfidence in unverified code
+  likelihood: medium
+  mitigation: MIT-011
+  attack_case_required: true
+- id: THREAT-012
+  requirements:
+  - REQ-022
+  - REQ-019
+  category: xss
+  attacker: Author of repository file names or globs
+  goal: Run script or mislead in the browser view
+  vector: Scope or changed-path text containing HTML rendered unescaped; staleness
+    conveyed by colour only; view computing its own staleness that disagrees with
+    the gate
+  impact: Script in a local page; a stale record shown as current
+  likelihood: low
+  mitigation: MIT-012
+  attack_case_required: true

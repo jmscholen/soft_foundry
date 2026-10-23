@@ -130,6 +130,7 @@ module SoftFoundry
         "version" => VERSION,
         "generated_at" => now,
         "branch" => plain(meta.dig("git", "branch")),
+        "scope" => plain(record.scope),
         "created_at" => self.class.stamp(meta["created_at"]),
         "surfaces" => plain(meta["surfaces"].is_a?(Hash) ? meta["surfaces"] : {}),
         "track" => self.class.track(record),
@@ -140,7 +141,7 @@ module SoftFoundry
         "human_decisions" => plain(Array(meta["human_decisions"]).select { |e| e.is_a?(Hash) }),
         "undischarged" => plain(@plane.phase("judge") ? record.undischarged_acceptance : []),
         "gates" => results.map { |result| gate(record, meta, result) },
-        "advisories" => Advisory.new(record).notices.map { |n| { "area" => n.area.to_s, "message" => plain(n.message) } },
+        "advisories" => Advisory.new(record, git: @git).notices.map { |n| { "area" => n.area.to_s, "message" => plain(n.message) } },
         "timeline" => timeline(record, meta),
         "spend" => spend(record, meta),
         "recorded_sessions" => recorded_sessions(record)
@@ -223,7 +224,7 @@ module SoftFoundry
       results = Gate.new(record, git: @git).evaluate_all
       row.merge("evaluated" => true, "merged_unclosed" => @index.merged_unclosed?(record),
                 "stale" => results.any?(&:stale?), "failed" => results.any?(&:failed?),
-                "advisories" => Advisory.new(record).notices.size,
+                "advisories" => Advisory.new(record, git: @git).notices.size,
                 "cells" => results.map { |r| { "phase" => r.phase.id, "status" => r.status, "state" => state(r), "skip_reason" => skip_reason(record, meta, r.phase, r.status) } })
     rescue StandardError => e
       { "slug" => slug, "error" => relative(e.message) }

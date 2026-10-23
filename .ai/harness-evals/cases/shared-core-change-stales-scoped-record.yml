@@ -1,0 +1,19 @@
+id: shared-core-change-stales-scoped-record
+kind: gate
+description: A change to a path in the repository's shared core stales a scoped record even when another record's scope claims that path.
+profile:
+  shared_core: ["${APP_FILE}"]
+record:
+  risk: low
+  scope: ["docs-only/**"]
+  siblings:
+    - slug: eval-sibling
+      scope: ["${APP_FILE}"]
+  complete: [intake, discover, specify, threat_model, plan, implement, verify]
+repository:
+  files:
+    "${APP_FILE}": "puts 2\n"
+expect:
+  phase: verify
+  check: evidence current
+  outcome: fail

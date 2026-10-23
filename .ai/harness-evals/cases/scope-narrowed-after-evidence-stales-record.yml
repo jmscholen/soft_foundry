@@ -1,0 +1,29 @@
+id: scope-narrowed-after-evidence-stales-record
+kind: gate
+description: Editing a record's declared scope after its evidence commit makes the evidence stale, so a narrowed scope cannot launder a change that was in scope when the evidence was recorded.
+record:
+  risk: low
+  scope: ["${APP_FILE}"]
+  complete: [intake, discover, specify, threat_model, plan, implement, verify]
+  later_files:
+    metadata.yml: |
+      change:
+        id: eval-scope-narrowed-after-evidence-stales-record
+        title: scope narrowed
+      git:
+        worktree: scratch
+        branch: change/eval-scope-narrowed-after-evidence-stales-record
+      type: feature
+      risk: low
+      track: gated
+      status: in_progress
+      current_phase: verify
+      scope: ["docs-only/**"]
+      surfaces:
+        application: true
+      human_decisions: []
+      skipped_phases: []
+expect:
+  phase: verify
+  check: evidence current
+  outcome: fail

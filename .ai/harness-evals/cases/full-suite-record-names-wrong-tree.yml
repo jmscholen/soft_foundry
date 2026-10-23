@@ -1,0 +1,24 @@
+id: full-suite-record-names-wrong-tree
+kind: gate
+description: A verification record that claims a full-suite run on a tree hash other than the evidence commit's tree fails the full-suite record check. A run recorded for different code is never reused.
+record:
+  risk: low
+  complete: [intake, discover, specify, threat_model, plan, implement, verify]
+  files:
+    06-verification/tests.yml: |
+      commit_sha: ${COMMIT}
+      full_suite:
+        tree: 0000000000000000000000000000000000000000
+        command: bundle exec rake test
+        outcome: passed
+      checks:
+        - id: CHECK-001
+          kind: tests
+          command: bundle exec rake test
+          result: pass
+          evidence: evidence/results.txt
+          criteria: [AC-001]
+expect:
+  phase: verify
+  check: "full-suite run recorded (record check, not a test result)"
+  outcome: fail

@@ -1,0 +1,14 @@
+commit_sha: ea50ad589eb0ac2d3a61a5899b1ad9d23029757d
+artifacts:
+  - path: evidence/transcript.txt
+    journey: EVAL-001
+    sha256: 12bd219fc3367829a24b5b08ec465fe32e182eb6e62309ca0170f50456ebb5e4
+  - path: evidence/transcript2.txt
+    journey: EVAL-005
+    sha256: 41e2ed0dfdc6df444867ae36244c2f9b7b3ae326c557fb17f8e26d436766005f
+  - path: evidence/journeys.rb
+    journey: EVAL-001
+    sha256: c4c3faa6739f978075206023fb6c4b448b4306b2034d982c8c9a75cba72b4620
+  - path: evidence/journeys2.rb
+    journey: EVAL-005
+    sha256: f725e6fe5487de7ac3ccec2d95703d96d9f147c4c40c70e246612f40b289b81b

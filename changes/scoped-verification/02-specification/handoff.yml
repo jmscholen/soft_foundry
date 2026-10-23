@@ -1,0 +1,46 @@
+---
+phase: 02-specification
+skill: specification
+status: complete
+commit_sha: 4b06125c587184a4c7d0599c8a9f8dc314fb3a2b
+started_at: '2026-10-22T13:49:06Z'
+completed_at: '2026-10-22T13:51:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- specification.md
+- requirements.yml
+- acceptance-criteria.yml
+- readiness.md
+blocking: []
+findings:
+- id: SPEC-001
+  severity: high
+  summary: Stale evidence silently passing is the main risk. Threat model should attack
+    unclaimed-path handling, declaration edits after evidence (REQ-013), glob validation
+    (REQ-014), and fail-closed git errors (REQ-016).
+- id: SPEC-002
+  severity: medium
+  summary: The full-suite citation is structural only (REQ-007, REQ-008). Planning
+    must keep gate output from implying a suite passed, and must define how a cited
+    record is located by slug and how a dirty worktree is detected.
+- id: SPEC-003
+  severity: medium
+  summary: Key names (metadata scope, repository shared_core and access_control, tests.yml
+    full-suite fields), the size command name and the policy file name are left to
+    planning. Harness-eval cases were not read (denied) and need new cases for stale-in-scope,
+    out-of-scope-current, shared core, unclaimed, declaration change and tree mismatch.
+next: threat_model
+notes: ''
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-22T13:49:06Z'
+  finished_at: '2026-10-22T13:51:12Z'
+  exit_status: 0
+  previous_phase: discover
+  session_id: 9144f36d-1566-4206-9e45-6b34ce03cafb
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

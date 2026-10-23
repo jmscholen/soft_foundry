@@ -1,0 +1,107 @@
+commit_sha: ea50ad589eb0ac2d3a61a5899b1ad9d23029757d
+size: full_route_sweep   # soft-foundry change size --phase evaluate: no scope declared on this record
+journeys:
+  - id: EVAL-001
+    criteria: [AC-001]
+    persona: Maintainer with an unscoped record and an empty-scope record
+    starting_state: records legacy (no scope key) and empty (scope []) with complete evidence at one commit
+    steps: [commit lib/a/new.rb, run gate verify for each]
+    assertions: [both report STALE naming lib/a/new.rb, identical text, sizing and full-suite lines skip with "no scope declared"]
+    evidence: [evidence/transcript.txt]
+    result: pass
+  - id: EVAL-002
+    criteria: [AC-002, AC-005]
+    persona: Maintainer with records A (lib/a/**) and B (lib/b/**)
+    starting_state: shared core lib/base/** declared, evidence at one commit
+    steps: [commit lib/a/new.rb, gate verify a and b]
+    assertions: [A stale with "scope: lib/a/**" and "reason: lib/a/new.rb: in scope", B evidence current (pass) though lib/a changed]
+    evidence: [evidence/transcript.txt]
+    result: pass
+  - id: EVAL-003
+    criteria: [AC-003, AC-004]
+    persona: Maintainer
+    starting_state: as EVAL-002 with further commits
+    steps: [commit lib/other/new.rb (unclaimed), commit lib/base/new.rb (shared core), gate verify b]
+    assertions: ["reason: lib/other/new.rb: unclaimed", "reason: lib/base/new.rb: shared core", both stale causes listed on separate prefixed lines]
+    evidence: [evidence/transcript.txt]
+    result: pass
+  - id: EVAL-004
+    criteria: [AC-007]
+    persona: Maintainer narrowing a declaration
+    starting_state: scoped record with current evidence
+    steps: [change scope to lib/a/sub/** and commit, gate verify]
+    assertions: ["reason: changes/a/metadata.yml: declaration changed: scope"]
+    evidence: [evidence/transcript.txt]
+    result: pass
+  - id: EVAL-005
+    criteria: [AC-008, AC-009]
+    persona: Implementing agent recording and citing a full-suite run
+    starting_state: A and B at the same evidence commit
+    steps: [A records tree/command/outcome, A records wrong tree, A records failed, B cites A, B cites missing record, B cites with dirty lib path, B cites A whose run is on another tree, B cites ../a]
+    assertions: [record passes and says "a record, not a test result", wrong tree / failed / missing / dirty / other tree / path-shaped cite each fail naming the cause and "run the full suite on this tree and record it in tests.yml"]
+    evidence: [evidence/transcript2.txt]
+    result: pass
+  - id: EVAL-006
+    criteria: [AC-010]
+    persona: Reader of gate output
+    starting_state: the outputs of EVAL-001 to EVAL-005
+    steps: [read every full-suite and size line]
+    assertions: [the check is named "full-suite run recorded (record check, not a test result)" and passing text ends "a record, not a test result"; no line says the suite passed as a gate conclusion]
+    evidence: [evidence/transcript2.txt]
+    result: pass
+  - id: EVAL-007
+    criteria: [AC-011, AC-012, AC-013, AC-014]
+    persona: Maintainer sizing checks
+    starting_state: A scoped lib/a/**, access control lib/auth/**
+    steps: [size verify with in-scope diff, size evaluate and attack in-scope, add lib/auth/x.rb and re-size, size with out-of-scope and shared-core diff, branch exists but not checked out, gate with computed size above recorded]
+    assertions: [targeted_plus_full_before_merge and touched_doors_plus_smoke for in-scope diff, full_route_sweep with "lib/auth/x.rb: access control", full_at_verify listing lib/base and lib/other paths, branch tip diff includes lib/a/y.rb, gate fails recording smaller size naming computed and recorded]
+    evidence: [evidence/transcript.txt, evidence/transcript2.txt]
+    result: pass
+  - id: EVAL-008
+    criteria: [AC-015]
+    persona: Maintainer writing declarations
+    starting_state: record with scope or profile with shared_core
+    steps: [absolute glob, .. glob, glob matching no tracked file, empty glob, shared core outside the code path groups, then run check]
+    assertions: [each refused, exit 2, message names the declaration and the fix; well-formed declarations pass check (exit 0)]
+    evidence: [evidence/transcript.txt]
+    result: pass
+  - id: EVAL-009
+    criteria: [AC-016]
+    persona: Maintainer with corrupt evidence
+    starting_state: handoff commit_sha ffff...ffff unknown to git
+    steps: [gate verify]
+    assertions: [fail "commit_sha ... is not a commit in this repository" and "cannot compare: commit_sha invalid", never current]
+    evidence: [evidence/transcript.txt]
+    result: pass
+  - id: EVAL-010
+    criteria: [AC-017]
+    persona: Maintainer running gate, status and phase run
+    starting_state: A current for its scope, B's code landed
+    steps: [gate verify b after lib/a change, status a, phase run verify --dry-run for a and b]
+    assertions: [advisory lines for outside scope, scope matches no changed file and shared core without a full run print and the gate still returns its own exit; phase run refuses a as already complete (this half of AC-018 holds); phase run b would run]
+    evidence: [evidence/transcript.txt, evidence/transcript2.txt]
+    result: pass
+  - id: EVAL-011
+    criteria: [AC-019]
+    persona: Screen-reader or NO_COLOR user
+    starting_state: any stale result and any size
+    steps: [run with NO_COLOR=1 and stdin not a terminal, strip non-ASCII]
+    assertions: [112 non-ASCII glyphs removed leaves 164 outcome words (pass/fail/skip/warn) and 57 lines with stable prefixes scope: reason: base: size: phase:; no command waited for input; errors name the fix]
+    evidence: [evidence/transcript.txt]
+    result: pass
+  - id: EVAL-012
+    criteria: [AC-020]
+    persona: Reader of the browser view
+    starting_state: soft-foundry ui serving the sandbox
+    steps: [GET /api/change with token for a and b, GET without token, GET /app.js]
+    assertions: [scope returned as a list, gate states returned as words (pass/fail/stale), 401 without the token, page script renders "Scope: " and the word "Stale"]
+    evidence: [evidence/transcript2.txt]
+    result: pass   # data route and script source only; no rendered page was viewed
+  - id: EVAL-013
+    criteria: [AC-018]
+    persona: Maintainer with scoped A and B on one branch
+    starting_state: A has recorded size targeted_plus_full_before_merge and a passed full_suite, evidence current
+    steps: [land code under lib/b/ (claimed by B), gate verify a, change status a, phase run verify --dry-run for a]
+    assertions: ["evidence current still passes; check size matches diff still passes (computed targeted_plus_full_before_merge, scope lib/a/**); an advisory names lib/b/new.rb as outside the scope; status shows 06-verification complete ok; phase run refuses to rerun a"]
+    evidence: [evidence/transcript2.txt]
+    result: pass   # EVAL-F-001 of the earlier run is still repaired at this commit

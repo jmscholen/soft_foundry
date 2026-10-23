@@ -1,0 +1,26 @@
+---
+change:
+  id: scoped-verification
+  title: 'Scoped verification: per-change staleness scope with a shared core, full-suite
+    results cached by tree hash, and check sizing by policy'
+git:
+  worktree: "/Users/jscholen-iou/dev/soft_foundry"
+  branch: change/scoped-verification
+type: feature
+risk: high
+track: gated
+status: intake
+current_phase: learn
+created_at: 2026-10-22 13:45:52.000000000 Z
+surfaces:
+  application: true
+  database: false
+  infrastructure: false
+  security: true
+  accessibility: true
+  observability: false
+  policy: false
+human_decisions: []
+vetted:
+reopenings: []
+skipped_phases: []

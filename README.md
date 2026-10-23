@@ -295,6 +295,17 @@ When the review finds that the policy text itself must change for the code to be
 
 Every line `soft-foundry` prints carries its outcome as a word (`pass`, `fail`, `warn`, `skip`, `created`, `conflict`) so the output means the same thing in a screen reader, a CI log, or a terminal that cannot render the glyph next to it.
 
+### Scoped verification: re-run only what a change can affect
+
+By default any code change makes every record's commit-bound evidence stale and every verify re-run everything. A change can narrow that:
+
+- **Scope.** `scope:` in a record's `metadata.yml` (`change new <slug> --scope GLOB`) lists the paths the change owns. Its evidence goes stale only when a changed code file is in that scope, in the repository's `shared_core` (globs in `.ai/repository.yml`, for example the base controller, the user model, auth), or claimed by no active record. Code inside another active record's scope does not stale it. A record with no scope behaves exactly as before.
+- **Sizing.** `soft-foundry change size [slug] --phase verify|evaluate|attack` computes the check size from the diff and `.ai/policies/check-sizing.yml`: targeted checks plus one full run before merge when every changed code path is in the change's scope or in another active record's scope (that record owns and checks it), or the full suite at verify when shared core is touched, a changed path is claimed by no active record, or the change is unscoped; evaluate and attack run the touched doors plus a smoke test, and sweep every route only when a changed path matches the repository's `access_control` globs or no declaration exists. The gate refuses evidence that records a smaller size than the diff computes.
+- **Full-suite reuse.** `06-verification/tests.yml` may record a `full_suite:` run keyed by the evidence commit's tree hash, or cite another record's run on the same tree, so identical code is not re-tested for each record. A passing check shows a recorded run names this tree with a recorded outcome, not that the suite passed; Soft Foundry never runs your tests.
+- Editing a declaration (scope, `shared_core`, `access_control`, the sizing policy) after the evidence commit stales the evidence, so a narrowed declaration cannot launder an old change. A git failure while measuring reads as stale, never as unchanged. A recorded `git.branch` is trusted as the place to measure only when it is the checked-out branch, descends from it, or strictly descends from the evidence commit; otherwise the checked-out HEAD is the measure, and editing `git.branch` after the evidence commit makes the evidence stale.
+
+Known limits of scoped verification, accepted by the maintainer: (1) a record whose author sets `git.branch` in the record to a branch created at a later commit looks like a legitimately stacked branch, so code landing afterwards on the checked-out branch can go unmeasured; the author already controls the evidence the gate reads, and the gate checks structure, not truth. (2) An active record scoped to `**` claims every path, so it keeps other records' evidence current; the go-live advisory names it, and closing or narrowing that record makes the others stale again. (3) A recorded size is refused only at verification; evaluation and attack record theirs but the gate does not compare them.
+
 ### Proving the gate: harness evals
 
 A gate that has never refused anything has unknown power. `.ai/harness-evals/cases/` holds executable cases that measure the control plane itself, and `soft-foundry eval` runs them:

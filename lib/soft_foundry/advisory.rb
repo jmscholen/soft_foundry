@@ -3,6 +3,7 @@
 require_relative "text"
 require_relative "control_plane"
 require_relative "phase_provider"
+require_relative "git"
 
 module SoftFoundry
   # Go-live advisories for one change record: things a person should know
@@ -50,13 +51,15 @@ module SoftFoundry
       POLICY_DOCUMENTS.select { |name| policies[name].is_a?(Hash) && policies[name]["status"].to_s == "PASS" }
     end
 
-    def initialize(record)
+    def initialize(record, git: nil)
       @record = record
       @plane = record.control_plane
+      @git = git
     end
 
     def notices
       notices = []
+      notices.concat(scope_notices)
       notices.concat(skipped_phase_notices)
       notices.concat(environment_notices)
       notices.concat(accessibility_notices)
@@ -99,6 +102,50 @@ module SoftFoundry
     end
 
     private
+
+    # What a declared scope does not cover, measured from the commit that
+    # recorded the plan: paths the diff touches outside the scope, the
+    # shared core touched with no full-suite run recorded, a scope that
+    # matches no changed file once the implementation is done, and scopes
+    # that overlap another active record's. Only for a record that declares
+    # a scope; an unscoped record is whole-repository and has nothing to
+    # exceed. Reported, never a gate failure.
+    def scope_notices
+      return [] if @record.scope.empty?
+      git = @git || Git.new(@record.root)
+      return [] unless git.repository?
+      scope = Scope.new(@record, git: git)
+      notices = overlap_notices(scope)
+      base = scope.change_base
+      return notices unless base
+      measured = scope.measure(base, declarations: false)
+      return notices << Notice.new("scope", "scope #{scope.applied} could not be measured against the diff: #{measured.error}") if measured.error
+      outside = measured.entries.select { |e| [Scope::UNCLAIMED, Scope::CLAIMED].include?(e.reason) }
+      notices << Notice.new("scope", "the diff touches paths outside the declared scope #{scope.applied}: #{outside.first(5).map(&:path).join(', ')}#{outside.size > 5 ? ' (and more)' : ''}; widen the scope or move the change") unless outside.empty?
+      core = measured.entries.select { |e| e.reason == Scope::SHARED_CORE }
+      if !core.empty? && !full_suite_recorded?
+        notices << Notice.new("scope", "the diff touches the shared core (#{core.first(5).map(&:path).join(', ')}) and 06-verification/tests.yml records no full-suite run; run the full suite and record it before this goes live")
+      end
+      implement = @plane.phase("implement")
+      if implement && @record.phase_status(implement) == "complete" && measured.entries.none? { |e| e.reason == Scope::IN_SCOPE }
+        notices << Notice.new("scope", "the declared scope #{scope.applied} matches no changed file after the implementation; fix the scope or the change record")
+      end
+      notices
+    rescue GitError, SystemCallError => e
+      [Notice.new("scope", "scope could not be measured: #{e.message}")]
+    end
+
+    def overlap_notices(scope)
+      scope.overlapping_records.map do |slug|
+        Notice.new("scope", "the declared scope #{scope.applied} overlaps the scope of active record #{slug}; a path in both is claimed twice, so narrow one of them")
+      end
+    end
+
+    def full_suite_recorded?
+      verify = @plane.phase("verify")
+      path = File.join(@record.phase_dir(verify), "tests.yml")
+      File.file?(path) && load(path)["full_suite"].is_a?(Hash)
+    end
 
     def skipped_phase_notices
       notices = []

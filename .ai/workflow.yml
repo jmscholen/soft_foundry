@@ -85,6 +85,7 @@ rules:
   human_boundary_policy: .ai/policies/human-boundaries.yml
   path_groups: .ai/paths.yml
   handoff_template: .ai/templates/handoff.yml
+  check_sizing_policy: .ai/policies/check-sizing.yml
 
 # Phases that `soft-foundry phase run <phase> --panel SHELL,SHELL` may run
 # as a panel: members investigate independently into

@@ -286,17 +286,21 @@ module SoftFoundry
       sub = @argv.shift
       case sub
       when "new"
-        slug = @argv.shift or raise ArgumentError, "Usage: soft-foundry change new <slug> [--title TITLE] [--branch BRANCH] [--track TRACK]"
+        slug = @argv.shift or raise ArgumentError, "Usage: soft-foundry change new <slug> [--title TITLE] [--branch BRANCH] [--track TRACK] [--scope GLOB[,GLOB...]]"
         title = option("--title")
+        scope = option("--scope")&.split(",")&.map(&:strip)
+        problems = scope ? scope.flat_map { |g| Declarations.syntax_problems(g, :scope) } : []
+        raise TargetError, problems.join("; ") unless problems.empty?
         branch = option("--branch") || (git.repository? ? git.branch : nil)
         track = option("--track") || plane.default_track
         unless plane.track(track)
           @err.puts "unknown track '#{track}'; .ai/workflow.yml defines: #{plane.track_names.join(', ')}"
           return EXIT_TARGET
         end
-        record = ChangeRecord.create(@root, slug, control_plane: plane, title: title, branch: branch, worktree: @root, track: track)
+        record = ChangeRecord.create(@root, slug, control_plane: plane, title: title, branch: branch, worktree: @root, track: track, scope: scope)
         @out.puts "created #{relative(record.dir)} with #{plane.phases.size} phase directories"
         @out.puts "branch: #{branch || slug}"
+        @out.puts "scope: #{scope.join(', ')}" if scope&.any?
         @out.puts track_line(record)
         billing_notice(record: record)
         0
@@ -315,14 +319,38 @@ module SoftFoundry
         change_close(@argv.shift)
       when "request-discharge"
         change_request_discharge(@argv.shift)
+      when "size"
+        change_size(@argv.first.to_s.start_with?("-") ? nil : @argv.shift)
       when "vet"
         change_vet(@argv.shift)
       when "reopen"
         change_reopen(@argv.shift)
       else
-        @err.puts "Usage: soft-foundry change <new|status|list|vet|reopen|close|request-discharge>"
+        @err.puts "Usage: soft-foundry change <new|status|list|size|vet|reopen|close|request-discharge>"
         1
       end
+    end
+
+    # `change size [slug] [--phase verify|evaluate|attack] [--since COMMIT]`:
+    # the check size the diff calls for, one fact per line: the phase, the
+    # size, the applied scope, the diff base, and a reason per triggering
+    # path. Exit 0 when a size was computed; it is never guessed when git
+    # cannot answer.
+    def change_size(slug)
+      phase = option("--phase") || "verify"
+      since = option("--since")
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+      slug ||= current_slug
+      record = load_record(slug)
+      raise TargetError, "#{slug}: not a git repository; the size is computed from the diff" unless git.repository?
+      raise TargetError, "--since '#{since}' is not a commit in this repository; pass a commit hash" if since && !(since.match?(Gate::SHA) && git.commit?(since))
+      result = Sizing.new(record, git: git).compute(phase, since: since)
+      @out.puts "phase: #{result.phase}"
+      @out.puts "size: #{result.size}"
+      @out.puts "scope: #{result.applied}"
+      @out.puts "base: #{result.base}" if result.base
+      result.reasons.each { |reason| @out.puts "reason: #{reason}" }
+      0
     end
 
     # The person's acceptance of an explored feature. Everything refused
@@ -497,6 +525,7 @@ module SoftFoundry
       meta = record.metadata
       @out.puts "#{slug}: #{meta.dig('change', 'title')}  [status: #{meta['status']}, phase: #{meta['current_phase']}, risk: #{meta['risk']}]"
       @out.puts "  #{track_line(record)}"
+      @out.puts "  scope: #{record.scope.join(', ')}" unless record.scope.empty?
       results = Gate.new(record, git: git).evaluate_all
       results.each { |r| @out.puts format("  %-22s %-12s %s", r.phase.output, r.status, summarize(r)) }
       print_advisories(record)
@@ -1256,7 +1285,9 @@ module SoftFoundry
       @out.puts "#{result.phase.output}  #{result.status}  #{result.failed? ? 'FAIL' : (result.skipped? ? 'SKIP' : 'PASS')}"
       result.checks.each do |c|
         mark = { pass: "✓ pass", fail: "✗ fail", warn: "! warn", skip: "- skip" }.fetch(c.outcome)
-        @out.puts "  #{mark} #{c.name}#{c.detail.to_s.empty? ? '' : ": #{c.detail}"}"
+        first, *rest = c.detail.to_s.lines(chomp: true)
+        @out.puts "  #{mark} #{c.name}#{first.to_s.empty? ? '' : ": #{first}"}"
+        rest.each { |line| @out.puts "      #{line}" }
       end
     end
 
@@ -1264,7 +1295,7 @@ module SoftFoundry
     # ships. Printed with a status word per line and never affects the exit
     # code; see .ai/rules/accessibility.md and Advisory.
     def print_advisories(record)
-      notices = Advisory.new(record).notices
+      notices = Advisory.new(record, git: git).notices
       return if notices.empty?
       word = notices.size == 1 ? "issue" : "issues"
       @out.puts "advisory: #{notices.size} #{word} to address before #{record.slug} goes live (informational, does not block the gate)"

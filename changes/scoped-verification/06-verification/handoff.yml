@@ -1,0 +1,57 @@
+---
+phase: 06-verification
+skill: verification
+status: complete
+commit_sha: fb0bff73d47b9d0931cc34b6cf6f823e7d0e852a
+started_at: '2026-10-23T01:01:59Z'
+completed_at: '2026-10-23T14:14:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- results.md
+- tests.yml
+- evidence/manifest.yml
+- evidence/rake-test.txt
+- evidence/check.txt
+- evidence/ci.txt
+- evidence/eval.txt
+- evidence/rake-test-rerun.txt
+blocking: []
+findings:
+- id: VER-001
+  severity: major
+  summary: Full suite run 1 at fb0bff7 FAILED (635 runs, 1 failure, ProcessesTest#test_finds_a_real_running_process
+    at test/processes_test.rb:272, spawned ui server not listed within 4s while the
+    467s suite ran). A rerun on the same tree passed (4396 assertions, 0 failures)
+    and the test passes alone. Likely a load-sensitive timing flake, not shown. CHECK-001
+    is recorded as pass on the rerun, with the failed first run kept and disclosed;
+    I did not edit the test. Review should decide whether the flake needs a fix.
+- id: VER-002
+  severity: minor
+  summary: check, ci and eval pass at fb0bff7 (eval 18 passed, 1 live case skipped).
+    size full_at_verify; full_suite recorded for tree 537d8d1.
+- id: VER-003
+  severity: minor
+  summary: Fixtures corrected after RED (DEV-002) and the IMPL-004 sizing reading
+    were not re-judged here; review and evaluation should. red_commit 8287d58 not
+    re-run this round.
+- id: VER-004
+  severity: minor
+  summary: AC-019 and AC-020 (output wording, browser text) are covered by tests only;
+    evaluation should run the real commands and the ui page.
+next: evaluate
+notes: Provider keys unset for suite runs. The checkout was run with ruby -Ilib exe/soft-foundry.
+  The guard checks Bash against deny sets only. Only this phase's evidence, handoff
+  and the runner's metadata.yml update are uncommitted.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-23T13:56:47Z'
+  finished_at: '2026-10-23T14:14:01Z'
+  exit_status: 0
+  previous_phase: remediate
+  session_id: c846ea2d-96d2-4b90-b767-fc703ad2710b
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

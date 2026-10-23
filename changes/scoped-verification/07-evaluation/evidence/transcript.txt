@@ -1,0 +1,331 @@
+##### J-STALE: legacy (no scope), empty scope, A (lib/a/**), B (lib/b/**) with evidence at one commit
+$ soft-foundry check
+  ✓ pass control plane: 16 phases, 17 skills, no errors
+  [exit 0]
+
+--- sizes before any code change
+$ soft-foundry change size a --phase verify
+  phase: verify
+  size: targeted_plus_full_before_merge
+  scope: lib/a/**
+  base: 93f240e64ba2756de9b5f51f68e8da5b4d1f05a8
+  [exit 0]
+
+--- code change under lib/a after evidence
+-- legacy
+$ soft-foundry gate verify --change legacy
+  06-verification  complete  FAIL
+    ✓ pass handoff identity
+    ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 26d6a082582d6ba40613749c7c61027f950f39ae
+    ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
+    ✓ pass predecessor complete: 05-implementation
+    ✗ fail evidence current: STALE: code changed since 26d6a082582d: lib/a/new.rb
+    - skip red evidence: no check records a red_commit
+    - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+    - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+    ✓ pass content clean
+  advisory: 2 issues to address before legacy goes live (informational, does not block the gate)
+    ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  [exit 2]
+    >> ✗ fail evidence current: STALE: code changed since 26d6a082582d: lib/a/new.rb
+    >> - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+    >> - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+-- empty
+$ soft-foundry gate verify --change empty
+  06-verification  complete  FAIL
+    ✓ pass handoff identity
+    ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 26d6a082582d6ba40613749c7c61027f950f39ae
+    ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
+    ✓ pass predecessor complete: 05-implementation
+    ✗ fail evidence current: STALE: code changed since 26d6a082582d: lib/a/new.rb
+    - skip red evidence: no check records a red_commit
+    - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+    - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+    ✓ pass content clean
+  advisory: 2 issues to address before empty goes live (informational, does not block the gate)
+    ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  [exit 2]
+    >> ✗ fail evidence current: STALE: code changed since 26d6a082582d: lib/a/new.rb
+    >> - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+    >> - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+-- a
+$ soft-foundry gate verify --change a
+  06-verification  complete  FAIL
+    ✓ pass handoff identity
+    ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 26d6a082582d6ba40613749c7c61027f950f39ae
+    ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
+    ✓ pass predecessor complete: 05-implementation
+    ✗ fail evidence current: STALE: code changed since 26d6a082582d for this scope: lib/a/new.rb
+        scope: lib/a/**
+        reason: lib/a/new.rb: in scope
+    - skip red evidence: no check records a red_commit
+    ✗ fail check size matches diff: no size is recorded in tests.yml; computed size is targeted_plus_full_before_merge (lib/a/new.rb: in scope); record `size: targeted_plus_full_before_merge` and run those checks
+    - skip full-suite run recorded (record check, not a test result): none recorded; the full run is still owed before merge (record it in tests.yml, or cite another record's run)
+    ✓ pass content clean
+  advisory: 2 issues to address before a goes live (informational, does not block the gate)
+    ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  [exit 2]
+    >> ✗ fail evidence current: STALE: code changed since 26d6a082582d for this scope: lib/a/new.rb
+    >> scope: lib/a/**
+    >> reason: lib/a/new.rb: in scope
+    >> ✗ fail check size matches diff: no size is recorded in tests.yml; computed size is targeted_plus_full_before_merge (lib/a/new.rb: in scope); record `size: targeted_plus_full_before_merge` and run those checks
+-- b
+$ soft-foundry gate verify --change b
+  06-verification  complete  FAIL
+    ✓ pass handoff identity
+    ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 26d6a082582d6ba40613749c7c61027f950f39ae
+    ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
+    ✓ pass predecessor complete: 05-implementation
+    ✓ pass evidence current: no code changes since 26d6a082582d; specification unchanged since 93f240e64ba2
+        scope: lib/b/**
+    - skip red evidence: no check records a red_commit
+    ✗ fail check size matches diff: no size is recorded in tests.yml; computed size is targeted_plus_full_before_merge (lib/a/new.rb: claimed by another record (a)); record `size: targeted_plus_full_before_merge` and run those checks
+    - skip full-suite run recorded (record check, not a test result): none recorded; the full run is still owed before merge (record it in tests.yml, or cite another record's run)
+    ✓ pass content clean
+  advisory: 4 issues to address before b goes live (informational, does not block the gate)
+    ! warn scope: the diff touches paths outside the declared scope lib/b/**: lib/a/new.rb; widen the scope or move the change
+    ! warn scope: the declared scope lib/b/** matches no changed file after the implementation; fix the scope or the change record
+    ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  [exit 2]
+    >> ✓ pass evidence current: no code changes since 26d6a082582d; specification unchanged since 93f240e64ba2
+    >> scope: lib/b/**
+    >> ! warn scope: the diff touches paths outside the declared scope lib/b/**: lib/a/new.rb; widen the scope or move the change
+    >> ! warn scope: the declared scope lib/b/** matches no changed file after the implementation; fix the scope or the change record
+
+--- code change under lib/b: A must not be stale because of it
+-- a (a changed earlier; look for lib/b mention)
+$ soft-foundry gate verify --change a
+  06-verification  complete  FAIL
+    ✓ pass handoff identity
+    ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 26d6a082582d6ba40613749c7c61027f950f39ae
+    ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
+    ✓ pass predecessor complete: 05-implementation
+    ✗ fail evidence current: STALE: code changed since 26d6a082582d for this scope: lib/a/new.rb
+        scope: lib/a/**
+        reason: lib/a/new.rb: in scope
+    - skip red evidence: no check records a red_commit
+    ✗ fail check size matches diff: no size is recorded in tests.yml; computed size is targeted_plus_full_before_merge (lib/a/new.rb: in scope; lib/b/new.rb: claimed by another record (b)); record `size: targeted_plus_full_before_merge` and run those checks
+    - skip full-suite run recorded (record check, not a test result): none recorded; the full run is still owed before merge (record it in tests.yml, or cite another record's run)
+    ✓ pass content clean
+  advisory: 3 issues to address before a goes live (informational, does not block the gate)
+    ! warn scope: the diff touches paths outside the declared scope lib/a/**: lib/b/new.rb; widen the scope or move the change
+    ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  [exit 2]
+
+--- unclaimed lib/other
+-- b
+$ soft-foundry gate verify --change b
+  06-verification  complete  FAIL
+    ✓ pass handoff identity
+    ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 26d6a082582d6ba40613749c7c61027f950f39ae
+    ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
+    ✓ pass predecessor complete: 05-implementation
+    ✗ fail evidence current: STALE: code changed since 26d6a082582d for this scope: lib/b/new.rb, lib/other/new.rb
+        scope: lib/b/**
+        reason: lib/b/new.rb: in scope
+        reason: lib/other/new.rb: unclaimed
+    - skip red evidence: no check records a red_commit
+    ✗ fail check size matches diff: no size is recorded in tests.yml; computed size is full_at_verify (lib/other/new.rb: unclaimed); record `size: full_at_verify` and run those checks
+    ✗ fail full-suite run recorded (record check, not a test result): fail: no full-suite run is recorded and the computed size is the full suite at verify; run the full suite on this tree and record it in tests.yml
+    ✓ pass content clean
+  advisory: 3 issues to address before b goes live (informational, does not block the gate)
+    ! warn scope: the diff touches paths outside the declared scope lib/b/**: lib/a/new.rb, lib/other/new.rb; widen the scope or move the change
+    ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  [exit 2]
+
+--- shared core lib/base
+-- b
+$ soft-foundry gate verify --change b
+  06-verification  complete  FAIL
+    ✓ pass handoff identity
+    ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 26d6a082582d6ba40613749c7c61027f950f39ae
+    ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
+    ✓ pass predecessor complete: 05-implementation
+    ✗ fail evidence current: STALE: code changed since 26d6a082582d for this scope: lib/b/new.rb, lib/base/new.rb, lib/other/new.rb
+        scope: lib/b/**
+        reason: lib/b/new.rb: in scope
+        reason: lib/base/new.rb: shared core
+        reason: lib/other/new.rb: unclaimed
+    - skip red evidence: no check records a red_commit
+    ✗ fail check size matches diff: no size is recorded in tests.yml; computed size is full_at_verify (lib/base/new.rb: shared core; lib/other/new.rb: unclaimed); record `size: full_at_verify` and run those checks
+    ✗ fail full-suite run recorded (record check, not a test result): fail: no full-suite run is recorded and the computed size is the full suite at verify; run the full suite on this tree and record it in tests.yml
+    ✓ pass content clean
+  advisory: 4 issues to address before b goes live (informational, does not block the gate)
+    ! warn scope: the diff touches paths outside the declared scope lib/b/**: lib/a/new.rb, lib/other/new.rb; widen the scope or move the change
+    ! warn scope: the diff touches the shared core (lib/base/new.rb) and 06-verification/tests.yml records no full-suite run; run the full suite and record it before this goes live
+    ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  [exit 2]
+
+--- sizes with out-of-scope and shared-core paths
+$ soft-foundry change size a --phase verify
+  phase: verify
+  size: full_at_verify
+  scope: lib/a/**
+  base: 93f240e64ba2756de9b5f51f68e8da5b4d1f05a8
+  reason: lib/base/new.rb: shared core
+  reason: lib/other/new.rb: unclaimed
+  [exit 0]
+$ soft-foundry change size a --phase evaluate
+  phase: evaluate
+  size: touched_doors_plus_smoke
+  scope: lib/a/**
+  base: 93f240e64ba2756de9b5f51f68e8da5b4d1f05a8
+  reason: no changed path matches the access-control globs
+  [exit 0]
+
+##### J-SIZE: only in-scope diff
+$ soft-foundry change size a --phase verify
+  phase: verify
+  size: targeted_plus_full_before_merge
+  scope: lib/a/**
+  base: e647d7d3cf6b10ff3e5001932d82bc0a7525c350
+  reason: lib/a/x.rb: in scope
+  [exit 0]
+$ soft-foundry change size a --phase evaluate
+  phase: evaluate
+  size: touched_doors_plus_smoke
+  scope: lib/a/**
+  base: e647d7d3cf6b10ff3e5001932d82bc0a7525c350
+  reason: no changed path matches the access-control globs
+  [exit 0]
+$ soft-foundry change size a --phase attack
+  phase: attack
+  size: touched_doors_plus_smoke
+  scope: lib/a/**
+  base: e647d7d3cf6b10ff3e5001932d82bc0a7525c350
+  reason: no changed path matches the access-control globs
+  [exit 0]
+
+--- diff touches access control
+$ soft-foundry change size a --phase evaluate
+  phase: evaluate
+  size: full_route_sweep
+  scope: lib/a/**
+  base: e647d7d3cf6b10ff3e5001932d82bc0a7525c350
+  reason: lib/auth/x.rb: access control
+  [exit 0]
+$ soft-foundry change size a --phase attack
+  phase: attack
+  size: full_route_sweep
+  scope: lib/a/**
+  base: e647d7d3cf6b10ff3e5001932d82bc0a7525c350
+  reason: lib/auth/x.rb: access control
+  [exit 0]
+
+--- branch exists but is not checked out
+$ soft-foundry change size a --phase verify
+  soft-foundry: cannot size a: the plan phase is not recorded as complete in a commit, so there is no diff base; pass --since <commit>
+  [exit 1]
+
+##### J-DECL: narrowing scope after evidence
+$ soft-foundry gate verify --change a
+  06-verification  complete  FAIL
+    ✓ pass handoff identity
+    ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 094bf504490cef326e3e938cba20fcdcfc22f630
+    ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
+    ✓ pass predecessor complete: 05-implementation
+    ✗ fail evidence current: STALE: code changed since 094bf504490c for this scope: lib/a/x.rb, lib/auth/x.rb, changes/a/metadata.yml
+        scope: lib/a/sub/**
+        reason: lib/a/x.rb: unclaimed
+        reason: lib/auth/x.rb: unclaimed
+        reason: changes/a/metadata.yml: declaration changed: scope
+    - skip red evidence: no check records a red_commit
+    ✗ fail check size matches diff: no size is recorded in tests.yml; computed size is full_at_verify (lib/a/x.rb: unclaimed; lib/auth/x.rb: unclaimed); record `size: full_at_verify` and run those checks
+    ✗ fail full-suite run recorded (record check, not a test result): fail: no full-suite run is recorded and the computed size is the full suite at verify; run the full suite on this tree and record it in tests.yml
+    ✓ pass content clean
+  advisory: 4 issues to address before a goes live (informational, does not block the gate)
+    ! warn scope: the diff touches paths outside the declared scope lib/a/sub/**: lib/a/x.rb, lib/auth/x.rb; widen the scope or move the change
+    ! warn scope: the declared scope lib/a/sub/** matches no changed file after the implementation; fix the scope or the change record
+    ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  [exit 2]
+    >> ✗ fail evidence current: STALE: code changed since 094bf504490c for this scope: lib/a/x.rb, lib/auth/x.rb, changes/a/metadata.yml
+    >> scope: lib/a/sub/**
+    >> reason: lib/a/x.rb: unclaimed
+    >> reason: lib/auth/x.rb: unclaimed
+    >> reason: changes/a/metadata.yml: declaration changed: scope
+    >> ✗ fail check size matches diff: no size is recorded in tests.yml; computed size is full_at_verify (lib/a/x.rb: unclaimed; lib/auth/x.rb: unclaimed); record `size: full_at_verify` and run those checks
+    >> ! warn scope: the diff touches paths outside the declared scope lib/a/sub/**: lib/a/x.rb, lib/auth/x.rb; widen the scope or move the change
+    >> ! warn scope: the declared scope lib/a/sub/** matches no changed file after the implementation; fix the scope or the change record
+
+##### J-MALFORMED declarations
+-- absolute
+$ soft-foundry check
+  ✗ error changes/a/metadata.yml: scope glob "/abs/**" is absolute; use a path relative to the repository root
+  ✗ fail control plane: 1 error(s)
+  [exit 2]
+-- dotdot
+$ soft-foundry check
+  ✗ error changes/a/metadata.yml: scope glob "../x/**" has a parent-directory segment; use a path inside the repository
+  ✗ fail control plane: 1 error(s)
+  [exit 2]
+-- matches no tracked file
+$ soft-foundry check
+  ✗ error changes/a/metadata.yml: scope glob 'lib/nomatch/**' matches no tracked file; declare a path that exists or remove it
+  ✗ fail control plane: 1 error(s)
+  [exit 2]
+-- empty glob
+$ soft-foundry check
+  ✗ error changes/a/metadata.yml: scope glob "" is empty; declare a path glob or remove it
+  ✗ fail control plane: 1 error(s)
+  [exit 2]
+-- shared core outside code path groups
+$ soft-foundry check
+  ✗ error .ai/repository.yml: shared_core glob 'notes/**' matches nothing within the code path groups (lib/**, exe/**, test/**, infra/**); a shared core outside them never stales evidence, so declare code paths
+  ✗ fail control plane: 1 error(s)
+  [exit 2]
+
+##### J-FAILCLOSED: evidence commit unknown to git
+$ soft-foundry gate verify --change a
+  06-verification  complete  FAIL
+    ✓ pass handoff identity
+    ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✗ fail commit_sha recorded: ffffffffffffffffffffffffffffffffffffffff is not a commit in this repository
+    ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
+    ✓ pass predecessor complete: 05-implementation
+    ✗ fail evidence current: cannot compare: commit_sha invalid
+    - skip red evidence: no check records a red_commit
+    ✗ fail check size matches diff: no size is recorded in tests.yml; computed size is targeted_plus_full_before_merge (no changed code path is the cause; the diff base or a declaration is); record `size: targeted_plus_full_before_merge` and run those checks
+    - skip full-suite run recorded (record check, not a test result): none recorded; the full run is still owed before merge (record it in tests.yml, or cite another record's run)
+    ✓ pass content clean
+  advisory: 3 issues to address before a goes live (informational, does not block the gate)
+    ! warn scope: the declared scope lib/a/** matches no changed file after the implementation; fix the scope or the change record
+    ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+    ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  [exit 2]
+    >> ✗ fail evidence current: cannot compare: commit_sha invalid
+    >> ✗ fail check size matches diff: no size is recorded in tests.yml; computed size is targeted_plus_full_before_merge (no changed code path is the cause; the diff base or a declaration is); record `size: targeted_plus_full_before_merge` and run those checks
+    >> ! warn scope: the declared scope lib/a/** matches no changed file after the implementation; fix the scope or the change record

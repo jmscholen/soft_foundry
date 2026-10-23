@@ -1,9 +1,13 @@
 # frozen_string_literal: true
 
 require "yaml"
+require "date"
 require_relative "guard"
 require_relative "content_scan"
 require_relative "harness_eval"
+require_relative "declarations"
+require_relative "sizing"
+require_relative "git"
 
 module SoftFoundry
   # Lints the `.ai/` control plane itself: every phase has a skill, every skill
@@ -30,6 +34,7 @@ module SoftFoundry
       findings.concat(check_harness_evals)
       findings.concat(check_panel_phases)
       findings.concat(check_enforcement)
+      findings.concat(check_declarations)
       findings.concat(check_content)
       @plane.phases.each { |phase| findings.concat(check_phase(phase)) }
       findings
@@ -123,6 +128,44 @@ module SoftFoundry
         Hash(edges).each_value { |to| problems << Finding.new(:error, "transitions: '#{from}' targets unknown phase '#{to}'") unless ids.include?(to) }
         problems
       end
+    end
+
+    # The path declarations scoped verification reads, in the repository
+    # profile (shared_core, access_control) and in every open record's scope,
+    # and the sizing policy when the repository has one. A blind or
+    # malformed declaration silently lets stale evidence pass, so each is an
+    # error that names the glob and the fix. Needs a git repository to know
+    # which files are tracked; without one there is nothing to check against.
+    def check_declarations
+      git = Git.new(@plane.root)
+      return [] unless git.repository?
+      tracked = git.tracked_files
+      findings = []
+      %w[shared_core access_control].each do |key|
+        raw = @plane.repository_profile[key]
+        next if raw.nil?
+        Declarations.problems(raw, tracked_files: tracked, code_globs: @plane.code_globs, kind: key.to_sym).each do |problem|
+          findings << Finding.new(:error, ".ai/repository.yml: #{problem}")
+        end
+      end
+      Dir.glob(File.join(@plane.root, "changes", "*", "metadata.yml")).sort.each do |file|
+        data = YAML.safe_load_file(file, permitted_classes: [Time, Date], aliases: false)
+        next unless data.is_a?(Hash) && data["status"].to_s != "closed" && !data["scope"].nil?
+        slug = File.basename(File.dirname(file))
+        Declarations.problems(data["scope"], tracked_files: tracked, code_globs: @plane.code_globs, kind: :scope).each do |problem|
+          findings << Finding.new(:error, "changes/#{slug}/metadata.yml: #{problem}")
+        end
+      rescue Psych::Exception
+        findings << Finding.new(:error, "changes/#{File.basename(File.dirname(file))}/metadata.yml is not valid YAML without aliases; fix it")
+      end
+      begin
+        Sizing.policy_sizes(@plane)
+      rescue TargetError => e
+        findings << Finding.new(:error, e.message)
+      end
+      findings
+    rescue GitError => e
+      [Finding.new(:error, "path declarations could not be checked: #{e.message}")]
     end
 
     # The control plane and the pointer files are read as instructions by

@@ -1,0 +1,106 @@
+---
+phase: '08-attack'
+skill: adversarial-testing
+status: complete
+commit_sha: 7ca42a176a3a79baa30e58063dcaeabe1908661a
+started_at: '2026-10-23T01:18:30Z'
+completed_at: '2026-10-23T14:40:00Z'
+resolved_model:
+  profile: adversarial_high
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- changes/scoped-verification/08-attack/attack-plan.md
+- changes/scoped-verification/08-attack/cases.yml
+- changes/scoped-verification/08-attack/results.md
+- changes/scoped-verification/08-attack/evidence/manifest.yml
+- changes/scoped-verification/08-attack/evidence/attack.rb
+- changes/scoped-verification/08-attack/evidence/attack2.rb
+- changes/scoped-verification/08-attack/evidence/attack_lib.rb
+- changes/scoped-verification/08-attack/evidence/transcript.txt
+- changes/scoped-verification/08-attack/evidence/transcript2.txt
+- changes/scoped-verification/08-attack/evidence/attack3.rb
+- changes/scoped-verification/08-attack/evidence/transcript3.txt
+- changes/scoped-verification/08-attack/evidence/attack4.rb
+- changes/scoped-verification/08-attack/evidence/transcript4.txt
+blocking: []
+findings:
+- id: ATTACK-F-007
+  severity: moderate
+  case: ATTACK-019
+  summary: Narrowed by the REV-001 remediation, not closed (ATTACK-019, ATTACK-020).
+    A recorded git.branch created at the phases-complete commit (a commit that strictly
+    follows the evidence commit) is measured as the record's own branch, so code landing
+    on main afterwards is not counted. Scoped and unscoped records pass the whole
+    verify gate with a recorded size and a run of the evidence tree. The attack that
+    created the branch at the evidence commit itself (ATTACK-017) is now denied. The
+    remediation summary names this as an acknowledged residual.
+  failure_prevented: stale evidence passing the gate; consider requiring the recorded
+    branch to be HEAD's own or to equal or descend from HEAD unless it existed at
+    the evidence commit, or accept the residual explicitly in review and judgment.
+- id: ATTACK-F-003
+  severity: moderate
+  case: ATTACK-015
+  summary: 'Unchanged: an active record declaring ** claims every path, so another
+    record''s evidence stays current after unrelated code lands and the verify gate
+    passes in full; only a non-blocking advisory reports it. Accepted residual of
+    MIT-003 and, since REV-002, the intended per-change-scope behaviour.'
+  failure_prevented: stale evidence passing through a leftover wide record; consider
+    refusing an over-broad sibling scope or releasing abandoned records.
+- id: ATTACK-F-008
+  severity: minor
+  case: ATTACK-018
+  summary: 'Unchanged: a metadata.yml whose git is a scalar makes gate verify exit
+    1 with "String does not have #dig method" instead of a gate line. Fails closed;
+    robustness only.'
+  failure_prevented: unhandled error instead of a refusal naming the malformed field.
+- id: ATTACK-F-005
+  severity: minor
+  case: ATTACK-006
+  summary: Recorded size is gated for verification only; a smaller size in evaluation
+    or attack evidence is not refused (REQ-011 as specified). Residual.
+  failure_prevented: none beyond clarity.
+- id: ATTACK-F-009
+  severity: info
+  case: ATTACK-017
+  summary: 'Verified fixed by REV-001: a branch recorded and created at the evidence
+    commit no longer hides later code; scoped and unscoped records go stale and the
+    verify gate fails. A legitimately stacked branch still measures on its own branch
+    (ATTACK-021).'
+  failure_prevented: n/a
+- id: ATTACK-F-006
+  severity: info
+  case: ATTACK-014
+  summary: 'Still fixed: an edit of git.branch after the evidence commit stales scoped
+    and unscoped records.'
+  failure_prevented: n/a
+- id: ATTACK-F-001
+  severity: info
+  case: ATTACK-013
+  summary: 'Still fixed: renames list both sides.'
+  failure_prevented: n/a
+- id: ATTACK-F-004
+  severity: info
+  case: ATTACK-016
+  summary: 'Still fixed: a citation slug must equal the directory name exactly.'
+  failure_prevented: n/a
+next: remediate
+notes: 'Third rerun, after the REV-001/REV-002 remediation (84b9035). Local, ephemeral,
+  synthetic: attacks ran against throwaway git repositories in the system temp directory
+  (loopback only for the ui server); the real repository was not modified. The checkout''s
+  code was run with ruby -Ilib because the installed soft-foundry binary predates
+  the change. Provider keys unset for the driver runs. Size full_route_sweep from
+  change size --phase attack (no scope declared). No provider refusal. Not exercised:
+  a real browser, concurrency of a gate run against a commit, Windows paths. The run''s
+  commit is HEAD with the runner''s own handoff and metadata edits uncommitted; the
+  evidence files are uncommitted and describe that HEAD.'
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-23T14:15:35Z'
+  finished_at: '2026-10-23T14:20:19Z'
+  exit_status: 0
+  previous_phase: evaluate
+  session_id: e8e3f131-8c00-42b8-8173-1a7a91ace0c3
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"
