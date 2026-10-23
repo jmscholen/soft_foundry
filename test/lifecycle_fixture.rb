@@ -26,7 +26,7 @@ module LifecycleFixture
       set_metadata!(record, status: status, current_phase: current_phase)
       commit_all(dir, "record")
       complete.each { |id| complete_phase!(record, id, sha: head(dir)) }
-      commit_all(dir, "phases complete")
+      commit_all(dir, "phases complete") unless complete.empty?
       yield dir, record
     end
   end

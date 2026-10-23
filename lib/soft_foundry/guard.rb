@@ -69,7 +69,14 @@ module SoftFoundry
     # The change and skill whose permissions apply right now, or nil with
     # the reason nothing applies (no control plane, no branch record, a
     # finished change).
+    #
+    # A session the runner started names its own phase in SOFT_FOUNDRY_PHASE;
+    # that phase's skill applies instead of the record's current_phase, so
+    # two concurrent sessions are each held to their own. A marker that does
+    # not name a lifecycle phase (or, in a parallel run, an isolated one) is
+    # never ignored: `marker_problem` then holds why, and `decide` refuses.
     def active
+      @marker_problem = nil
       return [nil, nil, ".ai/ is not installed here"] unless @plane.present?
       return [nil, nil, "not a git repository"] unless @git.repository?
       branch = @git.branch.to_s
@@ -77,7 +84,12 @@ module SoftFoundry
       return [nil, nil, "no change record for branch '#{branch}'"] unless slug
       record = ChangeRecord.new(@root, slug, control_plane: @plane)
       status = record.metadata["status"].to_s
-      return [record, nil, "change #{slug} is #{status}"] if %w[closed judged].include?(status)
+      return [record, nil, "change #{slug} is #{status}"] if %w[closed released judged].include?(status)
+      if @env.key?(MARKER_ENV)
+        marked = marked_phase
+        return [record, nil, @marker_problem] unless marked
+        return [record, @plane.skill(marked.skill), nil]
+      end
       if record.exploring?
         definition = record.track_definition
         return [record, nil, "change #{slug} is exploring but its track names no skill"] unless definition&.skill
@@ -88,6 +100,25 @@ module SoftFoundry
       [record, @plane.skill(phase.skill), nil]
     rescue ArgumentError => e
       [nil, nil, e.message]
+    end
+
+    MARKER_ENV = "SOFT_FOUNDRY_PHASE"
+    PARALLEL_ENV = "SOFT_FOUNDRY_PARALLEL"
+    attr_reader :marker_problem
+
+    # The phase named by the session marker, or nil with `marker_problem` set.
+    def marked_phase
+      value = @env[MARKER_ENV].to_s
+      unless value.match?(/\A[a-z_]+\z/) && (phase = @plane.phase(value)) && phase.id == value
+        @marker_problem = "#{MARKER_ENV} is #{value.inspect}, which does not name a lifecycle phase; the session marker is set by `soft-foundry phase run` and must match a phase id exactly"
+        return nil
+      end
+      if @env[PARALLEL_ENV].to_s == "1" && !@plane.isolated_phases.include?(phase)
+        listed = @plane.isolated_phases.map(&:id)
+        @marker_problem = "#{MARKER_ENV} names #{value} in a parallel run, but #{value} is not in isolated_phases (.ai/workflow.yml: #{listed.empty? ? 'none declared' : listed.join(', ')})"
+        return nil
+      end
+      phase
     end
 
     # Decides one tool call. `tool_input` is the hook payload's tool_input.
@@ -195,6 +226,7 @@ module SoftFoundry
 
     def decide_by_skill(tool_name, tool_input)
       record, skill, why = active
+      return Decision.new(outcome: :violation, reason: @marker_problem, skill: nil, paths: []) if @marker_problem
       return Decision.new(outcome: :allow, reason: why, skill: nil, paths: []) unless skill
 
       sets = permission_sets(skill, record.slug)
@@ -284,7 +316,7 @@ module SoftFoundry
       stage = @env[Panel::STAGE_ENV].to_s
       return nil unless member.match?(Panel::NAME) && Panel::STAGES.include?(stage)
       record, = active
-      phase = record && @plane.phase(record.metadata["current_phase"].to_s)
+      phase = record && (@env.key?(MARKER_ENV) ? marked_phase : @plane.phase(record.metadata["current_phase"].to_s))
       return nil unless phase
       phase_dir = "changes/#{record.slug}/#{phase.output}/"
       draft = @env[Panel::DRAFT_ENV].to_s

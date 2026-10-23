@@ -19,7 +19,21 @@ module SoftFoundry
   # than on a note in the handoff saying the implementing session also
   # reviewed its own work.
   class PhaseRunner
-    Launch = Data.define(:shell, :executable, :args, :prompt, :session_id)
+    # The environment variable that tells a session which phase it is running
+    # (the guard resolves the active skill from it), and the one a parallel
+    # run adds. Both live in the reserved SOFT_FOUNDRY_ namespace `--env` refuses.
+    PHASE_ENV = "SOFT_FOUNDRY_PHASE"
+    PARALLEL_ENV = "SOFT_FOUNDRY_PARALLEL"
+
+    # `env` is merged into the child's environment, never put in its
+    # arguments. Its values may be credentials, so `inspect` names the
+    # variables and nothing else.
+    Launch = Data.define(:shell, :executable, :args, :prompt, :session_id, :env) do
+      def initialize(env: {}, **rest) = super(env: env.to_h.freeze, **rest)
+
+      def inspect = "#<PhaseRunner::Launch shell=#{shell} executable=#{executable} env=[#{env.keys.join(', ')}]>"
+      alias_method :to_s, :inspect
+    end
 
     # Non-interactive invocations. Each takes the prompt as its last
     # argument; anything after `--` on the command line is appended first.
@@ -89,17 +103,16 @@ module SoftFoundry
 
     # Why the phase cannot be run now, or nil. Everything here is also
     # what the gate would say afterwards; checking first saves a session.
-    #
-    # With `allow_stale`, a phase that is complete but whose evidence the
-    # gate reports stale passes the "already complete" refusal only (the
-    # caller reopens it); every other refusal still applies.
-    def refusal(phase, allow_stale: false)
+    # A complete phase whose evidence the gate reports stale is not
+    # refused here: `phase run` reopens it (PhaseReopen, source auto) and
+    # runs it, after every other refusal has been evaluated.
+    def refusal(phase)
       return "change #{@record.slug} is exploring; the exploring stage is worked with the person, not by a runner (run `change vet` first)" if @record.exploring?
       status = @record.metadata["status"].to_s
       return "change #{@record.slug} is #{status}" if %w[closed released judged].include?(status)
       # A complete phase is rerun only once the work it rests on has
       # changed, which the gate reports as stale evidence.
-      if @record.phase_status(phase) == "complete" && !(allow_stale && stale_complete?(phase))
+      if @record.phase_status(phase) == "complete" && !stale_complete?(phase)
         return "#{phase.output} is already complete; rerun it only after the work it rests on has changed (the gate will say when it is stale)"
       end
       prev = @plane.effective_predecessor(phase, skip: ->(p) { @record.skippable?(p) }) { |p| @record.phase_status(p) }
@@ -141,11 +154,12 @@ module SoftFoundry
       PROMPT
     end
 
-    def launch(phase, shell:, extra: [])
+    def launch(phase, shell:, extra: [], env: {})
       builder = SHELLS.fetch(shell) { raise ArgumentError, "unknown shell '#{shell}'; phase run supports #{SHELLS.keys.join(', ')}" }
       id = PRESET_ID.include?(shell) ? SecureRandom.uuid : nil
       text = prompt(phase)
-      Launch.new(shell: shell, executable: shell, args: builder.call(text, extra, id, "#{@record.slug}/#{phase.id}"), prompt: text, session_id: id)
+      Launch.new(shell: shell, executable: shell, args: builder.call(text, extra, id, "#{@record.slug}/#{phase.id}"), prompt: text, session_id: id,
+                 env: { PHASE_ENV => phase.id }.merge(env))
     end
 
     # Records how the phase is being run before the session starts, so a

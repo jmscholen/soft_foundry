@@ -285,7 +285,7 @@ module SoftFoundry
       prompt = prompt_for(member, stage, round: round, agreed: agreed)
       args = args_for(member, stage, prompt)
       Launch.new(member: member.name, stage: stage, executable: member.shell, args: args, prompt: prompt,
-                 env: { MEMBER_ENV => member.name, STAGE_ENV => stage }.merge(stage == "independent" ? { DRAFT_ENV => staging_for(member) } : {}),
+                 env: { "SOFT_FOUNDRY_PHASE" => @phase.id, MEMBER_ENV => member.name, STAGE_ENV => stage }.merge(stage == "independent" ? { DRAFT_ENV => staging_for(member) } : {}),
                  session_id: member.session_id, round: round, agreed: agreed)
     end
 

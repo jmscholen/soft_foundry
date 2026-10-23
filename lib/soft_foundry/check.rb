@@ -33,6 +33,7 @@ module SoftFoundry
       findings.concat(check_waivers)
       findings.concat(check_harness_evals)
       findings.concat(check_panel_phases)
+      findings.concat(check_isolated_phases)
       findings.concat(check_enforcement)
       findings.concat(check_declarations)
       findings.concat(check_content)
@@ -66,6 +67,30 @@ module SoftFoundry
     end
 
     # A panel never writes code, and only lifecycle phases can be panelled.
+    # Phases that may run side by side write only their own directory:
+    # lifecycle phases, never implementation, remediation, review, or
+    # judgment, and never one whose skill may write application code.
+    NEVER_ISOLATED = %w[implement remediate review judge].freeze
+
+    def check_isolated_phases
+      raw = @plane.workflow["isolated_phases"]
+      return [] if raw.nil?
+      return [Finding.new(:error, "workflow: isolated_phases must be a list of lifecycle phase ids")] unless raw.is_a?(Array)
+      raw.flat_map do |id|
+        phase = @plane.phase(id.to_s)
+        if phase.nil? || phase.id != id.to_s
+          next [Finding.new(:error, "workflow: isolated_phases names '#{id}', which is not a lifecycle phase")]
+        end
+        next [Finding.new(:error, "workflow: isolated_phases names '#{id}'; #{id} may not run in parallel with another phase")] if NEVER_ISOLATED.include?(phase.id)
+        writes_code = Array(@plane.skill(phase.skill).permissions["write"]).any? do |pattern|
+          @plane.expand(pattern).any? { |g| @plane.code_globs.include?(g) || ControlPlane.match_any?(g.delete_suffix("/**") + "/x", @plane.code_globs) }
+        rescue ArgumentError
+          false
+        end
+        writes_code ? [Finding.new(:error, "workflow: isolated_phases names '#{id}', whose skill can write application code; an isolated phase writes only its own directory")] : []
+      end
+    end
+
     def check_panel_phases
       Array(@plane.workflow["panel_phases"]).filter_map do |id|
         if id.to_s == "implement"

@@ -971,7 +971,7 @@ module SoftFoundry
         return panel_run(record, phase, panel_spec, rounds_given, chosen, extra, dry_run, shell_arg_values)
       end
       runner = PhaseRunner.new(@root, plane: plane, git: git, record: record)
-      if (why = runner.refusal(phase, allow_stale: true))
+      if (why = runner.refusal(phase))
         @err.puts "#{slug}: cannot run #{phase.id}: #{why}"
         return EXIT_TARGET
       end
@@ -1134,7 +1134,7 @@ module SoftFoundry
     # repository root, and returns its exit status.
     def spawn_shell(launch)
       executable = Shell.resolve(launch.executable)
-      pid = Process.spawn(executable, *launch.args, chdir: @root)
+      pid = Process.spawn(launch.env, executable, *launch.args, chdir: @root)
       Process.wait(pid)
       $?.exitstatus || 1
     end
