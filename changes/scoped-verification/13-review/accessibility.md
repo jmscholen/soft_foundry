@@ -4,20 +4,18 @@ Standard: `.ai/rules/accessibility.md` (WCAG 2.2 AA for user interfaces; CLI out
 
 ## Scope reviewed
 
-`surfaces.accessibility` is true. Examined the new and changed output a person reads or operates:
+`surfaces.accessibility` is true. Examined the output a person reads or operates at `8575131`:
 
-- `soft-foundry change size` (`cli.rb` `change_size`): lines prefixed `phase:`, `size:`, `scope:`, `base:`, `reason:`. No prompt. Failures from `Sizing` and `TargetError` name the cause and the next step (`--since`, the phase list, restore the policy file).
-- `soft-foundry gate` (`print_result`): the phase line uses the words `PASS`, `FAIL`, and `SKIP`. Each check uses the word `pass`, `fail`, `warn`, or `skip`. A glyph may sit beside the word. Continuation lines of a stale result keep `scope:` and `reason:` on their own lines. No ANSI color is emitted on this path. Stripping the check glyphs leaves the words, which is what AC-019 and the evaluation transcript recorded under `NO_COLOR`.
-- `soft-foundry change status`: `scope:` is its own line when a scope is declared. Advisories use `advisory:` and `! warn`.
-- Browser change view (`lib/soft_foundry/ui/assets/app.js`): the scope is a text node `Scope: ` plus the glob list via `textContent`. Gate state is the words in `STATES` (`Pass`, `Fail`, `Stale`, and the rest), and each state mark is paired with that word. Existing skip link, `:focus-visible` outline, and heading hierarchy are unchanged. The new span adds no control.
-- Contrast of the meta line that now includes scope, from `app.css`: `--steel` `#55606c` on `--ground` `#e9ecef` is about 5.4:1, above the 4.5:1 body-text ratio (1.4.3). Dark theme uses a lighter steel on a near-black ground. This phase did not open the page in a browser; the evaluation phase recorded the same limit. The conclusion is from the script and the stylesheet.
+- CLI: `soft-foundry change size` prints `phase:`, `size:`, `scope:`, `base:`, and `reason:` on their own lines (`cli.rb`). Gate lines use the words pass, fail, skip, and warn, with `scope:` and `reason:` continuations indented (`gate.rb` `scoped_stale_detail`). Errors from sizing and declarations name the next step (declare a path that exists, pass `--since`, restore the policy file). No new prompt. `test_size_output_is_words_prefixed_lines_with_no_prompt_and_plain_ascii` covers `NO_COLOR=1` and ASCII-only size output. Evaluation EVAL-011 recorded the same on the transcripts.
+- Browser view: `app.js` `changeView` renders scope as the text `Scope: ` plus the glob list, in the same `.meta` line as status, risk, and type. Staleness is the word `Stale` on the board flag and the sentence "stale evidence: code changed after the commit the evidence describes." State is not color alone (WCAG 2.2 1.4.1). The scope span adds no control; the existing keyboard path (links, `:focus-visible` in `app.css`) is unchanged (2.1.1, 2.4.7, 4.1.2). The meta line uses the existing `--steel` on `--ground` tokens, the same color as the status text beside it (1.4.3 as applied to that line).
+- Documents: the README sizing and branch paragraphs and the review files use heading hierarchy. No new image.
 
-Requirements REQ-021 and REQ-022, and evaluation section "Accessibility observations".
+This phase did not drive a browser, a screen reader, or a keyboard-only pass. The conclusion is from `app.js`, `app.css`, the CLI, the size-output test, and evaluation's accessibility observations. EVAL-012 did not drive a browser either.
 
 ## Findings
 
-None.
+No findings.
 
 ## Conformance
 
-Conforms. CLI outcomes are words, one fact per line, with a stable prefix, and errors name a next step (command-line rules in `.ai/rules/accessibility.md`; WCAG 2.2 1.4.1, 3.3.1, and 3.3.3 as applied to that output). Scope and staleness in the browser view are text, not color alone (1.4.1), the meta text meets 1.4.3, and the new scope span adds no control beyond the existing keyboard path (2.1.1, 4.1.2).
+Conforms. CLI outcomes are words, one fact per line, with a stable prefix, and errors name a next step (command-line rules in `.ai/rules/accessibility.md`; WCAG 2.2 1.4.1, 3.3.1, and 3.3.3 as applied to that output). Scope and staleness in the browser view are text, not color alone (1.4.1), and the new scope span adds no control beyond the existing keyboard path (2.1.1, 4.1.2).

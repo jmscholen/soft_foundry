@@ -1,10 +1,10 @@
 ---
 phase: 13-review
 skill: review
-status: pending
-commit_sha: 85edc8e85da71c4e55d3336507e688b779b6af5d
-started_at: '2026-10-23T03:21:13Z'
-completed_at: '2026-10-23T03:40:00Z'
+status: complete
+commit_sha: 8575131b467d81c15b6773696225499aa576c29e
+started_at: '2026-10-23T14:20:33Z'
+completed_at: '2026-10-23T14:29:26Z'
 resolved_model:
   profile: reasoning_high
   provider: xai
@@ -22,72 +22,70 @@ blocking: []
 findings:
 - id: REV-001
   severity: blocking
-  summary: 'A git.branch value stored in the evidence commit is trusted once that
-    branch exists, including when the branch is created afterwards at the phases-complete
-    commit. Later code on the checked-out branch stays outside the measured range,
-    and gate verify exits 0 for scoped and unscoped records (ATTACK-F-007, transcript3.txt
-    ATTACK-019).
+  summary: 'A git.branch value stored before the branch exists is still the measure
+    when the branch is created later at any commit that strictly follows the evidence
+    commit, including the phases-complete commit. Later code on the checked-out branch
+    stays outside the measured range, and gate verify exits 0 for scoped and unscoped
+    records. The remediation closed only the branch created at the evidence commit
+    itself (ATTACK-017). ATTACK-019 and ATTACK-020 still pass (transcript3.txt, transcript4.txt).
 
     '
   failure: 'Record git.branch frozen before branch frozen exists, complete the phases
-    on the checked-out branch, create frozen at that commit, then commit lib/a/x.rb
-    on the checked-out branch. gate verify exits 0 and evidence current passes for
-    scope lib/a/** and for an unscoped record.
-
-    '
-- id: REV-002
-  severity: major
-  summary: 'Verify size ignores paths claimed by another active record, so the smaller
-    size is accepted for a diff outside the declared scope. The policy file and REQ-009
-    say that diff is full at verify. Evaluation recorded this as the repaired EVAL-F-001.
-
-    '
-  failure: 'Records A (scope lib/a/**) and B (scope lib/b/**). After A''s plan commit,
-    lib/b/f.rb is committed on A''s branch. change size A --phase verify reports targeted_plus_full_before_merge,
-    and the verify gate accepts that size with the full-suite check skipped.
+    on the checked-out branch, create frozen at the phases-complete commit, then commit
+    lib/a/x.rb on the checked-out branch. gate verify exits 0 and evidence current
+    passes for scope lib/a/** and for an unscoped record. The same shape with the
+    scope declared in the evidence commit also exits 0 (ATTACK-020).
 
     '
 - id: REV-003
   severity: major
   summary: 'An active sibling scoped ** claims every path, so another record''s evidence
     stays current and gate verify exits 0 after unrelated code lands. Closing the
-    sibling makes the same change stale. Any status other than closed still claims
-    (ATTACK-015, MIT-003). Judgment needs a recorded acceptance or a tighter claim
-    rule.
+    sibling makes the same change stale. Any status other than closed, including abandoned,
+    still claims (ATTACK-015, MIT-003). Judgment needs a recorded acceptance or a
+    tighter claim rule.
 
     '
   failure: 'Active record wide with scope ** and record b scoped lib/b/**. Commit
     lib/other/x.rb. gate verify --change b exits 0 with evidence current pass. The
-    same tree with wide closed fails evidence current, reason unclaimed.
+    same tree with wide closed fails evidence current, reason unclaimed. With wide
+    set to abandoned, evidence current still passes.
 
     '
 - id: REV-004
   severity: minor
   summary: 'metadata.yml with git set to a string makes gate verify exit 1 with "String
-    does not have #dig method" and no next step (ATTACK-F-008). It does not pass.
+    does not have #dig method" and no next step (ATTACK-018). It does not pass.
 
     '
-- id: REV-005
+- id: REV-006
   severity: minor
-  summary: 'The README sizing paragraph omits unclaimed paths as a full-at-verify
-    cause and omits git.branch from the declarations whose edit stales evidence.
+  summary: 'A recorded branch whose tip equals the evidence commit is measured at
+    HEAD, so a stack cut from that tip stales the lower record. The learned stacked
+    fixture still passes because it commits on the record branch after the evidence
+    sha.
 
     '
 next: remediate
 notes: 'Blocking finding REV-001 returns the change to remediate (workflow on_blocking_findings).
-  No application or test code was edited. The 632-run suite at 2294f86 was not rerun.
-  Implement and remediate recorded provider anthropic; this phase used xai. surfaces.policy
-  is false and no policy text change is owed. Accessibility conforms. Optional phases
-  10, 11, and 12 are still pending. executed_by was left as the runner wrote it.
+  Ancestry cannot separate ATTACK-019 from the stacked branch in ATTACK-021; the repair
+  has to record that the named ref did not resolve at the evidence commit. REV-002
+  stays closed: claimed paths do not enlarge verify size, by the maintainer decision,
+  and the policy file and README now say so. The previous README omission (then REV-005)
+  is fixed in fb0bff7. No application or test code was edited. The suite recorded
+  at fb0bff7 was not rerun. Implement and remediate recorded provider anthropic; this
+  phase used xai. surfaces.policy is false and no policy text change is owed. Accessibility
+  conforms. Optional phases 10, 11, and 12 are still pending. executed_by was left
+  as the runner wrote it.
 
   '
 executed_by:
   runner: soft-foundry phase run
   shell: grok
   fresh_context: true
-  started_at: '2026-10-23T03:21:13Z'
-  finished_at: '2026-10-23T03:32:54Z'
+  started_at: '2026-10-23T14:20:33Z'
+  finished_at: '2026-10-23T14:29:56Z'
   exit_status: 0
   previous_phase: attack
-  session_id: 9c7f29eb-d169-45ed-ad60-890704218486
+  session_id: 52715a11-dce8-4b35-802e-9e9eb1eb83eb
   cwd: "/Users/jscholen-iou/dev/soft_foundry"

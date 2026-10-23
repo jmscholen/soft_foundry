@@ -2,14 +2,12 @@
 
 ## Scope reviewed
 
-`.ai/rules/infrastructure.md`. `surfaces.infrastructure` is false. `.ai/repository.yml` records `infrastructure.iac.tools` as empty and deployment as GitHub releases; CI is `.github/workflows/ci.yml`. The diff from `5abc0e0` to `85edc8e` does not touch that workflow, and it adds no Terraform, OpenTofu, Pulumi, or CloudFormation. REQ-025: no deployed service, database, or runtime dependency. The gem's CI runs the suite, `soft-foundry check`, and the deterministic harness evals as it did before; verification recorded those passing at `2294f86`.
-
-Loaded the infrastructure rule's sections on plan safety, replacement, IAM, network exposure, state, secrets, drift, and recovery. None of those objects exist in this change.
+`.ai/rules/infrastructure.md`. `surfaces.infrastructure` is false. `.ai/repository.yml` records `infrastructure.detected_or_not_applicable: NOT_APPLICABLE` (library gem, no deployed service; CI is the only automation, evidence `.github/workflows/ci.yml`). The commits from the failing-test-first point through `8575131` do not touch `.github/workflows/ci.yml` or any Terraform, OpenTofu, Pulumi, or CloudFormation source. REQ-025: no deployed infrastructure, database, service, or runtime dependency. The gem's CI runs the new gate checks as part of the existing test and `soft-foundry ci` jobs. No plan, IAM, network, state, secret, drift, or rollback-of-infrastructure concern applies.
 
 ## Findings
 
-None.
+No findings.
 
 ## Conformance
 
-N/A. No infrastructure as code is present in the change, and none was modified. The rule's provider, plan, IAM, state, and secrets clauses have nothing to apply to.
+N/A. No infrastructure as code is present or modified. `.ai/rules/infrastructure.md` was loaded; its plan, IAM, state, secrets, replacement, and recovery clauses do not apply to this diff.
