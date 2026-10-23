@@ -1,13 +1,13 @@
 # Attack Results
 
-Commit SHA: def00544e7709e1e8264c585a296d302144c9a65
+Commit SHA: 6a34ac198fc230a898bbd8b1946516734c57c66c
 
-Size: `full_route_sweep` (`ruby -Ilib exe/soft-foundry change size --phase attack`, the checkout's own code since the installed binary predates the change; this record declares no scope, so the whole repository is sized full). Code paths were clean (only this change's handoff and metadata, edited by the runner, were modified). This is the rerun after remediation (f94fba6, 327a895): the same drivers were run against the remediated checkout and the transcripts replaced. Evidence: `evidence/attack.rb`, `evidence/attack2.rb` and `evidence/attack_lib.rb` drive the real CLI (`ruby -Ilib exe/soft-foundry`) against throwaway repositories; the output is `evidence/transcript.txt` and `evidence/transcript2.txt`.
+Size: `full_route_sweep` (`ruby -Ilib exe/soft-foundry change size --phase attack`, the checkout's own code since the installed binary predates the change; this record declares no scope, so the whole repository is sized full). Code paths were clean (only this change's handoff and metadata, edited by the runner, were modified). This is the second rerun, after the ATTACK-F-006 remediation (2294f86): the same drivers were run against the remediated checkout and the transcripts replaced, and a third driver (`evidence/attack3.rb`, `transcript3.txt`) probes variants of that remediation. Evidence: `evidence/attack.rb`, `evidence/attack2.rb` and `evidence/attack_lib.rb` drive the real CLI (`ruby -Ilib exe/soft-foundry`) against throwaway repositories; the output is `evidence/transcript.txt` and `evidence/transcript2.txt`.
 
 ## Authorization envelope
 Local, ephemeral, synthetic data, loopback only, no destructive action outside the temp directories; see `cases.yml` and `attack-plan.md`. No provider refusal occurred.
 
-Transcript headings in the drivers use their own numbering; this table maps case IDs to the transcript sections: ATTACK-001 to 006 are sections 001 to 006 of `transcript.txt`; ATTACK-007 is its section 007; ATTACK-008 is its section 009 (injection); ATTACK-009 is its section 010 (resource); ATTACK-010 is its section 011; ATTACK-011 is section 012 of `transcript2.txt` (the first attempt in `transcript.txt` section 012 could not start the server and is superseded); ATTACK-013 to 016 are sections 013 to 016 of `transcript2.txt`.
+Transcript headings in the drivers use their own numbering; this table maps case IDs to the transcript sections: ATTACK-001 to 006 are sections 001 to 006 of `transcript.txt`; ATTACK-007 is its section 007; ATTACK-008 is its section 009 (injection); ATTACK-009 is its section 010 (resource); ATTACK-010 is its section 011; ATTACK-011 is section 012 of `transcript2.txt` (the first attempt in `transcript.txt` section 012 could not start the server and is superseded); ATTACK-013 to 016 are sections 013 to 016 of `transcript2.txt`; ATTACK-017 to 019 are in `transcript3.txt`.
 
 ## Case outcomes
 | Case | Threat | Result | Evidence |
@@ -24,14 +24,24 @@ Transcript headings in the drivers use their own numbering; this table maps case
 | ATTACK-010 structural pass read as proof | THREAT-011 | denied | transcript.txt |
 | ATTACK-011 markup and the browser view | THREAT-012 | denied | transcript2.txt |
 | ATTACK-013 rename out of an access-control or claimed path | THREAT-006 | denied (fixed) | transcript2.txt |
-| ATTACK-014 repoint git.branch to hide staleness | THREAT-001 | violated (variant remains) | transcript2.txt |
+| ATTACK-014 repoint git.branch after the evidence commit | THREAT-001 | denied (fixed) | transcript2.txt |
 | ATTACK-015 active record with ** hides cross-record change | THREAT-003 | violated | transcript2.txt |
 | ATTACK-016 case-folded citation slug | THREAT-009 | denied (fixed) | transcript2.txt |
+| ATTACK-017 git.branch recorded in the evidence commit, branch at it | THREAT-001 | violated (unscoped); scoped fails incidentally | transcript3.txt |
+| ATTACK-018 malformed git metadata, delete and revert | THREAT-007 | denied (unhandled error on a scalar `git`) | transcript3.txt |
+| ATTACK-019 git.branch recorded before the branch exists | THREAT-001 | violated | transcript3.txt |
 
 There is no ATTACK-012: it was the first browser attempt and is folded into ATTACK-011.
 
 ## Rerun after remediation
 ATTACK-013 and ATTACK-016 are denied now: the diff lists both sides of a rename (the source path stales its record and raises the attack size to full_route_sweep), and a citation slug must equal the directory name. ATTACK-014 is only partly fixed (below). ATTACK-015 is unchanged, the accepted residual. Confirmed: a path claimed by another record no longer enlarges a record's verify size, and the size line names a cause when no path is one. No regression was found in ATTACK-001 to 011 (transcript differences are those intended changes and the changed wording).
+
+## Second rerun (after the ATTACK-F-006 remediation)
+ATTACK-014 is denied: an edit of `git.branch` after the evidence commit now stales scoped records (`declaration changed: git.branch`) and unscoped ones, and the whole verify gate fails. No regression in ATTACK-001 to 011, 013, 015, 016 (the transcript differences are the intended `git.branch` cause lines plus random hashes). The remediation compares `git.branch` at the evidence commit with now, so it does not cover a value that was already recorded then.
+
+New finding ATTACK-F-007 (moderate, ATTACK-019 and ATTACK-017): a session records `git.branch: frozen` before the evidence commit (no such branch exists yet, so the measure falls back to the worktree), completes the phases, then creates branch `frozen` at the phases-complete commit and lands code on main. `git.branch` is unchanged since the evidence, the tip contains the evidence commit, so `evidence current` measures only up to the tip; with a recorded size and a run of the evidence tree the whole `gate verify` passes for scoped and unscoped records although `lib/a/x.rb` changed after the evidence (transcript3.txt). In ATTACK-017 (branch created at the evidence commit) the scoped gate fails only because sizing uses the plan commit as its base, which `frozen` does not contain, an incidental refusal. Fix direction: measure at the checked-out HEAD unless the recorded branch is HEAD's own branch or its tip equals or descends from HEAD; or require the recorded branch tip to be at or ahead of HEAD.
+
+New finding ATTACK-F-008 (minor, ATTACK-018): a `metadata.yml` whose `git` is a scalar makes `gate verify` exit 1 with `String does not have #dig method` instead of a gate line. It fails closed (no pass), so it is a robustness defect only.
 
 ## Violations found
 Original findings with current status. ATTACK-013 and ATTACK-016 were fixed and verified; ATTACK-014 (variant) and ATTACK-015 remain open. None repaired here (this phase reports).
@@ -56,6 +66,8 @@ ATTACK-016 (minor). On a case-insensitive filesystem a citation of `ALPHA` resol
 
 ## Blocked cases and reason
 None.
+
+Also open from this rerun: ATTACK-F-007 (ATTACK-017, ATTACK-019) and ATTACK-F-008 (ATTACK-018). ATTACK-014 as originally raised is fixed.
 
 ## Not exercised
 A real browser rendering the page (keyboard, focus, screen reader); the two-process race of a concurrent gate run during a commit; a network remote; Windows path separators.

@@ -1,4 +1,4 @@
-commit_sha: def00544e7709e1e8264c585a296d302144c9a65
+commit_sha: 6a34ac198fc230a898bbd8b1946516734c57c66c
 authorization_envelope:
   target: "soft-foundry CLI at the commit above (scoped-verification: scope, shared core, full-suite record, check sizing, advisories, browser view data)"
   environment: ephemeral   # throwaway git repositories under the system temp directory; synthetic files
@@ -166,11 +166,11 @@ cases:
     starting_privilege: implementing session editing its own metadata.yml
     steps:
       - create branch old-tip at the evidence commit; commit a code change on the checked-out branch
-      - set metadata git.branch to old-tip (scoped and unscoped records)
+      - set metadata git.branch to old-tip (scoped and unscoped records) after the evidence commit
       - add a correct recorded size and a run of the evidence tree
     expected_safe_behavior: the branch value does not decide whether code that changed counts; or changing it is a stale cause
-    observed: "retried after remediation: a branch that does not contain the evidence commit now fails closed, but the attack branch old-tip was created AT the evidence commit, so it contains it and is accepted: both scoped and unscoped records flipped from STALE to 'evidence current ... on branch old-tip', and with a correct recorded size and a run of the evidence tree the whole verify gate reported PASS for a record whose code changed (lib/a/x.rb) after the evidence. The remediation closes only the variant where the recorded branch lacks the evidence commit; a branch that is an ancestor of HEAD still hides later changes"
-    result: violated
+    observed: "rerun after the ATTACK-F-006 remediation: an edit of git.branch after the evidence commit is now a stale cause for scoped records (reason 'declaration changed: git.branch') and unscoped records ('STALE: declaration changed: git.branch'); with a correct size and run the whole verify gate reports FAIL. The variant where git.branch was already recorded before the evidence commit is ATTACK-019"
+    result: denied
     evidence: [evidence/transcript2.txt]
   - id: ATTACK-015
     threat: THREAT-003
@@ -194,3 +194,38 @@ cases:
     observed: "retried after remediation: citing ALPHA where the record is alpha on a case-insensitive filesystem now fails: cited record 'ALPHA' has no verification record"
     result: denied
     evidence: [evidence/transcript2.txt]
+  - id: ATTACK-017
+    threat: THREAT-001
+    violation_attempted: hide later code changes behind a git.branch that was recorded in the evidence commit and points at it
+    starting_privilege: implementing session that records git.branch and creates the branch before the evidence commit
+    steps:
+      - record git.branch frozen in metadata.yml, commit, create branch frozen at that commit, record evidence at it
+      - land code on main afterwards; run gate verify (scoped and unscoped record), then with a recorded size and a run of the evidence tree
+    expected_safe_behavior: code that changed after the evidence is a stale cause whatever git.branch says
+    observed: "scoped: the gate fails, but only incidentally: sizing takes the plan commit as its base and frozen does not contain it ('cannot compute the size'); evidence current itself passed. unscoped (legacy): verify PASSES with and without a recorded size and run, although lib/a/x.rb changed on main after the evidence"
+    result: violated
+    evidence: [evidence/transcript3.txt]
+  - id: ATTACK-019
+    threat: THREAT-001
+    violation_attempted: same blindness, built so that the remediation sees no edit and sizing finds a base
+    starting_privilege: implementing session
+    steps:
+      - record git.branch frozen before any such branch exists (the measure falls back to the worktree), record evidence at that commit, commit the phases complete
+      - create branch frozen at the phases-complete commit afterwards; land code on main
+      - record the size the gate demands and a run of the evidence tree
+    expected_safe_behavior: the gate refuses, or measures the checked-out HEAD
+    observed: "scoped and unscoped records: the whole 06-verification gate reports PASS although lib/a/x.rb changed after the evidence. git.branch is unchanged since the evidence commit (no edit seen), the branch tip contains the evidence commit, and the branch is only behind HEAD"
+    result: violated
+    evidence: [evidence/transcript3.txt]
+  - id: ATTACK-018
+    threat: THREAT-007
+    violation_attempted: break the git.branch comparison with malformed metadata
+    starting_privilege: implementing session editing metadata.yml
+    steps:
+      - delete git.branch after evidence and change code (scoped)
+      - replace the git mapping with a scalar string
+      - repoint, then revert to the original value
+    expected_safe_behavior: stale or refused, never a pass
+    observed: "deleting the key is a stale cause and reverting leaves the code change stale; a scalar git value makes gate verify exit 1 with 'String does not have #dig method' (an unhandled error, not a pass)"
+    result: denied
+    evidence: [evidence/transcript3.txt]

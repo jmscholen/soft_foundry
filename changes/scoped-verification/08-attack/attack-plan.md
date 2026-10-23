@@ -12,13 +12,13 @@ Local, ephemeral, synthetic. Every attack ran against throwaway git repositories
 ## Threats mapped
 | Threat | Attack cases |
 | --- | --- |
-| THREAT-001 declaration narrowing after evidence | ATTACK-001, ATTACK-014 |
+| THREAT-001 declaration narrowing after evidence | ATTACK-001, ATTACK-014, ATTACK-017, ATTACK-019 |
 | THREAT-002 blind or empty declarations | ATTACK-002 |
 | THREAT-003 cross-record scope abuse | ATTACK-003, ATTACK-013, ATTACK-015 |
 | THREAT-004 forged or abusive full-suite records | ATTACK-004, ATTACK-016 |
 | THREAT-005 reuse over untracked, ignored, dirty files | ATTACK-005 |
 | THREAT-006 undersized checks | ATTACK-006, ATTACK-013 |
-| THREAT-007 git failure read as no change | ATTACK-007, ATTACK-014 |
+| THREAT-007 git failure read as no change | ATTACK-007, ATTACK-014, ATTACK-018 |
 | THREAT-008 replay after history rewrite | ATTACK-004 |
 | THREAT-009 injection through globs, slugs, YAML | ATTACK-002, ATTACK-004, ATTACK-008, ATTACK-016 |
 | THREAT-010 resource exhaustion (attack not required) | ATTACK-009 |
@@ -26,7 +26,7 @@ Local, ephemeral, synthetic. Every attack ran against throwaway git repositories
 | THREAT-012 markup in scope text, browser view | ATTACK-011 |
 
 ## Adversarial journeys
-Each case in `cases.yml` records the threat, the attempted violation, the starting privilege, the steps, the expected denial, what was observed and the evidence. Drivers: `evidence/attack.rb` (ATTACK-001 to 010 and the first-pass browser attempt), `evidence/attack2.rb` with `evidence/attack_lib.rb` (confirmation of suspects, ATTACK-011 to 016 and the browser view). Transcripts: `evidence/transcript.txt`, `evidence/transcript2.txt`. The attacker's starting privilege is that of an implementing session: it may edit and commit anything under `changes/<slug>/` for its own record (metadata, tests.yml, handoffs), may commit code, and may not edit `.ai/` through the guard (but a careless or malicious human edit to `.ai/` is modelled in ATTACK-001 because the specification makes that edit a stale cause).
+Each case in `cases.yml` records the threat, the attempted violation, the starting privilege, the steps, the expected denial, what was observed and the evidence. Drivers: `evidence/attack3.rb` (ATTACK-017 to 019, probes of the git.branch remediation, transcript `evidence/transcript3.txt`), `evidence/attack.rb` (ATTACK-001 to 010 and the first-pass browser attempt), `evidence/attack2.rb` with `evidence/attack_lib.rb` (confirmation of suspects, ATTACK-011 to 016 and the browser view). Transcripts: `evidence/transcript.txt`, `evidence/transcript2.txt`. The attacker's starting privilege is that of an implementing session: it may edit and commit anything under `changes/<slug>/` for its own record (metadata, tests.yml, handoffs), may commit code, and may not edit `.ai/` through the guard (but a careless or malicious human edit to `.ai/` is modelled in ATTACK-001 because the specification makes that edit a stale cause).
 
 ## Intent-violation cases
 The intents under attack: stale evidence never passes (ATTACK-001, 013, 014, 015); a claimed full-suite pass names the tree it ran on (ATTACK-004, 005); size is not smaller than the diff demands (ATTACK-006, 013); failures read as failures (ATTACK-007); declarations cannot be blind (ATTACK-002).

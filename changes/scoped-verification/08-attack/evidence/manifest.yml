@@ -1,17 +1,23 @@
-commit_sha: def00544e7709e1e8264c585a296d302144c9a65
+commit_sha: 6a34ac198fc230a898bbd8b1946516734c57c66c
 artifacts:
   - path: evidence/transcript.txt
     case: ATTACK-001
-    sha256: 151bbc8389428acac2641ea3e3c7bd0aef54cc58bf34181fbfa28fa28f7ad4ae   # ATTACK-001 to 010 (rerun after remediation), output of attack.rb
+    sha256: c5bc84c1309d7d2137ce8901195dc929f64fabf123dd2c16eca78faf9112ec12   # ATTACK-001 to 010 (second rerun), output of attack.rb
   - path: evidence/attack.rb
     case: ATTACK-001
     sha256: 5ac92ec5a999462fbf6937bdb20a4f986be62d0b0f665faf5a3d4e535e0073fc   # driver that produced transcript.txt
   - path: evidence/transcript2.txt
     case: ATTACK-013
-    sha256: 109df4f0f45955b5fdb2914a3666ee89f6468b2b4ef99871e3e14227767a32f7   # ATTACK-011, 013 to 016 (rerun after remediation), output of attack2.rb
+    sha256: 51971d5e478b6213d617a971995c3b13ffc7175b862ca2892fbe17e75f811917   # ATTACK-011, 013 to 016 (second rerun), output of attack2.rb
   - path: evidence/attack2.rb
     case: ATTACK-013
     sha256: 02fd8eb2dfd3b81b8711b85696ec72e241f3baae11ca71ad2a13cef2e140a7ec   # driver that produced transcript2.txt
   - path: evidence/attack_lib.rb
     case: ATTACK-013
-    sha256: 223b63f6f7142de2632c83ffb8383feccd6ad878dfd19e937fcbd683d7c44f1e   # helpers loaded by attack2.rb
+    sha256: 223b63f6f7142de2632c83ffb8383feccd6ad878dfd19e937fcbd683d7c44f1e   # helpers loaded by attack2.rb and attack3.rb
+  - path: evidence/transcript3.txt
+    case: ATTACK-017
+    sha256: 9697901ffcf7c86503e59c0e73fac0748fabcdf87fee8f1bf5c0807f75bf7d44   # ATTACK-017 to 019, output of attack3.rb
+  - path: evidence/attack3.rb
+    case: ATTACK-017
+    sha256: d5d41dcf50b6ddb3e4e4afa01cf027ea357d33a15753672af62291550b9fc0ed   # driver that produced transcript3.txt

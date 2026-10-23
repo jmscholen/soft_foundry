@@ -1,10 +1,10 @@
 ---
 phase: '08-attack'
 skill: adversarial-testing
-status: pending
-commit_sha: def00544e7709e1e8264c585a296d302144c9a65
+status: complete
+commit_sha: 6a34ac198fc230a898bbd8b1946516734c57c66c
 started_at: '2026-10-23T01:18:30Z'
-completed_at: '2026-10-23T02:06:58Z'
+completed_at: '2026-10-23T03:20:05Z'
 resolved_model:
   profile: adversarial_high
   provider: anthropic
@@ -21,32 +21,47 @@ outputs:
 - changes/scoped-verification/08-attack/evidence/transcript2.txt
 blocking: []
 findings:
-- id: ATTACK-F-006
+- id: ATTACK-F-007
   severity: moderate
-  case: ATTACK-014
-  summary: 'The remediation of ATTACK-F-002 is partial: a recorded git.branch that
-    is not checked out must contain the evidence commit, but a branch at the evidence
-    commit (an ancestor of HEAD) satisfies that. Repointing git.branch to it makes
-    later code changes invisible, scoped and unscoped, and with a recorded size and
-    a run of the evidence tree the whole verify gate passes.'
-  failure_prevented: stale evidence passing the gate; measure at HEAD unless the recorded
-    branch is HEAD's own branch or descends from HEAD, or treat a post-evidence edit
-    of git.branch as a stale cause.
+  case: ATTACK-019
+  summary: The ATTACK-F-006 remediation compares git.branch at the evidence commit
+    with now, so a value recorded before the evidence is not an edit. Recording git.branch
+    before the branch exists, then creating it at the phases-complete commit and landing
+    code on main, leaves evidence current for scoped and unscoped records, and with
+    a recorded size and a run of the evidence tree the whole verify gate passes (ATTACK-017
+    shows the unscoped variant; its scoped variant fails only incidentally on the
+    sizing base).
+  failure_prevented: stale evidence passing the gate; measure at the checked-out HEAD
+    unless the recorded branch is HEAD's own branch or its tip equals or descends
+    from HEAD.
 - id: ATTACK-F-003
   severity: moderate
   case: ATTACK-015
-  summary: 'Unchanged after remediation: an active record declaring ** claims every
-    path, so another record''s evidence stays current after unrelated code lands and
-    the verify gate passes in full; only a non-blocking advisory reports it. Accepted
-    residual of MIT-003, for review and judgment.'
+  summary: 'Unchanged: an active record declaring ** claims every path, so another
+    record''s evidence stays current after unrelated code lands and the verify gate
+    passes in full; only a non-blocking advisory reports it. Accepted residual of
+    MIT-003, for review and judgment.'
   failure_prevented: stale evidence passing through a leftover wide record; consider
     refusing an over-broad sibling scope or releasing abandoned records.
+- id: ATTACK-F-008
+  severity: minor
+  case: ATTACK-018
+  summary: 'A metadata.yml whose git is a scalar makes gate verify exit 1 with "String
+    does not have #dig method" instead of a gate line. Fails closed; robustness only.'
+  failure_prevented: unhandled error instead of a refusal naming the malformed field.
 - id: ATTACK-F-005
   severity: minor
   case: ATTACK-006
   summary: Recorded size is gated for verification only; a smaller size in evaluation
     or attack evidence is not refused (REQ-011 as specified). Residual.
   failure_prevented: none beyond clarity.
+- id: ATTACK-F-006
+  severity: info
+  case: ATTACK-014
+  summary: 'Verified fixed: an edit of git.branch after the evidence commit stales
+    scoped and unscoped records; the whole verify gate fails. The not-yet-existing-branch
+    variant remains as ATTACK-F-007.'
+  failure_prevented: n/a
 - id: ATTACK-F-001
   severity: info
   case: ATTACK-013
@@ -59,21 +74,22 @@ findings:
   summary: 'Verified fixed: a citation slug must equal the directory name exactly.'
   failure_prevented: n/a
 next: remediate
-notes: 'Rerun after remediation. Local, ephemeral, synthetic: attacks ran against
-  throwaway git repositories in the system temp directory (loopback only for the ui
-  server); the real repository was not modified. The checkout''s code was run with
-  ruby -Ilib because the installed soft-foundry binary predates the change. Provider
-  keys unset for the driver run. Size full_route_sweep from change size --phase attack.
-  No provider refusal. Not exercised: a real browser, concurrency of a gate run against
-  a commit, Windows paths. cases.yml was invalid YAML (unquoted colons) and was quoted.
-  The run''s commit is HEAD with the runner''s own handoff and metadata edits uncommitted.'
+notes: 'Second rerun, after the ATTACK-F-006 remediation (2294f86). Local, ephemeral,
+  synthetic: attacks ran against throwaway git repositories in the system temp directory
+  (loopback only for the ui server); the real repository was not modified. The checkout''s
+  code was run with ruby -Ilib because the installed soft-foundry binary predates
+  the change. Provider keys unset for the driver runs. Size full_route_sweep from
+  change size --phase attack (no scope declared). No provider refusal. Not exercised:
+  a real browser, concurrency of a gate run against a commit, Windows paths. The run''s
+  commit is HEAD with the runner''s own handoff and metadata edits uncommitted; the
+  new evidence files are uncommitted and describe that HEAD.'
 executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-23T02:03:07Z'
-  finished_at: '2026-10-23T02:07:05Z'
+  started_at: '2026-10-23T03:16:25Z'
+  finished_at: '2026-10-23T03:20:12Z'
   exit_status: 0
   previous_phase: evaluate
-  session_id: 302e32a4-ca62-40ea-b424-1b2bda076dfb
+  session_id: 1c91fd9a-c7b2-4837-ae8a-3fb97c6aa27b
   cwd: "/Users/jscholen-iou/dev/soft_foundry"
