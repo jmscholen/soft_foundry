@@ -1,12 +1,148 @@
-commit_sha: TBD
+commit_sha: 0af7da5ab3108db454fab80b351e13841e6575c6
+size: full_route_sweep
 journeys:
   - id: EVAL-001
-    criteria: [AC-001]
-    persona: TBD
-    starting_state: TBD
+    criteria: [AC-001, AC-004, AC-005, AC-012, AC-013, AC-016]
+    persona: Maintainer, and a phase session
+    starting_state: gated record, intake through review complete, judge pending
     steps:
-      - TBD
+      - "phase reopen evaluate --reason 'fixture changed'"
+      - "diff every non-handoff, non-metadata file against a copy taken before; read git status"
+      - "reopen with empty, 501-character and control-character reasons, an unknown phase, and no --reason"
+      - "reopen a phase whose downstream is already pending"
+      - "run reopen, change release, change discharge with SOFT_FOUNDRY_PHASE set"
     assertions:
-      - TBD
-    evidence: [evidence/TBD]
-    result: TBD   # pass | fail | blocked
+      - "exit 0; evaluate, attack, review reset one per line; verify and implement stay complete"
+      - "evidence files byte-identical; only three handoffs and metadata.yml differ"
+      - "phase_reopenings gains one entry (source manual, previous per phase); reopenings unchanged"
+      - "every refusal exits 1, names the problem and the next action, and writes nothing"
+      - "the marker refuses all three commands"
+    evidence: [evidence/j1-reopen.txt, evidence/j1-reopen.sh]
+    result: pass
+  - id: EVAL-002
+    criteria: [AC-002, AC-003, AC-010, AC-011, AC-014, AC-015]
+    persona: Maintainer
+    starting_state: gated records at several lifecycle points and statuses
+    steps:
+      - "reopen specify; read change status; run gate specify and gate all; run change close"
+      - "reopen remediate on a record with remediate complete"
+      - "reopen attack with document and index waived and pending; hash their handoffs"
+      - "reopen judge on a judged and on an intake record"
+      - "reopen on closed, released, exploring and awaiting_human records"
+    assertions:
+      - "specify and everything downstream pending; change close refuses naming 14-judgment"
+      - "remediate reopen resets verify through review as well (transition followed)"
+      - "waived pending handoffs byte-identical and not reported"
+      - "judged -> in_progress with current_phase judge; intake stays intake"
+      - "each blocked status refused with a message naming the status and what to do, no file changed"
+      - "gate on a reopened phase prints SKIP and exits 0 (same as a never-started phase); it does not pass the phase, and close refuses; see finding EVAL-F1"
+    evidence: [evidence/j2-gate-close.txt, evidence/j2-gate-close.sh]
+    result: pass
+  - id: EVAL-003
+    criteria: [AC-019, AC-020, AC-021, AC-022, AC-023, AC-024, AC-028, AC-030, AC-031, AC-032, AC-033, AC-034]
+    persona: Maintainer
+    starting_state: verify complete, evaluate and attack pending, stub claude on PATH
+    steps:
+      - "phase run evaluate attack --parallel with no --env, then with --env DATABASE_URL=db_{phase}<secret>"
+      - "refused forms: non-isolated, duplicate, single phase, bad env names"
+      - "attack named alone while evaluate is pending"
+      - "one stub exits 3; one stub commits; SIGTERM and SIGINT to the runner"
+      - "20 repeated runs, parse every YAML afterwards"
+    assertions:
+      - "both stubs start within the same second and finish together; wall time 2.6s for two 2s sessions"
+      - "no-env run prints a warn: line about isolation; env run gives each session its own value; the secret appears in no file, output or ps line"
+      - "refusals start no session and change no file; attack alone is refused for its predecessor, named with evaluate it is accepted"
+      - "one phase <id>: pass|fail line per phase; exit non-zero when one fails; the survivor completes"
+      - "HEAD movement prints a warn: line and exits non-zero"
+      - "a signal to the runner ends both children (exit 143) and the runner reports each"
+      - "20 of 20 runs leave every YAML parseable with both statuses complete; current_phase becomes review"
+    evidence: [evidence/j3-parallel.txt, evidence/j3b-parallel-timing.txt, evidence/j3c-parallel-pass.txt, evidence/j3d-signal.txt]
+    result: pass
+  - id: EVAL-004
+    criteria: [AC-035, AC-036, AC-037, AC-038, AC-039, AC-040, AC-041, AC-042, AC-043]
+    persona: Maintainer
+    starting_state: records finished through learn, APPROVED, unmerged and merged
+    steps:
+      - "change release with items; with no item, duplicate, malformed id, empty and 501-character descriptions"
+      - "release with BLOCKED, REJECTED and missing judgments"
+      - "release a judgment carrying undischarged U-1 and U-2"
+      - "merged in_progress record then merged released record through ci; discharge, close, repeat discharge, unknown item"
+      - "check with an empty and a missing release block; close a non-released record"
+    assertions:
+      - "release records at, commit and items; status released"
+      - "each refusal exits 1 with a reason and writes nothing"
+      - "U-1 and U-2 are carried as items with from: judgment in the one list"
+      - "ci fails a merged unreleased record as before; a merged released record with open items passes with an advisory and a released: line; with all discharged and status released it fails telling the person to close"
+      - "close names the open items; after discharging both it succeeds"
+      - "check names the record and the defect for an empty or missing release block"
+      - "plain close of a merged non-released record unchanged; the released: line is indented under a heading, not at column 0, a cosmetic difference from the criterion text (EVAL-F3)"
+    evidence: [evidence/j4-release.txt, evidence/j4-release.sh]
+    result: pass
+  - id: EVAL-005
+    criteria: [AC-044, AC-048]
+    persona: Maintainer and a UI reader
+    starting_state: released record c1 plus an open change c2 on its own branch; app code changed after the release
+    steps:
+      - "change status, change list --json, gate all, ci, learn list, learn promote --dry-run, ps"
+      - "soft-foundry ui; GET /api/changes with and without the token; read app.js"
+    assertions:
+      - "status shows released with its open items; list --json carries released: true, open_items: 2, stale: false, failed: false"
+      - "gate all and ci do not gate c1 for staleness after a later code change (ci prints 'released, not re-gated'); c2 is gated"
+      - "the API row is released with open_items 2; no token gives 401"
+      - "source: release items in a table with caption and th scope cells; state words 'open' and 'discharged'; no color-only state"
+      - "not rendered in a browser; scope check and snapshot/board were exercised only through list --json and the API"
+    evidence: [evidence/j5-consumers.txt, evidence/j5-consumers.sh]
+    result: pass
+  - id: EVAL-006
+    criteria: [AC-007, AC-008, AC-009, AC-049]
+    persona: Maintainer
+    starting_state: evaluate complete with current evidence; then app code changed
+    steps:
+      - "phase run evaluate while evidence is current"
+      - "commit a code change, phase run evaluate with the stub shell"
+      - "stale evaluate with an incomplete predecessor"
+      - "record with a manual reopen, an automatic reopen, a release and a discharge; read change status --json timeline"
+    assertions:
+      - "current evidence: refused, bytes of handoff and metadata unchanged"
+      - "stale evidence: 'reopened evaluate (automatic: evidence stale at <sha>)', a phase_reopenings entry with source auto naming the failed check and from_commit, then the stub session ran"
+      - "predecessor incomplete: refused for the predecessor, nothing reset"
+      - "timeline lists phase reopens with reason, reset phases and commit, labelled manual or automatic, plus released and discharged events; the plain-text change status shows the release line but not the phase reopenings (EVAL-F2)"
+    evidence: [evidence/j6-timeline-auto.txt, evidence/j6-timeline-auto.sh]
+    result: pass
+  - id: EVAL-007
+    criteria: [AC-025, AC-026, AC-027]
+    persona: Phase session
+    starting_state: metadata current_phase is implement; guard in block mode
+    steps:
+      - "feed guard tool calls with SOFT_FOUNDRY_PHASE evaluate, attack, bogus and implement with SOFT_FOUNDRY_PARALLEL"
+      - "feed a call with no marker"
+    assertions:
+      - "evaluate marker: app code and the attack directory refused, its own directory allowed"
+      - "attack marker: the evaluation directory refused, its own allowed"
+      - "unknown marker and implement during a parallel run are refused with a reason; none falls back to current_phase"
+      - "no marker: current_phase decides, as before"
+    evidence: [evidence/j7-guard-a11y-docs.txt]
+    result: pass
+  - id: EVAL-008
+    criteria: [AC-046, AC-047]
+    persona: Terminal-only or screen-reader reader
+    starting_state: piped output, NO_COLOR=1, stdin closed
+    steps:
+      - "capture reopen (success, empty reason, nothing to reset), release and discharge refusals, parallel refusals"
+    assertions:
+      - "0 lines with a non-ASCII byte or an escape sequence; no command prompted"
+      - "each refusal states what went wrong and the next action"
+    evidence: [evidence/a11y-captured-output.txt, evidence/j7-guard-a11y-docs.txt]
+    result: pass
+  - id: EVAL-009
+    criteria: [AC-045, AC-050]
+    persona: Maintainer
+    starting_state: this checkout
+    steps:
+      - "soft-foundry check; soft-foundry eval; search workflow.yml, metadata template, schemas.md, .ai/README.md, README.md and the usage text for the new commands"
+    assertions:
+      - "check passes (16 phases, 17 skills); eval 18 passed, 0 failed, 1 skipped"
+      - "isolated_phases and --parallel are in workflow.yml; phase_reopenings and released are in the change metadata template (.ai/templates/change/metadata.yml); .ai/README.md, README.md and the usage text name phase reopen, --parallel, --env, release and discharge; schemas.md names phase reopen, release and discharge but not --parallel or --env; the ps command table lists phase reopen and change release/discharge"
+      - "docs/user/ is outside the evaluation skill's read set and was not read; the ps table text was not separately inspected"
+    evidence: [evidence/j7-guard-a11y-docs.txt]
+    result: pass

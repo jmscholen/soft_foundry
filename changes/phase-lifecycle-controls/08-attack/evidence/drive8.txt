@@ -1,0 +1,36 @@
+## PAC-02 guard under session markers (attack-phase record, write to 08-attack vs 07-evaluation vs app)
+marker=attack: write own dir :: exit=0 
+marker=attack: write sibling dir :: exit=2 ✗ fail guard: Write changes/c1/07-evaluation/results.md is in adversarial-testing's deny_write set; the adversarial-testing skill's permissions.yml does not allow it (mod
+marker=attack: write app code :: exit=2 ✗ fail guard: Write lib/app.rb is in adversarial-testing's deny_write set; the adversarial-testing skill's permissions.yml does not allow it (mode: block, .ai/policies/en
+marker=evaluate: write own dir :: exit=2 ✗ fail guard: Write changes/c1/08-attack/results.md is not in evaluation's write set; the evaluation skill's permissions.yml does not allow it (mode: block, .ai/policies/
+marker=evaluate: write sibling dir :: exit=0 
+marker=evaluate: write app code :: exit=2 ✗ fail guard: Write lib/app.rb is in evaluation's deny_write set; the evaluation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a m
+marker=unknown: write own dir :: exit=2 ✗ fail guard: Write SOFT_FOUNDRY_PHASE is "nosuch", which does not name a lifecycle phase; the session marker is set by `soft-foundry phase run` and must match a phase id
+marker=unknown: write sibling dir :: exit=2 ✗ fail guard: Write SOFT_FOUNDRY_PHASE is "nosuch", which does not name a lifecycle phase; the session marker is set by `soft-foundry phase run` and must match a phase id
+marker=unknown: write app code :: exit=2 ✗ fail guard: Write SOFT_FOUNDRY_PHASE is "nosuch", which does not name a lifecycle phase; the session marker is set by `soft-foundry phase run` and must match a phase id
+marker=empty: write own dir :: exit=2 ✗ fail guard: Write SOFT_FOUNDRY_PHASE is "", which does not name a lifecycle phase; the session marker is set by `soft-foundry phase run` and must match a phase id exact
+marker=empty: write sibling dir :: exit=2 ✗ fail guard: Write SOFT_FOUNDRY_PHASE is "", which does not name a lifecycle phase; the session marker is set by `soft-foundry phase run` and must match a phase id exact
+marker=empty: write app code :: exit=2 ✗ fail guard: Write SOFT_FOUNDRY_PHASE is "", which does not name a lifecycle phase; the session marker is set by `soft-foundry phase run` and must match a phase id exact
+marker=mixed-case: write own dir :: exit=2 ✗ fail guard: Write SOFT_FOUNDRY_PHASE is "Attack", which does not name a lifecycle phase; the session marker is set by `soft-foundry phase run` and must match a phase id
+marker=mixed-case: write sibling dir :: exit=2 ✗ fail guard: Write SOFT_FOUNDRY_PHASE is "Attack", which does not name a lifecycle phase; the session marker is set by `soft-foundry phase run` and must match a phase id
+marker=mixed-case: write app code :: exit=2 ✗ fail guard: Write SOFT_FOUNDRY_PHASE is "Attack", which does not name a lifecycle phase; the session marker is set by `soft-foundry phase run` and must match a phase id
+marker=traversal: write own dir :: exit=2 ✗ fail guard: Write SOFT_FOUNDRY_PHASE is "../x", which does not name a lifecycle phase; the session marker is set by `soft-foundry phase run` and must match a phase id e
+marker=traversal: write sibling dir :: exit=2 ✗ fail guard: Write SOFT_FOUNDRY_PHASE is "../x", which does not name a lifecycle phase; the session marker is set by `soft-foundry phase run` and must match a phase id e
+marker=traversal: write app code :: exit=2 ✗ fail guard: Write SOFT_FOUNDRY_PHASE is "../x", which does not name a lifecycle phase; the session marker is set by `soft-foundry phase run` and must match a phase id e
+marker=trailing newline: write own dir :: exit=2 ✗ fail guard: Write SOFT_FOUNDRY_PHASE is "attack\n", which does not name a lifecycle phase; the session marker is set by `soft-foundry phase run` and must match a phase 
+marker=trailing newline: write sibling dir :: exit=2 ✗ fail guard: Write SOFT_FOUNDRY_PHASE is "attack\n", which does not name a lifecycle phase; the session marker is set by `soft-foundry phase run` and must match a phase 
+marker=trailing newline: write app code :: exit=2 ✗ fail guard: Write SOFT_FOUNDRY_PHASE is "attack\n", which does not name a lifecycle phase; the session marker is set by `soft-foundry phase run` and must match a phase 
+marker=implement (non-isolated): write own dir :: exit=2 ✗ fail guard: Write changes/c1/08-attack/results.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/
+marker=implement (non-isolated): write sibling dir :: exit=2 ✗ fail guard: Write changes/c1/07-evaluation/results.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, 
+marker=implement (non-isolated): write app code :: exit=0 
+marker=space: write own dir :: exit=2 ✗ fail guard: Write SOFT_FOUNDRY_PHASE is "attack ", which does not name a lifecycle phase; the session marker is set by `soft-foundry phase run` and must match a phase i
+marker=space: write sibling dir :: exit=2 ✗ fail guard: Write SOFT_FOUNDRY_PHASE is "attack ", which does not name a lifecycle phase; the session marker is set by `soft-foundry phase run` and must match a phase i
+marker=space: write app code :: exit=2 ✗ fail guard: Write SOFT_FOUNDRY_PHASE is "attack ", which does not name a lifecycle phase; the session marker is set by `soft-foundry phase run` and must match a phase i
+parallel attack: write sibling dir :: exit=2 ✗ fail guard: Write changes/c1/07-evaluation/results.md is in adversarial-testing's deny_write set; the adversarial-testing skill's permissions.yml does not allow it (mod
+parallel attack: write own dir :: exit=0 
+parallel marker=implement: write app :: exit=2 ✗ fail guard: Write SOFT_FOUNDRY_PHASE names implement in a parallel run, but implement is not in isolated_phases (.ai/workflow.yml: evaluate, attack); the guard refuses 
+attack session Bash: soft-foundry phase reopen :: exit=0 
+attack session Bash: env -u marker then release :: exit=0 
+attack session Bash: rewrite marker then discharge :: exit=0 
+attack session Edit metadata.yml (status/release hand edit) :: exit=2 ✗ fail guard: Edit changes/c1/metadata.yml is not in adversarial-testing's write set; the adversarial-testing skill's permissions.yml does not allow it (mode: block, .ai/
+attack session Edit sibling handoff :: exit=2 ✗ fail guard: Edit changes/c1/07-evaluation/handoff.yml is in adversarial-testing's deny_write set; the adversarial-testing skill's permissions.yml does not allow it (mod

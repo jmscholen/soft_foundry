@@ -1,0 +1,270 @@
+### PAC-01 reopen marker=implement
+$ SOFT_FOUNDRY_PHASE="implement" sf "phase" "reopen" "verify" "--reason" "x"
+exit=1
+--stdout--
+--stderr--
+soft-foundry: phase reopen is refused inside a phase-run session (SOFT_FOUNDRY_PHASE is set): a phase may not reset another phase's handoff; ask the person running the change to run `soft-foundry phase reopen`
+
+### PAC-01 release marker=implement
+$ SOFT_FOUNDRY_PHASE="implement" sf "change" "release" "c1" "--item" "A=a"
+exit=1
+--stdout--
+--stderr--
+soft-foundry: change release is refused inside a phase-run session (SOFT_FOUNDRY_PHASE is set): a phase may not decide what a change still owes; ask the person running the change to run it
+
+### PAC-01 reopen marker=review
+$ SOFT_FOUNDRY_PHASE="review" sf "phase" "reopen" "verify" "--reason" "x"
+exit=1
+--stdout--
+--stderr--
+soft-foundry: phase reopen is refused inside a phase-run session (SOFT_FOUNDRY_PHASE is set): a phase may not reset another phase's handoff; ask the person running the change to run `soft-foundry phase reopen`
+
+### PAC-01 release marker=review
+$ SOFT_FOUNDRY_PHASE="review" sf "change" "release" "c1" "--item" "A=a"
+exit=1
+--stdout--
+--stderr--
+soft-foundry: change release is refused inside a phase-run session (SOFT_FOUNDRY_PHASE is set): a phase may not decide what a change still owes; ask the person running the change to run it
+
+### PAC-01 reopen marker=attack
+$ SOFT_FOUNDRY_PHASE="attack" sf "phase" "reopen" "verify" "--reason" "x"
+exit=1
+--stdout--
+--stderr--
+soft-foundry: phase reopen is refused inside a phase-run session (SOFT_FOUNDRY_PHASE is set): a phase may not reset another phase's handoff; ask the person running the change to run `soft-foundry phase reopen`
+
+### PAC-01 release marker=attack
+$ SOFT_FOUNDRY_PHASE="attack" sf "change" "release" "c1" "--item" "A=a"
+exit=1
+--stdout--
+--stderr--
+soft-foundry: change release is refused inside a phase-run session (SOFT_FOUNDRY_PHASE is set): a phase may not decide what a change still owes; ask the person running the change to run it
+
+### PAC-01 reopen marker=verify
+$ SOFT_FOUNDRY_PHASE="verify" sf "phase" "reopen" "verify" "--reason" "x"
+exit=1
+--stdout--
+--stderr--
+soft-foundry: phase reopen is refused inside a phase-run session (SOFT_FOUNDRY_PHASE is set): a phase may not reset another phase's handoff; ask the person running the change to run `soft-foundry phase reopen`
+
+### PAC-01 release marker=verify
+$ SOFT_FOUNDRY_PHASE="verify" sf "change" "release" "c1" "--item" "A=a"
+exit=1
+--stdout--
+--stderr--
+soft-foundry: change release is refused inside a phase-run session (SOFT_FOUNDRY_PHASE is set): a phase may not decide what a change still owes; ask the person running the change to run it
+
+### PAC-01 reopen marker empty
+$ SOFT_FOUNDRY_PHASE="" sf "phase" "reopen" "verify" "--reason" "x"
+exit=1
+--stdout--
+--stderr--
+soft-foundry: phase reopen is refused inside a phase-run session (SOFT_FOUNDRY_PHASE is set): a phase may not reset another phase's handoff; ask the person running the change to run `soft-foundry phase reopen`
+
+### PAC-01 release marker empty
+$ SOFT_FOUNDRY_PHASE="" sf "change" "release" "c1" "--item" "A=a"
+exit=1
+--stdout--
+--stderr--
+soft-foundry: change release is refused inside a phase-run session (SOFT_FOUNDRY_PHASE is set): a phase may not decide what a change still owes; ask the person running the change to run it
+
+tree unchanged after marker refusals: true
+### PAC-06 reopen reason newline
+$  sf "phase" "reopen" "verify" "--reason" "a\nb: injected"
+exit=1
+--stdout--
+--stderr--
+soft-foundry: --reason may not contain control characters (newline, tab, escape, NUL); put it on one plain line
+
+=> exit 1; record changed: false
+### PAC-06 reopen reason esc
+$  sf "phase" "reopen" "verify" "--reason" "x\e[31mred"
+exit=1
+--stdout--
+--stderr--
+soft-foundry: --reason may not contain control characters (newline, tab, escape, NUL); put it on one plain line
+
+=> exit 1; record changed: false
+SPAWN ERR string contains null byte
+### PAC-06 reopen reason colon
+$  sf "phase" "reopen" "verify" "--reason" "k: v # c"
+exit=0
+--stdout--
+phase reopen: reopened verify (manual)
+phase reopen: reset verify
+phase reopen: reset evaluate
+phase reopen: reset attack
+phase reopen: reset review
+phase reopen: reset judge
+phase reopen: reset learn
+--stderr--
+
+=> exit 0; record changed: true
+### PAC-06 reopen reason dashes
+$  sf "phase" "reopen" "verify" "--reason" "---"
+exit=0
+--stdout--
+phase reopen: reopened verify (manual)
+phase reopen: reset verify
+phase reopen: reset evaluate
+phase reopen: reset attack
+phase reopen: reset review
+phase reopen: reset judge
+phase reopen: reset learn
+--stderr--
+
+=> exit 0; record changed: true
+### PAC-06 reopen reason 501
+$  sf "phase" "reopen" "verify" "--reason" "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+exit=1
+--stdout--
+--stderr--
+soft-foundry: --reason is 501 characters; the limit is 500
+
+=> exit 1; record changed: false
+### PAC-06 reopen reason 500
+$  sf "phase" "reopen" "verify" "--reason" "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+exit=0
+--stdout--
+phase reopen: reopened verify (manual)
+phase reopen: reset verify
+phase reopen: reset evaluate
+phase reopen: reset attack
+phase reopen: reset review
+phase reopen: reset judge
+phase reopen: reset learn
+--stderr--
+
+=> exit 0; record changed: true
+### PAC-06 reopen reason bidi
+$  sf "phase" "reopen" "verify" "--reason" "safe<U+202E>evil"
+exit=0
+--stdout--
+phase reopen: reopened verify (manual)
+phase reopen: reset verify
+phase reopen: reset evaluate
+phase reopen: reset attack
+phase reopen: reset review
+phase reopen: reset judge
+phase reopen: reset learn
+--stderr--
+
+=> exit 0; record changed: true
+### PAC-06 reopen reason zwsp
+$  sf "phase" "reopen" "verify" "--reason" "a<U+200B>b"
+exit=0
+--stdout--
+phase reopen: reopened verify (manual)
+phase reopen: reset verify
+phase reopen: reset evaluate
+phase reopen: reset attack
+phase reopen: reset review
+phase reopen: reset judge
+phase reopen: reset learn
+--stderr--
+
+=> exit 0; record changed: true
+### PAC-06 reopen reason c1
+$  sf "phase" "reopen" "verify" "--reason" "a\u009Bb"
+exit=1
+--stdout--
+--stderr--
+soft-foundry: --reason may not contain control characters (newline, tab, escape, NUL); put it on one plain line
+
+=> exit 1; record changed: false
+### PAC-06 reopen reason linesep
+$  sf "phase" "reopen" "verify" "--reason" "a\u2028b"
+exit=0
+--stdout--
+phase reopen: reopened verify (manual)
+phase reopen: reset verify
+phase reopen: reset evaluate
+phase reopen: reset attack
+phase reopen: reset review
+phase reopen: reset judge
+phase reopen: reset learn
+--stderr--
+
+=> exit 0; record changed: true
+### PAC-06 reopen reason nel
+$  sf "phase" "reopen" "verify" "--reason" "a\u0085b"
+exit=1
+--stdout--
+--stderr--
+soft-foundry: --reason may not contain control characters (newline, tab, escape, NUL); put it on one plain line
+
+=> exit 1; record changed: false
+### PAC-06 reopen reason tabs
+$  sf "phase" "reopen" "verify" "--reason" "a\tb"
+exit=1
+--stdout--
+--stderr--
+soft-foundry: --reason may not contain control characters (newline, tab, escape, NUL); put it on one plain line
+
+=> exit 1; record changed: false
+### PAC-06 reopen reason cr
+$  sf "phase" "reopen" "verify" "--reason" "a\rb"
+exit=1
+--stdout--
+--stderr--
+soft-foundry: --reason may not contain control characters (newline, tab, escape, NUL); put it on one plain line
+
+=> exit 1; record changed: false
+### PAC-06 reopen reason del
+$  sf "phase" "reopen" "verify" "--reason" "a\u007Fb"
+exit=1
+--stdout--
+--stderr--
+soft-foundry: --reason may not contain control characters (newline, tab, escape, NUL); put it on one plain line
+
+=> exit 1; record changed: false
+### PAC-06 reopen reason ansi8
+$  sf "phase" "reopen" "verify" "--reason" "a\u009B31mb"
+exit=1
+--stdout--
+--stderr--
+soft-foundry: --reason may not contain control characters (newline, tab, escape, NUL); put it on one plain line
+
+=> exit 1; record changed: false
+### PAC-06 reopen reason yaml-anchor
+$  sf "phase" "reopen" "verify" "--reason" "&a *a !!ruby/object:Object {}"
+exit=0
+--stdout--
+phase reopen: reopened verify (manual)
+phase reopen: reset verify
+phase reopen: reset evaluate
+phase reopen: reset attack
+phase reopen: reset review
+phase reopen: reset judge
+phase reopen: reset learn
+--stderr--
+
+=> exit 0; record changed: true
+### PAC-06 reopen reason pct
+$  sf "phase" "reopen" "verify" "--reason" "%s %n {phase}"
+exit=0
+--stdout--
+phase reopen: reopened verify (manual)
+phase reopen: reset verify
+phase reopen: reset evaluate
+phase reopen: reset attack
+phase reopen: reset review
+phase reopen: reset judge
+phase reopen: reset learn
+--stderr--
+
+=> exit 0; record changed: true
+### PAC-06 reopen reason html
+$  sf "phase" "reopen" "verify" "--reason" "<script>alert(1)</script>"
+exit=0
+--stdout--
+phase reopen: reopened verify (manual)
+phase reopen: reset verify
+phase reopen: reset evaluate
+phase reopen: reset attack
+phase reopen: reset review
+phase reopen: reset judge
+phase reopen: reset learn
+--stderr--
+
+=> exit 0; record changed: true

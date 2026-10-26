@@ -1,24 +1,88 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
-phase: 08-attack
+---
+phase: '08-attack'
 skill: adversarial-testing
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 0af7da5ab3108db454fab80b351e13841e6575c6
+started_at: '2026-10-26T15:17:36Z'
+completed_at: '2026-10-26T15:45:00Z'
 resolved_model:
   profile: adversarial_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- changes/phase-lifecycle-controls/08-attack/attack-plan.md
+- changes/phase-lifecycle-controls/08-attack/cases.yml
+- changes/phase-lifecycle-controls/08-attack/results.md
+- changes/phase-lifecycle-controls/08-attack/evidence/manifest.yml
+- changes/phase-lifecycle-controls/08-attack/evidence/
+blocking: []
+findings:
+- id: ATK-001
+  severity: major
+  summary: Release and phase reopen read status and the reset set before taking the
+    record lock, so concurrent commands both succeed. Release plus reopen leaves a
+    released record with verify through learn pending, and check and ci pass; four
+    concurrent reopens write four history entries.
+  failure: Start `change release c1 --item A=a` and `phase reopen verify --reason
+    r` together on a finished record. Both exit 0 in 14 of 14 runs; status is released
+    with six phases pending, the record can be discharged and closed (evidence/drive6.txt,
+    drive7.txt; code in phase_reopen.rb and release.rb, checks before the transaction).
+- id: ATK-002
+  severity: minor
+  summary: Text.free_text! refuses only control characters, so U+202E, U+200B and
+    U+2028 are stored in the record and in every reset handoff's notes, after which
+    scan fails with 14 errors and the content clean gate fails on each redone phase.
+  failure: Run `phase reopen verify --reason "looks fine<U+202E> gnirts<U+200B>"`
+    exits 0; `soft-foundry gate verify` after the phase is redone fails content clean
+    on handoff.yml (evidence/drive2.txt, drive11.txt).
+- id: ATK-003
+  severity: minor
+  summary: Mistyped --env forms echo the credential on stderr (the name part when
+    NAME= is forgotten; the whole value for the --env=NAME=VALUE spelling), against
+    REQ-012.
+  failure: Run `--env postgres://u:secretpw@h/db?x=1` prints the text before the first
+    = as the variable name; `--env=DB_URL=secretinline` prints it in `unknown option(s)`
+    (evidence/drive4.txt).
+- id: ATK-004
+  severity: minor
+  summary: A hand-edited discharge (discharged_at set, even to an empty string, with
+    no note or commit) passes check and ci, and change close does not lint the release
+    block.
+  failure: Set discharged_at to "" on every release item in metadata.yml; check and
+    ci exit 0 with no open items (evidence/drive3.txt). TB-3 accepts hand edits, so
+    this may be an accepted residual.
+- id: ATK-005
+  severity: minor
+  summary: Documented residuals reproduced. Bash is checked against deny sets only,
+    so `env -u SOFT_FOUNDRY_PHASE soft-foundry change release` from a marked session
+    releases the change, and a fully hand-forged finished record releases with only
+    a non-blocking advisory.
+  failure: Marked session runs `env -u SOFT_FOUNDRY_PHASE soft-foundry change release
+    c2 --item A=a` and gets exit 0 (evidence/drive10.txt); forged handoffs plus an
+    APPROVED judgment release with exit 0 (evidence/drive3.txt).
+- id: ATK-006
+  severity: minor
+  summary: ATTACK-011 (lock held or stale, symlinked lock, temp file, metadata, handoff
+    and lock directory) was not run; the runtime guard refused the shell command because
+    it named .soft-foundry and it was not worked around. THREAT-008 lock and symlink
+    mitigations are untested by this phase.
+  failure: Not a defect found; a coverage gap. A later phase or a person should run
+    the symlink and held-lock cases outside the guarded session.
 next: remediate
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: 'Attack run from a throwaway clone and fixtures; the real record, tree and
+  history were not touched and nothing was committed or staged. Size from change size:
+  full_route_sweep. The stub shell stood in for live sessions, so no model was attacked.
+  The guard hook was active for this session and blocked one command (ATTACK-011).
+  Not covered: browser rendering, kill-mid-write and signal forwarding, THREAT-010.
+  One ambient credential-named variable appeared in a first stub log and was scrubbed
+  before any evidence was kept.'
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-26T15:17:36Z'
+  finished_at: '2026-10-26T15:33:19Z'
+  exit_status: 0
+  previous_phase: evaluate
+  session_id: a187f840-4951-4665-acfd-ac414d30287a
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

@@ -1,0 +1,182 @@
+## PAC-07 ps while running (runner title)
+$ {"STUB_SLEEP"=>"3"} sf "phase" "run" "evaluate" "attack" "--parallel" "--shell" "claude" "--env" "DB_URL=postgres://u:secret@h/{phase}"
+exit=0 sig=nil (3.4s)
+billing: subscription (no ANTHROPIC_API_KEY in the environment, so claude bills to its own login); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+parallel: running evaluate, attack of c1 at once, each in its own fresh session; executed_by recorded in each handoff
+phase evaluate: claude exited 0
+07-evaluation  in_progress  PASS
+  ✓ pass handoff identity
+  ! warn phase in progress: not yet gated
+phase evaluate: pass
+phase attack: claude exited 0
+08-attack  in_progress  PASS
+  ✓ pass handoff identity
+  ! warn phase in progress: not yet gated
+phase attack: pass
+parallel: 2 phases run, 2 passed, 0 failed
+advisory: 1 issue to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the evaluation skill's permissions (`soft-foundry hooks install --claude`)
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the adversarial-testing skill's permissions (`soft-foundry hooks install --claude`)
+--ps (runner pid 82374)--
+  PID COMMAND
+82374 soft-foundry phase run evaluate attack --parallel --shell claude --env DB_URL=***            
+
+## PAC-10 session commits during parallel run
+$ {"STUB_COMMIT"=>"1"} sf "phase" "run" "evaluate" "attack" "--parallel" "--shell" "claude" "--env" "A=1"
+exit=1 sig=nil (0.3s)
+billing: subscription (no ANTHROPIC_API_KEY in the environment, so claude bills to its own login); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+parallel: running evaluate, attack of c1 at once, each in its own fresh session; executed_by recorded in each handoff
+phase evaluate: claude exited 0
+07-evaluation  in_progress  PASS
+  ✓ pass handoff identity
+  ! warn phase in progress: not yet gated
+phase evaluate: pass
+phase attack: claude exited 0
+08-attack  in_progress  PASS
+  ✓ pass handoff identity
+  ! warn phase in progress: not yet gated
+phase attack: pass
+parallel: 2 phases run, 2 passed, 0 failed
+advisory: 1 issue to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the evaluation skill's permissions (`soft-foundry hooks install --claude`)
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the adversarial-testing skill's permissions (`soft-foundry hooks install --claude`)
+fatal: Unable to create '/private/var/folders/v8/684xdbm92vz7dz03clwvpmvr0000gn/T/soft-foundry20261026-82334-xbqjzk/.git/index.lock': File exists.
+
+Another git process seems to be running in this repository, e.g.
+an editor opened by 'git commit'. Please make sure all processes
+are terminated then try again. If it still fails, a git process
+may have crashed in this repository earlier:
+remove the file manually to continue.
+warn: HEAD moved from 8a52c8e to b06973b during the run; the phases record 8a52c8e, so their evidence is bound to a commit that is no longer HEAD (sessions were told not to commit); inspect the new commits
+
+b06973b stub commit evaluate
+8a52c8e phases complete
+7707bec record
+24bcdea initial
+executed_by after: [{"exit_status"=>0}, {"exit_status"=>0}]
+## PAC-11 stale auto-reopen
+$ {} sf "phase" "run" "evaluate" "--shell" "claude" "--dry-run"
+exit=1 sig=nil (0.4s)
+c1: cannot run evaluate: 07-evaluation is already complete; rerun it only after the work it rests on has changed (the gate will say when it is stale)
+
+$ {} sf "phase" "run" "evaluate" "--shell" "claude" "--dry-run"
+exit=0 sig=nil (0.4s)
+phase reopen: would reopen evaluate (automatic: evidence stale at 7ff136d)
+phase reopen: would reset evaluate
+phase reopen: would reset attack
+would run evaluate of c1 with: claude -p --session-id b8d50ead-426d-4074-a998-d3e568facb68 --name c1/evaluate <prompt>
+--- prompt ---
+You are a fresh-context agent running one lifecycle phase of a Soft Foundry change, and nothing else.
+
+Change: c1 (branch change/c1)
+Phase: evaluate (changes/c1/07-evaluation/)
+Skill: evaluation (profile reasoning_high)
+
+1. Read AGENTS.md and .ai/README.md. Then load only this phase's skill contract: .ai/skills/evaluation/skill.yml, .ai/skills/evaluation/SKILL.md, .ai/skills/evaluation/permissions.yml, .ai/skills/evaluation/requirements.yml, .ai/skills/evaluation/completion.yml.
+2. Do the phase's work as the skill describes, reading the earlier phases under changes/c1/ that the skill's permissions.yml allows. Write only where that file allows; the runtime guard enforces it where installed and it is policy everywhere else.
+3. When the work is done, fill changes/c1/07-evaluation/handoff.yml: status complete, commit_sha (the HEAD the outputs describe), completed_at, resolved_model (provider and model actually used), outputs, findings for later phases, and next. Do not edit executed_by; the runner writes it.
+4. Do not alter any other phase's evidence or handoff, do not weaken requirements to obtain a pass, and do not run `soft-foundry phase run` yourself. If the work cannot be completed, set status blocked with the reason under blocking rather than pretending.
+5. Stop when the handoff is written. `soft-foundry gate evaluate` will be run on your output afterwards.
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the evaluation skill's permissions (`soft-foundry hooks install --claude`)
+
+$ {"STUB_EXIT"=>"0"} sf "phase" "run" "evaluate" "--shell" "claude"
+exit=0 sig=nil (0.4s)
+billing: subscription (no ANTHROPIC_API_KEY in the environment, so claude bills to its own login); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+phase reopen: reopened evaluate (automatic: evidence stale at 7ff136d)
+phase reopen: reset evaluate
+phase reopen: reset attack
+running evaluate of c1 in a fresh claude session (evaluation skill); executed_by recorded in changes/c1/07-evaluation/handoff.yml
+claude exited 0
+07-evaluation  in_progress  PASS
+  ✓ pass handoff identity
+  ! warn phase in progress: not yet gated
+advisory: 1 issue to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the evaluation skill's permissions (`soft-foundry hooks install --claude`)
+
+26:phase_reopenings:
+27-- at: '2026-10-26T15:25:19Z'
+28-  phase: evaluate
+29-  reset:
+30-  - evaluate
+31-  - attack
+32-  from_commit: 83bae8c372d6c0a5aa9fa0ea815d97a437c07cb6
+33-  reason: 'gate check ''evidence current'' failed: 07-evaluation is stale, its evidence
+34-    describes 7ff136d and application, test, or infrastructure code has changed since'
+35-  source: auto
+36-  previous:
+37-    evaluate:
+38-      status: complete
+39-      commit_sha: 7ff136d06f3e9417516d685c76b36f3a890fc0da
+40-      completed_at: '2026-09-09T00:00:00Z'
+$ {} sf "phase" "run" "evaluate" "--shell" "claude"
+exit=0 sig=nil (0.2s)
+billing: subscription (no ANTHROPIC_API_KEY in the environment, so claude bills to its own login); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+running evaluate of c1 in a fresh claude session (evaluation skill); executed_by recorded in changes/c1/07-evaluation/handoff.yml
+claude exited 0
+07-evaluation  in_progress  PASS
+  ✓ pass handoff identity
+  ! warn phase in progress: not yet gated
+advisory: 1 issue to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the evaluation skill's permissions (`soft-foundry hooks install --claude`)
+
+## PAC-11 released/closed: auto-reopen resets nothing
+$ {} sf "phase" "run" "evaluate" "--shell" "claude"
+exit=1 sig=nil (0.2s)
+c1: cannot run evaluate: change c1 is released
+
+$ {} sf "phase" "run" "evaluate" "attack" "--parallel" "--shell" "claude"
+exit=1 sig=nil (0.2s)
+c1: cannot run evaluate: change c1 is released
+
+unchanged: true
+## PAC-13 reopen refusal statuses, specify reopen on complete record
+$ {} sf "phase" "reopen" "verify" "--reason" "r"
+exit=1 sig=nil (0.2s)
+soft-foundry: c1 is closed, so a phase cannot be reopened: a merged change is reshaped by a new change, not by reopening its record
+
+unchanged: true
+$ {} sf "phase" "reopen" "verify" "--reason" "r"
+exit=1 sig=nil (0.2s)
+soft-foundry: c1 is released, so a phase cannot be reopened: a released change is finished apart from its open items; discharge them with `soft-foundry change discharge`, or open a new change
+
+unchanged: true
+$ {} sf "phase" "reopen" "verify" "--reason" "r"
+exit=1 sig=nil (0.2s)
+soft-foundry: c1 is exploring, so a phase cannot be reopened: an exploring change is reshaped with the person, and `soft-foundry change vet` ends it
+
+unchanged: true
+$ {} sf "phase" "reopen" "verify" "--reason" "r"
+exit=1 sig=nil (0.2s)
+soft-foundry: c1 is awaiting_human, so a phase cannot be reopened: a person must record the decision under human_decisions in metadata.yml first
+
+unchanged: true
+$ {} sf "phase" "reopen" "specify" "--reason" "spec change"
+exit=0 sig=nil (0.2s)
+phase reopen: reopened specify (manual)
+phase reopen: reset specify
+phase reopen: reset threat_model
+phase reopen: reset plan
+phase reopen: reset implement
+phase reopen: reset verify
+
+evidence files byte-identical after reopen: true
+$ {} sf "phase" "reopen" "specify" "--reason" "again"
+exit=1 sig=nil (0.2s)
+soft-foundry: nothing to reset: specify and every phase after it are already pending; run `soft-foundry phase run specify` instead
+
+$ {} sf "phase" "reopen" "nonsense" "--reason" "x"
+exit=1 sig=nil (0.2s)
+soft-foundry: unknown phase 'nonsense'; lifecycle phases: intake, discover, specify, threat_model, plan, implement, verify, evaluate, attack, remediate, document, index, observe, review, judge, learn
+
+$ {} sf "phase" "reopen" "specify"
+exit=1 sig=nil (0.2s)
+soft-foundry: --reason is required: say why the phase is being reopened (it is kept in the record)
+

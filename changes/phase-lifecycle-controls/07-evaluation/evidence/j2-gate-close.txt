@@ -1,0 +1,70 @@
+### EVAL-002 reopened phase cannot pass; close refuses (AC-014,015)
+phase reopen: reopened specify (manual)
+phase reopen: reset specify
+phase reopen: reset threat_model
+phase reopen: reset plan
+phase reopen: reset implement
+phase reopen: reset verify
+phase reopen: reset evaluate
+phase reopen: reset attack
+phase reopen: reset review
+exit=0
+c1: c1  [status: in_progress, phase: specify, risk: <placeholder>]
+  track: gated
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       pending      
+  03-threat-model        pending      
+  04-plan                pending      
+  05-implementation      pending      
+  06-verification        pending      
+  07-evaluation          pending      
+  08-attack              pending      
+  09-remediation         pending      
+--- gate specify / gate all exit
+gate specify exit=0
+gate all exit=0
+--- baseline: a never-started pending phase, gate exit
+gate pending(pre-existing behaviour) exit=0
+gate all exit=0
+--- close refuses
+c1: cannot close: 14-judgment is pending; a change is complete only with a final judgment (.ai/workflow.yml rules.final_judgment_required), so run the judge phase (`soft-foundry phase run judge`) or pass --force to close without one
+exit=1
+--- ci on reopened record
+ci exit=0
+--- AC-002 reopen remediate
+15
+phase reopen: reopened remediate (manual)
+phase reopen: reset verify
+phase reopen: reset evaluate
+phase reopen: reset attack
+phase reopen: reset remediate
+phase reopen: reset review
+exit=0
+--- AC-003 waived optional phases untouched
+phase reopen: reopened attack (manual)
+phase reopen: reset attack
+phase reopen: reset review
+exit=0
+waived pending handoffs byte-identical
+--- AC-010 judge reopen
+phase reopen: reopened judge (manual)
+phase reopen: reset judge
+exit=0
+status: in_progress
+current_phase: judge
+status: intake
+current_phase: judge
+--- AC-011 statuses
+soft-foundry: c1 is closed, so a phase cannot be reopened: a merged change is reshaped by a new change, not by reopening its record
+closed exit=1
+       0
+soft-foundry: c1 is released, so a phase cannot be reopened: a released change is finished apart from its open items; discharge them with `soft-foundry change discharge`, or open a new change
+released exit=1
+       0
+soft-foundry: c1 is exploring, so a phase cannot be reopened: an exploring change is reshaped with the person, and `soft-foundry change vet` ends it
+exploring exit=1
+       0
+soft-foundry: c1 is awaiting_human, so a phase cannot be reopened: a person must record the decision under human_decisions in metadata.yml first
+awaiting_human exit=1
+       0

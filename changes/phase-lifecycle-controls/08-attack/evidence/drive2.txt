@@ -1,0 +1,55 @@
+## bidi in --reason
+$ sf "phase" "reopen" "verify" "--reason" "safe<U+202E>evil<U+200B>x\u2028y"
+exit=0
+phase reopen: reopened verify (manual)
+phase reopen: reset verify
+phase reopen: reset evaluate
+phase reopen: reset attack
+phase reopen: reset review
+phase reopen: reset judge
+phase reopen: reset learn
+
+37:  reason: 'safe�M-^@�evil�M-^@M-^Kx�M-^@�    y'
+$ sf "scan"
+exit=2
+✗ error changes/c1/06-verification/handoff.yml:17 invisible: U+202E right-to-left override
+✗ error changes/c1/06-verification/handoff.yml:17 invisible: U+200B zero width space
+✗ error changes/c1/07-evaluation/handoff.yml:17 invisible: U+202E right-to-left override
+✗ error changes/c1/07-evaluation/handoff.yml:17 invisible: U+200B zero width space
+✗ error changes/c1/08-attack/handoff.yml:17 invisible: U+202E right-to-left override
+✗ error changes/c1/08-attack/handoff.yml:17 invisible: U+200B zero width space
+✗ error changes/c1/13-review/handoff.yml:17 invisible: U+202E right-to-left override
+✗ error changes/c1/13-review/handoff.yml:17 invisible: U+200B zero width space
+✗ error changes/c1/14-judgment/handoff.yml:17 invisible: U+202E right-to-left override
+✗ error changes/c1/14-judgment/handoff.yml:17 invisible: U+200B zero width space
+✗ error changes/c1/15-learning/handoff.yml:17 invisible: U+202E right-to-left override
+✗ error changes/c1/15-learning/handoff.yml:17 invisible: U+200B zero width space
+✗ error changes/c1/metadata.yml:37 invisible: U+202E right-to-left override
+✗ error changes/c1/metadata.yml:37 invisible: U+200B zero width space
+✗ fail scan: 14 errors, 0 warnings in 278 files
+
+$ sf "check"
+exit=0
+✓ pass control plane: 16 phases, 17 skills, no errors
+
+$ sf "change" "status" "c1"
+exit=0
+c1: c1  [status: in_progress, phase: verify, risk: TBD]
+  track: gated
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        pending      
+  07-evaluation          pending      
+  08-attack              pending      
+  09-remediation         pending      
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              pending      
+  14-judgment            pending      
+  15-learning            pending      
+

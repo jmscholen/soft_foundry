@@ -1,0 +1,836 @@
+## PAC-03 forged record: handoffs hand-edited complete, no executed_by, no real evidence
+$ sf "change" "release" "c1" "--item" "THROWAWAY=nothing really"
+exit=0
+c1: released
+released: c1: 3 open item(s): THROWAWAY, UND-1, UND-2
+released: c1: recorded at 2026-10-26T15:19:53Z (commit 4df3a0a27fca)
+advisory: 5 issues to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn judgment: final judgment (14-judgment) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+
+11:status: released
+12-current_phase: learn
+13-created_at: 2026-10-26 15:19:53.000000000 Z
+14-scope: []
+15-surfaces:
+16-  application: false
+17-  database: false
+18-  infrastructure: false
+19-  security: false
+20-  accessibility: false
+21-  observability: false
+22-  policy: false
+23-human_decisions: []
+24-vetted:
+25-reopenings: []
+26-phase_reopenings: []
+27-skipped_phases: []
+28:release:
+29-  at: '2026-10-26T15:19:53Z'
+30-  commit: 4df3a0a27fcaaa003e236d0e779fff68951a5668
+31-  items:
+32-  - id: THROWAWAY
+33-    description: nothing really
+34-  - id: UND-1
+35-    description: observe UND-1 in production
+36-    from: judgment
+37-  - id: UND-2
+38-    description: observe UND-2 in production
+39-    from: judgment
+$ sf "change" "status" "c1"
+exit=0
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 3 open item(s): THROWAWAY, UND-1, UND-2
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-evaluation          complete     ok
+  08-attack              complete     ok
+  09-remediation         pending      
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              complete     ok
+  14-judgment            complete     ok
+  15-learning            complete     ok
+advisory: 5 issues to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn judgment: final judgment (14-judgment) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+
+## PAC-04 close refuses until discharged
+$ sf "change" "close" "c1"
+exit=1
+c1: cannot close: released with 3 open item(s) THROWAWAY, UND-1, UND-2; discharge each with `soft-foundry change discharge ID --note TEXT`, or pass --force to close anyway
+
+$ sf "change" "discharge" "UND-1" "--note" "ok"
+exit=0
+c1: discharged UND-1
+released: c1: 2 open item(s): THROWAWAY, UND-2
+
+$ sf "change" "discharge" "UND-1" "--note" "again"
+exit=1
+soft-foundry: release item UND-1 is already discharged; open items: THROWAWAY, UND-2
+
+$ sf "change" "discharge" "NOPE" "--note" "x"
+exit=1
+soft-foundry: c1 has no release item "NOPE"; open items: THROWAWAY, UND-2
+
+$ sf "change" "discharge" "THROWAWAY" "--note" "x\ny"
+exit=1
+soft-foundry: --note may not contain control characters (newline, tab, escape, NUL); put it on one plain line
+
+$ sf "change" "discharge" "THROWAWAY" "--note" "<script>alert(1)</script>"
+exit=0
+c1: discharged THROWAWAY
+released: c1: 1 open item(s): UND-2
+
+$ {"SOFT_FOUNDRY_PHASE"=>"review"} sf "change" "discharge" "UND-2" "--note" "x"
+exit=1
+soft-foundry: change discharge is refused inside a phase-run session (SOFT_FOUNDRY_PHASE is set): a phase may not decide what a change still owes; ask the person running the change to run it
+
+$ sf "change" "release" "c1" "--item" "Z=z"
+exit=1
+soft-foundry: c1 is released, so it cannot be released: already released; discharge its items with `soft-foundry change discharge ID --note TEXT`
+
+$ sf "phase" "reopen" "verify" "--reason" "try to launder"
+exit=1
+soft-foundry: c1 is released, so a phase cannot be reopened: a released change is finished apart from its open items; discharge them with `soft-foundry change discharge`, or open a new change
+
+$ sf "change" "reopen" "c1" "--reason" "x"
+exit=1
+c1: track 'gated' has no exploring stage to reopen into
+
+## PAC-05 hand-edited malformed release blocks
+### variant: no release block
+$ sf "check"
+exit=2
+✗ error changes/c1/metadata.yml: released record's release block is missing (run `soft-foundry change release`, or fix the record)
+✗ fail control plane: 1 error(s)
+
+$ sf "ci"
+exit=2
+✗ error changes/c1/metadata.yml: released record's release block is missing (run `soft-foundry change release`, or fix the record)
+✗ fail control plane: 1 error(s)
+✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
+✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
+✓ pass eval control-well-formed: verify pass, as expected
+✓ pass eval evidence-stale-after-code-change: verify evidence current fail, as expected
+✓ pass eval full-suite-record-names-wrong-tree: verify full-suite run recorded (record check, not a test result) fail, as expected
+✓ pass eval hardening-while-exploring: implement not exploring fail, as expected
+✓ pass eval invisible-text-in-evidence: verify content clean fail, as expected
+✓ pass eval judgment-waived: intake waivers permitted fail, as expected
+✓ pass eval placeholder-left-in-evidence: verify no placeholders fail, as expected
+✓ pass eval red-commit-is-the-green-commit: verify red evidence fail, as expected
+✓ pass eval review-finding-without-failure: review findings explained fail, as expected
+✓ pass eval scope-narrowed-after-evidence-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-change-claimed-by-other-record-stays-current: verify evidence current pass, as expected
+✓ pass eval scoped-change-in-scope-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-unclaimed-code-change-stales-record: verify evidence current fail, as expected
+✓ pass eval secret-shape-in-evidence: verify content clean fail, as expected
+✓ pass eval shared-core-change-stales-scoped-record: verify evidence current fail, as expected
+✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
+✓ pass eval: 18 passed, 0 failed, 0 errors, 1 skipped
+
+change c1 (released, not re-gated)
+  released: c1: no open items remain; run `soft-foundry change close c1` once it is merged
+
+✗ ci failed
+
+$ sf "change" "close" "c1"
+exit=1
+c1: finished commit b8d536bf886e3a5c38315d5279e8180b9995e6cf is not reachable from main yet; pass --force to close anyway
+
+$ sf "change" "status" "c1"
+exit=0
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 0 open item(s)
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-evaluation          complete     ok
+  08-attack              complete     ok
+  09-remediation         pending      
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              complete     ok
+  14-judgment            complete     ok
+  15-learning            complete     ok
+advisory: 5 issues to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn judgment: final judgment (14-judgment) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+
+$ sf "change" "list"
+exit=0
+c1
+
+### variant: empty items
+$ sf "check"
+exit=2
+✗ error changes/c1/metadata.yml: release block has no items (a released record names what is still owed)
+✗ fail control plane: 1 error(s)
+
+$ sf "ci"
+exit=2
+✗ error changes/c1/metadata.yml: release block has no items (a released record names what is still owed)
+✗ fail control plane: 1 error(s)
+✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
+✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
+✓ pass eval control-well-formed: verify pass, as expected
+✓ pass eval evidence-stale-after-code-change: verify evidence current fail, as expected
+✓ pass eval full-suite-record-names-wrong-tree: verify full-suite run recorded (record check, not a test result) fail, as expected
+✓ pass eval hardening-while-exploring: implement not exploring fail, as expected
+✓ pass eval invisible-text-in-evidence: verify content clean fail, as expected
+✓ pass eval judgment-waived: intake waivers permitted fail, as expected
+✓ pass eval placeholder-left-in-evidence: verify no placeholders fail, as expected
+✓ pass eval red-commit-is-the-green-commit: verify red evidence fail, as expected
+✓ pass eval review-finding-without-failure: review findings explained fail, as expected
+✓ pass eval scope-narrowed-after-evidence-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-change-claimed-by-other-record-stays-current: verify evidence current pass, as expected
+✓ pass eval scoped-change-in-scope-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-unclaimed-code-change-stales-record: verify evidence current fail, as expected
+✓ pass eval secret-shape-in-evidence: verify content clean fail, as expected
+✓ pass eval shared-core-change-stales-scoped-record: verify evidence current fail, as expected
+✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
+✓ pass eval: 18 passed, 0 failed, 0 errors, 1 skipped
+
+change c1 (released, not re-gated)
+  released: c1: no open items remain; run `soft-foundry change close c1` once it is merged
+
+✗ ci failed
+
+$ sf "change" "close" "c1"
+exit=1
+c1: finished commit b8d536bf886e3a5c38315d5279e8180b9995e6cf is not reachable from main yet; pass --force to close anyway
+
+$ sf "change" "status" "c1"
+exit=0
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 0 open item(s)
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-evaluation          complete     ok
+  08-attack              complete     ok
+  09-remediation         pending      
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              complete     ok
+  14-judgment            complete     ok
+  15-learning            complete     ok
+advisory: 5 issues to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn judgment: final judgment (14-judgment) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+
+$ sf "change" "list"
+exit=0
+c1
+
+### variant: items null
+$ sf "check"
+exit=2
+✗ error changes/c1/metadata.yml: release block has no items (a released record names what is still owed)
+✗ fail control plane: 1 error(s)
+
+$ sf "ci"
+exit=2
+✗ error changes/c1/metadata.yml: release block has no items (a released record names what is still owed)
+✗ fail control plane: 1 error(s)
+✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
+✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
+✓ pass eval control-well-formed: verify pass, as expected
+✓ pass eval evidence-stale-after-code-change: verify evidence current fail, as expected
+✓ pass eval full-suite-record-names-wrong-tree: verify full-suite run recorded (record check, not a test result) fail, as expected
+✓ pass eval hardening-while-exploring: implement not exploring fail, as expected
+✓ pass eval invisible-text-in-evidence: verify content clean fail, as expected
+✓ pass eval judgment-waived: intake waivers permitted fail, as expected
+✓ pass eval placeholder-left-in-evidence: verify no placeholders fail, as expected
+✓ pass eval red-commit-is-the-green-commit: verify red evidence fail, as expected
+✓ pass eval review-finding-without-failure: review findings explained fail, as expected
+✓ pass eval scope-narrowed-after-evidence-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-change-claimed-by-other-record-stays-current: verify evidence current pass, as expected
+✓ pass eval scoped-change-in-scope-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-unclaimed-code-change-stales-record: verify evidence current fail, as expected
+✓ pass eval secret-shape-in-evidence: verify content clean fail, as expected
+✓ pass eval shared-core-change-stales-scoped-record: verify evidence current fail, as expected
+✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
+✓ pass eval: 18 passed, 0 failed, 0 errors, 1 skipped
+
+change c1 (released, not re-gated)
+  released: c1: no open items remain; run `soft-foundry change close c1` once it is merged
+
+✗ ci failed
+
+$ sf "change" "close" "c1"
+exit=1
+c1: finished commit b8d536bf886e3a5c38315d5279e8180b9995e6cf is not reachable from main yet; pass --force to close anyway
+
+$ sf "change" "status" "c1"
+exit=0
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 0 open item(s)
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-evaluation          complete     ok
+  08-attack              complete     ok
+  09-remediation         pending      
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              complete     ok
+  14-judgment            complete     ok
+  15-learning            complete     ok
+advisory: 5 issues to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn judgment: final judgment (14-judgment) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+
+$ sf "change" "list"
+exit=0
+c1
+
+### variant: release scalar
+$ sf "check"
+exit=2
+✗ error changes/c1/metadata.yml: released record's release block is not a mapping
+✗ fail control plane: 1 error(s)
+
+$ sf "ci"
+exit=2
+✗ error changes/c1/metadata.yml: released record's release block is not a mapping
+✗ fail control plane: 1 error(s)
+✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
+✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
+✓ pass eval control-well-formed: verify pass, as expected
+✓ pass eval evidence-stale-after-code-change: verify evidence current fail, as expected
+✓ pass eval full-suite-record-names-wrong-tree: verify full-suite run recorded (record check, not a test result) fail, as expected
+✓ pass eval hardening-while-exploring: implement not exploring fail, as expected
+✓ pass eval invisible-text-in-evidence: verify content clean fail, as expected
+✓ pass eval judgment-waived: intake waivers permitted fail, as expected
+✓ pass eval placeholder-left-in-evidence: verify no placeholders fail, as expected
+✓ pass eval red-commit-is-the-green-commit: verify red evidence fail, as expected
+✓ pass eval review-finding-without-failure: review findings explained fail, as expected
+✓ pass eval scope-narrowed-after-evidence-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-change-claimed-by-other-record-stays-current: verify evidence current pass, as expected
+✓ pass eval scoped-change-in-scope-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-unclaimed-code-change-stales-record: verify evidence current fail, as expected
+✓ pass eval secret-shape-in-evidence: verify content clean fail, as expected
+✓ pass eval shared-core-change-stales-scoped-record: verify evidence current fail, as expected
+✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
+✓ pass eval: 18 passed, 0 failed, 0 errors, 1 skipped
+
+change c1 (released, not re-gated)
+  released: c1: no open items remain; run `soft-foundry change close c1` once it is merged
+
+✗ ci failed
+
+$ sf "change" "close" "c1"
+exit=1
+c1: finished commit b8d536bf886e3a5c38315d5279e8180b9995e6cf is not reachable from main yet; pass --force to close anyway
+
+$ sf "change" "status" "c1"
+exit=0
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 0 open item(s)
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-evaluation          complete     ok
+  08-attack              complete     ok
+  09-remediation         pending      
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              complete     ok
+  14-judgment            complete     ok
+  15-learning            complete     ok
+advisory: 5 issues to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn judgment: final judgment (14-judgment) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+
+$ sf "change" "list"
+exit=0
+c1
+
+### variant: dup ids
+$ sf "check"
+exit=2
+✗ error changes/c1/metadata.yml: release block has a duplicate id A
+✗ error changes/c1/metadata.yml: final judgment's undischarged item UND-1 is not carried in the release block
+✗ error changes/c1/metadata.yml: final judgment's undischarged item UND-2 is not carried in the release block
+✗ fail control plane: 3 error(s)
+
+$ sf "ci"
+exit=2
+✗ error changes/c1/metadata.yml: release block has a duplicate id A
+✗ error changes/c1/metadata.yml: final judgment's undischarged item UND-1 is not carried in the release block
+✗ error changes/c1/metadata.yml: final judgment's undischarged item UND-2 is not carried in the release block
+✗ fail control plane: 3 error(s)
+✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
+✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
+✓ pass eval control-well-formed: verify pass, as expected
+✓ pass eval evidence-stale-after-code-change: verify evidence current fail, as expected
+✓ pass eval full-suite-record-names-wrong-tree: verify full-suite run recorded (record check, not a test result) fail, as expected
+✓ pass eval hardening-while-exploring: implement not exploring fail, as expected
+✓ pass eval invisible-text-in-evidence: verify content clean fail, as expected
+✓ pass eval judgment-waived: intake waivers permitted fail, as expected
+✓ pass eval placeholder-left-in-evidence: verify no placeholders fail, as expected
+✓ pass eval red-commit-is-the-green-commit: verify red evidence fail, as expected
+✓ pass eval review-finding-without-failure: review findings explained fail, as expected
+✓ pass eval scope-narrowed-after-evidence-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-change-claimed-by-other-record-stays-current: verify evidence current pass, as expected
+✓ pass eval scoped-change-in-scope-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-unclaimed-code-change-stales-record: verify evidence current fail, as expected
+✓ pass eval secret-shape-in-evidence: verify content clean fail, as expected
+✓ pass eval shared-core-change-stales-scoped-record: verify evidence current fail, as expected
+✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
+✓ pass eval: 18 passed, 0 failed, 0 errors, 1 skipped
+
+change c1 (released, not re-gated)
+  released: c1: 2 open item(s): A, A
+advisory: c1 is released with 2 open item(s) to discharge before it is closed (informational, does not block the gate)
+  ! warn owed A: a
+  ! warn owed A: b
+
+✗ ci failed
+
+$ sf "change" "close" "c1"
+exit=1
+c1: cannot close: released with 2 open item(s) A, A; discharge each with `soft-foundry change discharge ID --note TEXT`, or pass --force to close anyway
+
+$ sf "change" "status" "c1"
+exit=0
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 2 open item(s): A, A
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-evaluation          complete     ok
+  08-attack              complete     ok
+  09-remediation         pending      
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              complete     ok
+  14-judgment            complete     ok
+  15-learning            complete     ok
+advisory: 5 issues to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn judgment: final judgment (14-judgment) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+
+$ sf "change" "list"
+exit=0
+c1
+
+### variant: judgment items dropped
+$ sf "check"
+exit=2
+✗ error changes/c1/metadata.yml: final judgment's undischarged item UND-1 is not carried in the release block
+✗ error changes/c1/metadata.yml: final judgment's undischarged item UND-2 is not carried in the release block
+✗ fail control plane: 2 error(s)
+
+$ sf "ci"
+exit=2
+✗ error changes/c1/metadata.yml: final judgment's undischarged item UND-1 is not carried in the release block
+✗ error changes/c1/metadata.yml: final judgment's undischarged item UND-2 is not carried in the release block
+✗ fail control plane: 2 error(s)
+✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
+✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
+✓ pass eval control-well-formed: verify pass, as expected
+✓ pass eval evidence-stale-after-code-change: verify evidence current fail, as expected
+✓ pass eval full-suite-record-names-wrong-tree: verify full-suite run recorded (record check, not a test result) fail, as expected
+✓ pass eval hardening-while-exploring: implement not exploring fail, as expected
+✓ pass eval invisible-text-in-evidence: verify content clean fail, as expected
+✓ pass eval judgment-waived: intake waivers permitted fail, as expected
+✓ pass eval placeholder-left-in-evidence: verify no placeholders fail, as expected
+✓ pass eval red-commit-is-the-green-commit: verify red evidence fail, as expected
+✓ pass eval review-finding-without-failure: review findings explained fail, as expected
+✓ pass eval scope-narrowed-after-evidence-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-change-claimed-by-other-record-stays-current: verify evidence current pass, as expected
+✓ pass eval scoped-change-in-scope-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-unclaimed-code-change-stales-record: verify evidence current fail, as expected
+✓ pass eval secret-shape-in-evidence: verify content clean fail, as expected
+✓ pass eval shared-core-change-stales-scoped-record: verify evidence current fail, as expected
+✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
+✓ pass eval: 18 passed, 0 failed, 0 errors, 1 skipped
+
+change c1 (released, not re-gated)
+  released: c1: 1 open item(s): A
+advisory: c1 is released with 1 open item(s) to discharge before it is closed (informational, does not block the gate)
+  ! warn owed A: a
+
+✗ ci failed
+
+$ sf "change" "close" "c1"
+exit=1
+c1: cannot close: released with 1 open item(s) A; discharge each with `soft-foundry change discharge ID --note TEXT`, or pass --force to close anyway
+
+$ sf "change" "status" "c1"
+exit=0
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 1 open item(s): A
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-evaluation          complete     ok
+  08-attack              complete     ok
+  09-remediation         pending      
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              complete     ok
+  14-judgment            complete     ok
+  15-learning            complete     ok
+advisory: 5 issues to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn judgment: final judgment (14-judgment) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+
+$ sf "change" "list"
+exit=0
+c1
+
+### variant: item ids renamed
+$ sf "check"
+exit=2
+✗ error changes/c1/metadata.yml: final judgment's undischarged item UND-1 is not carried in the release block
+✗ error changes/c1/metadata.yml: final judgment's undischarged item UND-2 is not carried in the release block
+✗ fail control plane: 2 error(s)
+
+$ sf "ci"
+exit=2
+✗ error changes/c1/metadata.yml: final judgment's undischarged item UND-1 is not carried in the release block
+✗ error changes/c1/metadata.yml: final judgment's undischarged item UND-2 is not carried in the release block
+✗ fail control plane: 2 error(s)
+✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
+✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
+✓ pass eval control-well-formed: verify pass, as expected
+✓ pass eval evidence-stale-after-code-change: verify evidence current fail, as expected
+✓ pass eval full-suite-record-names-wrong-tree: verify full-suite run recorded (record check, not a test result) fail, as expected
+✓ pass eval hardening-while-exploring: implement not exploring fail, as expected
+✓ pass eval invisible-text-in-evidence: verify content clean fail, as expected
+✓ pass eval judgment-waived: intake waivers permitted fail, as expected
+✓ pass eval placeholder-left-in-evidence: verify no placeholders fail, as expected
+✓ pass eval red-commit-is-the-green-commit: verify red evidence fail, as expected
+✓ pass eval review-finding-without-failure: review findings explained fail, as expected
+✓ pass eval scope-narrowed-after-evidence-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-change-claimed-by-other-record-stays-current: verify evidence current pass, as expected
+✓ pass eval scoped-change-in-scope-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-unclaimed-code-change-stales-record: verify evidence current fail, as expected
+✓ pass eval secret-shape-in-evidence: verify content clean fail, as expected
+✓ pass eval shared-core-change-stales-scoped-record: verify evidence current fail, as expected
+✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
+✓ pass eval: 18 passed, 0 failed, 0 errors, 1 skipped
+
+change c1 (released, not re-gated)
+  released: c1: 2 open item(s): UND-1X, UND-2X
+advisory: c1 is released with 2 open item(s) to discharge before it is closed (informational, does not block the gate)
+  ! warn owed UND-1X: a
+  ! warn owed UND-2X: b
+
+✗ ci failed
+
+$ sf "change" "close" "c1"
+exit=1
+c1: cannot close: released with 2 open item(s) UND-1X, UND-2X; discharge each with `soft-foundry change discharge ID --note TEXT`, or pass --force to close anyway
+
+$ sf "change" "status" "c1"
+exit=0
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 2 open item(s): UND-1X, UND-2X
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-evaluation          complete     ok
+  08-attack              complete     ok
+  09-remediation         pending      
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              complete     ok
+  14-judgment            complete     ok
+  15-learning            complete     ok
+advisory: 5 issues to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn judgment: final judgment (14-judgment) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+
+$ sf "change" "list"
+exit=0
+c1
+
+### variant: all discharged
+$ sf "check"
+exit=0
+✓ pass control plane: 16 phases, 17 skills, no errors
+
+$ sf "ci"
+exit=0
+✓ pass control plane: 16 phases, 17 skills, no errors
+✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
+✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
+✓ pass eval control-well-formed: verify pass, as expected
+✓ pass eval evidence-stale-after-code-change: verify evidence current fail, as expected
+✓ pass eval full-suite-record-names-wrong-tree: verify full-suite run recorded (record check, not a test result) fail, as expected
+✓ pass eval hardening-while-exploring: implement not exploring fail, as expected
+✓ pass eval invisible-text-in-evidence: verify content clean fail, as expected
+✓ pass eval judgment-waived: intake waivers permitted fail, as expected
+✓ pass eval placeholder-left-in-evidence: verify no placeholders fail, as expected
+✓ pass eval red-commit-is-the-green-commit: verify red evidence fail, as expected
+✓ pass eval review-finding-without-failure: review findings explained fail, as expected
+✓ pass eval scope-narrowed-after-evidence-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-change-claimed-by-other-record-stays-current: verify evidence current pass, as expected
+✓ pass eval scoped-change-in-scope-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-unclaimed-code-change-stales-record: verify evidence current fail, as expected
+✓ pass eval secret-shape-in-evidence: verify content clean fail, as expected
+✓ pass eval shared-core-change-stales-scoped-record: verify evidence current fail, as expected
+✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
+✓ pass eval: 18 passed, 0 failed, 0 errors, 1 skipped
+
+change c1 (released, not re-gated)
+  released: c1: no open items remain; run `soft-foundry change close c1` once it is merged
+
+✓ ci passed
+
+$ sf "change" "close" "c1"
+exit=1
+c1: finished commit b8d536bf886e3a5c38315d5279e8180b9995e6cf is not reachable from main yet; pass --force to close anyway
+
+$ sf "change" "status" "c1"
+exit=0
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 0 open item(s)
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-evaluation          complete     ok
+  08-attack              complete     ok
+  09-remediation         pending      
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              complete     ok
+  14-judgment            complete     ok
+  15-learning            complete     ok
+advisory: 5 issues to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn judgment: final judgment (14-judgment) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+
+$ sf "change" "list"
+exit=0
+c1
+
+### variant: discharged_at false-y string
+$ sf "check"
+exit=0
+✓ pass control plane: 16 phases, 17 skills, no errors
+
+$ sf "ci"
+exit=0
+✓ pass control plane: 16 phases, 17 skills, no errors
+✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
+✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
+✓ pass eval control-well-formed: verify pass, as expected
+✓ pass eval evidence-stale-after-code-change: verify evidence current fail, as expected
+✓ pass eval full-suite-record-names-wrong-tree: verify full-suite run recorded (record check, not a test result) fail, as expected
+✓ pass eval hardening-while-exploring: implement not exploring fail, as expected
+✓ pass eval invisible-text-in-evidence: verify content clean fail, as expected
+✓ pass eval judgment-waived: intake waivers permitted fail, as expected
+✓ pass eval placeholder-left-in-evidence: verify no placeholders fail, as expected
+✓ pass eval red-commit-is-the-green-commit: verify red evidence fail, as expected
+✓ pass eval review-finding-without-failure: review findings explained fail, as expected
+✓ pass eval scope-narrowed-after-evidence-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-change-claimed-by-other-record-stays-current: verify evidence current pass, as expected
+✓ pass eval scoped-change-in-scope-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-unclaimed-code-change-stales-record: verify evidence current fail, as expected
+✓ pass eval secret-shape-in-evidence: verify content clean fail, as expected
+✓ pass eval shared-core-change-stales-scoped-record: verify evidence current fail, as expected
+✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
+✓ pass eval: 18 passed, 0 failed, 0 errors, 1 skipped
+
+change c1 (released, not re-gated)
+  released: c1: no open items remain; run `soft-foundry change close c1` once it is merged
+
+✓ ci passed
+
+$ sf "change" "close" "c1"
+exit=1
+c1: finished commit b8d536bf886e3a5c38315d5279e8180b9995e6cf is not reachable from main yet; pass --force to close anyway
+
+$ sf "change" "status" "c1"
+exit=0
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 0 open item(s)
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-evaluation          complete     ok
+  08-attack              complete     ok
+  09-remediation         pending      
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              complete     ok
+  14-judgment            complete     ok
+  15-learning            complete     ok
+advisory: 5 issues to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn judgment: final judgment (14-judgment) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+
+$ sf "change" "list"
+exit=0
+c1
+
+### variant: items hash not array
+$ sf "check"
+exit=2
+✗ error changes/c1/metadata.yml: release block has no items (a released record names what is still owed)
+✗ fail control plane: 1 error(s)
+
+$ sf "ci"
+exit=2
+✗ error changes/c1/metadata.yml: release block has no items (a released record names what is still owed)
+✗ fail control plane: 1 error(s)
+✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
+✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
+✓ pass eval control-well-formed: verify pass, as expected
+✓ pass eval evidence-stale-after-code-change: verify evidence current fail, as expected
+✓ pass eval full-suite-record-names-wrong-tree: verify full-suite run recorded (record check, not a test result) fail, as expected
+✓ pass eval hardening-while-exploring: implement not exploring fail, as expected
+✓ pass eval invisible-text-in-evidence: verify content clean fail, as expected
+✓ pass eval judgment-waived: intake waivers permitted fail, as expected
+✓ pass eval placeholder-left-in-evidence: verify no placeholders fail, as expected
+✓ pass eval red-commit-is-the-green-commit: verify red evidence fail, as expected
+✓ pass eval review-finding-without-failure: review findings explained fail, as expected
+✓ pass eval scope-narrowed-after-evidence-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-change-claimed-by-other-record-stays-current: verify evidence current pass, as expected
+✓ pass eval scoped-change-in-scope-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-unclaimed-code-change-stales-record: verify evidence current fail, as expected
+✓ pass eval secret-shape-in-evidence: verify content clean fail, as expected
+✓ pass eval shared-core-change-stales-scoped-record: verify evidence current fail, as expected
+✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
+✓ pass eval: 18 passed, 0 failed, 0 errors, 1 skipped
+
+change c1 (released, not re-gated)
+  released: c1: no open items remain; run `soft-foundry change close c1` once it is merged
+
+✗ ci failed
+
+$ sf "change" "close" "c1"
+exit=1
+c1: finished commit b8d536bf886e3a5c38315d5279e8180b9995e6cf is not reachable from main yet; pass --force to close anyway
+
+$ sf "change" "status" "c1"
+exit=0
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 0 open item(s)
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-evaluation          complete     ok
+  08-attack              complete     ok
+  09-remediation         pending      
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              complete     ok
+  14-judgment            complete     ok
+  15-learning            complete     ok
+advisory: 5 issues to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn judgment: final judgment (14-judgment) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+
+$ sf "change" "list"
+exit=0
+c1
+

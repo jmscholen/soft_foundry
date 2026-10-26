@@ -1,0 +1,45 @@
+### EVAL-006 auto-reopen of stale phase, timeline (AC-007,008,009,049)
+--- current evidence: run refused, no bytes change (AC-008)
+c1: cannot run evaluate: 07-evaluation is already complete; rerun it only after the work it rests on has changed (the gate will say when it is stale)
+exit=1
+bytes unchanged
+--- stale: change app code, run evaluate (AC-007)
+phase reopen: reopened evaluate (automatic: evidence stale at b4e4985)
+phase reopen: reset evaluate
+- at: '2026-10-26T15:29:46Z'
+  phase: evaluate
+  reset:
+  - evaluate
+  from_commit: 34224773278e8b764b206892383a238e6904c1f7
+  reason: 'gate check ''evidence current'' failed: 07-evaluation is stale, its evidence
+  source: auto
+--- stale with predecessor incomplete (AC-009)
+c1: cannot run evaluate: 07-evaluation cannot start: its predecessor 06-verification is pending
+exit=1
+nothing reset
+--- timeline: manual + auto + release + discharge (AC-049)
+2026-09-09T00:00:00Z | completed | 
+2026-09-09T00:00:00Z | completed | 
+2026-09-09T00:00:00Z | completed | 
+2026-09-09T00:00:00Z | completed | 
+2026-09-09T00:00:00Z | completed | 
+2026-09-09T00:00:00Z | completed | 
+2026-09-09T00:00:00Z | completed | 
+2026-09-09T00:00:00Z | completed | 
+2026-09-09T00:00:00Z | completed | 
+2026-09-09T00:00:00Z | completed | 
+2026-09-09T00:00:00Z | completed | 
+2026-09-09T00:00:00Z | completed | 
+2026-10-01T00:00:00Z | phase_reopened | 
+2026-10-26T15:29:50Z | created | 
+2026-10-26T15:29:50Z | phase_reopened | 
+2026-10-26T15:29:50Z | released | 
+2026-10-26T15:29:52Z | discharged | 
+--- status text
+c1: c1  [status: released, phase: learn, risk: <placeholder>]
+  track: gated
+  released: c1: 1 open item(s): B
+  00-intake              complete     ok
+  01-discovery           complete     ok
+--- reopened for exploring is distinct: kinds present
+["completed", "phase_reopened", "created", "released", "discharged"]

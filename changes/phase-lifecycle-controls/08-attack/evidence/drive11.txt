@@ -1,0 +1,19 @@
+## ATTACK-BIDI: bidi/zero-width text accepted by --reason, then every reset phase fails its 'content clean' gate once redone
+$ sf "phase" "reopen" "verify" "--reason" "looks fine\u202E gnirts\u200B"
+exit=0
+"phase reopen: reopened verify (manual)
+phase reopen: reset verify
+phase reopen: reset evaluate
+phase reopen: reset attack
+phase reopen: reset review
+phase reopen: reset judge
+phase reopen: reset learn
+"
+$ sf "gate" "verify"
+exit=2
+"06-verification  complete  FAIL
+  - skip red evidence: no check records a red_commit
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+  \u2717 fail content clean: handoff.yml:17 invisible (U+202E right-to-left override); handoff.yml:17 invisible (U+200B zero width space)
+"

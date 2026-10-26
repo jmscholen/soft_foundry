@@ -1,0 +1,41 @@
+## hostile released record through CLI consumers
+$ sf "change" "status" "c1"
+exit=0
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 2 open item(s): 7, UND-1
+
+$ sf "change" "list"
+exit=0
+c1
+
+$ sf "check"
+exit=2
+✗ error changes/c1/metadata.yml: release item 2 is not a mapping
+✗ error changes/c1/metadata.yml: release item 3 is not a mapping
+✗ fail control plane: 2 error(s)
+
+$ sf "ci"
+exit=2
+✗ error changes/c1/metadata.yml: release item 2 is not a mapping
+✗ error changes/c1/metadata.yml: release item 3 is not a mapping
+✗ fail control plane: 2 error(s)
+
+change c1 (released, not re-gated)
+  released: c1: 2 open item(s): 7, UND-1
+
+✗ ci failed
+
+$ sf "change" "discharge" "7" "--note" "n"
+exit=0
+c1: discharged 7
+released: c1: 1 open item(s): UND-1
+
+$ sf "change" "close" "c1" "--force"
+exit=1
+c1: cannot close - undischarged and unconfirmed: UND-1
+confirm with --confirm ID (repeatable) once a human has verified it, or --pr NUMBER if a human already replied "CONFIRMED: <id>" there
+
+(timeline, ps and scope invocations omitted: not subcommands of this change, output was usage text and unrelated machine process listings)
+## env -u marker bypass (documented residual)
+session(marker=attack) runs `env -u SOFT_FOUNDRY_PHASE soft-foundry change release` -> exit 0: c2: released

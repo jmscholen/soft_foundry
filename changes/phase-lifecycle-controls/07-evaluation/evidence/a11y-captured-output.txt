@@ -1,0 +1,32 @@
+$ soft-foundry phase reopen evaluate --reason a11y check
+phase reopen: reopened evaluate (manual)
+phase reopen: reset evaluate
+phase reopen: reset attack
+phase reopen: reset review
+phase reopen: reset judge
+phase reopen: reset learn
+[exit 0]
+$ soft-foundry phase reopen evaluate --reason 
+soft-foundry: --reason is required: it may not be empty
+[exit 1]
+$ soft-foundry phase reopen evaluate --reason again
+soft-foundry: nothing to reset: evaluate and every phase after it are already pending; run `soft-foundry phase run evaluate` instead
+[exit 1]
+$ soft-foundry change release c1 --item A=a
+soft-foundry: cannot release c1: 14-judgment is pending; a release rests on a complete final judgment (run `soft-foundry phase run judge`)
+[exit 1]
+$ soft-foundry change release c1 --item A=a
+soft-foundry: cannot release c1: 14-judgment is pending; a release rests on a complete final judgment (run `soft-foundry phase run judge`)
+[exit 1]
+$ soft-foundry change discharge A --note n
+soft-foundry: c1 is in_progress, not released; only a released change has items to discharge (release it with `soft-foundry change release`)
+[exit 1]
+$ soft-foundry change discharge A --note n
+soft-foundry: c1 is in_progress, not released; only a released change has items to discharge (release it with `soft-foundry change release`)
+[exit 1]
+$ soft-foundry phase run evaluate attack --parallel --shell nosuch
+soft-foundry: unknown shell 'nosuch'; phase run supports claude, codex, grok
+[exit 1]
+$ soft-foundry phase run evaluate review --parallel
+c1: cannot run evaluate review in parallel: review is not in isolated_phases (.ai/workflow.yml: evaluate, attack); only phases that write nothing outside their own directory may run side by side
+[exit 1]

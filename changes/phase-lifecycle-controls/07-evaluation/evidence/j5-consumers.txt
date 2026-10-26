@@ -1,0 +1,82 @@
+### EVAL-005 released record among consumers (AC-044,046,048,049)
+--- change status (released)
+c1: c1  [status: released, phase: judge, risk: <placeholder>]
+  track: gated
+  released: c1: 2 open item(s): GOLIVE-1, GOLIVE-2
+  00-intake              complete     ok
+--- change list --json (released entry)
+[
+  {
+    "slug": "c1",
+    "title": "c1",
+    "status": "released",
+    "current_phase": "judge",
+    "risk": "<placeholder>",
+    "type": "<placeholder>",
+    "closed": false,
+    "released": true,
+    "open_items": 2,
+    "track": "gated",
+    "exploring": false,
+    "evaluated": false,
+    "merged_unclosed": false,
+    "stale": false,
+    "failed": false,
+    "advisories": null,
+    "cells": [
+      {
+        "phase": "intake",
+        "status": "complete",
+        "state": "complete",
+        "skip_reason": null
+      },
+      {
+        "phase": "discover",
+        "status": "complete",
+        "state": "complete",
+        "skip_reason": null
+--- gate all: released not evaluated for staleness
+--- ci
+change c1 (released, not re-gated)
+  released: c1: 2 open item(s): GOLIVE-1, GOLIVE-2
+advisory: c1 is released with 2 open item(s) to discharge before it is closed (informational, does not block the gate)
+change c2
+✓ ci passed
+--- scope check / learn
+no instincts recorded; the learning phase writes them to 15-learning/instincts.yml
+--- ps
+running: 1 soft-foundry process
+  pid 60801  phase run evaluate  change phase-lifecycle-controls  shell claude (session pid 60818)  in ~/dev/soft_foundry  since 2026-10-26T15:17:36Z
+sessions: 3 coding shells open in Soft Foundry repositories
+  pid 2790  claude  terminal ttys001  no change record for its branch  branch main  in ~/dev/ai_projects/my_ai  since 2026-10-20T13:05:29Z
+  pid 24835  grok  terminal ttys003  no change record for its branch  branch main  in ~/dev/ai_projects/my_ai  since 2026-10-22T02:11:42Z
+  pid 10419  claude  terminal ttys005  change phase-lifecycle-controls (phase attack, intake)  branch change/phase-lifecycle-controls  in ~/dev/soft_foundry  since 2026-10-22T13:27:17Z
+--- ui api
+url shape: http://127.0.0.1:57409/#token=<redacted>
+      "status": "released",
+      "released": true,
+      "open_items": 2,
+          "status": "complete",
+          "status": "complete",
+          "status": "complete",
+          "status": "complete",
+          "status": "complete",
+          "status": "complete",
+          "status": "complete",
+          "status": "complete",
+          "status": "complete",
+          "status": "pending",
+          "status": "pending",
+no token -> HTTP 401
+32:    phase_reopened: "Phase reopened", released: "Released", discharged: "Discharged"
+266:          el("p", { class: "meta" }, (repo.released ? repo.released + " released. " : "") + repo.closed + " closed. ", repoLink(repo.id, "All changes and gates in " + repo.name)));
+446:    var open = board.changes.filter(function (c) { return !c.closed && !c.released; });
+447:    var released = board.changes.filter(function (c) { return c.released; });
+451:    var owed = released.reduce(function (sum, c) { return sum + (c.open_items || 0); }, 0);
+455:      (released.length ? plural(released.length, "released record", "released records") + " with " + plural(owed, "open item", "open items") + ". " : "") +
+469:      released.length ? boardSection("Released", "released", board.phases, released,
+505:    if (change.released) flags.push(["Released: " + plural(change.open_items || 0, "open item", "open items"), "pour", changeHref(change.slug)]);
+600:      change.released ? el("p", { class: "note", "data-tone": "pour" },
+601:        "This record is released with " + plural(change.open_items || 0, "open item", "open items") + ". It is finished and approved, and not gated again here. Close it with ",
+603:      change.released ? releaseSection(change) : null,
+607:      !change.closed && !change.released && failing ? el("p", { class: "note", "data-tone": "flaw", text: plural(failing, "gate is", "gates are") + " failing. Select one to see which checks." }) : null,
