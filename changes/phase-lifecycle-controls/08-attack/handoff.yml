@@ -1,10 +1,10 @@
 ---
 phase: '08-attack'
 skill: adversarial-testing
-status: pending
-commit_sha: 0af7da5ab3108db454fab80b351e13841e6575c6
-started_at: '2026-10-26T15:17:36Z'
-completed_at: '2026-10-26T15:45:00Z'
+status: complete
+commit_sha: 1ce44defbcdf87589b6feb6c8b69a8f6ad3733cd
+started_at: '2026-10-26T16:34:09Z'
+completed_at: '2026-10-26T16:45:00Z'
 resolved_model:
   profile: adversarial_high
   provider: anthropic
@@ -19,70 +19,66 @@ blocking: []
 findings:
 - id: ATK-001
   severity: major
-  summary: Release and phase reopen read status and the reset set before taking the
-    record lock, so concurrent commands both succeed. Release plus reopen leaves a
-    released record with verify through learn pending, and check and ci pass; four
-    concurrent reopens write four history entries.
-  failure: Start `change release c1 --item A=a` and `phase reopen verify --reason
-    r` together on a finished record. Both exit 0 in 14 of 14 runs; status is released
-    with six phases pending, the record can be discharged and closed (evidence/drive6.txt,
-    drive7.txt; code in phase_reopen.rb and release.rb, checks before the transaction).
+  summary: 'FIXED, verified. The release/reopen check-then-write race is closed: 14
+    of 14 simultaneous pairs end with one winner and a consistent record; four concurrent
+    reopens write one history entry.'
+  failure: Not reproduced at 1ce44de (evidence/drive6.txt, drive7.txt). Release won
+    every time in the sample, so reopen-first ordering was not observed head to head.
 - id: ATK-002
   severity: minor
-  summary: Text.free_text! refuses only control characters, so U+202E, U+200B and
-    U+2028 are stored in the record and in every reset handoff's notes, after which
-    scan fails with 14 errors and the content clean gate fails on each redone phase.
-  failure: Run `phase reopen verify --reason "looks fine<U+202E> gnirts<U+200B>"`
-    exits 0; `soft-foundry gate verify` after the phase is redone fails content clean
-    on handoff.yml (evidence/drive2.txt, drive11.txt).
+  summary: FIXED, verified. Zero width, bidi, U+2028/2029, soft hyphen, U+180E and
+    tag characters are refused in --reason, --item and --note. Visible but confusable
+    text (Cyrillic look-alike, NBSP, Hangul filler, braille blank, variation selector)
+    is still accepted; scan stays clean.
+  failure: Not reproduced (evidence/drive2.txt, drive11.txt, drive12.txt). The accepted
+    look-alike set is a residual display risk in the UI timeline and status, not a
+    gate failure.
 - id: ATK-003
   severity: minor
-  summary: Mistyped --env forms echo the credential on stderr (the name part when
-    NAME= is forgotten; the whole value for the --env=NAME=VALUE spelling), against
-    REQ-012.
-  failure: Run `--env postgres://u:secretpw@h/db?x=1` prints the text before the first
-    = as the variable name; `--env=DB_URL=secretinline` prints it in `unknown option(s)`
-    (evidence/drive4.txt).
+  summary: FIXED, verified. Mistyped --env forms, including --env=NAME=VALUE, no longer
+    echo any part of the value.
+  failure: Not reproduced (evidence/drive4.txt, drive5.txt). Record, process title
+    and messages are clean.
 - id: ATK-004
   severity: minor
-  summary: A hand-edited discharge (discharged_at set, even to an empty string, with
-    no note or commit) passes check and ci, and change close does not lint the release
-    block.
+  summary: Still open, accepted residual (TB-3). A hand-edited discharge (discharged_at
+    set, even to an empty string, with no note or commit) passes check and ci, and
+    change close does not lint the release block.
   failure: Set discharged_at to "" on every release item in metadata.yml; check and
-    ci exit 0 with no open items (evidence/drive3.txt). TB-3 accepts hand edits, so
-    this may be an accepted residual.
+    ci exit 0 (evidence/drive3.txt). Review should confirm the acceptance is recorded.
 - id: ATK-005
   severity: minor
-  summary: Documented residuals reproduced. Bash is checked against deny sets only,
+  summary: Unchanged documented residuals. Bash is checked against deny sets only,
     so `env -u SOFT_FOUNDRY_PHASE soft-foundry change release` from a marked session
     releases the change, and a fully hand-forged finished record releases with only
     a non-blocking advisory.
-  failure: Marked session runs `env -u SOFT_FOUNDRY_PHASE soft-foundry change release
-    c2 --item A=a` and gets exit 0 (evidence/drive10.txt); forged handoffs plus an
-    APPROVED judgment release with exit 0 (evidence/drive3.txt).
+  failure: Marked session gets exit 0 (evidence/drive10.txt, drive8.txt); forged handoffs
+    plus an APPROVED judgment release with exit 0 (evidence/drive3.txt).
 - id: ATK-006
   severity: minor
-  summary: ATTACK-011 (lock held or stale, symlinked lock, temp file, metadata, handoff
-    and lock directory) was not run; the runtime guard refused the shell command because
-    it named .soft-foundry and it was not worked around. THREAT-008 lock and symlink
-    mitigations are untested by this phase.
-  failure: Not a defect found; a coverage gap. A later phase or a person should run
-    the symlink and held-lock cases outside the guarded session.
-next: remediate
-notes: 'Attack run from a throwaway clone and fixtures; the real record, tree and
-  history were not touched and nothing was committed or staged. Size from change size:
-  full_route_sweep. The stub shell stood in for live sessions, so no model was attacked.
-  The guard hook was active for this session and blocked one command (ATTACK-011).
-  Not covered: browser rendering, kill-mid-write and signal forwarding, THREAT-010.
-  One ambient credential-named variable appeared in a first stub log and was scrubbed
-  before any evidence was kept.'
+  summary: Coverage gap, not a defect. ATTACK-011 (held or stale lock, symlinked lock,
+    temp file, metadata, handoff and lock directory) is still not run; the runtime
+    guard refused shell commands naming the lock directory and was not worked around.
+    Kill-mid-write and signal forwarding are also unrun.
+  failure: No defect found. A person should run the symlink and held-lock cases outside
+    the guarded session; THREAT-008 lock and symlink mitigations are untested by this
+    phase.
+next: review
+notes: 'Second attack run, after remediation 529e749. All drivers were re-run against
+  a fresh throwaway clone at 1ce44de and fixtures in the system temp directory; the
+  real record, tree and history were not touched. Added drive12 (22 invisible and
+  look-alike character classes). Size from change size: full_route_sweep. A stub shell
+  stood in for live sessions, so no model was attacked. The three fixed findings (ATK-001
+  to 003) were verified fixed; no new defect was found in the changed code. This session
+  ran under the phase marker; the drivers unset it for their own subprocesses. Not
+  covered: browser rendering, kill-mid-write and signal forwarding, ATTACK-011, THREAT-010.'
 executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-26T15:17:36Z'
-  finished_at: '2026-10-26T15:33:19Z'
+  started_at: '2026-10-26T16:34:09Z'
+  finished_at: '2026-10-26T16:41:28Z'
   exit_status: 0
-  previous_phase: evaluate
-  session_id: a187f840-4951-4665-acfd-ac414d30287a
+  previous_phase: review
+  session_id: 07c5db8f-db01-4fee-aac3-fd7c9e581416
   cwd: "/Users/jscholen-iou/dev/soft_foundry"

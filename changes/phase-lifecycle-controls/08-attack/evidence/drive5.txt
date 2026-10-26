@@ -1,6 +1,6 @@
 ## PAC-07 ps while running (runner title)
 $ {"STUB_SLEEP"=>"3"} sf "phase" "run" "evaluate" "attack" "--parallel" "--shell" "claude" "--env" "DB_URL=postgres://u:secret@h/{phase}"
-exit=0 sig=nil (3.4s)
+exit=0 sig=nil (3.3s)
 billing: subscription (no ANTHROPIC_API_KEY in the environment, so claude bills to its own login); no budget applies
          set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
 parallel: running evaluate, attack of c1 at once, each in its own fresh session; executed_by recorded in each handoff
@@ -19,9 +19,9 @@ advisory: 1 issue to address before c1 goes live (informational, does not block 
   ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
 ! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the evaluation skill's permissions (`soft-foundry hooks install --claude`)
 ! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the adversarial-testing skill's permissions (`soft-foundry hooks install --claude`)
---ps (runner pid 82374)--
+--ps (runner pid 36175)--
   PID COMMAND
-82374 soft-foundry phase run evaluate attack --parallel --shell claude --env DB_URL=***            
+36175 soft-foundry phase run evaluate attack --parallel --shell claude --env DB_URL=***            
 
 ## PAC-10 session commits during parallel run
 $ {"STUB_COMMIT"=>"1"} sf "phase" "run" "evaluate" "attack" "--parallel" "--shell" "claude" "--env" "A=1"
@@ -44,19 +44,19 @@ advisory: 1 issue to address before c1 goes live (informational, does not block 
   ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
 ! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the evaluation skill's permissions (`soft-foundry hooks install --claude`)
 ! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the adversarial-testing skill's permissions (`soft-foundry hooks install --claude`)
-fatal: Unable to create '/private/var/folders/v8/684xdbm92vz7dz03clwvpmvr0000gn/T/soft-foundry20261026-82334-xbqjzk/.git/index.lock': File exists.
+fatal: Unable to create '/private/var/folders/v8/684xdbm92vz7dz03clwvpmvr0000gn/T/soft-foundry20261026-36150-3kbxpg/.git/index.lock': File exists.
 
 Another git process seems to be running in this repository, e.g.
 an editor opened by 'git commit'. Please make sure all processes
 are terminated then try again. If it still fails, a git process
 may have crashed in this repository earlier:
 remove the file manually to continue.
-warn: HEAD moved from 8a52c8e to b06973b during the run; the phases record 8a52c8e, so their evidence is bound to a commit that is no longer HEAD (sessions were told not to commit); inspect the new commits
+warn: HEAD moved from 45741ef to 30688d9 during the run; the phases record 45741ef, so their evidence is bound to a commit that is no longer HEAD (sessions were told not to commit); inspect the new commits
 
-b06973b stub commit evaluate
-8a52c8e phases complete
-7707bec record
-24bcdea initial
+30688d9 stub commit evaluate
+45741ef phases complete
+2fd385d record
+db07aba initial
 executed_by after: [{"exit_status"=>0}, {"exit_status"=>0}]
 ## PAC-11 stale auto-reopen
 $ {} sf "phase" "run" "evaluate" "--shell" "claude" "--dry-run"
@@ -65,10 +65,10 @@ c1: cannot run evaluate: 07-evaluation is already complete; rerun it only after 
 
 $ {} sf "phase" "run" "evaluate" "--shell" "claude" "--dry-run"
 exit=0 sig=nil (0.4s)
-phase reopen: would reopen evaluate (automatic: evidence stale at 7ff136d)
+phase reopen: would reopen evaluate (automatic: evidence stale at a3a0dcb)
 phase reopen: would reset evaluate
 phase reopen: would reset attack
-would run evaluate of c1 with: claude -p --session-id b8d50ead-426d-4074-a998-d3e568facb68 --name c1/evaluate <prompt>
+would run evaluate of c1 with: claude -p --session-id 51fa311d-dffc-48bd-b4db-8147c6b96cbd --name c1/evaluate <prompt>
 --- prompt ---
 You are a fresh-context agent running one lifecycle phase of a Soft Foundry change, and nothing else.
 
@@ -87,7 +87,7 @@ $ {"STUB_EXIT"=>"0"} sf "phase" "run" "evaluate" "--shell" "claude"
 exit=0 sig=nil (0.4s)
 billing: subscription (no ANTHROPIC_API_KEY in the environment, so claude bills to its own login); no budget applies
          set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
-phase reopen: reopened evaluate (automatic: evidence stale at 7ff136d)
+phase reopen: reopened evaluate (automatic: evidence stale at a3a0dcb)
 phase reopen: reset evaluate
 phase reopen: reset attack
 running evaluate of c1 in a fresh claude session (evaluation skill); executed_by recorded in changes/c1/07-evaluation/handoff.yml
@@ -100,19 +100,19 @@ advisory: 1 issue to address before c1 goes live (informational, does not block 
 ! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the evaluation skill's permissions (`soft-foundry hooks install --claude`)
 
 26:phase_reopenings:
-27-- at: '2026-10-26T15:25:19Z'
+27-- at: '2026-10-26T16:39:30Z'
 28-  phase: evaluate
 29-  reset:
 30-  - evaluate
 31-  - attack
-32-  from_commit: 83bae8c372d6c0a5aa9fa0ea815d97a437c07cb6
+32-  from_commit: c58227cc51feb7e683dd20aafc1e37d647e17590
 33-  reason: 'gate check ''evidence current'' failed: 07-evaluation is stale, its evidence
-34-    describes 7ff136d and application, test, or infrastructure code has changed since'
+34-    describes a3a0dcb and application, test, or infrastructure code has changed since'
 35-  source: auto
 36-  previous:
 37-    evaluate:
 38-      status: complete
-39-      commit_sha: 7ff136d06f3e9417516d685c76b36f3a890fc0da
+39-      commit_sha: a3a0dcbc71bc56fb9bceaa2f385f3943033d81ca
 40-      completed_at: '2026-09-09T00:00:00Z'
 $ {} sf "phase" "run" "evaluate" "--shell" "claude"
 exit=0 sig=nil (0.2s)

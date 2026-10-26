@@ -1,9 +1,9 @@
 ## ATTACK-RACE repro: release and phase reopen started together on a finished record
-[concurrent] sf phase reopen -> exit 0
 [concurrent] sf change release -> exit 0
+[concurrent] sf phase reopen -> exit 1
 $ sf "change" "status" "c1"
 exit=0
-c1: c1  [status: released, phase: verify, risk: TBD]
+c1: c1  [status: released, phase: learn, risk: TBD]
   track: gated
   released: c1: 1 open item(s): A
   00-intake              complete     ok
@@ -12,16 +12,16 @@ c1: c1  [status: released, phase: verify, risk: TBD]
   03-threat-model        complete     ok
   04-plan                complete     ok
   05-implementation      complete     ok
-  06-verification        pending      
-  07-evaluation          pending      
-  08-attack              pending      
+  06-verification        complete     ok
+  07-evaluation          complete     ok
+  08-attack              complete     ok
   09-remediation         pending      
   10-user-documentation  pending      
   11-faq-index           pending      
   12-observability       pending      
-  13-review              pending      
-  14-judgment            pending      
-  15-learning            pending      
+  13-review              complete     ok
+  14-judgment            complete     ok
+  15-learning            complete     ok
 
 $ sf "check"
 exit=0

@@ -1,32 +1,13 @@
 ## bidi in --reason
 $ sf "phase" "reopen" "verify" "--reason" "safe<U+202E>evil<U+200B>x\u2028y"
-exit=0
-phase reopen: reopened verify (manual)
-phase reopen: reset verify
-phase reopen: reset evaluate
-phase reopen: reset attack
-phase reopen: reset review
-phase reopen: reset judge
-phase reopen: reset learn
+exit=1
+soft-foundry: --reason may not contain invisible or direction-changing characters (zero width, bidi override, line or paragraph separator)
 
-37:  reason: 'safe�M-^@�evil�M-^@M-^Kx�M-^@�    y'
+46:#   reason: why the person sent it back to exploring
+54:#   reason: why the phase was reopened
 $ sf "scan"
-exit=2
-✗ error changes/c1/06-verification/handoff.yml:17 invisible: U+202E right-to-left override
-✗ error changes/c1/06-verification/handoff.yml:17 invisible: U+200B zero width space
-✗ error changes/c1/07-evaluation/handoff.yml:17 invisible: U+202E right-to-left override
-✗ error changes/c1/07-evaluation/handoff.yml:17 invisible: U+200B zero width space
-✗ error changes/c1/08-attack/handoff.yml:17 invisible: U+202E right-to-left override
-✗ error changes/c1/08-attack/handoff.yml:17 invisible: U+200B zero width space
-✗ error changes/c1/13-review/handoff.yml:17 invisible: U+202E right-to-left override
-✗ error changes/c1/13-review/handoff.yml:17 invisible: U+200B zero width space
-✗ error changes/c1/14-judgment/handoff.yml:17 invisible: U+202E right-to-left override
-✗ error changes/c1/14-judgment/handoff.yml:17 invisible: U+200B zero width space
-✗ error changes/c1/15-learning/handoff.yml:17 invisible: U+202E right-to-left override
-✗ error changes/c1/15-learning/handoff.yml:17 invisible: U+200B zero width space
-✗ error changes/c1/metadata.yml:37 invisible: U+202E right-to-left override
-✗ error changes/c1/metadata.yml:37 invisible: U+200B zero width space
-✗ fail scan: 14 errors, 0 warnings in 278 files
+exit=0
+✓ pass scan: 278 files, no findings
 
 $ sf "check"
 exit=0
@@ -34,7 +15,7 @@ exit=0
 
 $ sf "change" "status" "c1"
 exit=0
-c1: c1  [status: in_progress, phase: verify, risk: TBD]
+c1: c1  [status: in_progress, phase: learn, risk: TBD]
   track: gated
   00-intake              complete     ok
   01-discovery           complete     ok
@@ -42,14 +23,20 @@ c1: c1  [status: in_progress, phase: verify, risk: TBD]
   03-threat-model        complete     ok
   04-plan                complete     ok
   05-implementation      complete     ok
-  06-verification        pending      
-  07-evaluation          pending      
-  08-attack              pending      
+  06-verification        complete     ok
+  07-evaluation          complete     ok
+  08-attack              complete     ok
   09-remediation         pending      
   10-user-documentation  pending      
   11-faq-index           pending      
   12-observability       pending      
-  13-review              pending      
-  14-judgment            pending      
-  15-learning            pending      
+  13-review              complete     ok
+  14-judgment            complete     ok
+  15-learning            complete     ok
+advisory: 5 issues to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn judgment: final judgment (14-judgment) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
 

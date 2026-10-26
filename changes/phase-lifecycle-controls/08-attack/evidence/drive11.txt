@@ -1,19 +1,6 @@
-## ATTACK-BIDI: bidi/zero-width text accepted by --reason, then every reset phase fails its 'content clean' gate once redone
-$ sf "phase" "reopen" "verify" "--reason" "looks fine\u202E gnirts\u200B"
-exit=0
-"phase reopen: reopened verify (manual)
-phase reopen: reset verify
-phase reopen: reset evaluate
-phase reopen: reset attack
-phase reopen: reset review
-phase reopen: reset judge
-phase reopen: reset learn
-"
-$ sf "gate" "verify"
-exit=2
-"06-verification  complete  FAIL
-  - skip red evidence: no check records a red_commit
-  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
-  - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
-  \u2717 fail content clean: handoff.yml:17 invisible (U+202E right-to-left override); handoff.yml:17 invisible (U+200B zero width space)
-"
+## ATTACK-007 rerun (drive11 repro, after remediation)
+The original repro reopened verify with a reason carrying U+202E and U+200B, committed, redid the phase and ran `gate verify`.
+After remediation the first step is refused, so there is nothing to redo:
+  $ sf phase reopen verify --reason "looks fine<U+202E> gnirts<U+200B>"
+  exit=1  soft-foundry: --reason may not contain invisible or direction-changing characters (zero width, bidi override, line or paragraph separator)
+The driver then aborted at `git commit` because the refused command wrote nothing (tree clean). See drive2.txt (record and scan after the refusal) and drive12.txt (22 character classes).

@@ -1,6 +1,8 @@
 # Attack Plan
 
-Commit: 0af7da5ab3108db454fab80b351e13841e6575c6. Size from `soft-foundry change size phase-lifecycle-controls --phase attack`: `full_route_sweep` (no scope is declared, so the whole repository is sized largest). The only network-facing routes are the read-only UI routes, and every one was swept (ATTACK-016); the lifecycle commands were attacked in full.
+Commit: 1ce44defbcdf87589b6feb6c8b69a8f6ad3733cd. Size from `soft-foundry change size phase-lifecycle-controls --phase attack`: `full_route_sweep` (no scope is declared, so the whole repository is sized largest). The only network-facing routes are the read-only UI routes, and every one was swept (ATTACK-016); the lifecycle commands were attacked in full.
+
+Re-run after remediation (529e749): all drivers were re-run against a fresh clone at this commit, with drive12 added for 22 invisible and look-alike character classes. Size re-confirmed: `full_route_sweep`.
 
 ## Authorization envelope
 - Target: the soft-foundry CLI, guard hook and loopback UI at the commit above, run from a throwaway clone and throwaway fixture repositories in the system temp directory. Environment: local.

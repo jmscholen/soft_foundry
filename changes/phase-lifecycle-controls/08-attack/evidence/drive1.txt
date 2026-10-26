@@ -138,32 +138,20 @@ phase reopen: reset learn
 => exit 0; record changed: true
 ### PAC-06 reopen reason bidi
 $  sf "phase" "reopen" "verify" "--reason" "safe<U+202E>evil"
-exit=0
+exit=1
 --stdout--
-phase reopen: reopened verify (manual)
-phase reopen: reset verify
-phase reopen: reset evaluate
-phase reopen: reset attack
-phase reopen: reset review
-phase reopen: reset judge
-phase reopen: reset learn
 --stderr--
+soft-foundry: --reason may not contain invisible or direction-changing characters (zero width, bidi override, line or paragraph separator)
 
-=> exit 0; record changed: true
+=> exit 1; record changed: false
 ### PAC-06 reopen reason zwsp
 $  sf "phase" "reopen" "verify" "--reason" "a<U+200B>b"
-exit=0
+exit=1
 --stdout--
-phase reopen: reopened verify (manual)
-phase reopen: reset verify
-phase reopen: reset evaluate
-phase reopen: reset attack
-phase reopen: reset review
-phase reopen: reset judge
-phase reopen: reset learn
 --stderr--
+soft-foundry: --reason may not contain invisible or direction-changing characters (zero width, bidi override, line or paragraph separator)
 
-=> exit 0; record changed: true
+=> exit 1; record changed: false
 ### PAC-06 reopen reason c1
 $  sf "phase" "reopen" "verify" "--reason" "a\u009Bb"
 exit=1
@@ -174,18 +162,12 @@ soft-foundry: --reason may not contain control characters (newline, tab, escape,
 => exit 1; record changed: false
 ### PAC-06 reopen reason linesep
 $  sf "phase" "reopen" "verify" "--reason" "a\u2028b"
-exit=0
+exit=1
 --stdout--
-phase reopen: reopened verify (manual)
-phase reopen: reset verify
-phase reopen: reset evaluate
-phase reopen: reset attack
-phase reopen: reset review
-phase reopen: reset judge
-phase reopen: reset learn
 --stderr--
+soft-foundry: --reason may not contain invisible or direction-changing characters (zero width, bidi override, line or paragraph separator)
 
-=> exit 0; record changed: true
+=> exit 1; record changed: false
 ### PAC-06 reopen reason nel
 $  sf "phase" "reopen" "verify" "--reason" "a\u0085b"
 exit=1

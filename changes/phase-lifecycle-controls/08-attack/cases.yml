@@ -1,8 +1,8 @@
 ---
-commit_sha: 0af7da5ab3108db454fab80b351e13841e6575c6
+commit_sha: 1ce44defbcdf87589b6feb6c8b69a8f6ad3733cd
 authorization_envelope:
-  target: soft-foundry at commit 0af7da5ab3108db454fab80b351e13841e6575c6 (lib/soft_foundry,
-    the phase-lifecycle-controls change), run from a throwaway git clone and throwaway
+  target: soft-foundry at commit 1ce44defbcdf87589b6feb6c8b69a8f6ad3733cd (lib/soft_foundry,
+    the phase-lifecycle-controls change, after remediation commit 529e749), run from a throwaway git clone and throwaway
     fixture repositories under the system temp directory
   environment: local
   authorized_by: the person who started this attack run by invoking `soft-foundry
@@ -138,15 +138,13 @@ cases:
     space U+200B, line separator U+2028'
   - Then run scan, gate on a redone phase
   expected_safe_behavior: Refused or stored inert; the record stays valid and clean
-  observed: ASCII and C1 controls and length are refused. Bidi override, zero-width
-    space and U+2028 are accepted and persisted into the metadata and into the notes
-    of every reset handoff; `scan` then reports 14 errors and the `content clean`
-    gate fails on the redone phase
-  result: violated
+  observed: 'Rerun after remediation: ASCII and C1 controls, length, and now zero width (U+200B, 200C, 2060, FEFF), bidi (U+202E, U+2066), U+2028 and U+2029, soft hyphen, U+180E and tag characters are refused with a message naming the class; nothing is written. Visible but confusable text (NBSP, Hangul filler, braille blank, variation selector, combining overlay, Cyrillic look-alike, private use, U+FFFC) is accepted and stored, and scan stays clean afterwards. The same characters in --item and discharge --note are refused. Invalid UTF-8 is refused with a one-line message and no trace'
+  result: denied
   evidence:
-  - evidence/drive1.txt
   - evidence/drive2.txt
   - evidence/drive11.txt
+  - evidence/drive12.txt
+  - evidence/drive1.txt
 - id: ATTACK-008
   threat: THREAT-006
   violation_attempted: Stored XSS through released-item descriptions, discharge notes
@@ -176,11 +174,8 @@ cases:
     and the `--env=NAME=VALUE` spelling'
   expected_safe_behavior: Values appear only in each child's environment; names only
     in output; no message echoes a value
-  observed: Record clean; process title shows DB_URL=***; {phase} expanded per session;
-    reserved/lowercase/duplicate refused naming only the variable. But `--env postgres://u:secretpw@h/db?x=1`
-    is echoed in the error as the variable name, and `--env=DB_URL=secretinline` is
-    echoed in `unknown option(s)`
-  result: violated
+  observed: 'Rerun after remediation: a value given without NAME= and both --env=NAME=VALUE spellings are refused with messages that do not show the text (the argv lines in the log are the driver''s own commands); reserved, lowercase, digit-led and duplicate names are refused naming only the variable. The record is clean; the runner''s process title shows DB_URL=*** and SECRET_TOKEN=***; values reached only each child''s environment, with {phase} expanded per session'
+  result: denied
   evidence:
   - evidence/drive4.txt
   - evidence/drive5.txt
@@ -195,11 +190,8 @@ cases:
   - Start 4 `phase reopen verify` together, 4 times
   expected_safe_behavior: 'Serialised: one wins, the other sees the new state and
     refuses; one history entry'
-  observed: Both commands exit 0 in 14 of 14 runs; the record is `released` with verify..learn
-    all pending, one phase_reopenings entry, check and ci pass, and it can be discharged
-    and closed. Four concurrent reopens all exit 0 and write four history entries.
-    The status and reset set are read before the lock is taken
-  result: violated
+  observed: 'Rerun after remediation: release and phase reopen started together 14 times; every run exits 0 for release and 1 for reopen (the record is released), no reset phase, check and ci pass, 0 of 14 inconsistent. Four concurrent reopens, four times: exactly one exits 0 and one phase_reopenings entry is written, YAML parses. Release always won the race in this sample, so the reopen-first ordering was not observed; it is covered by the reopen-vs-reopen runs'
+  result: denied
   evidence:
   - evidence/drive6.txt
   - evidence/drive7.txt
