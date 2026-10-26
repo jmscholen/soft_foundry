@@ -1,13 +1,13 @@
 size: full_at_verify
 full_suite:
-  tree: b0dd5fbac2c474a4455fe35f74c6ec4688ae93e1
-  command: env -u MAILTRAP_API_KEY -u PERSONAL_SENDGRID_API_KEY bundle exec rake test
+  tree: 543e364149a5ab8b3e8873ff9eee4e50dbeb2e77
+  command: env -u MAILTRAP_API_KEY -u PERSONAL_SENDGRID_API_KEY -u SOFT_FOUNDRY_PHASE -u SOFT_FOUNDRY_PARALLEL bundle exec rake test
   outcome: passed
 checks:
   - id: CHECK-001
     kind: tests
-    command: env -u MAILTRAP_API_KEY -u PERSONAL_SENDGRID_API_KEY bundle exec rake test
-    result: pass   # 781 runs, 6004 assertions, 0 failures, 0 errors, 0 skips
+    command: env -u MAILTRAP_API_KEY -u PERSONAL_SENDGRID_API_KEY -u SOFT_FOUNDRY_PHASE -u SOFT_FOUNDRY_PARALLEL bundle exec rake test
+    result: pass   # 784 runs, 6030 assertions, 0 failures, 0 errors, 0 skips
     evidence: evidence/rake-test.txt
     criteria: []
     red_commit: 053562b

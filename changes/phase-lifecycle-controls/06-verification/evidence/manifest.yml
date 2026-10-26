@@ -1,8 +1,8 @@
-commit_sha: 7342f98395f31c9b541c505e2cb3a406711dacb4
+commit_sha: 529e749851af45073d32327857722660a72c3085
 artifacts:
   - path: evidence/rake-test.txt
     produced_by: rake test
-    sha256: 424afb610757428b3cad0672290438f947a5be482b8da10619c1c1c86e733ebb
+    sha256: 7ebd0a6c09990833d8433ae9d0357ddf3669e5a3e2640fa39ce78e02830e39e7
   - path: evidence/check.txt
     produced_by: soft-foundry check
     sha256: 2be6498003ac7633f001dde7fb6c82d20d270c7515d869ca3f7276b8c1f3730e

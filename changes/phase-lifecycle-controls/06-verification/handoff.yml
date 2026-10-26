@@ -1,10 +1,10 @@
 ---
 phase: 06-verification
 skill: verification
-status: pending
-commit_sha: 7342f98395f31c9b541c505e2cb3a406711dacb4
-started_at: '2026-10-26T14:42:12Z'
-completed_at: '2026-10-26T15:35:00Z'
+status: complete
+commit_sha: 529e749851af45073d32327857722660a72c3085
+started_at: '2026-10-26T16:12:44Z'
+completed_at: '2026-10-26T16:24:00Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -16,29 +16,36 @@ outputs:
 - changes/phase-lifecycle-controls/06-verification/evidence/rake-test.txt
 - changes/phase-lifecycle-controls/06-verification/evidence/check.txt
 - changes/phase-lifecycle-controls/06-verification/evidence/eval.txt
+- changes/phase-lifecycle-controls/06-verification/evidence/prior-run-7342f98/
 - changes/phase-lifecycle-controls/06-verification/evidence/prior-run-4c79227/
 blocking: []
 findings:
 - id: VER-001
   severity: minor
-  summary: Full suite, check and eval pass at 7342f98 (781 runs, 0 failures; 18 evals
-    passed, 1 skipped). The earlier failures (isolated_phases fixtures at 4c79227)
-    are fixed; that failed run is kept in evidence/prior-run-4c79227/.
+  summary: Full suite, check and eval pass at 529e749 (784 runs, 6030 assertions,
+    0 failures; check clean; 18 evals passed, 1 skipped). Prior runs at 4c79227 (failed)
+    and 7342f98 (passed, now stale after remediation) are kept unedited under evidence/.
 - id: VER-002
   severity: minor
   summary: Red commit 053562b confirmed to hold test/record_lock_test.rb; the other
-    red commits listed in IMPL-006 were not individually re-confirmed.
+    red commits listed in IMPL-006 were not individually re-confirmed. The remediation
+    tests (phase_reopen_test, text_free_text_test) have no red commit recorded.
+- id: VER-003
+  severity: minor
+  summary: REM-002 items (EVAL-F1..F4, ATK-004..006) were not fixed by remediation;
+    verification only runs checks and does not assess them. Evaluate and attack must
+    rerun against 529e749.
 next: evaluate
-notes: Suite run with MAILTRAP_API_KEY and PERSONAL_SENDGRID_API_KEY unset. No code
-  or tests edited. Prior failed run preserved in evidence/prior-run-4c79227/. Shell
-  guard enforcement not verified in this session.
+notes: Suite run with MAILTRAP_API_KEY, PERSONAL_SENDGRID_API_KEY, SOFT_FOUNDRY_PHASE
+  and SOFT_FOUNDRY_PARALLEL unset. No code or tests edited. Shell guard enforcement
+  not verified in this session.
 executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-26T15:06:17Z'
-  finished_at: '2026-10-26T15:17:09Z'
+  started_at: '2026-10-26T16:12:44Z'
+  finished_at: '2026-10-26T16:24:00Z'
   exit_status: 0
-  previous_phase: verify
-  session_id: cdfc7f26-0bc5-45ba-aae1-801e645be9f1
+  previous_phase: remediate
+  session_id: 618f37ca-b1a5-498b-9098-47f49d623277
   cwd: "/Users/jscholen-iou/dev/soft_foundry"
