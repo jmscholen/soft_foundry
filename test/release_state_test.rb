@@ -189,4 +189,19 @@ class ReleaseStateTest < Minitest::Test
       assert index.merged_unclosed?(record), "released with a malformed block"
     end
   end
+
+  def test_a_blank_discharged_at_is_open_and_lint_refuses_it
+    with_finished_record do |dir, record|
+      release(dir, record, "A=a")
+      ["", "   "].each do |blank|
+        record.update_metadata { |m| m["release"]["items"][0]["discharged_at"] = blank }
+        assert_equal ["A"], record.open_release_items.map { |i| i["id"] }
+        problems = SoftFoundry::Release.lint(record.metadata)
+        assert(problems.any? { |p| p.include?("blank discharged_at") }, problems.inspect)
+      end
+      record.update_metadata { |m| m["release"]["items"][0]["discharged_at"] = "2026-10-24T10:00:00Z" }
+      assert_empty record.open_release_items
+      assert_empty SoftFoundry::Release.lint(record.metadata)
+    end
+  end
 end

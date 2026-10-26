@@ -1,26 +1,25 @@
 # Remediation
 
+Second round, after the BLOCKED judgment at `2da13ad`. The first round (ATK-001..003, commit `529e749`) is unchanged and still stands.
+
 ## Finding references
-ATK-001 (major), ATK-002 (minor), ATK-003 (minor) from 08-attack. Not changed: ATK-004 (hand-edited discharge; TB-3 accepts hand edits, recorded as an observation), ATK-005 (documented residuals), ATK-006 (coverage gap, not a defect), EVAL-F1..F4 and VER-002 (minor/cosmetic, below).
+REV-001 (major) and REV-002 (major) from 13-review, returned by 14-judgment. Not changed: REV-003 (D3, accepted by review), REV-004 (docs/user and harness-eval cases: outside this skill's write set), REV-005, REV-006, REV-007, EVAL-F1..F5 (minor; left for a person), ATK-004's hand-edited non-empty timestamp (TB-3), ATK-005, ATK-006.
 
 ## Root cause
-- ATK-001: `PhaseReopen#call` and `Release#release` read the record's status and computed the reset set or ran the checks before taking the record lock, then wrote under it. Two commands could both pass their checks against the same state, so both wrote.
-- ATK-002: `Text.free_text!` refused only `\p{Cntrl}`; zero-width, bidi and line-separator characters (category Cf, Zl, Zp) passed into the record, where the content scan later rejects them.
-- ATK-003: `ParallelRun.parse_env` echoed the text before the first `=` as a variable name (a whole credential when `NAME=` was forgotten), and the `--env=NAME=VALUE` spelling fell through to the generic "unknown option(s)" message, which prints the argument.
+- REV-001: `ChangeRecord::Transaction#commit!` renamed `metadata.yml` first. A crash after that rename and before the handoff renames left `phase_reopenings` recording a reset while the handoffs stayed `complete`, and `change close` decides from handoff status, so it could succeed on evidence the history says was reset.
+- REV-002: "discharged" was Ruby/JS truthiness of `discharged_at`. `""` was discharged in `open_release_items`, `change close`'s confirmation list and the timeline, and open in the released table; `Release.lint` allowed it.
 
 ## Changes made
-- `ChangeRecord#locked` (reentrant record lock). `PhaseReopen` and `Release#release` now do the status check, reset-set computation, judgment/lifecycle/gate checks and the write inside one lock hold.
-- `Text.free_text!` also refuses `[\p{Cf}\p{Zl}\p{Zp}]`.
-- `parse_env` echoes a name only when it is a short identifier (`\w{1,64}`), otherwise says the text is not shown; `phase run` refuses `--env=...` with a message that does not echo the value.
-- Tests: invisible-character refusal and no-echo of a mistyped name (`test/text_free_text_test.rb`); four concurrent reopens produce one reset and one history entry (`test/phase_reopen_test.rb`).
+- `Transaction#commit!` stages and renames handoffs first and `metadata.yml` last. A crash between renames now leaves reset handoffs with no history entry; close refuses a pending phase, so it cannot succeed on stale evidence. Staging failure still leaves the record byte-identical. The comment on `ChangeRecord#transaction` says so.
+- `ChangeRecord.discharged?(item)`: discharged only when `discharged_at` is a timestamp or a non-blank string. Used by `open_release_items`, `Release#discharge`, `Cli#change_close`'s confirmation list and the timeline in `snapshot.rb`. `releaseSection` in `ui/assets/app.js` uses the same test, so the CLI, `ci` and the page agree.
+- `Release.lint` refuses a present, non-nil, blank `discharged_at`, naming the item.
+- Tests: `test_a_crash_between_renames_never_leaves_history_for_a_reset_the_handoffs_do_not_show` (`test/phase_reopen_test.rb`, injects a failure on the metadata rename) and `test_a_blank_discharged_at_is_open_and_lint_refuses_it` (`test/release_state_test.rb`). I did not run them red before the fix, so there is no red commit for them (as VER-002).
 
 ## Not changed, with reason
-- EVAL-F1 (gate on a reopened phase prints SKIP, exits 0), EVAL-F2, EVAL-F3, EVAL-F4: minor or cosmetic; `change close` still refuses, so nothing passes wrongly. Left for a person to decide whether to schedule. EVAL-F1 touches AC-014 wording and should be settled with the specification owner.
-- ATK-004: accepted residual (TB-3). ATK-005: documented residuals. ATK-006: needs a run outside the guarded session.
-- `docs/` and `.ai/` are outside this skill's write set; no documentation or control-plane text was changed.
+`docs/` and `.ai/` (including harness-eval cases) are outside this skill's write set, so REV-004 and REQ-027 stay for the document phase and a maintainer. Minor findings above are not blockers per the judgment. The `app.js` change was not rendered in a browser.
 
 ## Evidence invalidated
-Implementation changed (`lib/soft_foundry/{change_record,phase_reopen,release,text,parallel_run,cli}.rb`, two test files), so verification, evaluation, attack, review and judgment evidence bound to earlier commits is stale.
+Implementation changed (`lib/soft_foundry/{change_record,release,cli,snapshot}.rb`, `lib/soft_foundry/ui/assets/app.js`, two test files). Verification, evaluation, attack, review and judgment evidence is stale.
 
 ## Required reruns
-Verify, then evaluate, attack (ATK-001 race, ATK-002 characters, ATK-003 echo cases should be re-driven), review, judge.
+Verify, evaluate, attack (re-drive a kill between renames and a blank `discharged_at` through `ci`, `change close` and the page), review, judge.

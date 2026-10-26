@@ -1,7 +1,7 @@
 ---
 phase: '08-attack'
 skill: adversarial-testing
-status: complete
+status: pending
 commit_sha: 1ce44defbcdf87589b6feb6c8b69a8f6ad3733cd
 started_at: '2026-10-26T16:34:09Z'
 completed_at: '2026-10-26T16:45:00Z'

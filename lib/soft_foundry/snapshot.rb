@@ -318,7 +318,7 @@ module SoftFoundry
       if release
         items = Array(release["items"]).select { |i| i.is_a?(Hash) }
         add.call(release["at"], "released", "released with #{items.size} item(s) owed: #{items.map { |i| i['id'] }.join(', ')}")
-        items.select { |i| i["discharged_at"] }.each do |i|
+        items.select { |i| ChangeRecord.discharged?(i) }.each do |i|
           add.call(i["discharged_at"], "discharged", "discharged #{i['id']}#{i['discharge_note'].to_s.empty? ? '' : ": #{i['discharge_note']}"}")
         end
       end

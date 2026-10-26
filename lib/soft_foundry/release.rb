@@ -64,7 +64,7 @@ module SoftFoundry
       text = Text.free_text!(note, "--note")
       item = @record.release_items.find { |i| i["id"].to_s == id.to_s }
       raise TargetError, "#{@record.slug} has no release item #{id.to_s.inspect}; open items: #{open_ids}" unless item
-      raise TargetError, "release item #{id} is already discharged; open items: #{open_ids}" if item["discharged_at"]
+      raise TargetError, "release item #{id} is already discharged; open items: #{open_ids}" if ChangeRecord.discharged?(item)
 
       commit = @git.repository? ? @git.head_sha : nil
       @record.update_metadata do |m|
@@ -103,6 +103,9 @@ module SoftFoundry
         problems << "release item #{i + 1} has no id" if id.strip.empty?
         problems << "release item #{id.inspect} has control characters in its id" if id.match?(/\p{Cntrl}/)
         problems << "release item #{id.inspect} has no description" if item["description"].to_s.strip.empty?
+        if item.key?("discharged_at") && !item["discharged_at"].nil? && !ChangeRecord.discharged?(item)
+          problems << "release item #{id.inspect} has a blank discharged_at (a discharge records a time; remove the key to leave the item open)"
+        end
         ids << id unless id.empty?
       end
       ids.tally.each { |id, n| problems << "release block has a duplicate id #{id}" if n > 1 }

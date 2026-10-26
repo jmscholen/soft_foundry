@@ -488,7 +488,7 @@ module SoftFoundry
           @err.puts "#{slug}: cannot close: released with #{open.size} open item(s) #{open.map { |i| i['id'] }.join(', ')}; discharge each with `soft-foundry change discharge ID --note TEXT`, or pass --force to close anyway"
           return EXIT_TARGET
         end
-        confirmed += record.release_items.select { |i| i["from"] == "judgment" && i["discharged_at"] }.map { |i| i["id"].to_s }
+        confirmed += record.release_items.select { |i| i["from"] == "judgment" && ChangeRecord.discharged?(i) }.map { |i| i["id"].to_s }
       end
 
       unless force

@@ -170,4 +170,21 @@ class PhaseReopenTest < Minitest::Test
       tree_bytes(dir).each { |f, bytes| YAML.safe_load(bytes, permitted_classes: [Time, Date]) if f.end_with?(".yml") }
     end
   end
+
+  def test_a_crash_between_renames_never_leaves_history_for_a_reset_the_handoffs_do_not_show
+    with_lifecycle_record do |dir, record|
+      original = SoftFoundry::SafeWrite.method(:commit_staged)
+      SoftFoundry::SafeWrite.define_singleton_method(:commit_staged) do |tmp, path|
+        raise IOError, "killed" if path.end_with?("metadata.yml")
+        original.call(tmp, path)
+      end
+      begin
+        assert_raises(IOError) { reopen(dir, record, "attack") }
+      ensure
+        SoftFoundry::SafeWrite.define_singleton_method(:commit_staged, original)
+      end
+      assert_empty Array(record.metadata["phase_reopenings"])
+      assert_equal "pending", record.phase_status(record.control_plane.phase("attack"))
+    end
+  end
 end

@@ -84,7 +84,16 @@ module SoftFoundry
       items.is_a?(Array) ? items.select { |i| i.is_a?(Hash) } : []
     end
 
-    def open_release_items = release_items.reject { |i| i["discharged_at"] }
+    # An item is discharged only when it records a time: a non-empty
+    # string or a timestamp. A blank value is open, the same in the CLI,
+    # `ci`, `change close` and the page.
+    def self.discharged?(item)
+      return false unless item.is_a?(Hash)
+      value = item["discharged_at"]
+      value.respond_to?(:strftime) || (value.is_a?(String) && !value.strip.empty?)
+    end
+
+    def open_release_items = release_items.reject { |i| self.class.discharged?(i) }
 
     # Runs the block holding the record lock (reentrant), for a command that
     # must check the record's state and write it as one step.
@@ -114,10 +123,12 @@ module SoftFoundry
     end
 
     # Several files changed together: every new file is staged first, and
-    # only when all staged does any rename happen, metadata.yml first (a
-    # crash between renames then leaves a history entry naming a reset
-    # that is incomplete, which is visible). A staging failure removes
-    # what was staged and leaves the record byte-identical.
+    # only when all staged does any rename happen, metadata.yml last. A
+    # crash between renames then leaves handoffs reset with no history
+    # entry, which `change close` refuses (a pending phase), never a
+    # history entry for a reset the handoffs do not show. A staging
+    # failure removes what was staged and leaves the record
+    # byte-identical.
     def transaction
       RecordLock.synchronize(root, slug) do
         tx = Transaction.new(self)
@@ -138,15 +149,15 @@ module SoftFoundry
 
       def commit!
         writes = []
-        unless @metadata_blocks.empty?
-          data = @record.metadata
-          @metadata_blocks.each { |b| b.call(data) }
-          writes << [File.join(@record.dir, "metadata.yml"), YAML.dump(data)]
-        end
         @handoff_blocks.each do |phase, blocks|
           data = @record.handoff(phase) || {}
           blocks.each { |b| b.call(data) }
           writes << [@record.handoff_path(phase), YAML.dump(data)]
+        end
+        unless @metadata_blocks.empty?
+          data = @record.metadata
+          @metadata_blocks.each { |b| b.call(data) }
+          writes << [File.join(@record.dir, "metadata.yml"), YAML.dump(data)]
         end
         staged = []
         begin
