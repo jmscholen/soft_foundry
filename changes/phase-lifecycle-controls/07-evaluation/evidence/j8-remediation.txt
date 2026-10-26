@@ -37,8 +37,8 @@ soft-foundry: environment variable name SOFT_FOUNDRY_X begins SOFT_FOUNDRY_, whi
 --- valid --env still accepted
 ! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the evaluation skill's permissions (`soft-foundry hooks install --claude`)
 ! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the adversarial-testing skill's permissions (`soft-foundry hooks install --claude`)
-would run evaluate of c1 with: claude -p --session-id f8e2e607-7936-416b-b3f5-7f42c67eb1e6 --name c1/evaluate <prompt>
-would run attack of c1 with: claude -p --session-id e6392f45-94a4-4b53-9055-7a18389af51e --name c1/attack <prompt>
+would run evaluate of c1 with: claude -p --session-id ebbd2662-3615-4b5d-bd3c-7a07137becb1 --name c1/evaluate <prompt>
+would run attack of c1 with: claude -p --session-id a03a3f98-cd2b-426a-af64-089bd1d2284f --name c1/attack <prompt>
 parallel: would set DATABASE_URL, SOFT_FOUNDRY_PHASE, SOFT_FOUNDRY_PARALLEL in each session (values are not shown)
 exit=0
 --- concurrent reopen (AC-029 lock): 6 at once on a complete record
@@ -54,16 +54,16 @@ entries=1 metadata_parses=true
 --- concurrent release (6 at once): exactly one wins
    1 exit=0
    5 exit=1
-status=released items=["I1"]
+status=released items=["I3"]
    1 advisory: 5 issues to address before c1 goes live (informational, does not block the gate)
    1 c1: released
    1 released: c1: 1 open item(s): 
-   1 released: c1: recorded at 2026-10-26T16:32:39Z (commit 945f198fca13)
+   1 released: c1: recorded at 2026-10-26T20:06:53Z (commit c40eedaf53ea)
    5 soft-foundry: c1 is released, so it cannot be released: already released; discharge its items with `soft-foundry change discharge ID --note TEXT`
 --- reopen racing release on a judged record
 c1: released
 released: c1: 1 open item(s): A
-released: c1: recorded at 2026-10-26T16:32:41Z (commit b3a3fff00d19)
+released: c1: recorded at 2026-10-26T20:06:56Z (commit 84a2578a9edc)
 advisory: 5 issues to address before c1 goes live (informational, does not block the gate)
   ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
   ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes

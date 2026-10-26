@@ -3,7 +3,7 @@ $ sf "change" "release" "c1" "--item" "THROWAWAY=nothing really"
 exit=0
 c1: released
 released: c1: 3 open item(s): THROWAWAY, UND-1, UND-2
-released: c1: recorded at 2026-10-26T16:37:02Z (commit cfa4445b7a64)
+released: c1: recorded at 2026-10-26T20:02:31Z (commit 80c8c9ce81f6)
 advisory: 5 issues to address before c1 goes live (informational, does not block the gate)
   ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
   ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
@@ -13,7 +13,7 @@ advisory: 5 issues to address before c1 goes live (informational, does not block
 
 11:status: released
 12-current_phase: learn
-13-created_at: 2026-10-26 16:37:02.000000000 Z
+13-created_at: 2026-10-26 20:02:31.000000000 Z
 14-scope: []
 15-surfaces:
 16-  application: false
@@ -29,8 +29,8 @@ advisory: 5 issues to address before c1 goes live (informational, does not block
 26-phase_reopenings: []
 27-skipped_phases: []
 28:release:
-29-  at: '2026-10-26T16:37:02Z'
-30-  commit: cfa4445b7a647d2bea172ccdbac6ed870ee100de
+29-  at: '2026-10-26T20:02:31Z'
+30-  commit: 80c8c9ce81f624dc965e3f8442196ad612cf799e
 31-  items:
 32-  - id: THROWAWAY
 33-    description: nothing really
@@ -149,7 +149,7 @@ change c1 (released, not re-gated)
 
 $ sf "change" "close" "c1"
 exit=1
-c1: finished commit d2aa0eb92afa87024447dd19eea7325ed8c3dd43 is not reachable from main yet; pass --force to close anyway
+c1: finished commit 51c56bca767ac706c8b503b508d6b61182327214 is not reachable from main yet; pass --force to close anyway
 
 $ sf "change" "status" "c1"
 exit=0
@@ -220,7 +220,7 @@ change c1 (released, not re-gated)
 
 $ sf "change" "close" "c1"
 exit=1
-c1: finished commit d2aa0eb92afa87024447dd19eea7325ed8c3dd43 is not reachable from main yet; pass --force to close anyway
+c1: finished commit 51c56bca767ac706c8b503b508d6b61182327214 is not reachable from main yet; pass --force to close anyway
 
 $ sf "change" "status" "c1"
 exit=0
@@ -291,7 +291,7 @@ change c1 (released, not re-gated)
 
 $ sf "change" "close" "c1"
 exit=1
-c1: finished commit d2aa0eb92afa87024447dd19eea7325ed8c3dd43 is not reachable from main yet; pass --force to close anyway
+c1: finished commit 51c56bca767ac706c8b503b508d6b61182327214 is not reachable from main yet; pass --force to close anyway
 
 $ sf "change" "status" "c1"
 exit=0
@@ -362,7 +362,7 @@ change c1 (released, not re-gated)
 
 $ sf "change" "close" "c1"
 exit=1
-c1: finished commit d2aa0eb92afa87024447dd19eea7325ed8c3dd43 is not reachable from main yet; pass --force to close anyway
+c1: finished commit 51c56bca767ac706c8b503b508d6b61182327214 is not reachable from main yet; pass --force to close anyway
 
 $ sf "change" "status" "c1"
 exit=0
@@ -660,7 +660,7 @@ change c1 (released, not re-gated)
 
 $ sf "change" "close" "c1"
 exit=1
-c1: finished commit d2aa0eb92afa87024447dd19eea7325ed8c3dd43 is not reachable from main yet; pass --force to close anyway
+c1: finished commit 51c56bca767ac706c8b503b508d6b61182327214 is not reachable from main yet; pass --force to close anyway
 
 $ sf "change" "status" "c1"
 exit=0
@@ -696,12 +696,18 @@ c1
 
 ### variant: discharged_at false-y string
 $ sf "check"
-exit=0
-✓ pass control plane: 16 phases, 17 skills, no errors
+exit=2
+✗ error changes/c1/metadata.yml: release item "THROWAWAY" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ error changes/c1/metadata.yml: release item "UND-1" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ error changes/c1/metadata.yml: release item "UND-2" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ fail control plane: 3 error(s)
 
 $ sf "ci"
-exit=0
-✓ pass control plane: 16 phases, 17 skills, no errors
+exit=2
+✗ error changes/c1/metadata.yml: release item "THROWAWAY" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ error changes/c1/metadata.yml: release item "UND-1" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ error changes/c1/metadata.yml: release item "UND-2" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ fail control plane: 3 error(s)
 ✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
 ✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
 ✓ pass eval control-well-formed: verify pass, as expected
@@ -723,19 +729,23 @@ exit=0
 ✓ pass eval: 18 passed, 0 failed, 0 errors, 1 skipped
 
 change c1 (released, not re-gated)
-  released: c1: no open items remain; run `soft-foundry change close c1` once it is merged
+  released: c1: 3 open item(s): THROWAWAY, UND-1, UND-2
+advisory: c1 is released with 3 open item(s) to discharge before it is closed (informational, does not block the gate)
+  ! warn owed THROWAWAY: nothing really
+  ! warn owed UND-1: observe UND-1 in production
+  ! warn owed UND-2: observe UND-2 in production
 
-✓ ci passed
+✗ ci failed
 
 $ sf "change" "close" "c1"
 exit=1
-c1: finished commit d2aa0eb92afa87024447dd19eea7325ed8c3dd43 is not reachable from main yet; pass --force to close anyway
+c1: cannot close: released with 3 open item(s) THROWAWAY, UND-1, UND-2; discharge each with `soft-foundry change discharge ID --note TEXT`, or pass --force to close anyway
 
 $ sf "change" "status" "c1"
 exit=0
 c1: c1  [status: released, phase: learn, risk: TBD]
   track: gated
-  released: c1: 0 open item(s)
+  released: c1: 3 open item(s): THROWAWAY, UND-1, UND-2
   00-intake              complete     ok
   01-discovery           complete     ok
   02-specification       complete     ok
@@ -800,7 +810,7 @@ change c1 (released, not re-gated)
 
 $ sf "change" "close" "c1"
 exit=1
-c1: finished commit d2aa0eb92afa87024447dd19eea7325ed8c3dd43 is not reachable from main yet; pass --force to close anyway
+c1: finished commit 51c56bca767ac706c8b503b508d6b61182327214 is not reachable from main yet; pass --force to close anyway
 
 $ sf "change" "status" "c1"
 exit=0

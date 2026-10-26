@@ -13,7 +13,7 @@ run 11: release/reopen => [0, 1] status=released pending_handoffs=0 reopenings=0
 run 12: release/reopen => [0, 1] status=released pending_handoffs=0 reopenings=0
 run 13: release/reopen => [0, 1] status=released pending_handoffs=0 reopenings=0
 inconsistent (released with reset phases): 0/14
-4 concurrent reopens => exits [0, 1, 1, 1], phase_reopenings entries=1, YAML parses
+4 concurrent reopens => exits [1, 0, 1, 1], phase_reopenings entries=1, YAML parses
 4 concurrent reopens => exits [1, 1, 1, 0], phase_reopenings entries=1, YAML parses
 4 concurrent reopens => exits [1, 1, 0, 1], phase_reopenings entries=1, YAML parses
-4 concurrent reopens => exits [1, 0, 1, 1], phase_reopenings entries=1, YAML parses
+4 concurrent reopens => exits [0, 1, 1, 1], phase_reopenings entries=1, YAML parses

@@ -4,13 +4,13 @@ c1: cannot run evaluate: 07-evaluation is already complete; rerun it only after 
 exit=1
 bytes unchanged
 --- stale: change app code, run evaluate (AC-007)
-phase reopen: reopened evaluate (automatic: evidence stale at a72e2a5)
+phase reopen: reopened evaluate (automatic: evidence stale at 5d315a2)
 phase reopen: reset evaluate
-- at: '2026-10-26T16:28:33Z'
+- at: '2026-10-26T20:06:15Z'
   phase: evaluate
   reset:
   - evaluate
-  from_commit: feea5960006188f52af3b3088f0064821a50f75b
+  from_commit: 178065d5ac20340ed63454d771d1b85410eae857
   reason: 'gate check ''evidence current'' failed: 07-evaluation is stale, its evidence
   source: auto
 --- stale with predecessor incomplete (AC-009)
@@ -31,12 +31,12 @@ nothing reset
 2026-09-09T00:00:00Z | completed | 
 2026-09-09T00:00:00Z | completed | 
 2026-10-01T00:00:00Z | phase_reopened | 
-2026-10-26T16:28:37Z | created | 
-2026-10-26T16:28:37Z | phase_reopened | 
-2026-10-26T16:28:37Z | released | 
-2026-10-26T16:28:39Z | discharged | 
+2026-10-26T20:06:19Z | created | 
+2026-10-26T20:06:19Z | phase_reopened | 
+2026-10-26T20:06:20Z | released | 
+2026-10-26T20:06:21Z | discharged | 
 --- status text
-c1: c1  [status: released, phase: learn, risk: <placeholder>]
+c1: c1  [status: released, phase: learn, risk: TBD]
   track: gated
   released: c1: 1 open item(s): B
   00-intake              complete     ok

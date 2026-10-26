@@ -1,10 +1,10 @@
 ---
 phase: '08-attack'
 skill: adversarial-testing
-status: pending
-commit_sha: 1ce44defbcdf87589b6feb6c8b69a8f6ad3733cd
+status: complete
+commit_sha: 89b40116b816723a93f601a6da454e507f2e693b
 started_at: '2026-10-26T16:34:09Z'
-completed_at: '2026-10-26T16:45:00Z'
+completed_at: '2026-10-26T20:13:46Z'
 resolved_model:
   profile: adversarial_high
   provider: anthropic
@@ -22,30 +22,34 @@ findings:
   summary: 'FIXED, verified. The release/reopen check-then-write race is closed: 14
     of 14 simultaneous pairs end with one winner and a consistent record; four concurrent
     reopens write one history entry.'
-  failure: Not reproduced at 1ce44de (evidence/drive6.txt, drive7.txt). Release won
-    every time in the sample, so reopen-first ordering was not observed head to head.
+  failure: 'Not reproduced at 89b4011 (evidence/drive6.txt, drive7.txt): 14 of 14
+    pairs one winner (release won every time, reopen exit 1), four concurrent reopens
+    write one history entry.'
 - id: ATK-002
   severity: minor
   summary: FIXED, verified. Zero width, bidi, U+2028/2029, soft hyphen, U+180E and
     tag characters are refused in --reason, --item and --note. Visible but confusable
     text (Cyrillic look-alike, NBSP, Hangul filler, braille blank, variation selector)
     is still accepted; scan stays clean.
-  failure: Not reproduced (evidence/drive2.txt, drive11.txt, drive12.txt). The accepted
-    look-alike set is a residual display risk in the UI timeline and status, not a
-    gate failure.
+  failure: Not reproduced (evidence/drive1.txt, drive2.txt, drive11.txt, drive12.txt).
+    Visible-but-confusable text is still accepted; residual display risk, not a gate
+    failure.
 - id: ATK-003
   severity: minor
   summary: FIXED, verified. Mistyped --env forms, including --env=NAME=VALUE, no longer
     echo any part of the value.
-  failure: Not reproduced (evidence/drive4.txt, drive5.txt). Record, process title
-    and messages are clean.
+  failure: Not reproduced (evidence/drive4.txt, drive5.txt). Mistyped --env forms
+    echo no part of the value.
 - id: ATK-004
   severity: minor
-  summary: Still open, accepted residual (TB-3). A hand-edited discharge (discharged_at
-    set, even to an empty string, with no note or commit) passes check and ci, and
-    change close does not lint the release block.
-  failure: Set discharged_at to "" on every release item in metadata.yml; check and
-    ci exit 0 (evidence/drive3.txt). Review should confirm the acceptance is recorded.
+  summary: PARTLY FIXED (REV-002). A blank or whitespace discharged_at (empty, space,
+    tab/newline, false, 0, [], {}) is now refused by check and ci, counted open, and
+    blocks close. A hand-edited non-blank discharge (any time or junk string, no note
+    or commit) still passes check and ci and change close does not lint the release
+    block; accepted residual TB-3.
+  failure: Set discharged_at to a timestamp on every release item in metadata.yml;
+    check and ci exit 0 (evidence/drive3.txt, drive13.txt). Review should confirm
+    the acceptance is recorded.
 - id: ATK-005
   severity: minor
   summary: Unchanged documented residuals. Bash is checked against deny sets only,
@@ -53,32 +57,60 @@ findings:
     releases the change, and a fully hand-forged finished record releases with only
     a non-blocking advisory.
   failure: Marked session gets exit 0 (evidence/drive10.txt, drive8.txt); forged handoffs
-    plus an APPROVED judgment release with exit 0 (evidence/drive3.txt).
+    plus an APPROVED judgment release with exit 0 (evidence/drive3.txt). Unchanged
+    at 89b4011.
 - id: ATK-006
   severity: minor
   summary: Coverage gap, not a defect. ATTACK-011 (held or stale lock, symlinked lock,
-    temp file, metadata, handoff and lock directory) is still not run; the runtime
-    guard refused shell commands naming the lock directory and was not worked around.
-    Kill-mid-write and signal forwarding are also unrun.
+    temp file, metadata, handoff and lock directory) is still not run; the guard refused
+    shell commands naming the lock directory and was not worked around. Kill-mid-write
+    is now covered for phase reopen only (ATTACK-018); release, discharge, parallel
+    runs and signal forwarding are unrun.
   failure: No defect found. A person should run the symlink and held-lock cases outside
     the guarded session; THREAT-008 lock and symlink mitigations are untested by this
     phase.
+- id: ATK-007
+  severity: minor
+  summary: New, hand edit only. discharged_at set to U+00A0 (NBSP) counts as discharged
+    in the CLI (Ruby String#strip keeps NBSP) but open in the page (JS trim() strips
+    it), re-opening the CLI/page disagreement REV-002 fixed for ordinary blanks.
+  failure: 'Hand-edit every release item discharged_at to a lone U+00A0: check and
+    ci exit 0, change status shows 0 open items, change discharge says already discharged,
+    while the page shows open and the timeline lists no discharge (evidence/drive13.txt).
+    Needs a metadata.yml edit (TB-3); fix would use a Unicode-aware blank test in
+    ChangeRecord.discharged? and Release.lint.'
+- id: ATK-008
+  severity: minor
+  summary: 'New, informational. REV-001 holds (history never ahead of handoffs after
+    a kill before any rename), but recovery from a killed phase reopen is manual:
+    the leftover .soft-foundry-tmp file refuses every retry, and check and gate judge
+    still pass on the half-reset record.'
+  failure: 'SIGKILL before rename 1..7 of phase reopen (evidence/drive14.txt): phase_reopenings
+    stays empty, ci exits 2, close refuses; retry then fails naming the temp file
+    (or says nothing to reset after kill 7, with the reopen reason lost and a metadata
+    temp left that blocks the next metadata write). Fail-closed; no wrong state accepted.'
 next: review
-notes: 'Second attack run, after remediation 529e749. All drivers were re-run against
-  a fresh throwaway clone at 1ce44de and fixtures in the system temp directory; the
-  real record, tree and history were not touched. Added drive12 (22 invisible and
-  look-alike character classes). Size from change size: full_route_sweep. A stub shell
-  stood in for live sessions, so no model was attacked. The three fixed findings (ATK-001
-  to 003) were verified fixed; no new defect was found in the changed code. This session
-  ran under the phase marker; the drivers unset it for their own subprocesses. Not
-  covered: browser rendering, kill-mid-write and signal forwarding, ATTACK-011, THREAT-010.'
+notes: 'Third attack run at 89b4011, after remediation 030b28f (REV-001 handoffs renamed
+  before metadata; REV-002 blank discharged_at). All drivers re-run against a fresh
+  throwaway clone and fixtures in the system temp directory; the real record, tree
+  and history were not touched. drive4 output was not regenerated (its raw ps listing
+  captured unrelated processes on the maintainer machine); its commands and exit codes
+  were reproduced line for line and the earlier file is kept, see manifest redaction
+  note. Added ATTACK-017 (blank and odd discharged_at: 11 values through check, ci,
+  status, close, discharge and the UI JSON in-process) and ATTACK-018 (SIGKILL before
+  renames 1, 2, 3, 6, 7 via an RUBYOPT hook; script kill_hook.rb). Size from change
+  size: full_route_sweep. A stub shell stood in for live sessions, so no model was
+  attacked. Not covered: browser rendering of app.js (page behaviour read from source),
+  ATTACK-011, kill-mid-write for release and discharge, signal forwarding, THREAT-010.
+  This session ran under the phase marker; drivers unset it for their subprocesses.
+  Invisible characters in evidence were replaced with visible forms.'
 executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-26T16:34:09Z'
-  finished_at: '2026-10-26T16:41:28Z'
+  started_at: '2026-10-26T20:01:53Z'
+  finished_at: '2026-10-26T20:13:58Z'
   exit_status: 0
-  previous_phase: review
-  session_id: 07c5db8f-db01-4fee-aac3-fd7c9e581416
+  previous_phase: evaluate
+  session_id: 77a882f8-36d6-44e3-ab00-84ba4f3232cd
   cwd: "/Users/jscholen-iou/dev/soft_foundry"

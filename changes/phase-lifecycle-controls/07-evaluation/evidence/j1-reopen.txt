@@ -11,7 +11,7 @@ exit=0
  M changes/c1/metadata.yml
 ?? .soft-foundry/
 --- non-handoff/metadata diff vs before:
-none
+Only in /tmp/evalrun/j1-before: changes
 status: complete
 status: pending
 status: pending
@@ -19,19 +19,19 @@ status: pending            # pending | in_progress | complete | blocked
 status: pending
 status: complete
 phase_reopenings:
-- at: '2026-10-26T16:29:07Z'
+- at: '2026-10-26T20:02:29Z'
   phase: evaluate
   reset:
   - evaluate
   - attack
   - review
-  from_commit: bb8f775d3354f6f17ebd13107f154705c2047a4f
+  from_commit: bfd2cdb2332e36b9328bd30da7d36588aaa7ec8f
   reason: fixture changed
   source: manual
   previous:
     evaluate:
       status: complete
-      commit_sha: a3c9f00e5c94a3130243ad960057b892be05de38
+      commit_sha: c012a60a984ac920a5c4d84a8a92868cbdc0a9d1
       completed_at: '2026-09-09T00:00:00Z'
       session_id:
     attack:
@@ -57,7 +57,7 @@ exit=0
 --- again (AC-016 nothing to reset?) reopen review x2
 soft-foundry: nothing to reset: review and every phase after it are already pending; run `soft-foundry phase run review` instead
 exit=1
-c1: c1  [status: in_progress, phase: judge, risk: <placeholder>]
+c1: c1  [status: in_progress, phase: judge, risk: TBD]
   track: gated
   00-intake              complete     ok
   01-discovery           complete     ok

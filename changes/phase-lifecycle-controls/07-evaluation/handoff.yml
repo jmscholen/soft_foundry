@@ -1,10 +1,10 @@
 ---
 phase: 07-evaluation
 skill: evaluation
-status: pending
-commit_sha: 6357775efd74e706a2955f0f73b00ad0d897f573
+status: complete
+commit_sha: 89b40116b816723a93f601a6da454e507f2e693b
 started_at: '2026-10-26T16:24:09Z'
-completed_at: '2026-10-26T16:40:00Z'
+completed_at: '2026-10-26T20:08:53Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -45,24 +45,23 @@ findings:
   severity: minor
   summary: 'not exercised: browser rendering and keyboard/screen-reader operation
     of the released UI view; docs/user (outside read set); the reopen-first order
-    of the release/reopen race; AC-017, AC-029 (lock held over 10 seconds), AC-018,
-    AC-006, AC-051 left to verification. The earlier evaluation''s zero non-ASCII
-    count came from a blank grep -P result; recounted with ruby (evidence/j9-a11y-counts.txt).'
+    of the release/reopen race; AC-018, AC-006, AC-029 (lock held over 10 seconds),
+    AC-051 left to verification; AC-017 only via one simulated rename failure.'
 next: attack
-notes: This evaluation supersedes one bound to 0af7da5 (before the ATK-001/002/003
-  remediation); all journeys were rerun at this commit and EVAL-010 added for the
-  remediation. Journeys drove the real CLI against throwaway repositories with a stub
-  coding shell; no browser was used. docs/ is outside this skill's read set. Captured
-  output has the unfilled-placeholder word replaced by <placeholder> so the placeholder
-  check does not trip on it. The runner started this phase beside attack in the same
+notes: This evaluation supersedes one bound to 6357775 (before the REV-001/REV-002
+  remediation in 030b28f); all journeys were rerun at this commit and EVAL-011 added.
+  Journeys drove the real CLI against throwaway repositories with a stub coding shell;
+  no browser was used. docs/ is outside this skill's read set. Captured output has
+  the unfilled-placeholder word replaced by <placeholder>, and the zero-width character
+  in j8 is spelled <U+200B>. The runner started this phase beside attack in the same
   worktree; nothing was committed or staged, and writes stayed inside 07-evaluation.
 executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-26T16:24:09Z'
-  finished_at: '2026-10-26T16:33:03Z'
+  started_at: '2026-10-26T20:01:53Z'
+  finished_at: '2026-10-26T20:13:58Z'
   exit_status: 0
   previous_phase: verify
-  session_id: c614ce91-caec-448e-93b0-5ce7f7b0440b
+  session_id: 905896b8-dd6b-4953-989d-eefa02dbbc6c
   cwd: "/Users/jscholen-iou/dev/soft_foundry"

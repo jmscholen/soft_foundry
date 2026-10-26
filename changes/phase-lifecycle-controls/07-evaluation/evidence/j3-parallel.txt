@@ -12,10 +12,10 @@ phase evaluate: claude exited 0
   ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: d37c7817780d0cb9384e24887d0f6154180dc4e0
+  ✓ pass commit_sha recorded: 6454850a1392638313f4c5f23d98a60ce02ee4df
   ✓ pass completed_at recorded: 2026-10-26T00:00:00Z
   ✓ pass predecessor complete: 06-verification
-  ✓ pass evidence current: no code changes since d37c7817780d; specification unchanged since d37c7817780d
+  ✓ pass evidence current: no code changes since 6454850a1392; specification unchanged since 6454850a1392
   ✓ pass content clean
 phase evaluate: pass
 phase attack: claude exited 0
@@ -24,28 +24,28 @@ phase attack: claude exited 0
   ✓ pass required files present: attack-plan.md, cases.yml, results.md, evidence/manifest.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: d37c7817780d0cb9384e24887d0f6154180dc4e0
+  ✓ pass commit_sha recorded: 6454850a1392638313f4c5f23d98a60ce02ee4df
   ✓ pass completed_at recorded: 2026-10-26T00:00:00Z
   ✓ pass predecessor complete: 07-evaluation
-  ✓ pass evidence current: no code changes since d37c7817780d; specification unchanged since d37c7817780d
+  ✓ pass evidence current: no code changes since 6454850a1392; specification unchanged since 6454850a1392
   ✓ pass content clean
 phase attack: pass
 parallel: 2 phases run, 2 passed, 0 failed
 advisory: 1 issue to address before c1 goes live (informational, does not block the gate)
   ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
 exit=0
-wall=2s
-1793031908.N start attack DATABASE_URL=unset PARALLEL=1 pid=85115
-1793031908.N start evaluate DATABASE_URL=unset PARALLEL=1 pid=85114
-1793031910.N end evaluate
-1793031910.N end attack
+wall=3s
+1793044978.N start evaluate DATABASE_URL=unset PARALLEL=1 pid=80119
+1793044978.N start attack DATABASE_URL=unset PARALLEL=1 pid=80120
+1793044980.N end attack
+1793044980.N end evaluate
 changes/c1/07-evaluation/handoff.yml:status: complete
-changes/c1/07-evaluation/handoff.yml:commit_sha: d37c7817780d0cb9384e24887d0f6154180dc4e0
+changes/c1/07-evaluation/handoff.yml:commit_sha: 6454850a1392638313f4c5f23d98a60ce02ee4df
 changes/c1/08-attack/handoff.yml:status: complete
-changes/c1/08-attack/handoff.yml:commit_sha: d37c7817780d0cb9384e24887d0f6154180dc4e0
-d37c7817780d0cb9384e24887d0f6154180dc4e0
-d37c781 phases
-20175fa record
+changes/c1/08-attack/handoff.yml:commit_sha: 6454850a1392638313f4c5f23d98a60ce02ee4df
+6454850a1392638313f4c5f23d98a60ce02ee4df
+6454850 phases
+0803cb9 record
 current_phase: review
 --- with --env + secret (AC-022/024)
 exit=0
@@ -60,10 +60,10 @@ phase evaluate: claude exited 0
   ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 4fdbae478876ec1bbc98765f1d5c0be6863eedd2
+  ✓ pass commit_sha recorded: 2dec8bb723c25e2ec60bed2d3477a11114dacc73
   ✓ pass completed_at recorded: 2026-10-26T00:00:00Z
   ✓ pass predecessor complete: 06-verification
-  ✓ pass evidence current: no code changes since 4fdbae478876; specification unchanged since 4fdbae478876
+  ✓ pass evidence current: no code changes since 2dec8bb723c2; specification unchanged since 2dec8bb723c2
   ✓ pass content clean
 phase evaluate: pass
 phase attack: claude exited 0
@@ -72,19 +72,19 @@ phase attack: claude exited 0
   ✓ pass required files present: attack-plan.md, cases.yml, results.md, evidence/manifest.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 4fdbae478876ec1bbc98765f1d5c0be6863eedd2
+  ✓ pass commit_sha recorded: 2dec8bb723c25e2ec60bed2d3477a11114dacc73
   ✓ pass completed_at recorded: 2026-10-26T00:00:00Z
   ✓ pass predecessor complete: 07-evaluation
-  ✓ pass evidence current: no code changes since 4fdbae478876; specification unchanged since 4fdbae478876
+  ✓ pass evidence current: no code changes since 2dec8bb723c2; specification unchanged since 2dec8bb723c2
   ✓ pass content clean
 phase attack: pass
 parallel: 2 phases run, 2 passed, 0 failed
 advisory: 1 issue to address before c1 goes live (informational, does not block the gate)
   ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
-1793031911.N start evaluate DATABASE_URL=db_evaluate<SECRET> PARALLEL=1 pid=85355
-1793031911.N start attack DATABASE_URL=db_attack<SECRET> PARALLEL=1 pid=85356
-1793031913.N end attack
-1793031913.N end evaluate
+1793044982.N start evaluate DATABASE_URL=db_evaluate<SECRET> PARALLEL=1 pid=80364
+1793044982.N start attack DATABASE_URL=db_attack<SECRET> PARALLEL=1 pid=80365
+1793044984.N end evaluate
+1793044984.N end attack
 secret occurrences in changes/ and output:
 none
 0
@@ -118,10 +118,10 @@ phase evaluate: claude exited 0
   ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 934e988865e1a5800fd3addc8f834b91b6922a9b
+  ✓ pass commit_sha recorded: de1337c1f7df8f041279f15ae261cc13c3285fd4
   ✓ pass completed_at recorded: 2026-10-26T00:00:00Z
   ✓ pass predecessor complete: 06-verification
-  ✓ pass evidence current: no code changes since 934e988865e1; specification unchanged since 934e988865e1
+  ✓ pass evidence current: no code changes since de1337c1f7df; specification unchanged since de1337c1f7df
   ✓ pass content clean
 phase evaluate: pass
 phase attack: claude exited 3
@@ -133,12 +133,12 @@ parallel: 2 phases run, 1 passed, 1 failed
 advisory: 1 issue to address before c1 goes live (informational, does not block the gate)
   ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
 exit=1
-1793031917.N start evaluate DATABASE_URL=unset PARALLEL=1 pid=85788
-1793031917.N start attack DATABASE_URL=unset PARALLEL=1 pid=85789
-1793031919.N fail attack
-1793031919.N end evaluate
+1793044987.N start evaluate DATABASE_URL=unset PARALLEL=1 pid=80941
+1793044987.N start attack DATABASE_URL=unset PARALLEL=1 pid=80942
+1793044989.N fail attack
+1793044989.N end evaluate
 changes/c1/07-evaluation/handoff.yml:status: complete
-changes/c1/07-evaluation/handoff.yml:commit_sha: 934e988865e1a5800fd3addc8f834b91b6922a9b
+changes/c1/07-evaluation/handoff.yml:commit_sha: de1337c1f7df8f041279f15ae261cc13c3285fd4
 changes/c1/08-attack/handoff.yml:status: in_progress
 changes/c1/08-attack/handoff.yml:commit_sha:
 --- interrupt (AC-033)
@@ -154,10 +154,10 @@ phase evaluate: claude exited 0
   ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 78c532fffa51b879dbd8cd3be6462975e6c29871
+  ✓ pass commit_sha recorded: fe53e1122345ec5f33e8efe9394c212d43772ace
   ✓ pass completed_at recorded: 2026-10-26T00:00:00Z
   ✓ pass predecessor complete: 06-verification
-  ✓ pass evidence current: no code changes since 78c532fffa51; specification unchanged since 78c532fffa51
+  ✓ pass evidence current: no code changes since fe53e1122345; specification unchanged since fe53e1122345
   ✓ pass content clean
 phase evaluate: pass
 phase attack: claude exited 0
@@ -166,10 +166,10 @@ phase attack: claude exited 0
   ✓ pass required files present: attack-plan.md, cases.yml, results.md, evidence/manifest.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 78c532fffa51b879dbd8cd3be6462975e6c29871
+  ✓ pass commit_sha recorded: fe53e1122345ec5f33e8efe9394c212d43772ace
   ✓ pass completed_at recorded: 2026-10-26T00:00:00Z
   ✓ pass predecessor complete: 07-evaluation
-  ✓ pass evidence current: no code changes since 78c532fffa51; specification unchanged since 78c532fffa51
+  ✓ pass evidence current: no code changes since fe53e1122345; specification unchanged since fe53e1122345
   ✓ pass content clean
 phase attack: pass
 parallel: 2 phases run, 2 passed, 0 failed

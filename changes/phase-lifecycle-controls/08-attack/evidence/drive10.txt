@@ -52,14 +52,14 @@ Usage:
                                           create changes/<slug>/ from phase templ
 $ sf "ps"
 exit=0
-running: 3 soft-foundry processes
+running: 5 soft-foundry processes
   pid 98677  ui  port 0  in /private/tmp/evalrun/c1r  since 2026-10-26T15:29:19Z
   pid 3634  ui  port 0  in /private/tmp/evalrun/c1r  since 2026-10-26T16:28:29Z
-  pid 20264  phase run attack  change phase-lifecycle-controls  shell claude (session pid 20282)  in ~/dev/soft_foundry  since 2026-10-26T16:34:09Z
+  pid 76021  phase run evaluate  change phase-lifecycle-controls  shell claude (session pid 76032)  in ~/dev/soft_foundry  since 2026-10-26T20:01:52Z
+  pid 98496  ui  port 0  in /private/tmp/evalrun/c1r  since 2026-10-26T20:06:11Z
+  pid 99129  change new  change c1  in an unknown directory  since 2026-10-26T20:06:19Z
 sessions: 3 coding shells open in Soft Foundry repositories
-  pid 2790  claude  terminal ttys001  no change record for its branch  branch main  in ~/dev/ai_projects/my_ai  since 2026-10-20T13:05:29Z
-  pid 24835  grok  terminal ttys003  no change record for its branch  branch main  in ~/dev/ai_projects/my_ai  since 2026-10-22T02:11:42Z
-  pid 10419  claude 
+  pid 2790  claude  terminal ttys001  no change record for its branch  branch main  in ~/dev/ai_projects/my_ai  since 2026-10-
 $ sf "scope" "c1"
 exit=1
 Soft Foundry 0.21.0

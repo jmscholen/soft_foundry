@@ -1,8 +1,8 @@
 ---
-commit_sha: 1ce44defbcdf87589b6feb6c8b69a8f6ad3733cd
+commit_sha: 89b40116b816723a93f601a6da454e507f2e693b
 authorization_envelope:
-  target: soft-foundry at commit 1ce44defbcdf87589b6feb6c8b69a8f6ad3733cd (lib/soft_foundry,
-    the phase-lifecycle-controls change, after remediation commit 529e749), run from a throwaway git clone and throwaway
+  target: soft-foundry at commit 89b40116b816723a93f601a6da454e507f2e693b (lib/soft_foundry,
+    the phase-lifecycle-controls change, after remediation commits 529e749 and 030b28f), run from a throwaway git clone and throwaway
     fixture repositories under the system temp directory
   environment: local
   authorized_by: the person who started this attack run by invoking `soft-foundry
@@ -121,9 +121,10 @@ cases:
   - Run check, ci, change close, change status for each
   expected_safe_behavior: check and ci fail every malformed block
   observed: 'All structural variants fail check and ci (exit 2) with a named defect.
-    Setting discharged_at on items by hand, including to an empty string with no note
-    or commit, passes check and ci: a hand-edited discharge is indistinguishable from
-    a real one'
+    At 89b4011 an empty or whitespace discharged_at is now refused by check and ci (REV-002
+    fix). Setting discharged_at by hand to a real-looking time or any non-blank string,
+    with no note or commit, still passes check and ci: a hand-edited discharge is indistinguishable
+    from a real one (TB-3)'
   result: violated
   evidence:
   - evidence/drive3.txt
@@ -281,3 +282,51 @@ cases:
   result: denied
   evidence:
   - evidence/drive9.txt
+- id: ATTACK-017
+  threat: THREAT-004
+  violation_attempted: Re-attack of REV-002 (030b28f). A hand-edited blank or odd discharged_at
+    makes an owed release item look discharged, so ci passes and change close lets
+    an undischarged change through; the CLI, ci, status and the page may disagree
+  starting_privilege: Person with write access to metadata.yml (TB-3 hand edit)
+  steps:
+  - On a released record with two owed items set every discharged_at to "", " ", tab
+    and newline, NBSP, false, 0, [], {}, null, a junk string and a bare date
+  - Run check, ci, change status, change close and change discharge; read /api/change
+    in-process
+  expected_safe_behavior: Blank values are open in every surface and lint refuses
+    them; close refuses while an item is open
+  observed: '"", " ", tab/newline, false and 0 are refused by check and ci (blank discharged_at,
+    item named), counted open by status, and close refuses; [] and {} are refused
+    by check and ci and counted open; null is open. A junk string and a bare date
+    count as discharged (TB-3). U+00A0 alone is NOT blank to the CLI (String#strip keeps
+    it): check and ci pass, status shows 0 open items, discharge says already discharged,
+    while the page''s JS trim() strips it and shows the item open, and the timeline
+    shows no discharge entry'
+  result: violated
+  evidence:
+  - evidence/drive13.txt
+- id: ATTACK-018
+  threat: THREAT-008
+  violation_attempted: Re-attack of REV-001 (030b28f). Kill the process between the
+    renames of a phase reopen so history and handoffs disagree, then close or gate
+    on the half-reset record
+  starting_privilege: Person running the CLI; a SIGKILL stands in for a crash or
+    power loss (a hook prepended to SafeWrite.commit_staged kills before the Nth rename)
+  steps:
+  - On a finished record kill phase reopen before rename 1, 2, 3, 6 and 7 (6 handoffs
+    reset, then metadata)
+  - After each kill read metadata and handoffs, run check, ci, status, close and
+    gate judge, then retry the reopen
+  expected_safe_behavior: History never records a reset the handoffs do not show;
+    close refuses a half-reset record; a retry recovers or refuses with the way forward
+  observed: 'history entries stayed 0 in all five kills. Kill 1 left the record byte-identical
+    apart from 7 temp files. Kills 2, 3 and 6 left the first N handoffs pending
+    and the rest complete: ci exit 2, close refused (a required phase is pending),
+    status shows FAIL on the stale phases. Kill 7 (before the metadata rename) left
+    all six pending with no history; close refused. Every retry was refused: kills
+    1 to 6 by the leftover `.soft-foundry-tmp` file (named, remove and rerun), kill
+    7 by "nothing to reset". `check` stays exit 0 and `gate judge` still passes
+    on the half-reset record; only ci, status and close notice'
+  result: denied
+  evidence:
+  - evidence/drive14.txt

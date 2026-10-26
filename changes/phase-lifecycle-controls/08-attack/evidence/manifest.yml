@@ -1,12 +1,12 @@
 ---
-commit_sha: 1ce44defbcdf87589b6feb6c8b69a8f6ad3733cd
+commit_sha: 89b40116b816723a93f601a6da454e507f2e693b
 change_size:
   command: soft-foundry change size phase-lifecycle-controls --phase attack
   size: full_route_sweep
   reason: no scope declared on the record, so whole-repository scope is sized at the
     largest size; the only routes are the read-only loopback UI routes, all swept
-    in ATTACK-016 (and the lifecycle commands in ATTACK-001..015) Re-confirmed on
-    the post-remediation run.
+    in ATTACK-016 (and the lifecycle commands in ATTACK-001..018). Re-confirmed on
+    the third run at 89b4011.
 artifacts:
 - path: drive1.txt
   case: ATTACK-001
@@ -18,12 +18,12 @@ artifacts:
   case: ATTACK-002
   cases:
   - ATTACK-002
-  sha256: e4bb7440f8728bbf74a5f19306ae4d1b753ca50c62e7a768a28b656829c62bda
+  sha256: 7ec3ddd9291e584c109dee0d4ce511e8b67cf695a89880879b52dfa503525456
 - path: drive11.txt
   case: ATTACK-007
   cases:
   - ATTACK-007
-  sha256: b557026e4c9cc86a7971e7ee121247c8bad9e1ed045a5d8d14c52ffb2d7d19f9
+  sha256: b78cb0e75b20cadbf6f45ab203a950f1d0a595babc089d234a55c9673e110494
 - path: drive12.txt
   case: ATTACK-007
   cases:
@@ -40,7 +40,7 @@ artifacts:
   - ATTACK-004
   - ATTACK-005
   - ATTACK-006
-  sha256: d79a7555b48ca2d6bfcde7d4c7fea732f30c77da169bb7f7642c60bd18b1c3a7
+  sha256: 65c76f5c99bc5a2c0c8da05744714eb947c0c555354a61b2e50b30cbd828a327
 - path: drive4.txt
   case: ATTACK-009
   cases:
@@ -54,12 +54,12 @@ artifacts:
   - ATTACK-013
   - ATTACK-014
   - ATTACK-015
-  sha256: f076f38e6dcf66509112ae44c0771a07e38b01c7a55287c4b438c349014c5447
+  sha256: 78b3d9a8e626a379549a46f6b22f1cd3efc622bfa03340ab2e1b74d9a416650f
 - path: drive6.txt
   case: ATTACK-010
   cases:
   - ATTACK-010
-  sha256: 7d5ff92f8cd2045ad51ab67652aa446ef525df83795ba1b9c6f395d7cf9501a6
+  sha256: fcc9b33e4c97cba18dd142ff968ee24a91317682ac3e00df930e08ffc2d40fcb
 - path: drive7.txt
   case: ATTACK-010
   cases:
@@ -85,7 +85,7 @@ artifacts:
   sha256: 3311b26a670b293a10dadf78e81d5b1215e1ed965a14c68e815d196150777f08
 - path: scripts/drive11.rb
   case: ATTACK-001..016 (driver)
-  sha256: 68dc33bf76e5435053fa397fa2b12f293e3ad9751ad58a39c4f20a4384855bb2
+  sha256: 0bdd1bab1ab38043ca755e1d08e1d712da6d6b8cfd0219e7cca12c0c2d40c1d1
 - path: scripts/drive12.rb
   case: ATTACK-001..016 (driver)
   sha256: 730798e8164936bef711f974262ee756bcd7a3efe2692d25ebe7d713707f2d27
@@ -116,5 +116,37 @@ artifacts:
 - path: scripts/stub-claude.sh
   case: ATTACK-001..016 (driver)
   sha256: e07cc9d21a9c830de17809a438d09a6938ed303ad0515c7b6047c483ffc1ef9c
-
-redaction: "After the run, raw invisible characters (U+202E, U+200B and others) in drive1.txt and drive2.txt were replaced by visible <U+XXXX> forms, and in scripts/drive12.rb by \\u{XXXX} escapes (same strings, still runnable), so the content clean gate passes. Hashes above are of the redacted files. Findings and results are unchanged. Done by the implementing session at the maintainer decision."
+- path: drive13.txt
+  case: ATTACK-017
+  cases:
+  - ATTACK-017
+  - ATTACK-006
+  sha256: 354a2bcc7a2c94b6008a378e34a287177be64cbf6ff9d4dd9e95a60a36b5ccd7
+- path: drive14.txt
+  case: ATTACK-018
+  cases:
+  - ATTACK-018
+  sha256: 3a3509d8fafb4f5c872ff165916de8deea64db8261f2de4b3f9e0ddfb347794a
+- path: scripts/drive13.rb
+  case: ATTACK-017 (driver)
+  cases:
+  - ATTACK-017
+  sha256: 9f9c1496504d84f2ccd8d7cd2221ed9e0d3805637e59eb50dadcb1ae6535aa1f
+- path: scripts/drive14.rb
+  case: ATTACK-018 (driver)
+  cases:
+  - ATTACK-018
+  sha256: a88bcdb942698602e26b17100b6d1fb8ad9afffe03b8c0334fd23ca1bdd13312
+- path: scripts/kill_hook.rb
+  case: ATTACK-018 (driver)
+  cases:
+  - ATTACK-018
+  sha256: dba1355cd270de72c6f1bfc118e1bf250e914ec6a34960fd3008b6217b685593
+redaction: 'Raw invisible characters (U+202E, U+200B and others) in drive1.txt and
+  drive2.txt were replaced by visible <U+XXXX> forms, and in scripts/drive12.rb by
+  \u{XXXX} escapes (same strings, still runnable), so the content clean gate passes.
+  Hashes are of the redacted files. drive4.txt was NOT regenerated in the third run:
+  its raw ps listing on the maintainer machine captured unrelated processes; the third
+  run reproduced its exit codes and commands exactly (compared line by line), so the
+  retained file is from the post-remediation run at 1ce44de and its hash is kept.
+  Every other drive file was regenerated at 89b4011.'

@@ -1,6 +1,6 @@
 ### EVAL-005 released record among consumers (AC-044,046,048,049)
 --- change status (released)
-c1: c1  [status: released, phase: judge, risk: <placeholder>]
+c1: c1  [status: released, phase: judge, risk: TBD]
   track: gated
   released: c1: 2 open item(s): GOLIVE-1, GOLIVE-2
   00-intake              complete     ok
@@ -11,8 +11,8 @@ c1: c1  [status: released, phase: judge, risk: <placeholder>]
     "title": "c1",
     "status": "released",
     "current_phase": "judge",
-    "risk": "<placeholder>",
-    "type": "<placeholder>",
+    "risk": "TBD",
+    "type": "TBD",
     "closed": false,
     "released": true,
     "open_items": 2,
@@ -45,16 +45,16 @@ change c2
 --- scope check / learn
 no instincts recorded; the learning phase writes them to 15-learning/instincts.yml
 --- ps
-running: 3 soft-foundry processes
+running: 4 soft-foundry processes
   pid 98677  ui  port 0  in this repository  since 2026-10-26T15:29:19Z
-  pid 81427  phase run evaluate  change phase-lifecycle-controls  shell claude (session pid 81439)  in ~/dev/soft_foundry  since 2026-10-26T16:24:09Z
-  pid 3603  guard  in an unknown directory  since 2026-10-26T16:28:29Z
+  pid 3634  ui  port 0  in this repository  since 2026-10-26T16:28:29Z
+  pid 76021  phase run evaluate  change phase-lifecycle-controls  shell claude (session pid 76032)  in ~/dev/soft_foundry  since 2026-10-26T20:01:52Z
+  pid 97925  ci  in /private/var/folders/v8/684xdbm92vz7dz03clwvpmvr0000gn/T/soft-foundry20261026-97655-eydcln  since 2026-10-26T20:06:06Z
 sessions: 3 coding shells open in Soft Foundry repositories
   pid 2790  claude  terminal ttys001  no change record for its branch  branch main  in ~/dev/ai_projects/my_ai  since 2026-10-20T13:05:29Z
   pid 24835  grok  terminal ttys003  no change record for its branch  branch main  in ~/dev/ai_projects/my_ai  since 2026-10-22T02:11:42Z
-  pid 10419  claude  terminal ttys005  change phase-lifecycle-controls (phase attack, intake)  branch change/phase-lifecycle-controls  in ~/dev/soft_foundry  since 2026-10-22T13:27:17Z
 --- ui api
-url shape: http://127.0.0.1:60062/#token=<redacted>
+url shape: http://127.0.0.1:49950/#token=<redacted>
       "status": "released",
       "released": true,
       "open_items": 2,

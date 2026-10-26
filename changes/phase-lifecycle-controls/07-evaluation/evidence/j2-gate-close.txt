@@ -9,7 +9,7 @@ phase reopen: reset evaluate
 phase reopen: reset attack
 phase reopen: reset review
 exit=0
-c1: c1  [status: in_progress, phase: specify, risk: <placeholder>]
+c1: c1  [status: in_progress, phase: specify, risk: TBD]
   track: gated
   00-intake              complete     ok
   01-discovery           complete     ok

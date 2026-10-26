@@ -1,4 +1,4 @@
-commit_sha: 6357775efd74e706a2955f0f73b00ad0d897f573
+commit_sha: 89b40116b816723a93f601a6da454e507f2e693b
 size: full_route_sweep
 journeys:
   - id: EVAL-001
@@ -161,4 +161,20 @@ journeys:
       - "exactly one release succeeds, five are refused as already released, and the record holds the winner's single item"
       - "release and reopen at once end in one consistent state (released, no reopening; the reopen was refused as released)"
     evidence: [evidence/j8-remediation.txt, evidence/j8-remediation.sh]
+    result: pass
+  - id: EVAL-011
+    criteria: [AC-005, AC-017, AC-035, AC-040, AC-041, AC-042, AC-043, AC-049]
+    persona: Maintainer
+    starting_state: a released record with items A and B; a complete gated record
+    steps:
+      - "set item A's discharged_at to an empty string, then to spaces; run check, ci, change close, change status and change status --json, then discharge A"
+      - "discharge A and B with real notes and close"
+      - "phase reopen attack on a complete record; read handoff statuses and phase_reopenings"
+      - "simulate a failure of the metadata.yml rename inside a reopen transaction; read handoffs, metadata, then run change close"
+    assertions:
+      - "a blank or whitespace discharged_at is counted open everywhere: check and ci refuse it naming the item and the fix, close refuses with both items open, status says 2 open items, status --json open_items is 2, and discharge A is still allowed"
+      - "real discharges bring open items to 0 and print the close next action (close then stops only on the fixture's unmerged commit, which is a scratch-repository limit)"
+      - "a reopen resets attack and review and records exactly one phase_reopenings entry whose reset list matches the handoffs"
+      - "with the metadata rename failing, the handoff is already pending and phase_reopenings is empty (no history for a reset the handoffs do not show); change close then refuses, naming the pending judgment"
+    evidence: [evidence/j10-rev-remediation.txt, evidence/j10-rev-remediation.sh]
     result: pass

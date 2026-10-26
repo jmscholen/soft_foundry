@@ -1,6 +1,6 @@
 # Evaluation Plan
 
-Commit: 6357775efd74e706a2955f0f73b00ad0d897f573 (code is unchanged since the verified commit 529e749, the remediation of ATK-001/002/003; later commits touch only change records). The earlier evaluation of this change was bound to 0af7da5, before that remediation; every journey was rerun at this commit and the new journey EVAL-010 drives the remediated behavior.
+Commit: 89b40116b816723a93f601a6da454e507f2e693b. Code changed since the earlier evaluation (bound to 6357775) in change_record.rb, cli.rb, release.rb, snapshot.rb and ui/assets/app.js: the remediation of REV-001 (a blank discharged_at is open) and REV-002 (handoffs renamed before metadata.yml). Every journey was rerun at this commit and the new journey EVAL-011 drives the remediated behavior.
 Check size: `full_route_sweep` (`soft-foundry change size phase-lifecycle-controls --phase evaluate`: no scope declared, so the whole repository is sized at the largest size). The routes of this change are every new command and every consumer of the new states, so every one was driven.
 
 ## Intent being proven
