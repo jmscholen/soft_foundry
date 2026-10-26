@@ -30,6 +30,12 @@ module SoftFoundry
     def call(phase, reason:, source: "manual", env: ENV, now: Time.now)
       reason = Text.free_text!(reason, "--reason")
       refuse_marker!(env) if source == "manual"
+      @record.locked { reopen(phase, reason, source, now) }
+    end
+
+    private
+
+    def reopen(phase, reason, source, now)
       meta = @record.metadata
       status = meta["status"].to_s
       refuse_status!(status)
@@ -62,8 +68,6 @@ module SoftFoundry
       end
       Result.new(phase: phase, reset: reset, entry: entry)
     end
-
-    private
 
     def refuse_marker!(env)
       return unless env.key?(MARKER)

@@ -1051,6 +1051,7 @@ module SoftFoundry
       shell_arg_values = options("--shell-arg")
       dry_run = flag("--dry-run")
       parallel = flag("--parallel")
+      raise TargetError, "--env takes its value as the next argument (--env NAME=VALUE), not joined with =" if @argv.any? { |a| a.start_with?("--env=") }
       env_specs = options("--env")
       hide_env_values(env_specs)
       extra = []

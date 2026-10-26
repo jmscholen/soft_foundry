@@ -30,6 +30,10 @@ module SoftFoundry
     # anything is written.
     def release(specs, env: ENV, now: Time.now)
       refuse_marker!(env, "change release")
+      @record.locked { release_locked(specs, now) }
+    end
+
+    def release_locked(specs, now)
       refuse_status!
       judgment!
       lifecycle!
@@ -51,6 +55,7 @@ module SoftFoundry
       end
       block
     end
+    private :release_locked
 
     def discharge(id, note:, env: ENV, now: Time.now)
       refuse_marker!(env, "change discharge")

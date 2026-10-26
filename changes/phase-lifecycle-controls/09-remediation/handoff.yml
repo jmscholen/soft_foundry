@@ -1,24 +1,51 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
-phase: 09-remediation
+---
+phase: '09-remediation'
 skill: remediation
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: f8f5b43845dbf5fa062cadd153d7e1719ffa2353
+started_at: '2026-10-26T15:33:55Z'
+completed_at: '2026-10-26T16:15:00Z'
 resolved_model:
   profile: coding_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- summary.md
+blocking: []
+findings:
+- id: REM-001
+  severity: minor
+  summary: 'ATK-001, ATK-002, ATK-003 fixed in lib/soft_foundry (change_record, phase_reopen,
+    release, text, parallel_run, cli) with tests in test/phase_reopen_test.rb and
+    test/text_free_text_test.rb. Full suite at the working tree: 784 runs, 0 failures
+    (provider keys and SOFT_FOUNDRY_PHASE unset). All downstream evidence is now stale;
+    verify, evaluate, attack, review and judge must rerun, and attack should re-drive
+    ATK-001/002/003.'
+- id: REM-002
+  severity: minor
+  summary: 'Not fixed, for a person to decide: EVAL-F1 (gate on a reopened phase prints
+    SKIP and exits 0 against AC-014), EVAL-F2, EVAL-F3, EVAL-F4, ATK-004 (accepted
+    residual TB-3), ATK-005 (documented residuals), ATK-006 (needs a run outside the
+    guarded session). docs/ and .ai/ are outside this skill write set.'
+- id: REM-003
+  severity: minor
+  summary: 'The code and test changes are staged but NOT committed: the repository
+    pre-commit hook runs ci, which fails because verify, evaluate and attack evidence
+    is stale (expected after any remediation). The hook was not bypassed. commit_sha
+    is therefore the HEAD before the change; the outputs describe HEAD plus the staged
+    working tree. A person or the runner must commit before verify so its evidence
+    binds to the fixed code.'
 next: verify
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: Suite run with SOFT_FOUNDRY_PHASE, SOFT_FOUNDRY_PARALLEL, MAILTRAP_API_KEY
+  and PERSONAL_SENDGRID_API_KEY unset. The guard was not separately verified in this
+  session. Wrote only under lib/, test/ and this phase directory.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-26T15:33:55Z'
+  finished_at: '2026-10-26T16:12:10Z'
+  exit_status: 0
+  previous_phase: review
+  session_id: ae36e44e-44ec-4a46-929c-31236264ec32
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

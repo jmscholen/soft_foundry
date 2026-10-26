@@ -22,6 +22,10 @@ module SoftFoundry
       specs.each_with_object({}) do |spec, env|
         name, sep, value = spec.to_s.partition("=")
         raise ArgumentError, "--env takes NAME=VALUE (a variable name, an equals sign, then its value; {phase} in the value becomes the phase id)" if sep.empty?
+        # The text before the first = may be a whole credential when NAME= was forgotten, so only a short identifier-shaped name is echoed.
+        unless name.match?(/\A\w{1,64}\z/)
+          raise ArgumentError, "--env takes NAME=VALUE with NAME matching [A-Z_][A-Z0-9_]* and not beginning #{Text::RESERVED_ENV_PREFIX} (the text given is not shown)"
+        end
         Text.env_name!(name)
         raise ArgumentError, "environment variable #{name} is given twice; give each --env name once" if env.key?(name)
         raise ArgumentError, "the value of #{name} contains a NUL byte, which a process environment cannot carry" if value.include?("\0")

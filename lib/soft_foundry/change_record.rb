@@ -86,6 +86,10 @@ module SoftFoundry
 
     def open_release_items = release_items.reject { |i| i["discharged_at"] }
 
+    # Runs the block holding the record lock (reentrant), for a command that
+    # must check the record's state and write it as one step.
+    def locked(&block) = RecordLock.synchronize(root, slug, &block)
+
     # Read-modify-write of metadata.yml under the record lock. The block
     # receives a fresh read from disk, never a cached copy, so a concurrent
     # writer's change is not lost; the result is written atomically.

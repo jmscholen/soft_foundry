@@ -23,12 +23,14 @@ module SoftFoundry
     module_function
 
     # Non-empty after strip, at most `max` characters, no control
-    # characters (newline, tab, ESC, and NUL included). Returns the stripped text.
+    # characters (newline, tab, ESC, and NUL included) and no invisible or
+    # direction-changing ones (zero width, bidi override, line separator). Returns the stripped text.
     def free_text!(value, label, max: 500)
       text = value.to_s.strip
       raise ArgumentError, "#{label} is required: it may not be empty" if text.empty?
       raise ArgumentError, "#{label} is #{text.length} characters; the limit is #{max}" if text.length > max
       raise ArgumentError, "#{label} may not contain control characters (newline, tab, escape, NUL); put it on one plain line" if text.match?(/\p{Cntrl}/)
+      raise ArgumentError, "#{label} may not contain invisible or direction-changing characters (zero width, bidi override, line or paragraph separator)" if text.match?(/[\p{Cf}\p{Zl}\p{Zp}]/)
       text
     end
 

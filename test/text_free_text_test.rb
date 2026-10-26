@@ -38,6 +38,20 @@ class TextFreeTextTest < Minitest::Test
     end
   end
 
+  def test_refuses_invisible_and_direction_changing_characters
+    ["a\u202Eb", "a\u200Bb", "a\u2028b", "a\u2029b", "a\uFEFFb", "a\u2066b"].each do |bad|
+      error = assert_raises(ArgumentError, bad.inspect) { free(bad) }
+      assert_includes error.message, "invisible"
+    end
+  end
+
+  def test_parse_env_does_not_echo_a_mistyped_name
+    error = assert_raises(ArgumentError) { SoftFoundry::ParallelRun.parse_env(["postgres://u:secretpw@h/db?x=1"]) }
+    refute_includes error.message, "secretpw"
+    error = assert_raises(ArgumentError) { SoftFoundry::ParallelRun.parse_env(["bad name=v"]) }
+    refute_includes error.message, "bad name"
+  end
+
   def test_id_and_env_name_patterns
     assert_equal "GOLIVE-1", SoftFoundry::Text.id!("GOLIVE-1")
     assert_raises(ArgumentError) { SoftFoundry::Text.id!("golive") }

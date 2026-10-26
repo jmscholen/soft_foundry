@@ -23,6 +23,21 @@ class PhaseReopenTest < Minitest::Test
     end
   end
 
+  def test_concurrent_reopens_reset_once_and_write_one_history_entry
+    with_lifecycle_record do |dir, record|
+      outcomes = Array.new(4) do
+        Thread.new do
+          reopen(dir, record, "verify")
+          :ok
+        rescue SoftFoundry::TargetError
+          :refused
+        end
+      end.map(&:value)
+      assert_equal 1, outcomes.count(:ok)
+      assert_equal 1, Array(record.metadata["phase_reopenings"]).size
+    end
+  end
+
   def test_remediate_reopen_follows_the_transition_to_verify
     with_lifecycle_record(complete: LIFECYCLE + %w[remediate]) do |dir, record|
       result = reopen(dir, record, "remediate")
