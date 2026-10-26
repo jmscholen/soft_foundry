@@ -19,19 +19,19 @@ status: pending            # pending | in_progress | complete | blocked
 status: pending
 status: complete
 phase_reopenings:
-- at: '2026-10-26T15:18:47Z'
+- at: '2026-10-26T16:29:07Z'
   phase: evaluate
   reset:
   - evaluate
   - attack
   - review
-  from_commit: 64eb6b969a43669a53c307a2f25b232bd4ca4ede
+  from_commit: bb8f775d3354f6f17ebd13107f154705c2047a4f
   reason: fixture changed
   source: manual
   previous:
     evaluate:
       status: complete
-      commit_sha: 2e9a7da466316b7b5cab57b5f31de027b73e07b6
+      commit_sha: a3c9f00e5c94a3130243ad960057b892be05de38
       completed_at: '2026-09-09T00:00:00Z'
       session_id:
     attack:
@@ -80,7 +80,7 @@ advisory: 4 issues to address before c1 goes live (informational, does not block
 --- second reopen of already-pending evaluate
 soft-foundry: nothing to reset: evaluate and every phase after it are already pending; run `soft-foundry phase run evaluate` instead
 exit=1
-       0
+       1
 --- reason refusals (AC-012)
 soft-foundry: --reason is required: it may not be empty
 exit=1

@@ -1,10 +1,10 @@
 ---
 phase: 07-evaluation
 skill: evaluation
-status: pending
-commit_sha: 0af7da5ab3108db454fab80b351e13841e6575c6
-started_at: '2026-10-26T15:17:36Z'
-completed_at: '2026-10-26T15:33:30Z'
+status: complete
+commit_sha: 6357775efd74e706a2955f0f73b00ad0d897f573
+started_at: '2026-10-26T16:24:09Z'
+completed_at: '2026-10-26T16:40:00Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -32,24 +32,37 @@ findings:
   severity: minor
   summary: 'a parallel session exiting 0 with its handoff left in_progress is reported
     ''phase <id>: pass''; not compared with single phase run.'
+- id: EVAL-F5
+  severity: cosmetic
+  summary: a release item id containing a zero-width space is refused but the refusal
+    prints the id back with that character in it.
+- id: EVAL-F6
+  severity: cosmetic
+  summary: a refused phase reopen now creates the git-ignored .soft-foundry/locks/
+    directory because the record lock is taken before the state check; no tracked
+    file changes.
 - id: EVAL-G1
   severity: minor
   summary: 'not exercised: browser rendering and keyboard/screen-reader operation
-    of the released UI view; docs/user (outside read set); AC-017, AC-029, AC-018,
-    AC-006, AC-051 left to verification.'
+    of the released UI view; docs/user (outside read set); the reopen-first order
+    of the release/reopen race; AC-017, AC-029 (lock held over 10 seconds), AC-018,
+    AC-006, AC-051 left to verification. The earlier evaluation''s zero non-ASCII
+    count came from a blank grep -P result; recounted with ruby (evidence/j9-a11y-counts.txt).'
 next: attack
-notes: Journeys drove the real CLI against throwaway repositories with a stub coding
-  shell; no browser was used. docs/ is outside this skill's read set and the guard
-  blocked one read of it. Host guard hook was active for Bash in this session. Captured
+notes: This evaluation supersedes one bound to 0af7da5 (before the ATK-001/002/003
+  remediation); all journeys were rerun at this commit and EVAL-010 added for the
+  remediation. Journeys drove the real CLI against throwaway repositories with a stub
+  coding shell; no browser was used. docs/ is outside this skill's read set. Captured
   output has the unfilled-placeholder word replaced by <placeholder> so the placeholder
-  check does not trip on it.
+  check does not trip on it. The runner started this phase beside attack in the same
+  worktree; nothing was committed or staged, and writes stayed inside 07-evaluation.
 executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-26T15:17:36Z'
-  finished_at: '2026-10-26T15:33:19Z'
+  started_at: '2026-10-26T16:24:09Z'
+  finished_at: '2026-10-26T16:33:03Z'
   exit_status: 0
   previous_phase: verify
-  session_id: eeceb6f2-65f1-45a5-9286-06760ef5f07e
+  session_id: c614ce91-caec-448e-93b0-5ce7f7b0440b
   cwd: "/Users/jscholen-iou/dev/soft_foundry"

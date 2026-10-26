@@ -1,0 +1,77 @@
+### EVAL-010 remediated defects: lock race, invisible characters, --env echo (AC-012, AC-021, AC-022, AC-029, AC-035)
+--- invisible and direction-changing characters in --reason
+U+200B: soft-foundry: --reason may not contain invisible or direction-changing characters (zero width, bidi override, line or paragraph separator)
+  exit=1
+U+202E: soft-foundry: --reason may not contain invisible or direction-changing characters (zero width, bidi override, line or paragraph separator)
+  exit=1
+U+2028: soft-foundry: --reason may not contain invisible or direction-changing characters (zero width, bidi override, line or paragraph separator)
+  exit=1
+U+2029: soft-foundry: --reason may not contain invisible or direction-changing characters (zero width, bidi override, line or paragraph separator)
+  exit=1
+U+FEFF: soft-foundry: --reason may not contain invisible or direction-changing characters (zero width, bidi override, line or paragraph separator)
+  exit=1
+release item U+202E: soft-foundry: the description of item A may not contain invisible or direction-changing characters (zero width, bidi override, line or paragraph separator)
+release id with U+200B: soft-foundry: item id "A<U+200B>" must match [A-Z0-9][A-Z0-9-]* (capital letters, digits, and hyphens)
+release refusals wrote:        0 files
+discharge note U+200B: soft-foundry: --note may not contain invisible or direction-changing characters (zero width, bidi override, line or paragraph separator)
+records written by refusals:        0
+--- accented text still accepted
+phase reopen: reopened evaluate (manual)
+phase reopen: reset evaluate
+phase reopen: reset attack
+phase reopen: reset review
+exit=0
+--- --env forms
+soft-foundry: --env takes its value as the next argument (--env NAME=VALUE), not joined with =
+exit=1
+exit=1
+soft-foundry: --env takes NAME=VALUE (a variable name, an equals sign, then its value; {phase} in the value becomes the phase id)
+secret echoed in output: 0
+exit=1
+soft-foundry: --env takes NAME=VALUE with NAME matching [A-Z_][A-Z0-9_]* and not beginning SOFT_FOUNDRY_ (the text given is not shown)
+secret-as-name echoed: 0
+exit=1
+soft-foundry: --env takes NAME=VALUE with NAME matching [A-Z_][A-Z0-9_]* and not beginning SOFT_FOUNDRY_ (the text given is not shown)
+exit=1
+soft-foundry: environment variable name SOFT_FOUNDRY_X begins SOFT_FOUNDRY_, which is reserved for soft-foundry
+--- valid --env still accepted
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the evaluation skill's permissions (`soft-foundry hooks install --claude`)
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the adversarial-testing skill's permissions (`soft-foundry hooks install --claude`)
+would run evaluate of c1 with: claude -p --session-id f8e2e607-7936-416b-b3f5-7f42c67eb1e6 --name c1/evaluate <prompt>
+would run attack of c1 with: claude -p --session-id e6392f45-94a4-4b53-9055-7a18389af51e --name c1/attack <prompt>
+parallel: would set DATABASE_URL, SOFT_FOUNDRY_PHASE, SOFT_FOUNDRY_PARALLEL in each session (values are not shown)
+exit=0
+--- concurrent reopen (AC-029 lock): 6 at once on a complete record
+   1 exit=0
+   5 exit=1
+   1 phase reopen: reopened evaluate (manual)
+   1 phase reopen: reset attack
+   1 phase reopen: reset evaluate
+   1 phase reopen: reset review
+   5 soft-foundry: nothing to reset: evaluate and every phase after it are already pending; run `soft-foundry phase run evaluate` instead
+phase_reopenings entries: 1
+entries=1 metadata_parses=true
+--- concurrent release (6 at once): exactly one wins
+   1 exit=0
+   5 exit=1
+status=released items=["I1"]
+   1 advisory: 5 issues to address before c1 goes live (informational, does not block the gate)
+   1 c1: released
+   1 released: c1: 1 open item(s): 
+   1 released: c1: recorded at 2026-10-26T16:32:39Z (commit 945f198fca13)
+   5 soft-foundry: c1 is released, so it cannot be released: already released; discharge its items with `soft-foundry change discharge ID --note TEXT`
+--- reopen racing release on a judged record
+c1: released
+released: c1: 1 open item(s): A
+released: c1: recorded at 2026-10-26T16:32:41Z (commit b3a3fff00d19)
+advisory: 5 issues to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn judgment: final judgment (14-judgment) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+exit=0
+soft-foundry: c1 is released, so a phase cannot be reopened: a released change is finished apart from its open items; discharge them with `soft-foundry change discharge`, or open a new change
+exit=1
+status=released release=present reopenings=0
+  12 status: complete    4 status: pending            # pending | in_progress | complete | blocked 

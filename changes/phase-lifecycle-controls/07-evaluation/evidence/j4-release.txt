@@ -1,11 +1,11 @@
 ### EVAL-004 release / discharge / close / ci (AC-035..043)
 c1: released
 released: c1: 1 open item(s): GOLIVE-1
-released: c1: recorded at 2026-10-26T15:27:24Z (commit d2f1cf0ff359)
+released: c1: recorded at 2026-10-26T16:27:06Z (commit 12da1837d619)
 exit=0
 release:
-  at: '2026-10-26T15:27:24Z'
-  commit: d2f1cf0ff3591ec1d0d620ac5751c83ddc276fc0
+  at: '2026-10-26T16:27:06Z'
+  commit: 12da1837d6195cb9536b4db1d032b0fb20b9515e
   items:
   - id: GOLIVE-1
     description: switch flag on
@@ -34,7 +34,7 @@ judge missing exit=1
 --- AC-038 carries U-1,U-2
 c1: released
 released: c1: 3 open item(s): A, U-1, U-2
-released: c1: recorded at 2026-10-26T15:27:38Z (commit ad99874286af)
+released: c1: recorded at 2026-10-26T16:27:20Z (commit d10f81822123)
 advisory: 5 issues to address before c1 goes live (informational, does not block the gate)
   ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
   ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes

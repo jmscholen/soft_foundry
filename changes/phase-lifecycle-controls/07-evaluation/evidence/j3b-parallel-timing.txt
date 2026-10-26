@@ -6,15 +6,15 @@ phase attack: claude exited 0
 phase attack: pass
 parallel: 2 phases run, 2 passed, 0 failed
 exit=0
-wall=2.63s
+wall=2.65s
 changes/c1/07-evaluation/handoff.yml:status: complete
-changes/c1/07-evaluation/handoff.yml:commit_sha: 18fe04213a82af259dda491db0073bc07208a069
+changes/c1/07-evaluation/handoff.yml:commit_sha: 1cb8f647479ffb8c05ca4af39a1433a3a278a41c
 changes/c1/08-attack/handoff.yml:status: complete
-changes/c1/08-attack/handoff.yml:commit_sha: 18fe04213a82af259dda491db0073bc07208a069
+changes/c1/08-attack/handoff.yml:commit_sha: 1cb8f647479ffb8c05ca4af39a1433a3a278a41c
 current_phase: review
-18fe042 phases
+1cb8f64 phases
 --- single reopen timing (full lifecycle record)
-reopen intake wall=0.22s (includes ruby start)
+reopen intake wall=0.24s (includes ruby start)
 --- 20 repeats: every YAML parses, both statuses recorded
 bad runs: 0 of 20
 --- TERM (AC-033)

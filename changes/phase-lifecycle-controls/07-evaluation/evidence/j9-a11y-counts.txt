@@ -1,0 +1,4 @@
+a11y-captured-output.txt: 32 lines; with a non-ASCII byte: 0; with an escape sequence: 0
+j1-reopen.txt: 103 lines; with a non-ASCII byte: 0; with an escape sequence: 0
+j4-release.txt: 108 lines; with a non-ASCII byte: 10; with an escape sequence: 0
+j8-remediation.txt: 77 lines; with a non-ASCII byte: 0; with an escape sequence: 0

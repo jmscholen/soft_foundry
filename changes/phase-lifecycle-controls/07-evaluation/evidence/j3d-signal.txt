@@ -1,5 +1,5 @@
 ### EVAL-003d signal forwarding (AC-033)
-TERM: runner pid=80809 stubs running:        2
+TERM: runner pid=93709 stubs running:        2
 TERM: stubs 0.7s after signal:        0
 TERM: runner exit=0
 TERM: stub log:
@@ -11,7 +11,7 @@ phase evaluate: fail
 phase attack: claude exited 143
 phase attack: fail
 parallel: 2 phases run, 0 passed, 2 failed
-INT: runner pid=80979 stubs running:        2
+INT: runner pid=94098 stubs running:        2
 INT: stubs 0.7s after signal:        0
 INT: runner exit=0
 INT: stub log:

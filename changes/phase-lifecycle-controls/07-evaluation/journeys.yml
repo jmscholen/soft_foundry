@@ -1,4 +1,4 @@
-commit_sha: 0af7da5ab3108db454fab80b351e13841e6575c6
+commit_sha: 6357775efd74e706a2955f0f73b00ad0d897f573
 size: full_route_sweep
 journeys:
   - id: EVAL-001
@@ -130,9 +130,9 @@ journeys:
     steps:
       - "capture reopen (success, empty reason, nothing to reset), release and discharge refusals, parallel refusals"
     assertions:
-      - "0 lines with a non-ASCII byte or an escape sequence; no command prompted"
+      - "0 of 32 lines of reopen, release, discharge and parallel-refusal output have a non-ASCII byte or an escape sequence (evidence/j9-a11y-counts.txt, counted with ruby because macOS grep has no -P); no command prompted"
       - "each refusal states what went wrong and the next action"
-    evidence: [evidence/a11y-captured-output.txt, evidence/j7-guard-a11y-docs.txt]
+    evidence: [evidence/a11y-captured-output.txt, evidence/j9-a11y-counts.txt]
     result: pass
   - id: EVAL-009
     criteria: [AC-045, AC-050]
@@ -145,4 +145,20 @@ journeys:
       - "isolated_phases and --parallel are in workflow.yml; phase_reopenings and released are in the change metadata template (.ai/templates/change/metadata.yml); .ai/README.md, README.md and the usage text name phase reopen, --parallel, --env, release and discharge; schemas.md names phase reopen, release and discharge but not --parallel or --env; the ps command table lists phase reopen and change release/discharge"
       - "docs/user/ is outside the evaluation skill's read set and was not read; the ps table text was not separately inspected"
     evidence: [evidence/j7-guard-a11y-docs.txt]
+    result: pass
+  - id: EVAL-010
+    criteria: [AC-012, AC-021, AC-022, AC-029, AC-035]
+    persona: Maintainer, and two maintainers acting at once
+    starting_state: gated records complete through review, and complete through judgment
+    steps:
+      - "phase reopen with zero-width, bidi-override, line-separator and byte-order-mark characters in --reason; release item description and discharge note likewise; an accented reason"
+      - "phase run --parallel --env=NAME=V (joined with =); --env with a credential-shaped string and no name; a credential as the name; a name with a space; a SOFT_FOUNDRY_ name; a valid --env with {phase}"
+      - "six phase reopen processes at once on a complete record; six change release processes at once on a judged record; one release and one reopen at once"
+    assertions:
+      - "each invisible-character case exits 1, says what was wrong, and writes nothing; the accented reason is accepted"
+      - "the joined --env= form is refused with the next action; no refusal prints the credential-shaped text (0 occurrences); a valid --env is accepted and its value is not shown"
+      - "exactly one reopen succeeds and the five others say nothing to reset; phase_reopenings has one entry and metadata.yml parses"
+      - "exactly one release succeeds, five are refused as already released, and the record holds the winner's single item"
+      - "release and reopen at once end in one consistent state (released, no reopening; the reopen was refused as released)"
+    evidence: [evidence/j8-remediation.txt, evidence/j8-remediation.sh]
     result: pass

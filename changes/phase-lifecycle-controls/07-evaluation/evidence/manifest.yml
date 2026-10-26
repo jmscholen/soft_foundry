@@ -1,39 +1,45 @@
-commit_sha: 0af7da5ab3108db454fab80b351e13841e6575c6
+commit_sha: 6357775efd74e706a2955f0f73b00ad0d897f573
 note: captured output has the word for an unfilled placeholder replaced by <placeholder> so the placeholder check does not trip on it; nothing else was edited.
 artifacts:
   - path: evidence/j1-reopen.txt
     journey: EVAL-001
-    sha256: 5849dba2d30c3c43228fc1ac18ca75adbb02a120952ed39c211e7353ecbbe780
+    sha256: fea9029d71f6391b869693937985b1ab37558704b63c08b5d000ffd3dfd58abe
   - path: evidence/j2-gate-close.txt
     journey: EVAL-002
     sha256: d27bf7a23be5a591084b1147ab32828700ab034634bdb8aba9a6c7c6e4ed931a
   - path: evidence/j3-parallel.txt
     journey: EVAL-003
-    sha256: b6bc9731bbcbb662f4aaaf2dedabceb75fd61d04cea9965a161eb133ae8cdf0c
+    sha256: 9d27b551549a12620949cb7ea081a1ee355c71141cbb1b7a725f76da00fa99b3
   - path: evidence/j3b-parallel-timing.txt
     journey: EVAL-003
-    sha256: e902da26d2059314073a73aa8efc4121de1a742b6c0936a6f8726c09aa7ccf20
+    sha256: b25f082b66d0ef63498b85f6498d4327fe3585a2dbd8907b2e707637275c61af
   - path: evidence/j3c-parallel-pass.txt
     journey: EVAL-003
-    sha256: 0a713ec24d660b04c9d56065afb26e6dd911db8b2bb833b15455e29c8881ff0b
+    sha256: 771f558ef82eab7d8459638dcdca340d400458291b2170ada0617113d4125bfa
   - path: evidence/j3d-signal.txt
     journey: EVAL-003
-    sha256: 7fc78e6cfeff40b2eb6202c31902cbd3f94dc225690cc3db49ecfc1c8f7ecdfa
+    sha256: e9a8b79d819acf3843af66096ef750657341d4af8d234aa56f81ed3765ca6705
   - path: evidence/j4-release.txt
     journey: EVAL-004
-    sha256: 12b31b171c5d67ae71e962e0372670a5f4c18ff8a126e3401aa9c896af05f83a
+    sha256: 027f7b6b3b1b0e3149d3ce5440d7616b97d1220cf31b4a75f5d1a96361c2772e
   - path: evidence/j5-consumers.txt
     journey: EVAL-005
-    sha256: e18de7a82c39e8aa7ab2b892c254cb28d2ae0fa4efe322748ad5b27ebb7a3a5c
+    sha256: dff5c26771f8997d83c9c021589fa9a61fe17480054150585befac2cb4c9597f
   - path: evidence/j6-timeline-auto.txt
     journey: EVAL-006
-    sha256: ef11f594b4191771c870f80eb06f5b53cbb959cf4aa6d364766348833290adb0
+    sha256: 05dce7a5f6f41f01b463e9273c9c478e9f30261f1fd284a31f00e400020ec8dc
   - path: evidence/j7-guard-a11y-docs.txt
     journey: EVAL-007
     sha256: f2efc2aa9563f5e3847dc5b53b6e6cc0ace97675b21782ad0489c4a17ae73016
   - path: evidence/a11y-captured-output.txt
     journey: EVAL-008
     sha256: 43c6d40cd540265d223223bab53806642667bb3d5d6ff839ea6f8e0797f3297b
+  - path: evidence/j9-a11y-counts.txt
+    journey: EVAL-008
+    sha256: d97c5426fafa5653e41e4b352279aadc9fef767b0ffe9cc650e55d358dec0019
+  - path: evidence/j8-remediation.txt
+    journey: EVAL-010
+    sha256: 24ccf6724a6fcb7e070bc5ee9ca26d92c7b4cd4b04e0ce4ebfff2730a1066a0a
   - path: evidence/j1-reopen.sh
     journey: driver
     sha256: f6baeb8ce00934d8c192c29080ef8cd65785c7f88335b9168666dc22f705d26c
@@ -64,6 +70,12 @@ artifacts:
   - path: evidence/j7-guard-a11y-docs.sh
     journey: driver
     sha256: 9a0c76878bfd16be40bcf96dbe7ddfa0399d768acf59be22b1a646f605dd372c
+  - path: evidence/j8-remediation.sh
+    journey: driver
+    sha256: a48b279f072d716edf856115f0e55ccc0d5809e04dda816f2b7898210f3eb7e5
+  - path: evidence/j9-a11y-counts.sh
+    journey: driver
+    sha256: 3461435a5708dfd209e1d630ac7123af8ab9d97842d4101dfa82c5536e6a18d5
   - path: evidence/mkrepo.rb
     journey: driver
     sha256: 37eabd6e0530e713fe98537a7ef9f4e839af1ea53e5bee0a0730ff3917b685e3

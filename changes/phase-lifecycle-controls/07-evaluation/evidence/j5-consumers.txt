@@ -45,14 +45,16 @@ change c2
 --- scope check / learn
 no instincts recorded; the learning phase writes them to 15-learning/instincts.yml
 --- ps
-running: 1 soft-foundry process
-  pid 60801  phase run evaluate  change phase-lifecycle-controls  shell claude (session pid 60818)  in ~/dev/soft_foundry  since 2026-10-26T15:17:36Z
+running: 3 soft-foundry processes
+  pid 98677  ui  port 0  in this repository  since 2026-10-26T15:29:19Z
+  pid 81427  phase run evaluate  change phase-lifecycle-controls  shell claude (session pid 81439)  in ~/dev/soft_foundry  since 2026-10-26T16:24:09Z
+  pid 3603  guard  in an unknown directory  since 2026-10-26T16:28:29Z
 sessions: 3 coding shells open in Soft Foundry repositories
   pid 2790  claude  terminal ttys001  no change record for its branch  branch main  in ~/dev/ai_projects/my_ai  since 2026-10-20T13:05:29Z
   pid 24835  grok  terminal ttys003  no change record for its branch  branch main  in ~/dev/ai_projects/my_ai  since 2026-10-22T02:11:42Z
   pid 10419  claude  terminal ttys005  change phase-lifecycle-controls (phase attack, intake)  branch change/phase-lifecycle-controls  in ~/dev/soft_foundry  since 2026-10-22T13:27:17Z
 --- ui api
-url shape: http://127.0.0.1:57409/#token=<redacted>
+url shape: http://127.0.0.1:60062/#token=<redacted>
       "status": "released",
       "released": true,
       "open_items": 2,
