@@ -1,5 +1,11 @@
-commit_sha: TBD
+commit_sha: 4c79227f1433cfaf80b77d796c735aba08e5863e
 artifacts:
-  - path: TBD
-    produced_by: TBD
-    sha256: TBD
+  - path: evidence/rake-test.txt
+    produced_by: rake test
+    sha256: cb6c52323f8bf802b383635e3b9b5387f0c21ffc0c9475327acb81f5cd4244b3
+  - path: evidence/check.txt
+    produced_by: soft-foundry check
+    sha256: b187f92e8fb8fa649980f39a10bc13376df0e77b6a37211ff689aee4e20b15a1
+  - path: evidence/eval.txt
+    produced_by: soft-foundry eval
+    sha256: 4099f5a8b33e71dc6617321b7c4806629f5c0de2bb582d979bf4b9610955a64f

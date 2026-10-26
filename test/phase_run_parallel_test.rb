@@ -17,8 +17,8 @@ class PhaseRunParallelTest < Minitest::Test
   def with_parallel_record(complete: THROUGH_VERIFY, isolated: "[evaluate, attack]", **opts)
     with_lifecycle_record(complete: [], current_phase: "verify", **opts) do |dir, record|
       wf = File.join(dir, ".ai", "workflow.yml")
-      File.write(wf, File.read(wf).gsub(/^isolated_phases:.*\n/, "") + "\nisolated_phases: #{isolated}\n") if isolated
-      commit_all(dir, "isolated phases") if isolated
+      File.write(wf, File.read(wf).gsub(/^isolated_phases:.*\n/, "") + (isolated ? "\nisolated_phases: #{isolated}\n" : ""))
+      commit_all(dir, "isolated phases")
       complete.each { |id| complete_phase!(record, id, sha: head(dir)) }
       commit_all(dir, "phases complete")
       yield dir, record

@@ -13,11 +13,9 @@ class GuardSessionMarkerTest < Minitest::Test
 
   def with_parked_change(current_phase: "implement", isolated: true, status: "in_progress")
     with_lifecycle_record(complete: [], status: status, current_phase: current_phase) do |dir, record|
-      if isolated
-        wf = File.join(dir, ".ai", "workflow.yml")
-        File.write(wf, File.read(wf).gsub(/^isolated_phases:.*\n/, "") + "\nisolated_phases: [evaluate, attack]\n")
-        commit_all(dir, "isolated phases")
-      end
+      wf = File.join(dir, ".ai", "workflow.yml")
+      File.write(wf, File.read(wf).gsub(/^isolated_phases:.*\n/, "") + (isolated ? "\nisolated_phases: [evaluate, attack]\n" : ""))
+      commit_all(dir, "isolated phases")
       yield dir, record
     end
   end

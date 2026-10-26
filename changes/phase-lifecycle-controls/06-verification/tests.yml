@@ -1,27 +1,33 @@
-commit_sha: TBD
-# Optional. The check size computed by `soft-foundry change size --phase verify`.
-# A scoped change must record a size at least as large as the computed one.
-# size: TBD
-# Optional full-suite run, keyed by the git tree hash of the evidence commit
-# (`git rev-parse <commit_sha>^{tree}`), or a citation of another record's run
-# for the same tree. This is a record: Soft Foundry never runs the suite.
-# full_suite:
-#   tree: TBD
-#   command: TBD
-#   outcome: passed
-# full_suite:
-#   cite: <slug of another change record>
+size: full_at_verify
+full_suite:
+  tree: 8e1eb90f9645106949003ad250ddb85019dd6986
+  command: env -u MAILTRAP_API_KEY -u PERSONAL_SENDGRID_API_KEY bundle exec rake test
+  outcome: failed
 checks:
   - id: CHECK-001
-    kind: tests   # tests | lint | static_analysis | security_scan | iac_validate | migration_check | custom
-    command: TBD
-    result: TBD   # pass | fail | error | skipped
-    evidence: evidence/TBD
-    criteria: [AC-001]
-    # Optional, per check: the commit at which this test existed and failed
-    # (RED) and the test file. The gate verifies red_commit is a commit that
-    # precedes commit_sha, holds test_path, and that APP or INFRA code changed
-    # after it. A feature, fix, or refactor with no red_commit on any check is
-    # advised as having no failing-test-first evidence.
-    # red_commit: TBD
-    # test_path: TBD
+    kind: tests
+    command: env -u MAILTRAP_API_KEY -u PERSONAL_SENDGRID_API_KEY bundle exec rake test
+    result: fail   # 781 runs, 5999 assertions, 2 failures, 0 errors, 0 skips
+    evidence: evidence/rake-test.txt
+    criteria: []
+    red_commit: 053562b
+    test_path: test/record_lock_test.rb
+  - id: CHECK-002
+    kind: static_analysis
+    command: ruby -Ilib exe/soft-foundry check
+    result: pass
+    evidence: evidence/check.txt
+    criteria: []
+  - id: CHECK-003
+    kind: custom
+    command: ruby -Ilib exe/soft-foundry eval
+    result: pass   # 18 passed, 0 failed, 0 errors, 1 skipped
+    evidence: evidence/eval.txt
+    criteria: []
+  - id: CHECK-004
+    kind: tests
+    command: ruby -Ilib -Itest test/guard_session_marker_test.rb -n test_a_parallel_marker_without_a_declared_list_is_a_violation
+    result: fail   # rerun in isolation: reproduces deterministically
+    evidence: evidence/rake-test.txt
+    criteria: []
+commit_sha: 4c79227f1433cfaf80b77d796c735aba08e5863e

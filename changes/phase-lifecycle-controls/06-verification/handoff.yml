@@ -1,24 +1,47 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 06-verification
 skill: verification
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: pending
+commit_sha: 4c79227f1433cfaf80b77d796c735aba08e5863e
+started_at: '2026-10-26T14:42:12Z'
+completed_at: '2026-10-26T15:20:00Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
-next: evaluate
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- changes/phase-lifecycle-controls/06-verification/results.md
+- changes/phase-lifecycle-controls/06-verification/tests.yml
+- changes/phase-lifecycle-controls/06-verification/evidence/manifest.yml
+- changes/phase-lifecycle-controls/06-verification/evidence/rake-test.txt
+- changes/phase-lifecycle-controls/06-verification/evidence/check.txt
+- changes/phase-lifecycle-controls/06-verification/evidence/eval.txt
+blocking: []
+findings:
+- id: VER-001
+  severity: major
+  summary: 'Full suite fails: 781 runs, 2 failures. guard_session_marker_test.rb:72
+    and phase_run_parallel_test.rb:153 assume the real .ai/workflow.yml has no isolated_phases;
+    commit 4c79227 added it, and the fixtures (with_parked_change(isolated: false),
+    the parallel refusal fixture) do not strip the copied key. Test-fixture defects,
+    not confirmed product defects; the no-key refusal behaviour is currently undemonstrated.
+    Fix the fixtures (implementation or remediation), then rerun verify.'
+- id: VER-002
+  severity: minor
+  summary: check (16 phases, 17 skills) and eval (18 passed, 1 skipped) pass at this
+    commit. Red commit 053562b was confirmed to hold test/record_lock_test.rb; the
+    other red commits listed in IMPL-006 were not individually re-confirmed.
+next: implement
+notes: Suite run with MAILTRAP_API_KEY and PERSONAL_SENDGRID_API_KEY unset. No code
+  or tests edited. Failures preserved in evidence/rake-test.txt. Shell guard enforcement
+  not verified in this session.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-26T14:42:12Z'
+  finished_at: '2026-10-26T14:53:27Z'
+  exit_status: 0
+  previous_phase: implement
+  session_id: b2fba010-6fbe-493f-98d0-d9296b2a4dbe
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"
