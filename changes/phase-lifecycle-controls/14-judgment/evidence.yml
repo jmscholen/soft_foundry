@@ -1,30 +1,155 @@
-commit_judged: TBD
+commit_judged: 2da13adfd2e776de2b4e0c1d7eb64c3ca20f3e3b
 phases:
+  - phase: 00-intake
+    commit_sha: e68a2f5d970314644ace7928091dd0460227ec77
+    current: true
+    result: complete
+    note: "Request and assumptions. Not commit-bound code evidence. No skipped_phases. Risk high, track gated."
+  - phase: 01-discovery
+    commit_sha: c1eb7cf26eeeb676c60240a2d15bb332d069ad4c
+    current: true
+    result: complete
+    note: "DISC-001 through DISC-004 are specified. DISC-005 (harness evals not readable) is still open as REV-004."
+  - phase: 02-specification
+    commit_sha: 0019e26e6d700366138b104bfdbd13ffd03c9ba1
+    current: true
+    result: complete
+    note: "Handoff field names 0019e26. The completed specification was committed at d482a0d, which is the lock, and nothing under 02-specification/ changed after that. d482a0d is an ancestor of the verification commit and of 2da13ad. REQ-001..027 and AC-001..051."
+  - phase: 03-threat-model
+    commit_sha: d482a0d46034b14262bbd375efc0e067ecc2c0d0
+    current: true
+    result: complete
+    note: "Files committed at 529db49. TM-001 is the marker residual (ATK-005). MIT-007 claims the reset and history are one write. REV-001 shows the rename window breaks that claim."
+  - phase: 04-plan
+    commit_sha: 529db493a01274ed8c6e6512525401b4aa49f109
+    current: true
+    result: complete
+    note: "PLAN-005 named the crash-between-renames window and called it visible. Review showed close can still succeed. That is REV-001, and it is not accepted."
+  - phase: 05-implementation
+    commit_sha: d2050f61e44b44d5d9dd825c354cf7a520da4bf6
+    current: false
+    result: complete
+    note: "Not current for every code path. 529e749 changed lib/soft_foundry and tests (REM-001). Control-plane and README text landed in 4c79227. docs/user and harness-eval cases did not (D1, REV-004). Deviations D2, D3, D4, D5, D6, D8 stand as review left them."
   - phase: 06-verification
-    commit_sha: TBD
-    current: TBD   # true when commit_sha matches the judged commit for all code paths
-    result: TBD
+    commit_sha: 529e749851af45073d32327857722660a72c3085
+    current: true
+    result: complete
+    note: "git diff 529e749..2da13ad -- lib exe test spec infra is empty. Tree 543e364 matches tests.yml. CHECK-001 passed (784 runs, 0 failures). check and eval passed. Red commit 053562b confirmed for test/record_lock_test.rb. Remediation tests have no red commit (VER-002)."
   - phase: 07-evaluation
-    commit_sha: TBD
-    current: TBD
-    result: TBD
+    commit_sha: 6357775efd74e706a2955f0f73b00ad0d897f573
+    current: true
+    result: complete
+    note: "Same library and tests as 529e749. Journeys EVAL-001..010 passed. EVAL-F1 is D3 / REV-003. No browser. docs/user was outside the skill's read set."
   - phase: 08-attack
-    commit_sha: TBD
-    current: TBD
-    result: TBD
+    commit_sha: 1ce44defbcdf87589b6feb6c8b69a8f6ad3733cd
+    current: true
+    result: complete
+    note: "Second run after remediation. c3a971e rewrites attack evidence only. ATK-001..003 not reproduced. ATK-004 still open (REV-002 is the empty-string part). ATTACK-011 not run."
+  - phase: 09-remediation
+    commit_sha: f8f5b43845dbf5fa062cadd153d7e1719ffa2353
+    current: false
+    result: complete
+    note: "Handoff sha is the commit before the fix; the pre-commit hook refused the commit because downstream evidence was stale. The fix is in 529e749, which verification, evaluation, and attack then covered. REM-002 left EVAL-F1..F4 and ATK-004..006 for a person. REV-001 and REV-002 are new from review and were not in that remediation."
+  - phase: 10-user-documentation
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Pending. REQ-027 and AC-050 still require docs/user to name the commands. README and usage text do. The stub does not. Not missing as a phase; unmet as a requirement (REV-004)."
+  - phase: 11-faq-index
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Pending. No FAQ records to index until the document phase writes them."
+  - phase: 12-observability
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Pending and appropriate. surfaces.observability is false. No deployed service. REQ-026 is the timeline, status, and ci. Plain status omits reopenings (REV-005)."
   - phase: 13-review
-    commit_sha: TBD
-    current: TBD
-    result: TBD
-unresolved_findings: []
-# Acceptance criteria or judgment conditions left unsatisfied pending a
-# real-world event (production observation, etc.) rather than more
-# repository evidence, e.g.:
-#   - id: AC-060
-#     description: each fix observed corrected on production
-# `soft-foundry change close` refuses to close this change while any id
-# here lacks a human confirmation - via --confirm ID, or a PR comment
-# reading "CONFIRMED: <id>" (see `soft-foundry change request-discharge`)
-# - and then moves it into `discharged` with the confirmation source.
+    commit_sha: c3a971eb6dfd494b48cc06a48ca235205d654eae
+    current: true
+    result: complete
+    note: "No blocking findings. Prose committed in 2da13ad. No lib, exe, or test diff since c3a971e. REV-001 and REV-002 are major and are the block. Provider xAI, different from implementation and remediation."
+unresolved_findings:
+  - id: REV-001
+    severity: major
+    phase: 13-review
+    disposition: must_fix
+    summary: "Kill between the metadata rename and the handoff renames leaves phase_reopenings claiming a reset while the handoffs stay complete, so change close can succeed. AC-017 and REQ-022. Not accepted."
+  - id: REV-002
+    severity: major
+    phase: 13-review
+    disposition: must_fix
+    summary: "discharged_at empty is discharged in the CLI, ci, and change close, and open in the UI. Lint does not reject it. A judgment-carried item is treated as confirmed. Not accepted."
+  - id: REV-003
+    severity: minor
+    phase: 13-review
+    disposition: standing_review_reading
+    summary: "Gate on a reopened phase prints SKIP and exits 0. Close still refuses. D3 accepted because REQ-023 keeps the pending gate's meaning. AC-014's exit-code sentence is unmet. Not a reason for this block."
+  - id: REV-004
+    severity: minor
+    phase: 13-review
+    disposition: open
+    summary: "docs/user/README.md does not name the new commands. No harness-eval case for a malformed release block, a non-isolated parallel request, or a stale auto-reopen. REQ-027 unmet. Remediation cannot write those trees."
+  - id: REV-005
+    severity: minor
+    phase: 13-review
+    disposition: open
+    summary: "Plain change status prints the released line and does not print phase reopenings. The timeline does."
+  - id: REV-006
+    severity: minor
+    phase: 13-review
+    disposition: open
+    summary: "phase reopen leaves started_at, and the next phase run keeps that earlier timestamp."
+  - id: REV-007
+    severity: minor
+    phase: 13-review
+    disposition: open
+    summary: "ps reports only args[2], so phase run evaluate attack --parallel shows as evaluate."
+  - id: EVAL-F3
+    severity: minor
+    phase: 07-evaluation
+    disposition: open
+    summary: "ci prints the released line indented under a heading, not at column 0."
+  - id: EVAL-F4
+    severity: minor
+    phase: 07-evaluation
+    disposition: open
+    summary: "A parallel session that exits 0 with its handoff left in_progress is reported phase <id>: pass."
+  - id: EVAL-F5
+    severity: minor
+    phase: 07-evaluation
+    disposition: open
+    summary: "A release item id containing a zero-width character is refused, and the refusal prints the character back."
+  - id: ATK-002
+    severity: minor
+    phase: 08-attack
+    disposition: standing_review_reading
+    summary: "Invisible characters are refused. Visible look-alike letters are stored and shown. Scan stays clean. Display residual, not a gate bypass."
+  - id: ATK-004
+    severity: minor
+    phase: 08-attack
+    disposition: split
+    summary: "Empty discharged_at is REV-002 and must be fixed. A hand-edited non-empty timestamp with no note is the TB-3 case. That broader case is not adopted as a ship decision."
+  - id: ATK-005
+    severity: minor
+    phase: 08-attack
+    disposition: standing_review_reading
+    summary: "Unsetting SOFT_FOUNDRY_PHASE in a shell releases the change. A forged finished record releases with an advisory. TB-1. Documented. Not adopted as a ship decision."
+  - id: ATK-006
+    severity: minor
+    phase: 08-attack
+    disposition: open
+    summary: "ATTACK-011 (held lock, symlink, kill mid-write) was not run. REV-001 is the kill case traced in source."
+  - id: D6
+    severity: minor
+    phase: 05-implementation
+    disposition: standing_review_reading
+    summary: "--env values remain in shell history and in ps until setproctitle. Review accepted this. Not a ship decision of this judgment."
+  - id: THREAT-010
+    severity: minor
+    phase: 03-threat-model
+    disposition: standing_review_reading
+    summary: "Parallel isolation of shared resources is the adopter's job. With no --env the runner prints a warn line. MIT-009."
 undischarged: []
 discharged: []

@@ -1,24 +1,63 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 14-judgment
 skill: final-judgment
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 2da13adfd2e776de2b4e0c1d7eb64c3ca20f3e3b
+started_at: '2026-10-26T19:27:22Z'
+completed_at: '2026-10-26T19:36:00Z'
 resolved_model:
   profile: judgment_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
-next: learn
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+  provider: xAI
+  model: grok-4.7
+outputs:
+- final.md
+- residual-risk.md
+- evidence.yml
+blocking: []
+findings:
+- id: JUDGE-001
+  severity: major
+  summary: BLOCKED at 2da13ad on REV-001. Transaction#commit! renames metadata.yml
+    before the handoffs. A kill in that window leaves phase_reopenings claiming a
+    reset while the handoffs stay complete, and change close can succeed. AC-017 and
+    REQ-022 are unmet. PLAN-005 called the window visible. Visibility does not stop
+    close. Not accepted.
+  failure: Kill the process after metadata.yml is renamed and before the handoff renames
+    during phase reopen verify on a judged record. The history entry says those phases
+    were reset, the handoffs are still complete, and change close can succeed on the
+    old evidence.
+- id: JUDGE-002
+  severity: major
+  summary: BLOCKED on REV-002. An empty discharged_at is discharged in the CLI, ci,
+    and change close, and open in the released table. Release.lint does not reject
+    it. A judgment-carried item with that value is added to the close confirmation
+    list. Not accepted.
+  failure: Set discharged_at to an empty string on a release item. change status reports
+    0 open items, the UI row says open, and a from-judgment item is treated as confirmed
+    on change close.
+- id: JUDGE-003
+  severity: info
+  summary: Accounted and not the return reason. REV-003 (D3, gate SKIP exit 0), REV-004
+    (docs/user and harness-eval cases; remediation cannot write those trees), REV-005,
+    REV-006, REV-007, EVAL-F3, EVAL-F4, EVAL-F5, the look-alike residual, the non-empty
+    hand-edited discharge under TB-3, ATK-005, ATK-006, D6, and THREAT-010. Verification,
+    evaluation, and attack are current for 529e749. No code diff in lib, exe, test,
+    spec, or infra from that commit to 2da13ad. Nothing is undischarged.
+next: remediate
+notes: Fresh-context judgment under final-judgment permissions, treated as policy.
+  Read the change record through review and the source cited in final.md. Did not
+  edit any other phase, did not change requirements, did not run phase run, and did
+  not read harness-evals. Did not inject the kill or re-run the suite. The outcome
+  is recorded in final.md. next is remediate because workflow.yml sends a blocked
+  judgment there. Provider xAI, different from implementation and remediation (both
+  Anthropic).
+executed_by:
+  runner: soft-foundry phase run
+  shell: grok
+  fresh_context: true
+  started_at: '2026-10-26T19:27:22Z'
+  finished_at: '2026-10-26T19:36:08Z'
+  exit_status: 0
+  previous_phase: review
+  session_id: 88a8b7e3-e438-4dbd-9293-a8f17af4a136
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"
