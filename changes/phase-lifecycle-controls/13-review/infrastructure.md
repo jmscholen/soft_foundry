@@ -2,7 +2,7 @@
 
 ## Scope reviewed
 
-Loaded `.ai/rules/infrastructure.md`. `surfaces.infrastructure` is false. `.ai/repository.yml` records `infrastructure.iac.tools` as empty and `infrastructure.detected` as GitHub Actions only, with the rationale that this is a library gem and CI is the only automation. The branch diff from `c7229c87` to `c3a971eb` does not change `infra/` or `.github/`. No Terraform, OpenTofu, Pulumi, or CloudFormation source was added.
+Loaded `.ai/rules/infrastructure.md`. `surfaces.infrastructure` is false. `.ai/repository.yml` records `infrastructure.iac.tools` as empty and `infrastructure.detected` as GitHub Actions only, with the rationale that this is a library gem and CI is the only automation. The branch diff from `c7229c87` (merge-base with `main`) to `2be4aff` does not change `infra/` or `.github/`. No Terraform, OpenTofu, Pulumi, or CloudFormation source was added.
 
 ## Findings
 

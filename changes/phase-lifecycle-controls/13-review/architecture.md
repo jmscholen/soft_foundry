@@ -2,15 +2,17 @@
 
 ## Scope reviewed
 
-Loaded `.ai/rules/architecture.md`, `.ai/rules/general.md`, `.ai/rules/ruby.md`, `.ai/rules/errors.md`, `.ai/rules/dependencies.md`, `.ai/rules/git.md`, `.ai/rules/learned.md`, and `.ai/rules/testing.md` (the implementation baseline plus the discovered Ruby and testing rules). Compared the new types with the existing CLI, gate, and change-record layering, and with decisions D1 through D10.
+Loaded the implementation baseline and the discovered language and testing rules: `.ai/rules/general.md`, `.ai/rules/architecture.md`, `.ai/rules/ruby.md`, `.ai/rules/errors.md`, `.ai/rules/dependencies.md`, `.ai/rules/git.md`, `.ai/rules/learned.md`, and `.ai/rules/testing.md`. Compared `PhaseReopen`, `ParallelRun`, `Release`, `RecordLock`, `SafeWrite`, and `ChangeRecord::Transaction` with the existing CLI, gate, and change-record layering, and with decisions D1 through D10, at `2be4aff`.
 
 ## Findings
 
 | ID | Severity | Location | Finding | Failure it prevents | Rule or requirement |
 | --- | --- | --- | --- | --- | --- |
-| REV-001 | major | `ChangeRecord::Transaction` | The multi-file write is staged, then committed as separate renames with metadata first. That is not one write. See the functional review for the input and the wrong result. | Same as REV-001 in `functional.md`: a kill between renames leaves a history entry for a reset the handoffs do not show, and close can succeed. | `.ai/rules/general.md` (invariants enforceable where appropriate); `.ai/rules/errors.md` (a failure must not look like success); AC-017 |
+| REV-008 | minor | `ChangeRecord::Transaction` | The multi-file write is staged, then committed as separate renames, handoffs first and metadata last. That is one lock and not one write. The order closes the previous failure (a history entry for a reset the handoffs do not show). It does not make the two halves atomic. See `functional.md`. | Same as REV-008 in `functional.md`: a kill or a raised error between renames leaves pending handoffs, no history entry, and a leftover temp file. | `.ai/rules/general.md` (invariants enforceable where appropriate); `.ai/rules/errors.md` (a failure must not look like success); AC-017 |
 
-No other architecture finding. The new behavior sits in `PhaseReopen`, `ParallelRun`, `Release`, `RecordLock`, and `SafeWrite`, and the CLI calls them. The guard still resolves the skill. The gate's meaning for a pending phase is unchanged (D3, REV-003). No new dependency was added. Errors are `TargetError` or `ArgumentError` and name the next command. Red commits for the new tests are recorded by implementation (IMPL-006); verification re-confirmed `053562b`.
+No other architecture finding. The CLI calls the new types. The guard still resolves the skill. The gate's meaning for a pending phase is unchanged (D3, REV-003). No new dependency was added. Errors are `TargetError` or `ArgumentError` and name the next command. Rescue of `StandardError` in `ParallelRun#run` and `Guard#decide` records or refuses the call. It does not turn the failure into a silent success.
+
+The remediation tests for the rename order and the blank `discharged_at` have no red commit (VER-002). Remediation recorded why: the pre-commit hook runs `ci`, which fails while downstream evidence is stale, and the hook was not bypassed. The original slices still have the red commits named in IMPL-006. Verification re-confirmed `053562b`. That gap is recorded. It is not a new defect in the behavior.
 
 ## Deviation D2, accepted
 
@@ -18,4 +20,4 @@ No other architecture finding. The new behavior sits in `PhaseReopen`, `Parallel
 
 ## Conformance
 
-Conforms with REV-001. Boundaries, dependency direction, and the recorded decisions match `.ai/rules/architecture.md`. D2 is the approved reading of downstream.
+Conforms with REV-008. Boundaries, dependency direction, and the recorded decisions match `.ai/rules/architecture.md`. D2 is the approved reading of downstream. The previous REV-001 (metadata renamed first) is not the code at this commit.
