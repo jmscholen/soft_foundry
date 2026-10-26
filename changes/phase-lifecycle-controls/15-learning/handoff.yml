@@ -1,24 +1,40 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 15-learning
 skill: learning
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 89d3520475f5eeeebdc0256c8afbe1d3c2c092fa
+started_at: '2026-10-26T20:30:58Z'
+completed_at: '2026-10-26T20:40:00Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- findings.md
+- proposed-rules.md
+- proposed-evals.md
+- instincts.yml
+blocking: []
+findings:
+- id: LEARN-001
+  severity: info
+  summary: Five instincts written, none promoted. Proposed rules and harness evals
+    are listed for a later governance change.
+- id: LEARN-002
+  severity: info
+  summary: Residuals carried from judgment stay unmet (AC-017, REV-009 U+00A0, REQ-027
+    docs and eval cases). Proposed evals include discharged-agreement, which would
+    currently fail.
 next: done
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: Fresh-context learning under learning permissions, treated as policy. Wrote
+  only under 15-learning. Did not promote instincts or edit .ai/.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-26T20:30:58Z'
+  finished_at: '2026-10-26T20:31:59Z'
+  exit_status: 0
+  previous_phase: judge
+  session_id: 362df1d8-3df4-42b1-afb5-3342cf5667c8
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"
