@@ -18,4 +18,3 @@
 ✓ pass eval shared-core-change-stales-scoped-record: verify evidence current fail, as expected
 ✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
 ✓ pass eval: 18 passed, 0 failed, 0 errors, 1 skipped
-exit=0

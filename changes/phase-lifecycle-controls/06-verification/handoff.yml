@@ -1,10 +1,10 @@
 ---
 phase: 06-verification
 skill: verification
-status: pending
-commit_sha: 4c79227f1433cfaf80b77d796c735aba08e5863e
+status: complete
+commit_sha: 7342f98395f31c9b541c505e2cb3a406711dacb4
 started_at: '2026-10-26T14:42:12Z'
-completed_at: '2026-10-26T15:20:00Z'
+completed_at: '2026-10-26T15:35:00Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -16,32 +16,29 @@ outputs:
 - changes/phase-lifecycle-controls/06-verification/evidence/rake-test.txt
 - changes/phase-lifecycle-controls/06-verification/evidence/check.txt
 - changes/phase-lifecycle-controls/06-verification/evidence/eval.txt
+- changes/phase-lifecycle-controls/06-verification/evidence/prior-run-4c79227/
 blocking: []
 findings:
 - id: VER-001
-  severity: major
-  summary: 'Full suite fails: 781 runs, 2 failures. guard_session_marker_test.rb:72
-    and phase_run_parallel_test.rb:153 assume the real .ai/workflow.yml has no isolated_phases;
-    commit 4c79227 added it, and the fixtures (with_parked_change(isolated: false),
-    the parallel refusal fixture) do not strip the copied key. Test-fixture defects,
-    not confirmed product defects; the no-key refusal behaviour is currently undemonstrated.
-    Fix the fixtures (implementation or remediation), then rerun verify.'
+  severity: minor
+  summary: Full suite, check and eval pass at 7342f98 (781 runs, 0 failures; 18 evals
+    passed, 1 skipped). The earlier failures (isolated_phases fixtures at 4c79227)
+    are fixed; that failed run is kept in evidence/prior-run-4c79227/.
 - id: VER-002
   severity: minor
-  summary: check (16 phases, 17 skills) and eval (18 passed, 1 skipped) pass at this
-    commit. Red commit 053562b was confirmed to hold test/record_lock_test.rb; the
-    other red commits listed in IMPL-006 were not individually re-confirmed.
-next: implement
+  summary: Red commit 053562b confirmed to hold test/record_lock_test.rb; the other
+    red commits listed in IMPL-006 were not individually re-confirmed.
+next: evaluate
 notes: Suite run with MAILTRAP_API_KEY and PERSONAL_SENDGRID_API_KEY unset. No code
-  or tests edited. Failures preserved in evidence/rake-test.txt. Shell guard enforcement
-  not verified in this session.
+  or tests edited. Prior failed run preserved in evidence/prior-run-4c79227/. Shell
+  guard enforcement not verified in this session.
 executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-26T14:42:12Z'
-  finished_at: '2026-10-26T14:53:27Z'
+  started_at: '2026-10-26T15:06:17Z'
+  finished_at: '2026-10-26T15:17:09Z'
   exit_status: 0
-  previous_phase: implement
-  session_id: b2fba010-6fbe-493f-98d0-d9296b2a4dbe
+  previous_phase: verify
+  session_id: cdfc7f26-0bc5-45ba-aae1-801e645be9f1
   cwd: "/Users/jscholen-iou/dev/soft_foundry"

@@ -1,13 +1,13 @@
 size: full_at_verify
 full_suite:
-  tree: 8e1eb90f9645106949003ad250ddb85019dd6986
+  tree: b0dd5fbac2c474a4455fe35f74c6ec4688ae93e1
   command: env -u MAILTRAP_API_KEY -u PERSONAL_SENDGRID_API_KEY bundle exec rake test
-  outcome: failed
+  outcome: passed
 checks:
   - id: CHECK-001
     kind: tests
     command: env -u MAILTRAP_API_KEY -u PERSONAL_SENDGRID_API_KEY bundle exec rake test
-    result: fail   # 781 runs, 5999 assertions, 2 failures, 0 errors, 0 skips
+    result: pass   # 781 runs, 6004 assertions, 0 failures, 0 errors, 0 skips
     evidence: evidence/rake-test.txt
     criteria: []
     red_commit: 053562b
@@ -24,10 +24,3 @@ checks:
     result: pass   # 18 passed, 0 failed, 0 errors, 1 skipped
     evidence: evidence/eval.txt
     criteria: []
-  - id: CHECK-004
-    kind: tests
-    command: ruby -Ilib -Itest test/guard_session_marker_test.rb -n test_a_parallel_marker_without_a_declared_list_is_a_violation
-    result: fail   # rerun in isolation: reproduces deterministically
-    evidence: evidence/rake-test.txt
-    criteria: []
-commit_sha: 4c79227f1433cfaf80b77d796c735aba08e5863e

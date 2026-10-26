@@ -1,45 +1,9 @@
-Run options: --seed 4480
+Run options: --seed 15188
 
 # Running:
 
-................................................................................................................................................................................................................................................................................................................F................................................................F...........................................................................................................................................................................................................................................................................................................................................................................................................................
+.............................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................
 
-Finished in 610.206693s, 1.2799 runs/s, 9.8311 assertions/s.
+Finished in 602.995256s, 1.2952 runs/s, 9.9570 assertions/s.
 
-  1) Failure:
-PhaseRunParallelTest#test_a_workflow_without_isolated_phases_refuses_and_names_the_key [test/phase_run_parallel_test.rb:153]:
-["evaluate", "attack", "--parallel"]: billing: subscription (no ANTHROPIC_API_KEY in the environment, so claude bills to its own login); no budget applies
-         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
-parallel: running evaluate, attack of c1 at once, each in its own fresh session; executed_by recorded in each handoff
-phase evaluate: claude exited 0
-07-evaluation  in_progress  PASS
-  ✓ pass handoff identity
-  ! warn phase in progress: not yet gated
-phase evaluate: pass
-phase attack: claude exited 0
-08-attack  in_progress  PASS
-  ✓ pass handoff identity
-  ! warn phase in progress: not yet gated
-phase attack: pass
-parallel: 2 phases run, 2 passed, 0 failed
-advisory: 1 issue to address before c1 goes live (informational, does not block the gate)
-  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
-! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the evaluation skill's permissions (`soft-foundry hooks install --claude`)
-! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the adversarial-testing skill's permissions (`soft-foundry hooks install --claude`)
-warn: isolation of what the sessions share (a database, a port, a cache, a file) is the adopter's responsibility, and this run passed no --env; give each session its own with --env NAME=VALUE, using {phase} for a distinct value
-.
-Expected: 1
-  Actual: 0
-
-  2) Failure:
-GuardSessionMarkerTest#test_a_parallel_marker_without_a_declared_list_is_a_violation [test/guard_session_marker_test.rb:72]:
-Expected false to be truthy.
-
-781 runs, 5999 assertions, 2 failures, 0 errors, 0 skips
-rake aborted!
-Command failed with status (1)
-/Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/bundle:25:in `load'
-/Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/bundle:25:in `<main>'
-Tasks: TOP => test
-(See full trace by running task with --trace)
-exit=1
+781 runs, 6004 assertions, 0 failures, 0 errors, 0 skips
