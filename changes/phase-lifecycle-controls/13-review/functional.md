@@ -1,12 +1,26 @@
 # Functional Review
 
 ## Scope reviewed
-TBD
+
+Reviewed at `c3a971eb6dfd494b48cc06a48ca235205d654eae` against `02-specification/requirements.yml` (REQ-001 through REQ-027) and `02-specification/acceptance-criteria.yml` (AC-001 through AC-051). Code read: `lib/soft_foundry/phase_reopen.rb`, `parallel_run.rb`, `release.rb`, `record_lock.rb`, `safe_write.rb`, `text.rb`, `change_record.rb` (lock, transaction, release predicates, judgment outcome), `control_plane.rb#downstream` and `#isolated_phases`, `phase_runner.rb` (refusal, stale reopen, parallel prompt), `cli.rb` (reopen, parallel run, release, discharge, close, ci, status, usage), `check.rb` (isolated-phase lint and release-block lint), `snapshot.rb` timeline, `processes.rb#phase_of`, and `guard.rb` marker resolution. Evidence read: implementation decisions and deviations, verification at `529e749`, evaluation at `6357775`, attack at `1ce44de`, remediation summary. Later commits through `c3a971e` change only the change record.
 
 ## Findings
+
 | ID | Severity | Location | Finding | Failure it prevents | Rule or requirement |
 | --- | --- | --- | --- | --- | --- |
-| REV-TBD | blocking / major / minor | TBD | TBD | TBD: the concrete input or state and the wrong result (required for blocking and major) | TBD |
+| REV-001 | major | `lib/soft_foundry/change_record.rb` `Transaction#commit!` | A reopen stages every file, then renames `metadata.yml` before the handoffs. A crash between those renames leaves `phase_reopenings` claiming a reset while the handoffs stay `complete`. Staging failures are rolled back (`test_a_failure_while_staging_leaves_the_record_byte_identical`); a failure between renames is not. | Kill the process after the metadata rename and before the handoff renames during `phase reopen verify` on a judged record. The history entry says verify and everything after it were reset, the handoffs are still complete, and `change close` can still succeed on that evidence. | REQ-022, AC-017, MIT-007 |
+| REV-002 | major | `ChangeRecord#open_release_items`; `ui/assets/app.js` `releaseSection`; `Cli#change_close` | An empty `discharged_at` is truthy in Ruby and falsy in JavaScript. The CLI, `ci`, and `change close` treat the item as discharged. The released table shows it as open. `Release.lint` does not reject the empty value (ATK-004). | Set `discharged_at: ""` on a release item. `change status` reports 0 open items. The UI row says open. A judgment-carried item with that value is added to the close confirmation list, so `change close` can record it as confirmed. | REQ-019, REQ-020, REQ-025, AC-042 |
+| REV-003 | minor | `lib/soft_foundry/gate.rb` pending status; deviation D3 | `soft-foundry gate` on a reopened phase prints SKIP and exits 0, the same as a phase that never started. `change close` still refuses, and nothing in this change marks a phase complete. D3 is accepted: REQ-023 forbids changing what a pending gate means. The exit-code reading of AC-014 remains for the specification owner. | Run `soft-foundry gate verify` after `phase reopen verify`. A caller that treats exit 0 as "this phase passed" continues. The status line says pending. | AC-014, REQ-007, REQ-023 |
+| REV-005 | minor | `Cli#status` | Plain `change status` prints the released line and does not print `phase_reopenings`. The snapshot timeline (`change status --json` and the UI) does, including reason, reset phases, commit, and the automatic label. | Reopen a phase, then run `change status` with no `--json`. The text has no reopen line, so a log scraped from that command has no record of the reset. | AC-049, REQ-026 |
+| REV-006 | minor | `PhaseReopen#reopen`; `PhaseRunner#begin!` | Reopen clears `commit_sha`, `completed_at`, `executed_by`, and `outputs`. It leaves `started_at`. The next `phase run` sets `started_at` only when it is absent, so the new attempt keeps the previous start time. | Complete verify, reopen it, and run it again. The handoff and the timeline still say the phase started at the first run, which is before the reopen. | REQ-003, REQ-026 |
+
+## Accepted deviations
+
+- D2. `ControlPlane#downstream` follows lifecycle order plus `next` edges from the reopened phase and from phases reached by such an edge. Conditional edges are not followed, so reopening evaluate leaves verify complete (AC-001) and reopening remediate resets verify (AC-002). `downstream(judge)` is `[learn]`. REQ-002's "every transitions edge" reading cannot satisfy both criteria. Accepted in `architecture.md`.
+- D4. A stale complete phase was already allowed by `PhaseRunner#refusal`. Auto-reopen runs after the other refusals. AC-008 and AC-009 hold.
+- D5. Parallel preflight refuses `--panel`, `--max-rounds`, and `--shell-arg`, and a missing `isolated_phases` list. `current_phase` after the run steps over pending skippable phases. The runner tells each session the start HEAD and does not rewrite `commit_sha`.
+- D8. `ci` on an unmerged released record with no open items prints a notice and passes. REQ-020 and AC-040 speak about a merged change. The merged case still fails and names `change close`.
 
 ## Conformance
-TBD or N/A with justification
+
+Does not fully conform. REV-001 and REV-002 are major. Reopen of a live record, parallel preflight, release and discharge on the tool's own path, the session-marker refusal, and the released consumers behave as the acceptance criteria describe, including the deviations accepted above. Verification (784 runs, 0 failures at `529e749`), evaluation (journeys pass at `6357775`), and the second attack (`1ce44de`, ATK-001 through ATK-003 not reproduced) were read and not re-run.
