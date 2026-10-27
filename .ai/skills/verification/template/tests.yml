@@ -25,3 +25,7 @@ checks:
     # advised as having no failing-test-first evidence.
     # red_commit: TBD
     # test_path: TBD
+    # Optional, per check, where the change touches a path the repository
+    # profile lists under access_control (.ai/rules/access-control-parity.md):
+    # protection: in_force   # in_force | disabled | not_applicable
+    # protection_note: why the protection was disabled (required when disabled)

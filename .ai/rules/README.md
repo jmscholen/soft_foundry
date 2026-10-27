@@ -13,3 +13,5 @@ The rule loader must prefer repository-specific standards when they are stricter
 Infrastructure discovery must recognize Infrastructure as Code, including Terraform, OpenTofu, Pulumi, CloudFormation/CDK and other repository-native systems. The presence of IaC makes `infrastructure.md` applicable; tool-specific sections or future rule files may further specialize it.
 
 `learned.md` holds instincts promoted from change records by `soft-foundry learn promote` (each with the change that learned it, its confidence, and its evidence), at or above the threshold in `.ai/policies/learning.yml`. Implementation and exploration load it with the baseline rules; it is edited only through a change record.
+
+`access-control-parity.md` applies when the repository profile declares `access_control` globs and a change touches a matching path: verification states the protection each check ran with, and the gate checks that the statement is present (not that it is true).
