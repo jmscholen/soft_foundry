@@ -7,7 +7,7 @@ require_relative "lifecycle_fixture"
 class CliChangeNewOptionsTest < Minitest::Test
   include LifecycleFixture
 
-  def meta(dir, slug) = YAML.safe_load_file(File.join(dir, "changes", slug, "metadata.yml"))
+  def meta(dir, slug) = YAML.safe_load_file(File.join(dir, "changes", slug, "metadata.yml"), permitted_classes: [Time])
 
   def test_type_and_risk_are_recorded
     with_fixture_repo do |dir|

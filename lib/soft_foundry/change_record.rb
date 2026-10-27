@@ -4,6 +4,8 @@ require "fileutils"
 require "time"
 require "yaml"
 require_relative "text"
+require_relative "display"
+require_relative "errors"
 require_relative "record_lock"
 require_relative "safe_write"
 require_relative "advisory"
@@ -16,13 +18,31 @@ module SoftFoundry
 
     attr_reader :root, :slug, :control_plane
 
-    def self.create(root, slug, control_plane:, title: nil, branch: nil, worktree: nil, track: nil, scope: nil, now: Time.now)
+    # The one source of the allowed task types and risks (`change new --type`
+    # and `--risk`). `check` lints the metadata template's comments and the
+    # risk names in .ai/workflow.yml against these.
+    TYPES = %w[feature fix refactor docs infrastructure security chore].freeze
+    RISKS = %w[low medium high].freeze
+
+    # `value` when it is exactly one of `allowed` (no case folding or
+    # trimming), otherwise a TargetError naming the flag and the choices.
+    def self.vocabulary!(flag, value, allowed)
+      return value if allowed.include?(value)
+      raise TargetError, "#{flag} #{Display.safe(value).inspect} is not allowed; use one of: #{allowed.join(', ')}"
+    end
+
+    def self.create(root, slug, control_plane:, title: nil, branch: nil, worktree: nil, track: nil, scope: nil, type: nil, risk: nil, now: Time.now)
       record = new(root, slug, control_plane: control_plane)
       raise "change record already exists: #{record.dir}" if record.exists?
       track ||= control_plane.default_track
       raise ArgumentError, "unknown track '#{track}'; .ai/workflow.yml defines: #{control_plane.track_names.join(', ')}" unless control_plane.track(track)
+      vocabulary!("--type", type, TYPES) if type
+      vocabulary!("--risk", risk, RISKS) if risk
+      forced = control_plane.track_forced_by_risk(risk) if risk
+      raise TargetError, "--risk #{risk} forces the #{forced} track; drop --track #{track} (or use --track #{forced})" if forced && forced != track
       record.send(:scaffold, title: title || slug, branch: branch || slug, worktree: worktree || root, track: track, now: now)
       record.send(:declare_scope!, scope) if scope&.any?
+      record.send(:declare_classification!, type: type, risk: risk)
       record
     end
 
@@ -385,6 +405,17 @@ module SoftFoundry
       block = YAML.dump("scope" => globs).delete_prefix("---\n")
       body = SoftFoundry.read_text(path)
       body = body.match?(/^scope:/) ? body.sub(/^scope:.*\n(?:[ \t]+- .*\n)*/) { block } : "#{body.chomp}\n#{block}"
+      File.write(path, body)
+    end
+
+    # The task type and risk given to `change new`, as a text edit so the
+    # template's comments survive. Both were validated against fixed
+    # vocabularies, so they are plain words.
+    def declare_classification!(type:, risk:)
+      path = File.join(dir, "metadata.yml")
+      body = SoftFoundry.read_text(path)
+      body = body.sub(/^type: TBD/) { "type: #{type}" } if type
+      body = body.sub(/^risk: TBD/) { "risk: #{risk}" } if risk
       File.write(path, body)
     end
 

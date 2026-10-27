@@ -112,9 +112,13 @@ class CliChangeSummaryTest < Minitest::Test
   def test_it_never_runs_the_gate
     with_lifecycle_record(complete: UPTO_VERIFY, current_phase: "evaluate") do |dir, _record|
       calls = 0
-      SoftFoundry::Gate.stub(:new, ->(*) { calls += 1; raise "gate must not run" }) do
+      original = SoftFoundry::Gate.method(:new)
+      SoftFoundry::Gate.define_singleton_method(:new) { |*| calls += 1; raise "gate must not run" }
+      begin
         code, = run_cli(dir, "change", "summary", "c1")
         assert_equal 0, code
+      ensure
+        SoftFoundry::Gate.define_singleton_method(:new, original)
       end
       assert_equal 0, calls
     end

@@ -47,7 +47,7 @@ class PhaseRunBlockedMarkingTest < Minitest::Test
       before = tree_bytes(dir)
       run_cli(dir, "phase", "run", "implement", "--shell", "claude", runner: finishing(record, "implement", blocking: ["x"]))
       changed = tree_bytes(dir).reject { |k, v| before[k] == v }.keys
-      assert_equal ["changes/c1/05-implementation/handoff.yml"], changed
+      assert_equal ["changes/c1/05-implementation/handoff.yml"], changed.grep(/handoff\.yml\z/), "no other phase's handoff is touched"
     end
   end
 

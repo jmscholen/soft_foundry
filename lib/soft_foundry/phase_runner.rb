@@ -202,6 +202,26 @@ module SoftFoundry
       end
     end
 
+    # A session that wrote its handoff `complete` while listing blocking
+    # items has contradicted itself; the gate would refuse it afterwards.
+    # Sets that one handoff to `blocked` now, keeping `blocking` as written
+    # and adding a sentence to `notes`. `phase` is the runner's own
+    # argument, never read from the handoff. Returns the item count when it
+    # marked the phase, nil when there was nothing to mark; a lock or write
+    # failure raises and leaves the handoff as it was.
+    def mark_blocked!(phase)
+      count = nil
+      @record.update_handoff(phase) do |h|
+        blocking = h["blocking"]
+        next unless h["status"] == "complete" && blocking.is_a?(Array) && !blocking.empty?
+        count = blocking.size
+        h["status"] = "blocked"
+        note = "Marked blocked by soft-foundry phase run: the session wrote status complete while listing #{count} blocking item(s)."
+        h["notes"] = [h["notes"].to_s.strip, note].reject(&:empty?).join(" ")
+      end
+      count
+    end
+
     # The newest session of `shell` the prompt hook recorded in this
     # repository since `since`, or nil (hook not installed, or none fired).
     def recorded_session(ledger, shell:, since:)
