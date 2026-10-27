@@ -1,10 +1,10 @@
 ---
 phase: '08-attack'
 skill: adversarial-testing
-status: pending
-commit_sha: 821f1e8ffc2ad8de1fe70af87eabe048e1ea222f
+status: complete
+commit_sha: 3e356a192053aea57572f94afa3a15d7563ee647
 started_at: '2026-10-27T02:32:52Z'
-completed_at: '2026-10-27T02:38:19Z'
+completed_at: '2026-10-27T03:50:00Z'
 resolved_model:
   profile: adversarial_high
   provider: anthropic
@@ -28,6 +28,11 @@ outputs:
 - evidence/summary-hostile-handoffs.txt
 - evidence/summary-shape-hiding.txt
 - evidence/summary-symlink.txt
+- evidence/rerun-doors-at-head.txt
+- evidence/rerun-access-control-globs-at-head.txt
+- evidence/parallel-run-tests-at-head.txt
+- evidence/parallel-exit-edges.txt
+- evidence/parallel-exit-edges.rb
 blocking: []
 findings:
 - id: ATK-001
@@ -50,19 +55,26 @@ findings:
   summary: change new silently ignores --risk=low / --type=docs (equals form) and
     a repeated --type, leaving the template placeholder with no message. No lower
     risk can be recorded. ATTACK-010.
+- id: ATK-005
+  severity: low
+  summary: A parallel run whose session writes status blocked itself prints phase
+    fail but exits 0 (blocked is a gate warning); same rule as the single-phase path.
+    The REV-001 case, complete with blocking, now exits 2. ATTACK-012.
 next: remediate
-notes: Size full_route_sweep (no declared scope); the change has no routes, so the
-  five CLI and gate doors were attacked in a scratch clone at the commit, with payloads
-  shown as visible escapes. 7 of 11 cases denied, 4 low-severity violations, none
-  lets a blocker pass the gate or lowers a risk. The guard hook was not verified as
-  installed; the write boundary was kept by policy.
+notes: Rerun at 3e356a1 after the REV-001 remediation (only parallel_run changed since
+  821f1e8); CLI doors and glob lint rerun with the same outcomes, the new exit path
+  attacked as ATTACK-012. Size full_route_sweep (no declared scope), no routes, so
+  the CLI and gate doors were attacked in a scratch clone with payloads shown as visible
+  escapes. 7 of 12 cases denied, 5 low-severity violations, none lets a blocker pass
+  the gate or lowers a risk. The guard hook was not verified as installed; the write
+  boundary was kept by policy.
 executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-27T02:32:52Z'
-  finished_at: '2026-10-27T02:38:38Z'
+  started_at: '2026-10-27T03:37:13Z'
+  finished_at: '2026-10-27T03:40:14Z'
   exit_status: 0
   previous_phase: evaluate
-  session_id: f3c2044e-b7f6-439e-9364-1180b8127d82
+  session_id: 670f6373-a3a4-47ba-b76b-4d530e1f3be9
   cwd: "/Users/jscholen-iou/dev/soft_foundry"

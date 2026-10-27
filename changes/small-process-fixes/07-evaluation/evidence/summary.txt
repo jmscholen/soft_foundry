@@ -1,4 +1,4 @@
-# EVAL-005/006
+# EVAL-005/006 (HEAD 3e356a1)
 change: demo
 phase: intake (status: intake, risk: low, track: gated)
 phase-status: intake pending
@@ -41,8 +41,8 @@ phase-status: observe pending
 phase-status: review pending
 phase-status: judge pending
 phase-status: learn pending
-note: discover handoff.yml is not valid YAML without aliases ((<unknown>): did not find expected key while parsing a block mapping at line 1 column 1); redo or repair the file
+note: discover handoff.yml is not valid YAML without aliases ((<unknown>): did not find expected node content while parsing a flow node at line 2 column 1); redo or repair the file
 findings: none
 blocking: none
-note: advisories could not be read ((/private/var/folders/v8/684xdbm92vz7dz03clwvpmvr0000gn/T/tmp.WHC3NPEZaW/changes/demo/01-discovery/handoff.yml): did not find expected key while parsing a block mapping at line 1 column 1)
+note: advisories could not be read ((/private/var/folders/v8/684xdbm92vz7dz03clwvpmvr0000gn/T/tmp.ZYdCiz4yzM/changes/demo/01-discovery/handoff.yml): did not find expected node content while parsing a flow node at line 2 column 1)
 rc=0

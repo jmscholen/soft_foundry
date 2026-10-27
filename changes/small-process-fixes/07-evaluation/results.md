@@ -1,6 +1,6 @@
 # Evaluation Results
 
-Commit SHA: 821f1e8ffc2ad8de1fe70af87eabe048e1ea222f
+Commit SHA: 3e356a192053aea57572f94afa3a15d7563ee647
 
 ## Journey outcomes
 | Journey | Criteria | Result | Evidence |
@@ -25,3 +25,6 @@ None.
 
 ## Accessibility observations
 Non-TTY, NO_COLOR=1: no escape bytes in any transcript; outcomes are words; one fact per line with stable prefixes; errors state the fix. No interactive elements, so keyboard and focus checks do not apply.
+
+## Re-run at current HEAD
+All six journeys were re-run against the code at this commit (the REV-001 remediation changed only the parallel-run exit code in `lib/soft_foundry/cli.rb`) in a fresh scratch repository from `soft-foundry init`; transcripts in evidence/ replaced; all passed, zero ESC bytes. The parallel blocked exit code (REV-001) is not exercised live; it is covered by `test/phase_run_parallel_test.rb`.

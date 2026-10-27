@@ -1,4 +1,4 @@
-commit_sha: 821f1e8ffc2ad8de1fe70af87eabe048e1ea222f
+commit_sha: 3e356a192053aea57572f94afa3a15d7563ee647
 notes: Payloads with control or invisible characters are shown as visible escapes (cat -v form, <U+XXXX>, or <0xNN> bytes); none is raw.
 artifacts:
   - path: evidence/mark-blocked-shapes.txt
@@ -43,3 +43,18 @@ artifacts:
   - path: evidence/content-clean-guidance.txt
     case: ATTACK-009
     sha256: 9be525d54c52ea1eb7ae2b8b47ce9867fb83d215f7a39b69ec08bb1f1aaf00d6
+  - path: evidence/rerun-doors-at-head.txt
+    case: ATTACK-001, ATTACK-002, ATTACK-005, ATTACK-008, ATTACK-010
+    sha256: 980018c545fb10add2f2fa38282933e6f45a2f298b7f7aa5bc632dc94e886d7a
+  - path: evidence/rerun-access-control-globs-at-head.txt
+    case: ATTACK-007
+    sha256: 2d111699cade59d8b661f36e9679a849a615db75f3485f458a386484691b2ec1
+  - path: evidence/parallel-run-tests-at-head.txt
+    case: ATTACK-012
+    sha256: 65b775c1aed8f53ec6563aebb371f5838e3c806d35007bab2336a256b43d3eb4
+  - path: evidence/parallel-exit-edges.txt
+    case: ATTACK-012
+    sha256: b40c97223a18412e880204cc7a064326058861fd307d9d0d358e19abbf30f37c
+  - path: evidence/parallel-exit-edges.rb
+    case: ATTACK-012
+    sha256: 606c429c9255b311e520b4477ade7b9ea865984397a1afd22c8e5f1f2906c905

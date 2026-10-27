@@ -1,0 +1,30 @@
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+new=0
+7:type: fix                  # feature | fix | refactor | docs | infrastructure | security | chore
+8:risk: low                  # low | medium | high; a high risk change is always on the gated track (.ai/workflow.yml tracks.forced_by_risk)
+--- equals form / repeated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+7:type: TBD                  # feature | fix | refactor | docs | infrastructure | security | chore
+8:risk: TBD                  # low | medium | high; a high risk change is always on the gated track (.ai/workflow.yml tracks.forced_by_risk)
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+7:type: fix                  # feature | fix | refactor | docs | infrastructure | security | chore
+--- traversal
+soft-foundry: invalid change slug '../../etc'
+soft-foundry: invalid change slug '/tmp/x'
+soft-foundry: no change '../../etc'; known changes: accessibility-advisory; budget-and-openrouter; budget-billing-awareness; change-close-command; control-plane-scan; cross-cli-hooks; cross-provider-review; eq1; factory-readiness; init-command; learning-instincts; lifecycle-tracks; maturity-onboarding; maturity-report; observability-standard-dashboard; ok8; panel-phases; phase-lifecycle-controls; phase-runner; policy-conformance; and 18 more
+--- hostile summary
+phase-status: index pending
+phase-status: observe pending
+phase-status: review pending
+phase-status: judge pending
+phase-status: learn pending
+findings: none
+blocking: attack: a<U+000A> owed: none <U+001B>[2J<U+000D><U+202E><U+200B>
+owed: advisory attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+--- string blocking on blocked phase
+phase-status: attack blocked
+blocking: none
+--- symlink
+phase-status: attack blocked
+blocking: attack: outside-secret

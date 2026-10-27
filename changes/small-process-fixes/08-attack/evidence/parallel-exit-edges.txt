@@ -1,0 +1,9 @@
+EDGE blocked+nonzero session: exit=1
+.EDGE session-declared blocked: exit=0
+parallel: running evaluate, attack of c1 at once, each in its own fresh session; executed_by recorded in each handoff
+phase evaluate: claude exited 0
+phase evaluate: pass
+phase attack: claude exited 0
+phase attack: fail
+parallel: 2 phases run, 1 passed, 1 failed
+2 runs, 0 assertions, 0 failures, 0 errors, 0 skips

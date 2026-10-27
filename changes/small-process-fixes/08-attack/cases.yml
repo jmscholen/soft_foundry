@@ -1,6 +1,6 @@
-commit_sha: 821f1e8ffc2ad8de1fe70af87eabe048e1ea222f
+commit_sha: 3e356a192053aea57572f94afa3a15d7563ee647
 authorization_envelope:
-  target: soft-foundry CLI and gate code at commit 821f1e8 (change small-process-fixes), in a scratch git clone under /tmp
+  target: soft-foundry CLI and gate code at commit 3e356a1 (change small-process-fixes), in a scratch git clone under /tmp
   environment: local
   authorized_by: the change's phase-run contract (attack phase of small-process-fixes, adversarial_high); the repository owner's own tool, no third-party system
   allowed_surfaces:
@@ -133,3 +133,16 @@ cases:
     observed: "summary refused the oversize file (reads at most 262144) and aliases, quickly. mark_blocked! on the nine-level alias bomb returned in well under the 15-second limit. Blocking lists are capped at five by Display.list."
     result: denied
     evidence: [evidence/summary-hostile-handoffs.txt, evidence/mark-blocked-shapes.txt]
+  - id: ATTACK-012
+    threat: THREAT-005
+    violation_attempted: make a parallel run exit 0 while a phase carries a blocker, or lose the non-zero status when blocked and failed sessions combine
+    starting_privilege: author of a handoff.yml written by a phase session
+    steps:
+      - "run the new parallel test file at HEAD (26 runs)"
+      - "session writes status complete with blocking [n] while the other session exits 1"
+      - "session writes status blocked itself (not complete)"
+    expected_safe_behavior: complete-with-blocking is marked blocked and exits 2; session failures keep their higher-precedence status; a self-declared blocked phase prints fail
+    observed: "complete+blocking exits 2 (test passes). With a failing sibling session the exit is 1 (session status wins, as designed). A session that writes status blocked itself prints `phase attack: fail` but the parallel run exits 0, because blocked is a gate warning and mark_blocked! only acts on complete; the single-phase path uses the same rule (marked || result.failed?), so this is parity, not a regression. The blocker is still visible in the printed fail line and in change summary."
+    result: violated
+    severity: low
+    evidence: [evidence/parallel-run-tests-at-head.txt, evidence/parallel-exit-edges.txt, evidence/parallel-exit-edges.rb]

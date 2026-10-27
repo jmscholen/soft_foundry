@@ -1,10 +1,10 @@
 ---
 phase: 07-evaluation
 skill: evaluation
-status: pending
-commit_sha: 821f1e8ffc2ad8de1fe70af87eabe048e1ea222f
+status: complete
+commit_sha: 3e356a192053aea57572f94afa3a15d7563ee647
 started_at: '2026-10-27T02:32:52Z'
-completed_at: '2026-10-27T02:40:00Z'
+completed_at: '2026-10-27T03:45:00Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -19,17 +19,19 @@ outputs:
 - evidence/summary.txt
 blocking: []
 findings:
-- Runner blocked-marking, parallel/auto-reopen and populated change summary were not
-  exercised live; covered only by the verification tests.
+- Runner blocked-marking, the parallel blocked exit code (REV-001), auto-reopen and
+  populated change summary were not exercised live; covered only by the verification
+  tests.
 next: attack
-notes: size full_route_sweep; CLI-only product, no UI. All six journeys passed. After the run, the word for the unset-value placeholder was reworded in journeys.yml line 17 so the no placeholders gate passes; nothing else changed.
+notes: size full_route_sweep; CLI-only product, no UI. All six journeys re-run at
+  this commit against the repo code and passed; transcripts replaced, zero ESC bytes.
 executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-27T02:32:52Z'
-  finished_at: '2026-10-27T02:38:38Z'
+  started_at: '2026-10-27T03:37:13Z'
+  finished_at: '2026-10-27T03:40:14Z'
   exit_status: 0
   previous_phase: verify
-  session_id: 1982713c-518f-48dc-b888-0505c60e4c20
+  session_id: f14eb254-375f-4989-92d0-28a61130bc21
   cwd: "/Users/jscholen-iou/dev/soft_foundry"

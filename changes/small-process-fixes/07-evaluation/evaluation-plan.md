@@ -1,6 +1,6 @@
 # Evaluation Plan
 
-Commit SHA: 821f1e8ffc2ad8de1fe70af87eabe048e1ea222f
+Commit SHA: 3e356a192053aea57572f94afa3a15d7563ee647
 Size: `soft-foundry change size --phase evaluate` gave full_route_sweep (no scope declared, whole repository). This product has no UI or web routes; its "routes" are CLI commands, so the sweep covers the commands this change touches (`change new`, `change summary`, `check`) run for real in a scratch repository created with `soft-foundry init`.
 
 ## Intent being proven

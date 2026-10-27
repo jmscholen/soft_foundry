@@ -1,6 +1,6 @@
 # Attack Plan
 
-Commit SHA: 821f1e8ffc2ad8de1fe70af87eabe048e1ea222f
+Commit SHA: 3e356a192053aea57572f94afa3a15d7563ee647
 
 ## Intent to challenge
 Five small fixes must be safe to run on any adopter's machine: `change new --type/--risk` takes only fixed vocabularies and cannot be used to lower the risk controls; the phase runner marks a self-contradicting handoff blocked and touches only the phase it ran; recorded text echoed by `change summary` and `blocked:` cannot rewrite the terminal or forge facts; the summary and runner cannot be hung or flooded; the `protection stated` gate check cannot be passed by omission or a malformed profile glob.
@@ -15,7 +15,7 @@ Five small fixes must be safe to run on any adopter's machine: `change new --typ
 | THREAT-002 terminal injection | ATTACK-002 |
 | THREAT-003 other-phase write | ATTACK-003 |
 | THREAT-004 concurrency | ATTACK-004 |
-| THREAT-005 hiding blockers | ATTACK-005 |
+| THREAT-005 hiding blockers | ATTACK-005, ATTACK-012 |
 | THREAT-006 protection claim | ATTACK-006 |
 | THREAT-007 hostile glob | ATTACK-007 |
 | THREAT-008 risk/track evasion | ATTACK-010 |

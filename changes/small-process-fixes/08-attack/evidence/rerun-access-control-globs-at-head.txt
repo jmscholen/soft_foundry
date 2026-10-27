@@ -1,0 +1,6 @@
+[""] => ["access_control glob \"\" is empty; declare a path glob or remove it"]
+["["] => ["access_control glob \"[\" has an unclosed [ or {; fix the glob"]
+["**"] => []
+["../x"] => ["access_control glob \"../x\" has a parent-directory segment; use a path inside the repository"]
+["a?b/**"] => []
+["a\nb"] => ["access_control glob \"a\\nb\" has a control character; use a plain path glob"]
