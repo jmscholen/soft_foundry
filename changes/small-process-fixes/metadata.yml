@@ -1,65 +1,28 @@
+---
 change:
   id: small-process-fixes
-  title: Small process fixes - change new --type --risk, runner marks blocked, content-clean guidance, latest-state summary, access-control parity rule
+  title: Small process fixes - change new --type --risk, runner marks blocked, content-clean
+    guidance, latest-state summary, access-control parity rule
 git:
-  worktree: /Users/jscholen-iou/dev/soft_foundry
+  worktree: "/Users/jscholen-iou/dev/soft_foundry"
   branch: change/small-process-fixes
 type: feature
 risk: medium
-track: gated            # gated | iterative (.ai/workflow.yml tracks:); set by `change new --track`
-status: intake          # intake | exploring | in_progress | awaiting_human | judged | released | closed (released: finished and approved, owing the items in `release:`; closed stays the only end state)
-current_phase: intake
-created_at: 2026-10-27T00:29:27Z
-scope: []                  # optional path globs this change owns; empty means the whole repository. Evidence goes stale only for code inside this scope or the repository's shared_core, and the checks are sized from the diff (.ai/policies/check-sizing.yml)
+track: gated
+status: intake
+current_phase: discover
+created_at: 2026-10-27 00:29:27.000000000 Z
+scope: []
 surfaces:
   application: false
   database: false
   infrastructure: false
   security: false
-  accessibility: true    # true when a person perceives or operates the result (UI, CLI output, documents); loads .ai/rules/accessibility.md and enables the go-live accessibility advisories. Set automatically by `change new` when the repository profile records a user-facing framework.
+  accessibility: true
   observability: false
-  policy: false           # true when the change alters what the application collects, shares, retains, protects, or promises in its privacy policy, security policy, or terms; loads .ai/rules/policy-conformance.md and enables the go-live policy advisories. Set automatically by `change new` when the repository profile records a published policy document.
-
-# Human-boundary decisions this change required (.ai/policies/human-boundaries.yml),
-# each recorded once a person made it. While a decision the review says is owed
-# has no entry here, the change is parked with status: awaiting_human.
+  policy: false
 human_decisions: []
-# - boundary: legal commitment
-#   subject: privacy policy, clause 4 (third-party analytics recipient)
-#   decided_by: TBD
-#   decided_at: TBD
-#   decision: approved | declined
-
-# Iterative track only. `soft-foundry change vet` records the person's
-# acceptance of the explored feature and the commit the specification
-# locked at; from then on the phases from implement onward apply as on the
-# gated track. `change reopen` clears it, resets those phases to pending,
-# and appends the reopening here so the history stays in the record.
-vetted: null
-# vetted:
-#   at: 2026-09-16T00:00:00Z
-#   by: name
-#   commit: sha
+vetted:
 reopenings: []
-# - at: 2026-09-16T00:00:00Z
-#   from_commit: sha the change had been vetted at
-#   reason: why the person sent it back to exploring
 phase_reopenings: []
-# One entry per `phase reopen` or automatic reopen by `phase run` (a stale
-# complete phase):
-# - at: 2026-09-16T00:00:00Z
-#   phase: verify
-#   reset: [verify, evaluate]      # phases returned to pending, files kept
-#   from_commit: sha
-#   reason: why the phase was reopened
-#   source: manual                 # manual | auto
-#   previous: complete             # the phase's status before the reset
-# `release:` is added by `change release`; an absent key is valid, an empty
-# one is not.
-
-# Phases the harness would otherwise require, deliberately not run for
-# this change, each with a non-empty rationale. An entry with an empty
-# rationale does not count as a skip - the phase stays required.
 skipped_phases: []
-# - phase: threat_model
-#   rationale: TBD

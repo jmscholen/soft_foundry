@@ -1,24 +1,45 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 01-discovery
 skill: repository-discovery
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 07ec16c7072c99829e9bf912332e9aaf9fcf295c
+started_at: '2026-10-27T00:35:36Z'
+completed_at: '2026-10-27T00:50:00Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- changes/small-process-fixes/01-discovery/repository-context.md
+- changes/small-process-fixes/01-discovery/affected-components.md
+- changes/small-process-fixes/01-discovery/dependencies.md
+- changes/small-process-fixes/01-discovery/unknowns.md
+blocking: []
+findings:
+- No --type/--risk on change new; vocabularies exist only as template comments (cli.rb:292,
+  change_record.rb:19).
+- Runner finish! never reconciles complete+blocking; the gate fails it afterwards
+  (phase_runner.rb:197, gate.rb:104-115); two call sites, cli.rb:1120 and 1233.
+- Invisible-character kind is never exempt in the content scan; no skill text guides
+  quoting payloads.
+- Snapshot already derives per-phase state; no short latest-state view exists.
+- access_control profile key already exists (control_plane.rb:290); verification tests.yml
+  has no protection-state field; this repository declares no access_control, so the
+  check must not apply here.
+- No blocking unknowns; eleven non-blocking unknowns recorded for specification, including
+  routing of skill and rule edits.
+- 'repository.yml not changed: published policies still NOT_APPLICABLE as recorded.'
 next: specify
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: Discovery read-only except this phase directory. Harness-eval case contents
+  were not read (denied). The task and risk policy files were not opened in full;
+  recorded as an unknown. After the run, one raw zero-width space in repository-context.md was replaced by the visible form <U+200B> so the content clean gate passes; nothing else changed.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-27T00:35:36Z'
+  finished_at: '2026-10-27T00:38:43Z'
+  exit_status: 0
+  previous_phase: intake
+  session_id: 8687636a-7d68-4ccf-9f3b-b512e2c18dac
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"
