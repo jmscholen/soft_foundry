@@ -1,0 +1,92 @@
+---
+phase: 14-judgment
+skill: final-judgment
+status: complete
+commit_sha: 9119e406d33be0823bbc4c95fa79ad2ea7264a4f
+started_at: '2026-10-27T03:49:17Z'
+completed_at: '2026-10-27T03:56:00Z'
+resolved_model:
+  profile: judgment_high
+  provider: xai
+  model: grok-4.7
+outputs:
+- final.md
+- residual-risk.md
+- evidence.yml
+blocking: []
+findings:
+- id: JDG-001
+  severity: minor
+  summary: REV-001 is closed. parallel_run exits 2 when it marks a complete-with-blocking
+    handoff, and the new test passed at this HEAD (1 run, 6 assertions, 0 failures).
+- id: JDG-002
+  severity: minor
+  summary: 'REV-002 / ATK-004 accepted: change new ignores equals-form --type and
+    --risk and a repeated --type, so an equals-form high risk does not trip the forced-track
+    refusal. The spaced form is refused. No lower risk is recorded.'
+- id: JDG-003
+  severity: minor
+  summary: 'REV-003 / ATK-001 accepted: change summary prints blocking none and findings
+    none when those fields are a string or mapping. The gate still fails a string
+    blocking value on a complete handoff.'
+- id: JDG-004
+  severity: minor
+  summary: 'REV-004 / ATK-002 accepted: an access_control glob containing a format
+    character matches nothing, so protection stated skips. check still flags the character
+    in .ai/.'
+- id: JDG-005
+  severity: minor
+  summary: 'REV-005 / ATK-003 accepted: change summary follows a symlinked handoff.yml
+    or metadata.yml. Display.safe still escapes control characters. Planting the link
+    takes write access to the record.'
+- id: JDG-006
+  severity: minor
+  summary: 'REV-006 accepted: check_vocabulary does not compare tracks.forced_by_risk
+    keys. The shipped workflow agrees (high: gated).'
+- id: JDG-007
+  severity: minor
+  summary: 'REV-007 accepted: test/display_test.rb embeds raw U+202E, U+200B, U+2028,
+    and U+2066. The new guidance says to build those with source escapes.'
+- id: JDG-008
+  severity: minor
+  summary: 'REV-008 accepted: the warn line after a failed blocked-mark names the
+    exception and does not say what to do next. The gate result follows.'
+- id: JDG-009
+  severity: minor
+  summary: 'REV-009 / VER-001 accepted: the suite fails when it inherits SOFT_FOUNDRY_PHASE
+    and passes with the variable unset (822 runs, 0 failures). Pre-existing. The unset
+    run is the recorded full suite.'
+- id: JDG-010
+  severity: minor
+  summary: 'REV-010 / ATK-005 accepted: a parallel session that writes status blocked
+    itself is tallied as fail and the process exits 0. The single-run path also exits
+    0. The runner-marked complete-with-blocking case exits 2.'
+- id: JDG-011
+  severity: minor
+  summary: 'REV-011 accepted: the parallel exit assertion shares commit 44efb99 with
+    the fix. The recorded red_commit still points at e496c67 and test/protection_stated_test.rb.'
+- id: JDG-012
+  severity: minor
+  summary: 'IMPL-004 accepted as the specified limit: protection stated does not judge
+    whether an in_force claim is true. PANEL-MARK accepted as specified scope: phase
+    run --panel does not call mark_blocked, and the gate still fails that handoff.'
+next: learn
+notes: Outcome APPROVED_WITH_RESIDUAL_RISK at HEAD 9119e40. Required gates intake
+  through review pass, remediation passes, and verification, evaluation, attack, and
+  review evidence is current for this commit. User documentation, FAQ index, and observability
+  are optional and still pending. REV-001 is closed. REV-002 through REV-011 are accepted
+  residuals. No application, test, or infrastructure file was edited. executed_by
+  was left as the runner wrote it. Implement and remediate recorded anthropic; this
+  judgment used xai. The parallel blocked-exit test was re-run here (1 run, 6 assertions,
+  0 failures). soft-foundry gate all passed for every complete phase before this handoff
+  was set complete. Harness-eval cases were not read.
+executed_by:
+  runner: soft-foundry phase run
+  shell: grok
+  fresh_context: true
+  started_at: '2026-10-27T03:49:17Z'
+  finished_at: '2026-10-27T03:57:08Z'
+  exit_status: 0
+  previous_phase: review
+  session_id: b8c4a495-c69e-43e7-9676-101b1e315a5e
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

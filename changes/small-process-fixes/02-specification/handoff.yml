@@ -1,0 +1,40 @@
+---
+phase: 02-specification
+skill: specification
+status: complete
+commit_sha: d35fd54504078a989bb4e9bc28e72c6ce9d3343e
+started_at: '2026-10-27T00:50:11Z'
+completed_at: '2026-10-27T00:51:32Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- changes/small-process-fixes/02-specification/specification.md
+- changes/small-process-fixes/02-specification/requirements.yml
+- changes/small-process-fixes/02-specification/acceptance-criteria.yml
+- changes/small-process-fixes/02-specification/readiness.md
+blocking: []
+findings:
+- 'Vocabularies fixed: types feature|fix|refactor|docs|infrastructure|security|chore,
+  risks low|medium|high, one source of truth linted by check (REQ-002, REQ-003).'
+- Runner marks complete+blocking as blocked on single, parallel and auto-reopened
+  paths; threat model should examine the handoff rewrite (REQ-004..006).
+- change summary is a new subcommand reading recorded state only, no gate run (REQ-008,
+  REQ-009, REQ-017).
+- 'Parity: tests.yml gains protection/protection_note; gate check applies only when
+  profile declares access_control and a changed path matches (REQ-011..014).'
+- 'Left to plan: which phase may edit .ai/rules and .ai/skills text, harness-eval
+  cases (denied here), version bump.'
+next: threat_model
+notes: " After the run, the word for the unset-value placeholder was reworded in specification.md and acceptance-criteria.yml, and one raw zero-width space in specification.md became the visible form <U+200B>, so the no placeholders and content clean gates pass; nothing else changed."
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-27T00:50:11Z'
+  finished_at: '2026-10-27T00:51:38Z'
+  exit_status: 0
+  previous_phase: discover
+  session_id: bdec6431-7e5d-4eb2-8e5e-da9695aba87b
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

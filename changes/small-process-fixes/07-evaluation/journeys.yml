@@ -1,0 +1,51 @@
+commit_sha: 3e356a192053aea57572f94afa3a15d7563ee647
+size: full_route_sweep
+journeys:
+  - id: EVAL-001
+    criteria: [AC-001]
+    persona: maintainer
+    starting_state: fresh repo after soft-foundry init
+    steps: ["soft-foundry change new demo --type fix --risk low"]
+    assertions: ["metadata.yml type: fix, risk: low"]
+    evidence: [evidence/create.txt]
+    result: pass
+  - id: EVAL-002
+    criteria: [AC-002]
+    persona: maintainer
+    starting_state: fresh repo
+    steps: ["soft-foundry change new demo2 (no flags)"]
+    assertions: ["exit 0; type and risk keep the template placeholder value"]
+    evidence: [evidence/create.txt]
+    result: pass
+  - id: EVAL-003
+    criteria: [AC-003, AC-012]
+    persona: maintainer
+    starting_state: fresh repo
+    steps: ["change new d3 --type bogus", "change new d4 --risk huge"]
+    assertions: ["nonzero exit", "no changes/d3 or changes/d4", "message names flag, value and allowed list"]
+    evidence: [evidence/refusals.txt]
+    result: pass
+  - id: EVAL-004
+    criteria: [AC-004]
+    persona: maintainer
+    starting_state: fresh repo
+    steps: ["change new d5 --risk high --track iterative"]
+    assertions: ["refused with rc 1, no record created, message says to drop --track"]
+    evidence: [evidence/refusals.txt]
+    result: pass
+  - id: EVAL-005
+    criteria: [AC-010, AC-011, AC-012, AC-018, AC-019]
+    persona: maintainer
+    starting_state: record with no phases complete; unknown slug
+    steps: ["change summary demo", "change summary nope"]
+    assertions: ["change:, phase:, 16 phase-status:, findings:, blocking:, owed: lines", "unknown slug refused naming known changes", "no ESC bytes", "runs in well under one second"]
+    evidence: [evidence/summary.txt]
+    result: pass
+  - id: EVAL-006
+    criteria: [AC-011, AC-012]
+    persona: maintainer
+    starting_state: discovery handoff.yml replaced with malformed YAML
+    steps: ["change summary demo"]
+    assertions: ["discover shown as unreadable with a note giving the reason and fix", "other lines still print", "exit 0"]
+    evidence: [evidence/summary.txt]
+    result: pass

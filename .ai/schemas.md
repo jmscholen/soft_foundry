@@ -33,6 +33,8 @@ Created from `.ai/templates/handoff.yml`. Field semantics:
 
 `human_decisions` lists the human-boundary decisions (`.ai/policies/human-boundaries.yml`) the change required, each with `boundary`, `subject`, `decided_by`, `decided_at`, and `decision`. While a decision the review says is owed has no entry, the change is parked with `status: awaiting_human`; the phase handoff records what was asked.
 
+`tests.yml` checks may carry optional `protection` (`in_force`, `disabled`, `not_applicable`) and, required for `disabled`, `protection_note`; the verification gate's `protection stated` check reads them when the profile declares `access_control` and a changed path matches (`.ai/rules/access-control-parity.md`). A `phase run` session that leaves `status: complete` with a non-empty `blocking` list has its status rewritten to `blocked` by the runner.
+
 ## Gate semantics
 
 `soft-foundry gate <phase>` evaluates a phase's handoff against `completion.yml`:

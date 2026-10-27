@@ -1,0 +1,21 @@
+complete+blocking: -> 2
+status: blocked
+blocking:
+notes: 'hi Marked blocked by soft-foundry phase run: the session wrote status complete
+  while listing 2 blocking item(s).'
+Complete cased: -> nil
+blocking string: -> nil
+blocking blank: -> 1
+status: blocked
+blocking:
+notes: 'Marked blocked by soft-foundry phase run: the session wrote status complete
+  while listing 1 blocking item(s).'
+status in_progress+blocking: -> nil
+notes non-string: -> 1
+status: blocked
+blocking:
+notes: "[1, 2] Marked blocked by soft-foundry phase run: the session wrote status
+  complete while listing 1 blocking item(s)."
+alias bomb: -> 1
+
+bomb-sum-size: n/a

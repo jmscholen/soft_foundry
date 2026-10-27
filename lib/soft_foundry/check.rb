@@ -9,6 +9,7 @@ require_relative "declarations"
 require_relative "sizing"
 require_relative "git"
 require_relative "release"
+require_relative "change_record"
 
 module SoftFoundry
   # Lints the `.ai/` control plane itself: every phase has a skill, every skill
@@ -32,6 +33,7 @@ module SoftFoundry
       findings.concat(check_transitions)
       findings.concat(check_tracks)
       findings.concat(check_waivers)
+      findings.concat(check_vocabulary)
       findings.concat(check_harness_evals)
       findings.concat(check_panel_phases)
       findings.concat(check_isolated_phases)
@@ -66,6 +68,25 @@ module SoftFoundry
           end
         end
       end
+    end
+
+    # The allowed task types and risks live in ChangeRecord; the metadata
+    # template's comments and the risk names in workflow.yml must agree.
+    def check_vocabulary
+      path = File.join(@plane.dir, "templates", "change", "metadata.yml")
+      return [] unless File.file?(path)
+      body = SoftFoundry.read_text(path)
+      findings = { "type" => ChangeRecord::TYPES, "risk" => ChangeRecord::RISKS }.filter_map do |key, allowed|
+        comment = body[/^#{key}:[^#\n]*#\s*([a-z_]+(?:\s*\|\s*[a-z_]+)*)/, 1]
+        listed = comment.to_s.split("|").map(&:strip)
+        next if listed == allowed
+        Finding.new(:error, "templates/change/metadata.yml: the #{key} comment lists #{listed.empty? ? 'nothing' : listed.join(' | ')} but `change new --#{key}` allows #{allowed.join(' | ')} (ChangeRecord::#{key == 'type' ? 'TYPES' : 'RISKS'}); make them agree")
+      end
+      named = @plane.workflow["waivable_by_risk"]
+      if named.is_a?(Hash) && named.keys.map(&:to_s).sort != ChangeRecord::RISKS.sort
+        findings << Finding.new(:error, "workflow: waivable_by_risk names risks #{named.keys.join(', ')} but `change new --risk` allows #{ChangeRecord::RISKS.join(', ')}; make them agree")
+      end
+      findings
     end
 
     # A panel never writes code, and only lifecycle phases can be panelled.

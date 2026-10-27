@@ -30,3 +30,5 @@ EVALUATION asks whether legitimate behavior succeeds. ATTACK asks whether illegi
 This phase prefers a fresh session: `soft-foundry phase run attack` starts one with only this skill in its prompt and records `executed_by` in the handoff; an attack completed by the session that implemented the change is advised on every gate run.
 
 Run `soft-foundry change size --phase attack` and attack what it names; record the size with the evidence. `touched_doors_plus_smoke` means the doors the change touches plus a sign-in and app-wide smoke test; `full_route_sweep` means every route.
+
+Payloads that contain invisible, zero-width, bidirectional or control characters are written into evidence as visible escapes (for example `<U+200B>` for a zero-width space or `<U+202E>` for a right-to-left override) or are built inside a script with an escape such as `\u{200B}`, never pasted raw. A raw hidden character in evidence fails the `content clean` gate. Record in the manifest or notes that a payload is shown escaped.

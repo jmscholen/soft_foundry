@@ -1,0 +1,41 @@
+---
+phase: '09-remediation'
+skill: remediation
+status: complete
+commit_sha: f90f17af0e1d3f2edbcf1cbca425cc655be1780c
+started_at: '2026-10-27T02:59:00Z'
+completed_at: '2026-10-27T03:23:27Z'
+resolved_model:
+  profile: coding_high
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- summary.md
+- lib/soft_foundry/cli.rb
+- test/phase_run_parallel_test.rb
+blocking: []
+findings:
+- id: REM-001
+  severity: major
+  summary: 'REV-001 fixed: parallel_run now exits 2 when a phase was marked blocked,
+    like the single-run path. New test in test/phase_run_parallel_test.rb. Full suite
+    with SOFT_FOUNDRY_PHASE unset: 822 runs, 0 failures. Code is uncommitted at the
+    recorded HEAD.'
+- id: REM-002
+  severity: minor
+  summary: REV-002 through REV-009 and ATK-001 through ATK-004 were not fixed in this
+    pass; they must be accounted for again at the next judgment.
+next: verify
+notes: Edits to lib/ and test/ are uncommitted; commit_sha is the HEAD they apply
+  to. Verification, evaluation, attack, review, and judgment evidence are stale and
+  must rerun. Evaluation should exercise the parallel blocked exit status.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-27T02:59:00Z'
+  finished_at: '2026-10-27T03:23:32Z'
+  exit_status: 0
+  previous_phase: judge
+  session_id: 5f2c45e8-3f8b-4955-9230-87494dd1b0a2
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

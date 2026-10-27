@@ -25,6 +25,8 @@ require_relative "learning"
 require_relative "content_scan"
 require_relative "change_index"
 require_relative "snapshot"
+require_relative "change_summary"
+require_relative "display"
 require_relative "ui/server"
 require_relative "processes"
 require_relative "session_ledger"
@@ -290,8 +292,10 @@ module SoftFoundry
       sub = @argv.shift
       case sub
       when "new"
-        slug = @argv.shift or raise ArgumentError, "Usage: soft-foundry change new <slug> [--title TITLE] [--branch BRANCH] [--track TRACK] [--scope GLOB[,GLOB...]]"
+        slug = @argv.shift or raise ArgumentError, "Usage: soft-foundry change new <slug> [--title TITLE] [--branch BRANCH] [--track TRACK] [--scope GLOB[,GLOB...]] [--type #{ChangeRecord::TYPES.join('|')}] [--risk #{ChangeRecord::RISKS.join('|')}]"
         title = option("--title")
+        type = option("--type")
+        risk = option("--risk")
         scope = option("--scope")&.split(",")&.map(&:strip)
         problems = scope ? scope.flat_map { |g| Declarations.syntax_problems(g, :scope) } : []
         raise TargetError, problems.join("; ") unless problems.empty?
@@ -301,9 +305,11 @@ module SoftFoundry
           @err.puts "unknown track '#{track}'; .ai/workflow.yml defines: #{plane.track_names.join(', ')}"
           return EXIT_TARGET
         end
-        record = ChangeRecord.create(@root, slug, control_plane: plane, title: title, branch: branch, worktree: @root, track: track, scope: scope)
+        record = ChangeRecord.create(@root, slug, control_plane: plane, title: title, branch: branch, worktree: @root, track: track, scope: scope, type: type, risk: risk)
         @out.puts "created #{relative(record.dir)} with #{plane.phases.size} phase directories"
         @out.puts "branch: #{branch || slug}"
+        @out.puts "type: #{type}" if type
+        @out.puts "risk: #{risk}" if risk
         @out.puts "scope: #{scope.join(', ')}" if scope&.any?
         @out.puts track_line(record)
         billing_notice(record: record)
@@ -312,6 +318,8 @@ module SoftFoundry
         json = flag("--json")
         slug = @argv.shift || current_slug
         json ? status_json(slug) : status(slug)
+      when "summary"
+        change_summary(@argv.first.to_s.start_with?("-") ? nil : @argv.shift)
       when "list"
         if flag("--json")
           @out.puts JSON.pretty_generate(snapshot.board)
@@ -334,9 +342,21 @@ module SoftFoundry
       when "discharge"
         change_discharge
       else
-        @err.puts "Usage: soft-foundry change <new|status|list|size|vet|reopen|release|discharge|close|request-discharge>"
+        @err.puts "Usage: soft-foundry change <new|status|summary|list|size|vet|reopen|release|discharge|close|request-discharge>"
         1
       end
+    end
+
+    # `change summary [slug]`: where the change is now, one fact per line,
+    # from the recorded files alone (no gate, no writes). The slug must be
+    # one of the existing changes.
+    def change_summary(slug)
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+      slug ||= current_slug
+      known = list_changes
+      raise TargetError, "no change '#{Display.safe(slug)}'; known changes: #{known.empty? ? 'none' : Display.list(known, limit: 20)}" unless known.include?(slug)
+      ChangeSummary.new(load_record(slug), git: git).lines.each { |line| @out.puts line }
+      0
     end
 
     # `change size [slug] [--phase verify|evaluate|attack] [--since COMMIT]`:
@@ -1119,11 +1139,26 @@ module SoftFoundry
       learned = launch.session_id ? nil : runner.recorded_session(SessionLedger.new(SessionLedger.default_path), shell: shell_name, since: since)
       runner.finish!(phase, status, session_id: learned)
       @out.puts "#{shell_name} exited #{status}"
+      marked = mark_blocked(runner, phase)
       result = Gate.new(record, git: git).evaluate(phase)
       print_result(result)
       print_advisories(record)
       return EXIT_TARGET unless status.zero?
-      result.failed? ? 2 : 0
+      marked || result.failed? ? 2 : 0
+    end
+
+    # Sets a phase the session left complete-with-blocking to blocked and
+    # says so (`blocked: <phase> has N blocking item(s)`). True when it did.
+    # A failed write leaves the handoff as written and warns, so the gate
+    # still reports it.
+    def mark_blocked(runner, phase)
+      count = runner.mark_blocked!(phase)
+      return false unless count
+      @out.puts "blocked: #{phase.id} has #{count} blocking item(s); status set to blocked, redo the phase once they are resolved"
+      true
+    rescue StandardError => e
+      @err.puts "warn: could not mark #{phase.id} blocked: #{Display.safe(e.message.lines.first.to_s.strip)}"
+      false
     end
 
     # An --env value is on this process's command line, which `ps` shows to
@@ -1227,10 +1262,12 @@ module SoftFoundry
       outcomes = ParallelRun.new(@root, runner: @runner).run(launches)
       ledger = SessionLedger.new(SessionLedger.default_path)
       failed_start = []
+      marked_blocked = false
       outcomes.zip(phases).each do |o, p|
         learned = o.launch.session_id ? nil : runner.recorded_session(ledger, shell: o.launch.shell, since: started)
         begin
           runner.finish!(p, o.status, session_id: learned)
+          marked_blocked = true if mark_blocked(runner, p)
         rescue StandardError => e
           failed_start << p
           @err.puts "phase #{p.id}: could not record the result: #{e.message.lines.first.to_s.strip}"
@@ -1256,7 +1293,7 @@ module SoftFoundry
       record.update_metadata { |m| m["current_phase"] = first_open.id } if first_open
       print_advisories(record)
       return EXIT_TARGET if moved || outcomes.any? { |o| !o.status.zero? } || !failed_start.empty?
-      gate_failed ? 2 : 0
+      marked_blocked || gate_failed ? 2 : 0
     end
 
     # `phase run <phase> --panel SHELL,SHELL`: the phase as a panel.

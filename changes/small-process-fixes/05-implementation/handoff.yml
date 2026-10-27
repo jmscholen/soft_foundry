@@ -1,0 +1,51 @@
+---
+phase: 05-implementation
+skill: implementation
+status: complete
+commit_sha: 42b1689f993f94c02ad9063ff6bd8d0600b6bd8d
+started_at: '2026-10-27T00:54:57Z'
+completed_at: '2026-10-27T01:40:00Z'
+resolved_model:
+  profile: coding_high
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- log.md
+- decisions.md
+- deviations.md
+blocking: []
+findings:
+- id: IMPL-001
+  severity: major
+  summary: 'Control-plane text not written (DEV-001): .ai/rules/access-control-parity.md,
+    three skill guidance edits (REQ-007), and the tests.yml template protection fields
+    were outside this phase''s write set; a person must add them, using visible escapes
+    only.'
+- id: IMPL-002
+  severity: minor
+  summary: README, .ai/schemas.md and harness-eval cases not updated (DEV-002); covered
+    by unit and integration tests only.
+- id: IMPL-003
+  severity: minor
+  summary: 'RED commit is e496c67 (tests: test/display_test.rb, cli_change_new_options_test.rb,
+    phase_run_blocked_marking_test.rb, cli_change_summary_test.rb, protection_stated_test.rb);
+    GREEN is 42b1689. One RED test assertion was relaxed afterwards (metadata.yml
+    legitimately changes on a run; other handoffs must not) and one mock replaced
+    by a singleton override. Full suite 821 runs, 0 failures with provider keys unset.'
+- id: IMPL-004
+  severity: minor
+  summary: The protection check is presence-only by design; a false in_force claim
+    passes and is left to review. A single phase run that marks a phase blocked now
+    exits 2.
+next: verify
+notes: ''
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-27T00:54:57Z'
+  finished_at: '2026-10-27T01:15:35Z'
+  exit_status: 0
+  previous_phase: plan
+  session_id: dea30f73-a283-4dbe-a88a-aedc7a31b223
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

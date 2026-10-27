@@ -1,0 +1,30 @@
+commit_sha: 44efb99d6b1ebb1d73d99811ae036d646c746bf3
+size: full_at_verify
+full_suite:
+  tree: fc40a9d1630a14b54a6076ca2c4d63c308e0bc15
+  command: env -u SOFT_FOUNDRY_PHASE -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u GEMINI_API_KEY -u XAI_API_KEY bundle exec rake test
+  outcome: passed
+checks:
+  - id: CHECK-001
+    kind: tests
+    command: env -u SOFT_FOUNDRY_PHASE -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u GEMINI_API_KEY -u XAI_API_KEY bundle exec rake test
+    result: pass
+    evidence: evidence/full-suite.txt
+    criteria: [AC-001, AC-002, AC-003, AC-004, AC-005, AC-006, AC-007, AC-008, AC-009, AC-010, AC-011, AC-012, AC-013, AC-014, AC-015, AC-016, AC-017, AC-018, AC-019, AC-020]
+    red_commit: e496c6757201f9f554d67554e14ea09a79641640
+    test_path: test/protection_stated_test.rb
+    protection: not_applicable
+  - id: CHECK-002
+    kind: custom
+    command: ruby -Ilib exe/soft-foundry check
+    result: pass
+    evidence: evidence/check.txt
+    criteria: []
+    protection: not_applicable
+  - id: CHECK-003
+    kind: tests
+    command: bundle exec rake test (run with SOFT_FOUNDRY_PHASE=verify inherited from the phase runner)
+    result: fail
+    evidence: evidence/full-suite-with-phase-env.txt
+    criteria: []
+    protection: not_applicable

@@ -1,0 +1,60 @@
+commit_sha: 3e356a192053aea57572f94afa3a15d7563ee647
+notes: Payloads with control or invisible characters are shown as visible escapes (cat -v form, <U+XXXX>, or <0xNN> bytes); none is raw.
+artifacts:
+  - path: evidence/mark-blocked-shapes.txt
+    case: ATTACK-003
+    sha256: c5a803a2b7e7df174004ee15256e24b31edd6ca719aecc076346c80c2ecf7e71
+  - path: evidence/mark-blocked-shapes.rb
+    case: ATTACK-003
+    sha256: df814a550e4baf833f5d7155e2804b9d2d7613f6bd76a607efa8abf41ee75a91
+  - path: evidence/mark-blocked-concurrency.txt
+    case: ATTACK-004
+    sha256: 1e0095b47ac798242203262733bf344350977f9258d9fd1e10fcd2037bf963cf
+  - path: evidence/mark-blocked-concurrency.rb
+    case: ATTACK-004
+    sha256: a6e89541716aed6a5d6856839c4d7abc41c256f53139da68f4b52bf3388f47f9
+  - path: evidence/change-new-and-summary-paths.txt
+    case: ATTACK-001
+    sha256: 87c853198ed5e965f150f58fbd22edba0b9bb455185907e17e09e621cf538252
+  - path: evidence/summary-hostile-handoffs.txt
+    case: ATTACK-002
+    sha256: 68b0a6930fe69452a4c9969e3fe98a6e30a32b65669a7ea902ca3af71058daf5
+  - path: evidence/summary-shape-hiding.txt
+    case: ATTACK-005
+    sha256: 2057a985aa237f5500b6b1f9a9477548d4bf988860a610601f8228fab0655ccd
+  - path: evidence/summary-symlink.txt
+    case: ATTACK-001
+    sha256: bc3212385c55e9ec3b8d10e8a6e1d21498b1d68c66bd52cc05c6c4bcb37f227c
+  - path: evidence/protection-shapes.txt
+    case: ATTACK-006
+    sha256: 750458f914de45bede90b94a652f343445dc834115feee2300960a4f38953ce2
+  - path: evidence/protection-shapes.rb
+    case: ATTACK-006
+    sha256: 21177751cb741b95aec3492a3802deecb639f1c76ec9c07f9427793c1bcc1dc3
+  - path: evidence/access-control-globs.txt
+    case: ATTACK-007
+    sha256: 6fc421e13ff6915d0939200223fd836affcbb8195125366c6a6ac830eaa352be
+  - path: evidence/access-control-globs.rb
+    case: ATTACK-007
+    sha256: 096d95039bdcc98023443869cbcaac9e23a25d4edeaee45ae02330412f6d9c0d
+  - path: evidence/gate-on-blocking-shapes.txt
+    case: ATTACK-005
+    sha256: 4079a72548be3eb5ddc5610f4367445b6ae6259fb88f06c2d28cc3c877783048
+  - path: evidence/content-clean-guidance.txt
+    case: ATTACK-009
+    sha256: 9be525d54c52ea1eb7ae2b8b47ce9867fb83d215f7a39b69ec08bb1f1aaf00d6
+  - path: evidence/rerun-doors-at-head.txt
+    case: ATTACK-001, ATTACK-002, ATTACK-005, ATTACK-008, ATTACK-010
+    sha256: 980018c545fb10add2f2fa38282933e6f45a2f298b7f7aa5bc632dc94e886d7a
+  - path: evidence/rerun-access-control-globs-at-head.txt
+    case: ATTACK-007
+    sha256: 2d111699cade59d8b661f36e9679a849a615db75f3485f458a386484691b2ec1
+  - path: evidence/parallel-run-tests-at-head.txt
+    case: ATTACK-012
+    sha256: 65b775c1aed8f53ec6563aebb371f5838e3c806d35007bab2336a256b43d3eb4
+  - path: evidence/parallel-exit-edges.txt
+    case: ATTACK-012
+    sha256: b40c97223a18412e880204cc7a064326058861fd307d9d0d358e19abbf30f37c
+  - path: evidence/parallel-exit-edges.rb
+    case: ATTACK-012
+    sha256: 606c429c9255b311e520b4477ade7b9ea865984397a1afd22c8e5f1f2906c905

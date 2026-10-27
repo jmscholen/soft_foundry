@@ -1,0 +1,19 @@
+== handoff: status: complete
+blocking: stop
+
+  ✗ fail handoff identity: phase is '', expected '08-attack'; skill is '', expected 'adversarial-testing'
+  ✗ fail no placeholders: TBD remains in: attack-plan.md, cases.yml, results.md, evidence/manifest.yml
+  ✗ fail no blocking conditions: complete with unresolved: stop
+  ✗ fail commit_sha recorded: missing or malformed
+  ✗ fail completed_at recorded
+  ✗ fail predecessor complete: 07-evaluation is blocked
+  ✗ fail evidence current: cannot compare: commit_sha invalid
+== handoff: status: Complete
+blocking: [a]
+
+  ✗ fail handoff status: status 'Complete' is not one of pending, in_progress, complete, blocked
+== handoff: status: blocked
+blocking: []
+
+  ✗ fail handoff identity: phase is '', expected '08-attack'; skill is '', expected 'adversarial-testing'
+  ✗ fail blocking recorded: status is blocked but `blocking` is empty

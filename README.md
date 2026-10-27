@@ -329,6 +329,33 @@ By default any code change makes every record's commit-bound evidence stale and 
 
 Known limits of scoped verification, accepted by the maintainer: (1) a record whose author sets `git.branch` in the record to a branch created at a later commit looks like a legitimately stacked branch, so code landing afterwards on the checked-out branch can go unmeasured; the author already controls the evidence the gate reads, and the gate checks structure, not truth. (2) An active record scoped to `**` claims every path, so it keeps other records' evidence current; the go-live advisory names it, and closing or narrowing that record makes the others stale again. (3) A recorded size is refused only at verification; evaluation and attack record theirs but the gate does not compare them.
 
+### Everyday shortcuts: type and risk, blocked runs, summary, hidden characters
+
+```bash
+soft-foundry change new my-change --type fix --risk medium   # record both at creation
+soft-foundry change summary my-change                        # where the change is now
+```
+
+#### Type and risk at creation
+
+`change new --type TYPE --risk RISK` writes both to `metadata.yml`. Types: feature, fix, refactor, docs, infrastructure, security, chore. Risks: low, medium, high. An unknown value is refused before anything is created, with the allowed list; leaving a flag out keeps the placeholder as before.
+
+#### A session that completes with blocking items
+
+When a `phase run` session writes its handoff `status: complete` while `blocking` is not empty, the runner changes the status to `blocked`, keeps the blocking entries, adds a sentence to `notes`, and prints a `blocked:` line naming the phase. The same holds for `--parallel` runs. The gate still fails a hand-edited `complete` handoff that lists blocking items.
+
+#### Latest state of a change
+
+`change summary [slug]` prints recorded facts only, one per line with a stable prefix: `change:`, `phase:`, a `phase-status:` line per phase, `findings:`, `blocking:` and `owed:`. It runs no gate and writes nothing. An unreadable handoff is shown as `unreadable` with the reason and the rest still prints.
+
+#### Quoting hidden characters in evidence
+
+Payloads that contain invisible, zero-width, bidirectional or control characters go into evidence as visible escapes (`<U+200B>`, `<U+202E>`) or are built inside a script with an escape such as `\u{200B}`, never pasted raw. A raw one fails the `content clean` gate, which is unchanged. The adversarial-testing, verification and review skills say so.
+
+#### Access-control parity
+
+When the repository profile declares `access_control` globs and a change touches a matching path, verification states the protection each check ran with (`protection: in_force | disabled | not_applicable`, plus a `protection_note` for `disabled`) in `tests.yml`. The `protection stated` check requires the statement; whether it is true is for review (`.ai/rules/access-control-parity.md`). It names no framework and is not applicable to a repository that declares no `access_control`.
+
 ### Proving the gate: harness evals
 
 A gate that has never refused anything has unknown power. `.ai/harness-evals/cases/` holds executable cases that measure the control plane itself, and `soft-foundry eval` runs them:

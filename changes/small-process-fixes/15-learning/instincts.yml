@@ -1,0 +1,44 @@
+# Instincts: what this change taught, as reusable one-line triggers with an
+# action, a confidence score, and evidence in this record. `soft-foundry
+# learn list` shows them across every record; `learn promote` copies those
+# at or above the threshold in .ai/policies/learning.yml into
+# .ai/rules/learned.md, and only through a change record on a change
+# branch, never by the change that learned them. An empty list is a valid
+# answer; a malformed entry fails the learning gate.
+instincts:
+  - id: check-sibling-command-paths
+    trigger: when a change makes a command mark, return or exit with a new status
+    action: check every sibling path that calls the same helper (single and parallel run) and assert the process exit status in a test for each
+    confidence: 0.8
+    domain: testing
+    evidence:
+      - finding: REV-001
+  - id: accept-all-option-spellings
+    trigger: when adding a CLI option that takes a value
+    action: handle the spaced, equals and repeated forms, or refuse the ones you do not support with a message
+    confidence: 0.7
+    domain: review
+    evidence:
+      - finding: REV-002
+      - finding: ATK-004
+  - id: summary-never-says-none-for-unknown-shape
+    trigger: when a summary view reads a record field that may hold a string or mapping instead of a list
+    action: print the escaped value or mark it unreadable instead of printing none
+    confidence: 0.6
+    domain: review
+    evidence:
+      - finding: ATK-001
+  - id: clear-runner-env-in-tests
+    trigger: when the code under test reads an environment variable the phase runner sets
+    action: clear that variable in test setup so the suite gives the same result inside and outside a phase session
+    confidence: 0.7
+    domain: testing
+    evidence:
+      - finding: VER-001
+  - id: escape-invisible-chars-in-tests
+    trigger: when a test needs a bidirectional, zero-width or line-separator character
+    action: build it from a source escape such as "<U+202E>" rather than embedding the raw character
+    confidence: 0.6
+    domain: testing
+    evidence:
+      - finding: REV-007

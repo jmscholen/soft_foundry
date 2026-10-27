@@ -1,0 +1,19 @@
+# EVAL-003/004 (HEAD 3e356a1)
+soft-foundry: --type "bogus" is not allowed; use one of: feature, fix, refactor, docs, infrastructure, security, chore
+rc=1
+soft-foundry: --risk "huge" is not allowed; use one of: low, medium, high
+rc=1
+total 8
+drwxr-xr-x@  5 jscholen-iou  staff   160B Oct 26 23:37 .
+drwx------@ 10 jscholen-iou  staff   320B Oct 26 23:37 ..
+-rw-r--r--@  1 jscholen-iou  staff   592B Oct 26 23:37 README.md
+drwxr-xr-x@ 20 jscholen-iou  staff   640B Oct 26 23:37 demo
+drwxr-xr-x@ 20 jscholen-iou  staff   640B Oct 26 23:37 demo2
+soft-foundry: --risk high forces the gated track; drop --track iterative (or use --track gated)
+rc=1
+total 8
+drwxr-xr-x@  5 jscholen-iou  staff   160B Oct 26 23:37 .
+drwx------@ 10 jscholen-iou  staff   320B Oct 26 23:37 ..
+-rw-r--r--@  1 jscholen-iou  staff   592B Oct 26 23:37 README.md
+drwxr-xr-x@ 20 jscholen-iou  staff   640B Oct 26 23:37 demo
+drwxr-xr-x@ 20 jscholen-iou  staff   640B Oct 26 23:37 demo2

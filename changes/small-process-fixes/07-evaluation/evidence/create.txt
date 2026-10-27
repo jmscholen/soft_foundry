@@ -1,0 +1,6 @@
+# EVAL-001/002 (HEAD 3e356a1)
+type: fix                  # feature | fix | refactor | docs | infrastructure | security | chore
+risk: low                  # low | medium | high; a high risk change is always on the gated track (.ai/workflow.yml tracks.forced_by_risk)
+no-flags rc=0
+type: TBD                  # feature | fix | refactor | docs | infrastructure | security | chore
+risk: TBD                  # low | medium | high; a high risk change is always on the gated track (.ai/workflow.yml tracks.forced_by_risk)

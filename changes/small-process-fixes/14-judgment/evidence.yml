@@ -1,0 +1,140 @@
+commit_judged: 9119e406d33be0823bbc4c95fa79ad2ea7264a4f
+# For 06-verification, 07-evaluation, 08-attack, and 13-review, current: true
+# means no application, test, or infrastructure file changed between that
+# phase's commit_sha and commit_judged, including the worktree. The gate's
+# evidence-current check agrees. Earlier phases are current when their
+# completed record still stands and the gate passes.
+phases:
+  - phase: 00-intake
+    commit_sha: 28d4b1e82516307e9d3d94a9ce1a8634d3ad6485
+    current: true
+    result: pass
+    note: "Gate pass. Required. Track gated. Nothing waived."
+  - phase: 01-discovery
+    commit_sha: 07ec16c7072c99829e9bf912332e9aaf9fcf295c
+    current: true
+    result: pass
+    note: "Gate pass. Required at risk medium."
+  - phase: 02-specification
+    commit_sha: d35fd54504078a989bb4e9bc28e72c6ce9d3343e
+    current: true
+    result: pass
+    note: "Gate pass. Specification locked at 01b7304b244d1eb540e6ed558ac41cb3b951d87f. No specification file changed after that commit."
+  - phase: 03-threat-model
+    commit_sha: 01b7304b244d1eb540e6ed558ac41cb3b951d87f
+    current: true
+    result: pass
+    note: "Gate pass. Required at risk medium."
+  - phase: 04-plan
+    commit_sha: 4e65a204a1dff016ba12dc2b981b56987caa9c03
+    current: true
+    result: pass
+    note: "Gate pass. Required at risk medium."
+  - phase: 05-implementation
+    commit_sha: 42b1689f993f94c02ad9063ff6bd8d0600b6bd8d
+    current: true
+    result: pass
+    note: "Gate pass. Provider anthropic. Control-plane and README text landed in cf932d1. The REV-001 code fix landed in 44efb99. Both are ancestors of the judged commit, and verification is bound to 44efb99."
+  - phase: 06-verification
+    commit_sha: 44efb99d6b1ebb1d73d99811ae036d646c746bf3
+    current: true
+    result: pass
+    note: "Gate pass. Evidence current. Full suite recorded on tree fc40a9d1630a14b54a6076ca2c4d63c308e0bc15, outcome passed, 822 runs, 0 failures, SOFT_FOUNDRY_PHASE unset. CHECK-003 failed with the variable inherited (VER-001). Red evidence CHECK-001 holds. protection stated skipped: profile declares no access_control."
+  - phase: 07-evaluation
+    commit_sha: 3e356a192053aea57572f94afa3a15d7563ee647
+    current: true
+    result: pass
+    note: "Gate pass. Evidence current. EVAL-001 through EVAL-006 passed. The parallel blocked exit was covered by the verification test, which attack re-ran (26 runs, 0 failures)."
+  - phase: 08-attack
+    commit_sha: 3e356a192053aea57572f94afa3a15d7563ee647
+    current: true
+    result: pass
+    note: "Gate pass. Evidence current. 7 denied, 5 low violations accepted as residual. The complete-with-blocking parallel case exits 2. None lets a blocker pass the gate."
+  - phase: 09-remediation
+    commit_sha: f90f17af0e1d3f2edbcf1cbca425cc655be1780c
+    current: true
+    result: pass
+    note: "Gate pass. Provider anthropic. Predecessor is implementation. The handoff sha is the commit the edits sat on; the edits are 44efb99. No application, test, or infrastructure file changed after that commit. REV-001 is closed. REV-002 through REV-009 were left open and are accepted here."
+  - phase: 10-user-documentation
+    commit_sha: null
+    current: false
+    result: pending
+    note: "Optional, and pending. User-facing README text and the parity rule are in the tree from cf932d1. Review read them. The missing phase record does not block."
+  - phase: 11-faq-index
+    commit_sha: null
+    current: false
+    result: pending
+    note: "Optional, and pending. No documentation-phase output exists to index. Does not block."
+  - phase: 12-observability
+    commit_sha: null
+    current: false
+    result: pending
+    note: "Optional, and pending. surfaces.observability is false. No deployed service. Operator signals are the CLI lines."
+  - phase: 13-review
+    commit_sha: e349c99a15080828a9e078ff111cdebad9584f16
+    current: true
+    result: pass
+    note: "Gate pass. Evidence current. No blocking findings. No finding above minor. Provider xai, different from the anthropic implement and remediate sessions. No code diff from e349c99 to the judged commit."
+unresolved_findings:
+  - id: REV-002
+    severity: minor
+    disposition: accepted_residual
+    also: [ATK-004]
+    note: "Equals-form and repeated --type are ignored. Accepted. See residual-risk.md."
+  - id: REV-003
+    severity: minor
+    disposition: accepted_residual
+    also: [ATK-001]
+    note: "Non-list blocking and findings print as none and are not marked. The gate still fails a string blocking value."
+  - id: REV-004
+    severity: minor
+    disposition: accepted_residual
+    also: [ATK-002]
+    note: "A format character in an access_control glob skips protection stated. check still flags the invisible character in .ai/."
+  - id: REV-005
+    severity: minor
+    disposition: accepted_residual
+    also: [ATK-003]
+    note: "change summary follows a symlinked handoff or metadata file."
+  - id: REV-006
+    severity: minor
+    disposition: accepted_residual
+    also: []
+    note: "check does not compare tracks.forced_by_risk keys. Shipped workflow agrees."
+  - id: REV-007
+    severity: minor
+    disposition: accepted_residual
+    also: []
+    note: "display_test.rb embeds raw format characters."
+  - id: REV-008
+    severity: minor
+    disposition: accepted_residual
+    also: []
+    note: "warn: after a failed mark does not name the next step."
+  - id: REV-009
+    severity: minor
+    disposition: accepted_residual
+    also: [VER-001]
+    note: "Suite is not isolated from an inherited SOFT_FOUNDRY_PHASE. Pre-existing. The unset-variable run passed and is the recorded full suite."
+  - id: REV-010
+    severity: minor
+    disposition: accepted_residual
+    also: [ATK-005]
+    note: "A session-authored blocked status is tallied as fail and the parallel process exits 0. The runner-marked path exits 2. Same exit as the single-run path for a session-authored blocked handoff."
+  - id: REV-011
+    severity: minor
+    disposition: accepted_residual
+    also: []
+    note: "The parallel exit assertion shares commit 44efb99 with the fix. The recorded red_commit covers test/protection_stated_test.rb."
+  - id: IMPL-004
+    severity: minor
+    disposition: specified_limit
+    also: [THREAT-006]
+    note: "protection stated is structure-only, as REQ-013 and the rule require."
+  - id: PANEL-MARK
+    severity: minor
+    disposition: specified_scope
+    also: []
+    note: "phase run --panel does not call mark_blocked. REQ-005 does not name the panel path. The gate still fails a complete handoff that lists blockers."
+undischarged: []
+discharged: []

@@ -25,6 +25,8 @@ module SoftFoundry
 
     SHA = /\A[0-9a-f]{7,40}\z/
     SIZE_CHECK = "check size matches diff"
+    PROTECTION_CHECK = "protection stated"
+    PROTECTION_VALUES = %w[in_force disabled not_applicable].freeze
     FULL_SUITE_CHECK = "full-suite run recorded (record check, not a test result)"
     PLACEHOLDER = /\bTBD\b/
 
@@ -50,6 +52,7 @@ module SoftFoundry
       "specification locked" => "The specification is unchanged since it was recorded (the commit that recorded the completed phase, or the vetted commit on an iterative change).",
       "red evidence" => "Each test named with a red_commit existed before the implementation and code changed after it.",
       SIZE_CHECK => "The check size recorded in tests.yml is not smaller than the size computed from the diff and the declared scope, shared core and access-control globs.",
+      PROTECTION_CHECK => "When the repository profile declares access_control and a changed path matches, tests.yml states the protection of its checks: one check in_force, or every check states a value with a note. Presence only; whether a claim is true is for review.",
       FULL_SUITE_CHECK => "A full-suite run recorded in tests.yml (or cited from another record) names the tree of the evidence commit, with a recorded outcome of passed. A record check: Soft Foundry never runs the suite, and a pass here is not a test result.",
       "instincts valid" => "The instincts the learning phase recorded are well formed.",
       "findings explained" => "Every review finding above minor names the failure it prevents.",
@@ -68,7 +71,7 @@ module SoftFoundry
       names += ["required files present", "no placeholders", "no blocking conditions", "commit_sha recorded", "completed_at recorded", "predecessor complete"]
       names << "evidence current" if plane.skill(phase.skill).commit_bound?
       names << "specification locked" if phase.id == "specify"
-      names += ["red evidence", SIZE_CHECK, FULL_SUITE_CHECK] if phase.id == "verify"
+      names += ["red evidence", SIZE_CHECK, PROTECTION_CHECK, FULL_SUITE_CHECK] if phase.id == "verify"
       names << "instincts valid" if phase.id == "learn"
       names << "findings explained" if phase.id == "review"
       names << "panel recorded" if plane.panel_phases.include?(phase)
@@ -120,6 +123,7 @@ module SoftFoundry
         checks << specification_lock_check(phase) if phase.id == "specify"
         checks << red_evidence_check(phase, handoff) if phase.id == "verify"
         checks.concat(scoped_verification_checks(phase, handoff)) if phase.id == "verify"
+        checks << protection_check(phase) if phase.id == "verify"
         checks << instincts_check if phase.id == "learn"
         checks << findings_explained_check(handoff) if phase.id == "review"
         checks << panel_check(phase, handoff) if handoff["panel"].is_a?(Hash)
@@ -426,6 +430,56 @@ module SoftFoundry
       end
       computed, size_check = computed_size_check(tests)
       [size_check, full_suite_check(handoff, block, computed, true)]
+    end
+
+    # Access-control parity (.ai/rules/access-control-parity.md). Applies
+    # only when the profile declares `access_control` and a path changed
+    # since the plan matches one of its globs; otherwise it is skipped and
+    # the record is unaffected. Structure only: a `protection: in_force`
+    # claim is not checked against the run.
+    def protection_check(phase)
+      raw = @plane.repository_profile["access_control"]
+      return Check.new(PROTECTION_CHECK, :skip, "the repository profile declares no access_control") if raw.nil? || raw == []
+      problems = access_control_problems(raw)
+      return Check.new(PROTECTION_CHECK, :fail, ".ai/repository.yml: #{problems.join('; ')}") unless problems.empty?
+      return Check.new(PROTECTION_CHECK, :skip, "no git repository") unless @git.repository?
+      scope = Scope.new(@record, git: @git)
+      base = scope.change_base
+      return Check.new(PROTECTION_CHECK, :fail, "access_control is declared but the plan phase is not recorded in a commit, so the changed paths cannot be found") unless base
+      measured = scope.measure(base, declarations: false)
+      return Check.new(PROTECTION_CHECK, :fail, "cannot list the changed paths: #{measured.error}") if measured.error
+      touched = measured.paths.select { |path| ControlPlane.match_any?(path, @plane.access_control) }
+      return Check.new(PROTECTION_CHECK, :skip, "no changed path matches the access_control globs") if touched.empty?
+      protection_findings(tests_yml(phase), touched)
+    end
+
+    # Why the declared globs cannot be read: the shape rules `check` applies,
+    # plus unbalanced brackets or braces, which never match anything.
+    def access_control_problems(raw)
+      return ["access_control must be a list of path globs"] unless raw.is_a?(Array)
+      raw.flat_map do |glob|
+        found = Declarations.syntax_problems(glob, :access_control)
+        next found unless found.empty?
+        balanced = glob.count("[") == glob.count("]") && glob.count("{") == glob.count("}")
+        balanced ? [] : ["access_control glob #{glob.dump} has an unclosed [ or {; fix the glob"]
+      end
+    end
+
+    def protection_findings(tests, touched)
+      where = "changed access-control path#{touched.size == 1 ? '' : 's'}: #{touched.first(3).join(', ')}#{touched.size > 3 ? ", and #{touched.size - 3} more" : ''}"
+      checks = tests.is_a?(Hash) && tests["checks"].is_a?(Array) ? tests["checks"].select { |c| c.is_a?(Hash) } : []
+      fix = "set `protection: in_force` on a check run with the protection enabled, or give every check a `protection` (#{PROTECTION_VALUES.join(' | ')}) and a `protection_note`"
+      return Check.new(PROTECTION_CHECK, :fail, "#{where}; tests.yml lists no checks; #{fix}") if checks.empty?
+      name = ->(c) { c["id"].to_s.empty? ? "(unnamed check)" : c["id"].to_s }
+      invalid = checks.select { |c| c.key?("protection") && !PROTECTION_VALUES.include?(c["protection"].to_s) }
+      return Check.new(PROTECTION_CHECK, :fail, "#{where}; #{invalid.map(&name).join(', ')} has a protection that is not one of #{PROTECTION_VALUES.join(', ')}") unless invalid.empty?
+      note = ->(c) { !c["protection_note"].to_s.strip.empty? }
+      bare = checks.select { |c| c["protection"].to_s == "disabled" && !note.call(c) }
+      return Check.new(PROTECTION_CHECK, :fail, "#{where}; #{bare.map(&name).join(', ')} states protection: disabled without a protection_note saying why") unless bare.empty?
+      return Check.new(PROTECTION_CHECK, :pass, "#{where}; #{checks.count { |c| c['protection'].to_s == 'in_force' }} check(s) in force") if checks.any? { |c| c["protection"].to_s == "in_force" }
+      unstated = checks.reject { |c| c.key?("protection") && note.call(c) }
+      return Check.new(PROTECTION_CHECK, :fail, "#{where}; no check states protection: in_force and #{unstated.map(&name).join(', ')} gives no protection with a note; #{fix}") unless unstated.empty?
+      Check.new(PROTECTION_CHECK, :pass, "#{where}; every check states its protection with a note")
     end
 
     def tests_yml(phase)

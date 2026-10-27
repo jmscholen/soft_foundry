@@ -1,0 +1,20 @@
+
+..........................
+
+Finished in 70.254862s, 0.3701 runs/s, 12.7678 assertions/s.
+
+26 runs, 897 assertions, 0 failures, 0 errors, 0 skips
+        ok = o.status.zero? && !result.failed? && !failed_start.include?(p) && record.phase_status(p) != "blocked"
+        passed += 1 if ok
+        @out.puts "phase #{p.id}: #{ok ? 'pass' : 'fail'}"
+      end
+      @out.puts "parallel: #{phases.size} phases run, #{passed} passed, #{phases.size - passed} failed"
+      moved = git.repository? && start_head && git.head_sha != start_head
+      @err.puts "warn: HEAD moved from #{start_head[0, 7]} to #{git.head_sha[0, 7]} during the run; the phases record #{start_head[0, 7]}, so their evidence is bound to a commit that is no longer HEAD (sessions were told not to commit); inspect the new commits" if moved
+      first_open = plane.phases.find { |p| record.phase_status(p) != "complete" && !(record.phase_status(p) == "pending" && record.skippable?(p)) }
+      record.update_metadata { |m| m["current_phase"] = first_open.id } if first_open
+      print_advisories(record)
+      return EXIT_TARGET if moved || outcomes.any? { |o| !o.status.zero? } || !failed_start.empty?
+      marked_blocked || gate_failed ? 2 : 0
+    end
+

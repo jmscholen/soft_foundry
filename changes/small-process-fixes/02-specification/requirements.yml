@@ -1,0 +1,93 @@
+# Implementation-independent requirements. IDs are stable and referenced by
+# acceptance criteria, tests, evaluation journeys, and attack cases.
+requirements:
+  - id: REQ-001
+    category: functional
+    statement: "`change new` accepts `--type` and `--risk` and records the given values in the new change's metadata; omitting either leaves the placeholder value."
+    rationale: Removes hand-editing metadata after creation.
+    source: 00-intake/request.md
+  - id: REQ-002
+    category: functional
+    statement: "`--type` accepts only feature, fix, refactor, docs, infrastructure, security, chore, and `--risk` only low, medium, high; any other value is refused before a record is created, with a message naming the flag, the value and the allowed list."
+    rationale: A validated vocabulary keeps metadata consistent with policy.
+    source: 00-intake/request.md
+  - id: REQ-003
+    category: functional
+    statement: "The allowed type and risk values have one source of truth, and `check` reports a disagreement with the metadata template comments or the risk names in `.ai/workflow.yml`. A high risk with a non-gated track is refused as it is today."
+    rationale: Prevents the vocabularies drifting apart.
+    source: 01-discovery/unknowns.md
+  - id: REQ-004
+    category: functional
+    statement: "When a phase-run session leaves a handoff `complete` with a non-empty `blocking` list, the runner sets its status to `blocked`, keeps the blocking entries, notes the change in `notes`, and prints a `blocked:` line naming the phase and item count."
+    rationale: The failure is caught at the source instead of at the gate.
+    source: 00-intake/request.md
+  - id: REQ-005
+    category: functional
+    statement: "Blocked-marking behaves identically for single runs, parallel runs and runs that auto-reopened a stale phase, and touches only the handoff of the phase just run."
+    rationale: One behaviour on every run path; no other phase's evidence is altered.
+    source: 01-discovery/unknowns.md
+  - id: REQ-006
+    category: failure
+    statement: "The gate continues to fail a `complete` handoff with blocking items, and a failed blocked-marking write is reported with a `warn:` line and leaves the handoff as written."
+    rationale: Hand-edited records stay refused; the runner never hides a failure.
+    source: 01-discovery/affected-components.md
+  - id: REQ-007
+    category: functional
+    statement: "Guidance in the adversarial-testing, verification and review skills and in the README content-scan section tells agents to write invisible, zero-width, bidirectional and control characters in evidence as visible escapes or to build them in a script, and the scanner's behaviour is unchanged."
+    rationale: Quoted attack payloads should not fail the content-clean gate.
+    source: 00-intake/request.md
+  - id: REQ-008
+    category: functional
+    statement: "`soft-foundry change summary [slug]` prints from recorded files, without running the gate or writing, the change identity, current phase, each phase's recorded status, finding counts per phase, blocking items, and what is owed (open human decisions, release items, advisories), each as a line with a stable prefix."
+    rationale: One short view of where a change is.
+    source: 00-intake/request.md
+  - id: REQ-009
+    category: failure
+    statement: "`change summary` refuses an unknown slug naming the known changes, and shows a phase with an unreadable handoff as `unreadable` with a reason while still printing the rest and exiting zero."
+    rationale: A single bad file must not hide the whole picture.
+    source: 01-discovery/unknowns.md
+  - id: REQ-010
+    category: accessibility
+    statement: "All new command output (refusal messages, the `blocked:` line, the summary) conveys every outcome in words, emits no colour or styling unless a TTY and `NO_COLOR` is unset, has one fact per line with a stable prefix, is understandable without terminal width, never prompts, and error messages say what went wrong and what to do next (WCAG 2.2 AA applied to CLI output per `.ai/rules/accessibility.md`; 1.4.1 Use of Color, 1.3.1 Info and Relationships, 3.3.3 Error Suggestion)."
+    rationale: The change produces CLI output a person reads.
+    source: .ai/rules/accessibility.md
+  - id: REQ-011
+    category: functional
+    statement: "A rule in `.ai/rules/` states that when a change touches a path matching the repository profile's `access_control` globs, verification must run its checks with the protection in force and record the protection state of each check."
+    rationale: Passing only with protection disabled for convenience gives false assurance.
+    source: 00-intake/request.md
+  - id: REQ-012
+    category: data
+    statement: "`tests.yml` checks may carry `protection` (in_force, disabled, not_applicable) and `protection_note`; a check with `disabled` needs a non-empty note. Records without these fields remain valid."
+    rationale: Additive record format keeps old records working.
+    source: 00-intake/request.md
+  - id: REQ-013
+    category: security
+    statement: "When the profile declares `access_control` and a changed path matches, the gate requires at least one check stating `protection: in_force`, or every check stating a value with a note explaining why none ran with it in force; otherwise it fails with a message naming the matching path and what to record."
+    rationale: Structural guard against unstated protection state, without judging truth.
+    source: 00-intake/request.md
+  - id: REQ-014
+    category: functional
+    statement: "The parity check is not applicable, and adds nothing to a record, when the profile declares no `access_control` or no changed path matches, so repositories like Soft Foundry itself are unaffected."
+    rationale: Intake constraint that checks not relevant here add no risk.
+    source: 00-intake/request.md
+  - id: REQ-015
+    category: security
+    statement: "No fix adds a network call, credential, privilege or trust boundary, and the runner's write is confined to the handoff of the phase just run."
+    rationale: Keeps the change low in security exposure.
+    source: 00-intake/request.md
+  - id: REQ-016
+    category: observability
+    statement: "The operator-visible signals are plain-text, searchable lines: `blocked:`, the summary prefixes, and the gate's `protection stated` check result; no service telemetry is added."
+    rationale: Failures and state are discoverable in CI logs.
+    source: 00-intake/request.md
+  - id: REQ-017
+    category: performance
+    statement: "`change summary` does not run the gate and reads only the metadata and the phase handoffs, completing in under one second on a normal record."
+    rationale: Must be cheaper than reading every handoff by hand.
+    source: 00-intake/request.md
+  - id: REQ-018
+    category: policy
+    statement: "Nothing the application collects, shares, retains, protects or promises under a published privacy policy, security policy or terms changes; no clause is touched."
+    rationale: surfaces.policy is false; stated so the omission is deliberate.
+    source: .ai/rules/policy-conformance.md

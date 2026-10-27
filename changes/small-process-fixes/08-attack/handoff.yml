@@ -1,0 +1,80 @@
+---
+phase: '08-attack'
+skill: adversarial-testing
+status: complete
+commit_sha: 3e356a192053aea57572f94afa3a15d7563ee647
+started_at: '2026-10-27T02:32:52Z'
+completed_at: '2026-10-27T03:50:00Z'
+resolved_model:
+  profile: adversarial_high
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- attack-plan.md
+- cases.yml
+- results.md
+- evidence/manifest.yml
+- evidence/access-control-globs.rb
+- evidence/access-control-globs.txt
+- evidence/change-new-and-summary-paths.txt
+- evidence/content-clean-guidance.txt
+- evidence/gate-on-blocking-shapes.txt
+- evidence/mark-blocked-concurrency.rb
+- evidence/mark-blocked-concurrency.txt
+- evidence/mark-blocked-shapes.rb
+- evidence/mark-blocked-shapes.txt
+- evidence/protection-shapes.rb
+- evidence/protection-shapes.txt
+- evidence/summary-hostile-handoffs.txt
+- evidence/summary-shape-hiding.txt
+- evidence/summary-symlink.txt
+- evidence/rerun-doors-at-head.txt
+- evidence/rerun-access-control-globs-at-head.txt
+- evidence/parallel-run-tests-at-head.txt
+- evidence/parallel-exit-edges.txt
+- evidence/parallel-exit-edges.rb
+blocking: []
+findings:
+- id: ATK-001
+  severity: low
+  summary: 'change summary prints blocking: none and findings: none when those fields
+    are a string or mapping instead of a list, hiding the blocker text of a blocked
+    phase; the runner also does not mark complete+string blocking blocked (the gate
+    still fails it). ATTACK-005.'
+- id: ATK-002
+  severity: low
+  summary: An access_control glob containing a zero-width or other format character
+    passes the lint and never matches, so paths it names escape the protection stated
+    check. ATTACK-007.
+- id: ATK-003
+  severity: low
+  summary: change summary follows a symlinked handoff.yml or metadata.yml and echoes
+    status, blocking and findings from a file outside the record. ATTACK-008.
+- id: ATK-004
+  severity: low
+  summary: change new silently ignores --risk=low / --type=docs (equals form) and
+    a repeated --type, leaving the template placeholder with no message. No lower
+    risk can be recorded. ATTACK-010.
+- id: ATK-005
+  severity: low
+  summary: A parallel run whose session writes status blocked itself prints phase
+    fail but exits 0 (blocked is a gate warning); same rule as the single-phase path.
+    The REV-001 case, complete with blocking, now exits 2. ATTACK-012.
+next: remediate
+notes: Rerun at 3e356a1 after the REV-001 remediation (only parallel_run changed since
+  821f1e8); CLI doors and glob lint rerun with the same outcomes, the new exit path
+  attacked as ATTACK-012. Size full_route_sweep (no declared scope), no routes, so
+  the CLI and gate doors were attacked in a scratch clone with payloads shown as visible
+  escapes. 7 of 12 cases denied, 5 low-severity violations, none lets a blocker pass
+  the gate or lowers a risk. The guard hook was not verified as installed; the write
+  boundary was kept by policy.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-27T03:37:13Z'
+  finished_at: '2026-10-27T03:40:14Z'
+  exit_status: 0
+  previous_phase: evaluate
+  session_id: 670f6373-a3a4-47ba-b76b-4d530e1f3be9
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

@@ -1,0 +1,91 @@
+---
+phase: 13-review
+skill: review
+status: complete
+commit_sha: e349c99a15080828a9e078ff111cdebad9584f16
+started_at: '2026-10-27T03:40:25Z'
+completed_at: '2026-10-27T03:49:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: xai
+  model: grok-4.7
+outputs:
+- functional.md
+- architecture.md
+- security.md
+- accessibility.md
+- policy-conformance.md
+- infrastructure.md
+- operations.md
+- consolidated.md
+blocking: []
+findings:
+- id: REV-002
+  severity: minor
+  summary: change new ignores --risk=high and --type=docs (equals form) and a repeated
+    --type, creates the record, and prints no message. --risk=high --track iterative
+    leaves risk as the template's unset value on the iterative track.
+- id: REV-003
+  severity: minor
+  summary: 'change summary prints blocking: none and findings: none when those fields
+    are a string or mapping. mark_blocked! does not mark that handoff. The gate still
+    fails a complete handoff whose blocking value is a string (ATTACK-005).'
+- id: REV-004
+  severity: minor
+  summary: An access_control glob containing a format character passes access_control_problems
+    and matches nothing, so protection stated skips. soft-foundry check still flags
+    the invisible character in .ai/ (ATTACK-007).
+- id: REV-005
+  severity: minor
+  summary: change summary follows a symlinked handoff.yml or metadata.yml and prints
+    status, blocking, and findings from the target file (ATTACK-008). Display.safe
+    still escapes control characters in that text.
+- id: REV-006
+  severity: minor
+  summary: check_vocabulary compares the risk constant to waivable_by_risk keys and
+    the template comment, and does not compare tracks.forced_by_risk keys. The shipped
+    workflow agrees today.
+- id: REV-007
+  severity: minor
+  summary: test/display_test.rb embeds raw U+202E, U+200B, U+2028, and U+2066. The
+    same assertions can be written with source escapes, which is what the new skill
+    guidance tells agents to do.
+- id: REV-008
+  severity: minor
+  summary: 'The warn: line after a failed blocked-mark names the exception and does
+    not say what to do next. The gate result follows on the single-run and parallel
+    paths.'
+- id: REV-009
+  severity: minor
+  summary: The suite fails (12 failures, 1 error) when it inherits SOFT_FOUNDRY_PHASE=verify,
+    and passes with the variable unset (822 runs, 0 failures). Pre-existing; recorded
+    as VER-001.
+- id: REV-010
+  severity: minor
+  summary: 'A parallel run whose session writes status blocked itself prints phase
+    fail and parallel: ... failed, then exits 0. The runner-marked complete-with-blocking
+    case now exits 2 (ATTACK-012). The single-run path also exits 0 for a session-authored
+    blocked handoff.'
+- id: REV-011
+  severity: minor
+  summary: The regression test for the parallel blocked exit landed in the same commit
+    as the fix (44efb99). The recorded red_commit still points at e496c67 and test/protection_stated_test.rb,
+    which does not contain that assertion.
+next: judge
+notes: 'No blocking findings. Prior REV-001 is closed: parallel_run exits 2 when it
+  marks a handoff blocked, re-checked by the new test (1 run, 0 failures) at this
+  HEAD. Open findings are minor. Implement and remediate recorded provider anthropic;
+  this review used xai. No application, test, or control-plane file was edited. executed_by
+  was left as the runner wrote it. Harness-eval cases were not read (denied). Optional
+  phases document, index, and observe are still pending. Policy text changes owed:
+  none. surfaces.policy is false.'
+executed_by:
+  runner: soft-foundry phase run
+  shell: grok
+  fresh_context: true
+  started_at: '2026-10-27T03:40:25Z'
+  finished_at: '2026-10-27T03:49:06Z'
+  exit_status: 0
+  previous_phase: review
+  session_id: 47db972f-193d-4306-9f53-1b3dd0e24279
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

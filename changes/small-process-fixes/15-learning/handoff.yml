@@ -1,0 +1,41 @@
+---
+phase: 15-learning
+skill: learning
+status: complete
+commit_sha: '081efb7efeac549ccce25884541167ac427661ef'
+started_at: '2026-10-27T03:57:28Z'
+completed_at: '2026-10-27T04:05:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- findings.md
+- proposed-rules.md
+- proposed-evals.md
+- instincts.yml
+blocking: []
+findings:
+- id: LRN-001
+  severity: minor
+  summary: Five instincts recorded (confidence 0.6 to 0.8) from REV-001, REV-002/ATK-004,
+    ATK-001, VER-001 and REV-007. None promoted; promotion goes through a later change
+    record.
+- id: LRN-002
+  severity: minor
+  summary: Five rule proposals and four harness-eval proposals recorded, none self-applied.
+    The sibling-path exit-status lesson (REV-001) is the most valuable.
+next: done
+notes: Learning read the earlier phase handoffs, residual-risk and judgment summary
+  rather than every working file. The proposed testing rule file may not exist under
+  .ai/rules/; the governance change should decide its home. After the run, one raw right-to-left override in instincts.yml became the visible form <U+202E> so the content clean gate passes; nothing else changed.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-27T03:57:28Z'
+  finished_at: '2026-10-27T03:58:22Z'
+  exit_status: 0
+  previous_phase: judge
+  session_id: 7ececfe0-37bc-4f37-a6ca-9f7729b14d3c
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

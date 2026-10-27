@@ -1,0 +1,101 @@
+threats:
+  - id: THREAT-001
+    requirements: [REQ-008, REQ-009, REQ-015]
+    category: file
+    attacker: Person or script supplying a crafted slug, or an agent that persuades an operator to run it
+    goal: Read files outside `changes/` through `change summary`, or create a record outside it through `change new`
+    vector: Slug such as `../..`, an absolute path, a separator or NUL byte joined into a path
+    impact: Disclosure of local files into terminal or CI logs; misplaced record
+    likelihood: low
+    mitigation: MIT-001
+    attack_case_required: true
+  - id: THREAT-002
+    requirements: [REQ-004, REQ-008, REQ-010]
+    category: injection
+    attacker: Agent session or content it read (a file, a web page) that controls handoff and findings text
+    goal: Rewrite what a person sees in the terminal or CI log, or hide a blocker
+    vector: ANSI escape sequences, carriage returns or bidirectional overrides in `notes`, `blocking`, findings or advisories echoed by `summary` and `blocked:`
+    impact: Misleading status shown to the person deciding whether a change is safe
+    likelihood: medium
+    mitigation: MIT-002
+    attack_case_required: true
+  - id: THREAT-003
+    requirements: [REQ-004, REQ-005, REQ-015]
+    category: authorization
+    attacker: Defective runner logic, or an agent that controls handoff content
+    goal: Make the runner's write alter evidence of another phase or a field other than status and notes
+    vector: Phase name or path derived from handoff content; rewrite that serialises the whole record or follows an unexpected path
+    impact: Another phase's evidence altered, breaking the evidence-integrity rule
+    likelihood: low
+    mitigation: MIT-003
+    attack_case_required: true
+  - id: THREAT-004
+    requirements: [REQ-004, REQ-005, REQ-006]
+    category: concurrency
+    attacker: Timing between parallel phase runs finishing together
+    goal: Lose or corrupt a handoff write
+    vector: Two runner finishes read-modify-write handoffs and the record at once, or the blocked write races the session's final write
+    impact: A blocked status lost, so a complete handoff with blockers reaches the gate silently, or a corrupted handoff
+    likelihood: medium
+    mitigation: MIT-004
+    attack_case_required: true
+  - id: THREAT-005
+    requirements: [REQ-004, REQ-006]
+    category: authorization
+    attacker: Agent session under pressure to pass
+    goal: Reach a passing gate with unresolved blocking items
+    vector: Clearing or reshaping `blocking`, hand-editing status to `complete` after the runner marks it blocked, or writing blockers where the runner does not look
+    impact: Unresolved blockers recorded as a clean phase
+    likelihood: medium
+    mitigation: MIT-005
+    attack_case_required: true
+  - id: THREAT-006
+    requirements: [REQ-011, REQ-012, REQ-013]
+    category: authorization
+    attacker: Verification agent or implementer wanting a green record
+    goal: Pass verification with access control disabled, or avoid declaring the state
+    vector: Omitting `protection`, marking every check `not_applicable`, `disabled` with an empty or boilerplate note, or claiming `in_force` for a check that ran with the protection off
+    impact: False assurance that protected paths were tested with protection on
+    likelihood: medium
+    mitigation: MIT-006
+    attack_case_required: true
+  - id: THREAT-007
+    requirements: [REQ-013, REQ-014]
+    category: dependency
+    attacker: Malformed or hostile profile content, or discovery that records no globs
+    goal: Make the parity check pass silently or crash the gate
+    vector: Unreadable, empty or over-broad `access_control` glob; changed-file list unavailable
+    impact: Parity requirement skipped for a change that touches protected paths, or a gate that cannot run
+    likelihood: low
+    mitigation: MIT-007
+    attack_case_required: true
+  - id: THREAT-008
+    requirements: [REQ-001, REQ-002, REQ-003]
+    category: authorization
+    attacker: Person or agent choosing metadata values
+    goal: Evade risk-based controls by recording a lower risk or a track that skips hardening
+    vector: Passing a lower `--risk` than warranted, a case or whitespace variant that bypasses validation, `--risk high` with a non-gated track, or vocabularies that drift so a value is accepted by one list and not another
+    impact: Waivable phases or track chosen against the risk policy
+    likelihood: medium
+    mitigation: MIT-008
+    attack_case_required: true
+  - id: THREAT-009
+    requirements: [REQ-007]
+    category: injection
+    attacker: Author of quoted attack payloads, or content that plants hidden instructions
+    goal: Get raw invisible or bidirectional characters into files that agents read as instructions
+    vector: Payload pasted raw into evidence, or guidance that is itself ambiguous or contains hidden characters
+    impact: Hidden instruction smuggled into evidence; or content-clean gate failures that push agents to weaken the scan
+    likelihood: medium
+    mitigation: MIT-009
+    attack_case_required: true
+  - id: THREAT-010
+    requirements: [REQ-009, REQ-017]
+    category: resource_exhaustion
+    attacker: Agent or file producing very large or deeply nested handoff or findings content
+    goal: Slow or hang the summary or runner finish
+    vector: Oversized YAML, anchors that expand (alias bomb), very long blocking list echoed to the terminal
+    impact: Summary hangs or floods a CI log
+    likelihood: low
+    mitigation: MIT-010
+    attack_case_required: true

@@ -1,0 +1,41 @@
+---
+phase: 04-plan
+skill: planning
+status: complete
+commit_sha: 4e65a204a1dff016ba12dc2b981b56987caa9c03
+started_at: '2026-10-27T00:53:34Z'
+completed_at: '2026-10-27T00:54:39Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- changes/small-process-fixes/04-plan/implementation.md
+- changes/small-process-fixes/04-plan/testing.md
+- changes/small-process-fixes/04-plan/rollout.md
+- changes/small-process-fixes/04-plan/rollback.md
+blocking: []
+findings:
+- 'Six build steps in order: shared output escaper, change new --type/--risk with
+  one vocabulary constant and check lint, runner blocked marking (status and notes
+  only, record-locked), change summary, protection stated gate check (verification
+  only), then text edits and 0.22.0 bump.'
+- 'Open for implement: the plan skill cannot write .ai/, so the parity rule file,
+  skill guidance (adversarial-testing, verification, review) and tests.yml template
+  edits need an implementation phase that permits CONTROL_PLANE writes; confirm permissions.yml
+  first, otherwise record a human decision.'
+- Harness-eval cases were not planned (denied to this phase); gap recorded in testing.md
+  as not covered.
+- Every AC-001 to AC-020 is mapped to a test layer in testing.md.
+next: implement
+notes: Plan only; nothing implemented. Version bump chosen as minor (0.22.0).
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-27T00:53:34Z'
+  finished_at: '2026-10-27T00:54:46Z'
+  exit_status: 0
+  previous_phase: threat_model
+  session_id: 7b502255-94be-44d4-bcc2-e406ec25c1f2
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"
