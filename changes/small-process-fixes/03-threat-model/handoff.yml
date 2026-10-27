@@ -1,24 +1,37 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 03-threat-model
 skill: threat-modeling
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 01b7304b244d1eb540e6ed558ac41cb3b951d87f
+started_at: '2026-10-27T00:52:17Z'
+completed_at: '2026-10-27T01:05:00Z'
 resolved_model:
   profile: adversarial_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- changes/small-process-fixes/03-threat-model/attack-surface.md
+- changes/small-process-fixes/03-threat-model/trust-boundaries.md
+- changes/small-process-fixes/03-threat-model/threats.yml
+- changes/small-process-fixes/03-threat-model/mitigations.md
+blocking: []
+findings:
+- 'Ten threats, no high-severity: output injection into terminal (THREAT-002), slug
+  path traversal (THREAT-001) and false protection claims (THREAT-006) are the ones
+  plan must schedule mitigations for.'
+- 'Plan: summary and blocked: output need a shared control-character escaper; slug
+  validated against known changes; runner write limited to status and notes of the
+  just-run handoff.'
+- Attack cases ATK-001 to ATK-010 proposed in attack-surface.md for the attack phase.
 next: plan
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: ''
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-27T00:52:17Z'
+  finished_at: '2026-10-27T00:53:24Z'
+  exit_status: 0
+  previous_phase: specify
+  session_id: 9909ba89-dc6c-412d-81a3-b22b7aa2a50e
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"
