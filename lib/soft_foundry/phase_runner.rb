@@ -19,7 +19,21 @@ module SoftFoundry
   # than on a note in the handoff saying the implementing session also
   # reviewed its own work.
   class PhaseRunner
-    Launch = Data.define(:shell, :executable, :args, :prompt, :session_id)
+    # The environment variable that tells a session which phase it is running
+    # (the guard resolves the active skill from it), and the one a parallel
+    # run adds. Both live in the reserved SOFT_FOUNDRY_ namespace `--env` refuses.
+    PHASE_ENV = "SOFT_FOUNDRY_PHASE"
+    PARALLEL_ENV = "SOFT_FOUNDRY_PARALLEL"
+
+    # `env` is merged into the child's environment, never put in its
+    # arguments. Its values may be credentials, so `inspect` names the
+    # variables and nothing else.
+    Launch = Data.define(:shell, :executable, :args, :prompt, :session_id, :env) do
+      def initialize(env: {}, **rest) = super(env: env.to_h.freeze, **rest)
+
+      def inspect = "#<PhaseRunner::Launch shell=#{shell} executable=#{executable} env=[#{env.keys.join(', ')}]>"
+      alias_method :to_s, :inspect
+    end
 
     # Non-interactive invocations. Each takes the prompt as its last
     # argument; anything after `--` on the command line is appended first.
@@ -89,29 +103,52 @@ module SoftFoundry
 
     # Why the phase cannot be run now, or nil. Everything here is also
     # what the gate would say afterwards; checking first saves a session.
-    def refusal(phase)
+    # A complete phase whose evidence the gate reports stale is not
+    # refused here: `phase run` reopens it (PhaseReopen, source auto) and
+    # runs it, after every other refusal has been evaluated.
+    #
+    # `named` lists the other phases of a parallel run: a predecessor among
+    # them counts as satisfied for starting when its own predecessor is
+    # complete (the later phase's gate still needs it complete).
+    def refusal(phase, named: [])
       return "change #{@record.slug} is exploring; the exploring stage is worked with the person, not by a runner (run `change vet` first)" if @record.exploring?
       status = @record.metadata["status"].to_s
-      return "change #{@record.slug} is #{status}" if %w[closed judged].include?(status)
+      return "change #{@record.slug} is #{status}" if %w[closed released judged].include?(status)
       # A complete phase is rerun only once the work it rests on has
       # changed, which the gate reports as stale evidence.
-      if @record.phase_status(phase) == "complete" && !Gate.new(@record, git: @git).evaluate(phase).stale?
+      if @record.phase_status(phase) == "complete" && !stale_complete?(phase)
         return "#{phase.output} is already complete; rerun it only after the work it rests on has changed (the gate will say when it is stale)"
       end
       prev = @plane.effective_predecessor(phase, skip: ->(p) { @record.skippable?(p) }) { |p| @record.phase_status(p) }
       if prev && @record.phase_status(prev) != "complete"
+        if named.include?(prev)
+          root = @plane.effective_predecessor(prev, skip: ->(p) { @record.skippable?(p) }) { |p| @record.phase_status(p) }
+          return nil if root.nil? || @record.phase_status(root) == "complete"
+          return "#{phase.output} cannot start: its predecessor #{prev.output} is run beside it, but that phase's own predecessor #{root.output} is #{@record.phase_status(root) || 'missing'}"
+        end
         return "#{phase.output} cannot start: its predecessor #{prev.output} is #{@record.phase_status(prev) || 'missing'}"
       end
       nil
     end
 
+    # The phase is complete and the gate's "evidence current" check fails.
+    def stale_complete?(phase)
+      @record.phase_status(phase) == "complete" && Gate.new(@record, git: @git).evaluate(phase).stale?
+    end
+
+    # Why a stale phase is being reopened, for the history entry.
+    def stale_reason(phase)
+      sha = @record.handoff(phase)&.fetch("commit_sha", nil).to_s
+      "gate check 'evidence current' failed: #{phase.output} is stale, its evidence describes #{sha[0, 7]} and application, test, or infrastructure code has changed since"
+    end
+
     # The instructions the fresh session receives. Deliberately short: it
     # points at the canonical files rather than restating them, and names
     # exactly what may be written.
-    def prompt(phase)
+    def prompt(phase, parallel_head: nil)
       skill = @plane.skill(phase.skill)
       files = ControlPlane::SKILL_FILES.map { |f| ".ai/skills/#{skill.name}/#{f}" }
-      <<~PROMPT.strip
+      base = <<~PROMPT.strip
         You are a fresh-context agent running one lifecycle phase of a Soft Foundry change, and nothing else.
 
         Change: #{@record.slug} (branch #{@record.metadata.dig('git', 'branch')})
@@ -124,25 +161,27 @@ module SoftFoundry
         4. Do not alter any other phase's evidence or handoff, do not weaken requirements to obtain a pass, and do not run `soft-foundry phase run` yourself. If the work cannot be completed, set status blocked with the reason under blocking rather than pretending.
         5. Stop when the handoff is written. `soft-foundry gate #{phase.id}` will be run on your output afterwards.
       PROMPT
+      return base unless parallel_head
+
+      "#{base}\n6. This phase runs beside another in the same worktree. Your commit_sha is #{parallel_head} (the HEAD when the run was accepted; record exactly that value), and do not commit anything: do not run git commit, and leave staging alone. Write only inside changes/#{@record.slug}/#{phase.output}/."
     end
 
-    def launch(phase, shell:, extra: [])
+    def launch(phase, shell:, extra: [], env: {}, parallel_head: nil)
       builder = SHELLS.fetch(shell) { raise ArgumentError, "unknown shell '#{shell}'; phase run supports #{SHELLS.keys.join(', ')}" }
       id = PRESET_ID.include?(shell) ? SecureRandom.uuid : nil
-      text = prompt(phase)
-      Launch.new(shell: shell, executable: shell, args: builder.call(text, extra, id, "#{@record.slug}/#{phase.id}"), prompt: text, session_id: id)
+      text = prompt(phase, parallel_head: parallel_head)
+      Launch.new(shell: shell, executable: shell, args: builder.call(text, extra, id, "#{@record.slug}/#{phase.id}"), prompt: text, session_id: id,
+                 env: { PHASE_ENV => phase.id }.merge(env))
     end
 
     # Records how the phase is being run before the session starts, so a
     # session that dies still leaves the attempt in the record. Also moves
     # current_phase to this phase so the guard applies the right skill.
     def begin!(phase, launch, now: Time.now)
-      path = File.join(@record.dir, "metadata.yml")
-      meta = @record.metadata
-      previous = meta["current_phase"]
-      unless previous == phase.id
+      previous = nil
+      @record.update_metadata do |meta|
+        previous = meta["current_phase"]
         meta["current_phase"] = phase.id
-        File.write(path, YAML.dump(meta))
       end
       stamp_handoff(phase) do |h|
         h["status"] = "in_progress" if h["status"].to_s == "pending"
@@ -186,10 +225,7 @@ module SoftFoundry
     end
 
     def stamp_handoff(phase)
-      path = @record.handoff_path(phase)
-      h = @record.handoff(phase) || {}
-      yield h
-      File.write(path, YAML.dump(h))
+      @record.update_handoff(phase) { |h| yield h }
     end
   end
 end

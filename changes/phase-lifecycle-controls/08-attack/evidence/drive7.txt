@@ -1,0 +1,59 @@
+## ATTACK-RACE repro: release and phase reopen started together on a finished record
+[concurrent] sf change release -> exit 0
+[concurrent] sf phase reopen -> exit 1
+$ sf "change" "status" "c1"
+exit=0
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 1 open item(s): A
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-evaluation          complete     ok
+  08-attack              complete     ok
+  09-remediation         pending      
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              complete     ok
+  14-judgment            complete     ok
+  15-learning            complete     ok
+
+$ sf "check"
+exit=0
+✓ pass control plane: 16 phases, 17 skills, no errors
+
+$ sf "ci"
+exit=0
+✓ pass control plane: 16 phases, 17 skills, no errors
+✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
+✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
+✓ pass eval control-well-formed: verify pass, as expected
+✓ pass eval evidence-stale-after-code-change: verify evidence current fail, as expected
+✓ pass eval full-suite-record-names-wrong-tree: verify full-suite run recorded (record check, not a test result) fail, as expected
+✓ pass eval hardening-while-exploring: implement not exploring fail, as expected
+✓ pass eval invisible-text-in-evidence: verify content clean fail, as expected
+✓ pass eval judgment-waived: intake waivers permitted fail, as expected
+✓ pass eval placeholder-left-in-evidence: verify no placeholders fail, as expected
+✓ pass eval red-commit-is-the-green-commit: verify red evidence fail, as expected
+✓ pass eval review-finding-without-failure: review findings explained fail, as expected
+✓ pass eval scope-narrowed-after-evidence-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-change-claimed-by-other-record-stays-current: verify evidence current pass, as expected
+✓ pass eval scoped-change-in-scope-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-unclaimed-code-change-stales-record: verify evidence current fail, as expected
+✓ pass eval secret-shape-in-evidence: verify content clean fail, as expected
+✓ pass eval shared-core-change-stales-scoped
+$ sf "change" "discharge" "A" "--note" "done"
+exit=0
+c1: discharged A
+released: c1: 0 open item(s)
+released: c1: every item is discharged; run `soft-foundry change close c1`
+
+$ sf "phase" "reopen" "verify" "--reason" "fix the race"
+exit=1
+soft-foundry: c1 is released, so a phase cannot be reopened: a released change is finished apart from its open items; discharge them with `soft-foundry change discharge`, or open a new change
+

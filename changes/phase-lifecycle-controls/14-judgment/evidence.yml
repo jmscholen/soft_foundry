@@ -1,0 +1,170 @@
+commit_judged: f6b2f2d31b0297503c3e1b8c50c160e6f46614bf
+phases:
+  - phase: 00-intake
+    commit_sha: e68a2f5d970314644ace7928091dd0460227ec77
+    current: true
+    result: complete
+    note: "Request and assumptions. Not commit-bound code evidence. No skipped_phases. Risk high, track gated."
+  - phase: 01-discovery
+    commit_sha: c1eb7cf26eeeb676c60240a2d15bb332d069ad4c
+    current: true
+    result: complete
+    note: "DISC-001 through DISC-004 are specified. DISC-005 (harness evals not readable) is still open as REV-004."
+  - phase: 02-specification
+    commit_sha: 0019e26e6d700366138b104bfdbd13ffd03c9ba1
+    current: true
+    result: complete
+    note: "Handoff field names 0019e26. The completed specification was committed at d482a0d, which is the lock, and nothing under 02-specification/ changed after that. d482a0d is an ancestor of the verification commit and of f6b2f2d. REQ-001..027 and AC-001..051."
+  - phase: 03-threat-model
+    commit_sha: d482a0d46034b14262bbd375efc0e067ecc2c0d0
+    current: true
+    result: complete
+    note: "TM-001 is the marker residual (ATK-005). MIT-007's one-write claim is the crash window REV-008 leaves fail-closed. History is no longer ahead of the handoffs."
+  - phase: 04-plan
+    commit_sha: 529db493a01274ed8c6e6512525401b4aa49f109
+    current: true
+    result: complete
+    note: "PLAN-005 named a crash between renames with metadata first. The code now renames handoffs first. Close refuses a pending required phase. AC-017's all-or-nothing sentence is still unmet (REV-008)."
+  - phase: 05-implementation
+    commit_sha: d2050f61e44b44d5d9dd825c354cf7a520da4bf6
+    current: false
+    result: complete
+    note: "Not current for every code path. 030b28f changed lib/soft_foundry and tests. Control-plane and README text landed in 4c79227. docs/user and harness-eval cases did not (D1, REV-004). Deviations D2, D3, D4, D5, D6, D8 stand as review left them."
+  - phase: 06-verification
+    commit_sha: 030b28fb772fdc2cc610d255f3a5e09f35c50f01
+    current: true
+    result: complete
+    note: "git diff 030b28f..f6b2f2d -- lib exe test spec infra is empty. Tree 896e09dc matches tests.yml. CHECK-001 passed (786 runs, 0 failures). check and eval passed. Red commit 053562b confirmed for test/record_lock_test.rb. Remediation tests have no red commit (VER-002)."
+  - phase: 07-evaluation
+    commit_sha: 89b40116b816723a93f601a6da454e507f2e693b
+    current: true
+    result: complete
+    note: "Same library and tests as 030b28f. Journeys EVAL-001..011 passed. EVAL-011 is the fail-closed reopen and the ASCII-blank discharge. EVAL-F1 is D3 / REV-003. No browser. docs/user was outside the skill's read set."
+  - phase: 08-attack
+    commit_sha: 89b40116b816723a93f601a6da454e507f2e693b
+    current: true
+    result: complete
+    note: "Third run after 030b28f. ATK-001..003 not reproduced. ATK-007 is REV-009. ATK-008 is REV-008. ATTACK-011 not run."
+  - phase: 09-remediation
+    commit_sha: c7f45efcaf9fc7c60118af2418d9be85edce9b21
+    current: false
+    result: complete
+    note: "Handoff sha is the commit before the fix. The pre-commit hook refused the commit because downstream evidence was stale. The fix is in 030b28f, which verification, evaluation, and attack then covered. REV-004 and the minor residuals were left."
+  - phase: 10-user-documentation
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Pending. REQ-027 and AC-050 still require docs/user to name the commands. README and usage text do. The stub does not. Not missing as a phase. Unmet as a requirement (REV-004)."
+  - phase: 11-faq-index
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Pending. No FAQ records to index until the document phase writes them."
+  - phase: 12-observability
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Pending and appropriate. surfaces.observability is false. No deployed service. REQ-026 is the timeline, status, and ci. Plain status omits reopenings (REV-005)."
+  - phase: 13-review
+    commit_sha: 2be4aff7a95b8a9b17e745d9d07171affce92bfc
+    current: true
+    result: complete
+    note: "No blocking findings. Prose committed in f6b2f2d. No lib, exe, or test diff since 030b28f. REV-001 and REV-002 do not reproduce. REV-008 and REV-009 are minor and are residual. Provider xAI, different from implementation and remediation."
+unresolved_findings:
+  - id: REV-001
+    severity: major
+    phase: 13-review
+    disposition: fixed
+    summary: "Closed in 030b28f. Handoffs are renamed before metadata. A kill leaves no history entry for a reset the handoffs do not show. change close refuses a pending required phase (drive14)."
+  - id: REV-002
+    severity: major
+    phase: 13-review
+    disposition: fixed
+    summary: "Closed for an ASCII blank. discharged? requires a timestamp or a non-empty strip. Lint refuses a present blank. CLI, ci, close, and the page agree (drive13). The U+00A0 remainder is REV-009."
+  - id: REV-008
+    severity: minor
+    phase: 13-review
+    disposition: residual
+    summary: "Kill between handoff renames and the metadata rename leaves pending handoffs, no history, and a leftover temp. AC-017 is unmet. Close refuses. Not a return."
+  - id: REV-009
+    severity: minor
+    phase: 13-review
+    disposition: residual
+    summary: "Hand-edited discharged_at of only U+00A0 is discharged in Ruby and open on the page. check and ci exit 0. Not a return. The discharge command cannot write that value."
+  - id: REV-003
+    severity: minor
+    phase: 13-review
+    disposition: standing_review_reading
+    summary: "Gate on a reopened phase prints SKIP and exits 0. Close still refuses. D3 accepted because REQ-023 keeps the pending gate's meaning. AC-014's exit-code sentence is unmet."
+  - id: REV-004
+    severity: minor
+    phase: 13-review
+    disposition: residual
+    summary: "docs/user/README.md does not name the new commands. No harness-eval case for a malformed release block, a non-isolated parallel request, or a stale auto-reopen. REQ-027 unmet."
+  - id: REV-005
+    severity: minor
+    phase: 13-review
+    disposition: residual
+    summary: "Plain change status prints the released line and does not print phase reopenings. The timeline does."
+  - id: REV-006
+    severity: minor
+    phase: 13-review
+    disposition: residual
+    summary: "phase reopen leaves started_at, and the next phase run keeps that earlier timestamp."
+  - id: REV-007
+    severity: minor
+    phase: 13-review
+    disposition: residual
+    summary: "ps reports only args[2], so phase run evaluate attack --parallel shows as evaluate."
+  - id: EVAL-F3
+    severity: minor
+    phase: 07-evaluation
+    disposition: residual
+    summary: "ci prints the released line indented under a heading, not at column 0."
+  - id: EVAL-F4
+    severity: minor
+    phase: 07-evaluation
+    disposition: residual
+    summary: "A parallel session that exits 0 with its handoff left in_progress is reported phase <id>: pass. A single phase run exits 0 in that same case."
+  - id: EVAL-F5
+    severity: minor
+    phase: 07-evaluation
+    disposition: residual
+    summary: "A release item id containing a zero-width character is refused, and the refusal prints the character back."
+  - id: EVAL-F6
+    severity: minor
+    phase: 07-evaluation
+    disposition: residual
+    summary: "A refused phase reopen creates the git-ignored locks directory because the lock is taken before the state check."
+  - id: ATK-002
+    severity: minor
+    phase: 08-attack
+    disposition: standing_review_reading
+    summary: "Invisible characters are refused. Visible look-alike letters are stored and shown. Scan stays clean. Display residual, not a gate bypass."
+  - id: ATK-004
+    severity: minor
+    phase: 08-attack
+    disposition: standing_review_reading
+    summary: "A hand-edited non-blank discharge timestamp or junk string passes check and ci. Both surfaces show it discharged. TB-3. The blank and the U+00A0 cases are REV-002 and REV-009."
+  - id: ATK-005
+    severity: minor
+    phase: 08-attack
+    disposition: standing_review_reading
+    summary: "Unsetting SOFT_FOUNDRY_PHASE in a shell releases the change. A forged finished record releases with an advisory. TB-1. Documented."
+  - id: ATK-006
+    severity: minor
+    phase: 08-attack
+    disposition: residual
+    summary: "ATTACK-011 (held lock, symlink, kill mid-write of release and discharge) was not run. Phase reopen kill-mid-write is ATTACK-018."
+  - id: D6
+    severity: minor
+    phase: 05-implementation
+    disposition: standing_review_reading
+    summary: "--env values remain in shell history and in ps until setproctitle. Review accepted this."
+  - id: THREAT-010
+    severity: minor
+    phase: 03-threat-model
+    disposition: standing_review_reading
+    summary: "Parallel isolation of shared resources is the adopter's job. With no --env the runner prints a warn line. MIT-009."
+undischarged: []
+discharged: []

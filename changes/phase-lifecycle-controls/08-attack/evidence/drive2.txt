@@ -1,0 +1,42 @@
+## bidi in --reason
+$ sf "phase" "reopen" "verify" "--reason" "safe<U+202E>evil<U+200B>x\u2028y"
+exit=1
+soft-foundry: --reason may not contain invisible or direction-changing characters (zero width, bidi override, line or paragraph separator)
+
+46:#   reason: why the person sent it back to exploring
+54:#   reason: why the phase was reopened
+$ sf "scan"
+exit=0
+✓ pass scan: 278 files, no findings
+
+$ sf "check"
+exit=0
+✓ pass control plane: 16 phases, 17 skills, no errors
+
+$ sf "change" "status" "c1"
+exit=0
+c1: c1  [status: in_progress, phase: learn, risk: TBD]
+  track: gated
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-evaluation          complete     ok
+  08-attack              complete     ok
+  09-remediation         pending      
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              complete     ok
+  14-judgment            complete     ok
+  15-learning            complete     ok
+advisory: 5 issues to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn judgment: final judgment (14-judgment) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+

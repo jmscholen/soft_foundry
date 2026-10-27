@@ -1,0 +1,40 @@
+---
+phase: 15-learning
+skill: learning
+status: complete
+commit_sha: 89d3520475f5eeeebdc0256c8afbe1d3c2c092fa
+started_at: '2026-10-26T20:30:58Z'
+completed_at: '2026-10-26T20:40:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- findings.md
+- proposed-rules.md
+- proposed-evals.md
+- instincts.yml
+blocking: []
+findings:
+- id: LEARN-001
+  severity: info
+  summary: Five instincts written, none promoted. Proposed rules and harness evals
+    are listed for a later governance change.
+- id: LEARN-002
+  severity: info
+  summary: Residuals carried from judgment stay unmet (AC-017, REV-009 U+00A0, REQ-027
+    docs and eval cases). Proposed evals include discharged-agreement, which would
+    currently fail.
+next: done
+notes: Fresh-context learning under learning permissions, treated as policy. Wrote
+  only under 15-learning. Did not promote instincts or edit .ai/.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-26T20:30:58Z'
+  finished_at: '2026-10-26T20:31:59Z'
+  exit_status: 0
+  previous_phase: judge
+  session_id: 362df1d8-3df4-42b1-afb5-3342cf5667c8
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

@@ -1,0 +1,506 @@
+### discharged_at = empty ("")
+$ sf "change" "release" "c1" "--item" "A=a"
+exit=0
+c1: released
+released: c1: 2 open item(s): A, UND-1
+released: c1: recorded at 2026-10-26T20:07:33Z (commit 20d1ef1e8bcb)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry ph
+$ sf "check"
+exit=2
+✗ error changes/c1/metadata.yml: release item "A" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ error changes/c1/metadata.yml: release item "UND-1" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ fail control plane: 2 error(s)
+
+$ sf "ci"
+exit=2
+✗ error changes/c1/metadata.yml: release item "A" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ error changes/c1/metadata.yml: release item "UND-1" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ fail control plane: 2 error(s)
+
+change c1 (released, not re-gated)
+  released: c1: 2 open item(s): A, UND-
+$ sf "change" "status" "c1"
+exit=0
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 2 open item(s): A, UND-1
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-
+$ sf "change" "close" "c1"
+exit=1
+c1: cannot close: released with 2 open item(s) A, UND-1; discharge each with `soft-foundry change discharge ID --note TEXT`, or pass --force to close anyway
+
+$ sf "change" "discharge" "A" "--note" "real"
+exit=0
+c1: discharged A
+released: c1: 1 open item(s): UND-1
+
+UI /api/change -> 200, parses=true, timeline 'discharged' entries=1
+
+### discharged_at = space (" ")
+$ sf "change" "release" "c1" "--item" "A=a"
+exit=0
+c1: released
+released: c1: 2 open item(s): A, UND-1
+released: c1: recorded at 2026-10-26T20:07:50Z (commit f5db11baeb5f)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry ph
+$ sf "check"
+exit=2
+✗ error changes/c1/metadata.yml: release item "A" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ error changes/c1/metadata.yml: release item "UND-1" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ fail control plane: 2 error(s)
+
+$ sf "ci"
+exit=2
+✗ error changes/c1/metadata.yml: release item "A" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ error changes/c1/metadata.yml: release item "UND-1" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ fail control plane: 2 error(s)
+
+change c1 (released, not re-gated)
+  released: c1: 2 open item(s): A, UND-
+$ sf "change" "status" "c1"
+exit=0
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 2 open item(s): A, UND-1
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-
+$ sf "change" "close" "c1"
+exit=1
+c1: cannot close: released with 2 open item(s) A, UND-1; discharge each with `soft-foundry change discharge ID --note TEXT`, or pass --force to close anyway
+
+$ sf "change" "discharge" "A" "--note" "real"
+exit=0
+c1: discharged A
+released: c1: 1 open item(s): UND-1
+
+UI /api/change -> 200, parses=true, timeline 'discharged' entries=1
+
+### discharged_at = tab-newline ("\t\n")
+$ sf "change" "release" "c1" "--item" "A=a"
+exit=0
+c1: released
+released: c1: 2 open item(s): A, UND-1
+released: c1: recorded at 2026-10-26T20:08:06Z (commit 4f6d84db0f1d)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry ph
+$ sf "check"
+exit=2
+✗ error changes/c1/metadata.yml: release item "A" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ error changes/c1/metadata.yml: release item "UND-1" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ fail control plane: 2 error(s)
+
+$ sf "ci"
+exit=2
+✗ error changes/c1/metadata.yml: release item "A" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ error changes/c1/metadata.yml: release item "UND-1" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ fail control plane: 2 error(s)
+
+change c1 (released, not re-gated)
+  released: c1: 2 open item(s): A, UND-
+$ sf "change" "status" "c1"
+exit=0
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 2 open item(s): A, UND-1
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-
+$ sf "change" "close" "c1"
+exit=1
+c1: cannot close: released with 2 open item(s) A, UND-1; discharge each with `soft-foundry change discharge ID --note TEXT`, or pass --force to close anyway
+
+$ sf "change" "discharge" "A" "--note" "real"
+exit=0
+c1: discharged A
+released: c1: 1 open item(s): UND-1
+
+UI /api/change -> 200, parses=true, timeline 'discharged' entries=1
+
+### discharged_at = nbsp (" ")
+$ sf "change" "release" "c1" "--item" "A=a"
+exit=0
+c1: released
+released: c1: 2 open item(s): A, UND-1
+released: c1: recorded at 2026-10-26T20:08:22Z (commit e7beb455e483)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry ph
+$ sf "check"
+exit=0
+✓ pass control plane: 16 phases, 17 skills, no errors
+
+$ sf "ci"
+exit=0
+✓ pass control plane: 16 phases, 17 skills, no errors
+
+change c1 (released, not re-gated)
+  released: c1: no open items remain; run `soft-foundry change close c1` once it is merged
+
+✓ ci passed
+
+$ sf "change" "status" "c1"
+exit=0
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 0 open item(s)
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-evaluation
+$ sf "change" "close" "c1"
+exit=1
+c1: finished commit 32242b3ebee97e49d1831971fb6f2b61188deca5 is not reachable from main yet; pass --force to close anyway
+
+$ sf "change" "discharge" "A" "--note" "real"
+exit=1
+soft-foundry: release item A is already discharged; open items: none
+
+UI /api/change -> 200, parses=true, timeline 'discharged' entries=0
+
+### discharged_at = false (false)
+$ sf "change" "release" "c1" "--item" "A=a"
+exit=0
+c1: released
+released: c1: 2 open item(s): A, UND-1
+released: c1: recorded at 2026-10-26T20:08:38Z (commit 933fd5d64a0e)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry ph
+$ sf "check"
+exit=2
+✗ error changes/c1/metadata.yml: release item "A" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ error changes/c1/metadata.yml: release item "UND-1" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ fail control plane: 2 error(s)
+
+$ sf "ci"
+exit=2
+✗ error changes/c1/metadata.yml: release item "A" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ error changes/c1/metadata.yml: release item "UND-1" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ fail control plane: 2 error(s)
+
+change c1 (released, not re-gated)
+  released: c1: 2 open item(s): A, UND-
+$ sf "change" "status" "c1"
+exit=0
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 2 open item(s): A, UND-1
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-
+$ sf "change" "close" "c1"
+exit=1
+c1: cannot close: released with 2 open item(s) A, UND-1; discharge each with `soft-foundry change discharge ID --note TEXT`, or pass --force to close anyway
+
+$ sf "change" "discharge" "A" "--note" "real"
+exit=0
+c1: discharged A
+released: c1: 1 open item(s): UND-1
+
+UI /api/change -> 200, parses=true, timeline 'discharged' entries=1
+
+### discharged_at = zero (0)
+$ sf "change" "release" "c1" "--item" "A=a"
+exit=0
+c1: released
+released: c1: 2 open item(s): A, UND-1
+released: c1: recorded at 2026-10-26T20:08:53Z (commit 4091176e3e10)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry ph
+$ sf "check"
+exit=2
+✗ error changes/c1/metadata.yml: release item "A" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ error changes/c1/metadata.yml: release item "UND-1" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ fail control plane: 2 error(s)
+
+$ sf "ci"
+exit=2
+✗ error changes/c1/metadata.yml: release item "A" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ error changes/c1/metadata.yml: release item "UND-1" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ fail control plane: 2 error(s)
+
+change c1 (released, not re-gated)
+  released: c1: 2 open item(s): A, UND-
+$ sf "change" "status" "c1"
+exit=0
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 2 open item(s): A, UND-1
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-
+$ sf "change" "close" "c1"
+exit=1
+c1: cannot close: released with 2 open item(s) A, UND-1; discharge each with `soft-foundry change discharge ID --note TEXT`, or pass --force to close anyway
+
+$ sf "change" "discharge" "A" "--note" "real"
+exit=0
+c1: discharged A
+released: c1: 1 open item(s): UND-1
+
+UI /api/change -> 200, parses=true, timeline 'discharged' entries=1
+
+### discharged_at = empty array ([])
+$ sf "change" "release" "c1" "--item" "A=a"
+exit=0
+c1: released
+released: c1: 2 open item(s): A, UND-1
+released: c1: recorded at 2026-10-26T20:09:09Z (commit b70d18ca1ff0)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry ph
+$ sf "check"
+exit=2
+✗ error changes/c1/metadata.yml is not valid YAML without aliases; fix it
+✗ fail control plane: 1 error(s)
+
+$ sf "ci"
+exit=2
+✗ error changes/c1/metadata.yml is not valid YAML without aliases; fix it
+✗ fail control plane: 1 error(s)
+
+change c1 (released, not re-gated)
+  released: c1: 2 open item(s): A, UND-1
+  ! warn owed A: a
+  ! warn owed UND-1: observe UND-1 in production
+
+✗ ci failed
+
+$ sf "change" "status" "c1"
+exit=2
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 2 open item(s): A, UND-1
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     FAIL: ev
+$ sf "change" "close" "c1"
+exit=1
+c1: cannot close: released with 2 open item(s) A, UND-1; discharge each with `soft-foundry change discharge ID --note TEXT`, or pass --force to close anyway
+
+$ sf "change" "discharge" "A" "--note" "real"
+exit=0
+c1: discharged A
+released: c1: 1 open item(s): UND-1
+
+UI /api/change -> 200, parses=true, timeline 'discharged' entries=1
+
+### discharged_at = empty hash ({})
+$ sf "change" "release" "c1" "--item" "A=a"
+exit=0
+c1: released
+released: c1: 2 open item(s): A, UND-1
+released: c1: recorded at 2026-10-26T20:09:25Z (commit e768b36842e4)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry ph
+$ sf "check"
+exit=2
+✗ error changes/c1/metadata.yml is not valid YAML without aliases; fix it
+✗ fail control plane: 1 error(s)
+
+$ sf "ci"
+exit=2
+✗ error changes/c1/metadata.yml is not valid YAML without aliases; fix it
+✗ fail control plane: 1 error(s)
+
+change c1 (released, not re-gated)
+  released: c1: 2 open item(s): A, UND-1
+  ! warn owed A: a
+  ! warn owed UND-1: observe UND-1 in production
+
+✗ ci failed
+
+$ sf "change" "status" "c1"
+exit=2
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 2 open item(s): A, UND-1
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     FAIL: ev
+$ sf "change" "close" "c1"
+exit=1
+c1: cannot close: released with 2 open item(s) A, UND-1; discharge each with `soft-foundry change discharge ID --note TEXT`, or pass --force to close anyway
+
+$ sf "change" "discharge" "A" "--note" "real"
+exit=0
+c1: discharged A
+released: c1: 1 open item(s): UND-1
+
+UI /api/change -> 200, parses=true, timeline 'discharged' entries=1
+
+### discharged_at = null (nil)
+$ sf "change" "release" "c1" "--item" "A=a"
+exit=0
+c1: released
+released: c1: 2 open item(s): A, UND-1
+released: c1: recorded at 2026-10-26T20:09:40Z (commit f3e241e50d69)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry ph
+$ sf "check"
+exit=0
+✓ pass control plane: 16 phases, 17 skills, no errors
+
+$ sf "ci"
+exit=0
+✓ pass control plane: 16 phases, 17 skills, no errors
+
+change c1 (released, not re-gated)
+  released: c1: 2 open item(s): A, UND-1
+  ! warn owed A: a
+  ! warn owed UND-1: observe UND-1 in production
+
+✓ ci passed
+
+$ sf "change" "status" "c1"
+exit=0
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 2 open item(s): A, UND-1
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-
+$ sf "change" "close" "c1"
+exit=1
+c1: cannot close: released with 2 open item(s) A, UND-1; discharge each with `soft-foundry change discharge ID --note TEXT`, or pass --force to close anyway
+
+$ sf "change" "discharge" "A" "--note" "real"
+exit=0
+c1: discharged A
+released: c1: 1 open item(s): UND-1
+
+UI /api/change -> 200, parses=true, timeline 'discharged' entries=1
+
+### discharged_at = junk string ("not a time")
+$ sf "change" "release" "c1" "--item" "A=a"
+exit=0
+c1: released
+released: c1: 2 open item(s): A, UND-1
+released: c1: recorded at 2026-10-26T20:09:57Z (commit d3b311c703ee)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry ph
+$ sf "check"
+exit=0
+✓ pass control plane: 16 phases, 17 skills, no errors
+
+$ sf "ci"
+exit=0
+✓ pass control plane: 16 phases, 17 skills, no errors
+
+change c1 (released, not re-gated)
+  released: c1: no open items remain; run `soft-foundry change close c1` once it is merged
+
+✓ ci passed
+
+$ sf "change" "status" "c1"
+exit=0
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 0 open item(s)
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-evaluation
+$ sf "change" "close" "c1"
+exit=1
+c1: finished commit d27c7e25c0b18d2eb47dd165d61cb027b81f56d5 is not reachable from main yet; pass --force to close anyway
+
+$ sf "change" "discharge" "A" "--note" "real"
+exit=1
+soft-foundry: release item A is already discharged; open items: none
+
+UI /api/change -> 200, parses=true, timeline 'discharged' entries=0
+
+### discharged_at = bare date (#<Date: 2026-01-01 ((2461042j,0s,0n),+0s,2299161j)>)
+$ sf "change" "release" "c1" "--item" "A=a"
+exit=0
+c1: released
+released: c1: 2 open item(s): A, UND-1
+released: c1: recorded at 2026-10-26T20:10:13Z (commit 8d9c31146cb4)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry ph
+$ sf "check"
+exit=2
+✗ error changes/c1/metadata.yml is not valid YAML without aliases; fix it
+✗ fail control plane: 1 error(s)
+
+$ sf "ci"
+exit=2
+✗ error changes/c1/metadata.yml is not valid YAML without aliases; fix it
+✗ fail control plane: 1 error(s)
+
+change c1 (released, not re-gated)
+  released: c1: no open items remain; run `soft-foundry change close c1` once it is merged
+
+✗ ci failed
+
+$ sf "change" "status" "c1"
+exit=2
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 0 open item(s)
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     FAIL: evidence cur
+$ sf "change" "close" "c1"
+exit=1
+c1: finished commit 0971f38725b6dce93334e4f600412b488960dcf7 is not reachable from main yet; pass --force to close anyway
+
+$ sf "change" "discharge" "A" "--note" "real"
+exit=1
+soft-foundry: release item A is already discharged; open items: none
+
+UI /api/change -> 200, parses=true, timeline 'discharged' entries=2
+

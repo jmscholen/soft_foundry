@@ -1,0 +1,302 @@
+### reopen verify killed before rename #1
+STATE status=in_progress reopenings=0 handoffs(verify..learn)=["complete", "complete", "complete", "complete", "complete", "complete"] leftover_tmp=0
+$ {"KILL_AT"=>"1", "RUBYOPT"=>"-I/tmp/sfa/lib -r/Users/jscholen-iou/dev/soft_foundry/changes/phase-lifecycle-controls/08-attack/evidence/scripts/kill_hook.rb"} sf "phase" "reopen" "verify" "--reason" "kill test 1"
+exit= signal=9
+KILLED before rename #1 (handoff.yml)
+
+STATE status=in_progress reopenings=0 handoffs(verify..learn)=["complete", "complete", "complete", "complete", "complete", "complete"] leftover_tmp=7
+$ sf "check"
+exit=0 signal=nil
+✓ pass control plane: 16 phases, 17 skills, no errors
+
+$ sf "ci"
+exit=0 signal=nil
+✓ pass control plane: 16 phases, 17 skills, no errors
+
+change c1
+00-intake  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass waivers permitted: nothing waived
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: c6d71881b0b7322ab9755967dc21e97036f97729
+  ✓ pas
+$ sf "change" "status" "c1"
+exit=0 signal=nil
+c1: c1  [status: in_progress, phase: learn, risk: TBD]
+  track: gated
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-evaluation          complete     ok
+  
+$ sf "change" "close" "c1"
+exit=1 signal=nil
+c1: finished commit c6d71881b0b7322ab9755967dc21e97036f97729 is not reachable from main yet; pass --force to close anyway
+
+$ sf "gate" "judge"
+exit=0 signal=nil
+14-judgment  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: final.md, residual-risk.md, evidence.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: c6d71881b0b7322ab9755967dc21e97036f97729
+  ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
+  ✓ pass predecessor complete: 13-review
+  ✓ pass evidence current: no code ch
+-- retry after kill (leftover temps present?)
+$ sf "phase" "reopen" "verify" "--reason" "retry 1"
+exit=1 signal=nil
+soft-foundry: /private/var/folders/v8/684xdbm92vz7dz03clwvpmvr0000gn/T/soft-foundry20261026-17814-y6wun8/changes/c1/06-verification/handoff.yml.soft-foundry-tmp already exists (planted or leftover temporary file); remove it and rerun
+
+STATE status=in_progress reopenings=0 handoffs(verify..learn)=["complete", "complete", "complete", "complete", "complete", "complete"] leftover_tmp=7
+$ sf "change" "close" "c1"
+exit=1 signal=nil
+c1: finished commit c6d71881b0b7322ab9755967dc21e97036f97729 is not reachable from main yet; pass --force to close anyway
+
+### reopen verify killed before rename #2
+STATE status=in_progress reopenings=0 handoffs(verify..learn)=["complete", "complete", "complete", "complete", "complete", "complete"] leftover_tmp=0
+$ {"KILL_AT"=>"2", "RUBYOPT"=>"-I/tmp/sfa/lib -r/Users/jscholen-iou/dev/soft_foundry/changes/phase-lifecycle-controls/08-attack/evidence/scripts/kill_hook.rb"} sf "phase" "reopen" "verify" "--reason" "kill test 2"
+exit= signal=9
+KILLED before rename #2 (handoff.yml)
+
+STATE status=in_progress reopenings=0 handoffs(verify..learn)=["pending", "complete", "complete", "complete", "complete", "complete"] leftover_tmp=6
+$ sf "check"
+exit=0 signal=nil
+✓ pass control plane: 16 phases, 17 skills, no errors
+
+$ sf "ci"
+exit=2 signal=nil
+✓ pass control plane: 16 phases, 17 skills, no errors
+
+change c1
+00-intake  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass waivers permitted: nothing waived
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 35e66d9d3833e29571f004dcd390f571de9346c2
+  ✓ pas
+$ sf "change" "status" "c1"
+exit=2 signal=nil
+c1: c1  [status: in_progress, phase: learn, risk: TBD]
+  track: gated
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        pending      
+  07-evaluation          complete     FAIL: p
+$ sf "change" "close" "c1"
+exit=1 signal=nil
+c1: has not reached the end of its lifecycle yet (a required phase is still pending and not skipped-with-rationale), so there is nothing to confirm as merged; pass --force to close anyway
+
+$ sf "gate" "judge"
+exit=0 signal=nil
+14-judgment  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: final.md, residual-risk.md, evidence.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 35e66d9d3833e29571f004dcd390f571de9346c2
+  ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
+  ✓ pass predecessor complete: 13-review
+  ✓ pass evidence current: no code ch
+-- retry after kill (leftover temps present?)
+$ sf "phase" "reopen" "verify" "--reason" "retry 2"
+exit=1 signal=nil
+soft-foundry: /private/var/folders/v8/684xdbm92vz7dz03clwvpmvr0000gn/T/soft-foundry20261026-17814-hv0jz7/changes/c1/07-evaluation/handoff.yml.soft-foundry-tmp already exists (planted or leftover temporary file); remove it and rerun
+
+STATE status=in_progress reopenings=0 handoffs(verify..learn)=["pending", "complete", "complete", "complete", "complete", "complete"] leftover_tmp=6
+$ sf "change" "close" "c1"
+exit=1 signal=nil
+c1: has not reached the end of its lifecycle yet (a required phase is still pending and not skipped-with-rationale), so there is nothing to confirm as merged; pass --force to close anyway
+
+### reopen verify killed before rename #3
+STATE status=in_progress reopenings=0 handoffs(verify..learn)=["complete", "complete", "complete", "complete", "complete", "complete"] leftover_tmp=0
+$ {"KILL_AT"=>"3", "RUBYOPT"=>"-I/tmp/sfa/lib -r/Users/jscholen-iou/dev/soft_foundry/changes/phase-lifecycle-controls/08-attack/evidence/scripts/kill_hook.rb"} sf "phase" "reopen" "verify" "--reason" "kill test 3"
+exit= signal=9
+KILLED before rename #3 (handoff.yml)
+
+STATE status=in_progress reopenings=0 handoffs(verify..learn)=["pending", "pending", "complete", "complete", "complete", "complete"] leftover_tmp=5
+$ sf "check"
+exit=0 signal=nil
+✓ pass control plane: 16 phases, 17 skills, no errors
+
+$ sf "ci"
+exit=2 signal=nil
+✓ pass control plane: 16 phases, 17 skills, no errors
+
+change c1
+00-intake  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass waivers permitted: nothing waived
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 0240660198af8ee74f6874eefb0dd7534264dc14
+  ✓ pas
+$ sf "change" "status" "c1"
+exit=2 signal=nil
+c1: c1  [status: in_progress, phase: learn, risk: TBD]
+  track: gated
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        pending      
+  07-evaluation          pending      
+  08-a
+$ sf "change" "close" "c1"
+exit=1 signal=nil
+c1: has not reached the end of its lifecycle yet (a required phase is still pending and not skipped-with-rationale), so there is nothing to confirm as merged; pass --force to close anyway
+
+$ sf "gate" "judge"
+exit=0 signal=nil
+14-judgment  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: final.md, residual-risk.md, evidence.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 0240660198af8ee74f6874eefb0dd7534264dc14
+  ✓ pass completed_at recorded: 2026-09-09T00:00:00Z
+  ✓ pass predecessor complete: 13-review
+  ✓ pass evidence current: no code ch
+-- retry after kill (leftover temps present?)
+$ sf "phase" "reopen" "verify" "--reason" "retry 3"
+exit=1 signal=nil
+soft-foundry: /private/var/folders/v8/684xdbm92vz7dz03clwvpmvr0000gn/T/soft-foundry20261026-17814-1u9c0a/changes/c1/08-attack/handoff.yml.soft-foundry-tmp already exists (planted or leftover temporary file); remove it and rerun
+
+STATE status=in_progress reopenings=0 handoffs(verify..learn)=["pending", "pending", "complete", "complete", "complete", "complete"] leftover_tmp=5
+$ sf "change" "close" "c1"
+exit=1 signal=nil
+c1: has not reached the end of its lifecycle yet (a required phase is still pending and not skipped-with-rationale), so there is nothing to confirm as merged; pass --force to close anyway
+
+### reopen verify killed before rename #6
+STATE status=in_progress reopenings=0 handoffs(verify..learn)=["complete", "complete", "complete", "complete", "complete", "complete"] leftover_tmp=0
+$ {"KILL_AT"=>"6", "RUBYOPT"=>"-I/tmp/sfa/lib -r/Users/jscholen-iou/dev/soft_foundry/changes/phase-lifecycle-controls/08-attack/evidence/scripts/kill_hook.rb"} sf "phase" "reopen" "verify" "--reason" "kill test 6"
+exit= signal=9
+KILLED before rename #6 (handoff.yml)
+
+STATE status=in_progress reopenings=0 handoffs(verify..learn)=["pending", "pending", "pending", "pending", "pending", "complete"] leftover_tmp=2
+$ sf "check"
+exit=0 signal=nil
+✓ pass control plane: 16 phases, 17 skills, no errors
+
+$ sf "ci"
+exit=2 signal=nil
+✓ pass control plane: 16 phases, 17 skills, no errors
+
+change c1
+00-intake  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass waivers permitted: nothing waived
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 96852fa953544426d0553f53b5936f6396af5221
+  ✓ pas
+$ sf "change" "status" "c1"
+exit=2 signal=nil
+c1: c1  [status: in_progress, phase: learn, risk: TBD]
+  track: gated
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        pending      
+  07-evaluation          pending      
+  08-a
+$ sf "change" "close" "c1"
+exit=1 signal=nil
+c1: cannot close: 14-judgment is pending; a change is complete only with a final judgment (.ai/workflow.yml rules.final_judgment_required), so run the judge phase (`soft-foundry phase run judge`) or pass --force to close without one
+
+$ sf "gate" "judge"
+exit=0 signal=nil
+14-judgment  pending  SKIP
+  - skip phase pending: not started
+
+-- retry after kill (leftover temps present?)
+$ sf "phase" "reopen" "verify" "--reason" "retry 6"
+exit=1 signal=nil
+soft-foundry: /private/var/folders/v8/684xdbm92vz7dz03clwvpmvr0000gn/T/soft-foundry20261026-17814-dqc3o0/changes/c1/15-learning/handoff.yml.soft-foundry-tmp already exists (planted or leftover temporary file); remove it and rerun
+
+STATE status=in_progress reopenings=0 handoffs(verify..learn)=["pending", "pending", "pending", "pending", "pending", "complete"] leftover_tmp=2
+$ sf "change" "close" "c1"
+exit=1 signal=nil
+c1: cannot close: 14-judgment is pending; a change is complete only with a final judgment (.ai/workflow.yml rules.final_judgment_required), so run the judge phase (`soft-foundry phase run judge`) or pass --force to close without one
+
+### reopen verify killed before rename #7
+STATE status=in_progress reopenings=0 handoffs(verify..learn)=["complete", "complete", "complete", "complete", "complete", "complete"] leftover_tmp=0
+$ {"KILL_AT"=>"7", "RUBYOPT"=>"-I/tmp/sfa/lib -r/Users/jscholen-iou/dev/soft_foundry/changes/phase-lifecycle-controls/08-attack/evidence/scripts/kill_hook.rb"} sf "phase" "reopen" "verify" "--reason" "kill test 7"
+exit= signal=9
+KILLED before rename #7 (metadata.yml)
+
+STATE status=in_progress reopenings=0 handoffs(verify..learn)=["pending", "pending", "pending", "pending", "pending", "pending"] leftover_tmp=1
+$ sf "check"
+exit=0 signal=nil
+✓ pass control plane: 16 phases, 17 skills, no errors
+
+$ sf "ci"
+exit=0 signal=nil
+✓ pass control plane: 16 phases, 17 skills, no errors
+
+change c1
+00-intake  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass waivers permitted: nothing waived
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 02eeed0f6661a265aefeda05b29fb123304793ce
+  ✓ pas
+$ sf "change" "status" "c1"
+exit=0 signal=nil
+c1: c1  [status: in_progress, phase: learn, risk: TBD]
+  track: gated
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        pending      
+  07-evaluation          pending      
+  08-a
+$ sf "change" "close" "c1"
+exit=1 signal=nil
+c1: cannot close: 14-judgment is pending; a change is complete only with a final judgment (.ai/workflow.yml rules.final_judgment_required), so run the judge phase (`soft-foundry phase run judge`) or pass --force to close without one
+
+$ sf "gate" "judge"
+exit=0 signal=nil
+14-judgment  pending  SKIP
+  - skip phase pending: not started
+
+-- retry after kill (leftover temps present?)
+$ sf "phase" "reopen" "verify" "--reason" "retry 7"
+exit=1 signal=nil
+soft-foundry: nothing to reset: verify and every phase after it are already pending; run `soft-foundry phase run verify` instead
+
+STATE status=in_progress reopenings=0 handoffs(verify..learn)=["pending", "pending", "pending", "pending", "pending", "pending"] leftover_tmp=1
+$ sf "change" "close" "c1"
+exit=1 signal=nil
+c1: cannot close: 14-judgment is pending; a change is complete only with a final judgment (.ai/workflow.yml rules.final_judgment_required), so run the judge phase (`soft-foundry phase run judge`) or pass --force to close without one
+

@@ -1,0 +1,164 @@
+## PAC-09 parallel refusals
+$ {} sf "phase" "run" "implement" "review" "--parallel" "--shell" "claude"
+exit=1 (0.2s)
+c1: cannot run implement review in parallel: implement, review are not in isolated_phases (.ai/workflow.yml: evaluate, attack); only phases that write nothing outside their own directory may run side by side
+
+$ {} sf "phase" "run" "evaluate" "evaluate" "--parallel" "--shell" "claude"
+exit=1 (0.2s)
+c1: cannot run evaluate evaluate in parallel: evaluate is named twice; name each phase once
+
+$ {} sf "phase" "run" "Evaluate" "Attack" "--parallel" "--shell" "claude"
+exit=1 (0.2s)
+soft-foundry: unknown phase 'Evaluate'; lifecycle phases: intake, discover, specify, threat_model, plan, implement, verify, evaluate, attack, remediate, document, index, observe, review, judge, learn
+
+$ {} sf "phase" "run" "judge" "attack" "--parallel" "--shell" "claude"
+exit=1 (0.2s)
+c1: cannot run judge attack in parallel: judge is not in isolated_phases (.ai/workflow.yml: evaluate, attack); only phases that write nothing outside their own directory may run side by side
+
+$ {} sf "phase" "run" "evaluate" "--parallel" "--shell" "claude"
+exit=1 (0.2s)
+c1: cannot run evaluate in parallel: --parallel needs two or more phases; for one phase run `soft-foundry phase run evaluate`
+
+$ {} sf "phase" "run" "evaluate" "attack" "remediate" "--parallel" "--shell" "claude"
+exit=1 (0.2s)
+c1: cannot run evaluate attack remediate in parallel: remediate is not in isolated_phases (.ai/workflow.yml: evaluate, attack); only phases that write nothing outside their own directory may run side by side
+
+$ {} sf "phase" "run" "verify" "attack" "--parallel" "--shell" "claude"
+exit=1 (0.2s)
+c1: cannot run verify attack in parallel: verify is not in isolated_phases (.ai/workflow.yml: evaluate, attack); only phases that write nothing outside their own directory may run side by side
+
+$ {} sf "phase" "run" "evaluate" "../attack" "--parallel" "--shell" "claude"
+exit=1 (0.2s)
+soft-foundry: unknown phase '../attack'; lifecycle phases: intake, discover, specify, threat_model, plan, implement, verify, evaluate, attack, remediate, document, index, observe, review, judge, learn
+
+$ {} sf "phase" "run" "evaluate" "attack\n" "--parallel" "--shell" "claude"
+exit=1 (0.2s)
+soft-foundry: unknown phase 'attack
+'; lifecycle phases: intake, discover, specify, threat_model, plan, implement, verify, evaluate, attack, remediate, document, index, observe, review, judge, learn
+
+tree unchanged after parallel refusals: true
+## PAC-07 env secrets (dry-run & refusals)
+$ {} sf "phase" "run" "evaluate" "attack" "--parallel" "--dry-run" "--env" "DB_URL=postgres://u:secret@h/{phase}"
+exit=0 (0.2s)
+would run evaluate of c1 with: claude -p --session-id ef79d787-974d-45b5-921f-afacab90d3e7 --name c1/evaluate <prompt>
+would run attack of c1 with: claude -p --session-id db2682e0-1466-4a0f-aa4b-b49bf7426e10 --name c1/attack <prompt>
+parallel: would set DB_URL, SOFT_FOUNDRY_PHASE, SOFT_FOUNDRY_PARALLEL in each session (values are not shown)
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the evaluation skill's permissions (`soft-foundry hooks install --claude`)
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the adversarial-testing skill's permissions (`soft-foundry hooks install --claude`)
+
+$ {} sf "phase" "run" "evaluate" "attack" "--parallel" "--env" "SOFT_FOUNDRY_PHASE=review" "--dry-run"
+exit=1 (0.2s)
+soft-foundry: environment variable name SOFT_FOUNDRY_PHASE begins SOFT_FOUNDRY_, which is reserved for soft-foundry
+
+$ {} sf "phase" "run" "evaluate" "attack" "--parallel" "--env" "lower=secretval" "--dry-run"
+exit=1 (0.2s)
+soft-foundry: environment variable name "lower" must match [A-Z_][A-Z0-9_]*
+
+$ {} sf "phase" "run" "evaluate" "attack" "--parallel" "--env" "1A=secretval" "--dry-run"
+exit=1 (0.2s)
+soft-foundry: environment variable name "1A" must match [A-Z_][A-Z0-9_]*
+
+$ {} sf "phase" "run" "evaluate" "attack" "--parallel" "--env" "postgres://u:secretpw@h/db?x=1" "--dry-run"
+exit=1 (0.2s)
+soft-foundry: --env takes NAME=VALUE with NAME matching [A-Z_][A-Z0-9_]* and not beginning SOFT_FOUNDRY_ (the text given is not shown)
+
+spawn NUL err ArgumentError
+$ {} sf "phase" "run" "evaluate" "attack" "--parallel" "--env=DB_URL=secretinline" "--dry-run"
+exit=1 (0.2s)
+soft-foundry: --env takes its value as the next argument (--env NAME=VALUE), not joined with =
+
+$ {} sf "phase" "run" "evaluate" "--env=DB_URL=secretinline2" "--dry-run"
+exit=1 (0.2s)
+soft-foundry: --env takes its value as the next argument (--env NAME=VALUE), not joined with =
+
+$ {} sf "phase" "run" "evaluate" "--env" "DB_URL=postgres://u:secret@h/{phase}" "--dry-run"
+exit=0 (0.2s)
+would run evaluate of c1 with: claude -p --session-id 8196cff6-88fb-4761-8db7-81c6c598dc76 --name c1/evaluate <prompt>
+--- prompt ---
+You are a fresh-context agent running one lifecycle phase of a Soft Foundry change, and nothing else.
+
+Change: c1 (branch change/c1)
+Phase: evaluate (changes/c1/07-evaluation/)
+Skill: evaluation (profile reasoning_high)
+
+1. Read AGENTS.md and .ai/README.md. Then load only this phase's skill contract: .ai/skills/evaluation/skill.yml, .ai/skills/evaluation/SKILL.md, .ai/skills/evaluation/permissions.yml, .ai/skills/evaluation/requirements.yml, .ai/skills/evaluation/completion.yml.
+2. Do the phase's work as the skill describes, reading the earlier phases under changes/c1/ that the skill's permissions.yml allows. Write only where that file allows; the runtime guard enforces it where installed and it is policy everywhere else.
+3. When the work is done, fill changes/c1/07-evaluation/handoff.yml: status complete, commit_sha (the HEAD the outputs describe), completed_at, resolved_model (provider and model actually used), outputs, findings for later phases, and next. Do not edit executed_by; the runner writes it.
+4. Do not alter any other phase's evidence or handoff, do not weaken requirements to obtain a pass, and do not run `soft-foundry phase run` yourself. If the work cannot be completed, set status blocked with the reason under blocking rather than pretending.
+5. Stop when the handoff is written. `soft-foundry gate evaluate` will be run on your output afterwards.
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the evaluation skill's permissions (`soft-foundry hooks install --claude`)
+
+$ {} sf "phase" "run" "evaluate" "attack" "--parallel" "--env" "A=1" "--env" "A=2" "--dry-run"
+exit=1 (0.2s)
+soft-foundry: environment variable A is given twice; give each --env name once
+
+## PAC-07/10 real parallel run with stub, secret env, commit during run
+$ {"STUB_SLEEP"=>"4"} sf "phase" "run" "evaluate" "attack" "--parallel" "--shell" "claude" "--env" "DB_URL=postgres://u:secret@h/{phase}" "--env" "SECRET_TOKEN=tok-abc123"
+exit=0 (4.3s)
+billing: subscription (no ANTHROPIC_API_KEY in the environment, so claude bills to its own login); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+parallel: running evaluate, attack of c1 at once, each in its own fresh session; executed_by recorded in each handoff
+phase evaluate: claude exited 0
+07-evaluation  in_progress  PASS
+  ✓ pass handoff identity
+  ! warn phase in progress: not yet gated
+phase evaluate: pass
+phase attack: claude exited 0
+08-attack  in_progress  PASS
+  ✓ pass handoff identity
+  ! warn phase in progress: not yet gated
+phase attack: pass
+parallel: 2 phases run, 2 passed, 0 failed
+advisory: 1 issue to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the evaluation skill's permissions (`soft-foundry hooks install --claude`)
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the adversarial-testing skill's permissions (`soft-foundry hooks install --claude`)
+--ps while running--
+27000 soft-foundry phase run evaluate attack --parallel --shell claude --env DB_URL=*** --env SECRET_TOKEN=***              
+27005 /bin/sh /tmp/sfbin/stubs/claude -p --session-id d7d80c9b-a9f2-4472-8e95-e291e04e59e1 --name c1/evaluate You are a fresh-context agent running one lifecycle phase of a Soft Foundry change, and no
+27006 /bin/sh /tmp/sfbin/stubs/claude -p --session-id 1fb5f3c0-6c65-4bce-9b16-a54773a64b55 --name c1/attack You are a fresh-context agent running one lifecycle phase of a Soft Foundry change, and noth
+
+/var/folders/v8/684xdbm92vz7dz03clwvpmvr0000gn/T/soft-foundry20261026-26794-k7op2z/changes/c1/03-threat-model/threats.yml:4:    category: authorization   # authentication | authorization | isolation | injection | xss | csrf | ssrf | file | secrets | replay | concurrency | resource_exhaustion | dependency | infrastructure
+grep for secret in record: done
+stub envs:
+-- attack.txt
+argv: -p --session-id 1fb5f3c0-6c65-4bce-9b16-a54773a64b55 --name c1/attack You are a fresh-context agent running one lifecycle phase of a Soft Foundry change, and nothing else.
+
+Change: c1 (branch change/c1)
+Phase: attack (changes/c1/08-attack/)
+Skill: adversarial-testing (profile adversarial_high)
+
+1. Read AGENTS.md and .ai/README.md. Then load only this phase's skill contract: .ai/skills/adversarial-testing/skill.yml, .ai/skills/adversarial-testing/SKILL.md, .ai/skills/adversarial-testing/permissions.yml, .ai/skills/adversarial-testing/requirements.yml, .ai/skills/adversarial-testing/completi
+2. Do the phase's work as the skill describes, reading the earlier phases under changes/c1/ that the skill's permissions.yml allows. Write only where that file allows; the runtime guard enforces it where installed and it is policy everywhere else.
+3. When the work is done, fill changes/c1/08-attack/handoff.yml: status complete, commit_sha (the HEAD the outputs describe), completed_at, resolved_model (provider and model actually used), outputs, findings for later phases, and next. Do not edit executed_by; the runner writes it.
+4. Do not alter any other phase's evidence or handoff, do not weaken requirements to obtain a pass, and do not run `soft-foundry phase run` yourself. If the work cannot be completed, set status blocked with the reason under blocking rather than pretending.
+5. Stop when the handoff is written. `soft-foundry gate attack` will be run on your output afterwards.
+6. This phase runs beside another in the same worktree. Your commit_sha is 350acad4c03ba17d58c013613f5aaa18551c0433 (the HEAD when the run was accepted; record exactly that value), and do not commit anything: do not run git commit, and leave staging alone. Write only inside changes/c1/08-attack/.
+SECRET_TOKEN=tok-abc123
+SOFT_FOUNDRY_PHASE=attack
+SOFT_FOUNDRY_PARALLEL=1
+DB_URL=postgres://u:secret@h/attack
+pid=27006
+-- evaluate.txt
+argv: -p --session-id d7d80c9b-a9f2-4472-8e95-e291e04e59e1 --name c1/evaluate You are a fresh-context agent running one lifecycle phase of a Soft Foundry change, and nothing else.
+
+Change: c1 (branch change/c1)
+Phase: evaluate (changes/c1/07-evaluation/)
+Skill: evaluation (profile reasoning_high)
+
+1. Read AGENTS.md and .ai/README.md. Then load only this phase's skill contract: .ai/skills/evaluation/skill.yml, .ai/skills/evaluation/SKILL.md, .ai/skills/evaluation/permissions.yml, .ai/skills/evaluation/requirements.yml, .ai/skills/evaluation/completion.yml.
+2. Do the phase's work as the skill describes, reading the earlier phases under changes/c1/ that the skill's permissions.yml allows. Write only where that file allows; the runtime guard enforces it where installed and it is policy everywhere else.
+3. When the work is done, fill changes/c1/07-evaluation/handoff.yml: status complete, commit_sha (the HEAD the outputs describe), completed_at, resolved_model (provider and model actually used), outputs, findings for later phases, and next. Do not edit executed_by; the runner writes it.
+4. Do not alter any other phase's evidence or handoff, do not weaken requirements to obtain a pass, and do not run `soft-foundry phase run` yourself. If the work cannot be completed, set status blocked with the reason under blocking rather than pretending.
+5. Stop when the handoff is written. `soft-foundry gate evaluate` will be run on your output afterwards.
+6. This phase runs beside another in the same worktree. Your commit_sha is 350acad4c03ba17d58c013613f5aaa18551c0433 (the HEAD when the run was accepted; record exactly that value), and do not commit anything: do not run git commit, and leave staging alone. Write only inside changes/c1/07-evaluation/
+SECRET_TOKEN=tok-abc123
+SOFT_FOUNDRY_PHASE=evaluate
+SOFT_FOUNDRY_PARALLEL=1
+DB_URL=postgres://u:secret@h/evaluate
+pid=27005
+status after:
+ M changes/c1/07-evaluation/handoff.yml
+ M changes/c1/08-attack/handoff.yml
+ M changes/c1/metadata.yml
+?? .soft-foundry/

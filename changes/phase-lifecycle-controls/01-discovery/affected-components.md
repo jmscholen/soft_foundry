@@ -1,0 +1,18 @@
+# Affected Components
+
+| Component | Path | Why affected | Confidence |
+| --- | --- | --- | --- |
+| Phase reopen (new reset path) | `lib/soft_foundry/change_record.rb` (beside `reopen!`), `lib/soft_foundry/cli.rb` (`phase` subcommand dispatch, usage text) | `phase reopen <phase> --reason` resets a phase and its downstream phases and records history; today only the iterative-only `change reopen` does | discovered |
+| Phase runner refusal and auto-reopen | `lib/soft_foundry/phase_runner.rb` (`refusal`, `begin!`), `cli.rb` `phase run` | `refusal` rejects a complete-but-stale phase with no way forward; `phase run` must call the reopen when evidence is stale | discovered |
+| Parallel isolated runs | `cli.rb` `phase run` (`spawn_shell`; `spawn_panel` is the precedent), `phase_runner.rb` (`launch`, `begin!`, `finish!`) | new `--parallel`; per-run environment value; `begin!`/`finish!` rewrite `metadata.yml` with no lock | discovered |
+| Active-skill resolution by the guard | `lib/soft_foundry/guard.rb` (`active`, panel-member narrowing), `hooks.rb` | the guard reads one `current_phase`; concurrent sessions of different phases would race on it | discovered (race), inferred (fix shape) |
+| Isolated-phase declaration | `.ai/workflow.yml` (new list beside `panel_phases`), `lib/soft_foundry/control_plane.rb` (`panel_phases` accessor is the precedent), `check.rb` | the intake assumptions say the workflow declares which phases are isolated, not Ruby | inferred |
+| Released status and open items | `lib/soft_foundry/change_record.rb` (`close!`, status helpers), `change_index.rb` (`merged_unclosed?`), `cli.rb` (`change close`, `ci`, a new subcommand or flag) | `ci` fails a merged change that is not `closed`; `released` with named open items must pass; empty items refused | discovered |
+| Every place that special-cases `closed` | `snapshot.rb` (`summary`, `board_row`, timeline), `processes.rb`, `scope.rb`, `check.rb`, `learning.rb`, `guard.rb`, `ui/` (`server.rb`, `assets/app.js` open/closed counts) | each must decide what `released` means (gated, claims scope, shown as open or released) | discovered |
+| Processes command table | `lib/soft_foundry/processes.rb` (l.28) | lists subcommands per command; `phase reopen` and any new status command must be added | discovered |
+| Harness eval status list | `lib/soft_foundry/harness_eval.rb` `STATUSES` (l.36); cases under `.ai/harness-evals/cases/` (not read: denied to this phase) | a planted record cannot have status `released` until added; new gate/live cases are required by the request | discovered (list), inferred (cases) |
+| Templates and schemas | `.ai/templates/change/metadata.yml`, `.ai/templates/handoff.yml`, `.ai/schemas.md`, `.ai/README.md` | status vocabulary, new history key, open items, and the new commands are documented here and must stay in step | discovered |
+| Gate and advisories | `lib/soft_foundry/gate.rb`, `advisory.rb` | stale detection is reused as is; an advisory for open items on a released record is a likely addition | inferred |
+| User docs | `README.md`, `docs/user/` | document `phase reopen`, `--parallel`, `released`; `surfaces.accessibility: true` applies to CLI output | discovered |
+| Tests | `test/phase_runner_test.rb`, `lifecycle_tracks_test.rb`, `cli_change_close_test.rb`, `snapshot_test.rb`, `panel_*_test.rb`, `harness_eval_test.rb`, `processes_test.rb` | existing behaviour pinned here must not change ("existing records, iterative `change reopen`, `change close` behave as before") | discovered |
+| Unaffected | iterative-track `change vet`/`reopen`, exploration skill, panel machinery, budget, installer, updater | explicit non-goals | discovered |

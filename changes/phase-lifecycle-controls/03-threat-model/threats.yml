@@ -1,0 +1,101 @@
+threats:
+  - id: THREAT-001
+    requirements: [REQ-007, REQ-018]
+    category: authorization
+    attacker: an agent in a phase session
+    goal: reset or release the record from inside its session (erase a failed verdict, reset a sibling, release or discharge items)
+    vector: runs `soft-foundry phase reopen`, `change release`, or `change discharge` from Bash
+    impact: forged lifecycle state; verdicts erased or work declared finished without evidence
+    likelihood: medium
+    mitigation: MIT-001
+    attack_case_required: true
+  - id: THREAT-002
+    requirements: [REQ-007, REQ-013, REQ-018]
+    category: authentication
+    attacker: an agent in a phase session
+    goal: defeat the session marker so the refusal or the per-skill guard does not apply
+    vector: unsets the marker (`env -u`), prefixes a command with a different marker value, or edits the shell profile; Bash is checked against deny sets only
+    impact: the marker refusal is bypassed; the guard checks the session against a skill it does not hold
+    likelihood: medium
+    mitigation: MIT-001
+    attack_case_required: true
+  - id: THREAT-003
+    requirements: [REQ-013, REQ-009]
+    category: authorization
+    attacker: an agent or a misconfigured parallel run
+    goal: get the guard to apply a more permissive skill, or to ignore the violation
+    vector: marker holds an unknown, empty, mixed-case, non-isolated, or path-like phase name
+    impact: wrong permissions applied; writes outside the session's skill allowed
+    likelihood: medium
+    mitigation: MIT-002
+    attack_case_required: true
+  - id: THREAT-004
+    requirements: [REQ-017, REQ-018, REQ-020, REQ-021]
+    category: authorization
+    attacker: a contributor or implementing session wanting a green merge
+    goal: land a change that looks finished without closing it or without a real judgment
+    vector: hand-set or minimally satisfy `released` with a throwaway item; drop or rename undischarged judgment items; malformed or empty release block; never discharge
+    impact: `main` CI passes and owed work or missing evidence stays hidden
+    likelihood: medium
+    mitigation: MIT-003
+    attack_case_required: true
+  - id: THREAT-005
+    requirements: [REQ-003, REQ-004, REQ-005, REQ-007, REQ-008]
+    category: authorization
+    attacker: an implementing session or careless person
+    goal: launder evidence or discard a verdict using reopen or auto-reopen
+    vector: a trivial commit makes a phase stale, auto-reopen resets it, and the same session reruns it; or reopen specify to rewrite a locked specification without a record
+    impact: a rejected verdict is replaced; requirement change is unrecorded
+    likelihood: medium
+    mitigation: MIT-004
+    attack_case_required: true
+  - id: THREAT-006
+    requirements: [REQ-007, REQ-011, REQ-017, REQ-025]
+    category: injection
+    attacker: a person, script, or agent supplying free text
+    goal: inject YAML keys, forged log lines, terminal escapes, or HTML into the record, output, or UI
+    vector: reason, item description, or note containing newlines, `---`, ESC sequences, NUL, `<script>`, or 501+ characters
+    impact: corrupted or forged record; spoofed `pass` lines in output; script in the loopback UI
+    likelihood: medium
+    mitigation: MIT-005
+    attack_case_required: true
+  - id: THREAT-007
+    requirements: [REQ-011, REQ-012]
+    category: secrets
+    attacker: anyone reading the repo, logs, or process list
+    goal: read an adopter credential passed with `--env`
+    vector: value persisted in the record or handoff, echoed in an error, placed in argv seen by `ps`, or collided with runner variables via `SOFT_FOUNDRY_*`
+    impact: credential disclosure, possibly committed to Git
+    likelihood: medium
+    mitigation: MIT-006
+    attack_case_required: true
+  - id: THREAT-008
+    requirements: [REQ-014, REQ-022]
+    category: concurrency
+    attacker: concurrent sessions or an interrupted run
+    goal: corrupt or lose updates to the record
+    vector: simultaneous writes from parallel sessions or a person; kill mid-write; stale or symlinked lock file
+    impact: unparseable `metadata.yml`, half-applied reset, lost history entry, hung command
+    likelihood: medium
+    mitigation: MIT-007
+    attack_case_required: true
+  - id: THREAT-009
+    requirements: [REQ-009, REQ-010, REQ-015, REQ-016]
+    category: resource_exhaustion
+    attacker: a mistaken invocation or a session
+    goal: run a non-isolated phase in parallel, or move HEAD under siblings, or exhaust time through lock waits
+    vector: `--parallel` with implement/review/judge, aliases, duplicates; a session commits; held lock
+    impact: code-writing phases race; evidence bound to inconsistent commits; commands hang
+    likelihood: low
+    mitigation: MIT-008
+    attack_case_required: true
+  - id: THREAT-010
+    requirements: [REQ-011, REQ-015]
+    category: isolation
+    attacker: a sibling session sharing resources
+    goal: interfere with another session's database, port, or files
+    vector: parallel sessions evaluate or attack against one shared environment because no `--env` was given
+    impact: flaky or cross-contaminated evaluation and attack evidence
+    likelihood: medium
+    mitigation: MIT-009
+    attack_case_required: false

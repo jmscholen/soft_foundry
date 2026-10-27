@@ -1,0 +1,59 @@
+---
+phase: 01-discovery
+skill: repository-discovery
+status: complete
+commit_sha: c1eb7cf26eeeb676c60240a2d15bb332d069ad4c
+started_at: '2026-10-23T17:59:15Z'
+completed_at: '2026-10-23T18:10:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- changes/phase-lifecycle-controls/01-discovery/repository-context.md
+- changes/phase-lifecycle-controls/01-discovery/affected-components.md
+- changes/phase-lifecycle-controls/01-discovery/dependencies.md
+- changes/phase-lifecycle-controls/01-discovery/unknowns.md
+blocking: []
+findings:
+- id: DISC-001
+  severity: major
+  summary: Concurrent phase sessions share one metadata.yml current_phase, which the
+    guard reads to pick the active skill and begin!/finish! rewrite without a lock;
+    --parallel needs a per-session phase resolution (specify and threat-model).
+- id: DISC-002
+  severity: major
+  summary: The existing reopenings key and the snapshot timeline mean "reopened for
+    exploring"; phase-reopen history needs its own key or an unambiguous shape (specify).
+- id: DISC-003
+  severity: major
+  summary: closed is special-cased in ci, snapshot, processes, scope, check, learning,
+    guard, and the UI; each needs a deliberate released decision, and harness_eval
+    STATUSES must admit it (specify, plan).
+- id: DISC-004
+  severity: minor
+  summary: Undischarged judgment items already exist as a still-owed list and block
+    close; released open items must not become a second competing list or a route
+    around the final judgment (specify).
+- id: DISC-005
+  severity: minor
+  summary: ".ai/harness-evals/cases and .ai/policies were not readable in this phase
+    (guard denial); later phases must read them before adding cases or policy."
+- id: DISC-006
+  severity: minor
+  summary: No published privacy, security, or terms document exists; all three stay
+    NOT_APPLICABLE in .ai/repository.yml, which this phase left unchanged.
+next: specify
+notes: Harness evals and .ai/policies were not read (denied to this skill by the guard).
+  Bash is checked against deny sets only. The guard also refused one shell call whose
+  heredoc text it could not parse, so the files were written with the Write tool.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-23T17:59:15Z'
+  finished_at: '2026-10-23T18:02:04Z'
+  exit_status: 0
+  previous_phase: intake
+  session_id: 3e7d71fa-b219-4da4-b52a-c39d28707105
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

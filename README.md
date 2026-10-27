@@ -251,6 +251,29 @@ soft-foundry change reopen <slug> --reason "..."   # back to exploring; phases f
 
 The exploring stage's skill is `.ai/skills/exploration/`. `check` verifies that it can write no commit-bound phase's directory, so the invariant that exploring produces a journal and never evidence is linted, not just stated. Deploying anywhere other than the development environment is a human boundary on either track.
 
+### Reopening a phase, parallel runs, and released changes
+
+```bash
+soft-foundry phase reopen verify --reason "fix landed after verification"
+soft-foundry phase run evaluate attack --parallel --env DATABASE_URL=postgres://localhost/sf_{phase}
+soft-foundry change release my-change --item OBS-1="confirm the dashboard after deploy"
+soft-foundry change discharge OBS-1 --note "dashboard confirmed"
+```
+
+#### Reopening a phase
+
+`phase reopen <phase> --reason TEXT` resets the phase, every later phase, and the `next` loop-back of the reopened phase to `pending`. Evidence files are kept. Each reopening is appended to `phase_reopenings` in `metadata.yml` (`at`, `phase`, `reset`, `from_commit`, `reason`, `source`, `previous`). `phase run` makes the same reopen automatically (`source: auto`) when the phase it is asked to run is complete but its evidence is stale. It refuses on a closed, released, exploring or awaiting_human change, when there is nothing to reset, and from inside a `phase run` session.
+
+#### Running isolated phases in parallel
+
+`phase run A B --parallel` runs phases listed in `isolated_phases` in `.ai/workflow.yml` (evaluate and attack by default), each in its own fresh session. Each `--env NAME=VALUE` is expanded per session (`{phase}` becomes the phase id) and placed in that session's environment only. Soft Foundry never creates or tears down what a value names: isolating a shared database, port or cache is the adopter's responsibility, and the run prints a `warn:` line when no `--env` is given. Sessions share the start HEAD and are told not to commit. The values stay out of files, output and argv; the person's shell history and a microsecond window before the process title is rewritten remain. Output lines are `phase <id>: pass|fail` and `parallel:`.
+
+#### Released changes
+
+`change release` marks a judged change `released` and requires named open items; `change discharge ID --note TEXT` records that one is done; `change close` then closes it. `ci` passes on a merged released change while items are open and lists them, and still fails on `main` for a merged change that is neither `closed` nor `released`. `closed` remains the only end state.
+
+**Residual.** `phase run` sets `SOFT_FOUNDRY_PHASE` so `phase reopen`, `change release` and `change discharge` refuse inside a session. This guards against accident, not a sandbox: a session that unsets the variable in a shell is not stopped.
+
 ### Closing a change record
 
 A merged change's record has to be marked `closed`, or `soft-foundry ci` fails once that record has actually reached judgment: an un-closed record stays "live" to the gate checker, so a later edit to a path group its evidence covers will read as making that evidence stale. A record closes only with a completed judgment (`.ai/workflow.yml` `rules.final_judgment_required`); `--force` closes one without, as the person's recorded decision.

@@ -1,0 +1,108 @@
+### EVAL-004 release / discharge / close / ci (AC-035..043)
+c1: released
+released: c1: 1 open item(s): GOLIVE-1
+released: c1: recorded at 2026-10-26T20:04:53Z (commit ee06a68afc97)
+exit=0
+release:
+  at: '2026-10-26T20:04:53Z'
+  commit: ee06a68afc976718492f329da53bcb943c2449eb
+  items:
+  - id: GOLIVE-1
+    description: switch flag on
+status: released
+--- refusals AC-036
+soft-foundry: --item is required: name at least one thing still owed, as --item ID=DESCRIPTION (for example --item GOLIVE-1='switch the flag on')
+exit=1
+soft-foundry: item id A is given twice; ids must be unique
+exit=1
+soft-foundry: item id "lower" must match [A-Z0-9][A-Z0-9-]* (capital letters, digits, and hyphens)
+exit=1
+soft-foundry: the description of item A is required: it may not be empty
+exit=1
+soft-foundry: --item takes ID=DESCRIPTION (an id of capital letters, digits, and hyphens, an equals sign, then what is owed)
+exit=1
+soft-foundry: the description of item A is 501 characters; the limit is 500
+exit=1
+       0
+--- AC-037 judgments
+soft-foundry: cannot release c1: the final judgment is BLOCKED; only APPROVED or APPROVED_WITH_RESIDUAL_RISK can be released
+BLOCKED exit=1
+soft-foundry: cannot release c1: the final judgment is REJECTED; only APPROVED or APPROVED_WITH_RESIDUAL_RISK can be released
+REJECTED exit=1
+soft-foundry: cannot release c1: 14-judgment is pending; a release rests on a complete final judgment (run `soft-foundry phase run judge`)
+judge missing exit=1
+--- AC-038 carries U-1,U-2
+c1: released
+released: c1: 3 open item(s): A, U-1, U-2
+released: c1: recorded at 2026-10-26T20:05:06Z (commit 5f56a195884f)
+advisory: 5 issues to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn judgment: final judgment (14-judgment) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  - id: A
+  - id: U-1
+    from: judgment
+  - id: U-2
+    from: judgment
+--- AC-039 merged but in_progress/judged: ci
+  ! warn judgment: final judgment (14-judgment) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ✗ fail merged into main but status is 'in_progress', not 'closed' — run `soft-foundry change close c1`
+
+✗ ci failed
+ci exit=2
+--- AC-040 merged released: ci, discharge, close
+change c1 (released, not re-gated)
+  released: c1: 2 open item(s): A, B
+advisory: c1 is released with 2 open item(s) to discharge before it is closed (informational, does not block the gate)
+✓ ci passed
+ci exit=0
+c1: cannot close: released with 2 open item(s) A, B; discharge each with `soft-foundry change discharge ID --note TEXT`, or pass --force to close anyway
+close exit=1
+c1: discharged A
+released: c1: 1 open item(s): B
+discharge exit=0
+soft-foundry: release item A is already discharged; open items: B
+dup exit=1
+soft-foundry: c1 has no release item "ZZ"; open items: B
+unknown exit=1
+c1: cannot close: released with 1 open item(s) B; discharge each with `soft-foundry change discharge ID --note TEXT`, or pass --force to close anyway
+close with B open exit=1
+c1: discharged B
+released: c1: 0 open item(s)
+released: c1: every item is discharged; run `soft-foundry change close c1`
+change c1 (released, not re-gated)
+  ✗ fail released: c1: no open items remain and it is merged into main, but status is still 'released' - run `soft-foundry change close c1`
+✗ ci failed
+ci all-discharged-not-closed exit=2
+advisory: 5 issues to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn judgment: final judgment (14-judgment) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+c1: closed
+close exit=0
+status: closed
+soft-foundry: c1 is closed, not released; only a released change has items to discharge (release it with `soft-foundry change release`)
+discharge on closed exit=1
+soft-foundry: c1 is closed, so a phase cannot be reopened: a merged change is reshaped by a new change, not by reopening
+soft-foundry: c1 is closed, so it cannot be released: a closed change has nothing left to release
+--- AC-041 malformed release block in check
+✓ pass control plane: 16 phases, 17 skills, no errors
+✗ error changes/c1/metadata.yml: release block has no items (a released record names what is still owed)
+✗ fail control plane: 1 error(s)
+check exit=2
+✗ error changes/c1/metadata.yml: released record's release block is missing (run `soft-foundry change release`, or fix the record)
+✗ fail control plane: 1 error(s)
+--- AC-043 close non-released
+advisory: 5 issues to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn evaluation: evaluation (07-evaluation) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn attack: adversarial testing (08-attack) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn judgment: final judgment (14-judgment) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+c1: closed
+exit=0
+status: closed

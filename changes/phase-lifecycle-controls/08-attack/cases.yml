@@ -1,0 +1,332 @@
+---
+commit_sha: 89b40116b816723a93f601a6da454e507f2e693b
+authorization_envelope:
+  target: soft-foundry at commit 89b40116b816723a93f601a6da454e507f2e693b (lib/soft_foundry,
+    the phase-lifecycle-controls change, after remediation commits 529e749 and 030b28f), run from a throwaway git clone and throwaway
+    fixture repositories under the system temp directory
+  environment: local
+  authorized_by: the person who started this attack run by invoking `soft-foundry
+    phase run attack` for this change; the target is the tool's own CLI, guard and
+    loopback UI
+  allowed_surfaces:
+  - 'soft-foundry CLI: phase reopen, phase run (with a stub claude shell), change
+    release/discharge/close/status/list, check, ci, scan, gate, guard'
+  - the guard hook entry fed synthetic payloads
+  - UI::Server#respond called in-process (no socket)
+  - hand-edited metadata.yml and handoffs inside throwaway fixtures
+  prohibited_surfaces:
+  - the real repository's record, working tree, index and git history
+  - any real coding-shell session or provider API (no phase was run against a live
+    model)
+  - network access of any kind
+  - the user's real home directory state
+  data_constraints: synthetic fixtures and fake credentials only; one ambient credential-named
+    variable leaked into a first stub log and was scrubbed before anything was kept
+  network_constraints: none used; the UI server was not bound to a port
+  destructive_actions: prohibited
+cases:
+- id: ATTACK-001
+  threat: THREAT-001
+  violation_attempted: A session with the runner's marker set runs phase reopen /
+    change release to rewrite lifecycle state (AC-A1, PAC-01)
+  starting_privilege: A phase session (SOFT_FOUNDRY_PHASE set to implement, review,
+    attack, verify, or empty)
+  steps:
+  - Set the marker, run `phase reopen verify --reason x` and `change release c1 --item
+    A=a` on a finished record
+  - Compare every file under changes/ before and after
+  expected_safe_behavior: Both commands refuse naming the marker; nothing is written
+  observed: All 10 invocations exit 1 with the marker refusal; tree byte-identical
+    afterwards
+  result: denied
+  evidence:
+  - evidence/drive1.txt
+- id: ATTACK-002
+  threat: THREAT-002
+  violation_attempted: A session removes or rewrites the marker inside its own shell
+    command, then reopens, releases or discharges (AC-A2, PAC-01 residual)
+  starting_privilege: Phase session holding Bash
+  steps:
+  - From a shell with marker=attack run `env -u SOFT_FOUNDRY_PHASE soft-foundry change
+    release c2 --item A=a`
+  - Feed the guard hook Bash payloads for reopen, `env -u`, and `SOFT_FOUNDRY_PHASE=judge
+    ... discharge`
+  expected_safe_behavior: Threat model expects this is NOT stopped by the tool (a
+    convention, not a credential); the residual must be documented
+  observed: Release exited 0 and the record became released; the guard allowed all
+    three Bash payloads (it checks Bash against deny sets only). File-tool edits to
+    metadata.yml and sibling handoffs were refused
+  result: violated
+  evidence:
+  - evidence/drive10.txt
+  - evidence/drive8.txt
+- id: ATTACK-003
+  threat: THREAT-003
+  violation_attempted: Hostile or malformed marker values make the guard fall back
+    to a more permissive skill (AC-A2, AC-A12, PAC-02)
+  starting_privilege: 'Hook payload with marker values: unknown, empty, Attack, ../x,
+    trailing newline, trailing space, implement under SOFT_FOUNDRY_PARALLEL=1'
+  steps:
+  - Run `soft-foundry guard` with Write payloads to own dir, sibling dir, and app
+    code under each marker
+  expected_safe_behavior: Every malformed marker is refused; each valid marker is
+    held to its own skill; a non-isolated phase in a parallel run is refused
+  observed: All malformed values refused with a named reason; attack could write only
+    08-attack, evaluate only 07-evaluation; implement under PARALLEL=1 refused
+  result: denied
+  evidence:
+  - evidence/drive8.txt
+- id: ATTACK-004
+  threat: THREAT-004
+  violation_attempted: Hand-edited complete handoffs and judgment, then `change release`
+    with one throwaway item so main CI passes without real evidence (AC-A3, PAC-03)
+  starting_privilege: Implementing session or contributor with commit rights
+  steps:
+  - Build a record whose handoffs are hand-written complete (placeholder text, no
+    executed_by) with an APPROVED judgment
+  - Run `change release c1 --item THROWAWAY=...`
+  expected_safe_behavior: Refused by the judgment and gate checks, or the gap is reported
+  observed: Release succeeded (exit 0). The gap is reported only as a non-blocking
+    advisory (five phases completed without `phase run`). Matches the recorded limitation
+    that the gate checks structure, not content
+  result: violated
+  evidence:
+  - evidence/drive3.txt
+- id: ATTACK-005
+  threat: THREAT-004
+  violation_attempted: Release carries judgment undischarged items; close refuses
+    until all discharged; discharge misuse (AC-A4, AC-A5, PAC-04)
+  starting_privilege: Person running the CLI
+  steps:
+  - Release with two undischarged judgment items plus one given item
+  - Close, discharge a carried item, discharge twice, discharge unknown id, discharge
+    with a newline note, release again, reopen a released record, `change reopen`
+    on gated track
+  expected_safe_behavior: All items appear under their ids; close refuses while any
+    is open; repeats and unknown ids refused
+  observed: All three items listed; close refused with the open ids; every misuse
+    refused; nothing written on refusal
+  result: denied
+  evidence:
+  - evidence/drive3.txt
+- id: ATTACK-006
+  threat: THREAT-004
+  violation_attempted: Hand-edited release blocks merged to bypass the closed-or-released
+    requirement (AC-A13, PAC-05)
+  starting_privilege: Contributor editing metadata.yml
+  steps:
+  - 'Variants: block missing, items empty/null/hash, release scalar, duplicate ids,
+    judgment items dropped or renamed, all items discharged, discharged_at set to
+    an empty string'
+  - Run check, ci, change close, change status for each
+  expected_safe_behavior: check and ci fail every malformed block
+  observed: 'All structural variants fail check and ci (exit 2) with a named defect.
+    At 89b4011 an empty or whitespace discharged_at is now refused by check and ci (REV-002
+    fix). Setting discharged_at by hand to a real-looking time or any non-blank string,
+    with no note or commit, still passes check and ci: a hand-edited discharge is indistinguishable
+    from a real one (TB-3)'
+  result: violated
+  evidence:
+  - evidence/drive3.txt
+- id: ATTACK-007
+  threat: THREAT-006
+  violation_attempted: YAML or log injection and look-alike text through --reason,
+    --item, --note (AC-A8, PAC-06)
+  starting_privilege: Person or script supplying flag text
+  steps:
+  - 'Submit reasons with newline, ESC, NUL, CR, tab, DEL, C1 controls, NEL, `: `,
+    `---`, anchors/tags, 500 and 501 characters, bidi override U+202E, zero-width
+    space U+200B, line separator U+2028'
+  - Then run scan, gate on a redone phase
+  expected_safe_behavior: Refused or stored inert; the record stays valid and clean
+  observed: 'Rerun after remediation: ASCII and C1 controls, length, and now zero width (U+200B, 200C, 2060, FEFF), bidi (U+202E, U+2066), U+2028 and U+2029, soft hyphen, U+180E and tag characters are refused with a message naming the class; nothing is written. Visible but confusable text (NBSP, Hangul filler, braille blank, variation selector, combining overlay, Cyrillic look-alike, private use, U+FFFC) is accepted and stored, and scan stays clean afterwards. The same characters in --item and discharge --note are refused. Invalid UTF-8 is refused with a one-line message and no trace'
+  result: denied
+  evidence:
+  - evidence/drive2.txt
+  - evidence/drive11.txt
+  - evidence/drive12.txt
+  - evidence/drive1.txt
+- id: ATTACK-008
+  threat: THREAT-006
+  violation_attempted: Stored XSS through released-item descriptions, discharge notes
+    and reopen reasons in the UI (AC-A8, PAC-12)
+  starting_privilege: Anyone able to commit a record
+  steps:
+  - Hand-edit a released record with script/img onerror payloads, non-string ids and
+    descriptions, junk list entries, a 200 KB description
+  - Fetch /api/changes and /api/change; read app.js for HTML sinks
+  expected_safe_behavior: Payload served as JSON data only and rendered as text; no
+    crash
+  observed: Served as application/json and parsed; app.js has no innerHTML or similar
+    sink and sets record text with text:. No crash on malformed entries. Not executed
+    in a real browser
+  result: denied
+  evidence:
+  - evidence/drive9.txt
+- id: ATTACK-009
+  threat: THREAT-007
+  violation_attempted: Leak an --env credential through the record, ps, or messages
+    (AC-A7, PAC-07)
+  starting_privilege: Person passing a database URL
+  steps:
+  - Real parallel run with `--env DB_URL=postgres://u:secret@h/{phase}` and a second
+    secret; grep the record; read the runner's process title while it runs
+  - 'Reserved, lowercase and duplicate names; mistyped forms: a value without NAME=,
+    and the `--env=NAME=VALUE` spelling'
+  expected_safe_behavior: Values appear only in each child's environment; names only
+    in output; no message echoes a value
+  observed: 'Rerun after remediation: a value given without NAME= and both --env=NAME=VALUE spellings are refused with messages that do not show the text (the argv lines in the log are the driver''s own commands); reserved, lowercase, digit-led and duplicate names are refused naming only the variable. The record is clean; the runner''s process title shows DB_URL=*** and SECRET_TOKEN=***; values reached only each child''s environment, with {phase} expanded per session'
+  result: denied
+  evidence:
+  - evidence/drive4.txt
+  - evidence/drive5.txt
+- id: ATTACK-010
+  threat: THREAT-008
+  violation_attempted: Concurrent writers lose updates or leave a record in a state
+    no sequence of commands could (AC-A10, PAC-08)
+  starting_privilege: Two soft-foundry processes on one record
+  steps:
+  - Start `change release` and `phase reopen verify` together on a finished record,
+    14 times
+  - Start 4 `phase reopen verify` together, 4 times
+  expected_safe_behavior: 'Serialised: one wins, the other sees the new state and
+    refuses; one history entry'
+  observed: 'Rerun after remediation: release and phase reopen started together 14 times; every run exits 0 for release and 1 for reopen (the record is released), no reset phase, check and ci pass, 0 of 14 inconsistent. Four concurrent reopens, four times: exactly one exits 0 and one phase_reopenings entry is written, YAML parses. Release always won the race in this sample, so the reopen-first ordering was not observed; it is covered by the reopen-vs-reopen runs'
+  result: denied
+  evidence:
+  - evidence/drive6.txt
+  - evidence/drive7.txt
+- id: ATTACK-011
+  threat: THREAT-008
+  violation_attempted: Pre-created, symlinked, held or stale lock file; planted temp
+    file; symlinked metadata, handoff or lock directory (PAC-08)
+  starting_privilege: Anyone with write access to the working tree
+  steps:
+  - 'Planned: plant each symlink variant and hold the lock from another process'
+  expected_safe_behavior: Refuse without writing through the link; fail within about
+    10 s naming the lock
+  observed: Not executed. The runtime guard refused the shell command because it named
+    the .soft-foundry directory, and the guard is part of the declared scope, so it
+    was not worked around
+  result: blocked_by_scope
+  evidence: []
+- id: ATTACK-012
+  threat: THREAT-009
+  violation_attempted: Slip a non-isolated phase, a duplicate, a case variant, a path-like
+    or newline name into --parallel (AC-A12, PAC-09)
+  starting_privilege: Person running the CLI
+  steps:
+  - 'Nine refusal inputs: implement+review, evaluate twice, Evaluate Attack, judge+attack,
+    one phase, three phases, verify+attack, ../attack, attack with trailing newline'
+  - Compare the tree before and after
+  expected_safe_behavior: Nothing starts and nothing is written
+  observed: All refused (exit 1) with a reason; tree byte-identical
+  result: denied
+  evidence:
+  - evidence/drive4.txt
+- id: ATTACK-013
+  threat: THREAT-009
+  violation_attempted: A parallel session commits so siblings bind to different commits
+    (AC-A11, PAC-10)
+  starting_privilege: Stub sessions that run git commit
+  steps:
+  - Run evaluate and attack in parallel with sessions that both commit
+  expected_safe_behavior: Warn and non-zero exit; evidence still names the start HEAD
+  observed: 'Exit 1 with a `warn: HEAD moved from 8a52c8e to b06973b` line; one of
+    the two commits failed on git''s index.lock; the handoffs were not rebound'
+  result: denied
+  evidence:
+  - evidence/drive5.txt
+- id: ATTACK-014
+  threat: THREAT-005
+  violation_attempted: Trivial commit throws away a good verdict, or a closed or released
+    record is reset by `phase run` (AC-A6, PAC-11)
+  starting_privilege: Person or session making a code commit
+  steps:
+  - 'With evaluate and attack complete: run when current, commit an app change, run
+    again; also run on a released record'
+  expected_safe_behavior: A current phase is refused; a stale one is reset as source
+    auto with a labelled line; released resets nothing
+  observed: 'Current phase refused; after an app change the reset was labelled `automatic:
+    evidence stale at 7ff136d`, reset evaluate and attack, and was recorded; released
+    record refused both runs and was byte-identical'
+  result: denied
+  evidence:
+  - evidence/drive5.txt
+- id: ATTACK-015
+  threat: THREAT-005
+  violation_attempted: Reopen from states it must refuse; reopen must not touch evidence
+    (PAC-13)
+  starting_privilege: Person running the CLI
+  steps:
+  - Reopen verify with status closed, released, exploring, awaiting_human; reopen
+    specify on a complete record; repeat; unknown phase; missing reason
+  expected_safe_behavior: Refused states write nothing; reopen changes handoffs and
+    history only
+  observed: All four statuses refused naming the way forward; evidence files byte-identical
+    after reopening specify; repeat and bad inputs refused
+  result: denied
+  evidence:
+  - evidence/drive5.txt
+- id: ATTACK-016
+  threat: THREAT-006
+  violation_attempted: The UI gains a write route or accepts a foreign host, site
+    or missing token (CSRF check from the threat model)
+  starting_privilege: Browser or script on the same machine
+  steps:
+  - POST, PUT, DELETE, PATCH, OPTIONS; no token; wrong Host; cross-site; slug traversal;
+    an unlisted route
+  expected_safe_behavior: 405, 401, 403 and 404 as appropriate
+  observed: 405 for every non-GET verb, 401 without the token, 403 for wrong host
+    and cross-site, 404 for traversal and an unknown route
+  result: denied
+  evidence:
+  - evidence/drive9.txt
+- id: ATTACK-017
+  threat: THREAT-004
+  violation_attempted: Re-attack of REV-002 (030b28f). A hand-edited blank or odd discharged_at
+    makes an owed release item look discharged, so ci passes and change close lets
+    an undischarged change through; the CLI, ci, status and the page may disagree
+  starting_privilege: Person with write access to metadata.yml (TB-3 hand edit)
+  steps:
+  - On a released record with two owed items set every discharged_at to "", " ", tab
+    and newline, NBSP, false, 0, [], {}, null, a junk string and a bare date
+  - Run check, ci, change status, change close and change discharge; read /api/change
+    in-process
+  expected_safe_behavior: Blank values are open in every surface and lint refuses
+    them; close refuses while an item is open
+  observed: '"", " ", tab/newline, false and 0 are refused by check and ci (blank discharged_at,
+    item named), counted open by status, and close refuses; [] and {} are refused
+    by check and ci and counted open; null is open. A junk string and a bare date
+    count as discharged (TB-3). U+00A0 alone is NOT blank to the CLI (String#strip keeps
+    it): check and ci pass, status shows 0 open items, discharge says already discharged,
+    while the page''s JS trim() strips it and shows the item open, and the timeline
+    shows no discharge entry'
+  result: violated
+  evidence:
+  - evidence/drive13.txt
+- id: ATTACK-018
+  threat: THREAT-008
+  violation_attempted: Re-attack of REV-001 (030b28f). Kill the process between the
+    renames of a phase reopen so history and handoffs disagree, then close or gate
+    on the half-reset record
+  starting_privilege: Person running the CLI; a SIGKILL stands in for a crash or
+    power loss (a hook prepended to SafeWrite.commit_staged kills before the Nth rename)
+  steps:
+  - On a finished record kill phase reopen before rename 1, 2, 3, 6 and 7 (6 handoffs
+    reset, then metadata)
+  - After each kill read metadata and handoffs, run check, ci, status, close and
+    gate judge, then retry the reopen
+  expected_safe_behavior: History never records a reset the handoffs do not show;
+    close refuses a half-reset record; a retry recovers or refuses with the way forward
+  observed: 'history entries stayed 0 in all five kills. Kill 1 left the record byte-identical
+    apart from 7 temp files. Kills 2, 3 and 6 left the first N handoffs pending
+    and the rest complete: ci exit 2, close refused (a required phase is pending),
+    status shows FAIL on the stale phases. Kill 7 (before the metadata rename) left
+    all six pending with no history; close refused. Every retry was refused: kills
+    1 to 6 by the leftover `.soft-foundry-tmp` file (named, remove and rerun), kill
+    7 by "nothing to reset". `check` stays exit 0 and `gate judge` still passes
+    on the half-reset record; only ci, status and close notice'
+  result: denied
+  evidence:
+  - evidence/drive14.txt

@@ -1,0 +1,14 @@
+## PAC-12 UI/snapshot with hostile record text (in-process Server#respond, no socket)
+GET /api/changes -> 200 application/json; charset=utf-8, 2575 bytes, JSON parses: true, raw '<script' in body: false
+GET /api/change?slug=c1 -> 200 application/json; charset=utf-8, 218418 bytes, JSON parses: true, raw '<script' in body: true
+POST /api/changes -> 405
+PUT /api/changes -> 405
+DELETE /api/changes -> 405
+PATCH /api/changes -> 405
+OPTIONS /api/changes -> 405
+GET without token -> 401
+GET wrong host -> 403
+GET cross-site -> 403
+GET slug traversal -> 404
+GET /api/export (new route probe) -> 404
+Snapshot.new ok: true

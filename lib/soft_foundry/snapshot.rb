@@ -94,8 +94,9 @@ module SoftFoundry
     end
 
     # Every change record, one row each with a cell per phase. Only
-    # records that are not closed are gated, as in `ci`: a closed record is
-    # settled history and its row reports what its handoffs recorded. A
+    # records that are not closed or released are gated, as in `ci`: a
+    # closed or released record is settled history and its row reports what
+    # its handoffs recorded (a released one also its open-item count). A
     # record that cannot be read gets a row saying so.
     def board
       {
@@ -116,8 +117,8 @@ module SoftFoundry
         { "slug" => slug, "error" => "unreadable", "closed" => false }
       end
       open = rows.reject { |row| row["closed"] }
-      { "open" => open.size, "closed" => rows.size - open.size,
-        "changes" => open.map { |row| row.slice("slug", "title", "status", "current_phase", "error") } }
+      { "open" => open.size, "closed" => rows.size - open.size, "released" => open.count { |row| row["released"] },
+        "changes" => open.map { |row| row.slice("slug", "title", "status", "current_phase", "error").merge(row["released"] ? row.slice("released", "open_items") : {}) } }
     end
 
     # One change in full: every gate with its checks, the advisories, the
@@ -135,6 +136,8 @@ module SoftFoundry
         "surfaces" => plain(meta["surfaces"].is_a?(Hash) ? meta["surfaces"] : {}),
         "track" => self.class.track(record),
         "merged_unclosed" => @index.merged_unclosed?(record),
+        "release" => record.released? ? plain(record.metadata["release"].is_a?(Hash) ? record.metadata["release"] : {}) : nil,
+        "phase_reopenings" => plain(Array(meta["phase_reopenings"]).select { |r| r.is_a?(Hash) }),
         "failed" => results.any?(&:failed?),
         "stale" => results.any?(&:stale?),
         "skipped_phases" => plain(Array(meta["skipped_phases"]).select { |e| e.is_a?(Hash) }),
@@ -209,7 +212,9 @@ module SoftFoundry
         "current_phase" => plain(meta["current_phase"]),
         "risk" => plain(meta["risk"]),
         "type" => plain(meta["type"]),
-        "closed" => meta["status"] == "closed"
+        "closed" => meta["status"] == "closed",
+        "released" => meta["status"] == "released",
+        "open_items" => meta["status"] == "released" ? record.open_release_items.size : 0
       }
     end
 
@@ -217,8 +222,8 @@ module SoftFoundry
       record = @index.record(slug)
       meta = metadata(record)
       row = summary(record, meta).merge("track" => record.track, "exploring" => record.exploring?)
-      if row["closed"]
-        return row.merge("evaluated" => false, "merged_unclosed" => false, "stale" => false, "failed" => false, "advisories" => nil,
+      if row["closed"] || row["released"]
+        return row.merge("evaluated" => false, "merged_unclosed" => row["released"] && @index.merged_unclosed?(record), "stale" => false, "failed" => false, "advisories" => nil,
                          "cells" => @plane.phases.map { |phase| recorded_cell(record, meta, phase) })
       end
       results = Gate.new(record, git: @git).evaluate_all
@@ -303,6 +308,19 @@ module SoftFoundry
       end
       Array(meta["reopenings"]).select { |r| r.is_a?(Hash) }.each do |reopening|
         add.call(reopening["at"], "reopened", "reopened for exploring: #{reopening['reason']}")
+      end
+      Array(meta["phase_reopenings"]).select { |r| r.is_a?(Hash) }.each do |r|
+        how = r["source"].to_s == "auto" ? "automatic" : "manual"
+        sha = r["from_commit"].to_s[0, 7]
+        add.call(r["at"], "phase_reopened", "phase #{r['phase']} reopened (#{how}): reset #{Array(r['reset']).join(', ')}#{sha.empty? ? '' : " at #{sha}"}: #{r['reason']}")
+      end
+      release = meta["release"].is_a?(Hash) ? meta["release"] : nil
+      if release
+        items = Array(release["items"]).select { |i| i.is_a?(Hash) }
+        add.call(release["at"], "released", "released with #{items.size} item(s) owed: #{items.map { |i| i['id'] }.join(', ')}")
+        items.select { |i| ChangeRecord.discharged?(i) }.each do |i|
+          add.call(i["discharged_at"], "discharged", "discharged #{i['id']}#{i['discharge_note'].to_s.empty? ? '' : ": #{i['discharge_note']}"}")
+        end
       end
       Array(meta["human_decisions"]).select { |d| d.is_a?(Hash) }.each do |decision|
         add.call(decision["decided_at"], "human_decision", "#{decision['boundary']}: #{decision['subject']} #{decision['decision']} by #{decision['decided_by']}")

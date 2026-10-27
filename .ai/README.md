@@ -15,7 +15,7 @@ Canonical source templates under `.ai/skills/*/template/` and `.ai/templates/` a
 
 | Path | Purpose |
 | --- | --- |
-| `workflow.yml` | Lifecycle phases, non-linear `transitions`, global rules, permitted judgments, `waivable_by_risk` (which phases a change of each declared risk may name in `skipped_phases`; review and judgment never), and the lifecycle `tracks` (`gated`: every phase in order; `iterative`: an exploring stage with a person first, then `change vet`, then the same hardening phases). |
+| `workflow.yml` | Lifecycle phases, non-linear `transitions`, global rules, permitted judgments, `isolated_phases` (phases that may run side by side), `waivable_by_risk` (which phases a change of each declared risk may name in `skipped_phases`; review and judgment never), and the lifecycle `tracks` (`gated`: every phase in order; `iterative`: an exploring stage with a person first, then `change vet`, then the same hardening phases). |
 | `paths.yml` | Named path groups (`APP`, `TESTS`, `INFRA`, `DOCS`, `CONTROL_PLANE`, `HARNESS_EVALS`) that skill permissions reference as `${GROUP}`. `repository.yml` may override a group with the repository's real layout. |
 | `skills/<name>/` | One declarative skill per phase: contract files plus `template/` holding every file its completion gate requires. `skills/exploration/` is a stage skill, not a phase: it is loaded while a change on the iterative track is `exploring`, and `check` verifies it can write no commit-bound evidence. |
 | `templates/` | Shared templates: the phase `handoff.yml` and the change `metadata.yml`. |
@@ -28,6 +28,10 @@ Canonical source templates under `.ai/skills/*/template/` and `.ai/templates/` a
 `soft-foundry check` verifies this structure: every phase has a skill, every required file has a template, every permission references a known path group, no skill can write protected policy, every skill denies reading harness evals, every harness-eval case parses and names real phases and checks, and `waivable_by_risk` in `workflow.yml` names lifecycle phases only and never review or judgment. It also scans every file here and the pointer files for invisible Unicode, secret-shaped strings, instruction-override phrases, and fetch-and-execute commands, because these files are read as instructions. `soft-foundry gate` applies each skill's `completion.yml` to a change record.
 
 Repository discovery is the only skill permitted to write inside `.ai/`, and only to `repository.yml`, because that file is evidence rather than policy.
+
+## Phase lifecycle controls
+
+`soft-foundry phase reopen <phase> --reason TEXT` returns a phase and the phases after it to pending (evidence files are kept) and records why in `phase_reopenings`; `phase run` does the same on its own when it finds a complete phase stale. `soft-foundry phase run A B --parallel [--env NAME=VALUE]` runs the phases listed in `isolated_phases` side by side. `soft-foundry change release --item ID=DESCRIPTION` marks a judged change `released` with named open items, and `change discharge ID --note TEXT` closes them. `check` lints `isolated_phases` and every released record's release block.
 
 ## Repository maturity and gap analysis
 

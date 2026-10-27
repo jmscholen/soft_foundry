@@ -1,0 +1,41 @@
+instincts:
+  - id: order-renames-so-a-crash-fails-closed
+    trigger: when a command must update several files and cannot make them atomic
+    action: rename the evidence files first and the record of intent last, so a crash leaves a state that later checks refuse rather than a history of work not done
+    confidence: 0.85
+    domain: architecture
+    evidence:
+      - finding: REV-001
+      - phase: 09-remediation
+  - id: one-definition-of-a-state-across-surfaces
+    trigger: when the CLI and a browser page both decide whether an item is open or done
+    action: compute the state once on the server and send the result, instead of re-implementing the test in each language
+    confidence: 0.85
+    domain: architecture
+    evidence:
+      - finding: REV-002
+      - finding: REV-009
+  - id: sweep-neighbouring-values-when-fixing-a-boundary
+    trigger: when fixing a bug found with one odd input such as an empty string
+    action: list the neighbouring inputs (whitespace, tab, non-breaking space, false, zero) and test each before declaring the boundary fixed
+    confidence: 0.8
+    domain: testing
+    evidence:
+      - finding: REV-009
+      - phase: 13-review
+  - id: inject-the-failure-to-prove-fail-closed
+    trigger: when claiming a crash or race leaves the record safe
+    action: drive a real kill at each step or run the concurrent pair and capture the output, rather than arguing from reading the code
+    confidence: 0.85
+    domain: verification
+    evidence:
+      - phase: 08-attack
+      - finding: ATK-001
+  - id: name-the-phase-that-writes-required-docs
+    trigger: when a requirement asks for user documentation or harness-eval cases and the plan lists them as optional phases
+    action: record in the plan which phase writes them and do not skip it, since implementation and remediation cannot write docs or .ai
+    confidence: 0.8
+    domain: governance
+    evidence:
+      - finding: REV-004
+      - finding: JUDGE-004

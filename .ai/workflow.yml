@@ -95,6 +95,12 @@ rules:
 # parks the change at awaiting_human (.ai/policies/human-boundaries.yml).
 panel_phases: [specify, threat_model, plan, remediate, review]
 
+# Phases that write only their own directory and may run side by side with
+# `soft-foundry phase run <phase> <phase> --parallel`. `check` refuses
+# implement, remediate, review, judge, or any phase whose skill can write
+# application code.
+isolated_phases: [evaluate, attack]
+
 # Which lifecycle phases a change of each declared risk may name in its
 # skipped_phases (each entry still needs a non-empty rationale). A phase
 # not listed for the risk is required; a change whose risk is unset or

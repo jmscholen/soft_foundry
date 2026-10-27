@@ -33,7 +33,7 @@ module SoftFoundry
     TMP_PREFIX = "soft-foundry-eval-"
     KINDS = %w[gate live].freeze
     OUTCOMES = %w[pass fail].freeze
-    STATUSES = %w[intake in_progress exploring awaiting_human].freeze
+    STATUSES = %w[intake in_progress exploring awaiting_human released].freeze
     MAX_FILES = 200
     MAX_FILE_BYTES = 65_536
     FILE_KEYS = [%w[record files], %w[record later_files], %w[repository files], %w[application files]].freeze

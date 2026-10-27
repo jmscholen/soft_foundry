@@ -1,0 +1,26 @@
+size: full_at_verify
+full_suite:
+  tree: 543e364149a5ab8b3e8873ff9eee4e50dbeb2e77
+  command: env -u MAILTRAP_API_KEY -u PERSONAL_SENDGRID_API_KEY -u SOFT_FOUNDRY_PHASE -u SOFT_FOUNDRY_PARALLEL bundle exec rake test
+  outcome: passed
+checks:
+  - id: CHECK-001
+    kind: tests
+    command: env -u MAILTRAP_API_KEY -u PERSONAL_SENDGRID_API_KEY -u SOFT_FOUNDRY_PHASE -u SOFT_FOUNDRY_PARALLEL bundle exec rake test
+    result: pass   # 784 runs, 6030 assertions, 0 failures, 0 errors, 0 skips
+    evidence: evidence/rake-test.txt
+    criteria: []
+    red_commit: 053562b
+    test_path: test/record_lock_test.rb
+  - id: CHECK-002
+    kind: static_analysis
+    command: ruby -Ilib exe/soft-foundry check
+    result: pass
+    evidence: evidence/check.txt
+    criteria: []
+  - id: CHECK-003
+    kind: custom
+    command: ruby -Ilib exe/soft-foundry eval
+    result: pass   # 18 passed, 0 failed, 0 errors, 1 skipped
+    evidence: evidence/eval.txt
+    criteria: []

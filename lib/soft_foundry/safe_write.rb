@@ -26,6 +26,25 @@ module SoftFoundry
       File.unlink(tmp) if tmp && File.symlink?(tmp) == false && File.exist?(tmp) && !File.exist?(path)
     end
 
+    # First half of a multi-file write: puts the bytes in `<path>.soft-foundry-tmp`
+    # and returns that name. Nothing at `path` changes until `commit_staged`.
+    # A refusal removes only a temporary this call created.
+    def stage(path, bytes)
+      refuse_non_regular!(File.dirname(path), directory: true)
+      refuse_symlink!(path)
+      tmp = path + TMP_SUFFIX
+      raise TargetError, "#{tmp} already exists (planted or leftover temporary file); remove it and rerun" if File.symlink?(tmp) || File.exist?(tmp)
+      File.open(tmp, File::WRONLY | File::CREAT | File::EXCL | File::NOFOLLOW, 0o644) { |f| f.write(bytes) }
+      tmp
+    rescue Errno::EEXIST, Errno::ELOOP => e
+      raise TargetError, "refusing to write #{path}: #{e.class.name.split('::').last} (#{e.message})"
+    end
+
+    def commit_staged(tmp, path)
+      refuse_symlink!(path)
+      File.rename(tmp, path)
+    end
+
     # The directory must be a real directory (or absent, in which case it is created).
     def ensure_directory!(dir)
       raise TargetError, "#{dir} is a symlink; refusing to use it" if File.symlink?(dir)

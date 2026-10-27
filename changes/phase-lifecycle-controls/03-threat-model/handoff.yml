@@ -1,0 +1,51 @@
+---
+phase: 03-threat-model
+skill: threat-modeling
+status: complete
+commit_sha: d482a0d46034b14262bbd375efc0e067ecc2c0d0
+started_at: '2026-10-23T18:06:06Z'
+completed_at: '2026-10-23T18:07:28Z'
+resolved_model:
+  profile: adversarial_high
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- changes/phase-lifecycle-controls/03-threat-model/attack-surface.md
+- changes/phase-lifecycle-controls/03-threat-model/trust-boundaries.md
+- changes/phase-lifecycle-controls/03-threat-model/threats.yml
+- changes/phase-lifecycle-controls/03-threat-model/mitigations.md
+blocking: []
+findings:
+- id: TM-001
+  severity: major
+  summary: The session marker is an environment variable; Bash is checked against
+    deny sets only, so a session can unset or override it (THREAT-002). The refusal
+    in reopen/release/discharge is a guard against accident, not a sandbox. Plan should
+    state the residual in docs; attack phase should confirm and report it (PAC-01).
+- id: TM-002
+  severity: major
+  summary: Plan must make the guard reject unknown, empty, mixed-case, non-isolated,
+    or path-like marker values (THREAT-003, PAC-02) and read isolated_phases from
+    workflow.yml.
+- id: TM-003
+  severity: major
+  summary: release is checked once at release time; ci does not re-verify the judgment
+    or gates of a released record (THREAT-004). Plan should have check lint the release
+    block and release re-run gate checks; attack phase should try PAC-03 to PAC-05.
+- id: TM-004
+  severity: minor
+  summary: Record text is shown in the loopback UI; item descriptions and reasons
+    must be HTML-escaped (PAC-12). Lock file must not follow symlinks (PAC-08). --env
+    values reach the child environment by design (TB-5).
+next: plan
+notes: ''
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-23T18:06:06Z'
+  finished_at: '2026-10-23T18:07:33Z'
+  exit_status: 0
+  previous_phase: specify
+  session_id: 5fa8c23e-dce9-4417-b2bb-5c22937bedde
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

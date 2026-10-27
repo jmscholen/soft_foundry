@@ -1,0 +1,25 @@
+## ATTACK-007 rerun: invisible and look-alike characters through --reason, --item, --note (after remediation)
+reason ZWSP 200B: exit=1 scan_after=nil soft-foundry: --reason may not contain invisible or direction-changing characters (zero width, bidi override, 
+reason ZWNJ 200C: exit=1 scan_after=nil soft-foundry: --reason may not contain invisible or direction-changing characters (zero width, bidi override, 
+reason BOM FEFF: exit=1 scan_after=nil soft-foundry: --reason may not contain invisible or direction-changing characters (zero width, bidi override, 
+reason bidi 202E: exit=1 scan_after=nil soft-foundry: --reason may not contain invisible or direction-changing characters (zero width, bidi override, 
+reason bidi isolate 2066: exit=1 scan_after=nil soft-foundry: --reason may not contain invisible or direction-changing characters (zero width, bidi override, 
+reason line sep 2028: exit=1 scan_after=nil soft-foundry: --reason may not contain invisible or direction-changing characters (zero width, bidi override, 
+reason para sep 2029: exit=1 scan_after=nil soft-foundry: --reason may not contain invisible or direction-changing characters (zero width, bidi override, 
+reason word joiner 2060: exit=1 scan_after=nil soft-foundry: --reason may not contain invisible or direction-changing characters (zero width, bidi override, 
+reason tag E0041: exit=1 scan_after=nil soft-foundry: --reason may not contain invisible or direction-changing characters (zero width, bidi override, 
+reason soft hyphen AD: exit=1 scan_after=nil soft-foundry: --reason may not contain invisible or direction-changing characters (zero width, bidi override, 
+reason mongolian 180E: exit=1 scan_after=nil soft-foundry: --reason may not contain invisible or direction-changing characters (zero width, bidi override, 
+reason nbsp A0: exit=0 scan_after=0 phase reopen: reopened verify (manual)
+reason hangul filler 3164: exit=0 scan_after=0 phase reopen: reopened verify (manual)
+reason braille blank 2800: exit=0 scan_after=0 phase reopen: reopened verify (manual)
+reason variation sel FE0F: exit=0 scan_after=0 phase reopen: reopened verify (manual)
+reason combining 0338: exit=0 scan_after=0 phase reopen: reopened verify (manual)
+reason cyrillic a 0430: exit=0 scan_after=0 phase reopen: reopened verify (manual)
+reason private use E000: exit=0 scan_after=0 phase reopen: reopened verify (manual)
+reason object repl FFFC: exit=0 scan_after=0 phase reopen: reopened verify (manual)
+reason invalid utf8: exit=1 scan_after=nil soft-foundry: invalid byte sequence in UTF-8
+reason ctrl C1 9B: exit=1 scan_after=nil soft-foundry: --reason may not contain control characters (newline, tab, escape, NUL); put it on one plain lin
+reason plain: exit=0 scan_after=0 phase reopen: reopened verify (manual)
+item zwsp/bidi: 1; discharge note: 1
+item zwsp/bidi: 1; discharge note: 1

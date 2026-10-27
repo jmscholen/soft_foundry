@@ -1,0 +1,152 @@
+---
+commit_sha: 89b40116b816723a93f601a6da454e507f2e693b
+change_size:
+  command: soft-foundry change size phase-lifecycle-controls --phase attack
+  size: full_route_sweep
+  reason: no scope declared on the record, so whole-repository scope is sized at the
+    largest size; the only routes are the read-only loopback UI routes, all swept
+    in ATTACK-016 (and the lifecycle commands in ATTACK-001..018). Re-confirmed on
+    the third run at 89b4011.
+artifacts:
+- path: drive1.txt
+  case: ATTACK-001
+  cases:
+  - ATTACK-001
+  - ATTACK-007
+  sha256: 94cd9175ecc4c08662a193b3906578a431b8d76c8775855169957156c85839e8
+- path: drive10.txt
+  case: ATTACK-002
+  cases:
+  - ATTACK-002
+  sha256: 7ec3ddd9291e584c109dee0d4ce511e8b67cf695a89880879b52dfa503525456
+- path: drive11.txt
+  case: ATTACK-007
+  cases:
+  - ATTACK-007
+  sha256: b78cb0e75b20cadbf6f45ab203a950f1d0a595babc089d234a55c9673e110494
+- path: drive12.txt
+  case: ATTACK-007
+  cases:
+  - ATTACK-007
+  sha256: 48090735365128fb054a3470803c4dd52cec0a0515237b9e67d8738ba511528d
+- path: drive2.txt
+  case: ATTACK-007
+  cases:
+  - ATTACK-007
+  sha256: 8c54c45d27e901eb6ec6d5ec9cf5fe5aab0ef8f04daa183a29b607e15f77782c
+- path: drive3.txt
+  case: ATTACK-004
+  cases:
+  - ATTACK-004
+  - ATTACK-005
+  - ATTACK-006
+  sha256: 65c76f5c99bc5a2c0c8da05744714eb947c0c555354a61b2e50b30cbd828a327
+- path: drive4.txt
+  case: ATTACK-009
+  cases:
+  - ATTACK-009
+  - ATTACK-012
+  sha256: 9bc07744ca4f352e88f1d75cd0cf06dfd54192643d851ae9ebce45f5b5c7bb0e
+- path: drive5.txt
+  case: ATTACK-009
+  cases:
+  - ATTACK-009
+  - ATTACK-013
+  - ATTACK-014
+  - ATTACK-015
+  sha256: 78b3d9a8e626a379549a46f6b22f1cd3efc622bfa03340ab2e1b74d9a416650f
+- path: drive6.txt
+  case: ATTACK-010
+  cases:
+  - ATTACK-010
+  sha256: fcc9b33e4c97cba18dd142ff968ee24a91317682ac3e00df930e08ffc2d40fcb
+- path: drive7.txt
+  case: ATTACK-010
+  cases:
+  - ATTACK-010
+  sha256: aa063a0e5f3d7a8159ed3b6dc0e6b2d6126291b5dd432e08b89999dd341f9783
+- path: drive8.txt
+  case: ATTACK-002
+  cases:
+  - ATTACK-002
+  - ATTACK-003
+  sha256: be56244523885ecb75484c4dd1b588ae3b7ee7b629987c80e0102073820d3aa4
+- path: drive9.txt
+  case: ATTACK-008
+  cases:
+  - ATTACK-008
+  - ATTACK-016
+  sha256: 84a68412dff118ebb0b09fe77cb6ae86e7e8437ad1307e8fa0c8d4605c9be19d
+- path: scripts/drive1.rb
+  case: ATTACK-001..016 (driver)
+  sha256: 500a19dc78641cd6bae3dcb095a35f9e0fea88709aac44819fddb6dc3b6530af
+- path: scripts/drive10.rb
+  case: ATTACK-001..016 (driver)
+  sha256: 3311b26a670b293a10dadf78e81d5b1215e1ed965a14c68e815d196150777f08
+- path: scripts/drive11.rb
+  case: ATTACK-001..016 (driver)
+  sha256: 0bdd1bab1ab38043ca755e1d08e1d712da6d6b8cfd0219e7cca12c0c2d40c1d1
+- path: scripts/drive12.rb
+  case: ATTACK-001..016 (driver)
+  sha256: 730798e8164936bef711f974262ee756bcd7a3efe2692d25ebe7d713707f2d27
+- path: scripts/drive2.rb
+  case: ATTACK-001..016 (driver)
+  sha256: ee8fe66d7ade9e97375cce779eb148ad406b0452747ac95f901f871c0f8cdcfb
+- path: scripts/drive3.rb
+  case: ATTACK-001..016 (driver)
+  sha256: 19a1372906020674a3a5d647eef1eeb7cfe9b511d25e8e73e036cf2729fcbed0
+- path: scripts/drive4.rb
+  case: ATTACK-001..016 (driver)
+  sha256: 1f668553162c30cb0f9c5ec44ae209d53ff33a4cde1b28f26491ce9afe2f613e
+- path: scripts/drive5.rb
+  case: ATTACK-001..016 (driver)
+  sha256: 2ef5baa5616be5c6a475ef1a602e8c5217e161330a2bad246da089fd4d295445
+- path: scripts/drive6.rb
+  case: ATTACK-001..016 (driver)
+  sha256: 92c68bfa1f1696ac6f19953ef1bbc2a32c656afbbeb6ee752f3bc4048841a9dd
+- path: scripts/drive7.rb
+  case: ATTACK-001..016 (driver)
+  sha256: 0b77617f9c75fe66d589162ab88fb296dcebd38bc66cf0923dcdcd0e3c2b2ed2
+- path: scripts/drive8.rb
+  case: ATTACK-001..016 (driver)
+  sha256: 1c3683f56ceecbf16de3536fd4c3cf38ba88e5c86ab938c1ad0fd3442eca77f6
+- path: scripts/drive9.rb
+  case: ATTACK-001..016 (driver)
+  sha256: fd8e5c10432e3afbd5dc6c3973ab544ce224591dd9698095b656a39d2f9dc14d
+- path: scripts/stub-claude.sh
+  case: ATTACK-001..016 (driver)
+  sha256: e07cc9d21a9c830de17809a438d09a6938ed303ad0515c7b6047c483ffc1ef9c
+- path: drive13.txt
+  case: ATTACK-017
+  cases:
+  - ATTACK-017
+  - ATTACK-006
+  sha256: 354a2bcc7a2c94b6008a378e34a287177be64cbf6ff9d4dd9e95a60a36b5ccd7
+- path: drive14.txt
+  case: ATTACK-018
+  cases:
+  - ATTACK-018
+  sha256: 3a3509d8fafb4f5c872ff165916de8deea64db8261f2de4b3f9e0ddfb347794a
+- path: scripts/drive13.rb
+  case: ATTACK-017 (driver)
+  cases:
+  - ATTACK-017
+  sha256: 9f9c1496504d84f2ccd8d7cd2221ed9e0d3805637e59eb50dadcb1ae6535aa1f
+- path: scripts/drive14.rb
+  case: ATTACK-018 (driver)
+  cases:
+  - ATTACK-018
+  sha256: a88bcdb942698602e26b17100b6d1fb8ad9afffe03b8c0334fd23ca1bdd13312
+- path: scripts/kill_hook.rb
+  case: ATTACK-018 (driver)
+  cases:
+  - ATTACK-018
+  sha256: dba1355cd270de72c6f1bfc118e1bf250e914ec6a34960fd3008b6217b685593
+redaction: 'Raw invisible characters (U+202E, U+200B and others) in drive1.txt and
+  drive2.txt were replaced by visible <U+XXXX> forms, and in scripts/drive12.rb by
+  \u{XXXX} escapes (same strings, still runnable), so the content clean gate passes.
+  Hashes are of the redacted files. drive4.txt was NOT regenerated in the third run:
+  its raw ps listing on the maintainer machine captured unrelated processes; the third
+  run reproduced its exit codes and commands exactly (compared line by line), so the
+  retained file is from the post-remediation run at 1ce44de and its hash is kept.
+  Every other drive file was regenerated at 89b4011.'

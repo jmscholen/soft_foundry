@@ -1,0 +1,78 @@
+## hostile released record through CLI consumers
+$ sf "change" "status" "c1"
+exit=0
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 2 open item(s): 7, UND-1
+
+$ sf "change" "list"
+exit=0
+c1
+
+$ sf "check"
+exit=2
+✗ error changes/c1/metadata.yml: release item 2 is not a mapping
+✗ error changes/c1/metadata.yml: release item 3 is not a mapping
+✗ fail control plane: 2 error(s)
+
+$ sf "ci"
+exit=2
+✗ error changes/c1/metadata.yml: release item 2 is not a mapping
+✗ error changes/c1/metadata.yml: release item 3 is not a mapping
+✗ fail control plane: 2 error(s)
+
+change c1 (released, not re-gated)
+  released: c1: 2 open item(s): 7, UND-1
+
+✗ ci failed
+
+$ sf "change" "discharge" "7" "--note" "n"
+exit=0
+c1: discharged 7
+released: c1: 1 open item(s): UND-1
+
+$ sf "change" "close" "c1" "--force"
+exit=1
+c1: cannot close - undischarged and unconfirmed: UND-1
+confirm with --confirm ID (repeatable) once a human has verified it, or --pr NUMBER if a human already replied "CONFIRMED: <id>" there
+
+$ sf "timeline" "c1"
+exit=1
+Soft Foundry 0.21.0
+
+Usage:
+  soft-foundry init [options]             install the control plane into this repository, then onboard
+      --dry-run  --force  --no-onboard  --root PATH  --allow-non-git
+      --maturity scan|deep|off (default scan)  --reassess
+  soft-foundry onboard [options]           discover providers, repair agent adapters, assess maturity
+      --maturity scan|deep|off (default scan)  --reassess
+  soft-foundry doctor                     validate repository bootstrap
+  soft-foundry check                      lint the .ai/ control plane
+  soft-foundry change new <slug> [--track gated|iterative]
+                                          create changes/<slug>/ from phase templ
+$ sf "ps"
+exit=0
+running: 5 soft-foundry processes
+  pid 98677  ui  port 0  in /private/tmp/evalrun/c1r  since 2026-10-26T15:29:19Z
+  pid 3634  ui  port 0  in /private/tmp/evalrun/c1r  since 2026-10-26T16:28:29Z
+  pid 76021  phase run evaluate  change phase-lifecycle-controls  shell claude (session pid 76032)  in ~/dev/soft_foundry  since 2026-10-26T20:01:52Z
+  pid 98496  ui  port 0  in /private/tmp/evalrun/c1r  since 2026-10-26T20:06:11Z
+  pid 99129  change new  change c1  in an unknown directory  since 2026-10-26T20:06:19Z
+sessions: 3 coding shells open in Soft Foundry repositories
+  pid 2790  claude  terminal ttys001  no change record for its branch  branch main  in ~/dev/ai_projects/my_ai  since 2026-10-
+$ sf "scope" "c1"
+exit=1
+Soft Foundry 0.21.0
+
+Usage:
+  soft-foundry init [options]             install the control plane into this repository, then onboard
+      --dry-run  --force  --no-onboard  --root PATH  --allow-non-git
+      --maturity scan|deep|off (default scan)  --reassess
+  soft-foundry onboard [options]           discover providers, repair agent adapters, assess maturity
+      --maturity scan|deep|off (default scan)  --reassess
+  soft-foundry doctor                     validate repository bootstrap
+  soft-foundry check                      lint the .ai/ control plane
+  soft-foundry change new <slug> [--track gated|iterative]
+                                          create changes/<slug>/ from phase templ
+## env -u marker bypass (documented residual)
+session(marker=attack) runs `env -u SOFT_FOUNDRY_PHASE soft-foundry change release` -> exit 0: c2: released

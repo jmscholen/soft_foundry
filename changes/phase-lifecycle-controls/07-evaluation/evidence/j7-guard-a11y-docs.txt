@@ -1,0 +1,84 @@
+### EVAL-007 guard markers (AC-025,026)
+current_phase=implement in metadata
+evaluate marker writes app code:
+✗ fail guard: Edit lib/app.rb is in evaluation's deny_write set; the evaluation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a ma
+  -> exit=2
+evaluate marker writes own dir:
+  -> exit=0
+evaluate marker writes attack dir:
+✗ fail guard: Edit changes/c1/08-attack/results.md is not in evaluation's write set; the evaluation skill's permissions.yml does not allow it (mode: block, .ai/policies/e
+  -> exit=2
+attack marker writes evaluation dir:
+✗ fail guard: Edit changes/c1/07-evaluation/results.md is in adversarial-testing's deny_write set; the adversarial-testing skill's permissions.yml does not allow it (mode
+  -> exit=2
+attack marker writes own dir:
+  -> exit=0
+unknown marker:
+✗ fail guard: Edit SOFT_FOUNDRY_PHASE is "bogus", which does not name a lifecycle phase; the session marker is set by `soft-foundry phase run` and must match a phase id e
+  -> exit=2
+implement marker + parallel:
+✗ fail guard: Edit SOFT_FOUNDRY_PHASE names implement in a parallel run, but implement is not in isolated_phases (.ai/workflow.yml: evaluate, attack); the guard refuses w
+  -> exit=2
+no marker, current_phase decides (implement may write app):
+  -> exit=0
+
+### EVAL-008 output accessibility (AC-046,047)
+grep: invalid option -- P
+usage: grep [-abcdDEFGHhIiJLlMmnOopqRSsUVvwXxZz] [-A num] [-B num] [-C[num]]
+	[-e pattern] [-f file] [--binary-files=value] [--color=when]
+	[--context[=num]] [--directories=action] [--label] [--line-buffered]
+	[--null] [pattern] [file ...]
+non-ASCII lines in captured output: 
+grep: invalid option -- P
+usage: grep [-abcdDEFGHhIiJLlMmnOopqRSsUVvwXxZz] [-A num] [-B num] [-C[num]]
+	[-e pattern] [-f file] [--binary-files=value] [--color=when]
+	[--context[=num]] [--directories=action] [--label] [--line-buffered]
+	[--null] [pattern] [file ...]
+escape-sequence lines: 
+$ soft-foundry phase reopen evaluate --reason a11y check
+phase reopen: reopened evaluate (manual)
+phase reopen: reset evaluate
+phase reopen: reset attack
+phase reopen: reset review
+phase reopen: reset judge
+phase reopen: reset learn
+[exit 0]
+$ soft-foundry phase reopen evaluate --reason 
+soft-foundry: --reason is required: it may not be empty
+[exit 1]
+$ soft-foundry phase reopen evaluate --reason again
+soft-foundry: nothing to reset: evaluate and every phase after it are already pending; run `soft-foundry phase run evaluate` instead
+[exit 1]
+$ soft-foundry change release c1 --item A=a
+soft-foundry: cannot release c1: 14-judgment is pending; a release rests on a complete final judgment (run `soft-foundry phase run judge`)
+[exit 1]
+$ soft-foundry change release c1 --item A=a
+soft-foundry: cannot release c1: 14-judgment is pending; a release rests on a complete final judgment (run `soft-foundry phase run judge`)
+[exit 1]
+$ soft-foundry change discharge A --note n
+soft-foundry: c1 is in_progress, not released; only a released change has items to discharge (release it with `soft-foundry change release`)
+[exit 1]
+$ soft-foundry change discharge A --note n
+soft-foundry: c1 is in_progress, not released; only a released change has items to discharge (release it with `soft-foundry change release`)
+[exit 1]
+$ soft-foundry phase run evaluate attack --parallel --shell nosuch
+soft-foundry: unknown shell 'nosuch'; phase run supports claude, codex, grok
+[exit 1]
+$ soft-foundry phase run evaluate review --parallel
+c1: cannot run evaluate review in parallel: review is not in isolated_phases (.ai/workflow.yml: evaluate, attack); only phases that write nothing outside their own directory may run side by 
+[exit 1]
+
+### EVAL-009 docs and usage (AC-050): files mentioning each term
+.ai/workflow.yml                  [phase reopen]=0 [--parallel]=1 [--env]=0 [change release]=0 [change discharge]=0 
+.ai/templates/metadata.yml        [phase reopen]=0 [--parallel]=0 [--env]=0 [change release]=0 [change discharge]=0 
+.ai/schemas.md                    [phase reopen]=1 [--parallel]=0 [--env]=0 [change release]=1 [change discharge]=1 
+.ai/README.md                     [phase reopen]=1 [--parallel]=1 [--env]=1 [change release]=1 [change discharge]=1 
+README.md                         [phase reopen]=1 [--parallel]=1 [--env]=1 [change release]=1 [change discharge]=1 
+docs/user                         [phase reopen]=0 [--parallel]=0 [--env]=0 [change release]=0 [change discharge]=0 
+lib/soft_foundry/cli.rb           [phase reopen]=1 [--parallel]=1 [--env]=1 [change release]=1 [change discharge]=1 
+lib/soft_foundry/processes.rb     [phase reopen]=0 [--parallel]=0 [--env]=0 [change release]=0 [change discharge]=0 
+102:isolated_phases: [evaluate, attack]
+grep: .ai/templates/metadata.yml: No such file or directory
+✓ pass control plane: 16 phases, 17 skills, no errors
+✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
+✓ pass eval: 18 passed, 0 failed, 0 errors, 1 skipped

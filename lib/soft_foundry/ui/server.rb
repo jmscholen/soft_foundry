@@ -221,7 +221,7 @@ module SoftFoundry
           about = begin
             snapshot(root).overview
           rescue StandardError => e
-            { "open" => 0, "closed" => 0, "changes" => [], "error" => e.message.gsub("#{root}/", "") }
+            { "open" => 0, "closed" => 0, "released" => 0, "changes" => [], "error" => e.message.gsub("#{root}/", "") }
           end
           { "id" => id, "name" => Snapshot.plain(File.basename(root)), "path" => Processes.display(root), "home" => root == @root }.merge(about)
         end

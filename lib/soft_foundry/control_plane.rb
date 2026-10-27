@@ -44,6 +44,42 @@ module SoftFoundry
       phases.select { |p| ids.include?(p.id) }
     end
 
+    # The phases `phase run --parallel` may run side by side, in lifecycle
+    # order: phases that write only their own directory. Names that are not
+    # lifecycle phases are dropped here; `check` reports them. A workflow
+    # without the key has none.
+    def isolated_phases
+      ids = Array(workflow["isolated_phases"]).map(&:to_s)
+      phases.select { |p| ids.include?(p.id) }
+    end
+
+    # What reopening `phase` also invalidates: every lifecycle phase after
+    # it, plus the phases its own `next` transition leads back to (and
+    # theirs), to a fixed point. Only `next` edges are followed, and only
+    # from `phase` and from phases reached by an edge: a conditional edge
+    # (`on_code_change`, `on_blocked`, `on_rejected`) names a loop taken on
+    # an outcome, and a phase merely later in lifecycle order does not make
+    # its loops part of the reset. Returned in lifecycle order, without `phase`.
+    def downstream(phase)
+      reached = []
+      sources = [phase]
+      frontier = [phase]
+      until frontier.empty?
+        current = frontier.shift
+        index = phases.index(current)
+        later = index ? phases[(index + 1)..] : []
+        edge = self.phase(transitions.dig(current.id, "next").to_s)
+        found = later + (edge && sources.include?(current) ? [edge] : [])
+        found.each do |p|
+          next if p == phase || reached.include?(p)
+          reached << p
+          frontier << p
+          sources << p if p == edge
+        end
+      end
+      reached.sort_by { |p| phases.index(p) }
+    end
+
     def phase(key)
       phases.find { |p| p.id == key || p.output == key }
     end

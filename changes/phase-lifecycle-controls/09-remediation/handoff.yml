@@ -1,0 +1,52 @@
+---
+phase: '09-remediation'
+skill: remediation
+status: complete
+commit_sha: c7f45efcaf9fc7c60118af2418d9be85edce9b21
+started_at: '2026-10-26T19:36:39Z'
+completed_at: '2026-10-26T20:10:00Z'
+resolved_model:
+  profile: coding_high
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- summary.md
+blocking: []
+findings:
+- id: REM-004
+  severity: major
+  summary: 'REV-001 fixed: Transaction#commit! renames handoffs first and metadata.yml
+    last, so a crash between renames leaves no history entry for a reset the handoffs
+    do not show (close refuses a pending phase). REV-002 fixed: one ChangeRecord.discharged?
+    predicate (non-blank timestamp) in the CLI, ci, change close, timeline and released
+    table; Release.lint refuses a blank discharged_at. Full suite at the working tree:
+    786 runs, 6042 assertions, 0 failures (provider keys and SOFT_FOUNDRY_PHASE unset).
+    All downstream evidence is stale; verify, evaluate, attack, review and judge must
+    rerun.'
+- id: REM-005
+  severity: minor
+  summary: 'The changes are NOT committed: the pre-commit hook runs ci, which fails
+    while downstream evidence is stale, and it was not bypassed. commit_sha is the
+    HEAD before the change; a person or the runner must commit before verify so its
+    evidence binds to the fixed code. The two new tests have no red commit, and the
+    app.js change was not rendered in a browser. Attack should re-drive the kill-between-renames
+    and blank discharged_at cases.'
+- id: REM-006
+  severity: minor
+  summary: 'Not fixed, outside this skill write set or minor: REV-004 (docs/user,
+    harness-eval cases), REV-003/D3, REV-005, REV-006, REV-007, EVAL-F1..F5, ATK-005,
+    ATK-006.'
+next: verify
+notes: Suite run with SOFT_FOUNDRY_PHASE, SOFT_FOUNDRY_PARALLEL, MAILTRAP_API_KEY
+  and PERSONAL_SENDGRID_API_KEY unset. The guard was not separately verified in this
+  session. Wrote only under lib/, test/ and this phase directory.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-26T19:36:39Z'
+  finished_at: '2026-10-26T19:49:51Z'
+  exit_status: 0
+  previous_phase: judge
+  session_id: e084a53a-b101-49e7-9849-2c858a5edac8
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"

@@ -8,6 +8,7 @@ require_relative "harness_eval"
 require_relative "declarations"
 require_relative "sizing"
 require_relative "git"
+require_relative "release"
 
 module SoftFoundry
   # Lints the `.ai/` control plane itself: every phase has a skill, every skill
@@ -33,8 +34,10 @@ module SoftFoundry
       findings.concat(check_waivers)
       findings.concat(check_harness_evals)
       findings.concat(check_panel_phases)
+      findings.concat(check_isolated_phases)
       findings.concat(check_enforcement)
       findings.concat(check_declarations)
+      findings.concat(check_released_records)
       findings.concat(check_content)
       @plane.phases.each { |phase| findings.concat(check_phase(phase)) }
       findings
@@ -66,6 +69,30 @@ module SoftFoundry
     end
 
     # A panel never writes code, and only lifecycle phases can be panelled.
+    # Phases that may run side by side write only their own directory:
+    # lifecycle phases, never implementation, remediation, review, or
+    # judgment, and never one whose skill may write application code.
+    NEVER_ISOLATED = %w[implement remediate review judge].freeze
+
+    def check_isolated_phases
+      raw = @plane.workflow["isolated_phases"]
+      return [] if raw.nil?
+      return [Finding.new(:error, "workflow: isolated_phases must be a list of lifecycle phase ids")] unless raw.is_a?(Array)
+      raw.flat_map do |id|
+        phase = @plane.phase(id.to_s)
+        if phase.nil? || phase.id != id.to_s
+          next [Finding.new(:error, "workflow: isolated_phases names '#{id}', which is not a lifecycle phase")]
+        end
+        next [Finding.new(:error, "workflow: isolated_phases names '#{id}'; #{id} may not run in parallel with another phase")] if NEVER_ISOLATED.include?(phase.id)
+        writes_code = Array(@plane.skill(phase.skill).permissions["write"]).any? do |pattern|
+          @plane.expand(pattern).any? { |g| @plane.code_globs.include?(g) || ControlPlane.match_any?(g.delete_suffix("/**") + "/x", @plane.code_globs) }
+        rescue ArgumentError
+          false
+        end
+        writes_code ? [Finding.new(:error, "workflow: isolated_phases names '#{id}', whose skill can write application code; an isolated phase writes only its own directory")] : []
+      end
+    end
+
     def check_panel_phases
       Array(@plane.workflow["panel_phases"]).filter_map do |id|
         if id.to_s == "implement"
@@ -150,7 +177,7 @@ module SoftFoundry
       end
       Dir.glob(File.join(@plane.root, "changes", "*", "metadata.yml")).sort.each do |file|
         data = YAML.safe_load_file(file, permitted_classes: [Time, Date], aliases: false)
-        next unless data.is_a?(Hash) && data["status"].to_s != "closed" && !data["scope"].nil?
+        next unless data.is_a?(Hash) && !%w[closed released].include?(data["status"].to_s) && !data["scope"].nil?
         slug = File.basename(File.dirname(file))
         Declarations.problems(data["scope"], tracked_files: tracked, code_globs: @plane.code_globs, kind: :scope).each do |problem|
           findings << Finding.new(:error, "changes/#{slug}/metadata.yml: #{problem}")
@@ -166,6 +193,30 @@ module SoftFoundry
       findings
     rescue GitError => e
       [Finding.new(:error, "path declarations could not be checked: #{e.message}")]
+    end
+
+    # A released record must say what it still owes: a well-formed release
+    # block that carries every condition the final judgment left undischarged.
+    def check_released_records
+      base = File.join(@plane.root, "changes")
+      return [] unless File.directory?(base)
+
+      Dir.glob("**/metadata.yml", base: base).sort.flat_map do |rel|
+        slug = File.dirname(rel)
+        data = YAML.safe_load_file(File.join(base, rel), permitted_classes: [Time, Date], aliases: false)
+        next [] unless data.is_a?(Hash) && data["status"].to_s == "released"
+
+        evidence = File.join(base, slug, "14-judgment", "evidence.yml")
+        undischarged = begin
+          loaded = File.file?(evidence) ? YAML.safe_load_file(evidence, permitted_classes: [Time, Date], aliases: false) : {}
+          loaded.is_a?(Hash) ? Array(loaded["undischarged"]).filter_map { |i| i["id"].to_s if i.is_a?(Hash) } : []
+        rescue Psych::Exception
+          []
+        end
+        Release.lint(data, judgment_undischarged: undischarged).map { |problem| Finding.new(:error, "changes/#{slug}/metadata.yml: #{problem}") }
+      rescue Psych::Exception
+        []
+      end
     end
 
     # The control plane and the pointer files are read as instructions by

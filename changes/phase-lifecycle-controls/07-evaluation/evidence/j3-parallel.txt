@@ -1,0 +1,179 @@
+### EVAL-003 parallel run (AC-019..023,030..032,034)
+--- dry run? no; run with no --env (AC-023)
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the evaluation skill's permissions (`soft-foundry hooks install --claude`)
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the adversarial-testing skill's permissions (`soft-foundry hooks install --claude`)
+warn: isolation of what the sessions share (a database, a port, a cache, a file) is the adopter's responsibility, and this run passed no --env; give each session its own with --env NAME=VALUE, using {phase} for a distinct value
+billing: subscription (no ANTHROPIC_API_KEY in the environment, so claude bills to its own login); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+parallel: running evaluate, attack of c1 at once, each in its own fresh session; executed_by recorded in each handoff
+phase evaluate: claude exited 0
+07-evaluation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 6454850a1392638313f4c5f23d98a60ce02ee4df
+  ✓ pass completed_at recorded: 2026-10-26T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✓ pass evidence current: no code changes since 6454850a1392; specification unchanged since 6454850a1392
+  ✓ pass content clean
+phase evaluate: pass
+phase attack: claude exited 0
+08-attack  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: attack-plan.md, cases.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 6454850a1392638313f4c5f23d98a60ce02ee4df
+  ✓ pass completed_at recorded: 2026-10-26T00:00:00Z
+  ✓ pass predecessor complete: 07-evaluation
+  ✓ pass evidence current: no code changes since 6454850a1392; specification unchanged since 6454850a1392
+  ✓ pass content clean
+phase attack: pass
+parallel: 2 phases run, 2 passed, 0 failed
+advisory: 1 issue to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+exit=0
+wall=3s
+1793044978.N start evaluate DATABASE_URL=unset PARALLEL=1 pid=80119
+1793044978.N start attack DATABASE_URL=unset PARALLEL=1 pid=80120
+1793044980.N end attack
+1793044980.N end evaluate
+changes/c1/07-evaluation/handoff.yml:status: complete
+changes/c1/07-evaluation/handoff.yml:commit_sha: 6454850a1392638313f4c5f23d98a60ce02ee4df
+changes/c1/08-attack/handoff.yml:status: complete
+changes/c1/08-attack/handoff.yml:commit_sha: 6454850a1392638313f4c5f23d98a60ce02ee4df
+6454850a1392638313f4c5f23d98a60ce02ee4df
+6454850 phases
+0803cb9 record
+current_phase: review
+--- with --env + secret (AC-022/024)
+exit=0
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the evaluation skill's permissions (`soft-foundry hooks install --claude`)
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the adversarial-testing skill's permissions (`soft-foundry hooks install --claude`)
+billing: subscription (no ANTHROPIC_API_KEY in the environment, so claude bills to its own login); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+parallel: running evaluate, attack of c1 at once, each in its own fresh session; executed_by recorded in each handoff
+phase evaluate: claude exited 0
+07-evaluation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 2dec8bb723c25e2ec60bed2d3477a11114dacc73
+  ✓ pass completed_at recorded: 2026-10-26T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✓ pass evidence current: no code changes since 2dec8bb723c2; specification unchanged since 2dec8bb723c2
+  ✓ pass content clean
+phase evaluate: pass
+phase attack: claude exited 0
+08-attack  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: attack-plan.md, cases.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 2dec8bb723c25e2ec60bed2d3477a11114dacc73
+  ✓ pass completed_at recorded: 2026-10-26T00:00:00Z
+  ✓ pass predecessor complete: 07-evaluation
+  ✓ pass evidence current: no code changes since 2dec8bb723c2; specification unchanged since 2dec8bb723c2
+  ✓ pass content clean
+phase attack: pass
+parallel: 2 phases run, 2 passed, 0 failed
+advisory: 1 issue to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+1793044982.N start evaluate DATABASE_URL=db_evaluate<SECRET> PARALLEL=1 pid=80364
+1793044982.N start attack DATABASE_URL=db_attack<SECRET> PARALLEL=1 pid=80365
+1793044984.N end evaluate
+1793044984.N end attack
+secret occurrences in changes/ and output:
+none
+0
+--- bad --env (AC-022)
+soft-foundry: environment variable name SOFT_FOUNDRY_X begins SOFT_FOUNDRY_, which is reserved for soft-foundry
+exit=1
+soft-foundry: environment variable name "lower" must match [A-Z_][A-Z0-9_]*
+exit=1
+soft-foundry: environment variable A is given twice; give each --env name once
+exit=1
+--- refusals (AC-020/021) on pending state
+c1: cannot run evaluate review in parallel: review is not in isolated_phases (.ai/workflow.yml: evaluate, attack); only phases that write nothing outside their own directory may run side by side
+non-isolated exit=1
+c1: cannot run evaluate evaluate in parallel: evaluate is named twice; name each phase once
+duplicate exit=1
+c1: cannot run attack: 08-attack cannot start: its predecessor 07-evaluation is pending
+attack alone exit=1
+c1: cannot run evaluate in parallel: --parallel needs two or more phases; for one phase run `soft-foundry phase run evaluate`
+exit=1
+no session started
+       0
+--- one fails (AC-031)
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the evaluation skill's permissions (`soft-foundry hooks install --claude`)
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the adversarial-testing skill's permissions (`soft-foundry hooks install --claude`)
+billing: subscription (no ANTHROPIC_API_KEY in the environment, so claude bills to its own login); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+parallel: running evaluate, attack of c1 at once, each in its own fresh session; executed_by recorded in each handoff
+phase evaluate: claude exited 0
+07-evaluation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: de1337c1f7df8f041279f15ae261cc13c3285fd4
+  ✓ pass completed_at recorded: 2026-10-26T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✓ pass evidence current: no code changes since de1337c1f7df; specification unchanged since de1337c1f7df
+  ✓ pass content clean
+phase evaluate: pass
+phase attack: claude exited 3
+08-attack  in_progress  PASS
+  ✓ pass handoff identity
+  ! warn phase in progress: not yet gated
+phase attack: fail
+parallel: 2 phases run, 1 passed, 1 failed
+advisory: 1 issue to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+exit=1
+1793044987.N start evaluate DATABASE_URL=unset PARALLEL=1 pid=80941
+1793044987.N start attack DATABASE_URL=unset PARALLEL=1 pid=80942
+1793044989.N fail attack
+1793044989.N end evaluate
+changes/c1/07-evaluation/handoff.yml:status: complete
+changes/c1/07-evaluation/handoff.yml:commit_sha: de1337c1f7df8f041279f15ae261cc13c3285fd4
+changes/c1/08-attack/handoff.yml:status: in_progress
+changes/c1/08-attack/handoff.yml:commit_sha:
+--- interrupt (AC-033)
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the evaluation skill's permissions (`soft-foundry hooks install --claude`)
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the adversarial-testing skill's permissions (`soft-foundry hooks install --claude`)
+billing: subscription (no ANTHROPIC_API_KEY in the environment, so claude bills to its own login); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+parallel: running evaluate, attack of c1 at once, each in its own fresh session; executed_by recorded in each handoff
+       2
+phase evaluate: claude exited 0
+07-evaluation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: fe53e1122345ec5f33e8efe9394c212d43772ace
+  ✓ pass completed_at recorded: 2026-10-26T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✓ pass evidence current: no code changes since fe53e1122345; specification unchanged since fe53e1122345
+  ✓ pass content clean
+phase evaluate: pass
+phase attack: claude exited 0
+08-attack  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: attack-plan.md, cases.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: fe53e1122345ec5f33e8efe9394c212d43772ace
+  ✓ pass completed_at recorded: 2026-10-26T00:00:00Z
+  ✓ pass predecessor complete: 07-evaluation
+  ✓ pass evidence current: no code changes since fe53e1122345; specification unchanged since fe53e1122345
+  ✓ pass content clean
+phase attack: pass
+parallel: 2 phases run, 2 passed, 0 failed
+advisory: 1 issue to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+exit=0
+stub processes left:        0

@@ -1,0 +1,25 @@
+### EVAL-003d signal forwarding (AC-033)
+TERM: runner pid=89022 stubs running:        2
+TERM: stubs 0.7s after signal:        0
+TERM: runner exit=0
+TERM: stub log:
+start evaluate
+start attack
+parallel: running evaluate, attack of c1 at once, each in its own fresh session; executed_by recorded in each handoff
+phase evaluate: claude exited 143
+phase evaluate: fail
+phase attack: claude exited 143
+phase attack: fail
+parallel: 2 phases run, 0 passed, 2 failed
+INT: runner pid=89427 stubs running:        2
+INT: stubs 0.7s after signal:        0
+INT: runner exit=0
+INT: stub log:
+start attack
+start evaluate
+parallel: running evaluate, attack of c1 at once, each in its own fresh session; executed_by recorded in each handoff
+phase evaluate: claude exited 143
+phase evaluate: fail
+phase attack: claude exited 143
+phase attack: fail
+parallel: 2 phases run, 0 passed, 2 failed

@@ -4,6 +4,8 @@ require "fileutils"
 require "time"
 require "yaml"
 require_relative "text"
+require_relative "record_lock"
+require_relative "safe_write"
 require_relative "advisory"
 require_relative "declarations"
 
@@ -68,6 +70,106 @@ module SoftFoundry
     end
 
     def closed? = metadata["status"].to_s == "closed"
+    def released? = metadata["status"].to_s == "released"
+
+    # Closed or released: the lifecycle is over, nothing more is run or
+    # gated for commit-bound staleness, and no scope is claimed.
+    def finished? = closed? || released?
+
+    # The release block's items, or [] when absent or malformed (`check`
+    # reports a malformed block).
+    def release_items
+      block = metadata["release"]
+      items = block.is_a?(Hash) ? block["items"] : nil
+      items.is_a?(Array) ? items.select { |i| i.is_a?(Hash) } : []
+    end
+
+    # An item is discharged only when it records a time: a non-empty
+    # string or a timestamp. A blank value is open, the same in the CLI,
+    # `ci`, `change close` and the page.
+    def self.discharged?(item)
+      return false unless item.is_a?(Hash)
+      value = item["discharged_at"]
+      value.respond_to?(:strftime) || (value.is_a?(String) && !value.strip.empty?)
+    end
+
+    def open_release_items = release_items.reject { |i| self.class.discharged?(i) }
+
+    # Runs the block holding the record lock (reentrant), for a command that
+    # must check the record's state and write it as one step.
+    def locked(&block) = RecordLock.synchronize(root, slug, &block)
+
+    # Read-modify-write of metadata.yml under the record lock. The block
+    # receives a fresh read from disk, never a cached copy, so a concurrent
+    # writer's change is not lost; the result is written atomically.
+    def update_metadata
+      RecordLock.synchronize(root, slug) do
+        data = metadata
+        before = Marshal.load(Marshal.dump(data))
+        yield data
+        # An unchanged record is not rewritten, so the template's comments survive.
+        SafeWrite.write(File.join(dir, "metadata.yml"), YAML.dump(data)) unless data == before
+        data
+      end
+    end
+
+    def update_handoff(phase)
+      RecordLock.synchronize(root, slug) do
+        data = handoff(phase) || {}
+        yield data
+        SafeWrite.write(handoff_path(phase), YAML.dump(data))
+        data
+      end
+    end
+
+    # Several files changed together: every new file is staged first, and
+    # only when all staged does any rename happen, metadata.yml last. A
+    # crash between renames then leaves handoffs reset with no history
+    # entry, which `change close` refuses (a pending phase), never a
+    # history entry for a reset the handoffs do not show. A staging
+    # failure removes what was staged and leaves the record
+    # byte-identical.
+    def transaction
+      RecordLock.synchronize(root, slug) do
+        tx = Transaction.new(self)
+        yield tx
+        tx.commit!
+      end
+    end
+
+    class Transaction
+      def initialize(record)
+        @record = record
+        @metadata_blocks = []
+        @handoff_blocks = {}
+      end
+
+      def metadata(&block) = @metadata_blocks << block
+      def handoff(phase, &block) = (@handoff_blocks[phase] ||= []) << block
+
+      def commit!
+        writes = []
+        @handoff_blocks.each do |phase, blocks|
+          data = @record.handoff(phase) || {}
+          blocks.each { |b| b.call(data) }
+          writes << [@record.handoff_path(phase), YAML.dump(data)]
+        end
+        unless @metadata_blocks.empty?
+          data = @record.metadata
+          @metadata_blocks.each { |b| b.call(data) }
+          writes << [File.join(@record.dir, "metadata.yml"), YAML.dump(data)]
+        end
+        staged = []
+        begin
+          writes.each { |path, bytes| staged << [SafeWrite.stage(path, bytes), path] }
+        rescue StandardError
+          staged.each { |tmp, _| File.unlink(tmp) if File.file?(tmp) && !File.symlink?(tmp) }
+          raise
+        end
+        staged.each { |tmp, path| SafeWrite.commit_staged(tmp, path) }
+        nil
+      end
+    end
 
     # The commit that recorded a phase as complete: the newest commit
     # touching its handoff, provided the handoff says complete there. Nil
@@ -161,6 +263,20 @@ module SoftFoundry
     # change's work merged," which is what `ci` and `change close` need.
     def finished_commit_sha
       reached_lifecycle_end? ? last_commit_sha : nil
+    end
+
+    # The final judgment's outcome, read from the Outcome section of
+    # 14-judgment/final.md: the one judgment word (APPROVED, BLOCKED, ...)
+    # the section names. Nil when the file or section is missing, or the
+    # section names none or several (the unfilled template lists them all).
+    def judgment_outcome
+      judge = control_plane.phase("judge")
+      path = judge && File.join(phase_dir(judge), "final.md")
+      return nil unless path && File.file?(path)
+
+      section = SoftFoundry.read_text(path)[/^## Outcome[ \t]*\n(.*?)(?=^## |\z)/m, 1].to_s
+      found = section.scan(/\b[A-Z][A-Z_]{3,}\b/).uniq & control_plane.judgments.map(&:to_s)
+      found.size == 1 ? found.first : nil
     end
 
     def judgment_evidence_path = File.join(phase_dir(control_plane.phase("judge")), "evidence.yml")

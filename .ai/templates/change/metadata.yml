@@ -7,7 +7,7 @@ git:
 type: TBD                  # feature | fix | refactor | docs | infrastructure | security | chore
 risk: TBD                  # low | medium | high; a high risk change is always on the gated track (.ai/workflow.yml tracks.forced_by_risk)
 track: ${TRACK}            # gated | iterative (.ai/workflow.yml tracks:); set by `change new --track`
-status: ${STATUS}          # intake | exploring | in_progress | awaiting_human | judged | closed
+status: ${STATUS}          # intake | exploring | in_progress | awaiting_human | judged | released | closed (released: finished and approved, owing the items in `release:`; closed stays the only end state)
 current_phase: ${CURRENT_PHASE}
 created_at: ${CREATED_AT}
 scope: []                  # optional path globs this change owns; empty means the whole repository. Evidence goes stale only for code inside this scope or the repository's shared_core, and the checks are sized from the diff (.ai/policies/check-sizing.yml)
@@ -44,6 +44,18 @@ reopenings: []
 # - at: 2026-09-16T00:00:00Z
 #   from_commit: sha the change had been vetted at
 #   reason: why the person sent it back to exploring
+phase_reopenings: []
+# One entry per `phase reopen` or automatic reopen by `phase run` (a stale
+# complete phase):
+# - at: 2026-09-16T00:00:00Z
+#   phase: verify
+#   reset: [verify, evaluate]      # phases returned to pending, files kept
+#   from_commit: sha
+#   reason: why the phase was reopened
+#   source: manual                 # manual | auto
+#   previous: complete             # the phase's status before the reset
+# `release:` is added by `change release`; an absent key is valid, an empty
+# one is not.
 
 # Phases the harness would otherwise require, deliberately not run for
 # this change, each with a non-empty rationale. An entry with an empty

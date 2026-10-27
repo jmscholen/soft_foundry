@@ -1,0 +1,28 @@
+### EVAL-003c parallel with passing stubs (AC-030,031,032)
+parallel: running evaluate, attack of c1 at once, each in its own fresh session; executed_by recorded in each handoff
+phase evaluate: claude exited 0
+phase evaluate: pass
+phase attack: claude exited 0
+phase attack: pass
+parallel: 2 phases run, 2 passed, 0 failed
+exit=0
+current_phase: review
+081be5f phases
+081be5f
+--- one passes, one fails
+parallel: running evaluate, attack of c1 at once, each in its own fresh session; executed_by recorded in each handoff
+phase evaluate: claude exited 0
+phase evaluate: pass
+phase attack: claude exited 3
+phase attack: fail
+parallel: 2 phases run, 1 passed, 1 failed
+exit=1
+--- stub commits (AC-032 warn)
+parallel: running evaluate, attack of c1 at once, each in its own fresh session; executed_by recorded in each handoff
+phase evaluate: claude exited 0
+phase evaluate: pass
+phase attack: claude exited 0
+phase attack: pass
+parallel: 2 phases run, 2 passed, 0 failed
+warn: HEAD moved from 03b4500 to dd8ff64 during the run; the phases record 03b4500, so their evidence is bound to a commit that is no longer HEAD (sessions were told not to commit); inspect the new commits
+exit=1

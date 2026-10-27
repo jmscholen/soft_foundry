@@ -1,0 +1,103 @@
+### EVAL-001 reopen evaluate (AC-001,004,005,006)
+       0
+phase reopen: reopened evaluate (manual)
+phase reopen: reset evaluate
+phase reopen: reset attack
+phase reopen: reset review
+exit=0
+ M changes/c1/07-evaluation/handoff.yml
+ M changes/c1/08-attack/handoff.yml
+ M changes/c1/13-review/handoff.yml
+ M changes/c1/metadata.yml
+?? .soft-foundry/
+--- non-handoff/metadata diff vs before:
+Only in /tmp/evalrun/j1-before: changes
+status: complete
+status: pending
+status: pending
+status: pending            # pending | in_progress | complete | blocked
+status: pending
+status: complete
+phase_reopenings:
+- at: '2026-10-26T20:02:29Z'
+  phase: evaluate
+  reset:
+  - evaluate
+  - attack
+  - review
+  from_commit: bfd2cdb2332e36b9328bd30da7d36588aaa7ec8f
+  reason: fixture changed
+  source: manual
+  previous:
+    evaluate:
+      status: complete
+      commit_sha: c012a60a984ac920a5c4d84a8a92868cbdc0a9d1
+      completed_at: '2026-09-09T00:00:00Z'
+      session_id:
+    attack:
+25:reopenings: []
+---
+phase: '08-attack'
+skill: adversarial-testing
+status: pending
+commit_sha:
+started_at:
+completed_at:
+resolved_model:
+  profile: adversarial_high
+  provider:
+  model:
+outputs: []
+--- gate before redoing
+07-evaluation  pending  SKIP
+  - skip phase pending: not started
+advisory: 1 issue to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+exit=0
+--- again (AC-016 nothing to reset?) reopen review x2
+soft-foundry: nothing to reset: review and every phase after it are already pending; run `soft-foundry phase run review` instead
+exit=1
+c1: c1  [status: in_progress, phase: judge, risk: TBD]
+  track: gated
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-evaluation          complete     ok
+  08-attack              complete     ok
+  09-remediation         pending      
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              complete     ok
+  14-judgment            pending      
+  15-learning            pending      
+advisory: 4 issues to address before c1 goes live (informational, does not block the gate)
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+--- second reopen of already-pending evaluate
+soft-foundry: nothing to reset: evaluate and every phase after it are already pending; run `soft-foundry phase run evaluate` instead
+exit=1
+       1
+--- reason refusals (AC-012)
+soft-foundry: --reason is required: it may not be empty
+exit=1
+soft-foundry: --reason is 501 characters; the limit is 500
+exit=1
+soft-foundry: --reason may not contain control characters (newline, tab, escape, NUL); put it on one plain line
+exit=1
+soft-foundry: --reason is required: say why the phase is being reopened (it is kept in the record)
+exit=1
+soft-foundry: unknown phase 'nosuch'; lifecycle phases: intake, discover, specify, threat_model, plan, implement, verify, evaluate, attack, remediate, document, index, observe, review, judge, learn
+exit=1
+       1
+--- marker (AC-013)
+soft-foundry: phase reopen is refused inside a phase-run session (SOFT_FOUNDRY_PHASE is set): a phase may not reset another phase's handoff; ask the person running the change to run `soft-foundry phase reopen`
+exit=1
+soft-foundry: change release is refused inside a phase-run session (SOFT_FOUNDRY_PHASE is set): a phase may not decide what a change still owes; ask the person running the change to run it
+exit=1
+soft-foundry: change discharge is refused inside a phase-run session (SOFT_FOUNDRY_PHASE is set): a phase may not decide what a change still owes; ask the person running the change to run it
+exit=1
+       1

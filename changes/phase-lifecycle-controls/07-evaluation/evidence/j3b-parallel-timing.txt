@@ -1,0 +1,27 @@
+### EVAL-003b parallel: pass lines, timing, TERM, repeat for lost updates (AC-028,031,033,034)
+parallel: running evaluate, attack of c1 at once, each in its own fresh session; executed_by recorded in each handoff
+phase evaluate: claude exited 0
+phase evaluate: pass
+phase attack: claude exited 0
+phase attack: pass
+parallel: 2 phases run, 2 passed, 0 failed
+exit=0
+wall=2.64s
+changes/c1/07-evaluation/handoff.yml:status: complete
+changes/c1/07-evaluation/handoff.yml:commit_sha: 8954c223460dfdc9867e3a983665e7e2a09511b6
+changes/c1/08-attack/handoff.yml:status: complete
+changes/c1/08-attack/handoff.yml:commit_sha: 8954c223460dfdc9867e3a983665e7e2a09511b6
+current_phase: review
+8954c22 phases
+--- single reopen timing (full lifecycle record)
+reopen intake wall=0.23s (includes ruby start)
+--- 20 repeats: every YAML parses, both statuses recorded
+bad runs: 0 of 20
+--- TERM (AC-033)
+stubs before:        2
+stubs after:        0
+phase evaluate: claude exited 0
+phase evaluate: pass
+phase attack: claude exited 0
+phase attack: pass
+  ! warn verification: verification (06-verification) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes

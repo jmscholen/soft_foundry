@@ -1,0 +1,89 @@
+### EVAL-011 REV-001 blank discharged_at is open; REV-002 handoffs before metadata (AC-035..043, AC-005)
+--- discharged_at=""
+$ check
+✗ error changes/c1/metadata.yml: release item "A" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ fail control plane: 1 error(s)
+[exit 2]
+$ ci
+✗ error changes/c1/metadata.yml: release item "A" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ fail control plane: 1 error(s)
+change c1 (released, not re-gated)
+  released: c1: 2 open item(s): A, B
+advisory: c1 is released with 2 open item(s) to discharge before it is closed (informational, does not block the gate)
+✗ ci failed
+[exit 2]
+$ change close (A blank, B open)
+c1: cannot close: released with 2 open item(s) A, B; discharge each with `soft-foundry change discharge ID --note TEXT`, or pass --force to close anyway
+[exit 1]
+$ change status
+c1: c1  [status: released, phase: judge, risk: TBD]
+  released: c1: 2 open item(s): A, B
+$ status --json items
+  "released": true,
+  "open_items": 2,
+        "discharged_at": ""
+      "kind": "released",
+      "label": "released with 2 item(s) owed: A, B"
+$ discharge A (blank counts as open, so allowed)
+c1: discharged A
+released: c1: 1 open item(s): B
+[exit 0]
+--- discharged_at='   '
+$ check
+✗ error changes/c1/metadata.yml: release item "A" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ fail control plane: 1 error(s)
+[exit 2]
+$ ci
+✗ error changes/c1/metadata.yml: release item "A" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ fail control plane: 1 error(s)
+change c1 (released, not re-gated)
+  released: c1: 2 open item(s): A, B
+advisory: c1 is released with 2 open item(s) to discharge before it is closed (informational, does not block the gate)
+✗ ci failed
+[exit 2]
+$ change close (A blank, B open)
+c1: cannot close: released with 2 open item(s) A, B; discharge each with `soft-foundry change discharge ID --note TEXT`, or pass --force to close anyway
+[exit 1]
+$ change status
+c1: c1  [status: released, phase: judge, risk: TBD]
+  released: c1: 2 open item(s): A, B
+$ status --json items
+  "released": true,
+  "open_items": 2,
+        "discharged_at": "   "
+      "kind": "released",
+      "label": "released with 2 item(s) owed: A, B"
+$ discharge A (blank counts as open, so allowed)
+c1: discharged A
+released: c1: 1 open item(s): B
+[exit 0]
+--- real discharge still discharges
+c1: discharged A
+released: c1: 1 open item(s): B
+c1: discharged B
+released: c1: 0 open item(s)
+released: c1: every item is discharged; run `soft-foundry change close c1`
+c1: finished commit 971834ef66f913079572dab06d6e1471b6dbbe4f is not reachable from main yet; pass --force to close anyway
+close exit=1
+status: released
+--- REV-002: reopen writes handoffs, then metadata; history matches handoffs
+phase reopen: reopened attack (manual)
+phase reopen: reset attack
+phase reopen: reset review
+exit=0
+status: pending
+status: pending            # pending | in_progress | complete | blocked
+status: pending            # pending | in_progress | complete | blocked
+status: pending            # pending | in_progress | complete | blocked
+status: pending            # pending | in_progress | complete | blocked
+status: pending
+status: pending            # pending | in_progress | complete | blocked
+status: pending            # pending | in_progress | complete | blocked
+reopenings=1 phase=attack reset=["attack", "review"] reason=redo
+--- a crash between renames: metadata.yml rename fails
+simulated crash: killed
+attack handoff: status: pending
+reopenings in metadata: 0
+$ change close c1 (a pending phase must refuse)
+c1: cannot close: 14-judgment is pending; a change is complete only with a final judgment (.ai/workflow.yml rules.final_judgment_required), so run the judge phase (`soft-foundry phase run judge`) or pass --force to close
+[exit 1]
