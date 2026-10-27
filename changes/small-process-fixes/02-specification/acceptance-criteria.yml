@@ -4,7 +4,121 @@
 criteria:
   - id: AC-001
     requirements: [REQ-001]
-    given: TBD
-    when: TBD
-    then: TBD
-    verified_by: []   # test names, EVAL IDs, or ATTACK IDs, filled by later phases
+    given: 'a fresh repository'
+    when: '`change new demo --type fix --risk low` runs'
+    then: 'metadata.yml has type fix and risk low'
+    verified_by: []
+  - id: AC-002
+    requirements: [REQ-001]
+    given: 'a fresh repository'
+    when: '`change new demo` runs without the flags'
+    then: 'metadata.yml keeps type the placeholder value and risk the placeholder value and exit is zero'
+    verified_by: []
+  - id: AC-003
+    requirements: [REQ-002]
+    given: 'a fresh repository'
+    when: '`change new demo --type bogus` runs'
+    then: 'exit is nonzero, no changes/demo exists, and the message names --type, bogus and the seven allowed types; the same for --risk with the three allowed risks'
+    verified_by: []
+  - id: AC-004
+    requirements: [REQ-003]
+    given: 'the allowed values differ from the template comments or workflow risk names'
+    when: '`soft-foundry check` runs'
+    then: 'check fails naming the disagreement; and `change new x --risk high --track iterative` is refused as today'
+    verified_by: []
+  - id: AC-005
+    requirements: [REQ-004]
+    given: 'a phase-run session ends with status complete and one blocking item'
+    when: 'the runner finishes the phase'
+    then: 'handoff status is blocked, the blocking item is kept, notes mention the runner, and a line starting `blocked:` names the phase and 1 item'
+    verified_by: []
+  - id: AC-006
+    requirements: [REQ-004]
+    given: 'a phase-run session ends complete with empty blocking'
+    when: 'the runner finishes the phase'
+    then: 'handoff is unchanged and no `blocked:` line is printed'
+    verified_by: []
+  - id: AC-007
+    requirements: [REQ-005]
+    given: 'the same complete-with-blocking handoff in a --parallel run and in an auto-reopened run'
+    when: 'the runner finishes each'
+    then: "both are marked blocked identically and no other phase's handoff differs"
+    verified_by: []
+  - id: AC-008
+    requirements: [REQ-006]
+    given: 'a hand-edited complete handoff with blocking items'
+    when: '`soft-foundry gate <phase>` runs'
+    then: 'the gate fails as before; and when the blocked write fails, a `warn:` line is printed and the handoff stays as the session wrote it'
+    verified_by: []
+  - id: AC-009
+    requirements: [REQ-007]
+    given: 'the shipped skills and README'
+    when: 'the adversarial-testing, verification and review SKILL.md files and the README content-scan section are read'
+    then: 'each says to write invisible and control characters as visible escapes or build them in a script, and a raw zero-width character in evidence still fails the content scan'
+    verified_by: []
+  - id: AC-010
+    requirements: [REQ-008]
+    given: 'a change with several phases complete, one with findings, one blocked, one open human decision'
+    when: '`soft-foundry change summary` runs'
+    then: 'output has change:, phase:, one phase-status: line per phase, findings:, blocking: and owed: lines with the recorded values, and no file is modified and the gate is not run'
+    verified_by: []
+  - id: AC-011
+    requirements: [REQ-009]
+    given: 'an unknown slug, and separately a malformed handoff'
+    when: '`change summary nope` and `change summary` run'
+    then: 'the unknown slug is refused naming known changes; the malformed phase shows `unreadable` with a reason, the other lines print, and exit is zero'
+    verified_by: []
+  - id: AC-012
+    requirements: [REQ-010]
+    given: 'new output captured with NO_COLOR set and with stdout not a TTY'
+    when: 'each new message is read'
+    then: 'it contains no escape sequences, every outcome is a word, each fact is on its own line with a stable prefix, and each error names the fix'
+    verified_by: []
+  - id: AC-013
+    requirements: [REQ-011]
+    given: 'the shipped rules'
+    when: '`.ai/rules/` is listed and the parity rule read'
+    then: 'a rule file states the in-force requirement, the access_control source and the recorded states'
+    verified_by: []
+  - id: AC-014
+    requirements: [REQ-012]
+    given: 'a tests.yml with a check protection disabled and no note, and an older tests.yml without the fields'
+    when: 'the gate runs on each'
+    then: 'the first fails naming the check; the second is unaffected'
+    verified_by: []
+  - id: AC-015
+    requirements: [REQ-013]
+    given: 'a profile declaring access_control and a changed file matching it, with checks that state no protection'
+    when: '`soft-foundry gate verify` runs'
+    then: 'the gate fails with a message naming the matching path; it passes when one check states in_force or every check states a value with a note'
+    verified_by: []
+  - id: AC-016
+    requirements: [REQ-014]
+    given: 'a profile without access_control, or with no changed file matching'
+    when: '`soft-foundry gate verify` runs on a record without protection fields'
+    then: 'the parity check is not applicable and the result is the same as before this change'
+    verified_by: []
+  - id: AC-017
+    requirements: [REQ-015]
+    given: 'the implemented change'
+    when: 'the diff is inspected'
+    then: "no network call, credential or new privilege is added and the runner writes only the finished phase's handoff"
+    verified_by: []
+  - id: AC-018
+    requirements: [REQ-016]
+    given: 'a CI log from a blocked run and a summary run'
+    when: 'the log is searched for `blocked:` and the summary prefixes'
+    then: 'each appears as a plain-text line'
+    verified_by: []
+  - id: AC-019
+    requirements: [REQ-017]
+    given: 'a normal change record'
+    when: '`change summary` is timed'
+    then: 'it completes in under one second and no gate evaluation is invoked'
+    verified_by: []
+  - id: AC-020
+    requirements: [REQ-018]
+    given: 'the diff and the published policies'
+    when: 'the diff is compared against the privacy policy, security policy and terms'
+    then: 'no collected, shared, retained, protected or promised item differs'
+    verified_by: []
