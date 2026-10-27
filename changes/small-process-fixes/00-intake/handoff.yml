@@ -1,8 +1,8 @@
 # Phase handoff. One per phase directory. The gate checker validates this file.
 phase: 00-intake
 skill: intake
-status: pending
-commit_sha: a61901c398a95540b160f9159f667adb5f3ddf44
+status: complete
+commit_sha: 28d4b1e82516307e9d3d94a9ce1a8634d3ad6485
 started_at: 2026-10-27T00:30:00Z
 completed_at: 2026-10-27T00:40:00Z
 resolved_model:
