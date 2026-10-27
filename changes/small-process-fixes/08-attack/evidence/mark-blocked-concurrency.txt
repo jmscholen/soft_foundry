@@ -1,0 +1,8 @@
+intake blocked ["xintake"] 1 0
+discover blocked ["xdiscover"] 1 0
+specify blocked ["xspecify"] 1 0
+threat_model blocked ["xthreat_model"] 1 0
+plan blocked ["xplan"] 1 0
+implement blocked ["ximplement"] 1 0
+verify blocked ["xverify"] 1 0
+evaluate blocked ["xevaluate"] 1 0

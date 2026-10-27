@@ -1,0 +1,8 @@
+change: ok6
+phase: intake (status: intake, risk: TBD, track: gated)
+phase-status: discover blocked
+phase-status: specify complete
+phase-status: threat_model complete
+findings: none
+blocking: specify: ;  
+owed: none

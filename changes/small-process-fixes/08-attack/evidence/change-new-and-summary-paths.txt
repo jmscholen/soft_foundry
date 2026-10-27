@@ -1,0 +1,27 @@
+$ soft-foundry change new ../../etc --type fix
+soft-foundry: invalid change slug '../../etc'
+$ soft-foundry change new /tmp/x
+soft-foundry: invalid change slug '/tmp/x'
+$ soft-foundry change new a/./b
+soft-foundry: change record already exists: /private/tmp/sfa/repo/changes/a/./b
+$ soft-foundry change new ok1 --type Fix
+soft-foundry: --type "Fix" is not allowed; use one of: feature, fix, refactor, docs, infrastructure, security, chore
+$ soft-foundry change new okA --risk HIGH
+soft-foundry: --risk "HIGH" is not allowed; use one of: low, medium, high
+$ soft-foundry change new okB --risk high --track iterative
+soft-foundry: --risk high forces the gated track; drop --track iterative (or use --track gated)
+$ soft-foundry change new okC --risk=low --type=docs
+created changes/okC with 16 phase directories
+branch: change/atk
+track: gated
+$ soft-foundry change new okD --type fix --type security
+created changes/okD with 16 phase directories
+branch: change/atk
+type: fix
+track: gated
+$ soft-foundry change summary ../../etc
+soft-foundry: no change '../../etc'; known changes: a; a/b; accessibility-advisory; budget-and-openrouter; bud
+$ soft-foundry change summary /etc
+soft-foundry: no change '/etc'; known changes: a; a/b; accessibility-advisory; budget-and-openrouter; budget-b
+$ soft-foundry change summary a/../ok5
+soft-foundry: no change 'a/../ok5'; known changes: a; a/b; accessibility-advisory; budget-and-openrouter; budg

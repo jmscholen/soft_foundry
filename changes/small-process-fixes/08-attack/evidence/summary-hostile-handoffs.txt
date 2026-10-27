@@ -1,0 +1,17 @@
+change: ok5
+phase: intake (status: intake, risk: low, track: gated)
+phase-status: discover complete<U+001B>[2J<U+000D>FAKE
+phase-status: specify unreadable
+phase-status: threat_model unreadable
+phase-status: plan unreadable
+phase-status: implement unreadable
+phase-status: verify <0xEF><0xBF><0xBD><0xEF><0xBF><0xBD> bad
+phase-status: evaluate unreadable
+note: specify handoff.yml is not valid YAML without aliases ((<unknown>): did not find expected ',' or ']' while parsing a flow sequence at line 1 column 9); redo or repair the file
+note: threat_model handoff.yml is not valid YAML without aliases (Alias parsing was not enabled. To enable it, pass `aliases: true` to `Psych::load` or `Psych::safe_load`.); redo or repair the file
+note: plan handoff.yml is not a mapping
+note: implement handoff.yml is 300000 bytes; the summary reads at most 262144
+note: evaluate handoff.yml is not valid YAML without aliases (Alias parsing was not enabled. To enable it, pass `aliases: true` to `Psych::load` or `Psych::safe_load`.); redo or repair the file
+findings: discover 4 (<U+001B>[1mhigh 1, unspecified 3)
+blocking: discover: <U+001B>[31mred<U+202E> evil<U+000D><U+000A>owed: none; x<U+200B>z; ; {"a"=>1}
+note: advisories could not be read ((/private/tmp/sfa/repo/changes/ok5/06-verification/handoff.yml): invalid leading UTF-8 octet at line 1 column 1)

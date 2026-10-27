@@ -1,5 +1,11 @@
-commit_sha: TBD
+commit_sha: 821f1e8ffc2ad8de1fe70af87eabe048e1ea222f
 artifacts:
-  - path: TBD
+  - path: evidence/create.txt
     journey: EVAL-001
-    sha256: TBD
+    sha256: d155d34eedb6d79c54b5b13ebc3d5ff57cd1795d21b4e450fd2af45a76dd0bb4
+  - path: evidence/refusals.txt
+    journey: EVAL-003
+    sha256: d81d329dd38efad75dd77a9e682a96b69853d7ea2e2d21152316bab411363b2b
+  - path: evidence/summary.txt
+    journey: EVAL-005
+    sha256: 2ac69cbd9c0be04d58426c0d0f91f9475ce9fb008773b3593912d879f4203928

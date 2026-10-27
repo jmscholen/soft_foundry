@@ -1,0 +1,48 @@
+# EVAL-005/006
+change: demo
+phase: intake (status: intake, risk: low, track: gated)
+phase-status: intake pending
+phase-status: discover pending
+phase-status: specify pending
+phase-status: threat_model pending
+phase-status: plan pending
+phase-status: implement pending
+phase-status: verify pending
+phase-status: evaluate pending
+phase-status: attack pending
+phase-status: remediate pending
+phase-status: document pending
+phase-status: index pending
+phase-status: observe pending
+phase-status: review pending
+phase-status: judge pending
+phase-status: learn pending
+findings: none
+blocking: none
+owed: none
+rc=0
+soft-foundry: no change 'nope'; known changes: demo; demo2
+rc=1
+change: demo
+phase: intake (status: intake, risk: low, track: gated)
+phase-status: intake pending
+phase-status: discover unreadable
+phase-status: specify pending
+phase-status: threat_model pending
+phase-status: plan pending
+phase-status: implement pending
+phase-status: verify pending
+phase-status: evaluate pending
+phase-status: attack pending
+phase-status: remediate pending
+phase-status: document pending
+phase-status: index pending
+phase-status: observe pending
+phase-status: review pending
+phase-status: judge pending
+phase-status: learn pending
+note: discover handoff.yml is not valid YAML without aliases ((<unknown>): did not find expected key while parsing a block mapping at line 1 column 1); redo or repair the file
+findings: none
+blocking: none
+note: advisories could not be read ((/private/var/folders/v8/684xdbm92vz7dz03clwvpmvr0000gn/T/tmp.WHC3NPEZaW/changes/demo/01-discovery/handoff.yml): did not find expected key while parsing a block mapping at line 1 column 1)
+rc=0
