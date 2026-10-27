@@ -1,30 +1,133 @@
-commit_judged: TBD
+commit_judged: 4626e4b79a86f811c1143be7e197b7c2c854b744
+# current: true means no application, test, or infrastructure file changed
+# between that phase's commit_sha and commit_judged. Record-only commits
+# may sit between them. The gate's evidence-current check agrees.
 phases:
+  - phase: 00-intake
+    commit_sha: 28d4b1e82516307e9d3d94a9ce1a8634d3ad6485
+    current: true
+    result: pass
+    note: "Gate pass. Required. Nothing waived."
+  - phase: 01-discovery
+    commit_sha: 07ec16c7072c99829e9bf912332e9aaf9fcf295c
+    current: true
+    result: pass
+    note: "Gate pass. Required at risk medium."
+  - phase: 02-specification
+    commit_sha: d35fd54504078a989bb4e9bc28e72c6ce9d3343e
+    current: true
+    result: pass
+    note: "Gate pass. Specification locked at 01b7304b244d1eb540e6ed558ac41cb3b951d87f. No specification file other than the handoff changed after that commit."
+  - phase: 03-threat-model
+    commit_sha: 01b7304b244d1eb540e6ed558ac41cb3b951d87f
+    current: true
+    result: pass
+    note: "Gate pass. Required at risk medium."
+  - phase: 04-plan
+    commit_sha: 4e65a204a1dff016ba12dc2b981b56987caa9c03
+    current: true
+    result: pass
+    note: "Gate pass. Required at risk medium."
+  - phase: 05-implementation
+    commit_sha: 42b1689f993f94c02ad9063ff6bd8d0600b6bd8d
+    current: true
+    result: pass
+    note: "Gate pass. Provider anthropic. Control-plane and README text owed by DEV-001 and DEV-002 landed in cf932d1, after this handoff, and are in the judged tree."
   - phase: 06-verification
-    commit_sha: TBD
-    current: TBD   # true when commit_sha matches the judged commit for all code paths
-    result: TBD
+    commit_sha: cf932d1f40b7dfad1abaac9be3b72005c15966b6
+    current: true
+    result: pass
+    note: "Gate pass. Evidence current. Full suite recorded on tree 05de602d463c1605cec05972bfb28c1370fbf4c1, outcome passed, 821 runs, 0 failures, SOFT_FOUNDRY_PHASE unset. CHECK-003 failed with the variable inherited (VER-001). Red evidence CHECK-001 holds. protection stated skipped: profile declares no access_control. The suite does not assert the parallel blocked exit."
   - phase: 07-evaluation
-    commit_sha: TBD
-    current: TBD
-    result: TBD
+    commit_sha: 821f1e8ffc2ad8de1fe70af87eabe048e1ea222f
+    current: true
+    result: pass
+    note: "Gate pass. Evidence current. EVAL-001 through EVAL-006 passed. Blocked marking, parallel, and auto-reopen were not exercised live."
   - phase: 08-attack
-    commit_sha: TBD
-    current: TBD
-    result: TBD
+    commit_sha: 821f1e8ffc2ad8de1fe70af87eabe048e1ea222f
+    current: true
+    result: pass
+    note: "Gate pass. Evidence current. 7 denied, 4 low violations unrepaired. None lets a blocker pass the gate. Next was remediate. Remediation was not run."
+  - phase: 09-remediation
+    commit_sha:
+    current: false
+    result: pending
+    note: "Optional, and pending. Predecessor checks step over it. This judgment's verdict sends the change here because of REV-001."
+  - phase: 10-user-documentation
+    commit_sha:
+    current: false
+    result: pending
+    note: "Optional, and pending. User-facing README text and the parity rule are in the tree from cf932d1. Review read them. The missing phase record does not block."
+  - phase: 11-faq-index
+    commit_sha:
+    current: false
+    result: pending
+    note: "Optional, and pending. No documentation-phase output exists to index. Does not block."
+  - phase: 12-observability
+    commit_sha:
+    current: false
+    result: pending
+    note: "Optional, and pending. surfaces.observability is false. No deployed service. Operator signals are the CLI lines. REV-001 is the detection gap on the parallel process status."
   - phase: 13-review
-    commit_sha: TBD
-    current: TBD
-    result: TBD
-unresolved_findings: []
-# Acceptance criteria or judgment conditions left unsatisfied pending a
-# real-world event (production observation, etc.) rather than more
-# repository evidence, e.g.:
-#   - id: AC-060
-#     description: each fix observed corrected on production
-# `soft-foundry change close` refuses to close this change while any id
-# here lacks a human confirmation - via --confirm ID, or a PR comment
-# reading "CONFIRMED: <id>" (see `soft-foundry change request-discharge`)
-# - and then moves it into `discharged` with the confirmation source.
+    commit_sha: 7606451392918adb9fd0f4d60472e3a6f9d9d1c0
+    current: true
+    result: pass
+    note: "Gate pass. Evidence current. No blocking findings. One major finding (REV-001) names its failure. Provider xai, different from the anthropic implement session. No code diff from 7606451 to the judged commit."
+unresolved_findings:
+  - id: REV-001
+    severity: major
+    disposition: blocks_approval
+    also: []
+    note: "Parallel blocked-mark exits 0 while printing failure. Must be fixed, with a test, before any approval. See JDG-001."
+  - id: REV-002
+    severity: minor
+    disposition: open_not_blocking
+    also: [ATK-004]
+    note: "Equals-form and repeated --type are ignored. Re-judge after remediation."
+  - id: REV-003
+    severity: minor
+    disposition: open_not_blocking
+    also: [ATK-001]
+    note: "Non-list blocking and findings print as none and are not marked. The gate still fails a string blocking value. Re-judge after remediation."
+  - id: REV-004
+    severity: minor
+    disposition: open_not_blocking
+    also: [ATK-002]
+    note: "A format character in an access_control glob skips protection stated. check still flags the invisible character in .ai/. Re-judge after remediation."
+  - id: REV-005
+    severity: minor
+    disposition: open_not_blocking
+    also: [ATK-003]
+    note: "change summary follows a symlinked handoff or metadata file. Re-judge after remediation."
+  - id: REV-006
+    severity: minor
+    disposition: open_not_blocking
+    also: []
+    note: "check does not compare tracks.forced_by_risk keys. Shipped workflow agrees. Re-judge after remediation."
+  - id: REV-007
+    severity: minor
+    disposition: open_not_blocking
+    also: []
+    note: "display_test.rb embeds raw format characters. Re-judge after remediation."
+  - id: REV-008
+    severity: minor
+    disposition: open_not_blocking
+    also: []
+    note: "warn: after a failed mark does not name the next step. Re-judge after remediation."
+  - id: REV-009
+    severity: minor
+    disposition: open_not_blocking
+    also: [VER-001]
+    note: "Suite is not isolated from an inherited SOFT_FOUNDRY_PHASE. Pre-existing. The unset-variable run passed and is the recorded full suite. Re-judge after remediation."
+  - id: IMPL-004
+    severity: minor
+    disposition: specified_limit
+    also: [THREAT-006]
+    note: "protection stated is structure-only, as REQ-013 and the rule require. Kept visible. No further mitigation owed by this change."
+  - id: PANEL-MARK
+    severity: minor
+    disposition: specified_scope
+    also: []
+    note: "phase run --panel does not call mark_blocked. REQ-005 does not name the panel path. The gate still fails a complete handoff that lists blockers."
 undischarged: []
 discharged: []

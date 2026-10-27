@@ -1,24 +1,47 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 14-judgment
 skill: final-judgment
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 4626e4b79a86f811c1143be7e197b7c2c854b744
+started_at: '2026-10-27T02:51:49Z'
+completed_at: '2026-10-27T02:58:03Z'
 resolved_model:
   profile: judgment_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
-next: learn
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+  provider: xai
+  model: grok-4.7
+outputs:
+- final.md
+- residual-risk.md
+- evidence.yml
+blocking: []
+findings:
+- id: JDG-001
+  severity: major
+  summary: 'REV-001 blocks approval. phase run --parallel marks a complete-with-blocking
+    handoff blocked, prints blocked: and phase <id>: fail, and exits 0. The single-run
+    and auto-reopen paths exit nonzero. Fix parallel_run so a marked phase returns
+    2, with a test that asserts the nonzero status, then redo verify onward. REV-002
+    through REV-009 and the four low attack violations stay open and do not independently
+    block; the next judgment accounts for them again.'
+  failure: 'phase run evaluate attack --parallel, with the evaluate session writing
+    status complete and blocking ["needs a person"] and exiting 0. The handoff status
+    becomes blocked, stdout contains blocked: evaluate has 1 blocking item(s) and
+    phase evaluate: fail, and the process exits 0. A CI job that checks only the exit
+    code treats the blocked phase as success.'
+next: remediate
+notes: Verdict BLOCKED at HEAD 4626e4b. Required gates intake through review pass
+  and their evidence is current for this commit; remediation, user documentation,
+  FAQ index, and observability are optional and still pending. No application, test,
+  or infrastructure file was edited. executed_by was left as the runner wrote it.
+  Implement provider was anthropic; this judgment used xai. Remediation has not run.
+  Harness-eval cases were not read.
+executed_by:
+  runner: soft-foundry phase run
+  shell: grok
+  fresh_context: true
+  started_at: '2026-10-27T02:51:49Z'
+  finished_at: '2026-10-27T02:58:26Z'
+  exit_status: 0
+  previous_phase: review
+  session_id: ae876012-4cce-44b4-b0d3-da03173aff25
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"
