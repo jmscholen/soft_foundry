@@ -1,27 +1,30 @@
-commit_sha: TBD
-# Optional. The check size computed by `soft-foundry change size --phase verify`.
-# A scoped change must record a size at least as large as the computed one.
-# size: TBD
-# Optional full-suite run, keyed by the git tree hash of the evidence commit
-# (`git rev-parse <commit_sha>^{tree}`), or a citation of another record's run
-# for the same tree. This is a record: Soft Foundry never runs the suite.
-# full_suite:
-#   tree: TBD
-#   command: TBD
-#   outcome: passed
-# full_suite:
-#   cite: <slug of another change record>
+commit_sha: cf932d1f40b7dfad1abaac9be3b72005c15966b6
+size: full_at_verify
+full_suite:
+  tree: 05de602d463c1605cec05972bfb28c1370fbf4c1
+  command: env -u SOFT_FOUNDRY_PHASE -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u GEMINI_API_KEY -u XAI_API_KEY bundle exec rake test
+  outcome: passed
 checks:
   - id: CHECK-001
-    kind: tests   # tests | lint | static_analysis | security_scan | iac_validate | migration_check | custom
-    command: TBD
-    result: TBD   # pass | fail | error | skipped
-    evidence: evidence/TBD
-    criteria: [AC-001]
-    # Optional, per check: the commit at which this test existed and failed
-    # (RED) and the test file. The gate verifies red_commit is a commit that
-    # precedes commit_sha, holds test_path, and that APP or INFRA code changed
-    # after it. A feature, fix, or refactor with no red_commit on any check is
-    # advised as having no failing-test-first evidence.
-    # red_commit: TBD
-    # test_path: TBD
+    kind: tests
+    command: env -u SOFT_FOUNDRY_PHASE -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u GEMINI_API_KEY -u XAI_API_KEY bundle exec rake test
+    result: pass
+    evidence: evidence/full-suite.txt
+    criteria: [AC-001, AC-002, AC-003, AC-004, AC-005, AC-006, AC-007, AC-008, AC-009, AC-010, AC-011, AC-012, AC-013, AC-014, AC-015, AC-016, AC-017, AC-018, AC-019, AC-020]
+    red_commit: e496c6757201f9f554d67554e14ea09a79641640
+    test_path: test/protection_stated_test.rb
+    protection: not_applicable
+  - id: CHECK-002
+    kind: custom
+    command: ruby -Ilib exe/soft-foundry check
+    result: pass
+    evidence: evidence/check.txt
+    criteria: []
+    protection: not_applicable
+  - id: CHECK-003
+    kind: tests
+    command: bundle exec rake test (run with SOFT_FOUNDRY_PHASE=verify inherited from the phase runner)
+    result: fail
+    evidence: evidence/full-suite-with-phase-env.txt
+    criteria: []
+    protection: not_applicable

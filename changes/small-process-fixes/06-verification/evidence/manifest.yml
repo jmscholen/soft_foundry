@@ -1,5 +1,11 @@
-commit_sha: TBD
+commit_sha: cf932d1f40b7dfad1abaac9be3b72005c15966b6
 artifacts:
-  - path: TBD
-    produced_by: TBD
-    sha256: TBD
+  - path: evidence/full-suite.txt
+    produced_by: CHECK-001
+    sha256: 885f6927c86eff33cfb8107ebf429e99eaadb37e371bb92d15c7d09d651f5e51
+  - path: evidence/check.txt
+    produced_by: CHECK-002
+    sha256: 2be6498003ac7633f001dde7fb6c82d20d270c7515d869ca3f7276b8c1f3730e
+  - path: evidence/full-suite-with-phase-env.txt
+    produced_by: CHECK-003
+    sha256: e8a9a99fdcdd3fefe0903a6dcf38114350f899c24b69d739d436854d1b4a8788

@@ -1,24 +1,41 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 06-verification
 skill: verification
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: cf932d1f40b7dfad1abaac9be3b72005c15966b6
+started_at: '2026-10-27T01:45:11Z'
+completed_at: '2026-10-27T02:20:00Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- results.md
+- tests.yml
+- evidence/manifest.yml
+- evidence/full-suite.txt
+- evidence/check.txt
+- evidence/full-suite-with-phase-env.txt
+blocking: []
+findings:
+- id: VER-001
+  severity: minor
+  summary: The test suite is not isolated from an inherited SOFT_FOUNDRY_PHASE; run
+    inside a phase session it fails 12 tests and errors 1 (CHECK-003). Passes with
+    the variable unset (821 runs, 0 failures).
+- id: VER-002
+  severity: minor
+  summary: Full suite ran on cf932d1 (implementation 42b1689 plus control-plane and
+    README text); the control-plane text has no tests beyond soft-foundry check passing.
 next: evaluate
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: ''
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-27T01:45:11Z'
+  finished_at: '2026-10-27T02:32:38Z'
+  exit_status: 0
+  previous_phase: implement
+  session_id: 4c4b5625-5f64-4bdc-bfaa-aab84ed607db
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"
