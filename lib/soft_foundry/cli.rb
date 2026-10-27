@@ -1262,11 +1262,12 @@ module SoftFoundry
       outcomes = ParallelRun.new(@root, runner: @runner).run(launches)
       ledger = SessionLedger.new(SessionLedger.default_path)
       failed_start = []
+      marked_blocked = false
       outcomes.zip(phases).each do |o, p|
         learned = o.launch.session_id ? nil : runner.recorded_session(ledger, shell: o.launch.shell, since: started)
         begin
           runner.finish!(p, o.status, session_id: learned)
-          mark_blocked(runner, p)
+          marked_blocked = true if mark_blocked(runner, p)
         rescue StandardError => e
           failed_start << p
           @err.puts "phase #{p.id}: could not record the result: #{e.message.lines.first.to_s.strip}"
@@ -1292,7 +1293,7 @@ module SoftFoundry
       record.update_metadata { |m| m["current_phase"] = first_open.id } if first_open
       print_advisories(record)
       return EXIT_TARGET if moved || outcomes.any? { |o| !o.status.zero? } || !failed_start.empty?
-      gate_failed ? 2 : 0
+      marked_blocked || gate_failed ? 2 : 0
     end
 
     # `phase run <phase> --panel SHELL,SHELL`: the phase as a panel.

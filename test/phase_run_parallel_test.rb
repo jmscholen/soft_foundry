@@ -62,6 +62,25 @@ class PhaseRunParallelTest < Minitest::Test
     end
   end
 
+  def test_a_session_leaving_complete_with_blocking_is_marked_blocked_and_the_run_exits_nonzero
+    with_parallel_record do |dir, record|
+      code, out, = run_parallel(dir, "evaluate", "attack", "--parallel", "--shell", "claude") do |launch|
+        id = phase_of(launch)
+        complete!(record, dir, id)
+        if id == "evaluate"
+          path = record.handoff_path(record.control_plane.phase("evaluate"))
+          h = YAML.safe_load_file(path)
+          File.write(path, YAML.dump(h.merge("status" => "complete", "blocking" => ["needs a person"])))
+        end
+        0
+      end
+      assert_equal 2, code, out
+      assert_equal "blocked", record.phase_status(record.control_plane.phase("evaluate"))
+      assert_includes out, "blocked: evaluate has 1 blocking item(s)"
+      assert_includes out, "phase evaluate: fail"
+    end
+  end
+
   def test_the_sessions_overlap_in_time
     with_parallel_record do |dir, _record|
       barrier = Queue.new
