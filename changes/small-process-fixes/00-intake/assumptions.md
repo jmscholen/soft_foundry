@@ -1,7 +1,7 @@
 # Assumptions
 
 ## Explicit assumptions
-- `change new --type` and `--risk` accept the vocabularies already listed in the `metadata.yml` template comments; an unknown value is refused with the allowed list. Omitting them leaves `TBD` as today.
+- `change new --type` and `--risk` accept the vocabularies already listed in the `metadata.yml` template comments; an unknown value is refused with the allowed list. Omitting them leaves the placeholder values as today.
 - The runner already reads the handoff after a session; marking `blocked` is a write the runner makes to the handoff it just read, recorded in `executed_by` notes or output, never an edit of another phase's evidence.
 - Invisible-character guidance is skill text (under `.ai/skills/`) and shipped README text; it does not change what the scanner flags.
 - The latest-state summary is derived from existing record files (metadata, handoffs, findings); it adds no new stored state.
