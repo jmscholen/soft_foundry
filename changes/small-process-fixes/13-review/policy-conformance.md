@@ -4,9 +4,9 @@ Standard: `.ai/rules/policy-conformance.md`. Cite the policy document and clause
 
 ## Documents checked
 
-Recorded under `policies:` in `.ai/repository.yml` (profile assessed 2026-10-22, commit `fb74c5fe`, refreshed by discovery for this change at `07ec16c` without a profile edit):
+Recorded under `policies:` in `.ai/repository.yml` (profile assessed 2026-10-22, commit `fb74c5fe`):
 
-- privacy: status NOT_APPLICABLE. Rationale in the profile: library gem, no users' data transmitted. No `PRIVACY*` file at the repository root.
+- privacy: status NOT_APPLICABLE. Rationale in the profile: library gem, no users' data transmitted. No privacy policy file at the repository root.
 - security: status NOT_APPLICABLE. Rationale: maintainer decision of 2026-09-15 in `changes/security-policy-not-applicable`; no `SECURITY.md`. Vulnerability reports go through the public repository's issues.
 - terms: status NOT_APPLICABLE. Rationale: no service is offered. No terms file at the repository root.
 
@@ -14,9 +14,9 @@ Discovery recorded the absence as established. These are not published documents
 
 ## Scope reviewed
 
-`surfaces.policy: false`. Compared the diff and REQ-018 with the three profile entries and with the kinds of change the standard lists (new collection, new recipient, retention, purpose, security promise, consent or rights).
+`surfaces.policy` is false. Compared the diff and REQ-018 with the three profile entries and with the kinds of change the standard lists (new collection, new recipient, retention, purpose, security promise, consent or rights).
 
-The diff adds local CLI behavior, a local file read of the change record, a local handoff rewrite, guidance text, and a structure check on `tests.yml`. It does not add a network call, telemetry, a cookie, an account, a log of a person, a new recipient of user data, or a change to retention. The optional session index under `~/.soft-foundry/` is pre-existing and untouched. Provider API keys are unset in the verification run and are not read by the new code.
+The diff adds local CLI behavior, a local file read of the change record, a local handoff rewrite, guidance text, and a structure check on `tests.yml`. It does not add a network call, telemetry, a cookie, an account, a log of a person, a new recipient of user data, or a change to retention. The optional session index under the home directory is pre-existing and untouched. Provider API keys are unset in the verification run and are not read by the new code.
 
 ## Findings
 
