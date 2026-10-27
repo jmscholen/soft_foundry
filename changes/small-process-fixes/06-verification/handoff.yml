@@ -1,10 +1,10 @@
 ---
 phase: 06-verification
 skill: verification
-status: pending
-commit_sha: cf932d1f40b7dfad1abaac9be3b72005c15966b6
-started_at: '2026-10-27T01:45:11Z'
-completed_at: '2026-10-27T02:20:00Z'
+status: complete
+commit_sha: 44efb99d6b1ebb1d73d99811ae036d646c746bf3
+started_at: '2026-10-27T03:23:57Z'
+completed_at: '2026-10-27T03:37:00Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -22,7 +22,7 @@ findings:
   severity: minor
   summary: The test suite is not isolated from an inherited SOFT_FOUNDRY_PHASE; run
     inside a phase session it fails 12 tests and errors 1 (CHECK-003). Passes with
-    the variable unset (821 runs, 0 failures).
+    the variable unset (822 runs, 0 failures).
 - id: VER-002
   severity: minor
   summary: Full suite ran on cf932d1 (implementation 42b1689 plus control-plane and
@@ -33,9 +33,9 @@ executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-10-27T01:45:11Z'
-  finished_at: '2026-10-27T02:32:38Z'
+  started_at: '2026-10-27T03:23:57Z'
+  finished_at: '2026-10-27T03:37:03Z'
   exit_status: 0
-  previous_phase: implement
-  session_id: 4c4b5625-5f64-4bdc-bfaa-aab84ed607db
+  previous_phase: remediate
+  session_id: 0ec9424a-6565-4ee0-a585-5ddc4faba5ea
   cwd: "/Users/jscholen-iou/dev/soft_foundry"

@@ -1,7 +1,7 @@
-commit_sha: cf932d1f40b7dfad1abaac9be3b72005c15966b6
+commit_sha: 44efb99d6b1ebb1d73d99811ae036d646c746bf3
 size: full_at_verify
 full_suite:
-  tree: 05de602d463c1605cec05972bfb28c1370fbf4c1
+  tree: fc40a9d1630a14b54a6076ca2c4d63c308e0bc15
   command: env -u SOFT_FOUNDRY_PHASE -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u GEMINI_API_KEY -u XAI_API_KEY bundle exec rake test
   outcome: passed
 checks:
