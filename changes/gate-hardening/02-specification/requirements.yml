@@ -1,8 +1,190 @@
 # Implementation-independent requirements. IDs are stable and referenced by
 # acceptance criteria, tests, evaluation journeys, and attack cases.
+# Statements are quoted because several contain a colon followed by a space.
 requirements:
+  # --- A. Sealing a phase ---
   - id: REQ-001
-    category: functional   # functional | accessibility | security | policy | data | failure | performance | operations | infrastructure | observability
-    statement: TBD
-    rationale: TBD
+    category: functional
+    statement: "`soft-foundry phase seal <phase> [--change SLUG]` gates the named phase and, when every check passes, commits that phase's directory and the record's metadata in one commit whose message is `Record <slug> <phase id>`; on any failing check it prints the gate result, writes nothing to git, and exits 2."
+    rationale: "The specification lock and the plan diff base both rest on a committed handoff; today nobody is required to make that commit."
     source: 00-intake/request.md
+  - id: REQ-002
+    category: functional
+    statement: "`phase seal` refuses (exit 1) when the handoff is not `status: complete`, naming the status found, and when any APP, TESTS or INFRA path is dirty, untracked, or ignored-but-present, naming up to five paths; other dirty paths are left alone and listed in a note."
+    rationale: "A handoff's commit_sha describes committed code; sealing over uncommitted code would record evidence for code that is not in history."
+    source: 00-intake/assumptions.md
+  - id: REQ-003
+    category: functional
+    statement: "On a successful seal, `metadata.yml` `current_phase` moves to the first later phase that is pending and not skipped-with-rationale (unchanged when none), `status` becomes `in_progress` when it was `intake` and `judged` when the sealed phase is judge; the change is written under the record lock before the commit, and only `changes/<slug>/<phase output>/`, `changes/<slug>/metadata.yml`, and `changes/<slug>/budget.yml` when changed, are staged, by explicit path."
+    rationale: "No skill may write metadata.yml with a file tool, so the tool must advance the phase; staging by explicit path keeps a planted file out of the commit."
+    source: 01-discovery/handoff.yml DISC-003
+  - id: REQ-004
+    category: functional
+    statement: "`phase seal` is idempotent: on a phase whose directory and metadata are already committed and unchanged it prints `already sealed at <sha>` and exits 0; when the commit step fails it prints the failure, leaves the worktree as written, and exits 2 so a rerun completes the seal."
+    rationale: "A crash or a refused hook must not need a person to repair state."
+    source: 00-intake/request.md
+  - id: REQ-005
+    category: functional
+    statement: "`phase run <phase>` seals the phase after `finish!` and `mark_blocked!` when the handoff is complete and the gate passes; a handoff left in_progress, blocked, or failing its gate is not sealed and the runner exits 2. `phase run A B --parallel` seals each passed phase in lifecycle order after every session returns, leaves a failed phase unsealed and named, and exits 2 when any phase is unsealed. The fresh-session prompt tells the session that the runner seals the phase and that it must not commit."
+    rationale: "The runner is the one place that knows the session finished; sealing there removes the human step for every evidence phase."
+    source: 00-intake/request.md
+  - id: REQ-006
+    category: functional
+    statement: "The gate's `predecessor complete` check passes only when the predecessor's handoff is recorded in git with `status: complete` (`recorded_commit` non-nil); a predecessor complete on disk but not committed fails with a detail that names `soft-foundry phase seal <predecessor>`. Optional, waived, and track-optional pending phases are still stepped over."
+    rationale: "This is what turns sealing from a convention into a guarantee for the lock and the diff base."
+    source: 01-discovery/repository-context.md
+  # --- B. Gate checks ---
+  - id: REQ-007
+    category: functional
+    statement: "Every check this change adds has an entry in `Gate::CHECKS`, runs only on a complete handoff, and reports `skip` with the reason `closed record: not re-gated` (or `released record`) when the record's status is closed or released."
+    rationale: "History is read by the gate that closed it; five closed-record YAML files already fail to parse and must not become new failures."
+    source: 01-discovery/handoff.yml DISC-001
+  - id: REQ-008
+    category: functional
+    statement: "`structured files parse`: for a complete phase, each required file ending in .yml, and `evidence/manifest.yml` when present, loads with `YAML.safe_load` (permitted classes Time and Date, aliases allowed) as a mapping; a file that does not fails with the path and the parser's line and column. For specify this runs before the phase can be sealed, so a specification locks only when it parses."
+    rationale: "A locked specification that does not parse misleads every later reader and the go-live advisory."
+    source: 00-intake/request.md
+  - id: REQ-009
+    category: functional
+    statement: "`commit lineage`: for a complete phase with an effective predecessor whose handoff has a commit_sha, that SHA is an ancestor of or equal to this phase's commit_sha, and this phase's commit_sha is an ancestor of or equal to the measuring tip (the recorded branch tip `Scope.tip_for` returns, else HEAD); either failure names both SHAs."
+    rationale: "A commit_sha only had to exist, so an older SHA could move the staleness baseline back."
+    source: 00-intake/request.md
+  - id: REQ-010
+    category: functional
+    statement: "`test results recorded` (verify): `tests.yml` `checks` is a non-empty list whose entries each have id, kind, command, and result in pass, fail, error, skipped; a check whose result is fail or error, or skipped with non-empty criteria, must be named by id in the handoff's blocking list or in a finding's id or summary, else the check fails naming the check ids."
+    rationale: "The gate accepted `result: fail` on a check as long as the file existed."
+    source: 00-intake/request.md
+  - id: REQ-011
+    category: functional
+    statement: "`criteria covered`: at verify, every `criteria[].id` in the locked acceptance-criteria.yml that appears in no tests.yml check's criteria is reported as a warn naming the ids; at judge, every id that appears in neither a verify check's criteria nor an evaluation journey's criteria, and is not listed in `14-judgment/evidence.yml` `criteria_not_covered` with a non-empty reason, fails the check naming the ids."
+    rationale: "Nothing connected the criteria the specification locked to the checks verification ran."
+    source: 00-intake/request.md
+  - id: REQ-012
+    category: functional
+    statement: "`evidence manifest verified` (verify, evaluate, attack): every `artifacts[].path` resolves inside the phase directory, exists, and its SHA-256 equals the recorded sha256 (hex, case-insensitive); a mismatch or missing file fails naming the path and both digests; a file under evidence/ other than manifest.yml that no artifact names is a warn."
+    rationale: "Manifest hashes were recorded and never recomputed."
+    source: 00-intake/request.md
+  - id: REQ-013
+    category: functional
+    statement: "`verdict recorded` (judge): `ChangeRecord#judgment_outcome` returns one of the judgments `.ai/workflow.yml` lists; the detail is the word; nil fails naming the four words and the Outcome section."
+    rationale: "A complete judgment saying BLOCKED passed the gate and closed."
+    source: 00-intake/request.md
+  - id: REQ-014
+    category: security
+    statement: "`fresh session recorded` (review, judge): when `.ai/policies/enforcement.yml` `guard.mode` is block, the handoff's `executed_by` is a mapping with `runner: soft-foundry phase run` and `fresh_context: true`, else the check fails naming `soft-foundry phase run <phase>`; when the mode is warn or off the check skips and the existing advisory stands. The machine-local override and SOFT_FOUNDRY_GUARD are not consulted."
+    rationale: "Separation of duties was advice; a repository that chose block mode has said it wants a control."
+    source: 00-intake/request.md
+  - id: REQ-015
+    category: functional
+    statement: "The verification tests.yml template documents `result` as gated, the judgment evidence.yml template documents `criteria_not_covered`, the handoff template documents `branch_resolved`, and the fresh-session prompt and AGENTS.md step 9 name `phase seal` as the way a phase is completed."
+    rationale: "Agents learn the contract from the templates and the bootstrap contract."
+    source: 01-discovery/affected-components.md
+  # --- C. Commands ---
+  - id: REQ-016
+    category: functional
+    statement: "`gate <phase>` naming one phase whose handoff is not complete exits 3 with the printed line unchanged; `gate all`, `ci`, `phase run`, and `change status` are unaffected; the usage text lists exit codes 0, 2, and 3."
+    rationale: "A script read exit 0 on a reopened phase as a pass (phase-lifecycle-controls AC-014, D3); REQ-023 of that change kept the printed meaning of a pending gate, which is preserved."
+    source: 01-discovery/handoff.yml DISC-006
+  - id: REQ-017
+    category: functional
+    statement: "`change close` without --force refuses when `judgment_outcome` is BLOCKED (the message names remediate) or REJECTED (names intake), after the judge-complete check and before the merged check; --force closes as today."
+    rationale: "Only `change release` read the verdict."
+    source: 00-intake/request.md
+  - id: REQ-018
+    category: functional
+    statement: "The shared option helper accepts `--name=VALUE` as well as `--name VALUE` for every command that uses it, and refuses a flag given twice with `--name given twice`; `--env=` keeps its own refusal message."
+    rationale: "small-process-fixes REV-002: an equals-form risk was silently dropped."
+    source: changes/small-process-fixes/14-judgment/residual-risk.md
+  - id: REQ-019
+    category: functional
+    statement: "`change summary` prints `blocking: malformed (<phase>: <Class>, expected a list)` and the same shape for findings when a phase's field is not a list, instead of `none`; exit stays 0."
+    rationale: "small-process-fixes REV-003."
+    source: changes/small-process-fixes/14-judgment/residual-risk.md
+  # --- D. Residuals ---
+  - id: REQ-020
+    category: functional
+    statement: "When `phase seal` seals a commit-bound phase it writes `branch_resolved: true|false` into the handoff, stating whether `metadata.git.branch` resolved to a ref at that moment; `Scope.tip_for` measures the checked-out HEAD, not the branch tip, for a handoff that recorded false, even if the ref exists later. A handoff without the key is measured as today."
+    rationale: "scoped-verification REV-001: a ref created after the evidence commit became the measure; the owed mitigation is to record at the evidence commit that it did not resolve."
+    source: changes/scoped-verification/14-judgment/residual-risk.md
+  - id: REQ-021
+    category: failure
+    statement: "A `metadata.yml` whose `git` value is not a mapping, a handoff whose commit_sha git cannot resolve, an unreadable or symlinked required file, and a manifest path outside the phase directory each produce a gate `fail` line with the cause and the next step, never an uncaught exception; `gate` exits 2 in each case."
+    rationale: "scoped-verification REV-004 and the fail-closed rule."
+    source: changes/scoped-verification/14-judgment/residual-risk.md
+  - id: REQ-022
+    category: functional
+    statement: "`phase reopen` clears `started_at` on every handoff it resets; `ps` reports every phase named in a parallel run's command; a `discharged_at` consisting only of Unicode blanks (including U+00A0, U+2028, U+202F) is open in the CLI, `check`, `ci`, `change close`, and the released table."
+    rationale: "phase-lifecycle-controls REV-006, REV-007, REV-009."
+    source: changes/phase-lifecycle-controls/14-judgment/residual-risk.md
+  - id: REQ-023
+    category: functional
+    statement: "`check_vocabulary` also compares `tracks.forced_by_risk` keys with the risk vocabulary; the `warn:` printed after a failed blocked-mark names the next step (handoff left as written, phase to be redone); a parallel run in which a session wrote `status: blocked` itself exits 2."
+    rationale: "small-process-fixes REV-006, REV-008, REV-010."
+    source: changes/small-process-fixes/14-judgment/residual-risk.md
+  - id: REQ-024
+    category: functional
+    statement: "The test suite passes when the environment carries SOFT_FOUNDRY_PHASE, SOFT_FOUNDRY_PARALLEL, or a provider API key: the shared test helper clears them for every CLI invocation it builds."
+    rationale: "small-process-fixes REV-009: a phase session can record a red suite for a green tree."
+    source: changes/small-process-fixes/14-judgment/residual-risk.md
+  - id: REQ-025
+    category: security
+    statement: "This change's adversarial-testing phase executes, against `phase seal`, a held record lock, a symlinked lock file, a symlinked handoff.yml and metadata.yml, a kill between the metadata write and the commit, and a seal attempted from a session whose SOFT_FOUNDRY_PHASE names a different phase, and records the observed behaviour for each."
+    rationale: "phase-lifecycle-controls ATTACK-011 and THREAT-008 were never executed under the guard."
+    source: changes/phase-lifecycle-controls/14-judgment/residual-risk.md
+  - id: REQ-026
+    category: operations
+    statement: "`soft-foundry learn promote` is run on this branch and every instinct at or above the 0.80 threshold that `learn promote --dry-run` lists at implementation time is in `.ai/rules/learned.md`, with its change and evidence."
+    rationale: "Learning that is not promoted is not applied."
+    source: 01-discovery/handoff.yml DISC-008
+  - id: REQ-027
+    category: operations
+    statement: "The residuals this change does not close (scoped-verification REV-003 unbounded sibling scope; phase-lifecycle-controls REV-008 kill-mid-rename journal; small-process-fixes REV-004 format character in a glob and REV-011 red commit citing a different file; the inert workflow declarations) are named in the final judgment's residual-risk.md with the reason each is carried."
+    rationale: "A loose end that is carried on purpose is not a loose end."
+    source: 00-intake/request.md
+  # --- E. Documentation, evals, rules ---
+  - id: REQ-028
+    category: operations
+    statement: "README.md describes `phase seal`, the recorded-predecessor rule, each new check with what it verifies and what it leaves to review, the gate exit codes, and the close refusal; the fresh-context and reopening sections say the runner seals."
+    rationale: "The README is the adopter's reference."
+    source: 00-intake/request.md
+  - id: REQ-029
+    category: operations
+    statement: "`docs/user/` gains pages for `phase seal`, the gate checks, and the four phase-lifecycle commands (`phase reopen`, `phase run --parallel`, `change release`, `change discharge`), each grounded in an evaluation journey of this change and carrying its requirement and EVAL ids."
+    rationale: "phase-lifecycle-controls REQ-027 was left unmet."
+    source: changes/phase-lifecycle-controls/14-judgment/residual-risk.md
+  - id: REQ-030
+    category: operations
+    statement: "Each new check has a harness-eval gate case that plants the defect it refuses and names the check; three further cases cover a malformed release block, a non-isolated parallel request, and a stale auto-reopen; `soft-foundry eval` passes every gate case and `check` passes."
+    rationale: "A refusal without a planted case can be dropped by a later edit unnoticed."
+    source: changes/phase-lifecycle-controls/14-judgment/residual-risk.md
+  - id: REQ-031
+    category: operations
+    statement: "`soft-foundry ci` passes on this branch with every record under changes/ as it is, and the five closed-record files that do not parse are not edited."
+    rationale: "History stays green; evidence is never edited to obtain a pass."
+    source: 00-intake/assumptions.md
+  # --- Cross-cutting ---
+  - id: REQ-032
+    category: accessibility
+    statement: "Every refusal, gate line, and note this change adds is plain text with the file or check, the value found, and the next action on the first line, continuation facts on following lines, repository-relative paths, 12-character SHAs (full in --json), and no meaning carried by colour alone."
+    rationale: ".ai/rules/accessibility.md applies to CLI output a person reads."
+    source: .ai/rules/accessibility.md
+  - id: REQ-033
+    category: security
+    statement: "`phase seal` never stages with `-A` or a directory glob wider than the phase output directory, metadata.yml, and budget.yml of the named change."
+    rationale: "A planted file elsewhere in the worktree must not ride a sealing commit."
+    source: 00-intake/assumptions.md
+  - id: REQ-034
+    category: security
+    statement: "`phase seal`, `change summary`, and every new gate check refuse to read through a symlink at handoff.yml, metadata.yml, tests.yml, journeys.yml, acceptance-criteria.yml, evidence.yml, or evidence/manifest.yml, and `evidence manifest verified` refuses an artifact path that resolves outside the phase directory."
+    rationale: "small-process-fixes REV-005 and the manifest check's new file reads."
+    source: changes/small-process-fixes/14-judgment/residual-risk.md
+  - id: REQ-035
+    category: security
+    statement: "No new check or command performs a network call, reads a credential, or reads the machine-local enforcement override; the parallel sealing path never prints an --env value."
+    rationale: "The threat model's existing boundaries."
+    source: 03-threat-model (to be written)
+  - id: REQ-036
+    category: performance
+    statement: "The new checks add at most two `ancestor?` calls and one tip resolution per phase and one SHA-256 per listed artifact; `gate all` on this repository's largest open record completes within twice its pre-change wall time, measured at evaluation."
+    rationale: "The gate runs inside every pre-commit."
+    source: 01-discovery/dependencies.md

@@ -1,10 +1,342 @@
 # Each criterion must be testable and map to at least one requirement.
 # Criteria are locked once specification completes; changing them requires a
 # recorded requirement change, never a downstream edit.
+# Fixture vocabulary: "a gated record" is a change created with `change new`
+# on its own branch in a scratch repository; "phase P complete at HEAD" is a
+# handoff with status complete and commit_sha HEAD, committed unless stated.
 criteria:
+  # --- A. Sealing ---
   - id: AC-001
+    requirements: [REQ-001, REQ-003]
+    given: "a gated record with intake complete on disk and uncommitted, every check passing"
+    when: "`phase seal intake` runs"
+    then: "exit 0; a new commit `Record <slug> intake` contains exactly 00-intake/** and metadata.yml; metadata current_phase is discover and status in_progress; the output line is `sealed 00-intake at <sha>`"
+    verified_by: []
+  - id: AC-002
     requirements: [REQ-001]
-    given: TBD
-    when: TBD
-    then: TBD
-    verified_by: []   # test names, EVAL IDs, or ATTACK IDs, filled by later phases
+    given: "a gated record whose intake handoff is complete but request.md still contains the template placeholder word the gate scans for"
+    when: "`phase seal intake` runs"
+    then: "exit 2; the gate result is printed with `no placeholders` failing; `git log` is unchanged; metadata is unchanged"
+    verified_by: []
+  - id: AC-003
+    requirements: [REQ-002]
+    given: "a gated record whose intake handoff is in_progress"
+    when: "`phase seal intake` runs"
+    then: "exit 1; the message names status in_progress and says to complete the handoff first; nothing is committed"
+    verified_by: []
+  - id: AC-004
+    requirements: [REQ-002]
+    given: "a gated record with implement complete on disk and an uncommitted edit to an APP path"
+    when: "`phase seal implement` runs"
+    then: "exit 1; the message names the dirty path and says to commit the code first; nothing is committed"
+    verified_by: []
+  - id: AC-005
+    requirements: [REQ-002]
+    given: "a gated record with specify complete on disk and an uncommitted scratch file outside APP, TESTS, INFRA and outside the record"
+    when: "`phase seal specify` runs"
+    then: "exit 0; the scratch file is neither staged nor committed and is named in a note line"
+    verified_by: []
+  - id: AC-006
+    requirements: [REQ-003, REQ-033]
+    given: "a gated record with plan complete on disk and an uncommitted file planted under changes/<slug>/06-verification/"
+    when: "`phase seal plan` runs"
+    then: "the sealing commit contains 04-plan/** and metadata.yml only; the planted file is still untracked"
+    verified_by: []
+  - id: AC-007
+    requirements: [REQ-003]
+    given: "a gated record with judge complete on disk"
+    when: "`phase seal judge` runs"
+    then: "metadata status is judged and current_phase is learn"
+    verified_by: []
+  - id: AC-008
+    requirements: [REQ-003]
+    given: "a gated record at medium risk with discover in skipped_phases with a rationale and intake complete on disk"
+    when: "`phase seal intake` runs"
+    then: "metadata current_phase is specify"
+    verified_by: []
+  - id: AC-009
+    requirements: [REQ-004]
+    given: "a gated record whose intake was sealed by AC-001"
+    when: "`phase seal intake` runs again"
+    then: "exit 0; output is `already sealed at <sha>`; no new commit"
+    verified_by: []
+  - id: AC-010
+    requirements: [REQ-004]
+    given: "a gated record with intake complete and a pre-commit hook that exits 1"
+    when: "`phase seal intake` runs"
+    then: "exit 2; the hook's output is shown; metadata in the worktree shows current_phase discover; with the hook removed, a second `phase seal intake` exits 0 and commits"
+    verified_by: []
+  - id: AC-011
+    requirements: [REQ-005]
+    given: "`phase run verify` with a stub shell whose session writes a complete, passing verification handoff"
+    when: "the session returns 0"
+    then: "the runner exits 0 and HEAD is a commit `Record <slug> verify` containing 06-verification/** and metadata.yml; executed_by shows finished_at and exit_status 0"
+    verified_by: []
+  - id: AC-012
+    requirements: [REQ-005]
+    given: "`phase run verify` with a stub shell whose session leaves the handoff in_progress"
+    when: "the session returns 0"
+    then: "the runner exits 2; HEAD is unchanged; the output says the phase was not sealed and why"
+    verified_by: []
+  - id: AC-013
+    requirements: [REQ-005, REQ-023]
+    given: "`phase run evaluate attack --parallel` with stub sessions where evaluate passes and attack writes status blocked itself"
+    when: "both sessions return"
+    then: "evaluate is sealed (one commit), attack is not, the output names both outcomes, and the runner exits 2"
+    verified_by: []
+  - id: AC-014
+    requirements: [REQ-005]
+    given: "`phase run evaluate attack --parallel` with stub sessions where both pass"
+    when: "both sessions return"
+    then: "two commits exist, `Record <slug> evaluate` before `Record <slug> attack`; `gate attack` passes `predecessor complete` and `commit lineage`"
+    verified_by: []
+  - id: AC-015
+    requirements: [REQ-005, REQ-015]
+    given: "the fresh-session prompt for any phase"
+    when: "it is generated"
+    then: "its last step says the runner seals the phase after the gate and that the session must not commit; the parallel variant keeps its do-not-commit sentence"
+    verified_by: []
+  - id: AC-016
+    requirements: [REQ-006]
+    given: "a gated record with intake complete on disk but not committed, and discover complete on disk"
+    when: "`gate discover` runs"
+    then: "`predecessor complete` fails with a detail containing `soft-foundry phase seal intake`; after `phase seal intake`, `gate discover` passes that check"
+    verified_by: []
+  - id: AC-017
+    requirements: [REQ-006]
+    given: "a low-risk gated record with discover, specify, threat_model, plan skipped with rationale, intake sealed, implement complete on disk"
+    when: "`gate implement` runs"
+    then: "`predecessor complete` passes, naming intake as the stepped-to predecessor"
+    verified_by: []
+  # --- B. Checks ---
+  - id: AC-018
+    requirements: [REQ-007]
+    given: "a closed record whose specification requirements.yml does not parse"
+    when: "`gate specify --change <slug>` runs"
+    then: "`structured files parse` reports skip with `closed record: not re-gated`; `ci` prints `(closed, skipped)` for it and exits 0"
+    verified_by: []
+  - id: AC-019
+    requirements: [REQ-007, REQ-030]
+    given: "`Gate::CHECKS`"
+    when: "read"
+    then: "it has entries named structured files parse, commit lineage, test results recorded, criteria covered, evidence manifest verified, verdict recorded, fresh session recorded; `soft-foundry check` passes and `eval` lint accepts a case naming each"
+    verified_by: []
+  - id: AC-020
+    requirements: [REQ-008]
+    given: "a gated record with specify complete and a requirements.yml containing an unquoted `fail closed:` inside a statement (the scoped-verification shape)"
+    when: "`gate specify` runs"
+    then: "`structured files parse` fails naming 02-specification/requirements.yml and a line number; `phase seal specify` exits 2 and commits nothing"
+    verified_by: []
+  - id: AC-021
+    requirements: [REQ-008]
+    given: "a gated record with verify complete and evidence/manifest.yml that parses but is a YAML sequence, not a mapping"
+    when: "`gate verify` runs"
+    then: "`structured files parse` fails naming the file and `expected a mapping`"
+    verified_by: []
+  - id: AC-022
+    requirements: [REQ-009]
+    given: "a gated record with intake sealed at commit X and discover complete with commit_sha equal to X's parent"
+    when: "`gate discover` runs"
+    then: "`commit lineage` fails naming both SHAs and saying the predecessor's commit is not an ancestor"
+    verified_by: []
+  - id: AC-023
+    requirements: [REQ-009]
+    given: "a gated record with verify complete whose commit_sha is a commit on an unrelated branch not reachable from HEAD"
+    when: "`gate verify` runs"
+    then: "`commit lineage` fails saying the commit is not an ancestor of the measuring tip"
+    verified_by: []
+  - id: AC-024
+    requirements: [REQ-009]
+    given: "the stacked two-record fixture from lifecycle_tracks_test where the lower record's git.branch names its own branch"
+    when: "`gate verify --change <lower>` runs from the upper branch"
+    then: "`commit lineage` passes, measured against the lower branch's tip"
+    verified_by: []
+  - id: AC-025
+    requirements: [REQ-010]
+    given: "a gated record with verify complete whose tests.yml has CHECK-002 `result: fail` and a handoff with empty blocking and no finding naming CHECK-002"
+    when: "`gate verify` runs"
+    then: "`test results recorded` fails naming CHECK-002"
+    verified_by: []
+  - id: AC-026
+    requirements: [REQ-010]
+    given: "the same record with a finding whose summary contains CHECK-002"
+    when: "`gate verify` runs"
+    then: "`test results recorded` passes with a detail naming the acknowledged check"
+    verified_by: []
+  - id: AC-027
+    requirements: [REQ-010]
+    given: "a gated record with verify complete whose tests.yml has a check with `result: skipped` and `criteria: [AC-001]`, unacknowledged"
+    when: "`gate verify` runs"
+    then: "`test results recorded` fails naming that check"
+    verified_by: []
+  - id: AC-028
+    requirements: [REQ-011]
+    given: "a gated record with specify sealed naming AC-001..AC-003 and verify complete whose checks cover AC-001 and AC-002 only"
+    when: "`gate verify` runs"
+    then: "`criteria covered` is a warn naming AC-003; the gate passes"
+    verified_by: []
+  - id: AC-029
+    requirements: [REQ-011]
+    given: "the same record with evaluate complete whose journeys cover nothing and judge complete with no criteria_not_covered"
+    when: "`gate judge` runs"
+    then: "`criteria covered` fails naming AC-003"
+    verified_by: []
+  - id: AC-030
+    requirements: [REQ-011]
+    given: "the same record with evidence.yml `criteria_not_covered: [{id: AC-003, reason: ...}]`"
+    when: "`gate judge` runs"
+    then: "`criteria covered` passes with a detail saying AC-003 was set aside with a reason; an entry with an empty reason fails"
+    verified_by: []
+  - id: AC-031
+    requirements: [REQ-012]
+    given: "a gated record with verify complete whose manifest lists evidence/run.txt with a sha256 that does not match the file"
+    when: "`gate verify` runs"
+    then: "`evidence manifest verified` fails naming evidence/run.txt and both digests"
+    verified_by: []
+  - id: AC-032
+    requirements: [REQ-012]
+    given: "a gated record with attack complete whose manifest matches and whose evidence/ holds an extra unlisted file"
+    when: "`gate attack` runs"
+    then: "`evidence manifest verified` is a warn naming the unlisted file; the gate passes"
+    verified_by: []
+  - id: AC-033
+    requirements: [REQ-012, REQ-034]
+    given: "a manifest artifact path of `../../05-implementation/log.md`"
+    when: "`gate verify` runs"
+    then: "`evidence manifest verified` fails saying the path resolves outside the phase directory"
+    verified_by: []
+  - id: AC-034
+    requirements: [REQ-013]
+    given: "a finished record whose final.md Outcome is BLOCKED"
+    when: "`gate judge` runs"
+    then: "`verdict recorded` passes with detail BLOCKED"
+    verified_by: []
+  - id: AC-035
+    requirements: [REQ-013]
+    given: "a finished record whose final.md Outcome still lists all four words"
+    when: "`gate judge` runs"
+    then: "`verdict recorded` fails naming the four words"
+    verified_by: []
+  - id: AC-036
+    requirements: [REQ-014]
+    given: "a repository whose enforcement.yml says block and a record with review complete and executed_by null"
+    when: "`gate review` runs"
+    then: "`fresh session recorded` fails with a detail containing `soft-foundry phase run review`"
+    verified_by: []
+  - id: AC-037
+    requirements: [REQ-014]
+    given: "the same record in a repository whose enforcement.yml says warn"
+    when: "`gate review` runs"
+    then: "`fresh session recorded` skips and the existing fresh-context advisory is printed"
+    verified_by: []
+  - id: AC-038
+    requirements: [REQ-014]
+    given: "a repository in block mode, a record with judge complete and executed_by from the runner with fresh_context true, and a machine-local override saying off"
+    when: "`gate judge` runs"
+    then: "`fresh session recorded` passes; the override changes nothing"
+    verified_by: []
+  # --- C. Commands ---
+  - id: AC-039
+    requirements: [REQ-016]
+    given: "a gated record with verify reopened (pending)"
+    when: "`gate verify` runs"
+    then: "the line reads `06-verification  pending  SKIP` as today and the exit code is 3; `gate all` on the same record exits 0"
+    verified_by: []
+  - id: AC-040
+    requirements: [REQ-017]
+    given: "a finished, merged record whose Outcome is BLOCKED"
+    when: "`change close <slug>` runs"
+    then: "exit is the target error code, the message names BLOCKED and remediate; with --force it closes"
+    verified_by: []
+  - id: AC-041
+    requirements: [REQ-017]
+    given: "a finished, merged record whose Outcome is APPROVED_WITH_RESIDUAL_RISK"
+    when: "`change close <slug>` runs"
+    then: "it closes as today"
+    verified_by: []
+  - id: AC-042
+    requirements: [REQ-018]
+    given: "a fresh repository"
+    when: "`change new demo --type=fix --risk=low --track=gated` runs"
+    then: "metadata.yml has type fix, risk low, track gated; `change new demo2 --type fix --type docs` is refused with `--type given twice`"
+    verified_by: []
+  - id: AC-043
+    requirements: [REQ-019]
+    given: "a record whose verify handoff has `blocking: \"text\"`"
+    when: "`change summary` runs"
+    then: "a line `blocking: malformed (06-verification: String, expected a list)` is printed and exit is 0"
+    verified_by: []
+  # --- D. Residuals ---
+  - id: AC-044
+    requirements: [REQ-020]
+    given: "a record whose git.branch names a ref that does not exist, verify sealed, then the ref created at a later commit"
+    when: "`gate verify` runs"
+    then: "the sealed handoff has branch_resolved false, and `evidence current` measures the checked-out HEAD (reports STALE when code changed on it)"
+    verified_by: []
+  - id: AC-045
+    requirements: [REQ-021]
+    given: "a metadata.yml with `git: a string`"
+    when: "`gate verify` runs"
+    then: "a fail line names metadata.yml git and says it must be a mapping with branch and worktree; exit 2; no Ruby backtrace"
+    verified_by: []
+  - id: AC-046
+    requirements: [REQ-022]
+    given: "a record with verify complete and started_at set"
+    when: "`phase reopen verify --reason x` runs"
+    then: "the verify handoff has started_at null; and a `discharged_at` of U+00A0 is reported open by `change status`, `check`, and refused by `change close`"
+    verified_by: []
+  - id: AC-047
+    requirements: [REQ-023]
+    given: "a workflow.yml whose tracks.forced_by_risk has the key `hihg`"
+    when: "`soft-foundry check` runs"
+    then: "it fails naming forced_by_risk and the unknown key"
+    verified_by: []
+  - id: AC-048
+    requirements: [REQ-024]
+    given: "the full suite run with SOFT_FOUNDRY_PHASE=verify and ANTHROPIC_API_KEY set in the environment"
+    when: "`bundle exec rake test` completes"
+    then: "0 failures, 0 errors"
+    verified_by: []
+  - id: AC-049
+    requirements: [REQ-034]
+    given: "a record whose 00-intake/handoff.yml is a symlink to another phase's handoff"
+    when: "`phase seal intake` and `change summary` run"
+    then: "both refuse naming the symlink; nothing is committed"
+    verified_by: []
+  # --- E. Documentation, evals, rules ---
+  - id: AC-050
+    requirements: [REQ-026]
+    given: "this branch after implementation"
+    when: "`learn promote --dry-run` runs"
+    then: "it lists nothing to promote, and `.ai/rules/learned.md` contains every id the pre-change dry run listed"
+    verified_by: []
+  - id: AC-051
+    requirements: [REQ-028, REQ-029, REQ-030]
+    given: "this branch after documentation"
+    when: "README.md, docs/user/, and `soft-foundry eval` are inspected"
+    then: "README names phase seal, the seven checks, exit code 3, and the close refusal; docs/user/ has pages for phase seal, the gate checks, phase reopen, phase run --parallel, change release, change discharge, each with REQ and EVAL ids; `eval` reports a passing gate case for each of the seven checks and the three owed cases"
+    verified_by: []
+  - id: AC-052
+    requirements: [REQ-031, REQ-032, REQ-036]
+    given: "this branch at the verification commit"
+    when: "`soft-foundry ci` runs, and `gate all` on this record is timed against the pre-change gem"
+    then: "ci exits 0 with the five closed-record files unmodified (git diff against main is empty for them); every new line satisfies REQ-032 on inspection; the timed gate is under twice the pre-change wall time"
+    verified_by: []
+  - id: AC-053
+    requirements: [REQ-025]
+    given: "this change's adversarial-testing phase"
+    when: "08-attack/results.md and cases.yml are read"
+    then: "cases exist and were executed for a held record lock, a symlinked lock file, a symlinked handoff.yml, a symlinked metadata.yml, a kill between the metadata write and the commit, and a seal from a session whose SOFT_FOUNDRY_PHASE names another phase, each with observed behaviour and a result of denied or violated, and every violated case is a finding"
+    verified_by: []
+  - id: AC-054
+    requirements: [REQ-027]
+    given: "this change's final judgment"
+    when: "14-judgment/residual-risk.md is read"
+    then: "it names scoped-verification REV-003, phase-lifecycle-controls REV-008, small-process-fixes REV-004 and REV-011, and the inert workflow declarations, each with the reason it is carried, matching readiness.md"
+    verified_by: []
+  - id: AC-055
+    requirements: [REQ-035]
+    given: "the diff of this change against main"
+    when: "lib/ is searched for net/http, open-uri, socket, and reads of SOFT_FOUNDRY_GUARD or .soft-foundry/enforcement.yml in the gate and seal paths, and `phase run evaluate attack --parallel --env SECRET=hunter2` runs with a failing stub session"
+    then: "the search finds nothing new; the runner's output and the sealing output contain no occurrence of hunter2"
+    verified_by: []
