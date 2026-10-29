@@ -1,21 +1,35 @@
 # Phase handoff. One per phase directory. The gate checker validates this file.
 phase: 04-plan
 skill: planning
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 3b72c429a815bb4d25d816a6e7187db6a762c1ee
+started_at: '2026-10-29T01:58:00Z'
+completed_at: '2026-10-29T02:01:00Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+  - implementation.md
+  - testing.md
+  - rollout.md
+  - rollback.md
+blocking: []
+findings:
+  - id: PLAN-001
+    severity: major
+    summary: "D1: `phase seal` refuses when the checked-out branch is not the record's git.branch (TM-001), taken as implied by REQ-001 and REQ-033 rather than as a requirement change; it narrows behaviour and weakens nothing. Review should confirm that reading."
+  - id: PLAN-002
+    severity: major
+    summary: "D2: one phase-completion fixture (HarnessEval.complete_phase!) writes values the new checks accept and plant() commits after completion, so planted records are recorded and lineage holds; test_helper delegates to it. This is the first GREEN step because every later check depends on it."
+  - id: PLAN-003
+    severity: minor
+    summary: "Seven items (templates, skill text, AGENTS.md step 9, README, harness-eval cases, learned rules) are outside the implementation skill's write set and land under the maintainer's warn-mode override, recorded in 05-implementation/deviations.md, as on the last three changes. docs/user/ pages are the documentation phase's."
+  - id: PLAN-004
+    severity: minor
+    summary: "Every check this change adds applies to this change's own verification, evaluation, attack, review and judgment; those phases must record result, criteria, manifests, and run through phase run, or the record will fail its own gate, which is the intended test."
 next: implement
-notes: ""
+notes: "Plan written by the session that opened the change. current_phase advanced from threat_model to plan with a shell command (guard limitation recorded in 01-discovery). This handoff's recording commit becomes Scope#change_base for the change."
 # Written by `soft-foundry phase run`, never by the agent: how this phase was
 # executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
 # session_id, cwd).
