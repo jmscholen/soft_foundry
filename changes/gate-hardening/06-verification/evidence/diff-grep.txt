@@ -1,0 +1,32 @@
+# AC-055: added lines in lib/ (diff against main, merge-base 3e5627dc3d9c0ff1791ad938462ba800f67087b0) matching net/http, open-uri, socket, SOFT_FOUNDRY_GUARD, enforcement.yml
+$ git diff main -- lib/ | grep -nE '^\+.*(net/http|open-uri|socket|SOFT_FOUNDRY_GUARD|enforcement\.yml)'
+360:+    # (.ai/policies/enforcement.yml guard.mode), or the default. Never the
+364:+      path = File.join(dir, "policies", "enforcement.yml")
+grep exit=0
+
+# context of each hit (git diff main -- lib/soft_foundry/control_plane.rb)
+7-     def judgments = Array(workflow["judgments"])
+8- 
+9-+    GUARD_MODES = %w[warn block off].freeze
+10-+    GUARD_DEFAULT_MODE = "warn"
+11-+
+12-+    # The guard mode the repository's own policy declares
+13:+    # (.ai/policies/enforcement.yml guard.mode), or the default. Never the
+14-+    # machine-local override or the environment: the gate reads what the
+15-+    # repository asks of its records, not what one machine relaxed.
+16-+    def enforcement_mode
+17:+      path = File.join(dir, "policies", "enforcement.yml")
+18-+      return GUARD_DEFAULT_MODE unless File.file?(path)
+19-+      value = (YAML.safe_load_file(path) || {}).dig("guard", "mode").to_s.strip.downcase
+20-+      GUARD_MODES.include?(value) ? value : GUARD_DEFAULT_MODE
+21-+    rescue Psych::Exception
+22-+      GUARD_DEFAULT_MODE
+23-+    end
+24-+
+25-     # Phases no declared risk may waive through skipped_phases: review
+
+# whole-tree lib/ requires of net/http, open-uri, socket at HEAD
+lib/soft_foundry/updater.rb:4:require "net/http"
+lib/soft_foundry/provider.rb:4:require "net/http"
+lib/soft_foundry/ui/server.rb:7:require "socket"
+grep exit=0

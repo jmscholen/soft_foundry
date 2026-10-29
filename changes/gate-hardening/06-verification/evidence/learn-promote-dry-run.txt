@@ -1,0 +1,67 @@
+# learn promote --dry-run (AC-050); HEAD 15e6d923296135a660f6648b635a61edf93433a2; 2026-10-29T06:11:52Z
+$ ruby -Ilib exe/soft-foundry learn promote --dry-run
+- skip a-hook-decides-or-refuses-never-raises: already in .ai/rules/learned.md
+- skip bind-waivers-to-risk-and-never-waive-the-verdict: already in .ai/rules/learned.md
+- skip run-the-lifecycle-in-block-mode-before-trusting-a-warn-mode-control: already in .ai/rules/learned.md
+- skip commit-the-failing-test-first: already in .ai/rules/learned.md
+- skip check-the-request-against-the-users-real-situation: already in .ai/rules/learned.md
+- skip report-fields-never-the-command-line: already in .ai/rules/learned.md
+- skip open-the-page-before-trusting-its-tests: already in .ai/rules/learned.md
+- skip exempt-closed-evidence-in-policy-not-by-editing-it: already in .ai/rules/learned.md
+- skip sanitize-transcripts-before-they-become-evidence: already in .ai/rules/learned.md
+- skip read-the-host-contract-before-writing-an-adapter: already in .ai/rules/learned.md
+- skip a-skill-may-name-what-it-may-read: already in .ai/rules/learned.md
+- skip back-a-name-based-check-with-a-state-check: already in .ai/rules/learned.md
+- skip record-a-baseline-only-in-the-call-that-consumes-it: already in .ai/rules/learned.md
+- skip check-the-commit-landed-before-binding-evidence: already in .ai/rules/learned.md
+- skip regenerate-evidence-never-annotate: already in .ai/rules/learned.md
+- skip observe-results-not-commands: already in .ai/rules/learned.md
+- skip inject-the-failure-to-prove-fail-closed: already in .ai/rules/learned.md
+- skip one-definition-of-a-state-across-surfaces: already in .ai/rules/learned.md
+- skip order-renames-so-a-crash-fails-closed: already in .ai/rules/learned.md
+- skip no-rename-collapse-in-staleness-diffs: already in .ai/rules/learned.md
+- skip verify-specification-yaml-parses-before-lock: already in .ai/rules/learned.md
+- skip run-built-command-lines-live-once: already in .ai/rules/learned.md
+- skip carry-deferred-findings-into-the-next-intake-by-id: already in .ai/rules/learned.md
+- skip every-reference-is-a-link-with-its-source: already in .ai/rules/learned.md
+- skip a-wider-view-needs-a-wider-frame: already in .ai/rules/learned.md
+- skip ask-with-options-after-being-corrected: already in .ai/rules/learned.md
+- skip every-limit-states-what-happens-at-the-limit: already in .ai/rules/learned.md
+- skip diff-old-and-new-output-when-refactoring-printing-code: already in .ai/rules/learned.md
+- skip exercise-the-real-path-with-a-stand-in: already in .ai/rules/learned.md
+- skip a-downloads-final-address-is-not-a-file-name: already in .ai/rules/learned.md
+- skip assert-the-bound-the-code-guarantees-not-a-stopwatch: already in .ai/rules/learned.md
+- skip never-locate-the-running-rubys-tools-through-path: already in .ai/rules/learned.md
+- skip say-policy-only-at-launch-when-no-hook-exists: already in .ai/rules/learned.md
+- skip exempt-list-not-allow-list: already in .ai/rules/learned.md
+- skip build-invisible-and-secret-shapes-at-run-time: already in .ai/rules/learned.md
+- skip let-the-runner-rerun-what-the-gate-calls-stale: already in .ai/rules/learned.md
+- skip measure-staleness-on-the-record-branch: already in .ai/rules/learned.md
+- skip name-the-agent-trust-boundary-first: already in .ai/rules/learned.md
+- skip name-the-phase-that-writes-required-docs: already in .ai/rules/learned.md
+- skip sweep-neighbouring-values-when-fixing-a-boundary: already in .ai/rules/learned.md
+- skip record-resolved-fact-for-measure-selecting-declarations: already in .ai/rules/learned.md
+- skip quote-at-the-point-of-use: already in .ai/rules/learned.md
+- skip recheck-cli-capabilities-against-the-installed-version: already in .ai/rules/learned.md
+- skip check-sibling-command-paths: already in .ai/rules/learned.md
+- skip look-at-the-real-data-before-building-a-view-of-it: already in .ai/rules/learned.md
+- skip a-complaint-phrased-as-a-question-is-a-requirement: already in .ai/rules/learned.md
+- skip a-non-goal-that-excludes-the-obvious-reading-needs-a-question: already in .ai/rules/learned.md
+- skip compare-what-is-recorded-as-started-with-what-is-alive: already in .ai/rules/learned.md
+- skip a-catch-all-must-say-which-failure-it-caught: already in .ai/rules/learned.md
+- skip stop-background-servers-in-scripts-with-sigterm: already in .ai/rules/learned.md
+- skip read-the-method-before-asserting-on-it: already in .ai/rules/learned.md
+- skip install-under-the-ruby-that-runs-the-command: already in .ai/rules/learned.md
+- skip reset-what-a-test-assumes-empty: confidence 0.75 is below 0.80
+- skip unknown-input-keeps-known-constraints: confidence 0.75 is below 0.80
+- skip compare-resolved-slugs-exactly: confidence 0.75 is below 0.80
+- skip stamp-handoff-times-from-the-clock: confidence 0.75 is below 0.80
+- skip prefer-checkout-exe-in-hooks: confidence 0.70 is below 0.80
+- skip malformed-metadata-fails-with-a-gate-line: confidence 0.70 is below 0.80
+- skip stacked-fixtures-guard-measure-rule-changes: confidence 0.70 is below 0.80
+- skip accept-all-option-spellings: confidence 0.70 is below 0.80
+- skip clear-runner-env-in-tests: confidence 0.70 is below 0.80
+- skip branch-from-the-record-branch-when-stacking: confidence 0.60 is below 0.80
+- skip escape-invisible-chars-in-tests: confidence 0.60 is below 0.80
+- skip summary-never-says-none-for-unknown-shape: confidence 0.60 is below 0.80
+exit=0

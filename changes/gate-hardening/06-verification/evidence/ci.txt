@@ -1,0 +1,181 @@
+# soft-foundry ci (AC-052); HEAD 15e6d923296135a660f6648b635a61edf93433a2; 2026-10-29T06:11:52Z; provider keys and SOFT_FOUNDRY_* unset
+$ ruby -Ilib exe/soft-foundry ci
+✓ pass control plane: 16 phases, 17 skills, no errors
+✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
+✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
+✓ pass eval commit-sha-older-than-predecessor: discover commit lineage fail, as expected
+✓ pass eval control-well-formed: verify pass, as expected
+✓ pass eval criteria-uncovered-at-judgment: judge criteria covered fail, as expected
+✓ pass eval evidence-manifest-digest-mismatch: verify evidence manifest verified fail, as expected
+✓ pass eval evidence-manifest-path-escapes-phase: verify evidence manifest verified fail, as expected
+✓ pass eval evidence-stale-after-code-change: verify evidence current fail, as expected
+✓ pass eval full-suite-record-names-wrong-tree: verify full-suite run recorded (record check, not a test result) fail, as expected
+✓ pass eval hardening-while-exploring: implement not exploring fail, as expected
+✓ pass eval invisible-text-in-evidence: verify content clean fail, as expected
+✓ pass eval judgment-waived: intake waivers permitted fail, as expected
+✓ pass eval placeholder-left-in-evidence: verify no placeholders fail, as expected
+✓ pass eval predecessor-complete-but-unrecorded: discover predecessor complete fail, as expected
+✓ pass eval red-commit-is-the-green-commit: verify red evidence fail, as expected
+✓ pass eval released-record-is-not-regated: specify pass, as expected
+✓ pass eval review-finding-without-failure: review findings explained fail, as expected
+✓ pass eval review-without-fresh-session-in-block-mode: review fresh session recorded fail, as expected
+✓ pass eval scope-narrowed-after-evidence-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-change-claimed-by-other-record-stays-current: verify evidence current pass, as expected
+✓ pass eval scoped-change-in-scope-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-unclaimed-code-change-stales-record: verify evidence current fail, as expected
+✓ pass eval secret-shape-in-evidence: verify content clean fail, as expected
+✓ pass eval shared-core-change-stales-scoped-record: verify evidence current fail, as expected
+✓ pass eval specification-does-not-parse: specify structured files parse fail, as expected
+✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
+✓ pass eval test-result-fail-unacknowledged: verify test results recorded fail, as expected
+✓ pass eval verdict-unfilled: judge verdict recorded fail, as expected
+✓ pass eval: 28 passed, 0 failed, 0 errors, 1 skipped
+
+change accessibility-advisory (closed, skipped)
+
+change budget-and-openrouter (closed, skipped)
+
+change budget-billing-awareness (closed, skipped)
+
+change change-close-command (closed, skipped)
+
+change control-plane-scan (closed, skipped)
+
+change cross-cli-hooks (closed, skipped)
+
+change cross-provider-review (closed, skipped)
+
+change factory-readiness (closed, skipped)
+
+change gate-hardening
+00-intake  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass waivers permitted: nothing waived
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 3e5627dc3d9c0ff1791ad938462ba800f67087b0
+  ✓ pass commit lineage: reaches HEAD 15e6d9232961
+  ✓ pass completed_at recorded: 2026-10-29T01:42:00Z
+  ✓ pass predecessor complete: first phase
+  ✓ pass content clean
+01-discovery  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: repository-context.md, affected-components.md, dependencies.md, unknowns.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: a0a8460fcc5efd55a3a4f450e60cf65e79725e3b
+  ✓ pass commit lineage: descends from 00-intake at 3e5627dc3d9c; reaches HEAD 15e6d9232961
+  ✓ pass completed_at recorded: 2026-10-29T01:46:00Z
+  ✓ pass predecessor complete: 00-intake
+  ✓ pass content clean
+02-specification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+  ✓ pass structured files parse: requirements.yml, acceptance-criteria.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 914a34deb2b249a48bd7612a65684fecb5f20b87
+  ✓ pass commit lineage: descends from 01-discovery at a0a8460fcc5e; reaches HEAD 15e6d9232961
+  ✓ pass completed_at recorded: 2026-10-29T01:53:00Z
+  ✓ pass predecessor complete: 01-discovery
+  ✓ pass specification locked: locked at 829441a628bc, the commit that recorded it
+  ✓ pass content clean
+03-threat-model  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: attack-surface.md, trust-boundaries.md, threats.yml, mitigations.md, handoff.yml
+  ✓ pass structured files parse: threats.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 829441a628bc8c0dd184477fb80def40267f572a
+  ✓ pass commit lineage: descends from 02-specification at 914a34deb2b2; reaches HEAD 15e6d9232961
+  ✓ pass completed_at recorded: 2026-10-29T01:57:00Z
+  ✓ pass predecessor complete: 02-specification
+  ✓ pass content clean
+04-plan  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: implementation.md, testing.md, rollout.md, rollback.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 3b72c429a815bb4d25d816a6e7187db6a762c1ee
+  ✓ pass commit lineage: descends from 03-threat-model at 829441a628bc; reaches HEAD 15e6d9232961
+  ✓ pass completed_at recorded: 2026-10-29T02:01:00Z
+  ✓ pass predecessor complete: 03-threat-model
+  ✓ pass content clean
+05-implementation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: c02528c5e9e91dcfa4624f176af54436ae1f25eb
+  ✓ pass commit lineage: descends from 04-plan at 3b72c429a815; reaches HEAD 15e6d9232961
+  ✓ pass completed_at recorded: 2026-10-29T06:20:00Z
+  ✓ pass predecessor complete: 04-plan
+  ✓ pass content clean
+06-verification  in_progress  PASS
+  ✓ pass handoff identity
+  ! warn phase in progress: not yet gated
+advisory: 1 issue to address before gate-hardening goes live (informational, does not block the gate)
+  ! warn accessibility: the accessibility review (13-review/accessibility.md) has not run yet
+
+change init-command (closed, skipped)
+
+change learning-instincts (closed, skipped)
+
+change lifecycle-tracks (closed, skipped)
+
+change maturity-onboarding (closed, skipped)
+
+change maturity-report (closed, skipped)
+
+change observability-standard-dashboard (closed, skipped)
+
+change panel-phases (closed, skipped)
+
+change phase-lifecycle-controls (closed, skipped)
+
+change phase-runner (closed, skipped)
+
+change policy-conformance (closed, skipped)
+
+change red-green-evidence (closed, skipped)
+
+change runtime-guard (closed, skipped)
+
+change scoped-verification (closed, skipped)
+
+change security-policy-not-applicable (closed, skipped)
+
+change self-update (closed, skipped)
+
+change session-id-quoting (closed, skipped)
+
+change session-ledger (closed, skipped)
+
+change small-process-fixes (closed, skipped)
+
+change ui-explainer-timeline (closed, skipped)
+
+change ui-links (closed, skipped)
+
+change ui-processes (closed, skipped)
+
+change ui-repositories (closed, skipped)
+
+change ui-server (closed, skipped)
+
+change ui-snapshot (closed, skipped)
+
+change update-from-github (closed, skipped)
+
+change update-release-asset-name (closed, skipped)
+
+change upstream-failure-reporting (closed, skipped)
+
+✓ ci passed
+exit=0

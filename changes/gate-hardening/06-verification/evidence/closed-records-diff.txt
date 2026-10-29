@@ -1,0 +1,5 @@
+# AC-052: files under changes/ other than this record that differ from main; HEAD 15e6d923296135a660f6648b635a61edf93433a2
+$ git diff main --name-only -- changes/ | grep -v '^changes/gate-hardening/'
+grep exit=1 (1 = no such files)
+
+# the records ci reports as closed/skipped are listed in ci.txt

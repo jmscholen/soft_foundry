@@ -1,0 +1,52 @@
+# RED commit shape (.ai/rules/testing.md); HEAD 15e6d923296135a660f6648b635a61edf93433a2
+$ git show --stat --format='%H %P %s' 9a96f45
+9a96f459d945c829688761e85a8bda164f7b9d4b fc82c4eda3241e1db65c0a5a50642826c024b436 RED: gate hardening tests, failing before implementation
+
+ test/fixture_completion_test.rb |  50 ++++++
+ test/gate_checks_test.rb        | 376 ++++++++++++++++++++++++++++++++++++++++
+ test/gate_hardening_cli_test.rb | 175 +++++++++++++++++++
+ test/phase_run_sealing_test.rb  | 136 +++++++++++++++
+ test/phase_seal_test.rb         | 212 ++++++++++++++++++++++
+ 5 files changed, 949 insertions(+)
+
+$ git merge-base --is-ancestor 9a96f45 HEAD
+ancestor: yes
+
+$ git diff --stat 9a96f45 HEAD -- lib/ exe/
+ lib/soft_foundry/scope.rb          |  20 ++-
+ lib/soft_foundry/text.rb           |  11 ++
+ 15 files changed, 737 insertions(+), 56 deletions(-)
+
+# GREEN commits after RED
+15e6d923296135a660f6648b635a61edf93433a2 Record gate-hardening implement
+c02528c5e9e91dcfa4624f176af54436ae1f25eb GREEN: clear every hook-exported git variable in git calls
+7d336546eb08564e222b2929f9ae2180cdfc4278 GREEN: gate hardening (phase seal, seven record checks, residuals)
+
+# test files added in the two GREEN commits
+7d33654 GREEN: gate hardening (phase seal, seven record checks, residuals)
+ test/factory_readiness_test.rb     |  6 ++++--
+ test/gate_checks_test.rb           | 13 ++++++++-----
+ test/gate_hardening_cli_test.rb    | 30 +++++++++++++-----------------
+ test/gate_test.rb                  |  8 +++++++-
+ test/harness_eval_test.rb          | 10 +++++++---
+ test/lifecycle_fixture.rb          |  3 +--
+ test/phase_run_auto_reopen_test.rb |  4 ++--
+ test/phase_run_marker_test.rb      |  9 ++++++---
+ test/phase_run_parallel_test.rb    | 24 +++++++++++++-----------
+ test/phase_runner_test.rb          |  6 ++++--
+ test/phase_seal_test.rb            |  3 ++-
+ test/scoped_verification_test.rb   |  8 +++++++-
+ test/snapshot_test.rb              | 10 ++++++----
+ test/test_helper.rb                | 31 +++++++++++++++++--------------
+c02528c GREEN: clear every hook-exported git variable in git calls
+ test/git_hook_env_test.rb | 55 +++++++++++++++++++++++++++++++++++++++++++++++
+
+# RED state of the five files at 9a96f45 (run there, provider keys and SOFT_FOUNDRY_* unset)
+$ (git worktree add --detach /tmp/gh-verify/red 9a96f45; ASDF_RUBY_VERSION=3.3.1) ruby -Ilib -Itest -e 'ARGV.each { |f| require File.expand_path(f) }' test/phase_seal_test.rb test/gate_checks_test.rb test/fixture_completion_test.rb test/phase_run_sealing_test.rb test/gate_hardening_cli_test.rb
+# last lines of the run (the failure bodies are omitted: 53 failures and 4 errors, every one a NameError/NoMethodError/assertion against the not-yet-implemented seal, checks, fixture, and CLI options)
+Finished in 34.938068s, 1.6887 runs/s, 2.3470 assertions/s.
+59 runs, 82 assertions, 53 failures, 4 errors, 0 skips
+exit=1
+
+# the failing/erroring test names at the RED commit
+distinct failing tests: 57

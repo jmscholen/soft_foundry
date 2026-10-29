@@ -1,24 +1,95 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 06-verification
 skill: verification
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 15e6d923296135a660f6648b635a61edf93433a2
+started_at: '2026-10-29T06:08:50Z'
+completed_at: '2026-10-29T06:50:00Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- results.md
+- tests.yml
+- evidence/manifest.yml
+- evidence/full-suite.txt
+- evidence/suite-phase-env.txt
+- evidence/check.txt
+- evidence/eval.txt
+- evidence/ci.txt
+- evidence/closed-records-diff.txt
+- evidence/learn-promote-dry-run.txt
+- evidence/diff-grep.txt
+- evidence/red-commit.txt
+- evidence/gate-checks.txt
+blocking: []
+findings:
+- id: VER-001
+  severity: minor
+  summary: 'Every check passed at 15e6d92: full suite 884 runs, 6585 assertions, 0
+    failures, 0 errors in a clean environment (CHECK-001) and again with SOFT_FOUNDRY_PHASE=verify
+    and ANTHROPIC_API_KEY=x (CHECK-002, AC-048); check, eval (28 gate cases), ci,
+    learn promote --dry-run, the AC-055 grep, and the RED-commit shape all pass. The
+    counts differ from IMPL-004''s 881/6572 only by the three test/git_hook_env_test.rb
+    runs c02528c added.'
+- id: VER-002
+  severity: minor
+  summary: The plan's harness_eval_test#test_lint_accepts_new_check_names (AC-019)
+    was never written; every other planned test method exists under its planned name.
+    AC-019 rests on CHECK-003 (check passes), CHECK-004 (the ten gate cases naming
+    the seven checks pass lint and run) and CHECK-010 (Gate::CHECKS lists the seven
+    names). Review may ask for the unit test or accept the three command runs as the
+    evidence.
+- id: VER-003
+  severity: minor
+  summary: 'Criteria named by no verification check: AC-053 (attack cases) and AC-054
+    (residual-risk inspection), which the attack and judgment phases own; criteria
+    covered warns here by design. AC-051''s docs/user/ clause (documentation) and
+    AC-052''s timing clause (gate all against the pre-change gem, evaluation) are
+    also still owed by later phases, though both criteria are named by CHECK-004/005/006
+    for their command clauses.'
+- id: VER-004
+  severity: minor
+  summary: 'AC-055 search: the only added lib/ lines mentioning enforcement.yml are
+    ControlPlane#enforcement_mode''s read of the repository''s own .ai/policies/enforcement.yml
+    (required by REQ-014) and its comment; gate.rb, phase_seal.rb and control_plane.rb
+    read neither SOFT_FOUNDRY_GUARD nor the machine-local override; no new net/http,
+    open-uri or socket require (the three existing ones are unchanged against main).
+    Review should confirm that reading is the intended policy source.'
+- id: VER-005
+  severity: minor
+  summary: 'AC-050''s second clause (every id the pre-change dry run listed is in
+    .ai/rules/learned.md) could only be checked indirectly: the pre-change list lives
+    in 01-discovery, outside this skill''s read set. The dry run now lists nothing
+    to promote, and each of the 52 ids it reports as already promoted is present in
+    learned.md.'
+- id: VER-006
+  severity: minor
+  summary: Each full-suite run takes about 17 minutes on this machine (1007 s and
+    999 s), so a verification that runs it twice is a 35-minute phase; evaluation's
+    AC-052 timing of gate all is unaffected but should budget for this when planning
+    reruns.
 next: evaluate
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: Fresh session started by `soft-foundry phase run verify` (executed_by below).
+  Every command ran with the branch's own code via `ruby -Ilib exe/soft-foundry` and
+  with provider keys and SOFT_FOUNDRY_* unset (`env -u`), except CHECK-002 which sets
+  the AC-048 names; the exact list is the first line of each suite transcript. The
+  RED-state run used a detached git worktree of 9a96f45 under /tmp (removed afterwards)
+  and a helper script under /tmp; nothing outside this phase directory was written
+  in the repository. The guard checked Bash against deny sets only; the declared read
+  set was honoured as policy (00-intake and 01-discovery were not read, which is why
+  VER-005 is indirect). A first attempt at the suite runs with a mis-quoted unset
+  list (zsh does not split $VAR) was stopped before finishing and its partial transcript
+  overwritten by the recorded runs. No code or test was changed.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-29T06:08:50Z'
+  finished_at: '2026-10-29T06:50:09Z'
+  exit_status: 0
+  previous_phase: verify
+  session_id: f8adcb9f-b0bd-479f-bccc-6df99d1a8fc9
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"
+branch_resolved: true

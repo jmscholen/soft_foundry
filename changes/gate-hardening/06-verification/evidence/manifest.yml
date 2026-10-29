@@ -1,5 +1,32 @@
-commit_sha: TBD
+commit_sha: 15e6d923296135a660f6648b635a61edf93433a2
 artifacts:
-  - path: TBD
-    produced_by: TBD
-    sha256: TBD
+  - path: evidence/check.txt
+    produced_by: "CHECK-003: the control-plane check command"
+    sha256: f5b5ca38a1566c5800f913899e66fb85f33a1178182ca1fb0748f8f35b9cf856
+  - path: evidence/ci.txt
+    produced_by: "CHECK-005: the ci command"
+    sha256: ce39fe340c3bc4fe9bd0988daeedcb24b0204037cb8201da331517d5b97e802b
+  - path: evidence/closed-records-diff.txt
+    produced_by: "CHECK-006: git diff main --name-only -- changes/"
+    sha256: 714969f403764c53081a6f92aacfc4547580b1da1c165083a1dc3f03b7245ce1
+  - path: evidence/diff-grep.txt
+    produced_by: "CHECK-008: git diff main -- lib/ piped to grep"
+    sha256: 713bf0099041b9a3ecf2da1a6c9878569c1373624a6aa0619b314425e3a2a0f2
+  - path: evidence/eval.txt
+    produced_by: "CHECK-004: the harness eval command"
+    sha256: 94172c612ad7a5508cbdc8e2d15aaa0fc48e6142b7d8d7e1058da1a06500a230
+  - path: evidence/full-suite.txt
+    produced_by: "CHECK-001: bundle exec rake test, clean environment"
+    sha256: 2725888c65fe49faddb4f0a0a4d46e31e6ca30de3ae5db698b09d7a3cec7a60f
+  - path: evidence/gate-checks.txt
+    produced_by: "CHECK-010: ruby -Ilib -e listing Gate::CHECKS"
+    sha256: 04a59bee8df493783e63bf13b79d7821b47879bf447a478db43f9e10c9598448
+  - path: evidence/learn-promote-dry-run.txt
+    produced_by: "CHECK-007: learn promote --dry-run"
+    sha256: e5e1fe1066f2ba881fa774ed01fb31376229e6d77b2467d96b038ec29596929c
+  - path: evidence/red-commit.txt
+    produced_by: "CHECK-009: git show, git merge-base, and the RED files run at 9a96f45"
+    sha256: 624a1a6e92725f8fad2d289d20774f71fced726025c804234e0c832696ac4641
+  - path: evidence/suite-phase-env.txt
+    produced_by: "CHECK-002: bundle exec rake test with SOFT_FOUNDRY_PHASE=verify ANTHROPIC_API_KEY=x"
+    sha256: 5c8ef3a7b8c3be43c279a1ec9e8223ce91e471a19aecfdb34cbec976524227c4

@@ -1,0 +1,4 @@
+# soft-foundry check; HEAD 15e6d923296135a660f6648b635a61edf93433a2; 2026-10-29T06:11:52Z; provider keys and SOFT_FOUNDRY_* unset
+$ ruby -Ilib exe/soft-foundry check
+✓ pass control plane: 16 phases, 17 skills, no errors
+exit=0
