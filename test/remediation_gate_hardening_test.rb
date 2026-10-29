@@ -112,6 +112,17 @@ class RemediationGateHardeningTest < Minitest::Test
     end
   end
 
+  # Found by sealing remediation itself: the seal follows a loop phase's
+  # `next` transition (remediate -> verify) instead of scanning forward.
+  def test_sealing_remediation_returns_the_record_to_verify
+    with_lifecycle_record(complete: LIFECYCLE.take(6), current_phase: "remediate") do |dir, record|
+      complete_phase!(record, "remediate", sha: head(dir))
+      code, out, err = run_cli(dir, "phase", "seal", "remediate")
+      assert_equal 0, code, out + err
+      assert_equal "verify", record.metadata["current_phase"]
+    end
+  end
+
   # ATK-009: the runner stamp is one of the runner's own names, not any prefix.
   def test_fresh_session_stamp_must_be_a_real_runner
     with_lifecycle_record(complete: LIFECYCLE.take(9), current_phase: "review") do |dir, record|
