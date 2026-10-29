@@ -9,7 +9,7 @@ type: feature
 risk: high
 track: gated
 status: in_progress
-current_phase: evaluate
+current_phase: review
 created_at: 2026-10-29 01:34:20.000000000 Z
 scope: []
 surfaces:
@@ -23,5 +23,31 @@ surfaces:
 human_decisions: []
 vetted:
 reopenings: []
-phase_reopenings: []
+phase_reopenings:
+- at: '2026-10-29T11:35:26Z'
+  phase: verify
+  reset:
+  - verify
+  - evaluate
+  - attack
+  from_commit: 303a48f7f1f543aebed9f3cce84e6934d2af3eb2
+  reason: 'remediation of 08-attack findings ATK-001 to ATK-009: verification, evaluation
+    and attack are redone after the fix'
+  source: manual
+  previous:
+    verify:
+      status: complete
+      commit_sha: 15e6d923296135a660f6648b635a61edf93433a2
+      completed_at: '2026-10-29T06:50:00Z'
+      session_id: f8adcb9f-b0bd-479f-bccc-6df99d1a8fc9
+    evaluate:
+      status: in_progress
+      commit_sha:
+      completed_at:
+      session_id: 296fed4e-4f98-4179-ab9a-5cf4caa6ec24
+    attack:
+      status: complete
+      commit_sha: 303a48f7f1f543aebed9f3cce84e6934d2af3eb2
+      completed_at: '2026-10-29T11:32:00Z'
+      session_id: df7eadf4-1c50-4e9a-8df2-330875d658ad
 skipped_phases: []

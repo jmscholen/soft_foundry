@@ -1,21 +1,29 @@
 # Phase handoff. One per phase directory. The gate checker validates this file.
 phase: 09-remediation
 skill: remediation
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: c30af60717f2701055a272e9173581a4d36cd999
+started_at: '2026-10-29T11:33:00Z'
+completed_at: '2026-10-29T16:04:00Z'
 resolved_model:
   profile: coding_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+  - summary.md
+blocking: []
+findings:
+  - id: REM-001
+    severity: minor
+    summary: "ATK-001 is closed structurally: commit lineage refuses a recorded phase whose commit_sha differs from its recorded handoff's unless phase_reopenings shows the phase reset at or after the recorded commit (RED 4d7392a, GREEN c30af60). Verification should include test/remediation_gate_hardening_test.rb with red_commit 4d7392a, and attack should re-run ATTACK-005g against this code."
+  - id: REM-002
+    severity: minor
+    summary: "ATK-003, ATK-006, ATK-007 and the ATK-009 residue are carried, each with its reason in summary.md; review and judgment decide whether any becomes a requirement change. The specification's `gate --json` wording (ATK-009) is a text error in the locked specification and is recorded, not edited."
+  - id: REM-003
+    severity: minor
+    summary: "Evidence invalidated: verify, evaluate and attack were reset to pending by `phase reopen verify` (phase_reopenings entry at 2026-10-29T11:35:26Z, from_commit 303a48f) before the RED commit, so ci passed on each commit of this phase. Their earlier files are kept under their directories for the reruns to read."
 next: verify
-notes: ""
+notes: "Remediation performed by the session that implemented the change, which is what the remediation skill is for (it writes code). current_phase was set to remediate, and back after the reopen moved it to verify, with shell commands (guard limitation recorded in 01-discovery). This phase did not read 07-evaluation/evidence or 08-attack/evidence beyond the attack handoff's findings, which are its input."
 # Written by `soft-foundry phase run`, never by the agent: how this phase was
 # executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
 # session_id, cwd).
