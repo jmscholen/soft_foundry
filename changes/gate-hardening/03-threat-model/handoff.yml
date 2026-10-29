@@ -1,21 +1,38 @@
 # Phase handoff. One per phase directory. The gate checker validates this file.
 phase: 03-threat-model
 skill: threat-modeling
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 829441a628bc8c0dd184477fb80def40267f572a
+started_at: '2026-10-29T01:54:00Z'
+completed_at: '2026-10-29T01:57:00Z'
 resolved_model:
-  profile: adversarial_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+  - attack-surface.md
+  - trust-boundaries.md
+  - threats.yml
+  - mitigations.md
+blocking: []
+findings:
+  - id: TM-001
+    severity: major
+    summary: "MIT-013 proposes that `phase seal` refuse when the checked-out branch is not the record's git.branch (THREAT-013). It is not stated in the locked specification; the model reads it as how REQ-001 and REQ-033 must behave for a stacked workflow. The plan decides whether to implement it under those requirements or record it as a requirement change."
+  - id: TM-002
+    severity: minor
+    summary: "A forged executed_by (THREAT-002) passes `fresh session recorded` and is accepted at the committer boundary; the mitigation is the recorded session id and the session ledger a reviewer can consult. A ledger cross-check inside the gate is named as a follow-up, not scoped here."
+  - id: TM-003
+    severity: minor
+    summary: "Alias-expansion YAML (THREAT-010) is bounded only by Psych and by the fixed set of parsed files; ATTACK-012 measures it and the judgment carries the bound."
+  - id: TM-004
+    severity: minor
+    summary: "A handoff committed by hand with --no-verify and never sealed is recorded (THREAT-009, ATTACK-011): recorded_commit sees the commit. The model accepts this; the seal exists so no one has to remember, not so no one can. MIT-012 relies on the same fact for crash recovery."
+  - id: TM-005
+    severity: minor
+    summary: "Nineteen attack cases are proposed in attack-surface.md; six of them are the ones REQ-025 requires (ATTACK-001, -002, -003, -007, -009, -010). Every threat has attack_case_required true."
 next: plan
-notes: ""
+notes: "Threat model written by the session that opened the change. current_phase advanced from specify to threat_model with a shell command (guard limitation recorded in 01-discovery). No harness-eval file was opened."
 # Written by `soft-foundry phase run`, never by the agent: how this phase was
 # executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
 # session_id, cwd).
