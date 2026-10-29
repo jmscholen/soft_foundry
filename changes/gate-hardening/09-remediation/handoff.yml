@@ -2,9 +2,9 @@
 phase: 09-remediation
 skill: remediation
 status: complete
-commit_sha: c30af60717f2701055a272e9173581a4d36cd999
+commit_sha: c5c20b4dd3dfceeb13637b6d1b15601949fd8658
 started_at: '2026-10-29T11:33:00Z'
-completed_at: '2026-10-29T16:04:00Z'
+completed_at: '2026-10-29T16:27:00Z'
 resolved_model:
   profile: coding_high
   provider: anthropic
@@ -22,8 +22,11 @@ findings:
   - id: REM-003
     severity: minor
     summary: "Evidence invalidated: verify, evaluate and attack were reset to pending by `phase reopen verify` (phase_reopenings entry at 2026-10-29T11:35:26Z, from_commit 303a48f) before the RED commit, so ci passed on each commit of this phase. Their earlier files are kept under their directories for the reruns to read."
+  - id: REM-004
+    severity: minor
+    summary: "Found by sealing this phase: PhaseSeal#advance! ignored the remediate -> verify transition and set current_phase to review. Reopened and fixed in a second pass (RED d6c2748, GREEN c5c20b4): the seal follows a loop phase's `next` transition when that phase is not complete. The first seal commit c02a761 stays in history; this handoff is recorded at the second."
 next: verify
-notes: "Remediation performed by the session that implemented the change, which is what the remediation skill is for (it writes code). current_phase was set to remediate, and back after the reopen moved it to verify, with shell commands (guard limitation recorded in 01-discovery). This phase did not read 07-evaluation/evidence or 08-attack/evidence beyond the attack handoff's findings, which are its input."
+notes: "Remediation performed by the session that implemented the change, which is what the remediation skill is for (it writes code). current_phase was set to remediate, and back after the reopen moved it to verify, with shell commands (guard limitation recorded in 01-discovery). This phase did not read 07-evaluation/evidence or 08-attack/evidence beyond the attack handoff's findings, which are its input. Reopened once (2026-10-29T16:24Z) for the advance! fix and sealed again."
 # Written by `soft-foundry phase run`, never by the agent: how this phase was
 # executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
 # session_id, cwd).

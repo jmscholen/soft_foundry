@@ -25,6 +25,9 @@ GREEN `c30af60`, after RED `4d7392a` (`test/remediation_gate_hardening_test.rb`,
 - `lib/soft_foundry/phase_seal.rb`: a `note:` naming the missing record branch and the branch committed to.
 - `test/phase_seal_test.rb`: `test_branch_resolved_false_measures_head` reshaped; its fixture committed a complete handoff and then rewrote its `commit_sha`, which is the ATK-001 attack, so it now completes verification after repointing the branch.
 
+### Found by sealing this phase (second pass)
+The first seal of this phase (`c02a761`) set `current_phase` to `review`: `PhaseSeal#advance!` scanned the later phases and ignored the `remediate -> verify` transition in `.ai/workflow.yml`. The phase was reopened (`phase_reopenings`, 16:24Z), the seal now follows a loop phase's `next` transition when that phase is not complete (RED `d6c2748`, GREEN `c5c20b4`, `test_sealing_remediation_returns_the_record_to_verify`), and this phase is sealed again on that commit.
+
 ## Not remediated (carried for review and judgment)
 - **ATK-003**: a manual `phase seal` fired while the runner's session is still open yields two consistent `Record` commits. Within TB-3; the runner could fold its stamp into the existing seal. Carried: a design change to the runner, not a refusal.
 - **ATK-006**: a deleted or unparseable `.ai/policies/enforcement.yml` defaults the mode to warn, so `fresh session recorded` skips. REQ-014 says "when the mode is block"; the deletion is a commit to a protected path review sees. Carried as the specified behaviour, with the note that `check` could refuse a missing policy.

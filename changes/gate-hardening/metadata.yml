@@ -9,7 +9,7 @@ type: feature
 risk: high
 track: gated
 status: in_progress
-current_phase: review
+current_phase: verify
 created_at: 2026-10-29 01:34:20.000000000 Z
 scope: []
 surfaces:
@@ -50,4 +50,18 @@ phase_reopenings:
       commit_sha: 303a48f7f1f543aebed9f3cce84e6934d2af3eb2
       completed_at: '2026-10-29T11:32:00Z'
       session_id: df7eadf4-1c50-4e9a-8df2-330875d658ad
+- at: '2026-10-29T16:24:15Z'
+  phase: remediate
+  reset:
+  - remediate
+  from_commit: c02a76113cd6153ece1d1dce45a945b02c63b93c
+  reason: PhaseSeal#advance! ignored the remediate -> verify transition and set current_phase
+    to review (found by sealing remediation); fixed in a second remediation pass
+  source: manual
+  previous:
+    remediate:
+      status: complete
+      commit_sha: c30af60717f2701055a272e9173581a4d36cd999
+      completed_at: '2026-10-29T16:04:00Z'
+      session_id:
 skipped_phases: []
