@@ -1,21 +1,40 @@
 # Phase handoff. One per phase directory. The gate checker validates this file.
 phase: 05-implementation
 skill: implementation
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 7d336546eb08564e222b2929f9ae2180cdfc4278
+started_at: '2026-10-29T02:02:00Z'
+completed_at: '2026-10-29T06:03:00Z'
 resolved_model:
   profile: coding_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+  - log.md
+  - decisions.md
+  - deviations.md
+blocking: []
+findings:
+  - id: IMPL-001
+    severity: minor
+    summary: "RED commit 9a96f45 holds the five new test files (test/phase_seal_test.rb, gate_checks_test.rb, fixture_completion_test.rb, phase_run_sealing_test.rb, gate_hardening_cli_test.rb); GREEN is 7d33654. Verification names 9a96f45 as red_commit with one of those paths on each check that runs them."
+  - id: IMPL-002
+    severity: minor
+    summary: "One defect found by existing tests during GREEN and fixed before this commit: PhaseSeal#advance! chose the next current_phase among pending phases only, skipping an in-progress one; it now takes the first phase that is not complete, stepping over a skippable pending one (decisions.md)."
+  - id: IMPL-003
+    severity: minor
+    summary: "REQ-030 is met for the seven new checks (ten gate cases, all passing) and partially for the three cases phase-lifecycle-controls owed: a malformed release block and a non-isolated parallel request are not gate behaviours and stay unit-tested; the stale auto-reopen condition is the existing evidence-stale-after-code-change case (deviations.md item 5). The judgment should carry the two as a known limit of the gate-case format."
+  - id: IMPL-004
+    severity: minor
+    summary: "Full suite at 7d33654 with provider keys and SOFT_FOUNDRY_PHASE unset: 881 runs, 6572 assertions, 0 failures, 0 errors. soft-foundry check passes (16 phases, 17 skills). eval: 28 passed, 1 live case skipped. The suite with SOFT_FOUNDRY_PHASE=verify and a key set (AC-048) is verification's to run."
+  - id: IMPL-005
+    severity: minor
+    summary: "Existing-test expectation changes forced by REQ-005 and REQ-006 are itemised in deviations.md item 4 for review; no expectation was weakened, and each carries the requirement in a comment."
+  - id: IMPL-006
+    severity: minor
+    summary: "The maintainer's warn-mode override (.soft-foundry/enforcement.yml) was in place from the control-plane text until after 7d33654 and is removed; doctor reports the guard in block mode from repository policy. The per-skill SKILL.md lines named in the plan's step 7 were not edited (deviations.md item 5)."
 next: verify
-notes: ""
+notes: "Implementation performed by the session that opened the change. current_phase was advanced to implement with a shell command before this phase (guard limitation recorded in 01-discovery); this phase is the first sealed with `soft-foundry phase seal`, which advances it from now on. Implementation did not read 07-evaluation/evidence, 08-attack/evidence, or 06-/13-/14- directories; .ai/harness-evals/ was written only under the override, as recorded."
 # Written by `soft-foundry phase run`, never by the agent: how this phase was
 # executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
 # session_id, cwd).

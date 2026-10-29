@@ -501,8 +501,11 @@ module SoftFoundry
         File.join(glob.delete_suffix("/**"), name)
       end
 
+      # Git::CLEAN_ENV: `ci` runs these cases from the pre-commit hook, where
+      # GIT_INDEX_FILE names the committing repository's index, and a scratch
+      # repository's `add` must not write into it.
       def git(dir, *args)
-        out, err, status = Open3.capture3({ "GIT_DIR" => nil, "GIT_WORK_TREE" => nil }, "git", "-C", dir, *args)
+        out, err, status = Open3.capture3(Git::CLEAN_ENV, "git", "-C", dir, *args)
         raise "git #{args.first} failed: #{err.strip}" unless status.success?
         out
       end

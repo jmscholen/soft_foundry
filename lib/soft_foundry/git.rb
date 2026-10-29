@@ -7,6 +7,15 @@ require_relative "control_plane"
 module SoftFoundry
   # Thin wrapper over the git CLI for the few facts the harness needs.
   class Git
+    # The variables git exports to a hook, and that a shell may set,
+    # cleared from every git call so the target directory alone decides
+    # which repository, index and object store are touched. Inside a
+    # pre-commit hook GIT_INDEX_FILE names the committing repository's
+    # (temporary) index; a scratch repository's `add` that inherited it
+    # wrote its records there (found by the first `phase seal`).
+    CLEAN_ENV = { "GIT_DIR" => nil, "GIT_WORK_TREE" => nil, "GIT_INDEX_FILE" => nil, "GIT_OBJECT_DIRECTORY" => nil,
+                  "GIT_ALTERNATE_OBJECT_DIRECTORIES" => nil, "GIT_COMMON_DIR" => nil, "GIT_PREFIX" => nil, "GIT_NAMESPACE" => nil }.freeze
+
     def initialize(root)
       @root = File.expand_path(root)
     end
@@ -176,9 +185,9 @@ module SoftFoundry
     # GitError with git's own output (the hook's refusal included) when
     # either step fails, so the caller can show it.
     def commit!(message, paths:)
-      add_out, add_err, add_ok = Open3.capture3({ "GIT_DIR" => nil, "GIT_WORK_TREE" => nil }, "git", "-C", @root, "add", "--", *paths)
+      add_out, add_err, add_ok = Open3.capture3(CLEAN_ENV, "git", "-C", @root, "add", "--", *paths)
       raise GitError, "git add failed: #{(add_err + add_out).strip}" unless add_ok.success?
-      out, err, ok = Open3.capture3({ "GIT_DIR" => nil, "GIT_WORK_TREE" => nil }, "git", "-C", @root, "commit", "-q", "-m", message, "--only", "--", *paths)
+      out, err, ok = Open3.capture3(CLEAN_ENV, "git", "-C", @root, "commit", "-q", "-m", message, "--only", "--", *paths)
       raise GitError, "git commit failed:\n#{(err + out).strip}" unless ok.success?
       head_sha
     end
@@ -217,10 +226,8 @@ module SoftFoundry
       ok
     end
 
-    # GIT_DIR and GIT_WORK_TREE are cleared so the target directory alone
-    # decides which repository is inspected.
     def run(*args)
-      out, _err, status = Open3.capture3({ "GIT_DIR" => nil, "GIT_WORK_TREE" => nil }, "git", "-C", @root, *args)
+      out, _err, status = Open3.capture3(CLEAN_ENV, "git", "-C", @root, *args)
       [out, status.success?]
     end
   end
