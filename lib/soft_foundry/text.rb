@@ -20,7 +20,18 @@ module SoftFoundry
     ENV_NAME = /\A[A-Z_][A-Z0-9_]*\z/
     RESERVED_ENV_PREFIX = "SOFT_FOUNDRY_"
 
+    # Whitespace in the Unicode sense, plus the format characters that
+    # render as nothing: what `String#strip` keeps but a reader never sees.
+    BLANK = /\A[\s\p{Z}​‌‍⁠﻿]*\z/
+
     module_function
+
+    # Nil, or text that is only ASCII or Unicode blanks (U+00A0, U+2028,
+    # U+202F, zero-width characters). The one blank test every surface
+    # uses, so the CLI, `check`, `ci`, `change close`, and the page agree.
+    def blank?(value)
+      value.nil? || (value.respond_to?(:to_str) && value.to_str.match?(BLANK))
+    end
 
     # Non-empty after strip, at most `max` characters, no control
     # characters (newline, tab, ESC, and NUL included) and no invisible or

@@ -1,0 +1,18 @@
+id: specification-does-not-parse
+kind: gate
+description: A requirements.yml that is not valid YAML (an unquoted colon inside a statement) fails the specification before it can lock (structured files parse, REQ-008).
+record:
+  risk: medium
+  complete: [intake, discover, specify]
+  files:
+    02-specification/requirements.yml: |
+      requirements:
+        - id: REQ-016
+          category: failure
+          statement: the gate must fail closed: when it cannot tell
+          rationale: recorded
+          source: 00-intake/request.md
+expect:
+  phase: specify
+  check: structured files parse
+  outcome: fail

@@ -21,6 +21,7 @@ require_relative "pr_discharge"
 require_relative "advisory"
 require_relative "guard"
 require_relative "phase_runner"
+require_relative "phase_seal"
 require_relative "learning"
 require_relative "content_scan"
 require_relative "change_index"
@@ -40,6 +41,9 @@ module SoftFoundry
   class CLI
     UPSTREAM = "https://github.com/jmscholen/soft_foundry"
     EXIT_TARGET = 1
+    # `gate <phase>` on a phase whose handoff is not complete: not a pass
+    # (0) and not a failing check (2).
+    EXIT_NOT_COMPLETE = 3
     EXIT_CONFLICTS = 3
     EXIT_INTERNAL = 4
 
@@ -229,18 +233,29 @@ module SoftFoundry
     def plane = @plane ||= ControlPlane.new(@root)
     def git = @git ||= Git.new(@root)
 
+    # A single-valued option, as `--name VALUE` or `--name=VALUE`; given
+    # twice it is refused rather than one spelling silently winning.
     def option(name)
-      index = @argv.index(name)
-      return nil unless index
-      @argv.delete_at(index)
-      @argv.delete_at(index) or raise TargetError, "#{name} requires a value"
+      value = take_option(name)
+      raise TargetError, "#{name} given twice; give it once" if value && option_present?(name)
+      value
     end
 
     # Every occurrence of a repeatable option, e.g. multiple --confirm ID.
     def options(name)
       values = []
-      values << option(name) while @argv.include?(name)
+      values << take_option(name) while option_present?(name)
       values
+    end
+
+    def option_present?(name) = @argv.any? { |a| a == name || a.start_with?("#{name}=") }
+
+    def take_option(name)
+      index = @argv.index { |a| a == name || a.start_with?("#{name}=") }
+      return nil unless index
+      arg = @argv.delete_at(index)
+      return arg.delete_prefix("#{name}=") unless arg == name
+      @argv.delete_at(index) or raise TargetError, "#{name} requires a value"
     end
 
     def models
@@ -514,6 +529,12 @@ module SoftFoundry
       unless force
         if (judged = record.judgment_status) != "complete"
           @err.puts "#{slug}: cannot close: 14-judgment is #{judged || 'missing'}; a change is complete only with a final judgment (.ai/workflow.yml rules.final_judgment_required), so run the judge phase (`soft-foundry phase run judge`) or pass --force to close without one"
+          return EXIT_TARGET
+        end
+        outcome = record.judgment_outcome
+        if %w[BLOCKED REJECTED].include?(outcome)
+          back = outcome == "BLOCKED" ? "remediate (`soft-foundry phase run remediate`, then verify onward)" : "intake (the request is reconsidered from the start)"
+          @err.puts "#{slug}: cannot close: the final judgment is #{outcome}; a #{outcome} change returns to #{back}, it does not close; pass --force to close anyway"
           return EXIT_TARGET
         end
         branch = git.repository? ? git.default_branch : nil
@@ -804,7 +825,11 @@ module SoftFoundry
       results = target == "all" ? gate.evaluate_all : [gate.evaluate(target)]
       results.each { |r| print_result(r) }
       print_advisories(record)
-      results.any?(&:failed?) ? 2 : 0
+      return 2 if results.any?(&:failed?)
+      # One phase named that is pending, in progress, or blocked has nothing
+      # to pass: the line says so as before, and the exit says it is not a pass.
+      return EXIT_NOT_COMPLETE if target != "all" && results.first.status != "complete"
+      0
     end
 
     # `eval [--live] [--shell S] [--case ID]... [--json] [-- shell args]`:
@@ -1033,7 +1058,8 @@ module SoftFoundry
 
     PHASE_RUN_USAGE = "soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex|grok | --panel SHELL,SHELL[,...] [--max-rounds N] [--shell-arg SHELL=ARG]...] [--dry-run] [-- shell args...]"
     PHASE_REOPEN_USAGE = "soft-foundry phase reopen <phase> --reason TEXT [--change SLUG]"
-    PHASE_USAGE = "#{PHASE_RUN_USAGE}\n       #{PHASE_REOPEN_USAGE}"
+    PHASE_SEAL_USAGE = "soft-foundry phase seal <phase> [--change SLUG]"
+    PHASE_USAGE = "#{PHASE_RUN_USAGE}\n       #{PHASE_REOPEN_USAGE}\n       #{PHASE_SEAL_USAGE}"
 
     # `phase reopen <phase> --reason TEXT`: reset the phase and everything
     # downstream so each can be run again. State only; no evidence is touched.
@@ -1062,6 +1088,7 @@ module SoftFoundry
     def phase
       sub = @argv.shift
       return phase_reopen if sub == "reopen"
+      return phase_seal if sub == "seal"
       raise ArgumentError, "Usage: #{PHASE_USAGE}" unless sub == "run"
       target = @argv.shift or raise ArgumentError, "Usage: #{PHASE_USAGE}"
       slug = option("--change") || current_slug
@@ -1142,9 +1169,44 @@ module SoftFoundry
       marked = mark_blocked(runner, phase)
       result = Gate.new(record, git: git).evaluate(phase)
       print_result(result)
+      sealed = false
+      if status.zero? && !marked && !result.failed?
+        sealed = seal_after_run(record, phase)
+      end
       print_advisories(record)
       return EXIT_TARGET unless status.zero?
-      marked || result.failed? ? 2 : 0
+      marked || result.failed? || !sealed ? 2 : 0
+    end
+
+    # `phase seal <phase> [--change SLUG]`: gate the phase and, on pass,
+    # commit its directory and the record's metadata (PhaseSeal).
+    def phase_seal
+      target = @argv.shift or raise ArgumentError, "Usage: #{PHASE_SEAL_USAGE}"
+      slug = option("--change") || current_slug
+      raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
+      record = load_record(slug)
+      phase = plane.phase(target) or raise TargetError, "unknown phase '#{target}'; lifecycle phases: #{plane.phases.map(&:id).join(', ')}"
+      result = PhaseSeal.new(@root, plane: plane, git: git, record: record).call(phase)
+      print_result(result.gate) if result.gate && result.outcome == :gate_failed
+      result.lines.each { |line| (result.outcome == :refused ? @err : @out).puts line }
+      case result.outcome
+      when :sealed, :already_sealed then 0
+      when :refused then EXIT_TARGET
+      else 2
+      end
+    end
+
+    # Seals a phase a run just finished. The runner is the authority here,
+    # so the session marker is not consulted. True when the phase is in
+    # history afterwards; otherwise the lines say why it is not.
+    def seal_after_run(record, phase)
+      if record.phase_status(phase) != "complete"
+        @out.puts "#{phase.output} is not sealed: the session left its handoff #{record.phase_status(phase) || 'missing'}; complete it and run `soft-foundry phase seal #{phase.id}`, or run the phase again"
+        return false
+      end
+      result = PhaseSeal.new(@root, plane: plane, git: git, record: record, env: {}).call(phase)
+      result.lines.each { |line| @out.puts line }
+      %i[sealed already_sealed].include?(result.outcome)
     end
 
     # Sets a phase the session left complete-with-blocking to blocked and
@@ -1157,7 +1219,7 @@ module SoftFoundry
       @out.puts "blocked: #{phase.id} has #{count} blocking item(s); status set to blocked, redo the phase once they are resolved"
       true
     rescue StandardError => e
-      @err.puts "warn: could not mark #{phase.id} blocked: #{Display.safe(e.message.lines.first.to_s.strip)}"
+      @err.puts "warn: could not mark #{phase.id} blocked: #{Display.safe(e.message.lines.first.to_s.strip)}; the handoff is left as written (complete with blocking items, which the gate refuses): fix the cause, then set its status to blocked by hand or redo the phase"
       false
     end
 
@@ -1274,26 +1336,36 @@ module SoftFoundry
         end
       end
 
+      # Sessions were told not to commit, so HEAD moving during the run is
+      # theirs to explain; measured before the runner's own sealing commits.
+      moved = git.repository? && start_head && git.head_sha != start_head
+      @err.puts "warn: HEAD moved from #{start_head[0, 7]} to #{git.head_sha[0, 7]} during the run; the phases record #{start_head[0, 7]}, so their evidence is bound to a commit that is no longer HEAD (sessions were told not to commit); inspect the new commits" if moved
       passed = 0
       gate_failed = false
+      blocked_by_session = false
+      # Gated and sealed in lifecycle order, so a later phase's predecessor
+      # is recorded before that phase is gated.
       outcomes.zip(phases).each do |o, p|
         @out.puts "phase #{p.id}: could not run: #{o.error}" if o.error
         @out.puts "phase #{p.id}: #{o.launch.shell} exited #{o.status}"
         result = Gate.new(record, git: git).evaluate(p)
         print_result(result)
         gate_failed ||= result.failed?
-        ok = o.status.zero? && !result.failed? && !failed_start.include?(p) && record.phase_status(p) != "blocked"
+        blocked_by_session ||= record.phase_status(p) == "blocked"
+        ok = o.status.zero? && !result.failed? && !failed_start.include?(p) && !moved
+        ok &&= seal_after_run(record, p)
+        @out.puts "phase #{p.id}: not sealed" unless ok || record.phase_status(p) == "complete"
         passed += 1 if ok
         @out.puts "phase #{p.id}: #{ok ? 'pass' : 'fail'}"
       end
-      @out.puts "parallel: #{phases.size} phases run, #{passed} passed, #{phases.size - passed} failed"
-      moved = git.repository? && start_head && git.head_sha != start_head
-      @err.puts "warn: HEAD moved from #{start_head[0, 7]} to #{git.head_sha[0, 7]} during the run; the phases record #{start_head[0, 7]}, so their evidence is bound to a commit that is no longer HEAD (sessions were told not to commit); inspect the new commits" if moved
-      first_open = plane.phases.find { |p| record.phase_status(p) != "complete" && !(record.phase_status(p) == "pending" && record.skippable?(p)) }
-      record.update_metadata { |m| m["current_phase"] = first_open.id } if first_open
+      @out.puts "parallel: #{phases.size} phases run, #{passed} passed and sealed, #{phases.size - passed} failed"
+      if passed.zero?
+        first_open = plane.phases.find { |p| record.phase_status(p) != "complete" && !(record.phase_status(p) == "pending" && record.skippable?(p)) }
+        record.update_metadata { |m| m["current_phase"] = first_open.id } if first_open
+      end
       print_advisories(record)
       return EXIT_TARGET if moved || outcomes.any? { |o| !o.status.zero? } || !failed_start.empty?
-      marked_blocked || gate_failed ? 2 : 0
+      marked_blocked || gate_failed || blocked_by_session || passed < phases.size ? 2 : 0
     end
 
     # `phase run <phase> --panel SHELL,SHELL`: the phase as a panel.
@@ -1379,9 +1451,10 @@ module SoftFoundry
       outcome.failures.each { |f| @err.puts "✗ fail panel: #{f}" }
       result = Gate.new(record, git: git).evaluate(phase)
       print_result(result)
+      sealed = outcome.outcome == "agreed" && outcome.failures.empty? && !result.failed? && seal_after_run(record, phase)
       print_advisories(record)
       return EXIT_TARGET if outcome.outcome != "agreed" || !outcome.failures.empty?
-      result.failed? ? 2 : 0
+      result.failed? || !sealed ? 2 : 0
     end
 
     # Starts each launch as a child process with its panel environment, all
@@ -1782,7 +1855,9 @@ module SoftFoundry
                                                   post a PR comment asking a human to confirm each
                                                   undischarged acceptance criterion
           soft-foundry gate <phase|all> [--change SLUG]
-                                                  evaluate a phase's completion gate
+                                                  evaluate a phase's completion gate; exits 0 when every
+                                                  check passes, 2 when one fails, and 3 when the one phase
+                                                  named is pending, in progress, or blocked (nothing to pass)
           soft-foundry scan [path...]             scan .ai/, AGENTS.md, CLAUDE.md, and every change record (or
                                                   the given paths) for invisible Unicode, secret-shaped strings,
                                                   instruction-override phrases, and fetch-and-execute commands
@@ -1813,6 +1888,13 @@ module SoftFoundry
                                                   can be run again (any track); evidence files are kept and the
                                                   reset is recorded in phase_reopenings. A stale complete phase
                                                   given to `phase run` is reopened automatically
+          soft-foundry phase seal <phase> [--change SLUG]
+                                                  end a phase: gate it and, when every check passes, commit
+                                                  its directory and the record's metadata as `Record <slug>
+                                                  <phase>` (the pre-commit hook runs). Refuses an incomplete
+                                                  handoff, uncommitted code, another session's phase, or the
+                                                  wrong branch; `phase run` seals the phase it ran. Later gates
+                                                  read a predecessor from this commit
           soft-foundry phase run <phase> --panel SHELL,SHELL[,...] [--max-rounds N] [--shell-arg SHELL=ARG]... [--dry-run]
                                                   run a panel phase (panel_phases in .ai/workflow.yml) as two
                                                   to four agents: independent drafts, turns in ARGUMENT.md

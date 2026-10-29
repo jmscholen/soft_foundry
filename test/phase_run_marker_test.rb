@@ -8,9 +8,10 @@ class PhaseRunMarkerTest < Minitest::Test
   include LifecycleFixture
 
   def test_a_single_phase_launch_carries_the_marker_and_no_parallel_flag
-    with_lifecycle_record(complete: LIFECYCLE - %w[review judge], current_phase: "attack") do |dir, _record|
+    with_lifecycle_record(complete: LIFECYCLE - %w[review judge], current_phase: "attack") do |dir, record|
       launches = []
-      code, out, err = run_cli(dir, "phase", "run", "review", "--shell", "claude", runner: ->(l) { launches << l; 0 })
+      runner = ->(l) { launches << l; complete_phase!(record, "review", sha: head(dir), runner: false); 0 }
+      code, out, err = run_cli(dir, "phase", "run", "review", "--shell", "claude", runner: runner)
       assert_equal 0, code, out + err
       assert_equal({ "SOFT_FOUNDRY_PHASE" => "review" }, launches.first.env)
     end
@@ -38,7 +39,9 @@ class PhaseRunMarkerTest < Minitest::Test
         path = "#{bin}:#{ENV['PATH']}"
         env = { "PATH" => path, "OUT_FILE" => out_file }
         code, out, err = run_cli(dir, "phase", "run", "review", "--shell", "claude", env: env)
-        assert_equal 0, code, out + err
+        # The script writes no handoff, so the phase is not sealed (REQ-005); the environment still reached it.
+        assert_equal 2, code, out + err
+        assert_includes out, "not sealed"
         assert_equal "review|", File.read(out_file)
       ensure
         File.delete(out_file) if out_file && File.exist?(out_file)

@@ -15,7 +15,8 @@ class PhaseSealTest < Minitest::Test
 
   def log(dir) = sh(dir, "git", "log", "--format=%s", "-n", "3").lines.map(&:chomp)
   def files_in_head(dir) = sh(dir, "git", "show", "--name-only", "--format=", "HEAD").lines.map(&:chomp).reject(&:empty?)
-  def dirty(dir) = sh(dir, "git", "status", "--porcelain").lines.map(&:chomp)
+  # The record lock directory is machine-local state the fixture repository does not ignore.
+  def dirty(dir) = sh(dir, "git", "status", "--porcelain").lines.map(&:chomp).reject { |l| l.include?(".soft-foundry/") }
   def meta(record) = record.metadata
 
   # A record with the named phases sealed (complete and committed) and

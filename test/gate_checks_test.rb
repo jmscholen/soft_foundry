@@ -133,11 +133,13 @@ class GateChecksTest < Minitest::Test
 
   def test_lineage_fails_on_older_commit
     with_lifecycle_record(complete: %w[intake], current_phase: "discover") do |dir, record|
-      parent = sh(dir, "git", "rev-parse", "HEAD~1").strip
-      complete_phase!(record, "discover", sha: parent)
+      # Intake recorded the record commit; a discover commit_sha from before
+      # the record existed is older than its predecessor's.
+      older = sh(dir, "git", "rev-parse", "HEAD~2").strip
+      complete_phase!(record, "discover", sha: older)
       lineage = check(dir, record, "discover", "commit lineage")
       assert_equal :fail, lineage.outcome, lineage.detail
-      assert_includes lineage.detail, parent[0, 12]
+      assert_includes lineage.detail, older[0, 12]
       assert_includes lineage.detail, "ancestor"
     end
   end
@@ -319,7 +321,8 @@ class GateChecksTest < Minitest::Test
   def set_mode!(dir, mode)
     path = File.join(dir, ".ai", "policies", "enforcement.yml")
     File.write(path, File.read(path).sub(/^  mode: \w+/, "  mode: #{mode}"))
-    commit_all(dir, "mode #{mode}")
+    sh(dir, "git", "add", "-A")
+    sh(dir, "git", "commit", "-q", "--allow-empty", "-m", "mode #{mode}")
   end
 
   def test_fresh_session_required_in_block_mode
@@ -352,7 +355,7 @@ class GateChecksTest < Minitest::Test
       complete_phase!(record, "judge", sha: head(dir), runner: true)
       fresh = check(dir, record, "judge", "fresh session recorded")
       assert_equal :pass, fresh.outcome, fresh.detail
-      complete_phase!(record, "judge", sha: head(dir), runner: false)
+      record.update_handoff(record.control_plane.phase("judge")) { |h| h["executed_by"] = nil }
       fresh = check(dir, record, "judge", "fresh session recorded")
       assert_equal :fail, fresh.outcome, "the machine-local override must not relax the gate"
     end

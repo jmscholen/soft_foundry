@@ -192,9 +192,16 @@ module SoftFoundry
       index && args[index + 1]
     end
 
+    # The phase a command names, or every phase of a parallel run joined
+    # with commas, so an operator looking for the second phase finds it.
     def phase_of(command, args)
-      value = { "phase run" => args[2], "gate" => args[1] }[command]
-      value&.match?(PHASE) ? value : nil
+      values = case command
+               when "phase run" then args.drop(2).take_while { |a| !a.start_with?("-") }
+               when "gate" then [args[1]]
+               else []
+               end
+      return nil if values.empty? || values.any? { |v| !v.to_s.match?(PHASE) }
+      values.join(",")
     end
 
     def change_of(command, args, dir)

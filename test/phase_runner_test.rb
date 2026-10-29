@@ -42,8 +42,10 @@ class PhaseRunnerTest < Minitest::Test
     [code, out.string + err.string, launches]
   end
 
+  # Completed by "the session" (or by hand): executed_by is the runner's to
+  # write, so the fixture leaves it alone here.
   def complete_handoff!(record, phase_id, dir)
-    complete_phase!(record, phase_id, sha: head(dir))
+    complete_phase!(record, phase_id, sha: head(dir), runner: false)
   end
 
   # --- refusals ------------------------------------------------------------
@@ -117,7 +119,7 @@ class PhaseRunnerTest < Minitest::Test
       assert_includes out, "claude exited 0"
       assert_includes out, "13-review  complete  PASS"
 
-      assert_equal "review", record.metadata["current_phase"]
+      assert_equal "judge", record.metadata["current_phase"], "the seal advanced the record past the review it recorded"
       executed = record.handoff(phase)["executed_by"]
       assert_equal "soft-foundry phase run", executed["runner"]
       assert_equal "claude", executed["shell"]

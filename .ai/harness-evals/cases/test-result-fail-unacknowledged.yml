@@ -1,0 +1,26 @@
+id: test-result-fail-unacknowledged
+kind: gate
+description: A verification check recorded as fail with no blocking entry or finding naming it is refused (test results recorded, REQ-010).
+record:
+  risk: medium
+  complete: [intake, discover, specify, threat_model, plan, implement, verify]
+  files:
+    06-verification/tests.yml: |
+      commit_sha: ${COMMIT}
+      checks:
+        - id: CHECK-001
+          kind: tests
+          command: bundle exec rake test
+          result: pass
+          evidence: evidence/recorded.txt
+          criteria: [AC-001]
+        - id: CHECK-002
+          kind: lint
+          command: bundle exec rubocop
+          result: fail
+          evidence: evidence/recorded.txt
+          criteria: []
+expect:
+  phase: verify
+  check: test results recorded
+  outcome: fail

@@ -59,6 +59,7 @@ module SoftFoundry
           tx.handoff(p) do |h|
             h["status"] = "pending"
             h["commit_sha"] = nil
+            h["started_at"] = nil
             h["completed_at"] = nil
             h["executed_by"] = nil
             h["outputs"] = []

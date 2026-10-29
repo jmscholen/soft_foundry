@@ -53,8 +53,14 @@ module SoftFoundry
     # tip would leave later code unseen. A change stacked under another
     # keeps its own branch as the measure; code above it is the other
     # change's record to cover.
-    def self.tip_for(record, git, sha)
-      branch = record.metadata.dig("git", "branch").to_s
+    #
+    # `resolved` is the handoff's branch_resolved, written by `phase seal`:
+    # false means the named branch did not exist when the evidence was
+    # sealed, so a branch created later at some descendant cannot be the
+    # measure, and HEAD is (scoped-verification REV-001).
+    def self.tip_for(record, git, sha, resolved: nil)
+      return nil if resolved == false
+      branch = record.git_branch
       return nil if branch == git.branch.to_s
       tip = git.branch_tip(branch)
       return nil unless tip
@@ -105,10 +111,10 @@ module SoftFoundry
     # `declarations`, an edit since `sha` to the record's scope, the
     # shared core, the access-control globs or the sizing policy counts
     # too. Any git failure is reported as an error, never as no change.
-    def measure(sha, declarations: true)
-      tip = self.class.tip_for(@record, @git, sha)
-      where = tip ? " on branch #{@record.metadata.dig('git', 'branch')}" : ""
-      raise GitError, "branch #{@record.metadata.dig('git', 'branch')} does not contain the evidence commit #{sha[0, 12]}; correct git.branch in metadata.yml" if tip && !@git.ancestor?(sha, tip)
+    def measure(sha, declarations: true, resolved: nil)
+      tip = self.class.tip_for(@record, @git, sha, resolved: resolved)
+      where = tip ? " on branch #{@record.git_branch}" : ""
+      raise GitError, "branch #{@record.git_branch} does not contain the evidence commit #{sha[0, 12]}; correct git.branch in metadata.yml" if tip && !@git.ancestor?(sha, tip)
       paths = @git.diff_paths(sha, tip)
       code = paths.select { |p| ControlPlane.match_any?(p, @plane.code_globs) }
       entries = code.map { |path| classify(path) }
@@ -118,7 +124,7 @@ module SoftFoundry
         entries << Entry.new("changes/#{@record.slug}/metadata.yml", edit, nil) if edit
       end
       Result.new(applied: applied, entries: entries, paths: paths, where: where, error: nil)
-    rescue GitError, Psych::Exception => e
+    rescue GitError, Psych::Exception, TargetError => e
       Result.new(applied: applied, entries: [], paths: [], where: "", error: e.message)
     end
 

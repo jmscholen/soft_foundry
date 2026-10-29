@@ -51,6 +51,7 @@ module SoftFoundry
 
     def handoff(phase)
       path = @record.handoff_path(phase)
+      return Handoff.new("unreadable", nil, "handoff.yml is a symlink; the summary reads only regular record files") if File.symlink?(path)
       return Handoff.new("missing", nil, nil) unless File.file?(path)
       size = File.size(path)
       return Handoff.new("unreadable", nil, "handoff.yml is #{size} bytes; the summary reads at most #{MAX_BYTES}") if size > MAX_BYTES
@@ -70,6 +71,7 @@ module SoftFoundry
     def finding_lines(handoffs)
       rows = handoffs.filter_map do |phase, h|
         list = h.data && h.data["findings"]
+        next malformed_line("findings", phase, list) if malformed?(list)
         next unless list.is_a?(Array) && !list.empty?
         counts = list.map { |f| f.is_a?(Hash) ? Display.safe(f["severity"]) : "unspecified" }.tally
         ordered = counts.sort_by { |sev, _| [SEVERITY_ORDER.index(sev) || SEVERITY_ORDER.size, sev] }
@@ -81,9 +83,18 @@ module SoftFoundry
     def blocking_lines(handoffs)
       rows = handoffs.filter_map do |phase, h|
         list = h.data && h.data["blocking"]
+        next malformed_line("blocking", phase, list) if malformed?(list)
         "blocking: #{phase.id}: #{Display.list(list)}" if list.is_a?(Array) && !list.empty?
       end
       rows.empty? ? ["blocking: none"] : rows
+    end
+
+    # A field the template writes as a list, written as something else: the
+    # gate reads it one way and `none` would hide it, so it is named.
+    def malformed?(value) = !value.nil? && !value.is_a?(Array)
+
+    def malformed_line(field, phase, value)
+      "#{field}: malformed (#{phase.output}: #{value.class.name}, expected a list)"
     end
 
     def owed_lines(meta)

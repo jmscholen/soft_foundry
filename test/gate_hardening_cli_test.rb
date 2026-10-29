@@ -71,7 +71,7 @@ class GateHardeningCliTest < Minitest::Test
       assert_equal SoftFoundry::CLI::EXIT_TARGET, code, out + err
       assert_includes out + err, "--type given twice"
       refute File.exist?(File.join(dir, "changes", "demo2"))
-      code, out, err = run_cli(dir, "phase", "run", "verify", "--env=X=1")
+      code, out, err = run_cli(dir, "phase", "run", "verify", "--change", "demo", "--env=X=1")
       assert_equal SoftFoundry::CLI::EXIT_TARGET, code
       assert_includes out + err, "--env takes its value as the next argument"
     end
@@ -137,9 +137,9 @@ class GateHardeningCliTest < Minitest::Test
 
   def test_ps_reports_every_parallel_phase
     processes = SoftFoundry::Processes.allocate
-    assert_equal "evaluate,attack", processes.send(:phase_of, "phase run", %w[soft-foundry phase run evaluate attack --parallel])
-    assert_equal "verify", processes.send(:phase_of, "phase run", %w[soft-foundry phase run verify --shell claude])
-    assert_nil processes.send(:phase_of, "phase run", %w[soft-foundry phase run ../x])
+    assert_equal "evaluate,attack", processes.send(:phase_of, "phase run", %w[phase run evaluate attack --parallel])
+    assert_equal "verify", processes.send(:phase_of, "phase run", %w[phase run verify --shell claude])
+    assert_nil processes.send(:phase_of, "phase run", %w[phase run ../x])
   end
 
   # --- check compares forced_by_risk keys (REQ-023) ---
@@ -157,19 +157,15 @@ class GateHardeningCliTest < Minitest::Test
 
   def test_failed_blocked_mark_names_the_next_step
     with_lifecycle_record(complete: LIFECYCLE.take(9), current_phase: "review") do |dir, record|
-      review = record.control_plane.phase("review")
-      runner = lambda do |_launch|
-        record.update_handoff(review) { |h| h.merge!("status" => "complete", "blocking" => ["needs a person"]) }
-        File.chmod(0o555, record.phase_dir(review))
-        0
-      end
-      begin
-        _code, _out, err = run_cli(dir, "phase", "run", "review", "--shell", "claude", runner: runner)
-        assert_includes err, "warn: could not mark review blocked"
-        assert_includes err, "left as written"
-      ensure
-        File.chmod(0o755, record.phase_dir(review))
-      end
+      out = StringIO.new
+      err = StringIO.new
+      cli = SoftFoundry::CLI.new([], out: out, err: err, root: dir)
+      failing = Object.new
+      def failing.mark_blocked!(_phase) = raise(SoftFoundry::TargetError, "lock held by another process")
+      refute cli.send(:mark_blocked, failing, record.control_plane.phase("review"))
+      assert_includes err.string, "warn: could not mark review blocked: lock held by another process"
+      assert_includes err.string, "left as written"
+      assert_includes err.string, "redo the phase"
     end
   end
 end

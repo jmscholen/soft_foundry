@@ -31,7 +31,7 @@ Repository discovery is the only skill permitted to write inside `.ai/`, and onl
 
 ## Phase lifecycle controls
 
-`soft-foundry phase reopen <phase> --reason TEXT` returns a phase and the phases after it to pending (evidence files are kept) and records why in `phase_reopenings`; `phase run` does the same on its own when it finds a complete phase stale. `soft-foundry phase run A B --parallel [--env NAME=VALUE]` runs the phases listed in `isolated_phases` side by side. `soft-foundry change release --item ID=DESCRIPTION` marks a judged change `released` with named open items, and `change discharge ID --note TEXT` closes them. `check` lints `isolated_phases` and every released record's release block.
+`soft-foundry phase seal <phase>` ends a phase: it gates the phase and, on pass, commits the phase directory and `metadata.yml` (`Record <slug> <phase>`) and moves `current_phase` on; `phase run` seals the phase it ran. The gate's `predecessor complete` check reads the predecessor from that commit, so the specification lock and the plan's diff base always exist. `soft-foundry phase reopen <phase> --reason TEXT` returns a phase and the phases after it to pending (evidence files are kept) and records why in `phase_reopenings`; `phase run` does the same on its own when it finds a complete phase stale. `soft-foundry phase run A B --parallel [--env NAME=VALUE]` runs the phases listed in `isolated_phases` side by side. `soft-foundry change release --item ID=DESCRIPTION` marks a judged change `released` with named open items, and `change discharge ID --note TEXT` closes them. `check` lints `isolated_phases` and every released record's release block.
 
 ## Repository maturity and gap analysis
 

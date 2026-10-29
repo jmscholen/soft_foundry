@@ -34,7 +34,7 @@ class PhaseRunAutoReopenTest < Minitest::Test
     with_stale_record do |dir, record|
       stale_sha = record.handoff(record.control_plane.phase("verify"))["commit_sha"]
       code, out, launches = run_phase(dir, "verify", "--shell", "claude")
-      assert_equal 0, code, out
+      assert_equal 2, code, out # the stub session writes no handoff, so nothing is sealed (REQ-005)
       assert_equal 1, launches.size
       assert_includes out, "phase reopen: reopened verify (automatic: evidence stale at #{stale_sha[0, 7]})"
       %w[verify evaluate attack].each { |id| assert_includes out, "phase reopen: reset #{id}" }
@@ -100,7 +100,7 @@ class PhaseRunAutoReopenTest < Minitest::Test
   def test_an_auto_reopen_works_inside_a_marked_environment_because_it_runs_before_the_session
     with_stale_record do |dir, record|
       code, out, = run_cli(dir, "phase", "run", "verify", "--shell", "claude", runner: ->(_l) { 0 }, env: { "SOFT_FOUNDRY_PHASE" => "evaluate" })
-      assert_equal 0, code, out
+      assert_equal 2, code, out # reopened and run; the stub writes no handoff, so nothing is sealed (REQ-005)
       assert_equal "auto", record.metadata["phase_reopenings"].fetch(0)["source"]
     end
   end

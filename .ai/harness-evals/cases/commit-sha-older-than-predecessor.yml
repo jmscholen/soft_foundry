@@ -1,0 +1,13 @@
+id: commit-sha-older-than-predecessor
+kind: gate
+description: A phase whose commit_sha is older than its predecessor's would move the staleness baseline back and is refused (commit lineage, REQ-009).
+record:
+  risk: medium
+  complete: [intake, discover]
+  handoff:
+    discover:
+      commit_sha: ${BASE}
+expect:
+  phase: discover
+  check: commit lineage
+  outcome: fail

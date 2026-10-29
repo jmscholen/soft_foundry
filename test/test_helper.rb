@@ -81,24 +81,27 @@ module FoundryFixture
 
   def head(dir) = sh(dir, "git", "rev-parse", "HEAD").strip
 
-  def cli(dir, *args)
+  # Variables a phase session or a developer's shell may carry that would
+  # change what a command does under test: cleared for every invocation
+  # the suite builds, so the suite passes wherever it is run (REQ-024).
+  SESSION_ENV = { "SOFT_FOUNDRY_PHASE" => nil, "SOFT_FOUNDRY_PARALLEL" => nil, "SOFT_FOUNDRY_GUARD" => nil, "SOFT_FOUNDRY_BILLING" => nil,
+                  "ANTHROPIC_API_KEY" => nil, "OPENAI_API_KEY" => nil, "XAI_API_KEY" => nil, "OPENROUTER_API_KEY" => nil, "GEMINI_API_KEY" => nil }.freeze
+  # Scrubbed once when the suite loads, so a test that sets one of them
+  # deliberately (with_env) still wins inside its block.
+  SESSION_ENV.each_key { |k| ENV.delete(k) }
+
+  def cli(dir, *args, **opts)
     out = StringIO.new
     err = StringIO.new
-    code = SoftFoundry::CLI.new(args, out: out, err: err, root: dir).run
+    code = SoftFoundry::CLI.new(args, out: out, err: err, root: dir, **opts).run
     [code, out.string + err.string]
   end
 
-  def complete_phase!(record, phase_id, sha:, fill: true)
-    phase = record.control_plane.phase(phase_id)
-    dir = record.phase_dir(phase)
-    if fill
-      Dir.glob("**/*", base: dir).each do |rel|
-        path = File.join(dir, rel)
-        File.write(path, File.read(path).gsub(/\bTBD\b/, "done")) if File.file?(path)
-      end
-    end
-    handoff = YAML.safe_load_file(File.join(dir, "handoff.yml"))
-    handoff.merge!("status" => "complete", "commit_sha" => sha, "completed_at" => "2026-09-09T00:00:00Z")
-    File.write(File.join(dir, "handoff.yml"), YAML.dump(handoff))
+  # The one phase-completion fixture, shared with the harness evals so a
+  # planted record means the same thing in both (HarnessEval.complete_phase!).
+  # `runner: false` leaves executed_by alone, for tests about phases
+  # completed outside `phase run`.
+  def complete_phase!(record, phase_id, sha:, fill: true, runner: true)
+    SoftFoundry::HarnessEval.complete_phase!(record, phase_id, sha, fill: fill, runner: runner)
   end
 end

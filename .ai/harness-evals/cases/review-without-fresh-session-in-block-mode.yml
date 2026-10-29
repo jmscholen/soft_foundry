@@ -1,0 +1,19 @@
+id: review-without-fresh-session-in-block-mode
+kind: gate
+description: In a repository whose guard policy is block, a review with no runner stamp in executed_by is refused (fresh session recorded, REQ-014).
+record:
+  risk: medium
+  complete: [intake, discover, specify, threat_model, plan, implement, verify, evaluate, attack, review]
+  handoff:
+    review:
+      executed_by: null
+repository:
+  files:
+    .ai/policies/enforcement.yml: |
+      version: 1
+      guard:
+        mode: block
+expect:
+  phase: review
+  check: fresh session recorded
+  outcome: fail

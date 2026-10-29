@@ -10,6 +10,7 @@ require_relative "record_lock"
 require_relative "safe_write"
 require_relative "advisory"
 require_relative "declarations"
+require_relative "record_file"
 
 module SoftFoundry
   # A durable `changes/<slug>/` record initialized from control-plane templates.
@@ -61,7 +62,16 @@ module SoftFoundry
 
     def handoff(phase)
       path = handoff_path(phase)
-      File.exist?(path) ? load(path) : nil
+      File.exist?(path) || File.symlink?(path) ? load(path) : nil
+    end
+
+    # metadata.yml's git.branch. A `git:` that is not a mapping is the
+    # record's fault and is named as such, so a gate check or command
+    # prints a line instead of a Ruby error (REQ-021).
+    def git_branch
+      git = metadata["git"]
+      raise TargetError, "changes/#{slug}/metadata.yml: git must be a mapping with branch and worktree, not #{git.nil? ? 'nothing' : git.class.name.downcase}; restore the git: block" unless git.is_a?(Hash)
+      git["branch"].to_s
     end
 
     def phase_status(phase)
@@ -110,7 +120,7 @@ module SoftFoundry
     def self.discharged?(item)
       return false unless item.is_a?(Hash)
       value = item["discharged_at"]
-      value.respond_to?(:strftime) || (value.is_a?(String) && !value.strip.empty?)
+      value.respond_to?(:strftime) || (value.is_a?(String) && !Text.blank?(value))
     end
 
     def open_release_items = release_items.reject { |i| self.class.discharged?(i) }
@@ -482,8 +492,10 @@ module SoftFoundry
       YAML.dump(text).sub(/\A--- ?/, "").chomp
     end
 
+    # Record files are read through RecordFile, which refuses a symlink or
+    # a non-regular file in place of the record's own (REQ-034).
     def load(path)
-      YAML.safe_load_file(path, permitted_classes: [Time, Date], aliases: true) || {}
+      RecordFile.load_yaml(path, path.delete_prefix("#{root}/"))
     end
   end
 end

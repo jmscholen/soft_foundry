@@ -86,6 +86,11 @@ module SoftFoundry
       if named.is_a?(Hash) && named.keys.map(&:to_s).sort != ChangeRecord::RISKS.sort
         findings << Finding.new(:error, "workflow: waivable_by_risk names risks #{named.keys.join(', ')} but `change new --risk` allows #{ChangeRecord::RISKS.join(', ')}; make them agree")
       end
+      forced = @plane.workflow.dig("tracks", "forced_by_risk")
+      unknown = forced.is_a?(Hash) ? forced.keys.map(&:to_s) - ChangeRecord::RISKS : []
+      unless unknown.empty?
+        findings << Finding.new(:error, "workflow: tracks.forced_by_risk names #{unknown.join(', ')}, which `change new --risk` does not allow (#{ChangeRecord::RISKS.join(', ')}); a renamed key would stop forcing the track")
+      end
       findings
     end
 

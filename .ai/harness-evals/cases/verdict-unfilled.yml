@@ -1,0 +1,19 @@
+id: verdict-unfilled
+kind: gate
+description: A judgment whose Outcome section still lists every permitted word names no verdict and is refused (verdict recorded, REQ-013).
+record:
+  risk: medium
+  complete: [intake, discover, specify, threat_model, plan, implement, verify, evaluate, attack, review, judge]
+  files:
+    14-judgment/final.md: |
+      # Final Judgment
+
+      ## Outcome
+      APPROVED | APPROVED_WITH_RESIDUAL_RISK | BLOCKED | REJECTED
+
+      ## Commit judged
+      ${COMMIT}
+expect:
+  phase: judge
+  check: verdict recorded
+  outcome: fail

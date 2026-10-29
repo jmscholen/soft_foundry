@@ -106,7 +106,9 @@ class GatedSpecificationLockTest < Minitest::Test
 
   def test_an_uncommitted_specification_is_not_locked_yet
     with_change do |dir, _plane, record, gate|
-      %w[intake discover specify].each { |p| complete_phase!(record, p, sha: head(dir)) }
+      %w[intake discover].each { |p| complete_phase!(record, p, sha: head(dir)) }
+      commit_all(dir, "intake and discover recorded")
+      complete_phase!(record, "specify", sha: head(dir))
       c = check(gate, "specify", "specification locked")
       assert_equal :warn, c.outcome
       assert_includes c.detail, "not yet locked"
@@ -149,7 +151,7 @@ class FreshContextAdvisoryTest < Minitest::Test
     with_fixture_repo do |dir|
       plane = SoftFoundry::ControlPlane.new(dir)
       record = SoftFoundry::ChangeRecord.create(dir, "c3", control_plane: plane)
-      plane.phases.take(9).each { |p| complete_phase!(record, p.id, sha: head(dir)) } # intake..attack
+      plane.phases.take(9).each { |p| complete_phase!(record, p.id, sha: head(dir), runner: false) } # intake..attack, in session
       notices = SoftFoundry::Advisory.new(record).notices.select { |n| n.message.include?("without `soft-foundry phase run`") }
       assert_equal %w[verification evaluation attack], notices.map(&:area)
       assert_includes notices[0].message, "06-verification"

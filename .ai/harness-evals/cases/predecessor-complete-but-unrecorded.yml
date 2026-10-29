@@ -1,0 +1,11 @@
+id: predecessor-complete-but-unrecorded
+kind: gate
+description: A predecessor complete on disk but never sealed into git does not satisfy the next phase's gate; the detail names phase seal (predecessor complete, REQ-006).
+record:
+  risk: medium
+  complete: [intake, discover]
+  commit: false
+expect:
+  phase: discover
+  check: predecessor complete
+  outcome: fail

@@ -171,6 +171,24 @@ module SoftFoundry
       out.lines(chomp: true).map { |line| line[3..].to_s.split(" -> ").last }
     end
 
+    # Stages exactly `paths` (by name, never -A) and commits them with
+    # `message`, letting the repository's hooks run. Returns the new HEAD.
+    # GitError with git's own output (the hook's refusal included) when
+    # either step fails, so the caller can show it.
+    def commit!(message, paths:)
+      add_out, add_err, add_ok = Open3.capture3({ "GIT_DIR" => nil, "GIT_WORK_TREE" => nil }, "git", "-C", @root, "add", "--", *paths)
+      raise GitError, "git add failed: #{(add_err + add_out).strip}" unless add_ok.success?
+      out, err, ok = Open3.capture3({ "GIT_DIR" => nil, "GIT_WORK_TREE" => nil }, "git", "-C", @root, "commit", "-q", "-m", message, "--only", "--", *paths)
+      raise GitError, "git commit failed:\n#{(err + out).strip}" unless ok.success?
+      head_sha
+    end
+
+    # Dirty, untracked or ignored paths under `prefix` (a directory, with
+    # its trailing slash) or equal to it.
+    def dirty_under(prefix)
+      dirty_paths.select { |p| p == prefix || p.start_with?(prefix) }
+    end
+
     private
 
     def hash!(sha)

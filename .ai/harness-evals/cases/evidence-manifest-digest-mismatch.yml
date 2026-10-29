@@ -1,0 +1,13 @@
+id: evidence-manifest-digest-mismatch
+kind: gate
+description: An evidence file changed after its manifest digest was recorded is refused (evidence manifest verified, REQ-012).
+record:
+  risk: medium
+  complete: [intake, discover, specify, threat_model, plan, implement, verify]
+  files:
+    06-verification/evidence/recorded.txt: |
+      edited after the manifest was written
+expect:
+  phase: verify
+  check: evidence manifest verified
+  outcome: fail
