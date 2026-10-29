@@ -1,5 +1,7 @@
-# AC-052: files under changes/ other than this record that differ from main; HEAD 15e6d923296135a660f6648b635a61edf93433a2
-$ git diff main --name-only -- changes/ | grep -v '^changes/gate-hardening/'
-grep exit=1 (1 = no such files)
-
-# the records ci reports as closed/skipped are listed in ci.txt
+CHECK-006: no other record's files differ from main (AC-052). HEAD d8b621d6347231eb773243159833f7f870aeef93; merge base with main: 3e5627dc3d9c0ff1791ad938462ba800f67087b0; 2026-10-29T20:24:01Z
+--- git diff main --name-only -- changes/ | grep -v '^changes/gate-hardening/'
+(exit of grep: 1; 1 means no line matched, i.e. no other record differs)
+--- git status --short -- changes/ | grep -v gate-hardening (uncommitted files outside this record)
+(exit of grep: 1)
+--- files of this record that differ from main (count): 85
+--- the closed records on main (for reference): 36 record directories under changes/ on main

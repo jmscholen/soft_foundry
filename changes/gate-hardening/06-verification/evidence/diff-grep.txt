@@ -1,32 +1,42 @@
-# AC-055: added lines in lib/ (diff against main, merge-base 3e5627dc3d9c0ff1791ad938462ba800f67087b0) matching net/http, open-uri, socket, SOFT_FOUNDRY_GUARD, enforcement.yml
-$ git diff main -- lib/ | grep -nE '^\+.*(net/http|open-uri|socket|SOFT_FOUNDRY_GUARD|enforcement\.yml)'
-360:+    # (.ai/policies/enforcement.yml guard.mode), or the default. Never the
-364:+      path = File.join(dir, "policies", "enforcement.yml")
-grep exit=0
-
-# context of each hit (git diff main -- lib/soft_foundry/control_plane.rb)
-7-     def judgments = Array(workflow["judgments"])
-8- 
-9-+    GUARD_MODES = %w[warn block off].freeze
-10-+    GUARD_DEFAULT_MODE = "warn"
-11-+
-12-+    # The guard mode the repository's own policy declares
-13:+    # (.ai/policies/enforcement.yml guard.mode), or the default. Never the
-14-+    # machine-local override or the environment: the gate reads what the
-15-+    # repository asks of its records, not what one machine relaxed.
-16-+    def enforcement_mode
-17:+      path = File.join(dir, "policies", "enforcement.yml")
-18-+      return GUARD_DEFAULT_MODE unless File.file?(path)
-19-+      value = (YAML.safe_load_file(path) || {}).dig("guard", "mode").to_s.strip.downcase
-20-+      GUARD_MODES.include?(value) ? value : GUARD_DEFAULT_MODE
-21-+    rescue Psych::Exception
-22-+      GUARD_DEFAULT_MODE
-23-+    end
-24-+
-25-     # Phases no declared risk may waive through skipped_phases: review
-
-# whole-tree lib/ requires of net/http, open-uri, socket at HEAD
+CHECK-008 (AC-055 search clause): HEAD d8b621d6347231eb773243159833f7f870aeef93; 2026-10-29T20:24:01Z
+--- git diff main -- lib/ | grep -nE '^\+.*(net/http|open-uri|socket|SOFT_FOUNDRY_GUARD|enforcement\.yml)'
+389:+    # (.ai/policies/enforcement.yml guard.mode), or the default. Never the
+393:+      path = File.join(dir, "policies", "enforcement.yml")
+(grep exit 0)
+--- whole-tree: grep -rnE "require ['\"](net/http|open-uri|socket)" lib/
 lib/soft_foundry/updater.rb:4:require "net/http"
 lib/soft_foundry/provider.rb:4:require "net/http"
 lib/soft_foundry/ui/server.rb:7:require "socket"
-grep exit=0
+--- are those files changed against main? git diff main --stat -- <files>
+(empty stat = unchanged)
+--- grep -rn 'SOFT_FOUNDRY_GUARD\|\.soft-foundry' lib/soft_foundry/gate.rb lib/soft_foundry/phase_seal.rb lib/soft_foundry/control_plane.rb lib/soft_foundry/change_record.rb
+(grep exit 1)
+--- enforcement.yml readers in lib/ (whole tree): grep -rn 'enforcement.yml' lib/
+lib/soft_foundry/guard.rb:30:    POLICY = ".ai/policies/enforcement.yml"
+lib/soft_foundry/guard.rb:31:    LOCAL = ".soft-foundry/enforcement.yml"
+lib/soft_foundry/control_plane.rb:122:    # (.ai/policies/enforcement.yml guard.mode), or the default. Never the
+lib/soft_foundry/control_plane.rb:126:      path = File.join(dir, "policies", "enforcement.yml")
+lib/soft_foundry/cli.rb:1519:        @err.puts "✗ fail guard: #{where} #{decision.reason}; #{because} (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is documented in README.md)"
+lib/soft_foundry/cli.rb:1962:                                                  refuse it in block mode; mode from .ai/policies/enforcement.yml,
+lib/soft_foundry/cli.rb:1963:                                                  .soft-foundry/enforcement.yml, or SOFT_FOUNDRY_GUARD=warn|block|off
+lib/soft_foundry/check.rb:257:    # .ai/policies/enforcement.yml is optional (the guard defaults to warn),
+lib/soft_foundry/check.rb:260:      path = File.join(@plane.dir, "policies", "enforcement.yml")
+lib/soft_foundry/check.rb:265:      [Finding.new(:error, "policies/enforcement.yml: guard.mode '#{mode}' is not one of #{Guard::MODES.join(', ')}")]
+lib/soft_foundry/check.rb:267:      [Finding.new(:error, "policies/enforcement.yml is not valid YAML: #{e.message}")]
+--- lib/ files changed against main:
+ lib/soft_foundry/change_record.rb  |  40 ++++-
+ lib/soft_foundry/change_summary.rb |  11 ++
+ lib/soft_foundry/check.rb          |   5 +
+ lib/soft_foundry/cli.rb            | 118 ++++++++++++---
+ lib/soft_foundry/control_plane.rb  |  16 ++
+ lib/soft_foundry/gate.rb           | 295 ++++++++++++++++++++++++++++++++++++-
+ lib/soft_foundry/git.rb            |  31 +++-
+ lib/soft_foundry/harness_eval.rb   |  96 ++++++++++--
+ lib/soft_foundry/phase_reopen.rb   |   1 +
+ lib/soft_foundry/phase_runner.rb   |   2 +-
+ lib/soft_foundry/phase_seal.rb     | 146 ++++++++++++++++++
+ lib/soft_foundry/processes.rb      |  11 +-
+ lib/soft_foundry/record_file.rb    |  38 +++++
+ lib/soft_foundry/scope.rb          |  20 ++-
+ lib/soft_foundry/text.rb           |  11 ++
+ 15 files changed, 785 insertions(+), 56 deletions(-)

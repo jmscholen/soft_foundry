@@ -1,0 +1,91 @@
+CHECK-011: every planned test method in 04-plan/testing.md's coverage table, looked up at HEAD d8b621d6347231eb773243159833f7f870aeef93 under its planned file and, failing that, anywhere under test/ (script kept outside the repository, /tmp/sf-verify-planned-tests.rb, its text in this file below); 2026-10-29T20:24:24Z
+51 planned test methods in the coverage table
+present in planned file   test/gate_checks_test.rb#test_criteria_set_aside_with_reason_pass_and_blank_reason_fails
+present in planned file   test/gate_checks_test.rb#test_fail_result_named_in_finding_passes
+present in planned file   test/gate_checks_test.rb#test_fresh_session_ignores_machine_override
+present in planned file   test/gate_checks_test.rb#test_fresh_session_required_in_block_mode
+present in planned file   test/gate_checks_test.rb#test_fresh_session_skips_in_warn_mode
+present in planned file   test/gate_checks_test.rb#test_git_string_is_a_gate_line
+present in planned file   test/gate_checks_test.rb#test_lineage_fails_on_older_commit
+present in planned file   test/gate_checks_test.rb#test_lineage_fails_on_unreachable_commit
+present in planned file   test/gate_checks_test.rb#test_lineage_measures_stacked_record_on_its_branch
+present in planned file   test/gate_checks_test.rb#test_manifest_digest_mismatch_fails
+present in planned file   test/gate_checks_test.rb#test_manifest_path_outside_phase_fails
+present in planned file   test/gate_checks_test.rb#test_new_checks_skip_on_closed_record
+present in planned file   test/gate_checks_test.rb#test_predecessor_must_be_recorded
+present in planned file   test/gate_checks_test.rb#test_predecessor_steps_over_waived_phases
+present in planned file   test/gate_checks_test.rb#test_sequence_manifest_fails_parse
+present in planned file   test/gate_checks_test.rb#test_skipped_with_criteria_must_be_named
+present in planned file   test/gate_checks_test.rb#test_unacknowledged_fail_result_fails
+present in planned file   test/gate_checks_test.rb#test_uncovered_criteria_fail_at_judge
+present in planned file   test/gate_checks_test.rb#test_uncovered_criteria_warn_at_verify
+present in planned file   test/gate_checks_test.rb#test_unfilled_verdict_fails
+present in planned file   test/gate_checks_test.rb#test_unlisted_evidence_file_warns
+present in planned file   test/gate_checks_test.rb#test_unparseable_specification_fails_and_cannot_seal
+present in planned file   test/gate_checks_test.rb#test_verdict_blocked_is_recorded
+present in planned file   test/phase_seal_test.rb#test_advances_past_skipped_phase
+present in planned file   test/phase_seal_test.rb#test_already_sealed_is_idempotent
+present in planned file   test/phase_seal_test.rb#test_branch_resolved_false_measures_head
+present in planned file   test/phase_seal_test.rb#test_gate_failure_commits_nothing
+present in planned file   test/phase_seal_test.rb#test_hook_failure_leaves_rerunnable_state
+present in planned file   test/phase_seal_test.rb#test_judge_seal_sets_status_judged
+present in planned file   test/phase_seal_test.rb#test_leaves_unrelated_dirty_file_and_notes_it
+present in planned file   test/phase_seal_test.rb#test_refuses_dirty_code_paths
+present in planned file   test/phase_seal_test.rb#test_refuses_incomplete_handoff
+present in planned file   test/phase_seal_test.rb#test_refuses_symlinked_handoff
+present in planned file   test/phase_seal_test.rb#test_seal_commits_phase_and_metadata_and_advances
+present in planned file   test/phase_seal_test.rb#test_stages_only_the_phase_and_metadata
+present in another file   test_closes_approved_with_residual_risk (planned test/cli_change_close_test.rb; found in test/gate_hardening_cli_test.rb)
+present in another file   test_env_value_never_printed_by_sealing (planned test/phase_run_parallel_test.rb; found in test/phase_run_sealing_test.rb)
+present in another file   test_equals_form_and_twice (planned test/cli_change_new_options_test.rb; found in test/gate_hardening_cli_test.rb)
+present in another file   test_forced_by_risk_keys_checked (planned test/check_test.rb; found in test/gate_hardening_cli_test.rb)
+present in another file   test_gate_on_pending_phase_exits_3_and_all_exits_0 (planned test/gate_test.rb; found in test/gate_hardening_cli_test.rb)
+present in another file   test_malformed_blocking_named (planned test/cli_change_summary_test.rb; found in test/gate_hardening_cli_test.rb)
+present in another file   test_parallel_seals_in_lifecycle_order (planned test/phase_run_parallel_test.rb; found in test/phase_run_sealing_test.rb)
+present in another file   test_parallel_seals_passed_and_exits_2_on_blocked (planned test/phase_run_parallel_test.rb; found in test/phase_run_sealing_test.rb)
+present in another file   test_prompt_says_runner_seals (planned test/phase_runner_test.rb; found in test/phase_run_sealing_test.rb)
+present in another file   test_refuses_blocked_without_force (planned test/cli_change_close_test.rb; found in test/gate_hardening_cli_test.rb)
+present in another file   test_refuses_symlinked_handoff (planned test/cli_change_summary_test.rb; found in test/phase_seal_test.rb)
+present in another file   test_reopen_clears_started_at (planned test/cli_phase_reopen_test.rb; found in test/gate_hardening_cli_test.rb)
+present in another file   test_run_does_not_seal_in_progress_handoff (planned test/phase_runner_test.rb; found in test/phase_run_sealing_test.rb)
+present in another file   test_run_seals_passing_phase (planned test/phase_runner_test.rb; found in test/phase_run_sealing_test.rb)
+present in another file   test_unicode_blank_discharged_at_is_open (planned test/cli_change_release_test.rb; found in test/gate_hardening_cli_test.rb)
+MISSING                   test/harness_eval_test.rb#test_lint_accepts_new_check_names
+--- remediation tests (not in the plan's table; RED 4d7392a and d6c2748):
+test/remediation_gate_hardening_test.rb#test_rewriting_a_recorded_commit_sha_forward_is_refused_until_the_phase_is_reopened
+test/remediation_gate_hardening_test.rb#test_fail_acknowledgement_matches_whole_ids
+test/remediation_gate_hardening_test.rb#test_hollow_reasons_and_unknown_criteria_are_refused
+test/remediation_gate_hardening_test.rb#test_empty_artifacts_list_fails
+test/remediation_gate_hardening_test.rb#test_seal_names_a_missing_record_branch
+test/remediation_gate_hardening_test.rb#test_sealing_remediation_returns_the_record_to_verify
+test/remediation_gate_hardening_test.rb#test_fresh_session_stamp_must_be_a_real_runner
+--- summary: 35 in planned file, 15 in another file, 1 missing
+exit=1
+
+--- script:
+# CHECK-011: every planned test method in 04-plan/testing.md's coverage table exists at HEAD.
+plan = File.read("changes/gate-hardening/04-plan/testing.md")
+rows = plan.lines.select { |l| l.start_with?("| AC-") }
+planned = rows.flat_map { |l| l.scan(/`([a-z_]+_test)#(test_[a-z0-9_]+)`/) }.uniq
+status = Hash.new { |h, k| h[k] = [] }
+planned.each do |file, meth|
+  path = "test/#{file}.rb"
+  if File.exist?(path) && File.read(path).match?(/^\s*def #{Regexp.escape(meth)}\b/)
+    status[:planned] << "#{path}##{meth}"
+  else
+    found = Dir["test/**/*.rb"].select { |f| File.read(f).match?(/^\s*def #{Regexp.escape(meth)}\b/) }
+    if found.empty?
+      status[:missing] << "#{path}##{meth}"
+    else
+      status[:elsewhere] << "#{meth} (planned #{path}; found in #{found.join(', ')})"
+    end
+  end
+end
+puts "#{planned.size} planned test methods in the coverage table"
+status[:planned].sort.each { |s| puts "present in planned file   #{s}" }
+status[:elsewhere].sort.each { |s| puts "present in another file   #{s}" }
+status[:missing].sort.each { |s| puts "MISSING                   #{s}" }
+puts "--- remediation tests (not in the plan's table; RED 4d7392a and d6c2748):"
+File.read("test/remediation_gate_hardening_test.rb").scan(/^\s*def (test_\w+)/).flatten.each { |m| puts "test/remediation_gate_hardening_test.rb##{m}" }
+puts "--- summary: #{status[:planned].size} in planned file, #{status[:elsewhere].size} in another file, #{status[:missing].size} missing"
+exit(status[:missing].empty? ? 0 : 1)

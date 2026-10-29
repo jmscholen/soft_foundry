@@ -1,5 +1,4 @@
-# soft-foundry eval (gate cases; live cases need a shell); HEAD 15e6d923296135a660f6648b635a61edf93433a2; 2026-10-29T06:11:52Z; provider keys and SOFT_FOUNDRY_* unset
-$ ruby -Ilib exe/soft-foundry eval
+CHECK-004: ruby -Ilib exe/soft-foundry eval (env -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u XAI_API_KEY -u GEMINI_API_KEY -u GOOGLE_API_KEY -u SOFT_FOUNDRY_PHASE -u SOFT_FOUNDRY_PARALLEL -u SOFT_FOUNDRY_GUARD); HEAD d8b621d6347231eb773243159833f7f870aeef93; 2026-10-29T20:24:50Z
 ✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
 ✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
 ✓ pass eval commit-sha-older-than-predecessor: discover commit lineage fail, as expected
@@ -30,4 +29,4 @@ $ ruby -Ilib exe/soft-foundry eval
 ✓ pass eval test-result-fail-unacknowledged: verify test results recorded fail, as expected
 ✓ pass eval verdict-unfilled: judge verdict recorded fail, as expected
 ✓ pass eval: 28 passed, 0 failed, 0 errors, 1 skipped
-exit=0
+exit=0  finished 2026-10-29T20:25:19Z

@@ -1,0 +1,11 @@
+ruby in worktree: ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23]; commit d8b621d6347231eb773243159833f7f870aeef93; files: test/phase_seal_test.rb test/gate_checks_test.rb test/fixture_completion_test.rb test/phase_run_sealing_test.rb test/gate_hardening_cli_test.rb test/remediation_gate_hardening_test.rb test/git_hook_env_test.rb; started 2026-10-29T20:26:41Z
+Run options: --seed 58320
+
+# Running:
+
+.....................................................................
+
+Finished in 181.596033s, 0.3800 runs/s, 1.9108 assertions/s.
+
+69 runs, 347 assertions, 0 failures, 0 errors, 0 skips
+exit=0

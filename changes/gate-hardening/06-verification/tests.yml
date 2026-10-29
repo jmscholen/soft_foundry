@@ -1,18 +1,24 @@
-commit_sha: 15e6d923296135a660f6648b635a61edf93433a2
+commit_sha: d8b621d6347231eb773243159833f7f870aeef93
 # `soft-foundry change size --phase verify` computed full_at_verify (no scope
 # declared: whole-repository scope is sized at the largest size).
 size: full_at_verify
-# The full suite run on this tree (git rev-parse 15e6d92^{tree}), provider
-# keys and SOFT_FOUNDRY_* unset. A record of a run, not a test result: the
-# transcript is evidence/full-suite.txt.
+# The full suite run on this tree (git rev-parse d8b621d^{tree}), provider
+# keys and SOFT_FOUNDRY_* unset, with no other test, eval, ci or worktree
+# process from this session running. A record of a run, not a test result:
+# the transcript is evidence/full-suite.txt. A first run of the same command
+# on the same tree, concurrent with CHECK-002's first run and with CHECK-004,
+# CHECK-005 and CHECK-009, is kept as evidence/full-suite-run1.txt: 1 failure,
+# harness_eval_test line 198, which counts every soft-foundry-eval-* directory
+# in the system temp dir and so sees another process's scratch repository
+# (finding VER-003).
 full_suite:
-  tree: 487f172507937dcb8a78550e652b344f77966b5e
-  command: "bundle exec rake test (env -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u XAI_API_KEY -u GEMINI_API_KEY -u GOOGLE_API_KEY -u SOFT_FOUNDRY_PHASE -u SOFT_FOUNDRY_PARALLEL -u SOFT_FOUNDRY_GUARD)"
+  tree: e679e2b60c74f1790d4586b59c73a5a08d9f76d8
+  command: "bundle exec rake test (env -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u XAI_API_KEY -u GEMINI_API_KEY -u GOOGLE_API_KEY -u SOFT_FOUNDRY_PHASE -u SOFT_FOUNDRY_PARALLEL -u SOFT_FOUNDRY_GUARD), run alone"
   outcome: passed
 checks:
   - id: CHECK-001
     kind: tests
-    command: "bundle exec rake test, with provider keys and SOFT_FOUNDRY_* unset (the recorded full-suite run)"
+    command: "bundle exec rake test, with provider keys and SOFT_FOUNDRY_* unset, run alone (the recorded full-suite run; the earlier concurrent run is evidence/full-suite-run1.txt)"
     result: pass
     evidence: evidence/full-suite.txt
     criteria: [AC-001, AC-002, AC-003, AC-004, AC-005, AC-006, AC-007, AC-008, AC-009, AC-010, AC-011, AC-012, AC-013, AC-014, AC-015, AC-016, AC-017, AC-018, AC-020, AC-021, AC-022, AC-023, AC-024, AC-025, AC-026, AC-027, AC-028, AC-029, AC-030, AC-031, AC-032, AC-033, AC-034, AC-035, AC-036, AC-037, AC-038, AC-039, AC-040, AC-041, AC-042, AC-043, AC-044, AC-045, AC-046, AC-047, AC-049, AC-055]
@@ -21,7 +27,7 @@ checks:
     protection: not_applicable
   - id: CHECK-002
     kind: tests
-    command: "SOFT_FOUNDRY_PHASE=verify ANTHROPIC_API_KEY=x bundle exec rake test (AC-048: the suite under a phase session's environment)"
+    command: "SOFT_FOUNDRY_PHASE=verify ANTHROPIC_API_KEY=x bundle exec rake test, run alone (AC-048: the suite under a phase session's environment; the earlier concurrent run is evidence/suite-phase-env-run1.txt)"
     result: pass
     evidence: evidence/suite-phase-env.txt
     criteria: [AC-048]
@@ -51,36 +57,54 @@ checks:
     protection: not_applicable
   - id: CHECK-006
     kind: custom
-    command: "git diff main --name-only -- changes/ | grep -v '^changes/gate-hardening/' (AC-052: no other record's files, including the five closed-record files that do not parse, differ from main)"
+    command: "git diff main --name-only -- changes/ | grep -v '^changes/gate-hardening/' and git status --short -- changes/ outside this record (AC-052: no other record's files, including the five closed-record files that do not parse, differ from main)"
     result: pass
     evidence: evidence/closed-records-diff.txt
     criteria: [AC-052]
     protection: not_applicable
   - id: CHECK-007
     kind: custom
-    command: "ruby -Ilib exe/soft-foundry learn promote --dry-run (AC-050: nothing left to promote; every id at or above 0.80 is already in .ai/rules/learned.md)"
+    command: "ruby -Ilib exe/soft-foundry learn promote --dry-run, then each id it reports as already promoted looked up in .ai/rules/learned.md (AC-050)"
     result: pass
     evidence: evidence/learn-promote-dry-run.txt
     criteria: [AC-050]
     protection: not_applicable
   - id: CHECK-008
     kind: security_scan
-    command: "git diff main -- lib/ | grep -nE '^\\+.*(net/http|open-uri|socket|SOFT_FOUNDRY_GUARD|enforcement\\.yml)' plus a whole-tree grep of lib/ for those requires (AC-055's search clause; the --env run is phase_run_sealing_test#test_env_value_never_printed_by_sealing in CHECK-001)"
+    command: "git diff main -- lib/ | grep -nE '^\\+.*(net/http|open-uri|socket|SOFT_FOUNDRY_GUARD|enforcement\\.yml)'; whole-tree grep of lib/ for those requires and for SOFT_FOUNDRY_GUARD or the machine-local override directory in gate.rb, phase_seal.rb, control_plane.rb, change_record.rb (AC-055's search clause; the --env run is phase_run_sealing_test#test_env_value_never_printed_by_sealing in CHECK-001)"
     result: pass
     evidence: evidence/diff-grep.txt
     criteria: [AC-055]
     protection: not_applicable
   - id: CHECK-009
     kind: custom
-    command: "git show --stat 9a96f45; git merge-base --is-ancestor 9a96f45 HEAD; the five RED files run at 9a96f45 in a detached worktree (.ai/rules/testing.md: the test exists and fails before the implementation)"
+    command: "RED commit shape: git show --stat and ancestry for 9a96f45, 4d7392a, d6c2748 and the GREEN commits c30af60, c5c20b4; the RED files run at 9a96f45, 4d7392a and d6c2748 in detached worktrees under /tmp (.ai/rules/testing.md: each test exists and fails before its implementation)"
     result: pass
     evidence: evidence/red-commit.txt
     criteria: []
+    red_commit: d6c2748fecf66a029d0ecb905c4165e48f5d3740
+    test_path: test/remediation_gate_hardening_test.rb
     protection: not_applicable
   - id: CHECK-010
     kind: custom
-    command: "ruby -Ilib -e 'require \"soft_foundry\"; SoftFoundry::Gate::CHECKS.each { |c| puts c }' (AC-019: the seven check names are entries of Gate::CHECKS)"
+    command: "ruby -Ilib -e 'require \"soft_foundry\"; SoftFoundry::Gate::CHECKS.each { |name, _| puts name }' and a lookup of the seven names (AC-019)"
     result: pass
     evidence: evidence/gate-checks.txt
     criteria: [AC-019]
+    protection: not_applicable
+  - id: CHECK-011
+    kind: custom
+    command: "every planned test method in 04-plan/testing.md's coverage table looked up at HEAD under its planned file, then anywhere under test/ (script text in the evidence file)"
+    result: fail
+    evidence: evidence/planned-tests.txt
+    criteria: []
+    protection: not_applicable
+  - id: CHECK-012
+    kind: tests
+    command: "the five RED files of 9a96f45, test/remediation_gate_hardening_test.rb and test/git_hook_env_test.rb run at HEAD d8b621d in a detached worktree (GREEN confirmation of the files the RED commits hold, outside the full suite's ordering)"
+    result: pass
+    evidence: evidence/red-run-head.txt
+    criteria: []
+    red_commit: 4d7392a6eb3089e3612011f8cefa4bed5169edcb
+    test_path: test/remediation_gate_hardening_test.rb
     protection: not_applicable

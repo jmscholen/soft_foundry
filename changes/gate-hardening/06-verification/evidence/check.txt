@@ -1,4 +1,3 @@
-# soft-foundry check; HEAD 15e6d923296135a660f6648b635a61edf93433a2; 2026-10-29T06:11:52Z; provider keys and SOFT_FOUNDRY_* unset
-$ ruby -Ilib exe/soft-foundry check
+CHECK-003: ruby -Ilib exe/soft-foundry check (env -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u XAI_API_KEY -u GEMINI_API_KEY -u GOOGLE_API_KEY -u SOFT_FOUNDRY_PHASE -u SOFT_FOUNDRY_PARALLEL -u SOFT_FOUNDRY_GUARD); HEAD d8b621d6347231eb773243159833f7f870aeef93; 2026-10-29T20:23:21Z
 ✓ pass control plane: 16 phases, 17 skills, no errors
 exit=0

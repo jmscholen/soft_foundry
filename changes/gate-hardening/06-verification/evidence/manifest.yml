@@ -1,32 +1,54 @@
-commit_sha: 15e6d923296135a660f6648b635a61edf93433a2
+commit_sha: d8b621d6347231eb773243159833f7f870aeef93
+# Every regular file under evidence/ with its SHA-256. A gitignored, untracked guard-baseline directory left under evidence/ by the earlier session (06:49 UTC) is not evidence and is not listed (handoff notes).
 artifacts:
   - path: evidence/check.txt
     produced_by: "CHECK-003: the control-plane check command"
-    sha256: f5b5ca38a1566c5800f913899e66fb85f33a1178182ca1fb0748f8f35b9cf856
+    sha256: cf9cc69bceaed32bfc23e8e5bcc23d36a69c0737b892470184e965de861a942f
   - path: evidence/ci.txt
     produced_by: "CHECK-005: the ci command"
-    sha256: ce39fe340c3bc4fe9bd0988daeedcb24b0204037cb8201da331517d5b97e802b
+    sha256: c80a1f60e29480de596ab188b38b65b0e51945f468f969422a6207e95cceb295
   - path: evidence/closed-records-diff.txt
-    produced_by: "CHECK-006: git diff main --name-only -- changes/"
-    sha256: 714969f403764c53081a6f92aacfc4547580b1da1c165083a1dc3f03b7245ce1
+    produced_by: "CHECK-006: git diff main --name-only -- changes/ and git status --short -- changes/ outside this record"
+    sha256: dce433986f7540cfcb0927b1b0ee73981abe108f3aaf1256636d8f9806cbdb40
   - path: evidence/diff-grep.txt
-    produced_by: "CHECK-008: git diff main -- lib/ piped to grep"
-    sha256: 713bf0099041b9a3ecf2da1a6c9878569c1373624a6aa0619b314425e3a2a0f2
+    produced_by: "CHECK-008: git diff main -- lib/ piped to grep, and whole-tree greps of lib/"
+    sha256: 6f5c9b72f889c155a85d37ae0f8068ec4b51c2c5bf93a3e4e86db6dc16d163ab
   - path: evidence/eval.txt
     produced_by: "CHECK-004: the harness eval command"
-    sha256: 94172c612ad7a5508cbdc8e2d15aaa0fc48e6142b7d8d7e1058da1a06500a230
+    sha256: 8e5c36931bec78fb9ebf480df83d14e0985fdc2a22b2dba65997080a35c57fa3
+  - path: evidence/full-suite-run1.txt
+    produced_by: "CHECK-001: the first run of the same command, concurrent with CHECK-002, CHECK-004, CHECK-005 and CHECK-009; 1 failure (harness_eval_test.rb:198, VER-003); kept, not the recorded run"
+    sha256: daf0b99e8c0b07f3a444fba3b0c63bfcc254a7c2a8498936ba03836709d8d23b
   - path: evidence/full-suite.txt
-    produced_by: "CHECK-001: bundle exec rake test, clean environment"
-    sha256: 2725888c65fe49faddb4f0a0a4d46e31e6ca30de3ae5db698b09d7a3cec7a60f
+    produced_by: "CHECK-001: bundle exec rake test, clean environment, run alone (the recorded full-suite run)"
+    sha256: da47115bee516a000610325547d4865a813d84e245c86c94eee81922c6b8c055
   - path: evidence/gate-checks.txt
-    produced_by: "CHECK-010: ruby -Ilib -e listing Gate::CHECKS"
-    sha256: 04a59bee8df493783e63bf13b79d7821b47879bf447a478db43f9e10c9598448
+    produced_by: "CHECK-010: ruby -Ilib -e listing Gate::CHECKS and looking up the seven names"
+    sha256: ebb6d6909d9d3cedfc7bd05c7219efa14a710466253baf655790393a803f6c73
   - path: evidence/learn-promote-dry-run.txt
-    produced_by: "CHECK-007: learn promote --dry-run"
-    sha256: e5e1fe1066f2ba881fa774ed01fb31376229e6d77b2467d96b038ec29596929c
+    produced_by: "CHECK-007: learn promote --dry-run, and each already-promoted id looked up in .ai/rules/learned.md"
+    sha256: 8107ed564afcc71e115a7d27a18321c0e59dc38ff705cbfbf72d2975eb669fc6
+  - path: evidence/planned-tests.txt
+    produced_by: "CHECK-011: the planned test methods of 04-plan/testing.md looked up at HEAD (script text included)"
+    sha256: 8786d2382c270232e718739f3229bb717bc9ceeaa2f4aee6538e876b96c6c664
   - path: evidence/red-commit.txt
-    produced_by: "CHECK-009: git show, git merge-base, and the RED files run at 9a96f45"
-    sha256: 624a1a6e92725f8fad2d289d20774f71fced726025c804234e0c832696ac4641
+    produced_by: "CHECK-009: git show, git merge-base ancestry, and the summary lines of the RED-state and HEAD worktree runs"
+    sha256: 59d85e82db085a6313d1dca50af8962e92bdf34778d864e33a0672852dc9a59a
+  - path: evidence/red-run-4d7392a.txt
+    produced_by: "CHECK-009: test/remediation_gate_hardening_test.rb run at 4d7392a in a detached worktree"
+    sha256: 0ce4ff5d873c7dbde0d8ab3130623c80fb806f2d977358a508d7782e2c3c8447
+  - path: evidence/red-run-9a96f45.txt
+    produced_by: "CHECK-009: the five RED files run at 9a96f45 in a detached worktree"
+    sha256: bb45de37afc0ce50016aea268a5abaa14fd3f490fcedfa9f0971fd6a39ff723f
+  - path: evidence/red-run-d6c2748.txt
+    produced_by: "CHECK-009: test/remediation_gate_hardening_test.rb run at d6c2748 in a detached worktree"
+    sha256: 4fc8245c977b37d1aac6f261ae6fee43c8b7b1e613608cce9a4f203693196d17
+  - path: evidence/red-run-head.txt
+    produced_by: "CHECK-012: the RED files, the remediation file and test/git_hook_env_test.rb run at HEAD d8b621d in a detached worktree"
+    sha256: 93c60171b82be6f62f22f9a14e555138ebcfe8bd8d089283f878035be91b27a0
+  - path: evidence/suite-phase-env-run1.txt
+    produced_by: "CHECK-002: the first run of the same command, concurrent with CHECK-001, CHECK-004, CHECK-005 and CHECK-009; 1 failure (harness_eval_test.rb:198, VER-003); kept, not the recorded run"
+    sha256: 4f8964a44664025ac662c3d80d4567287f2d1f6fdebe5617ac832e4078f6090c
   - path: evidence/suite-phase-env.txt
-    produced_by: "CHECK-002: bundle exec rake test with SOFT_FOUNDRY_PHASE=verify ANTHROPIC_API_KEY=x"
-    sha256: 5c8ef3a7b8c3be43c279a1ec9e8223ce91e471a19aecfdb34cbec976524227c4
+    produced_by: "CHECK-002: bundle exec rake test with SOFT_FOUNDRY_PHASE=verify ANTHROPIC_API_KEY=x, run alone"
+    sha256: d7828dc50d1263f1b75b102b44eb185923f2a73ffc2715ba934802d1a8ad3006
