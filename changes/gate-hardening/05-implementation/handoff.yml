@@ -2,9 +2,9 @@
 phase: 05-implementation
 skill: implementation
 status: complete
-commit_sha: 7d336546eb08564e222b2929f9ae2180cdfc4278
+commit_sha: c02528c5e9e91dcfa4624f176af54436ae1f25eb
 started_at: '2026-10-29T02:02:00Z'
-completed_at: '2026-10-29T06:03:00Z'
+completed_at: '2026-10-29T06:20:00Z'
 resolved_model:
   profile: coding_high
   provider: anthropic
@@ -17,7 +17,7 @@ blocking: []
 findings:
   - id: IMPL-001
     severity: minor
-    summary: "RED commit 9a96f45 holds the five new test files (test/phase_seal_test.rb, gate_checks_test.rb, fixture_completion_test.rb, phase_run_sealing_test.rb, gate_hardening_cli_test.rb); GREEN is 7d33654. Verification names 9a96f45 as red_commit with one of those paths on each check that runs them."
+    summary: "RED commit 9a96f45 holds the five new test files (test/phase_seal_test.rb, gate_checks_test.rb, fixture_completion_test.rb, phase_run_sealing_test.rb, gate_hardening_cli_test.rb); GREEN is 7d33654 plus c02528c (the hook-environment fix found by the first seal, with test/git_hook_env_test.rb, whose RED state is the failed seal recorded in log.md item 8). Verification names 9a96f45 as red_commit with one of those paths on each check that runs them."
   - id: IMPL-002
     severity: minor
     summary: "One defect found by existing tests during GREEN and fixed before this commit: PhaseSeal#advance! chose the next current_phase among pending phases only, skipping an in-progress one; it now takes the first phase that is not complete, stepping over a skippable pending one (decisions.md)."
