@@ -1,24 +1,76 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
-phase: 08-attack
+---
+phase: '08-attack'
 skill: adversarial-testing
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-started_at: null
-completed_at: null
+status: pending
+commit_sha:
+started_at: '2026-10-29T22:00:50Z'
+completed_at:
 resolved_model:
   profile: adversarial_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs: []
+blocking: []
+findings:
+- id: ATK-010
+  severity: major
+  summary: 'The ATK-001 remediation is closed only for an uncommitted rewrite (ATTACK-023
+    4a). recorded_commit is the newest commit touching the handoff whose status is
+    complete, so rewriting a sealed phase''s commit_sha to HEAD and committing the
+    handoff by hand (any message) makes that commit the recorded one: commit lineage
+    says recorded with this commit_sha, evidence current passes, the gate passes and
+    phase seal prints already sealed. Stale evidence reads current again. Compare
+    against the newest commit whose subject is Record <slug> <phase> (the seal''s
+    own), or require that the commit that last changed commit_sha is such a commit
+    or follows a reopening. Evidence: evidence/ATTACK-023-lineage-rebind.txt (4a).'
+- id: ATK-011
+  severity: minor
+  summary: 'A reopening licenses a commit_sha rewrite without proving a rerun (ATTACK-023
+    4b, ATTACK-024). A hand-added phase_reopenings entry (reset the phase, from_commit
+    HEAD) passes reopened_since?, and so does a real phase reopen followed by restoring
+    status complete, completed_at and the new commit_sha by hand; phase seal records
+    a second Record commit with the old evidence files untouched. Within the metadata
+    trust boundary, but the claim that commit_sha moves only through reopening is
+    only half of the structure: consider requiring that the phase''s evidence files
+    or manifest changed in the commit that moved commit_sha.'
+- id: ATK-012
+  severity: minor
+  summary: 'A recorded phase whose on-disk commit_sha is the same commit in another
+    form (abbreviated, upper case) is refused with a message that prints the same
+    12 characters for both SHAs (ATTACK-023 4g: commit_sha is ef208f546fc4 but recorded
+    ... with commit_sha ef208f546fc4). The refusal is safe; compare resolved commits,
+    or print the raw strings, so the message is not self-contradictory.'
+- id: ATK-013
+  severity: minor
+  summary: 'Boundaries of the other remediations (ATTACK-025): a two-word reason of
+    no content (no no, xx yy, a list or mapping of two words, via to_s) passes criteria
+    covered; CHECK-1.5 and CHECK-1/2 count as naming CHECK-1 because only word characters
+    and hyphen delimit the id; a manifest listing one zero-byte file satisfies the
+    non-empty rule. Accepted structure-only limits unless review wants a stricter
+    test (reason must be a string; delimit ids with a whitespace or punctuation list).'
+- id: ATK-003
+  severity: minor
+  summary: 'Carried, unchanged (ATTACK-008b): a manual phase seal fired while the
+    phase run session is open yields two Record commits, both consistent.'
+- id: ATK-006
+  severity: minor
+  summary: 'Carried, unchanged (ATTACK-019e): a deleted or unparseable enforcement
+    policy defaults to warn and the fresh-session check skips.'
+- id: ATK-007
+  severity: minor
+  summary: 'Carried, unchanged (ATTACK-020): hand edits to metadata.yml ride into
+    the seal commit and are honoured at once; the first seal drops the template comments
+    so the edit sits in a large diff.'
+- id: ATK-009
+  severity: minor
+  summary: 'Carried residue, unchanged (ATTACK-002g, 006, 007a, 018f, 021): absolute
+    paths in lock and safe-write refusals, (<unknown>) in change summary for an unparseable
+    metadata.yml, gate --json named by the specification does not exist, no session
+    id line in the advisory or change summary, and a killed seal needs .git/index.lock
+    removed by hand. Confirmed closed: ATK-002, ATK-004, ATK-005, ATK-008 and the
+    --fake runner stamp.'
 next: remediate
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: |-
+  Fresh session started by soft-foundry phase run attack (executed_by below), beside the evaluation phase in the same worktree; this is the rerun after 09-remediation, commit_sha is the HEAD the runner named, 5db4836. Every first-run case was run again unchanged against scratch git repositories under /tmp/sf-attack2/ (evidence/scripts/build.rb from a copy of this repository's .ai/; the branch's code via ruby -I lib exe/soft-foundry under Ruby 3.3.1, SOFT_FOUNDRY_* and provider keys unset except where a case sets one), then ATTACK-023 to ATTACK-025 attacked the fixes themselves. Nothing outside changes/gate-hardening/08-attack/ was written in this repository, nothing was staged or committed, and the evaluation phase's files were not touched. Check size: full_route_sweep. The first run's transcripts were replaced; findings ATK-002/004/005/008 and the --fake stamp are confirmed remediated, ATK-001 only for an uncommitted rewrite (new ATK-010, major, so next is remediate). Guard limitations: Bash is checked against deny sets only, so the declared read set was honoured as policy (00-intake, 01-discovery, 04-plan, 05-implementation and 09-remediation findings were read only through 09-remediation/summary.md, which the read set does not list; it was used to choose what to retest, treat as a deviation); the scripts name /tmp/sf-attack2 and asdf Ruby 3.3.1 by absolute path. Invisible characters in the ATTACK-017 transcript are written as <U+XXXX> escapes. No provider refusal occurred.
+  reopened 2026-10-29T23:53:33Z (manual): evidence files kept for reference; rerun this phase (ATK-010 (major): the ATK-001 fix is bypassed by a hand-committed handoff; remediating it with ATK-011, 012, 013, 006, 007)
+executed_by:

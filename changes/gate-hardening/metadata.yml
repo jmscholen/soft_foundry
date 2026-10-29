@@ -9,7 +9,7 @@ type: feature
 risk: high
 track: gated
 status: in_progress
-current_phase: evaluate
+current_phase: remediate
 created_at: 2026-10-29 01:34:20.000000000 Z
 scope: []
 surfaces:
@@ -63,5 +63,37 @@ phase_reopenings:
       status: complete
       commit_sha: c30af60717f2701055a272e9173581a4d36cd999
       completed_at: '2026-10-29T16:04:00Z'
+      session_id:
+- at: '2026-10-29T23:53:33Z'
+  phase: verify
+  reset:
+  - verify
+  - evaluate
+  - attack
+  - remediate
+  from_commit: 5db483653a8eb1301cc926c4b2adca7b2363769d
+  reason: 'ATK-010 (major): the ATK-001 fix is bypassed by a hand-committed handoff;
+    remediating it with ATK-011, 012, 013, 006, 007'
+  source: manual
+  previous:
+    verify:
+      status: complete
+      commit_sha: d8b621d6347231eb773243159833f7f870aeef93
+      completed_at: '2026-10-29T22:00:00Z'
+      session_id: '0990f0cf-b8da-43d0-bfe0-af7a6cb15027'
+    evaluate:
+      status: in_progress
+      commit_sha:
+      completed_at:
+      session_id: 590522cf-3895-4ab4-8842-ebbe3d3a9fc1
+    attack:
+      status: complete
+      commit_sha: 5db483653a8eb1301cc926c4b2adca7b2363769d
+      completed_at: '2026-10-29T22:11:14Z'
+      session_id: 386203a2-6648-4b68-af46-697f4ccf986e
+    remediate:
+      status: complete
+      commit_sha: c5c20b4dd3dfceeb13637b6d1b15601949fd8658
+      completed_at: '2026-10-29T16:27:00Z'
       session_id:
 skipped_phases: []

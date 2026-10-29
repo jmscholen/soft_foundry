@@ -1,35 +1,45 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
-phase: 09-remediation
+---
+phase: '09-remediation'
 skill: remediation
-status: complete
-commit_sha: c5c20b4dd3dfceeb13637b6d1b15601949fd8658
+status: pending
+commit_sha:
 started_at: '2026-10-29T11:33:00Z'
-completed_at: '2026-10-29T16:27:00Z'
+completed_at:
 resolved_model:
   profile: coding_high
   provider: anthropic
   model: claude-fable-5-1
-outputs:
-  - summary.md
+outputs: []
 blocking: []
 findings:
-  - id: REM-001
-    severity: minor
-    summary: "ATK-001 is closed structurally: commit lineage refuses a recorded phase whose commit_sha differs from its recorded handoff's unless phase_reopenings shows the phase reset at or after the recorded commit (RED 4d7392a, GREEN c30af60). Verification should include test/remediation_gate_hardening_test.rb with red_commit 4d7392a, and attack should re-run ATTACK-005g against this code."
-  - id: REM-002
-    severity: minor
-    summary: "ATK-003, ATK-006, ATK-007 and the ATK-009 residue are carried, each with its reason in summary.md; review and judgment decide whether any becomes a requirement change. The specification's `gate --json` wording (ATK-009) is a text error in the locked specification and is recorded, not edited."
-  - id: REM-003
-    severity: minor
-    summary: "Evidence invalidated: verify, evaluate and attack were reset to pending by `phase reopen verify` (phase_reopenings entry at 2026-10-29T11:35:26Z, from_commit 303a48f) before the RED commit, so ci passed on each commit of this phase. Their earlier files are kept under their directories for the reruns to read."
-  - id: REM-004
-    severity: minor
-    summary: "Found by sealing this phase: PhaseSeal#advance! ignored the remediate -> verify transition and set current_phase to review. Reopened and fixed in a second pass (RED d6c2748, GREEN c5c20b4): the seal follows a loop phase's `next` transition when that phase is not complete. The first seal commit c02a761 stays in history; this handoff is recorded at the second."
+- id: REM-001
+  severity: minor
+  summary: 'ATK-001 is closed structurally: commit lineage refuses a recorded phase
+    whose commit_sha differs from its recorded handoff''s unless phase_reopenings
+    shows the phase reset at or after the recorded commit (RED 4d7392a, GREEN c30af60).
+    Verification should include test/remediation_gate_hardening_test.rb with red_commit
+    4d7392a, and attack should re-run ATTACK-005g against this code.'
+- id: REM-002
+  severity: minor
+  summary: ATK-003, ATK-006, ATK-007 and the ATK-009 residue are carried, each with
+    its reason in summary.md; review and judgment decide whether any becomes a requirement
+    change. The specification's `gate --json` wording (ATK-009) is a text error in
+    the locked specification and is recorded, not edited.
+- id: REM-003
+  severity: minor
+  summary: 'Evidence invalidated: verify, evaluate and attack were reset to pending
+    by `phase reopen verify` (phase_reopenings entry at 2026-10-29T11:35:26Z, from_commit
+    303a48f) before the RED commit, so ci passed on each commit of this phase. Their
+    earlier files are kept under their directories for the reruns to read.'
+- id: REM-004
+  severity: minor
+  summary: 'Found by sealing this phase: PhaseSeal#advance! ignored the remediate
+    -> verify transition and set current_phase to review. Reopened and fixed in a
+    second pass (RED d6c2748, GREEN c5c20b4): the seal follows a loop phase''s `next`
+    transition when that phase is not complete. The first seal commit c02a761 stays
+    in history; this handoff is recorded at the second.'
 next: verify
-notes: "Remediation performed by the session that implemented the change, which is what the remediation skill is for (it writes code). current_phase was set to remediate, and back after the reopen moved it to verify, with shell commands (guard limitation recorded in 01-discovery). This phase did not read 07-evaluation/evidence or 08-attack/evidence beyond the attack handoff's findings, which are its input. Reopened once (2026-10-29T16:24Z) for the advance! fix and sealed again."
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: |-
+  Remediation performed by the session that implemented the change, which is what the remediation skill is for (it writes code). current_phase was set to remediate, and back after the reopen moved it to verify, with shell commands (guard limitation recorded in 01-discovery). This phase did not read 07-evaluation/evidence or 08-attack/evidence beyond the attack handoff's findings, which are its input. Reopened once (2026-10-29T16:24Z) for the advance! fix and sealed again.
+  reopened 2026-10-29T23:53:33Z (manual): evidence files kept for reference; rerun this phase (ATK-010 (major): the ATK-001 fix is bypassed by a hand-committed handoff; remediating it with ATK-011, 012, 013, 006, 007)
+executed_by:
