@@ -39,6 +39,9 @@ module SoftFoundry
     VERDICT_CHECK = "verdict recorded"
     FRESH_CHECK = "fresh session recorded"
     RESULT_WORDS = %w[pass fail error skipped].freeze
+    # The two names the runner writes into executed_by.runner; any other
+    # string, prefix or not, is not the runner's (ATK-009).
+    RUNNERS = ["soft-foundry phase run", "soft-foundry phase run --panel"].freeze
     # A closed or released record is read by the gate that closed it: the
     # checks added since report skip there rather than re-judging history.
     HISTORICAL = { "closed" => "closed record: not re-gated", "released" => "released record: not re-gated" }.freeze
@@ -465,6 +468,14 @@ module SoftFoundry
         return Check.new(LINEAGE_CHECK, :fail, "commit_sha #{sha[0, 12]} is not an ancestor of #{at_head ? 'HEAD' : "the record branch's tip"} #{tip[0, 12]}; the evidence commit must be in this record's history")
       end
       facts << "reaches #{at_head ? 'HEAD' : 'the branch tip'} #{tip[0, 12]}"
+      # A recorded phase's commit_sha moves only through a reopening: a
+      # forward rewrite would make stale evidence read current (ATK-001).
+      recorded_at = recorded_commit(phase)
+      recorded_sha = recorded_at && @record.recorded_handoff(phase, git: @git)&.fetch("commit_sha", nil).to_s
+      if recorded_sha && !recorded_sha.empty? && recorded_sha != sha && !@record.reopened_since?(phase, recorded_at, git: @git)
+        return Check.new(LINEAGE_CHECK, :fail, "commit_sha is #{sha[0, 12]} but this phase was recorded at #{recorded_at[0, 12]} with commit_sha #{recorded_sha[0, 12]} and has not been reopened since; evidence is replaced by `soft-foundry phase reopen #{phase.id} --reason TEXT` and a rerun, never by rewriting the commit it names")
+      end
+      facts << "recorded with this commit_sha" if recorded_sha == sha
       Check.new(LINEAGE_CHECK, :pass, facts.join("; "))
     rescue TargetError, GitError => e
       Check.new(LINEAGE_CHECK, :fail, e.message)
@@ -490,7 +501,8 @@ module SoftFoundry
       return Check.new(RESULTS_CHECK, :fail, "#{malformed.join('; ')}; #{shape}") unless malformed.empty?
       named = (Array(handoff["blocking"]).map(&:to_s) + Array(handoff["findings"]).flat_map { |f| f.is_a?(Hash) ? [f["id"].to_s, f["summary"].to_s] : [f.to_s] }).join("\n")
       not_passed = checks.select { |c| %w[fail error].include?(c["result"]) || (c["result"] == "skipped" && !Array(c["criteria"]).empty?) }
-      unnamed = not_passed.reject { |c| named.include?(c["id"].to_s) }
+      # The whole id, so CHECK-1 is not acknowledged by a line about CHECK-10 (ATK-004).
+      unnamed = not_passed.reject { |c| named.match?(/(?<![\w-])#{Regexp.escape(c['id'].to_s)}(?![\w-])/) }
       unless unnamed.empty?
         list = unnamed.map { |c| "#{c['id']} (#{c['result']})" }.join(", ")
         return Check.new(RESULTS_CHECK, :fail, "#{list} did not pass and no blocking entry or finding names #{unnamed.size == 1 ? 'it' : 'them'}; a check that did not pass is redone, or named in the handoff's blocking list or in a finding so the record says so")
@@ -515,9 +527,12 @@ module SoftFoundry
       end
       covered = by_checks | criteria_named(journeys_yml, "journeys")
       aside = Array(judgment_evidence_safe["criteria_not_covered"]).select { |e| e.is_a?(Hash) }
-      bad = aside.select { |e| Text.blank?(e["reason"]) || e["reason"].to_s.match?(PLACEHOLDER) }.map { |e| e["id"].to_s }
-      return Check.new(CRITERIA_CHECK, :fail, "criteria_not_covered sets #{bad.join(', ')} aside without a reason; give each a reason or cover it") unless bad.empty?
+      # A reason is at least two words of letters; "-", "n/a" or one bare word vouch for nothing (ATK-005).
+      bad = aside.select { |e| Text.blank?(e["reason"]) || e["reason"].to_s.match?(PLACEHOLDER) || e["reason"].to_s.scan(/\p{L}{2,}/).size < 2 }.map { |e| e["id"].to_s }
+      return Check.new(CRITERIA_CHECK, :fail, "criteria_not_covered sets #{bad.join(', ')} aside without a reason of at least two words; give each a reason or cover it") unless bad.empty?
       aside_ids = aside.map { |e| e["id"].to_s }
+      unknown = aside_ids - ids
+      return Check.new(CRITERIA_CHECK, :fail, "criteria_not_covered names #{unknown.join(', ')}, which #{unknown.size == 1 ? 'is not a criterion' : 'are not criteria'} in 02-specification/acceptance-criteria.yml") unless unknown.empty?
       missing = ids - covered - aside_ids
       unless missing.empty?
         return Check.new(CRITERIA_CHECK, :fail, "#{missing.join(', ')} named by no verification check or evaluation journey and not set aside in 14-judgment/evidence.yml criteria_not_covered with a reason")
@@ -569,6 +584,7 @@ module SoftFoundry
       data = RecordFile.load_yaml(path, "#{phase.output}/evidence/manifest.yml")
       artifacts = data.is_a?(Hash) ? data["artifacts"] : nil
       return Check.new(MANIFEST_CHECK, :fail, "evidence/manifest.yml artifacts is #{artifacts.nil? ? 'missing' : 'not a list'}; list each evidence file with path, produced_by, sha256") unless artifacts.is_a?(Array)
+      return Check.new(MANIFEST_CHECK, :fail, "evidence/manifest.yml lists no artifact; a phase whose evidence is the point names at least one file with its sha256 (ATK-008)") if artifacts.empty?
       inside = File.expand_path(dir)
       listed = []
       problems = artifacts.each_with_index.filter_map do |a, i|
@@ -615,7 +631,7 @@ module SoftFoundry
       mode = @plane.enforcement_mode
       return Check.new(FRESH_CHECK, :skip, "the repository's guard policy is #{mode}, so the fresh-context advisory applies instead") unless mode == "block"
       by = handoff["executed_by"]
-      if by.is_a?(Hash) && by["runner"].to_s.start_with?("soft-foundry phase run") && by["fresh_context"] == true
+      if by.is_a?(Hash) && RUNNERS.include?(by["runner"].to_s) && by["fresh_context"] == true
         return Check.new(FRESH_CHECK, :pass, "#{by['runner']}#{by['shell'].to_s.empty? ? '' : " (#{by['shell']})"}")
       end
       Check.new(FRESH_CHECK, :fail, "no fresh-context session is recorded in executed_by, and the repository's guard policy is block; run `soft-foundry phase run #{phase.id}` so the phase is done in a fresh session and stamped by the runner")

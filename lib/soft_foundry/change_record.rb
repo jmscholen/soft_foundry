@@ -216,6 +216,28 @@ module SoftFoundry
       nil
     end
 
+    # The handoff as it was at the commit that recorded the phase complete,
+    # or nil when the phase is not recorded.
+    def recorded_handoff(phase, git:)
+      sha = recorded_commit(phase, git: git)
+      return nil unless sha
+      data = YAML.safe_load(git.blob(sha, "changes/#{slug}/#{phase.output}/handoff.yml").to_s, permitted_classes: [Time, Date], aliases: true)
+      data.is_a?(Hash) ? data : nil
+    rescue Psych::Exception
+      nil
+    end
+
+    # True when `phase_reopenings` shows this phase reset at or after
+    # commit `since`: the recorded way a recorded phase's evidence is
+    # replaced (`phase reopen`, or the runner's automatic reopen).
+    def reopened_since?(phase, since, git:)
+      Array(metadata["phase_reopenings"]).any? do |entry|
+        next false unless entry.is_a?(Hash) && Array(entry["reset"]).map(&:to_s).include?(phase.id)
+        from = entry["from_commit"].to_s
+        from.match?(/\A[0-9a-f]{7,40}\z/) && git.commit?(from) && (from.start_with?(since) || since.start_with?(from) || git.ancestor?(since, from))
+      end
+    end
+
     # The person's recorded acceptance on an exploring track, or nil.
     def vetted
       v = metadata["vetted"]

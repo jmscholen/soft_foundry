@@ -48,6 +48,11 @@ module SoftFoundry
       advance!(phase)
       notes = unrelated_dirty_paths(phase).first(5)
       lines = notes.empty? ? [] : ["note: left uncommitted (outside this phase and the record's metadata): #{notes.join(', ')}"]
+      branch = @record.git_branch
+      current = @git.branch.to_s
+      if current != branch && @git.branch_tip(branch).nil?
+        lines << "note: the record's branch #{branch} does not exist; this seal commits to the checked-out branch #{current.empty? ? '(detached)' : current}; create #{branch} here or correct git.branch in metadata.yml (ATK-002)"
+      end
       begin
         sha = @git.commit!(message(phase), paths: staged_paths(phase))
       rescue GitError => e

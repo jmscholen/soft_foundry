@@ -191,11 +191,12 @@ class PhaseSealTest < Minitest::Test
   end
 
   def test_branch_resolved_false_measures_head
-    with_unsealed("verify", sealed: %w[intake discover specify threat_model plan implement]) do |dir, record|
+    # The branch is repointed before verification completes: a completed
+    # handoff whose commit_sha is later rewritten is the ATK-001 shape and is refused.
+    with_lifecycle_record(complete: %w[intake discover specify threat_model plan implement], current_phase: "verify") do |dir, record|
       record.update_metadata { |m| m["git"]["branch"] = "change/ghost" }
       commit_all(dir, "point at a branch that does not exist")
-      evidence = head(dir)
-      record.update_handoff(record.control_plane.phase("verify")) { |h| h["commit_sha"] = evidence }
+      complete_phase!(record, "verify", sha: head(dir))
       code, out, err = seal(dir, "verify", env: { "SOFT_FOUNDRY_PHASE" => "verify" })
       assert_equal 0, code, out + err
       handoff = record.handoff(record.control_plane.phase("verify"))
