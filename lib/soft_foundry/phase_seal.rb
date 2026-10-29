@@ -115,8 +115,13 @@ module SoftFoundry
     # when none. A first seal moves the change out of intake; sealing
     # judgment marks it judged.
     def advance!(phase)
+      # A loop phase (remediation, observability on a code change) names
+      # where it returns to in .ai/workflow.yml transitions; that phase is
+      # next when it is not complete, which after remediation it never is.
+      back = @plane.phase(@plane.transitions.dig(phase.id, "next").to_s)
       later = @plane.phases.drop(@plane.phases.index(phase) + 1)
-      nxt = later.find { |p| @record.phase_status(p) != "complete" && !(@record.phase_status(p) == "pending" && @record.skippable?(p)) }
+      nxt = back && @record.phase_status(back) != "complete" ? back : nil
+      nxt ||= later.find { |p| @record.phase_status(p) != "complete" && !(@record.phase_status(p) == "pending" && @record.skippable?(p)) }
       @record.update_metadata do |m|
         m["status"] = "in_progress" if m["status"].to_s == "intake"
         m["status"] = "judged" if phase.id == "judge"
