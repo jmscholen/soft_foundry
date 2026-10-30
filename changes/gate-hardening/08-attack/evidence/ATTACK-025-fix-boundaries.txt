@@ -1,0 +1,250 @@
+== 5a: criteria_not_covered reasons that survive the two-word test
+-- reason = "n/a n/a"
+14-judgment  complete  FAIL
+  ✗ fail criteria covered: criteria_not_covered sets AC-001 aside without a reason of at least two words; give each a reason or cover it
+-- reason = "no no"
+14-judgment  complete  FAIL
+  ✗ fail criteria covered: criteria_not_covered sets AC-001 aside without a reason of at least two words; give each a reason or cover it
+-- reason = "xx yy"
+14-judgment  complete  PASS
+  ✓ pass criteria covered: 1 criterion: 1 covered, 1 set aside with a reason (AC-001)
+-- reason = ["foo","bar"]
+14-judgment  complete  FAIL
+  ✗ fail criteria covered: criteria_not_covered sets AC-001 aside without a reason of at least two words; give each a reason or cover it
+-- reason = {"a"=>"foo","b"=>"bar"}
+14-judgment  complete  FAIL
+  ✗ fail criteria covered: criteria_not_covered sets AC-001 aside without a reason of at least two words; give each a reason or cover it
+-- reason = "ok -"
+14-judgment  complete  FAIL
+  ✗ fail criteria covered: criteria_not_covered sets AC-001 aside without a reason of at least two words; give each a reason or cover it
+-- reason = "éé éé"
+14-judgment  complete  FAIL
+  ✗ fail criteria covered: criteria_not_covered sets AC-001 aside without a reason of at least two words; give each a reason or cover it
+-- reason = 42
+14-judgment  complete  FAIL
+  ✗ fail criteria covered: criteria_not_covered sets AC-001 aside without a reason of at least two words; give each a reason or cover it
+-- reason = true
+14-judgment  complete  FAIL
+  ✗ fail criteria covered: criteria_not_covered sets AC-001 aside without a reason of at least two words; give each a reason or cover it
+-- id not a string: nil, array
+id=nil
+  ✗ fail criteria covered: criteria_not_covered names , which is not a criterion in 02-specification/acceptance-criteria.yml
+id=["AC-001"]
+  ✗ fail criteria covered: criteria_not_covered names ["AC-001"], which is not a criterion in 02-specification/acceptance-criteria.yml
+id="ac-001"
+  ✗ fail criteria covered: criteria_not_covered names ac-001, which is not a criterion in 02-specification/acceptance-criteria.yml
+id="AC-001 "
+  ✗ fail criteria covered: criteria_not_covered names AC-001 , which is not a criterion in 02-specification/acceptance-criteria.yml
+== 5b: whole-id acknowledgement: neighbours and empty/odd ids
+-- id="CHECK-1" finding="CHECK-1.5 failed"
+  ✗ fail test results recorded: CHECK-1 (fail) did not pass and no blocking entry or finding names it; a check that did not pass is redone, or named in the handoff's blocking list or in a finding so the record says so
+-- id="CHECK-1" finding="CHECK-1/2 failed"
+  ✗ fail test results recorded: CHECK-1 (fail) did not pass and no blocking entry or finding names it; a check that did not pass is redone, or named in the handoff's blocking list or in a finding so the record says so
+-- id="CHECK-1" finding="CHECK-10 failed"
+  ✗ fail test results recorded: CHECK-1 (fail) did not pass and no blocking entry or finding names it; a check that did not pass is redone, or named in the handoff's blocking list or in a finding so the record says so
+-- id="CHECK-1" finding="check-1 failed"
+  ✗ fail test results recorded: CHECK-1 (fail) did not pass and no blocking entry or finding names it; a check that did not pass is redone, or named in the handoff's blocking list or in a finding so the record says so
+-- id="CHECK-1" finding="preCHECK-1"
+  ✗ fail test results recorded: CHECK-1 (fail) did not pass and no blocking entry or finding names it; a check that did not pass is redone, or named in the handoff's blocking list or in a finding so the record says so
+-- id="" finding="anything at all."
+  ✗ fail test results recorded: check #1 has no id; record each check run as id, kind, command, result (pass | fail | error | skipped), evidence, criteria
+-- id=nil finding="anything at all."
+  ✗ fail test results recorded: check #1 has no id; record each check run as id, kind, command, result (pass | fail | error | skipped), evidence, criteria
+-- id=" " finding="anything at all."
+  ✗ fail test results recorded:   has no id; record each check run as id, kind, command, result (pass | fail | error | skipped), evidence, criteria
+-- id="a.b" finding="axb failed"
+  ✗ fail test results recorded: a.b (fail) did not pass and no blocking entry or finding names it; a check that did not pass is redone, or named in the handoff's blocking list or in a finding so the record says so
+-- id="CHECK-1" finding="CHECK‑1 failed (non-breaking hyphen)"
+  ✗ fail test results recorded: CHECK-1 (fail) did not pass and no blocking entry or finding names it; a check that did not pass is redone, or named in the handoff's blocking list or in a finding so the record says so
+== 5c: manifest minimum: one trivial artifact vouches for nothing
+07-evaluation  complete  FAIL
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✗ fail evidence manifest verified: every file the manifest lists is empty; evidence names at least one file with content (ATK-013)
+-- artifacts with a nil entry / a hash with no path / [{}]
+artifacts=[nil]
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✗ fail evidence manifest verified: artifact #1 is not a mapping
+artifacts=[{}]
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✗ fail evidence manifest verified: artifact #1 has no path
+artifacts=[[]]
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✗ fail evidence manifest verified: artifact #1 is not a mapping
+== 5d: git.branch values that look like options or refs
+-- git.branch=--all
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD 078328cc88e6; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✗ fail evidence current: STALE: declaration changed: git.branch since 7a16cdd365d9; rerun this phase
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+c1: 07-evaluation is not sealed: its gate fails; nothing was committed
+[exit 0] head: branch edited
+-- git.branch=-q
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD 670e59c95012; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✗ fail evidence current: STALE: declaration changed: git.branch since 7a16cdd365d9; rerun this phase
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+c1: 07-evaluation is not sealed: its gate fails; nothing was committed
+[exit 0] head: branch edited
+-- git.branch=HEAD
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD 634c9a2e37fa; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✗ fail evidence current: STALE: declaration changed: git.branch since 7a16cdd365d9; rerun this phase
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+c1: 07-evaluation is not sealed: its gate fails; nothing was committed
+[exit 0] head: branch edited
+-- git.branch=refs/heads/change/c1
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD 023b3706372f; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✗ fail evidence current: STALE: declaration changed: git.branch since 7a16cdd365d9; rerun this phase
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+c1: 07-evaluation is not sealed: its gate fails; nothing was committed
+[exit 0] head: branch edited
+-- git.branch=../c1
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD 8ed3254971af; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✗ fail evidence current: STALE: declaration changed: git.branch since 7a16cdd365d9; rerun this phase
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+c1: 07-evaluation is not sealed: its gate fails; nothing was committed
+[exit 0] head: branch edited
+-- git.branch=change/c1 --
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD 491dddf18e5c; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✗ fail evidence current: STALE: declaration changed: git.branch since 7a16cdd365d9; rerun this phase
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+c1: 07-evaluation is not sealed: its gate fails; nothing was committed
+[exit 0] head: branch edited
+-- git.branch=c1:x
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD 0a904035f4b1; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✗ fail evidence current: STALE: declaration changed: git.branch since 7a16cdd365d9; rerun this phase
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+c1: 07-evaluation is not sealed: its gate fails; nothing was committed
+[exit 0] head: branch edited
+-- git.branch=@{-1}
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD f597d89a6637; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✗ fail evidence current: STALE: declaration changed: git.branch since 7a16cdd365d9; rerun this phase
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+c1: 07-evaluation is not sealed: its gate fails; nothing was committed
+[exit 0] head: branch edited
+-- git.branch=@
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD 0beab0edebd0; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✗ fail evidence current: STALE: declaration changed: git.branch since 7a16cdd365d9; rerun this phase
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+c1: 07-evaluation is not sealed: its gate fails; nothing was committed
+[exit 0] head: branch edited
+== 5e: the loop: seal remediation with verify complete, with verify pending, twice
+sealed 06-verification at e78af058aabe
+completed remediate at e78af058aabe
+$ /tmp/sf-attack2/bin/sf phase seal remediate
+already sealed at ba79d49be057 (09-remediation and metadata.yml are unchanged since)
+[exit 0]
+--- git log
+ba79d49 remediate complete on disk
+e78af05 Record c1 verify
+7a16cdd phases complete through verify
+e26e293 record
+b0fc78b initial
+--- git status
+--- metadata
+status: in_progress
+current_phase: evaluate
+$ /tmp/sf-attack2/bin/sf phase seal remediate
+already sealed at ba79d49be057 (09-remediation and metadata.yml are unchanged since)
+[exit 0]
+--- git log
+ba79d49 remediate complete on disk
+e78af05 Record c1 verify
+7a16cdd phases complete through verify
+e26e293 record
+b0fc78b initial
+--- git status
+--- metadata
+status: in_progress
+current_phase: evaluate

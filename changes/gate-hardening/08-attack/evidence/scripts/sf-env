@@ -1,0 +1,3 @@
+#!/bin/sh
+# Same as sf but keeps whatever the caller exported (for cases that set SOFT_FOUNDRY_PHASE on purpose).
+exec /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry "$@"

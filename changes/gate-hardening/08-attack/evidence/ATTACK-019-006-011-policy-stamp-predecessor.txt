@@ -1,0 +1,73 @@
+built /tmp/sf-attack2/repos/a019 through attack; HEAD a08b559ad478
+completed review at a08b559ad478 (no executed_by)
+== 19a: block policy (the repository's): gate review
+13-review  complete  FAIL
+  ✗ fail fresh session recorded: no fresh-context session is recorded in executed_by, and the repository's guard policy is block; run `soft-foundry phase run review` so the phase is done in a fresh session and stamped by the runner
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+== 19b: SOFT_FOUNDRY_GUARD=warn in the environment (the gate must ignore it)
+13-review  complete  FAIL
+  ✗ fail fresh session recorded: no fresh-context session is recorded in executed_by, and the repository's guard policy is block; run `soft-foundry phase run review` so the phase is done in a fresh session and stamped by the runner
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+== 19c: machine-local override file set to warn (the gate must ignore it)
+✗ fail guard hook (claude: not installed, codex: not installed; mode: warn, machine-local override (.soft-foundry/enforcement.yml)); install with `soft-foundry hooks install --claude` or `--codex`
+13-review  complete  FAIL
+  ✗ fail fresh session recorded: no fresh-context session is recorded in executed_by, and the repository's guard policy is block; run `soft-foundry phase run review` so the phase is done in a fresh session and stamped by the runner
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+== 19d: repository policy edited by hand to warn and committed
+ .soft-foundry/enforcement.yml | 2 ++
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+13-review  complete  PASS
+  - skip fresh session recorded: the repository's guard policy is warn, so the fresh-context advisory applies instead
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+-- advisory on the same record:
+advisory: 1 issue to address before c1 goes live (informational, does not block the gate)
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+== 19e: policy file deleted; policy file malformed; mode: BLOCK (case)
+13-review  complete  PASS
+  - skip fresh session recorded: the repository's guard policy is warn, so the fresh-context advisory applies instead
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+13-review  complete  PASS
+  - skip fresh session recorded: the repository's guard policy is warn, so the fresh-context advisory applies instead
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+13-review  complete  FAIL
+  ✗ fail fresh session recorded: no fresh-context session is recorded in executed_by, and the repository's guard policy is block; run `soft-foundry phase run review` so the phase is done in a fresh session and stamped by the runner
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+== 6a: hand-written executed_by with fresh_context true on review (no runner ran)
+13-review  complete  PASS
+  ✓ pass fresh session recorded: soft-foundry phase run (claude)
+== 6b: what a reviewer can see: change summary and the session ledger
+phase: review (status: in_progress, risk: TBD, track: gated)
+phase-status: review complete
+-- sessions ledger lookup for the forged id:
+0
+soft-foundry: unknown option(s): --help
+== 6c: stamp variants: runner 'soft-foundry phase run --fake', fresh_context 'true' (string), runner prefixed with spaces
+variant [runner=soft-foundry phase run --fake;fc=true]
+  ✗ fail fresh session recorded: no fresh-context session is recorded in executed_by, and the repository's guard policy is block; run `soft-foundry phase run review` so the phase is done in a fresh session and stamped by the runner
+variant [runner=soft-foundry phase run;fc="true"]
+  ✗ fail fresh session recorded: no fresh-context session is recorded in executed_by, and the repository's guard policy is block; run `soft-foundry phase run review` so the phase is done in a fresh session and stamped by the runner
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+variant [runner= soft-foundry phase run;fc=true]
+  ✗ fail fresh session recorded: no fresh-context session is recorded in executed_by, and the repository's guard policy is block; run `soft-foundry phase run review` so the phase is done in a fresh session and stamped by the runner
+variant [runner=SOFT-FOUNDRY PHASE RUN;fc=true]
+  ✗ fail fresh session recorded: no fresh-context session is recorded in executed_by, and the repository's guard policy is block; run `soft-foundry phase run review` so the phase is done in a fresh session and stamped by the runner
+== 11a: evaluate complete and committed by hand with --no-verify, never sealed; gate attack
+completed evaluate at 7a16cdd365d9
+completed attack at eaa420ce0d61
+08-attack  complete  PASS
+  ✓ pass commit lineage: descends from 07-evaluation at 7a16cdd365d9; reaches HEAD eaa420ce0d61
+  ✓ pass predecessor complete: 07-evaluation
+== 11b: evaluate complete on disk only (not committed); gate attack
+completed evaluate at 7a16cdd365d9
+completed attack at 7a16cdd365d9
+08-attack  complete  FAIL
+  ✓ pass commit lineage: descends from 07-evaluation at 7a16cdd365d9; reaches HEAD 7a16cdd365d9
+  ✗ fail predecessor complete: 07-evaluation is complete but not recorded in git; run `soft-foundry phase seal evaluate` so the record's history carries it (the specification lock and the plan diff base are read from that commit)
+-- and phase seal attack:
+c1: 08-attack is not sealed: its gate fails; nothing was committed
+[exit 2]
+== 11c: evaluate handoff committed as complete, then edited back to in_progress on disk: is it still 'recorded'?
+completed evaluate at 7a16cdd365d9
+completed attack at 29cdbc4bc02d
+08-attack  complete  FAIL
+  ✗ fail predecessor complete: 07-evaluation is in_progress

@@ -1,0 +1,76 @@
+== 7a: SIGKILL the whole process group (ruby + git + hook) 1.5 s into a seal whose pre-commit hook sleeps 4 s
+completed evaluate at 7a16cdd365d9
+bin/batch3.sh: line 9: 37195 Killed: 9               perl -e 'setpgrp(0,0); exec @ARGV' -- $B/sf phase seal evaluate > $OUT/a007-seal.txt 2>&1
+seal process exit 137
+--- state: 4ddc45f evaluate complete on disk | staged: changes/c1/07-evaluation/handoff.yml changes/c1/metadata.yml  | index.lock: present | metadata current_phase: current_phase: attack | branch_resolved: branch_resolved: true
+-- gate attack in the half-state (attack complete on disk):
+08-attack  complete  PASS
+  ✓ pass predecessor complete: 07-evaluation
+fatal: Unable to create '/tmp/sf-attack2/repos/a007/.git/index.lock': File exists.
+
+Another git process seems to be running in this repository, e.g.
+an editor opened by 'git commit'. Please make sure all processes
+are terminated then try again. If it still fails, a git process
+may have crashed in this repository earlier:
+remove the file manually to continue.
+-- rerun phase seal evaluate (hook still sleeps 4 s):
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+note: left uncommitted (outside this phase and the record's metadata): changes/c1/08-attack/attack-plan.md, changes/c1/08-attack/cases.yml, changes/c1/08-attack/evidence/manifest.yml, changes/c1/08-attack/handoff.yml, changes/c1/08-attack/results.md
+c1: 07-evaluation is not sealed: git add failed: fatal: Unable to create '/tmp/sf-attack2/repos/a007/.git/index.lock': File exists.
+
+Another git process seems to be running in this repository, e.g.
+an editor opened by 'git commit'. Please make sure all processes
+are terminated then try again. If it still fails, a git process
+may have crashed in this repository earlier:
+remove the file manually to continue.
+metadata.yml is advanced in the worktree; fix the cause and run `soft-foundry phase seal evaluate` again to complete the seal
+[exit 2]
+--- state: 4ddc45f evaluate complete on disk | staged: changes/c1/07-evaluation/handoff.yml changes/c1/metadata.yml  | index.lock: present | metadata current_phase: current_phase: review | branch_resolved: branch_resolved: true
+M  changes/c1/07-evaluation/handoff.yml
+ M changes/c1/08-attack/attack-plan.md
+ M changes/c1/08-attack/cases.yml
+ M changes/c1/08-attack/evidence/manifest.yml
+ M changes/c1/08-attack/handoff.yml
+ M changes/c1/08-attack/results.md
+MM changes/c1/metadata.yml
+?? changes/c1/08-attack/evidence/recorded.txt
+== 7b: SIGKILL only the ruby parent while git runs the hook (git finishes on its own)
+completed evaluate at 7a16cdd365d9
+bin/batch3.sh: line 14: 37446 Killed: 9               $B/sf phase seal evaluate > $OUT/a007b-seal.txt 2>&1
+seal process exit 137
+--- state: f75981d Record c1 evaluate | staged:  | index.lock: absent | metadata current_phase: current_phase: attack | branch_resolved: branch_resolved: true
+-- rerun:
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+already sealed at f75981df9820 (07-evaluation and metadata.yml are unchanged since)
+[exit 0]
+--- state: f75981d Record c1 evaluate | staged:  | index.lock: absent | metadata current_phase: current_phase: attack | branch_resolved: branch_resolved: true
+== 7c: hook refuses the commit (exit 1): what the seal leaves and says
+completed evaluate at 7a16cdd365d9
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/locks/c1.lock
+c1: 07-evaluation is not sealed: git commit failed:
+hook: refusing
+metadata.yml is advanced in the worktree; fix the cause and run `soft-foundry phase seal evaluate` again to complete the seal
+[exit 2]
+--- state: d1d8981 evaluate complete on disk | staged: changes/c1/07-evaluation/handoff.yml changes/c1/metadata.yml  | index.lock: absent | metadata current_phase: current_phase: attack | branch_resolved: branch_resolved: true
+-- fix the hook and rerun:
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/locks/c1.lock
+sealed 07-evaluation at cfb635342ddd
+[exit 0]
+--- state: cfb6353 Record c1 evaluate | staged:  | index.lock: absent | metadata current_phase: current_phase: attack | branch_resolved: branch_resolved: true
+== 7d: a stale .git/index.lock left by a killed git
+completed evaluate at 7a16cdd365d9
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/locks/c1.lock
+c1: 07-evaluation is not sealed: git add failed: fatal: Unable to create '/tmp/sf-attack2/repos/a007d/.git/index.lock': File exists.
+
+Another git process seems to be running in this repository, e.g.
+an editor opened by 'git commit'. Please make sure all processes
+are terminated then try again. If it still fails, a git process
+may have crashed in this repository earlier:
+remove the file manually to continue.
+metadata.yml is advanced in the worktree; fix the cause and run `soft-foundry phase seal evaluate` again to complete the seal
+[exit 2]
+--- state: 8b767ea evaluate complete on disk | staged:  | index.lock: present | metadata current_phase: current_phase: attack | branch_resolved: branch_resolved: true
+[exit 0]

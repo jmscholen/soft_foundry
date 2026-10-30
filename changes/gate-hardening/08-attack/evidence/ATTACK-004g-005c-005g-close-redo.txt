@@ -1,0 +1,87 @@
+== C: change close c1 refuses BLOCKED and REJECTED without --force
+$ /tmp/sf-attack2/bin/sf change close c1
+c1: cannot close: the final judgment is BLOCKED; a BLOCKED change returns to remediate (`soft-foundry phase run remediate`, then verify onward), it does not close; pass --force to close anyway
+[exit 1]
+-- with --force:
+$ /tmp/sf-attack2/bin/sf change close c1 --force
+c1: closed
+[exit 0]
+$ /tmp/sf-attack2/bin/sf change close c1
+c1: cannot close: the final judgment is REJECTED; a REJECTED change returns to intake (the request is reconsidered from the start), it does not close; pass --force to close anyway
+[exit 1]
+-- with --force:
+$ /tmp/sf-attack2/bin/sf change close c1 --force
+c1: closed
+[exit 0]
+== 4g redo: evidence/ is a symlink to a directory outside the repository, manifest there lists recorded.txt with the right digest
+completed evaluate at 7a16cdd365d9
+total 32
+-rw-r--r--@ 1 jscholen-iou  wheel  650 Oct 29 22:32 evaluation-plan.md
+lrwxr-xr-x@ 1 jscholen-iou  wheel   37 Oct 29 22:32 evidence -> /tmp/sf-attack2/repos/a004g-elsewhere
+-rw-r--r--@ 1 jscholen-iou  wheel  571 Oct 29 22:32 handoff.yml
+-rw-r--r--@ 1 jscholen-iou  wheel  254 Oct 29 22:32 journeys.yml
+-rw-r--r--@ 1 jscholen-iou  wheel  253 Oct 29 22:32 results.md
+07-evaluation  complete  FAIL
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✗ fail evidence manifest verified: evidence/recorded.txt: resolves outside 07-evaluation/
+c1: 07-evaluation is not sealed: its gate fails; nothing was committed
+[exit 2]
+--- git log
+0128f8c evaluate complete on disk
+7a16cdd phases complete through verify
+e26e293 record
+b0fc78b initial
+--- git status
+ D changes/c1/07-evaluation/evidence/manifest.yml
+ D changes/c1/07-evaluation/evidence/recorded.txt
+ M changes/c1/07-evaluation/handoff.yml
+?? changes/c1/07-evaluation/evidence
+--- metadata
+status: in_progress
+current_phase: evaluate
+== 5c redo: commit_sha equal to the predecessor's
+completed evaluate at e26e29393970
+07-evaluation  complete  PASS
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD 03c4a113ea33; recorded with this commit_sha
+== 5g: a sealed phase's commit_sha is moved forward to HEAD and the phase re-sealed (stale evidence reads current)
+completed evaluate at 7a16cdd365d9
+sealed 07-evaluation at 497f88581632
+-- gate evaluate after the code change (expected: stale)
+07-evaluation  complete  FAIL
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD 4656678152e9; recorded with this commit_sha
+  ✗ fail evidence current: STALE: code changed since 7a16cdd365d9: lib/app.rb
+-- commit_sha rewritten to HEAD 4656678152e922e221c27e160b2c7b492d32b4eb, nothing else touched
+07-evaluation  complete  FAIL
+  ✗ fail commit lineage: commit_sha is 4656678152e922e221c27e160b2c7b492d32b4eb but this phase was recorded at 497f88581632 with commit_sha 7a16cdd365d942a62b0fcce2eeb9f20559be527e, and has not been reopened since; evidence is replaced by `soft-foundry phase reopen evaluate --reason TEXT` and a rerun, never by rewriting the commit it names
+  ✓ pass evidence current: no code changes since 4656678152e9; specification unchanged since 7a16cdd365d9
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 4656678152e922e221c27e160b2c7b492d32b4eb
+  ✗ fail commit lineage: commit_sha is 4656678152e922e221c27e160b2c7b492d32b4eb but this phase was recorded at 497f88581632 with commit_sha 7a16cdd365d942a62b0fcce2eeb9f20559be527e, and has not been reopened since; evidence is replaced by `soft-foundry phase reopen evaluate --reason TEXT` and a rerun, never by rewriting the commit it names
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✓ pass evidence current: no code changes since 4656678152e9; specification unchanged since 7a16cdd365d9
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+c1: 07-evaluation is not sealed: its gate fails; nothing was committed
+[exit 2]
+--- git log
+4656678 code change after evaluate was sealed
+497f885 Record c1 evaluate
+7a16cdd phases complete through verify
+e26e293 record
+b0fc78b initial
+--- git status
+ M changes/c1/07-evaluation/handoff.yml
+--- metadata
+status: in_progress
+current_phase: attack
+1
+497f885 Record c1 evaluate
+e26e293 record

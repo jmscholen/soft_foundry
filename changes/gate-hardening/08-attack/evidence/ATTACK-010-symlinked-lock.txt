@@ -1,0 +1,29 @@
+completed evaluate at 7a16cdd365d9
+== 10a: lock file is a symlink to changes/c1/metadata.yml
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+soft-foundry: /private/tmp/sf-attack2/repos/a010/.soft-foundry/locks/c1.lock is a symlink; refusing to write through it
+[exit 1]
+metadata.yml unchanged
+--- state: d808db3 evaluate complete on disk | staged:  | index.lock: absent | metadata current_phase: current_phase: evaluate | branch_resolved: 
+== 10b: lock file is a symlink to a file outside the repository (/etc/hosts)
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+soft-foundry: /private/tmp/sf-attack2/repos/a010/.soft-foundry/locks/c1.lock is a symlink; refusing to write through it
+[exit 1]
+== 10c: lock path is a directory
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+soft-foundry: /private/tmp/sf-attack2/repos/a010/.soft-foundry/locks/c1.lock exists but is not a regular file
+[exit 1]
+== 10d: the locks directory is a symlink to /tmp
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+soft-foundry: /private/tmp/sf-attack2/repos/a010/.soft-foundry/locks is a symlink; refusing to use it
+[exit 1]
+== 10e: the locks directory is unwritable
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+soft-foundry: /private/tmp/sf-attack2/repos/a010/.soft-foundry/locks is not writable
+[exit 1]
+== 10f: a dangling symlink at the lock path
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+soft-foundry: /private/tmp/sf-attack2/repos/a010/.soft-foundry/locks/c1.lock is a symlink; refusing to write through it
+[exit 1]
+-- clean rerun:
+[exit 0]

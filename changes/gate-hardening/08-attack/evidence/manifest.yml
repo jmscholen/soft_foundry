@@ -1,5 +1,190 @@
-commit_sha: TBD
+---
+commit_sha: 47583efe394ea04c1605d5c1536b0e560f86eb37
+notes: Every file under evidence/ is listed. Transcripts are the raw output of the
+  scripts under evidence/scripts/, run at 47583ef against scratch repositories under
+  /tmp/sf-attack2/ (a rerun after the third remediation pass; earlier runs at 303a48f
+  and 5db4836 were replaced). Every control, format, bidi or invisible character other
+  than TAB and LF in a transcript is written as a visible <U+XXXX> escape (two such
+  characters in ATTACK-017-criteria-verdict.txt); no payload is pasted raw.
 artifacts:
-  - path: TBD
-    case: ATTACK-001
-    sha256: TBD
+- path: evidence/ATTACK-001-session-marker.txt
+  produced_by: 'ATTACK-001: phase seal with SOFT_FOUNDRY_PHASE naming another phase
+    (batch1.sh)'
+  sha256: 13bb10dba110bd07b617a4d453b0b3e94d5eaab39ef2363a7f2a1beb25472855
+- path: evidence/ATTACK-002-handoff-symlink.txt
+  produced_by: 'ATTACK-002: symlinked handoff.yml and phase directory (batch1.sh)'
+  sha256: 2c5ba31f5e2112245ecdaa06663a67a9cc773e21669a6a2ff99458f6a23d0161
+- path: evidence/ATTACK-003-metadata-symlink.txt
+  produced_by: 'ATTACK-003: symlinked metadata.yml (batch1.sh)'
+  sha256: 997532fc305dece2df8fdb98b04ac5d531b9b76c7799663a1493142dde308792
+- path: evidence/ATTACK-004-manifest-paths.txt
+  produced_by: 'ATTACK-004: manifest artifact paths that escape, symlink, FIFO, directory,
+    hard link, size (batch2.sh)'
+  sha256: 06f4a675d1068fe510ccf2e678437659a4e08aeda6e1a4342a9ca5fd700a4203
+- path: evidence/ATTACK-004g-005c-005g-close-redo.txt
+  produced_by: 'ATTACK-004g, 005c, 005g, 022: evidence/ symlinked, equal commit_sha,
+    forward rebind of a sealed commit_sha, change close refusals (batch2b.sh)'
+  sha256: ea5e92ded144967b5f73706c5fa38c7fd6419a9c7774528d2961f8456a597a6c
+- path: evidence/ATTACK-005-commit-lineage.txt
+  produced_by: 'ATTACK-005: commit_sha older, unreachable, abbreviated, upper-case,
+    garbage predecessor, later commit (batch2.sh)'
+  sha256: f6efed3f0bcd1243abdbb9477f6469e4c259ecd3f27792e4e31407659b2bdc6a
+- path: evidence/ATTACK-007-kill-mid-seal-redo.txt
+  produced_by: 'ATTACK-007 redo: group SIGKILL with an uncommitted handoff, half-state
+    gate, rerun, ten early kills (batch3b.sh)'
+  sha256: 828bcbcf2735a1944dd833450f9854c175ef790c18d16707a7c1197bb4fce242
+- path: evidence/ATTACK-007-kill-mid-seal.txt
+  produced_by: 'ATTACK-007 first run: 7a with a hand-committed predecessor (superseded
+    by the redo), 7b parent-only kill, 7c hook refusal, 7d stale index.lock (batch3.sh)'
+  sha256: bde8efd717995a3c35b44e84f07e0ca94f0f39123033d6aabb6f6d11f95268f4
+- path: evidence/ATTACK-008-concurrent-seals.txt
+  produced_by: 'ATTACK-008: two simultaneous seals; 8b first attempt invalid (phase
+    already complete), superseded by the redo (batch3.sh)'
+  sha256: 92e99a65076c7919ab10e162bf95463c485868ab0221accb1045b662c023db8d
+- path: evidence/ATTACK-008-runner-race-redo.txt
+  produced_by: 'ATTACK-008 redo: a manual seal racing phase run at 1.0 s and at 2.6
+    s (batch3b.sh)'
+  sha256: 75df501e290d03aba4d4f59232bd1a25fb692fc75088943031f43858ad92b181
+- path: evidence/ATTACK-009-held-lock.txt
+  produced_by: 'ATTACK-009: a held record lock, timed (batch3.sh)'
+  sha256: 075d24b5bc330700ad4e62770b2539bb0cef53d008a58601757201b0ff5f7a0d
+- path: evidence/ATTACK-010-symlinked-lock.txt
+  produced_by: 'ATTACK-010: symlinked, directory, dangling lock file; symlinked and
+    unwritable locks directory (batch3.sh)'
+  sha256: 106bee9d6861e7da40088d075036d006f9ff3f49c33cb8ad53a94a6e4bde9ca1
+- path: evidence/ATTACK-012-yaml-aliases.txt
+  produced_by: 'ATTACK-012: 10,000 aliases, nested 10^7 and 10^9 aliases, a 50 MB
+    scalar, timed (batch2b.sh)'
+  sha256: 8cadf3f65a4aaf126790604fc9ce4547d4b027a9aeb6e5cf63fce82ea25eb699
+- path: evidence/ATTACK-013-env-redaction-redo.txt
+  produced_by: 'ATTACK-013 redo: non-executable shell, value ''phase'', value ''c1''
+    (batch3b.sh)'
+  sha256: f8ac9b42c8150e5e9f2091c040373b23477c6775ee15721e5d3ec03bf4ec4519
+- path: evidence/ATTACK-013-env-redaction.txt
+  produced_by: 'ATTACK-013: --env SECRET=hunter2 through phase run --parallel with
+    a failing fake claude; 13b and 13e invalid here (PATH lost env), redone (batch3.sh)'
+  sha256: bc90824e01d5b0a20519cc4f783d3294c148cea2c19bc10509d36da0ffbc75da
+- path: evidence/ATTACK-014-wrong-branch.txt
+  produced_by: 'ATTACK-014: phase seal --change c1 from branch other, detached HEAD,
+    deleted record branch, remote-only branch (batch1.sh)'
+  sha256: c26dbf4843629498f4c162baa6eee4aea192255ec1f2bef6ebaadb8894fc7eaa
+- path: evidence/ATTACK-015-hostile-keys-ui.txt
+  produced_by: 'ATTACK-015: script tag key and HTML check id through the gate, the
+    Snapshot JSON, a Psych error, app.js insertion (batch2b.sh)'
+  sha256: 237e1b30b40330642eaf7828d403563f74299ff4fea6a8d20678a3eb7fe8af0c
+- path: evidence/ATTACK-016-fail-acknowledged-redo.txt
+  produced_by: 'ATTACK-016 redo: 16c to 16g with alias-free writes (batch2b.sh)'
+  sha256: b6443a016f947c9ed1d2ce66c734385ce97182a46738b0edabafa1157ace01db
+- path: evidence/ATTACK-016-fail-acknowledged.txt
+  produced_by: 'ATTACK-016 first run: 16a and 16b valid; 16c onward invalid because
+    the helper script tripped on YAML aliases it wrote (the backtrace is the helper''s,
+    not the tool''s), redone (batch2.sh)'
+  sha256: 3b59eed17d500452d1e6cdd7a1676ff7102e76819172608b97c73050bf672a46
+- path: evidence/ATTACK-017-criteria-verdict.txt
+  produced_by: 'ATTACK-017 and ATTACK-022: criteria_not_covered reasons (hidden characters
+    shown as <U+XXXX>), verdict words, change close (batch2.sh; close redone in batch2b.sh)'
+  sha256: 37c29a5f392230a1b0bf730b55abd7038a0b49a27f02eaded132be7fcb69686c
+- path: evidence/ATTACK-018-git-not-mapping.txt
+  produced_by: 'ATTACK-018: git: as a string, list, empty, number; branch as a list;
+    unparseable metadata.yml (batch1.sh)'
+  sha256: 9676f3967416bc3d00eed568117bdc0362fabe3b2286dcd39033fa0bde44cceb
+- path: evidence/ATTACK-019-006-011-policy-stamp-predecessor.txt
+  produced_by: 'ATTACK-019, ATTACK-006, ATTACK-011: policy mode sources, forged executed_by,
+    hand-committed and unsealed predecessor (batch2b.sh)'
+  sha256: 7a2f921f7825551ebac4361bd3f0085a26452037ea726b6e15ceb84da8d0ca03
+- path: evidence/ATTACK-020-seal-entry-extras.txt
+  produced_by: 'ATTACK-020: smuggled metadata edit, planted temp siblings, traversal
+    slugs, status casing, dirty code paths (batch1.sh)'
+  sha256: f6e1ba6987009a37c3214035265a29378a3712027256c66aa4a1b07c7217d4d6
+- path: evidence/ATTACK-021-cross-record-and-json.txt
+  produced_by: 'ATTACK-021: cross-record seal from a session marker, gate JSON options,
+    summary and advisory sources (batch3b.sh)'
+  sha256: 39f805763df728a600e81a120159087cf3c6c0e7097bcf5457ca8421655f5fdf
+- path: evidence/ATTACK-021-json-summary.txt
+  produced_by: 'ATTACK-021: gate usage, change status --json, change summary with
+    a forged stamp (batch3.sh)'
+  sha256: 93ad7d035c531e1ee03840990997700471eb705a377826c8489760d4f49a8f66
+- path: evidence/ATTACK-023-lineage-rebind.txt
+  produced_by: 'ATTACK-023: commit_sha rewrites by hand commit, forged and real reopenings,
+    abbreviated forms (batch4.sh)'
+  sha256: f5744f7c488382c39c353999122e5b5f251d1028ded6ae4a29b61441032581f5
+- path: evidence/ATTACK-024-reopen-rewrite.txt
+  produced_by: 'ATTACK-024: phase reopen then hand-restored complete handoff (batch6.sh)'
+  sha256: 557e14f4281837fa8ddb60e9935ba1bc38981abe727089d706ae21902e7bdf44
+- path: evidence/ATTACK-025-fix-boundaries.txt
+  produced_by: 'ATTACK-025: boundaries of the two-word reason, whole-id match, manifest
+    minimum, git.branch values, remediation seal (batch5.sh)'
+  sha256: e8275dfdf43d112df9aca176077931ec7ac019b9e816e6ee6cccc2e8b78b796f
+- path: evidence/ATTACK-026-forged-subject-and-third-pass.txt
+  produced_by: 'ATTACK-026: forged Record subject on a hand commit, empty forged commit,
+    reopen then hand edit, hand-committed phase, hand-edited risk, missing or malformed
+    enforcement.yml, gate all timing (batch7.sh)'
+  sha256: 3f9550f0ec902c24cb6e8d452d417af3f54bf9a52d4d890b6fa97e55cb3d0980
+- path: evidence/ATTACK-027-structure-only-rerun-and-policy-shape.txt
+  produced_by: 'ATTACK-027: reopen plus one appended newline seals; guard mode spellings
+    and shapes (batch8.sh)'
+  sha256: 182224721a80e45132655cff8ffb313079ecb4f7fbf1956dd26df731367dc722
+- path: evidence/ATTACK-028-guard-shape-fail-closed.txt
+  produced_by: 'ATTACK-028: guard policy shapes against the fresh-session check, and
+    the scalar guard crash (batch9.sh plus a manual rerun)'
+  sha256: a34f3746e4edc155b70fb942e4915c6626a291d90ccedb884587b634bbadf105
+- path: evidence/scripts/batch1.sh
+  produced_by: cases ATTACK-001, 002, 003, 014, 018, 020
+  sha256: 7128f67559e5af30fc4f8aafb65c593c1f481fb2693d9eb7e3fe6bf348c0a9c8
+- path: evidence/scripts/batch2.sh
+  produced_by: cases ATTACK-004, 005, 016 (first run), 017, 022
+  sha256: 1ccb0e11d1487656398fc6b5749f573ff66b48cb0aa07fb6dd8b232e58663beb
+- path: evidence/scripts/batch2b.sh
+  produced_by: cases ATTACK-016 redo, 004g, 005c, 005g, close, 012, 015, 019, 006,
+    011
+  sha256: da2fb6795152258957f089f8a0c5ad25d135a4ba03d33584c7c8ad3f351acfd3
+- path: evidence/scripts/batch3.sh
+  produced_by: cases ATTACK-007, 008, 009, 010, 013, JSON and summary checks
+  sha256: d1d7a304327e30aa889b265c421812531bd2aea9b2aa86e7bf74606b348f88f4
+- path: evidence/scripts/batch3b.sh
+  produced_by: cases ATTACK-007 redo, 008 redo, 013 redo, 021
+  sha256: 24be64483d6149f2adfd29e37bb9df33efcbae737310845a8dcb41a99efb71ad
+- path: evidence/scripts/batch4.sh
+  produced_by: cases ATTACK-023
+  sha256: 4ba1a28efd83f06357b85dacbd3b943754b2404bb7847d098547fcf04048f45e
+- path: evidence/scripts/batch5.sh
+  produced_by: cases ATTACK-025
+  sha256: d4a8e7c0711160c10947c5c0e751d54f60a673f082e31fc8d2befb6915fad9f1
+- path: evidence/scripts/batch6.sh
+  produced_by: cases ATTACK-024
+  sha256: 35fb338c83a407c0e350445fb19fddd6cd20085be7974aff95d9350bc3a46218
+- path: evidence/scripts/batch7.sh
+  produced_by: commands for ATTACK-026
+  sha256: 85bc6f5b8568f929b37a05964a3cc3224b128d0ec7c2b83fc1decb45213caa5c
+- path: evidence/scripts/batch8.sh
+  produced_by: commands for ATTACK-027
+  sha256: dae5717a2e58b18e71a5dd8acd31a91be36119e83b857373bc2eb4d9c249715c
+- path: evidence/scripts/batch9.sh
+  produced_by: commands for ATTACK-028
+  sha256: d70a44ce083e2b8b67219ac6f01484e6383da113224269f34e1993a36b9049d6
+- path: evidence/scripts/build.rb
+  produced_by: builds a scratch repository from a copy of this repository's .ai/ with
+    record c1 complete through a named phase
+  sha256: dd4ed70af542109ba1eeb0dc2bc62d21a431d90611f0e4a27a240fa144907498
+- path: evidence/scripts/complete.rb
+  produced_by: completes a phase on disk the way the suite's fixture does (HarnessEval.complete_phase!)
+  sha256: 79efa7a4c98849978bfb97fb2d4b745a73166eb4065be861c7569be3c4ee0cca
+- path: evidence/scripts/fake-claude-completing.sh
+  produced_by: 'fake claude on PATH for ATTACK-008: completes the phase handoff, sleeps,
+    exits 0'
+  sha256: b595878603f16f666d2e2b70fcf3e7ce3a9dc0849eea26c867b0b52dda1a8c1e
+- path: evidence/scripts/fake-claude-failing.sh
+  produced_by: 'fake claude on PATH for ATTACK-013: logs that it ran and that SECRET
+    was set, exits 1'
+  sha256: 485370d58e1e1cba6e5300d24d2358993344bc888ef020bb22c302a92b48ab70
+- path: evidence/scripts/lib.sh
+  produced_by: 'shared shell helpers: fresh copy of the template, run, log'
+  sha256: b87d8d3ccca1ab96b1f4be3b6e9b485e059da121113d088703310dbd53199412
+- path: evidence/scripts/sf
+  produced_by: runs the branch's soft-foundry with SOFT_FOUNDRY_* and provider keys
+    unset
+  sha256: 52bc9e3cfe50f6cadd360110c8316f164ba097be853492db6cfb14a2dc4cc0bc
+- path: evidence/scripts/sf-env
+  produced_by: runs the branch's soft-foundry with SOFT_FOUNDRY_* and provider keys
+    unset
+  sha256: 8538cde56d26dc9508bab6e044c34393c0e83dbab9a76cdce81afb1ada275ff5

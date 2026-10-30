@@ -1,0 +1,808 @@
+completed evaluate at 7a16cdd365d9
+== 18: metadata.yml with [git: a string]
+4:git: a string
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+c1: cannot seal evaluate: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not string; restore the git: block
+[exit 1]
+$ /tmp/sf-attack2/bin/sf gate evaluate
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not string; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✗ fail evidence current: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not string; restore the git: block
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+[exit 2]
+$ /tmp/sf-attack2/bin/sf change summary
+change: c1
+phase: evaluate (status: in_progress, risk: TBD, track: gated)
+phase-status: intake complete
+phase-status: discover complete
+phase-status: specify complete
+phase-status: threat_model complete
+phase-status: plan complete
+phase-status: implement complete
+phase-status: verify complete
+phase-status: evaluate complete
+phase-status: attack pending
+phase-status: remediate pending
+phase-status: document pending
+phase-status: index pending
+phase-status: observe pending
+phase-status: review pending
+phase-status: judge pending
+phase-status: learn pending
+findings: none
+blocking: none
+owed: none
+[exit 0]
+$ /tmp/sf-attack2/bin/sf change status
+c1: c1  [status: in_progress, phase: evaluate, risk: TBD]
+  track: gated
+  00-intake              complete     FAIL: commit lineage
+  01-discovery           complete     FAIL: commit lineage
+  02-specification       complete     FAIL: commit lineage
+  03-threat-model        complete     FAIL: commit lineage
+  04-plan                complete     FAIL: commit lineage
+  05-implementation      complete     FAIL: commit lineage
+  06-verification        complete     FAIL: commit lineage, evidence current
+  07-evaluation          complete     FAIL: commit lineage, evidence current
+  08-attack              pending      
+  09-remediation         pending      
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              pending      
+  14-judgment            pending      
+  15-learning            pending      
+[exit 2]
+$ /tmp/sf-attack2/bin/sf gate all
+00-intake  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass waivers permitted: nothing waived
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not string; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: first phase
+  ✓ pass content clean
+01-discovery  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: repository-context.md, affected-components.md, dependencies.md, unknowns.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not string; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 00-intake
+  ✓ pass content clean
+02-specification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+  ✓ pass structured files parse: requirements.yml, acceptance-criteria.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not string; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 01-discovery
+  ✓ pass specification locked: locked at 7a16cdd365d9, the commit that recorded it
+  ✓ pass content clean
+03-threat-model  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: attack-surface.md, trust-boundaries.md, threats.yml, mitigations.md, handoff.yml
+  ✓ pass structured files parse: threats.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not string; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 02-specification
+  ✓ pass content clean
+04-plan  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: implementation.md, testing.md, rollout.md, rollback.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not string; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 03-threat-model
+  ✓ pass content clean
+05-implementation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not string; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 04-plan
+  ✓ pass content clean
+06-verification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not string; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✗ fail evidence current: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not string; restore the git: block
+  - skip red evidence: no check records a red_commit
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass test results recorded: 1 check, 1 pass
+  ✓ pass criteria covered: 1 criterion named by verification checks
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not string; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✗ fail evidence current: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not string; restore the git: block
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+08-attack  pending  SKIP
+  - skip phase pending: not started
+09-remediation  pending  SKIP
+  - skip phase pending: not started
+10-user-documentation  pending  SKIP
+  - skip phase pending: not started
+11-faq-index  pending  SKIP
+  - skip phase pending: not started
+12-observability  pending  SKIP
+  - skip phase pending: not started
+13-review  pending  SKIP
+  - skip phase pending: not started
+14-judgment  pending  SKIP
+  - skip phase pending: not started
+15-learning  pending  SKIP
+  - skip phase pending: not started
+[exit 2]
+== 18: metadata.yml with [git: []]
+4:git: []
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+c1: cannot seal evaluate: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not array; restore the git: block
+[exit 1]
+$ /tmp/sf-attack2/bin/sf gate evaluate
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not array; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✗ fail evidence current: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not array; restore the git: block
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+[exit 2]
+$ /tmp/sf-attack2/bin/sf change summary
+change: c1
+phase: evaluate (status: in_progress, risk: TBD, track: gated)
+phase-status: intake complete
+phase-status: discover complete
+phase-status: specify complete
+phase-status: threat_model complete
+phase-status: plan complete
+phase-status: implement complete
+phase-status: verify complete
+phase-status: evaluate complete
+phase-status: attack pending
+phase-status: remediate pending
+phase-status: document pending
+phase-status: index pending
+phase-status: observe pending
+phase-status: review pending
+phase-status: judge pending
+phase-status: learn pending
+findings: none
+blocking: none
+owed: none
+[exit 0]
+$ /tmp/sf-attack2/bin/sf change status
+c1: c1  [status: in_progress, phase: evaluate, risk: TBD]
+  track: gated
+  00-intake              complete     FAIL: commit lineage
+  01-discovery           complete     FAIL: commit lineage
+  02-specification       complete     FAIL: commit lineage
+  03-threat-model        complete     FAIL: commit lineage
+  04-plan                complete     FAIL: commit lineage
+  05-implementation      complete     FAIL: commit lineage
+  06-verification        complete     FAIL: commit lineage, evidence current
+  07-evaluation          complete     FAIL: commit lineage, evidence current
+  08-attack              pending      
+  09-remediation         pending      
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              pending      
+  14-judgment            pending      
+  15-learning            pending      
+[exit 2]
+$ /tmp/sf-attack2/bin/sf gate all
+00-intake  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass waivers permitted: nothing waived
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not array; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: first phase
+  ✓ pass content clean
+01-discovery  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: repository-context.md, affected-components.md, dependencies.md, unknowns.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not array; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 00-intake
+  ✓ pass content clean
+02-specification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+  ✓ pass structured files parse: requirements.yml, acceptance-criteria.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not array; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 01-discovery
+  ✓ pass specification locked: locked at 7a16cdd365d9, the commit that recorded it
+  ✓ pass content clean
+03-threat-model  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: attack-surface.md, trust-boundaries.md, threats.yml, mitigations.md, handoff.yml
+  ✓ pass structured files parse: threats.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not array; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 02-specification
+  ✓ pass content clean
+04-plan  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: implementation.md, testing.md, rollout.md, rollback.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not array; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 03-threat-model
+  ✓ pass content clean
+05-implementation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not array; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 04-plan
+  ✓ pass content clean
+06-verification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not array; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✗ fail evidence current: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not array; restore the git: block
+  - skip red evidence: no check records a red_commit
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass test results recorded: 1 check, 1 pass
+  ✓ pass criteria covered: 1 criterion named by verification checks
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not array; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✗ fail evidence current: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not array; restore the git: block
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+08-attack  pending  SKIP
+  - skip phase pending: not started
+09-remediation  pending  SKIP
+  - skip phase pending: not started
+10-user-documentation  pending  SKIP
+  - skip phase pending: not started
+11-faq-index  pending  SKIP
+  - skip phase pending: not started
+12-observability  pending  SKIP
+  - skip phase pending: not started
+13-review  pending  SKIP
+  - skip phase pending: not started
+14-judgment  pending  SKIP
+  - skip phase pending: not started
+15-learning  pending  SKIP
+  - skip phase pending: not started
+[exit 2]
+== 18: metadata.yml with [git:]
+4:git:
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+c1: cannot seal evaluate: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not nothing; restore the git: block
+[exit 1]
+$ /tmp/sf-attack2/bin/sf gate evaluate
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not nothing; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✗ fail evidence current: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not nothing; restore the git: block
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+[exit 2]
+$ /tmp/sf-attack2/bin/sf change summary
+change: c1
+phase: evaluate (status: in_progress, risk: TBD, track: gated)
+phase-status: intake complete
+phase-status: discover complete
+phase-status: specify complete
+phase-status: threat_model complete
+phase-status: plan complete
+phase-status: implement complete
+phase-status: verify complete
+phase-status: evaluate complete
+phase-status: attack pending
+phase-status: remediate pending
+phase-status: document pending
+phase-status: index pending
+phase-status: observe pending
+phase-status: review pending
+phase-status: judge pending
+phase-status: learn pending
+findings: none
+blocking: none
+owed: none
+[exit 0]
+$ /tmp/sf-attack2/bin/sf change status
+c1: c1  [status: in_progress, phase: evaluate, risk: TBD]
+  track: gated
+  00-intake              complete     FAIL: commit lineage
+  01-discovery           complete     FAIL: commit lineage
+  02-specification       complete     FAIL: commit lineage
+  03-threat-model        complete     FAIL: commit lineage
+  04-plan                complete     FAIL: commit lineage
+  05-implementation      complete     FAIL: commit lineage
+  06-verification        complete     FAIL: commit lineage, evidence current
+  07-evaluation          complete     FAIL: commit lineage, evidence current
+  08-attack              pending      
+  09-remediation         pending      
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              pending      
+  14-judgment            pending      
+  15-learning            pending      
+[exit 2]
+$ /tmp/sf-attack2/bin/sf gate all
+00-intake  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass waivers permitted: nothing waived
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not nothing; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: first phase
+  ✓ pass content clean
+01-discovery  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: repository-context.md, affected-components.md, dependencies.md, unknowns.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not nothing; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 00-intake
+  ✓ pass content clean
+02-specification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+  ✓ pass structured files parse: requirements.yml, acceptance-criteria.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not nothing; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 01-discovery
+  ✓ pass specification locked: locked at 7a16cdd365d9, the commit that recorded it
+  ✓ pass content clean
+03-threat-model  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: attack-surface.md, trust-boundaries.md, threats.yml, mitigations.md, handoff.yml
+  ✓ pass structured files parse: threats.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not nothing; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 02-specification
+  ✓ pass content clean
+04-plan  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: implementation.md, testing.md, rollout.md, rollback.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not nothing; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 03-threat-model
+  ✓ pass content clean
+05-implementation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not nothing; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 04-plan
+  ✓ pass content clean
+06-verification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not nothing; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✗ fail evidence current: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not nothing; restore the git: block
+  - skip red evidence: no check records a red_commit
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass test results recorded: 1 check, 1 pass
+  ✓ pass criteria covered: 1 criterion named by verification checks
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not nothing; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✗ fail evidence current: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not nothing; restore the git: block
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+08-attack  pending  SKIP
+  - skip phase pending: not started
+09-remediation  pending  SKIP
+  - skip phase pending: not started
+10-user-documentation  pending  SKIP
+  - skip phase pending: not started
+11-faq-index  pending  SKIP
+  - skip phase pending: not started
+12-observability  pending  SKIP
+  - skip phase pending: not started
+13-review  pending  SKIP
+  - skip phase pending: not started
+14-judgment  pending  SKIP
+  - skip phase pending: not started
+15-learning  pending  SKIP
+  - skip phase pending: not started
+[exit 2]
+== 18: metadata.yml with [git: 7]
+4:git: 7
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+c1: cannot seal evaluate: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not integer; restore the git: block
+[exit 1]
+$ /tmp/sf-attack2/bin/sf gate evaluate
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not integer; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✗ fail evidence current: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not integer; restore the git: block
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+[exit 2]
+$ /tmp/sf-attack2/bin/sf change summary
+change: c1
+phase: evaluate (status: in_progress, risk: TBD, track: gated)
+phase-status: intake complete
+phase-status: discover complete
+phase-status: specify complete
+phase-status: threat_model complete
+phase-status: plan complete
+phase-status: implement complete
+phase-status: verify complete
+phase-status: evaluate complete
+phase-status: attack pending
+phase-status: remediate pending
+phase-status: document pending
+phase-status: index pending
+phase-status: observe pending
+phase-status: review pending
+phase-status: judge pending
+phase-status: learn pending
+findings: none
+blocking: none
+owed: none
+[exit 0]
+$ /tmp/sf-attack2/bin/sf change status
+c1: c1  [status: in_progress, phase: evaluate, risk: TBD]
+  track: gated
+  00-intake              complete     FAIL: commit lineage
+  01-discovery           complete     FAIL: commit lineage
+  02-specification       complete     FAIL: commit lineage
+  03-threat-model        complete     FAIL: commit lineage
+  04-plan                complete     FAIL: commit lineage
+  05-implementation      complete     FAIL: commit lineage
+  06-verification        complete     FAIL: commit lineage, evidence current
+  07-evaluation          complete     FAIL: commit lineage, evidence current
+  08-attack              pending      
+  09-remediation         pending      
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              pending      
+  14-judgment            pending      
+  15-learning            pending      
+[exit 2]
+$ /tmp/sf-attack2/bin/sf gate all
+00-intake  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass waivers permitted: nothing waived
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not integer; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: first phase
+  ✓ pass content clean
+01-discovery  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: repository-context.md, affected-components.md, dependencies.md, unknowns.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not integer; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 00-intake
+  ✓ pass content clean
+02-specification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+  ✓ pass structured files parse: requirements.yml, acceptance-criteria.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not integer; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 01-discovery
+  ✓ pass specification locked: locked at 7a16cdd365d9, the commit that recorded it
+  ✓ pass content clean
+03-threat-model  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: attack-surface.md, trust-boundaries.md, threats.yml, mitigations.md, handoff.yml
+  ✓ pass structured files parse: threats.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not integer; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 02-specification
+  ✓ pass content clean
+04-plan  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: implementation.md, testing.md, rollout.md, rollback.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not integer; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 03-threat-model
+  ✓ pass content clean
+05-implementation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not integer; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 04-plan
+  ✓ pass content clean
+06-verification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not integer; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✗ fail evidence current: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not integer; restore the git: block
+  - skip red evidence: no check records a red_commit
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass test results recorded: 1 check, 1 pass
+  ✓ pass criteria covered: 1 criterion named by verification checks
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not integer; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✗ fail evidence current: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not integer; restore the git: block
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+08-attack  pending  SKIP
+  - skip phase pending: not started
+09-remediation  pending  SKIP
+  - skip phase pending: not started
+10-user-documentation  pending  SKIP
+  - skip phase pending: not started
+11-faq-index  pending  SKIP
+  - skip phase pending: not started
+12-observability  pending  SKIP
+  - skip phase pending: not started
+13-review  pending  SKIP
+  - skip phase pending: not started
+14-judgment  pending  SKIP
+  - skip phase pending: not started
+15-learning  pending  SKIP
+  - skip phase pending: not started
+[exit 2]
+== 18e: metadata.yml git.branch is a list
+4:git:
+5-  worktree: /tmp/sf-attack2/repos/template
+6-  branch: [a, b]
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD dc21c96deb77; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✗ fail evidence current: STALE: declaration changed: git.branch since 7a16cdd365d9; rerun this phase
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+c1: 07-evaluation is not sealed: its gate fails; nothing was committed
+[exit 2]
+$ /tmp/sf-attack2/bin/sf gate evaluate
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD dc21c96deb77; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✗ fail evidence current: STALE: declaration changed: git.branch since 7a16cdd365d9; rerun this phase
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+[exit 2]
+== 18f: metadata.yml does not parse
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+soft-foundry: (changes/c1/metadata.yml): did not find expected node content while parsing a flow node at line 2 column 1
+[exit 1]
+$ /tmp/sf-attack2/bin/sf gate evaluate
+soft-foundry: (changes/c1/metadata.yml): did not find expected node content while parsing a flow node at line 2 column 1
+[exit 1]
+$ /tmp/sf-attack2/bin/sf change summary
+soft-foundry: (<unknown>): did not find expected node content while parsing a flow node at line 2 column 1
+[exit 1]
+$ /tmp/sf-attack2/bin/sf ci
+✗ error changes/c1/metadata.yml is not valid YAML without aliases; fix it
+✗ fail control plane: 1 error(s)
+✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
+✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
+✓ pass eval commit-sha-older-than-predecessor: discover commit lineage fail, as expected
+✓ pass eval control-well-formed: verify pass, as expected
+✓ pass eval criteria-uncovered-at-judgment: judge criteria covered fail, as expected
+✓ pass eval evidence-manifest-digest-mismatch: verify evidence manifest verified fail, as expected
+✓ pass eval evidence-manifest-path-escapes-phase: verify evidence manifest verified fail, as expected
+✓ pass eval evidence-stale-after-code-change: verify evidence current fail, as expected
+✓ pass eval full-suite-record-names-wrong-tree: verify full-suite run recorded (record check, not a test result) fail, as expected
+✓ pass eval hardening-while-exploring: implement not exploring fail, as expected
+✓ pass eval invisible-text-in-evidence: verify content clean fail, as expected
+✓ pass eval judgment-waived: intake waivers permitted fail, as expected
+✓ pass eval placeholder-left-in-evidence: verify no placeholders fail, as expected
+✓ pass eval predecessor-complete-but-unrecorded: discover predecessor complete fail, as expected
+✓ pass eval red-commit-is-the-green-commit: verify red evidence fail, as expected
+✓ pass eval released-record-is-not-regated: specify pass, as expected
+✓ pass eval review-finding-without-failure: review findings explained fail, as expected
+✓ pass eval review-without-fresh-session-in-block-mode: review fresh session recorded fail, as expected
+✓ pass eval scope-narrowed-after-evidence-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-change-claimed-by-other-record-stays-current: verify evidence current pass, as expected
+✓ pass eval scoped-change-in-scope-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-unclaimed-code-change-stales-record: verify evidence current fail, as expected
+✓ pass eval secret-shape-in-evidence: verify content clean fail, as expected
+✓ pass eval shared-core-change-stales-scoped-record: verify evidence current fail, as expected
+✓ pass eval specification-does-not-parse: specify structured files parse fail, as expected
+✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
+✓ pass eval test-result-fail-unacknowledged: verify test results recorded fail, as expected
+soft-foundry: (changes/c1/metadata.yml): did not find expected node content while parsing a flow node at line 2 column 1
+✓ pass eval verdict-unfilled: judge verdict recorded fail, as expected
+✓ pass eval: 28 passed, 0 failed, 0 errors, 1 skipped
+[exit 1]

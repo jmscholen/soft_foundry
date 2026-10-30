@@ -1,0 +1,47 @@
+== 8b redo: phase run evaluate (fake claude completes the handoff then sleeps 2 s) racing a manual phase seal fired at 1.0 s
+manual seal exit 0
+phase run exit 0
+-- phase run output:
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the evaluation skill's permissions (`soft-foundry hooks install --claude`)
+billing: subscription (no ANTHROPIC_API_KEY in the environment, so claude bills to its own login); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+running evaluate of c1 in a fresh claude session (evaluation skill); executed_by recorded in changes/c1/07-evaluation/handoff.yml
+claude exited 0
+07-evaluation  complete  PASS
+note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/locks/c1.lock
+sealed 07-evaluation at 2666dec6a35b
+-- manual seal output:
+note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/locks/c1.lock
+sealed 07-evaluation at 8990db4c13b2
+--- state: 2666dec Record c1 evaluate | staged:  | index.lock: absent | metadata current_phase: current_phase: attack | branch_resolved: branch_resolved: true
+-- Record commits: 2
+2666dec Record c1 evaluate
+8990db4 Record c1 evaluate
+7a16cdd phases complete through verify
+e26e293 record
+  07-evaluation          complete     ok
+  08-attack              pending      
+== 8c: the same race, manual seal at 2.5 s (after the session exits, while the runner is sealing)
+manual seal exit 2
+phase run exit 0
+-- phase run output:
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the evaluation skill's permissions (`soft-foundry hooks install --claude`)
+billing: subscription (no ANTHROPIC_API_KEY in the environment, so claude bills to its own login); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+running evaluate of c1 in a fresh claude session (evaluation skill); executed_by recorded in changes/c1/07-evaluation/handoff.yml
+claude exited 0
+07-evaluation  complete  PASS
+note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/locks/c1.lock
+sealed 07-evaluation at 952b57c3822a
+-- manual seal output:
+note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/locks/c1.lock
+c1: 07-evaluation is not sealed: git add failed: fatal: Unable to create '/tmp/sf-attack2/repos/a008c/.git/index.lock': File exists.
+
+Another git process seems to be running in this repository, e.g.
+an editor opened by 'git commit'. Please make sure all processes
+are terminated then try again. If it still fails, a git process
+may have crashed in this repository earlier:
+remove the file manually to continue.
+metadata.yml is advanced in the worktree; fix the cause and run `soft-foundry phase seal evaluate` again to complete the seal
+--- state: 952b57c Record c1 evaluate | staged:  | index.lock: absent | metadata current_phase: current_phase: attack | branch_resolved: branch_resolved: true
+-- Record commits: 1

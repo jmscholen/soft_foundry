@@ -1,0 +1,146 @@
+completed evaluate at 7a16cdd365d9
+lrwxr-xr-x@ 1 jscholen-iou  wheel  30 Oct 29 22:30 changes/c1/07-evaluation/handoff.yml -> ../06-verification/handoff.yml
+== 2a: phase seal evaluate
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+c1: cannot seal evaluate: changes/c1/07-evaluation/handoff.yml is a symlink; a record file must be a regular file (replace the link with the file itself)
+[exit 1]
+--- git log
+7b6f7f0 evaluate complete on disk
+7a16cdd phases complete through verify
+e26e293 record
+b0fc78b initial
+--- git status
+ T changes/c1/07-evaluation/handoff.yml
+--- metadata
+status: in_progress
+current_phase: evaluate
+== 2b: gate evaluate
+$ /tmp/sf-attack2/bin/sf gate evaluate
+soft-foundry: changes/c1/07-evaluation/handoff.yml is a symlink; a record file must be a regular file (replace the link with the file itself)
+07-evaluation  missing  FAIL
+  ✗ fail handoff present: 07-evaluation/handoff.yml cannot be read: changes/c1/07-evaluation/handoff.yml is a symlink; a record file must be a regular file (replace the link with the file itself)
+[exit 1]
+== 2c: change summary
+$ /tmp/sf-attack2/bin/sf change summary
+change: c1
+phase: evaluate (status: in_progress, risk: TBD, track: gated)
+phase-status: intake complete
+phase-status: discover complete
+phase-status: specify complete
+phase-status: threat_model complete
+phase-status: plan complete
+phase-status: implement complete
+phase-status: verify complete
+phase-status: evaluate unreadable
+phase-status: attack pending
+phase-status: remediate pending
+phase-status: document pending
+phase-status: index pending
+phase-status: observe pending
+phase-status: review pending
+phase-status: judge pending
+phase-status: learn pending
+note: evaluate handoff.yml is a symlink; the summary reads only regular record files
+findings: none
+blocking: none
+note: advisories could not be read (changes/c1/07-evaluation/handoff.yml is a symlink; a record file must be a regular file (replace the link with the file itself))
+[exit 0]
+== 2d: change status
+$ /tmp/sf-attack2/bin/sf change status
+c1: c1  [status: in_progress, phase: evaluate, risk: TBD]
+  track: gated
+soft-foundry: changes/c1/07-evaluation/handoff.yml is a symlink; a record file must be a regular file (replace the link with the file itself)
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-evaluation          missing      FAIL: handoff present
+  08-attack              pending      
+  09-remediation         pending      
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              pending      
+  14-judgment            pending      
+  15-learning            pending      
+[exit 1]
+== 2e: symlink to a file outside the repository (/etc/hosts)
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+c1: cannot seal evaluate: changes/c1/07-evaluation/handoff.yml is a symlink; a record file must be a regular file (replace the link with the file itself)
+[exit 1]
+$ /tmp/sf-attack2/bin/sf gate evaluate
+soft-foundry: changes/c1/07-evaluation/handoff.yml is a symlink; a record file must be a regular file (replace the link with the file itself)
+07-evaluation  missing  FAIL
+  ✗ fail handoff present: 07-evaluation/handoff.yml cannot be read: changes/c1/07-evaluation/handoff.yml is a symlink; a record file must be a regular file (replace the link with the file itself)
+[exit 1]
+== 2f: dangling symlink
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+c1: cannot seal evaluate: changes/c1/07-evaluation/handoff.yml is a symlink; a record file must be a regular file (replace the link with the file itself)
+[exit 1]
+$ /tmp/sf-attack2/bin/sf gate evaluate
+soft-foundry: changes/c1/07-evaluation/handoff.yml is a symlink; a record file must be a regular file (replace the link with the file itself)
+07-evaluation  missing  FAIL
+  ✗ fail handoff present: 07-evaluation/handoff.yml cannot be read: changes/c1/07-evaluation/handoff.yml is a symlink; a record file must be a regular file (replace the link with the file itself)
+[exit 1]
+$ /tmp/sf-attack2/bin/sf change summary
+change: c1
+phase: evaluate (status: in_progress, risk: TBD, track: gated)
+phase-status: intake complete
+phase-status: discover complete
+phase-status: specify complete
+phase-status: threat_model complete
+phase-status: plan complete
+phase-status: implement complete
+phase-status: verify complete
+phase-status: evaluate unreadable
+phase-status: attack pending
+phase-status: remediate pending
+phase-status: document pending
+phase-status: index pending
+phase-status: observe pending
+phase-status: review pending
+phase-status: judge pending
+phase-status: learn pending
+note: evaluate handoff.yml is a symlink; the summary reads only regular record files
+findings: none
+blocking: none
+note: advisories could not be read (changes/c1/07-evaluation/handoff.yml is a symlink; a record file must be a regular file (replace the link with the file itself))
+[exit 0]
+== 2g: the whole phase directory is a symlink to 06-verification
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+soft-foundry: /private/tmp/sf-attack2/repos/a002/changes/c1/07-evaluation is a symlink; refusing to write through it
+[exit 1]
+$ /tmp/sf-attack2/bin/sf gate evaluate
+07-evaluation  complete  FAIL
+  ✗ fail handoff identity: phase is '06-verification', expected '07-evaluation'; skill is 'verification', expected 'evaluation'
+  ✗ fail required files present: missing: evaluation-plan.md, journeys.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: e26e29393970b255e076bc9b5aab621e7ee01234
+  ✗ fail commit lineage: commit_sha is e26e29393970b255e076bc9b5aab621e7ee01234 but this phase was recorded at 7b6f7f0c6e74 with commit_sha 7a16cdd365d942a62b0fcce2eeb9f20559be527e, and has not been reopened since; evidence is replaced by `soft-foundry phase reopen evaluate --reason TEXT` and a rerun, never by rewriting the commit it names
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✓ pass evidence current: no code changes since e26e29393970; specification unchanged since 7a16cdd365d9
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+[exit 2]
+--- git log
+7b6f7f0 evaluate complete on disk
+7a16cdd phases complete through verify
+e26e293 record
+b0fc78b initial
+--- git status
+ D changes/c1/07-evaluation/evaluation-plan.md
+ D changes/c1/07-evaluation/evidence/manifest.yml
+ D changes/c1/07-evaluation/evidence/recorded.txt
+ D changes/c1/07-evaluation/handoff.yml
+ D changes/c1/07-evaluation/journeys.yml
+ D changes/c1/07-evaluation/results.md
+?? changes/c1/07-evaluation
+--- metadata
+status: in_progress
+current_phase: evaluate

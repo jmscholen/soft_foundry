@@ -1,0 +1,35 @@
+== 8a: reopen, restore status/completed_at/new commit_sha by hand, append ONE newline to results.md, seal (ATK-011 structure-only boundary)
+sealed 07-evaluation at 7becd6ba2cd9
+$ /tmp/sf-attack2/bin/sf phase reopen evaluate --reason code changed after evaluate
+phase reopen: reopened evaluate (manual)
+phase reopen: reset evaluate
+[exit 0]
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/locks/c1.lock
+sealed 07-evaluation at 12ba11609daf
+[exit 0]
+--- git log
+12ba116 Record c1 evaluate
+fdf141c change the code after evaluation
+7becd6b Record c1 evaluate
+9915b24 evaluate complete on disk
+7a16cdd phases complete through verify
+--- git status
+--- metadata
+status: in_progress
+current_phase: attack
+-- evidence content identical apart from one trailing newline in results.md:
+ changes/c1/07-evaluation/handoff.yml | 18 +++++-------------
+ changes/c1/07-evaluation/results.md  |  1 +
+ 2 files changed, 6 insertions(+), 13 deletions(-)
+== 8b: guard mode spellings in enforcement.yml
+-- guard: {mode: blokc}
+✗ error policies/enforcement.yml: guard.mode 'blokc' is not one of warn, block, off
+-- guard: {mode: BLOCK}
+✗ error policies/enforcement.yml: guard.mode 'BLOCK' is not one of warn, block, off
+-- guard: {mode: "block "}
+✗ error policies/enforcement.yml: guard.mode 'block ' is not one of warn, block, off
+-- guard: block
+-- mode: block
+-- guard: {}
+-- guard: {mode: block}

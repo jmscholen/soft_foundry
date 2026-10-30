@@ -1,0 +1,31 @@
+---
+commit_sha: e26e29393970b255e076bc9b5aab621e7ee01234
+checks:
+== 15a: gate verify (detail echoes the id)
+06-verification  complete  FAIL
+  ✗ fail test results recorded: <img src=x onerror=alert(1)> (fail) did not pass and no blocking entry or finding names it; a check that did not pass is redone, or named in the handoff's blocking list or in a finding so the record says so
+== 15b: gate --json
+/Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/json-2.21.2/lib/json/common.rb:364:in `parse': invalid number: '06-verification' at line 1 column 1 (JSON::ParserError)
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/json-2.21.2/lib/json/common.rb:364:in `parse'
+	from -e:1:in `<main>'
+06-verification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+== 15c: the ui snapshot's check detail for this phase (what /api/changes/c1 serves)
+control"},{"name":"test results recorded","outcome":"fail","detail":"<img src=x onerror=alert(1)> (fail) did not pass and no blocking entry or finding names it; a chec
+== 15d: a Psych error whose message echoes a key: tests.yml with a '<script>' key and a syntax error after it
+06-verification  complete  FAIL
+  ✗ fail structured files parse: 06-verification/tests.yml: line 2, column 28: did not find expected ',' or ']'
+  ✗ fail test results recorded: tests.yml is missing or does not parse (see structured files parse)
+== 15e: app.js inserts check detail through linkify: strings become text nodes?
+85:  function add(node, child) {
+86-    if (child === null || child === undefined || child === false) return;
+87-    if (Array.isArray(child)) child.forEach(function (c) { add(node, c); });
+88-    else node.appendChild(typeof child === "object" ? child : document.createTextNode(String(child)));
+89-  }
+90-
+91-  function mark(state) {
+92-    return el("span", { class: "mark", "data-state": state, "aria-hidden": "true" });
+93-  }

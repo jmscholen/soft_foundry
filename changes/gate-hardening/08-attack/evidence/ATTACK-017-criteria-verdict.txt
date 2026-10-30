@@ -1,0 +1,90 @@
+built /tmp/sf-attack2/repos/a017 through judge; HEAD 4fbc2a13eef6
+== baseline judge gate
+14-judgment  complete  PASS
+  ✓ pass criteria covered: 1 criterion: 1 covered
+  ✓ pass verdict recorded: APPROVED
+  ✓ pass fresh session recorded: soft-foundry phase run (harness)
+== make AC-001 uncovered: verify check and journey name no criteria
+14-judgment  complete  FAIL
+  ✗ fail criteria covered: AC-001 named by no verification check or evaluation journey and not set aside in 14-judgment/evidence.yml criteria_not_covered with a reason
+== 17: criteria_not_covered reason=[ ]
+14-judgment  complete  FAIL
+  ✗ fail criteria covered: criteria_not_covered sets AC-001 aside without a reason of at least two words; give each a reason or cover it
+== 17: criteria_not_covered reason=[ <U+00A0> ** <U+00A0> ** ]
+14-judgment  complete  FAIL
+  ✗ fail criteria covered: criteria_not_covered sets AC-001 aside without a reason of at least two words; give each a reason or cover it
+== 17: criteria_not_covered reason=[ <U+200B> ** ** ]
+14-judgment  complete  FAIL
+  ✗ fail criteria covered: criteria_not_covered sets AC-001 aside without a reason of at least two words; give each a reason or cover it
+== 17: criteria_not_covered reason=[ T B D ]
+14-judgment  complete  FAIL
+  ✗ fail criteria covered: criteria_not_covered sets AC-001 aside without a reason of at least two words; give each a reason or cover it
+== 17: criteria_not_covered reason=[ T B D : a s k l a t e r ]
+14-judgment  complete  FAIL
+  ✗ fail criteria covered: criteria_not_covered sets AC-001 aside without a reason of at least two words; give each a reason or cover it
+== 17: criteria_not_covered reason=[ - ]
+14-judgment  complete  FAIL
+  ✗ fail criteria covered: criteria_not_covered sets AC-001 aside without a reason of at least two words; give each a reason or cover it
+== 17: criteria_not_covered reason=[ n / a ]
+14-judgment  complete  FAIL
+  ✗ fail criteria covered: criteria_not_covered sets AC-001 aside without a reason of at least two words; give each a reason or cover it
+== 17: criteria_not_covered reason=[ . ]
+14-judgment  complete  FAIL
+  ✗ fail criteria covered: criteria_not_covered sets AC-001 aside without a reason of at least two words; give each a reason or cover it
+== 17: criteria_not_covered reason=[ b e c a u s e ]
+14-judgment  complete  FAIL
+  ✗ fail criteria covered: criteria_not_covered sets AC-001 aside without a reason of at least two words; give each a reason or cover it
+== 17x: criteria_not_covered names an id that is not a criterion, plus AC-001 as a bare string
+14-judgment  complete  FAIL
+  ✗ fail criteria covered: criteria_not_covered names AC-999, which is not a criterion in 02-specification/acceptance-criteria.yml
+== 17y: criteria_not_covered is a mapping, then a string
+14-judgment  complete  FAIL
+  ✓ pass structured files parse: evidence.yml, handoff.yml
+  ✗ fail criteria covered: AC-001 named by no verification check or evaluation journey and not set aside in 14-judgment/evidence.yml criteria_not_covered with a reason
+14-judgment  complete  FAIL
+  ✓ pass structured files parse: evidence.yml, handoff.yml
+  ✗ fail criteria covered: AC-001 named by no verification check or evaluation journey and not set aside in 14-judgment/evidence.yml criteria_not_covered with a reason
+== 17z: a failing journey still counts as covering AC-001 (names only)
+14-judgment  complete  PASS
+  ✓ pass criteria covered: 1 criterion: 1 covered
+== V: verdict words
+outcome text=[APPROVED]
+14-judgment  complete  PASS
+  ✓ pass verdict recorded: APPROVED
+outcome text=[APPROVED and BLOCKED]
+14-judgment  complete  FAIL
+  ✗ fail verdict recorded: 14-judgment/final.md's Outcome section names none or several of APPROVED, APPROVED_WITH_RESIDUAL_RISK, BLOCKED, REJECTED; state exactly one
+outcome text=[approved]
+14-judgment  complete  FAIL
+  ✗ fail verdict recorded: 14-judgment/final.md's Outcome section names none or several of APPROVED, APPROVED_WITH_RESIDUAL_RISK, BLOCKED, REJECTED; state exactly one
+outcome text=[NOT_APPROVED]
+14-judgment  complete  FAIL
+  ✗ fail verdict recorded: 14-judgment/final.md's Outcome section names none or several of APPROVED, APPROVED_WITH_RESIDUAL_RISK, BLOCKED, REJECTED; state exactly one
+outcome text=[not APPROVED]
+14-judgment  complete  PASS
+  ✓ pass verdict recorded: APPROVED
+outcome text=[APPROVED_WITH_RESIDUAL_RISK (not APPROVED outright)]
+14-judgment  complete  FAIL
+  ✗ fail verdict recorded: 14-judgment/final.md's Outcome section names none or several of APPROVED, APPROVED_WITH_RESIDUAL_RISK, BLOCKED, REJECTED; state exactly one
+outcome text=[BLOCKED. See REJECTED items? no: BLOCKED]
+14-judgment  complete  FAIL
+  ✗ fail verdict recorded: 14-judgment/final.md's Outcome section names none or several of APPROVED, APPROVED_WITH_RESIDUAL_RISK, BLOCKED, REJECTED; state exactly one
+outcome text=[]
+14-judgment  complete  FAIL
+  ✗ fail verdict recorded: 14-judgment/final.md's Outcome section names none or several of APPROVED, APPROVED_WITH_RESIDUAL_RISK, BLOCKED, REJECTED; state exactly one
+== V2: Outcome section absent; word in another section
+14-judgment  complete  FAIL
+  ✗ fail verdict recorded: 14-judgment/final.md's Outcome section names none or several of APPROVED, APPROVED_WITH_RESIDUAL_RISK, BLOCKED, REJECTED; state exactly one
+== C: change close refuses BLOCKED and REJECTED without --force
+$ /tmp/sf-attack2/bin/sf change close
+soft-foundry: Usage: soft-foundry change close <slug> [--pr NUMBER] [--confirm ID]... [--force]
+[exit 1]
+$ /tmp/sf-attack2/bin/sf change close --force
+soft-foundry: invalid change slug '--force'
+[exit 1]
+$ /tmp/sf-attack2/bin/sf change close
+soft-foundry: Usage: soft-foundry change close <slug> [--pr NUMBER] [--confirm ID]... [--force]
+[exit 1]
+$ /tmp/sf-attack2/bin/sf change close --force
+soft-foundry: invalid change slug '--force'
+[exit 1]
