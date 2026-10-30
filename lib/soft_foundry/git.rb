@@ -21,19 +21,36 @@ module SoftFoundry
     end
 
     def repository?
-      run("rev-parse", "--is-inside-work-tree").first.strip == "true"
+      observed(:repository) { run("rev-parse", "--is-inside-work-tree").first.strip == "true" }
     rescue Errno::ENOENT
       false
     end
 
+    # Runs the block with HEAD, the branch and branch tips read once. The
+    # repository is not expected to move inside it; the cache is dropped on
+    # the way out, so a later read sees any commit made since.
+    def observing
+      return yield if @observed
+      @observed = {}
+      begin
+        yield
+      ensure
+        @observed = nil
+      end
+    end
+
     def head_sha
-      out, ok = run("rev-parse", "HEAD")
-      ok ? out.strip : nil
+      observed(:head) do
+        out, ok = run("rev-parse", "HEAD")
+        ok ? out.strip : nil
+      end
     end
 
     def branch
-      out, ok = run("rev-parse", "--abbrev-ref", "HEAD")
-      ok ? out.strip : nil
+      observed(:branch) do
+        out, ok = run("rev-parse", "--abbrev-ref", "HEAD")
+        ok ? out.strip : nil
+      end
     end
 
     # The committer identity configured for this repository, or nil.
@@ -55,7 +72,9 @@ module SoftFoundry
     end
 
     def commit?(sha)
+      return true if fixed?(sha) && memo[[:commit, sha.to_s]]
       _, ok = run("cat-file", "-e", "#{sha}^{commit}")
+      memo[[:commit, sha.to_s]] = true if ok && fixed?(sha)
       ok
     end
 
@@ -71,7 +90,10 @@ module SoftFoundry
     # already been merged.
     def ancestor?(sha, ref)
       return false unless sha.to_s.match?(/\A[0-9a-f]{7,40}\z/) && ref.to_s != ""
+      # Between two named commits the answer never changes.
+      return memo[[:ancestor, sha, ref]] if fixed?(sha) && fixed?(ref) && memo.key?([:ancestor, sha, ref])
       _, ok = run("merge-base", "--is-ancestor", sha, ref)
+      memo[[:ancestor, sha, ref]] = ok if fixed?(sha) && fixed?(ref)
       ok
     end
 
@@ -155,12 +177,13 @@ module SoftFoundry
     end
 
     # The newest commit touching `path` whose subject is exactly `subject`
-    # (the message a seal gives its commit), or nil.
+    # (the message a seal gives its commit); the newest commit touching it
+    # when none has that subject, or nil, from one git call.
     def last_commit_with_subject(path, subject)
       out, ok = run("log", "--format=%H%x09%s", "--", path)
       return nil unless ok
-      line = out.lines(chomp: true).find { |l| l.split("\t", 2).last == subject }
-      line&.split("\t", 2)&.first
+      rows = out.lines(chomp: true).map { |l| l.split("\t", 2) }
+      (rows.find { |_, s| s == subject } || rows.first)&.first
     end
 
     # The full hash of the commit `sha` names (abbreviated or not), or nil.
@@ -172,7 +195,10 @@ module SoftFoundry
 
     # The contents of `path` at commit `sha`, or nil when absent there.
     def blob(sha, path)
+      key = [:blob, sha.to_s, path]
+      return memo[key] if fixed?(sha) && memo.key?(key)
       out, ok = run("show", "#{sha}:#{path}")
+      memo[key] = ok ? out : nil if fixed?(sha)
       ok ? out : nil
     end
 
@@ -180,12 +206,13 @@ module SoftFoundry
     # CI checkout that fetched every branch still finds it. Nil if neither.
     def branch_tip(name)
       return nil if name.to_s.strip.empty? || name.to_s == "HEAD"
-      ["refs/heads/#{name}", "refs/remotes/origin/#{name}"].each do |ref|
-        next unless ref?(ref)
-        out, ok = run("rev-parse", ref)
-        return out.strip if ok
+      observed([:tip, name.to_s]) do
+        ["refs/heads/#{name}", "refs/remotes/origin/#{name}"].each do |ref|
+          next unless ref?(ref)
+          out, ok = run("rev-parse", ref)
+          break out.strip if ok
+        end.then { |r| r.is_a?(String) ? r : nil }
       end
-      nil
     end
 
     # Modified, staged, untracked, and ignored paths. Ignored directories are
@@ -215,6 +242,18 @@ module SoftFoundry
     end
 
     private
+
+    # Answers about a commit named by its full hash cannot change while this
+    # object lives, so the gate asks git once per question (REQ-036).
+    def memo = (@memo ||= {})
+
+    def observed(key)
+      return yield unless @observed
+      return @observed[key] if @observed.key?(key)
+      @observed[key] = yield
+    end
+
+    def fixed?(sha) = sha.to_s.match?(/\A[0-9a-f]{40}\z/)
 
     def hash!(sha)
       value = sha.to_s

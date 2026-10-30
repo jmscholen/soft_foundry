@@ -117,10 +117,14 @@ module SoftFoundry
     end
 
     def evaluate_all
-      @plane.phases.map { |phase| evaluate(phase) }
+      @git.observing { @plane.phases.map { |phase| evaluate(phase) } }
     end
 
-    def evaluate(phase)
+    # HEAD and the branch tips are read once per evaluation: one gate run
+    # looks at one state of the repository (REQ-036).
+    def evaluate(phase) = @git.observing { evaluate_observed(phase) }
+
+    def evaluate_observed(phase)
       phase = @plane.phase(phase) || raise(ArgumentError, "unknown phase '#{phase}'") unless phase.is_a?(ControlPlane::Phase)
       skill = @plane.skill(phase.skill)
       checks = []
@@ -458,14 +462,14 @@ module SoftFoundry
       prev_sha = prev ? @record.handoff(prev)&.fetch("commit_sha", nil).to_s : ""
       if prev && prev_sha.match?(SHA) && @git.commit?(prev_sha)
         unless @git.ancestor?(prev_sha, sha)
-          return Check.new(LINEAGE_CHECK, :fail, "#{prev.output} recorded #{prev_sha[0, 12]}, which is not an ancestor of this phase's commit_sha #{sha[0, 12]}; a phase's commit_sha is the HEAD its outputs describe, which follows its predecessor's")
+          return Check.new(LINEAGE_CHECK, :fail, "#{prev.output} recorded #{prev_sha[0, 12]}, which is not an ancestor of this phase's commit_sha #{sha[0, 12]}; a phase's commit_sha is the HEAD its outputs describe, which follows its predecessor's; rerun this phase from the current HEAD (`soft-foundry phase reopen #{phase.id} --reason TEXT`), or reseal the predecessor if it was the one rewritten")
         end
         facts << "descends from #{prev.output} at #{prev_sha[0, 12]}"
       end
       tip = Scope.tip_for(@record, @git, sha, resolved: handoff["branch_resolved"]) || @git.head_sha
       at_head = tip == @git.head_sha
       unless @git.ancestor?(sha, tip)
-        return Check.new(LINEAGE_CHECK, :fail, "commit_sha #{sha[0, 12]} is not an ancestor of #{at_head ? 'HEAD' : "the record branch's tip"} #{tip[0, 12]}; the evidence commit must be in this record's history")
+        return Check.new(LINEAGE_CHECK, :fail, "commit_sha #{sha[0, 12]} is not an ancestor of #{at_head ? 'HEAD' : "the record branch's tip"} #{tip[0, 12]}; the evidence commit must be in this record's history; check out the record's branch, or reopen this phase (`soft-foundry phase reopen #{phase.id} --reason TEXT`) and rerun it here")
       end
       facts << "reaches #{at_head ? 'HEAD' : 'the branch tip'} #{tip[0, 12]}"
       # A recorded phase's commit_sha moves only through a reopening that
