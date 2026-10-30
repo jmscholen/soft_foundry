@@ -1,0 +1,119 @@
+# EVAL-011: Uncovered criteria warn at verification and fail at judgment unless set aside with a reason (AC-028, AC-029, AC-030)
+# driver: evidence/journeys-driver.rb, run 2026-10-30T01:23:56Z at 87d7b8f0e9e6
+
+# scratch repository: /tmp/sf-eval3/repos/eval-011-criteria
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+$ soft-foundry phase seal specify
+note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/
+sealed 02-specification at b3a3cf4c6442
+exit 0
+
+assert pass: specify sealed naming AC-001..AC-003
+$ soft-foundry gate verify
+06-verification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 54fb685b35ae69e2b7074f7f16232fe75e61e4d7
+  ✓ pass commit lineage: descends from 05-implementation at b3a3cf4c6442; reaches HEAD 54fb685b35ae
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since 54fb685b35ae; specification unchanged since b3a3cf4c6442
+  - skip red evidence: no check records a red_commit
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass test results recorded: 1 check, 1 pass
+  ! warn criteria covered: AC-003 named by no verification check's criteria; an evaluation journey may cover it, or the judgment sets it aside with a reason in evidence.yml criteria_not_covered
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+exit 0
+
+assert pass: AC-028 `criteria covered` warns naming AC-003 and the gate passes
+$ soft-foundry gate judge
+14-judgment  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: final.md, residual-risk.md, evidence.yml, handoff.yml
+  ✓ pass structured files parse: evidence.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 53c40a43effa5ff45f16cc7e2180e5c145e8f03f
+  ✓ pass commit lineage: descends from 13-review at 2c2c9d83e02d; reaches HEAD 53c40a43effa
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 13-review
+  ✓ pass evidence current: no code changes since 53c40a43effa; specification unchanged since b3a3cf4c6442
+  ✗ fail criteria covered: AC-003 named by no verification check or evaluation journey and not set aside in 14-judgment/evidence.yml criteria_not_covered with a reason
+  ✓ pass verdict recorded: APPROVED
+  ✓ pass fresh session recorded: soft-foundry phase run (harness)
+  ✓ pass content clean
+exit 2
+
+assert pass: AC-029 at judge, `criteria covered` fails naming AC-003
+$ soft-foundry gate judge
+14-judgment  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: final.md, residual-risk.md, evidence.yml, handoff.yml
+  ✓ pass structured files parse: evidence.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 53c40a43effa5ff45f16cc7e2180e5c145e8f03f
+  ✓ pass commit lineage: descends from 13-review at 2c2c9d83e02d; reaches HEAD 53c40a43effa
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 13-review
+  ✓ pass evidence current: no code changes since 53c40a43effa; specification unchanged since b3a3cf4c6442
+  ✓ pass criteria covered: 3 criteria: 2 covered, 1 set aside with a reason (AC-003)
+  ✓ pass verdict recorded: APPROVED
+  ✓ pass fresh session recorded: soft-foundry phase run (harness)
+  ✓ pass content clean
+exit 0
+
+assert pass: AC-030 passes saying AC-003 was set aside with a reason
+$ soft-foundry gate judge
+14-judgment  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: final.md, residual-risk.md, evidence.yml, handoff.yml
+  ✓ pass structured files parse: evidence.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 53c40a43effa5ff45f16cc7e2180e5c145e8f03f
+  ✓ pass commit lineage: descends from 13-review at 2c2c9d83e02d; reaches HEAD 53c40a43effa
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 13-review
+  ✓ pass evidence current: no code changes since 53c40a43effa; specification unchanged since b3a3cf4c6442
+  ✗ fail criteria covered: criteria_not_covered sets AC-003 aside without a reason of at least two words; give each a reason or cover it
+  ✓ pass verdict recorded: APPROVED
+  ✓ pass fresh session recorded: soft-foundry phase run (harness)
+  ✓ pass content clean
+exit 2
+
+assert pass: AC-030 an empty reason fails
+$ soft-foundry gate judge
+14-judgment  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: final.md, residual-risk.md, evidence.yml, handoff.yml
+  ✓ pass structured files parse: evidence.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 53c40a43effa5ff45f16cc7e2180e5c145e8f03f
+  ✓ pass commit lineage: descends from 13-review at 2c2c9d83e02d; reaches HEAD 53c40a43effa
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 13-review
+  ✓ pass evidence current: no code changes since 53c40a43effa; specification unchanged since b3a3cf4c6442
+  ✗ fail criteria covered: criteria_not_covered sets AC-003 aside without a reason of at least two words; give each a reason or cover it
+  ✓ pass verdict recorded: APPROVED
+  ✓ pass fresh session recorded: soft-foundry phase run (harness)
+  ✗ fail content clean: evidence.yml:23 invisible (U+200B zero width space)
+exit 2
+
+assert pass: a reason of Unicode blanks fails too
+
+# EVAL-011: PASS (6 assertions passed, 0 failed)

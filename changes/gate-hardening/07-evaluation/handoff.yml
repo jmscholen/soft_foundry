@@ -1,19 +1,50 @@
 ---
 phase: 07-evaluation
 skill: evaluation
-status: pending
-commit_sha:
+status: complete
+commit_sha: 87d7b8f0e9e6bbf05f765d35d0a4b56af324ec13
 started_at: '2026-10-29T22:00:50Z'
-completed_at:
+completed_at: '2026-10-30T01:23:29Z'
 resolved_model:
   profile: reasoning_high
-  provider:
-  model:
-outputs: []
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- evaluation-plan.md
+- journeys.yml
+- results.md
+- evidence/manifest.yml
 blocking: []
-findings: []
+findings:
+- 'EVAL-017/019 (major, AC-052 timing clause, REQ-036): gate all on this record takes
+  3.43 s vs 1.08 s pre-change (ratio 3.16, bound is under 2); 220 git subprocesses
+  vs 60. Needs remediation (cache SHA/tip resolution across checks) or a recorded
+  decision on the bound.'
+- 'EVAL-018 (minor, REQ-032): the commit lineage failure line names the check and
+  both 12-character SHAs but gives no next action.'
+- 'EVAL-001 to EVAL-016: all 18 journeys exercising AC-001 to AC-047, AC-049, AC-052
+  (smoke) and AC-055 pass at 87d7b8f; AC-019, AC-048, AC-050, AC-051, AC-053, AC-054
+  belong to verify, attack or documentation and were not journeys.'
+- AC-022 literal fixture cannot fail (sealed commit_sha precedes the sealing commit);
+  EVAL-009 exercises the intent with an older commit. The specification wording may
+  be tightened.
+- 'Driver corrections made this run (no expectation weakened): --help exit status
+  is 1 on both gems, change status takes a positional slug, lineage fixture uses the
+  first commit.'
 next: attack
 notes: |-
   reopened 2026-10-29T11:35:26Z (manual): evidence files kept for reference; rerun this phase (remediation of 08-attack findings ATK-001 to ATK-009: verification, evaluation and attack are redone after the fix)
   reopened 2026-10-29T23:53:33Z (manual): evidence files kept for reference; rerun this phase (ATK-010 (major): the ATK-001 fix is bypassed by a hand-committed handoff; remediating it with ATK-011, 012, 013, 006, 007)
+
+  Completed by the session already named in executed_by; the guard could not stop Bash writes outside the phase directory, so that boundary was held by policy. Scratch repositories live under /tmp/sf-eval3.
 executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-30T01:16:29Z'
+  finished_at: '2026-10-30T01:24:08Z'
+  exit_status: 0
+  previous_phase: evaluate
+  session_id: 2de85aed-5756-41b9-b6ba-7f41452745a4
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"
+branch_resolved: true

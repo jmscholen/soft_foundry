@@ -1,0 +1,160 @@
+# EVAL-013: The judgment must say one permitted word; review and judgment must carry the runner's stamp when the policy is block (AC-034 to AC-038)
+# driver: evidence/journeys-driver.rb, run 2026-10-30T01:18:53Z at 87d7b8f0e9e6
+
+# scratch repository: /tmp/sf-eval3/repos/eval-013-verdict
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+$ soft-foundry gate judge
+14-judgment  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: final.md, residual-risk.md, evidence.yml, handoff.yml
+  ✓ pass structured files parse: evidence.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 57343a3b0e54e6b110cc74317480222052b44efa
+  ✓ pass commit lineage: descends from 13-review at 57343a3b0e54; reaches HEAD 80ef2d196f98; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 13-review
+  ✓ pass evidence current: no code changes since 57343a3b0e54; specification unchanged since 80ef2d196f98
+  ✓ pass criteria covered: 1 criterion: 1 covered
+  ✓ pass verdict recorded: BLOCKED
+  ✓ pass fresh session recorded: soft-foundry phase run (harness)
+  ✓ pass content clean
+exit 0
+
+assert pass: AC-034 `verdict recorded` passes with detail BLOCKED
+$ soft-foundry gate judge
+14-judgment  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: final.md, residual-risk.md, evidence.yml, handoff.yml
+  ✓ pass structured files parse: evidence.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 57343a3b0e54e6b110cc74317480222052b44efa
+  ✓ pass commit lineage: descends from 13-review at 57343a3b0e54; reaches HEAD 80ef2d196f98; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 13-review
+  ✓ pass evidence current: no code changes since 57343a3b0e54; specification unchanged since 80ef2d196f98
+  ✓ pass criteria covered: 1 criterion: 1 covered
+  ✗ fail verdict recorded: 14-judgment/final.md's Outcome section names none or several of APPROVED, APPROVED_WITH_RESIDUAL_RISK, BLOCKED, REJECTED; state exactly one
+  ✓ pass fresh session recorded: soft-foundry phase run (harness)
+  ✓ pass content clean
+exit 2
+
+assert pass: AC-035 fails naming the four words
+# repository policy set to guard mode block (scratch copy)
+# policy as copied from this repository:   mode: block
+$ soft-foundry gate review
+13-review  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: functional.md, architecture.md, security.md, accessibility.md, policy-conformance.md, infrastructure.md, operations.md, consolidated.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 57343a3b0e54e6b110cc74317480222052b44efa
+  ✓ pass commit lineage: descends from 08-attack at 57343a3b0e54; reaches HEAD 80ef2d196f98; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 08-attack
+  ✓ pass evidence current: no code changes since 57343a3b0e54; specification unchanged since 80ef2d196f98
+  ✗ fail fresh session recorded: no fresh-context session is recorded in executed_by, and the repository's guard policy is block; run `soft-foundry phase run review` so the phase is done in a fresh session and stamped by the runner
+  ✓ pass findings explained: no findings above minor
+  ✓ pass content clean
+advisory: 1 issue to address before c1 goes live (informational, does not block the gate)
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+exit 2
+
+assert pass: AC-036 block mode, executed_by null: fails with `soft-foundry phase run review`
+$ soft-foundry gate review
+13-review  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: functional.md, architecture.md, security.md, accessibility.md, policy-conformance.md, infrastructure.md, operations.md, consolidated.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 57343a3b0e54e6b110cc74317480222052b44efa
+  ✓ pass commit lineage: descends from 08-attack at 57343a3b0e54; reaches HEAD 80ef2d196f98; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 08-attack
+  ✓ pass evidence current: no code changes since 57343a3b0e54; specification unchanged since 80ef2d196f98
+  - skip fresh session recorded: the repository's guard policy is warn, so the fresh-context advisory applies instead
+  ✓ pass findings explained: no findings above minor
+  ✓ pass content clean
+advisory: 1 issue to address before c1 goes live (informational, does not block the gate)
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+exit 0
+
+assert pass: AC-037 warn mode: the check skips
+assert pass: AC-037 the fresh-context advisory is printed
+$ soft-foundry gate judge   # machine-local override says off; judge has the runner's stamp
+14-judgment  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: final.md, residual-risk.md, evidence.yml, handoff.yml
+  ✓ pass structured files parse: evidence.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 57343a3b0e54e6b110cc74317480222052b44efa
+  ✓ pass commit lineage: descends from 13-review at 57343a3b0e54; reaches HEAD 80ef2d196f98; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 13-review
+  ✓ pass evidence current: no code changes since 57343a3b0e54; specification unchanged since 80ef2d196f98
+  ✓ pass criteria covered: 1 criterion: 1 covered
+  ✓ pass verdict recorded: APPROVED
+  ✓ pass fresh session recorded: soft-foundry phase run (harness)
+  ✓ pass content clean
+advisory: 1 issue to address before c1 goes live (informational, does not block the gate)
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+exit 0
+
+assert pass: AC-038 passes; the override changes nothing
+$ soft-foundry gate judge   # override still off, stamp removed
+14-judgment  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: final.md, residual-risk.md, evidence.yml, handoff.yml
+  ✓ pass structured files parse: evidence.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 57343a3b0e54e6b110cc74317480222052b44efa
+  ✓ pass commit lineage: descends from 13-review at 57343a3b0e54; reaches HEAD 80ef2d196f98; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 13-review
+  ✓ pass evidence current: no code changes since 57343a3b0e54; specification unchanged since 80ef2d196f98
+  ✓ pass criteria covered: 1 criterion: 1 covered
+  ✓ pass verdict recorded: APPROVED
+  ✗ fail fresh session recorded: no fresh-context session is recorded in executed_by, and the repository's guard policy is block; run `soft-foundry phase run judge` so the phase is done in a fresh session and stamped by the runner
+  ✓ pass content clean
+advisory: 2 issues to address before c1 goes live (informational, does not block the gate)
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn judgment: final judgment (14-judgment) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+exit 2
+
+assert pass: AC-038 with the stamp removed it fails even though the override says off
+$ SOFT_FOUNDRY_GUARD=off soft-foundry gate judge   # the environment override is not consulted either
+14-judgment  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: final.md, residual-risk.md, evidence.yml, handoff.yml
+  ✓ pass structured files parse: evidence.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 57343a3b0e54e6b110cc74317480222052b44efa
+  ✓ pass commit lineage: descends from 13-review at 57343a3b0e54; reaches HEAD 80ef2d196f98; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 13-review
+  ✓ pass evidence current: no code changes since 57343a3b0e54; specification unchanged since 80ef2d196f98
+  ✓ pass criteria covered: 1 criterion: 1 covered
+  ✓ pass verdict recorded: APPROVED
+  ✗ fail fresh session recorded: no fresh-context session is recorded in executed_by, and the repository's guard policy is block; run `soft-foundry phase run judge` so the phase is done in a fresh session and stamped by the runner
+  ✓ pass content clean
+advisory: 2 issues to address before c1 goes live (informational, does not block the gate)
+  ! warn review: independent review (13-review) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+  ! warn judgment: final judgment (14-judgment) was completed without `soft-foundry phase run`, so no fresh-context session is recorded; separation of duties rests on the handoff's notes
+exit 2
+
+assert pass: SOFT_FOUNDRY_GUARD=off does not change the gate
+
+# EVAL-013: PASS (8 assertions passed, 0 failed)

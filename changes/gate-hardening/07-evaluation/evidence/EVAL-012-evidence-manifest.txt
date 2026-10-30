@@ -1,0 +1,179 @@
+# EVAL-012: Listed artifacts must exist under the phase with matching digests; unlisted files warn; escapes are refused (AC-031, AC-032, AC-033)
+# driver: evidence/journeys-driver.rb, run 2026-10-30T01:18:47Z at 87d7b8f0e9e6
+
+# scratch repository: /tmp/sf-eval3/repos/eval-012-manifest
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+$ soft-foundry gate verify
+06-verification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 535c6de57bba0b47b7c6a508334907b6ec79ddf0
+  ✓ pass commit lineage: descends from 05-implementation at 40a2659f88f2; reaches HEAD 535c6de57bba
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since 535c6de57bba; specification unchanged since 535c6de57bba
+  - skip red evidence: no check records a red_commit
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass test results recorded: 1 check, 1 pass
+  ✓ pass criteria covered: 1 criterion named by verification checks
+  ✗ fail evidence manifest verified: evidence/run.txt: sha256 recorded deadbeefdead, file has 393276ac30e6; regenerate the manifest after the evidence is final
+  ✓ pass content clean
+exit 2
+
+assert pass: AC-031 fails naming evidence/run.txt and both digests
+$ soft-foundry gate verify
+06-verification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 535c6de57bba0b47b7c6a508334907b6ec79ddf0
+  ✓ pass commit lineage: descends from 05-implementation at 40a2659f88f2; reaches HEAD 535c6de57bba
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since 535c6de57bba; specification unchanged since 535c6de57bba
+  - skip red evidence: no check records a red_commit
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass test results recorded: 1 check, 1 pass
+  ✓ pass criteria covered: 1 criterion named by verification checks
+  ✗ fail evidence manifest verified: evidence/run.txt: sha256 recorded 0, file has 393276ac30e6; regenerate the manifest after the evidence is final
+  ✓ pass content clean
+exit 2
+
+# observation: an unquoted all-digit sha256 is a YAML integer; the gate still fails but prints the recorded value as a number
+assert pass: AC-031 (unquoted all-digit digest) still fails naming evidence/run.txt
+$ soft-foundry gate verify
+06-verification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 535c6de57bba0b47b7c6a508334907b6ec79ddf0
+  ✓ pass commit lineage: descends from 05-implementation at 40a2659f88f2; reaches HEAD 535c6de57bba
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since 535c6de57bba; specification unchanged since 535c6de57bba
+  - skip red evidence: no check records a red_commit
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass test results recorded: 1 check, 1 pass
+  ✓ pass criteria covered: 1 criterion named by verification checks
+  ✓ pass evidence manifest verified: 2 artifacts match
+  ✓ pass content clean
+exit 0
+
+assert pass: an upper-case digest matches (case-insensitive); every file listed, so the check passes
+$ soft-foundry gate verify
+06-verification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 535c6de57bba0b47b7c6a508334907b6ec79ddf0
+  ✓ pass commit lineage: descends from 05-implementation at 40a2659f88f2; reaches HEAD 535c6de57bba
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since 535c6de57bba; specification unchanged since 535c6de57bba
+  - skip red evidence: no check records a red_commit
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass test results recorded: 1 check, 1 pass
+  ✓ pass criteria covered: 1 criterion named by verification checks
+  ✗ fail evidence manifest verified: ../../05-implementation/log.md: path resolves outside 06-verification/
+  ✓ pass content clean
+exit 2
+
+assert pass: AC-033 a path escaping the phase directory fails saying so
+$ soft-foundry gate verify
+06-verification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 535c6de57bba0b47b7c6a508334907b6ec79ddf0
+  ✓ pass commit lineage: descends from 05-implementation at 40a2659f88f2; reaches HEAD 535c6de57bba
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since 535c6de57bba; specification unchanged since 535c6de57bba
+  - skip red evidence: no check records a red_commit
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass test results recorded: 1 check, 1 pass
+  ✓ pass criteria covered: 1 criterion named by verification checks
+  ✗ fail evidence manifest verified: /etc/hosts: path resolves outside 06-verification/
+  ✓ pass content clean
+exit 2
+
+assert pass: an absolute path is refused too
+$ soft-foundry gate verify
+06-verification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 535c6de57bba0b47b7c6a508334907b6ec79ddf0
+  ✓ pass commit lineage: descends from 05-implementation at 40a2659f88f2; reaches HEAD 535c6de57bba
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since 535c6de57bba; specification unchanged since 535c6de57bba
+  - skip red evidence: no check records a red_commit
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass test results recorded: 1 check, 1 pass
+  ✓ pass criteria covered: 1 criterion named by verification checks
+  ✗ fail evidence manifest verified: evidence/link.md: is a symlink; evidence files are regular files
+  ✓ pass content clean
+exit 2
+
+assert pass: a symlinked artifact resolving outside the phase is refused
+# scratch repository: /tmp/sf-eval3/repos/eval-012-manifest-extra
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+$ soft-foundry gate attack
+08-attack  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: attack-plan.md, cases.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: cases.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: a70c9fcd57476ed4ef2fcaa704b36cb60b7c2728
+  ✓ pass commit lineage: descends from 07-evaluation at c524d7908123; reaches HEAD a70c9fcd5747
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 07-evaluation
+  ✓ pass evidence current: no code changes since a70c9fcd5747; specification unchanged since a70c9fcd5747
+  ! warn evidence manifest verified: unlisted: evidence/extra.log, evidence/recorded.txt (no artifact names them)
+  ✓ pass content clean
+exit 0
+
+assert pass: AC-032 warns naming the unlisted evidence/extra.log and the gate passes
+
+# EVAL-012: PASS (7 assertions passed, 0 failed)

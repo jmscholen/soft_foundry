@@ -1,0 +1,386 @@
+# EVAL-014: gate exit 3, close refuses BLOCKED, change new takes --flag=value, summary names malformed lists (AC-039 to AC-043)
+# driver: evidence/journeys-driver.rb, run 2026-10-30T01:18:59Z at 87d7b8f0e9e6
+
+# scratch repository: /tmp/sf-eval3/repos/eval-014-cmds
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+$ soft-foundry phase reopen verify --reason 'rerun the suite'
+phase reopen: reopened verify (manual)
+phase reopen: reset verify
+exit 0
+
+assert pass: phase reopen verify exits 0
+$ soft-foundry gate verify
+06-verification  pending  SKIP
+  - skip phase pending: not started
+exit 3
+
+assert pass: AC-039 line reads `06-verification  pending  SKIP`-style and exit is 3
+$ soft-foundry gate all
+00-intake  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass waivers permitted: nothing waived
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 17c489c9a5c91c5a2e3f2e269438501cedca56a6
+  ✓ pass commit lineage: reaches HEAD 6831d6af4313; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: first phase
+  ✓ pass content clean
+01-discovery  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: repository-context.md, affected-components.md, dependencies.md, unknowns.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 17c489c9a5c91c5a2e3f2e269438501cedca56a6
+  ✓ pass commit lineage: descends from 00-intake at 17c489c9a5c9; reaches HEAD 6831d6af4313; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 00-intake
+  ✓ pass content clean
+02-specification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+  ✓ pass structured files parse: requirements.yml, acceptance-criteria.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 17c489c9a5c91c5a2e3f2e269438501cedca56a6
+  ✓ pass commit lineage: descends from 01-discovery at 17c489c9a5c9; reaches HEAD 6831d6af4313; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 01-discovery
+  ✓ pass specification locked: locked at 6831d6af4313, the commit that recorded it
+  ✓ pass content clean
+03-threat-model  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: attack-surface.md, trust-boundaries.md, threats.yml, mitigations.md, handoff.yml
+  ✓ pass structured files parse: threats.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 17c489c9a5c91c5a2e3f2e269438501cedca56a6
+  ✓ pass commit lineage: descends from 02-specification at 17c489c9a5c9; reaches HEAD 6831d6af4313; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 02-specification
+  ✓ pass content clean
+04-plan  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: implementation.md, testing.md, rollout.md, rollback.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 17c489c9a5c91c5a2e3f2e269438501cedca56a6
+  ✓ pass commit lineage: descends from 03-threat-model at 17c489c9a5c9; reaches HEAD 6831d6af4313; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 03-threat-model
+  ✓ pass content clean
+05-implementation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 17c489c9a5c91c5a2e3f2e269438501cedca56a6
+  ✓ pass commit lineage: descends from 04-plan at 17c489c9a5c9; reaches HEAD 6831d6af4313; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 04-plan
+  ✓ pass content clean
+06-verification  pending  SKIP
+  - skip phase pending: not started
+07-evaluation  pending  SKIP
+  - skip phase pending: not started
+08-attack  pending  SKIP
+  - skip phase pending: not started
+09-remediation  pending  SKIP
+  - skip phase pending: not started
+10-user-documentation  pending  SKIP
+  - skip phase pending: not started
+11-faq-index  pending  SKIP
+  - skip phase pending: not started
+12-observability  pending  SKIP
+  - skip phase pending: not started
+13-review  pending  SKIP
+  - skip phase pending: not started
+14-judgment  pending  SKIP
+  - skip phase pending: not started
+15-learning  pending  SKIP
+  - skip phase pending: not started
+exit 0
+
+assert pass: AC-039 gate all exits 0 on the same record
+$ soft-foundry --help
+Soft Foundry 0.22.0
+
+Usage:
+  soft-foundry init [options]             install the control plane into this repository, then onboard
+      --dry-run  --force  --no-onboard  --root PATH  --allow-non-git
+      --maturity scan|deep|off (default scan)  --reassess
+  soft-foundry onboard [options]           discover providers, repair agent adapters, assess maturity
+      --maturity scan|deep|off (default scan)  --reassess
+  soft-foundry doctor                     validate repository bootstrap
+  soft-foundry check                      lint the .ai/ control plane
+  soft-foundry change new <slug> [--track gated|iterative]
+                                          create changes/<slug>/ from phase templates; the track
+                                          defaults to .ai/workflow.yml tracks.default
+  soft-foundry change status [slug] [--json]
+                                          show track, phase status, and gate results; --json prints
+                                          the same state with every check, advisory, recorded time,
+                                          and spend entry as JSON (same exit code)
+  soft-foundry change list [--json]       list change records; --json prints every record with one
+                                          cell per phase (closed records are not re-gated)
+  soft-foundry change vet <slug> [--by NAME]
+                                          iterative track: record the person's acceptance of the
+                                          explored feature, lock the specification at HEAD, and
+                                          make the phases from implementation onward apply
+  soft-foundry change reopen <slug> --reason TEXT
+                                          iterative track: send a vetted change back to exploring,
+                                          resetting every phase from implementation onward
+  soft-foundry change release [slug] --item ID=DESCRIPTION [--item ...]
+                                          a finished change judged APPROVED or APPROVED_WITH_RESIDUAL_RISK
+                                          that still owes real-world confirmations: status released,
+                                          each owed item recorded (judgment undischarged items are
+                                          carried); `ci` passes a merged released change while items
+                                          are open
+  soft-foundry change discharge ITEM-ID --note TEXT [--change SLUG]
+                                          record one open release item as confirmed, with time,
+                                          commit, and note
+  soft-foundry change close <slug> [--pr N] [--confirm ID]... [--force]
+                                          mark a merged change's lifecycle closed; refuses if
+                                          unmerged, or if an undischarged item lacks a --confirm ID
+                                          or a PR comment reading "CONFIRMED: <id>"; a released
+                                          change also needs every release item discharged
+  soft-foundry change request-discharge <slug> --pr N
+                                          post a PR comment asking a human to confirm each
+                                          undischarged acceptance criterion
+  soft-foundry gate <phase|all> [--change SLUG]
+                                          evaluate a phase's completion gate; exits 0 when every
+                                          check passes, 2 when one fails, and 3 when the one phase
+                                          named is pending, in progress, or blocked (nothing to pass)
+  soft-foundry scan [path...]             scan .ai/, AGENTS.md, CLAUDE.md, and every change record (or
+                                          the given paths) for invisible Unicode, secret-shaped strings,
+                                          instruction-override phrases, and fetch-and-execute commands
+  soft-foundry learn list [--min-confidence X]
+                                          instincts recorded by every change's learning phase,
+                                          highest confidence first
+  soft-foundry learn promote [--min-confidence X] [--dry-run]
+                                          copy instincts at or above the threshold (.ai/policies/learning.yml,
+                                          default 0.80) into .ai/rules/learned.md through the change
+                                          record on the current branch
+  soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex|grok] [--dry-run] [-- args...]
+                                          run one phase in a fresh coding-shell session with only its
+                                          skill in the prompt; stamps executed_by in the handoff and
+                                          gates the phase when the session returns. Without --shell,
+                                          review and judge pick an installed shell on a different
+                                          provider from implementation and remediation
+  soft-foundry phase run <phase> <phase>... --parallel [--env NAME=VALUE]... [--shell ...] [--dry-run]
+                                          run isolated_phases (.ai/workflow.yml, for example evaluate
+                                          and attack) at once, each in its own fresh session; {phase} in
+                                          an --env value becomes the phase id, so each session can have
+                                          its own database or port (isolating what they share is the
+                                          adopter's job); one line per phase, nothing is committed
+  soft-foundry phase run <phase> --env NAME=VALUE ...
+                                          --env also applies to a single phase: the variable is in that
+                                          session's environment only, and its value is never printed
+  soft-foundry phase reopen <phase> --reason TEXT [--change SLUG]
+                                          reset the phase and everything downstream to pending so each
+                                          can be run again (any track); evidence files are kept and the
+                                          reset is recorded in phase_reopenings. A stale complete phase
+                                          given to `phase run` is reopened automatically
+  soft-foundry phase seal <phase> [--change SLUG]
+                                          end a phase: gate it and, when every check passes, commit
+                                          its directory and the record's metadata as `Record <slug>
+                                          <phase>` (the pre-commit hook runs). Refuses an incomplete
+                                          handoff, uncommitted code, another session's phase, or the
+                                          wrong branch; `phase run` seals the phase it ran. Later gates
+                                          read a predecessor from this commit
+  soft-foundry phase run <phase> --panel SHELL,SHELL[,...] [--max-rounds N] [--shell-arg SHELL=ARG]... [--dry-run]
+                                          run a panel phase (panel_phases in .ai/workflow.yml) as two
+                                          to four agents: independent drafts, turns in ARGUMENT.md
+                                          until they agree, then one consensus output; a split parks
+                                          the change at awaiting_human
+  soft-foundry budget status [--change SLUG]
+                                          show billing mode and compare recorded spend against
+                                          .ai/policies/budget.yml (no budget on a subscription)
+  soft-foundry budget record --phase P --provider NAME --model NAME
+                             --tokens-in N --tokens-out N [--usd X] [--change SLUG]
+                                          record a phase's spend into the change's ledger; warns
+                                          each time the total passes another warning interval
+  soft-foundry budget threshold [USD|off|default]
+                                          show or set how often recorded spend warns (machine-local)
+  soft-foundry ui [--port N] [--repo PATH]...
+                                          serve a read-only page on http://127.0.0.1:N/ for every Soft
+                                          Foundry repository with a session or command running, this
+                                          one, and any named with --repo: each repository's changes
+                                          phase by phase, each gate's checks, and what is running. It
+                                          follows the records as they change and stops on Ctrl-C. Open
+                                          the link it prints: it carries the token the page needs
+                                          (N defaults to a free port)
+  soft-foundry ps [--json]                list what is running on this machine under your user, in any
+                                          repository: every soft-foundry command, and every claude,
+                                          codex, or grok session open in a repository that has a
+                                          control plane, with its terminal, branch, and the change
+                                          and phase that branch is on; warns about phase runs
+                                          recorded here that never finished
+  soft-foundry sessions [WORD...] [--change SLUG] [--phase PHASE] [--agent claude|codex|grok] [--limit N] [--json]
+                                          find recorded coding sessions (any repository, open or finished)
+                                          whose prompts, folder, branch, or change match every word,
+                                          newest first, each with a status word and the exact resume
+                                          command; needs `hooks install --sessions`
+  soft-foundry resume <change> [phase] [--agent claude|codex|grok]
+                                          print the newest recorded session's resume command for a
+                                          change (it never starts the session)
+  soft-foundry session log --shell claude|codex|grok
+                                          the session hook itself: records the prompt payload on stdin
+                                          in ~/.soft-foundry/sessions.jsonl; prints nothing, always exits 0
+  soft-foundry eval [--case ID]... [--json]
+                                          run the harness evals in .ai/harness-evals/cases/: each gate
+                                          case plants a defective change record in a scratch repository
+                                          carrying this control plane and asserts which gate check
+                                          refuses it; one status line per case, then a summary
+  soft-foundry eval --live --shell claude|codex|grok [--case ID]... [-- args...]
+                                          also run the live cases: plant a defect in a scratch
+                                          application and run the case's phase in a fresh session
+                                          through `phase run`, passing when its findings name the defect
+  soft-foundry ci                         check + harness evals (gate cases) + gate every change record
+                                          (used by CI and pre-commit)
+  soft-foundry hooks install              install the pre-commit hook
+  soft-foundry hooks install --claude [--local] | --codex
+                                          install the PreToolUse guard into .claude/settings.json
+                                          (or settings.local.json) or .codex/hooks.json so a coding
+                                          shell's tool calls are checked against the active skill's
+                                          permissions.yml (codex: then trust it with /hooks; grok runs the
+                                          claude entry in a folder it trusts)
+  soft-foundry hooks install --sessions   install the session hook at user level for Claude Code, Codex,
+                                          and Grok (~/.claude/settings.json, ~/.codex/hooks.json,
+                                          ~/.grok/hooks/) and a find-session skill, so every coding
+                                          session is recorded (codex: then trust it with /hooks)
+  soft-foundry hooks uninstall --claude [--local] | --codex | --sessions
+                                          remove only Soft Foundry's guard or session entries
+  soft-foundry guard                      the hook itself: reads a tool call from stdin, exits 2 to
+                                          refuse it in block mode; mode from .ai/policies/enforcement.yml,
+                                          .soft-foundry/enforcement.yml, or SOFT_FOUNDRY_GUARD=warn|block|off
+  soft-foundry update [--yes]             check the GitHub repository for a newer release; --yes installs
+                                          it under the Ruby that runs soft-foundry (the gem is not on
+                                          RubyGems; a release is a v<version> tag with the gem attached)
+  soft-foundry models                     show locally accessible models
+  soft-foundry shell claude|codex|grok    launch a coding shell in this repository
+  soft-foundry version
+
+`AGENTS.md` and `.ai/` are canonical. Vendor files such as `CLAUDE.md` only point to them.
+exit 1
+
+# usage entry for gate:
+#   soft-foundry gate <phase|all> [--change SLUG]
+#                                             evaluate a phase's completion gate; exits 0 when every
+#                                             check passes, 2 when one fails, and 3 when the one phase
+#                                             named is pending, in progress, or blocked (nothing to pass)
+assert pass: the usage entry for gate lists exit codes 0, 2 and 3
+$ soft-foundry gate --help
+[stderr] soft-foundry: unknown phase '--help'
+exit 1
+
+# observation: `gate --help` is read as a phase name; the codes live in the top-level --help entry above
+# scratch repository: /tmp/sf-eval3/repos/eval-014-close-blocked
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+$ soft-foundry change close c1   # persona: maintainer, after merge; outcome BLOCKED
+[stderr] c1: cannot close: the final judgment is BLOCKED; a BLOCKED change returns to remediate (`soft-foundry phase run remediate`, then verify onward), it does not close; pass --force to close anyway
+exit 1
+
+assert pass: AC-040 close refused with exit 1 naming BLOCKED and remediate
+assert pass: AC-040 status still judged
+$ soft-foundry change close c1 --force
+c1: closed
+exit 0
+
+assert pass: AC-040 --force closes
+# scratch repository: /tmp/sf-eval3/repos/eval-014-close-residual
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+$ soft-foundry change close c1   # persona: maintainer, after merge; outcome APPROVED_WITH_RESIDUAL_RISK
+c1: closed
+exit 0
+
+assert pass: AC-041 APPROVED_WITH_RESIDUAL_RISK closes as today
+# scratch repository: /tmp/sf-eval3/repos/eval-014-new-flags
+$ soft-foundry change new demo --type=fix --risk=low --track=gated
+created changes/demo with 16 phase directories
+branch: main
+type: fix
+risk: low
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+assert pass: AC-042 --type=fix --risk=low --track=gated recorded
+$ soft-foundry change new demo2 --type fix --type docs
+[stderr] soft-foundry: --type given twice; give it once
+exit 1
+
+assert pass: AC-042 a flag given twice is refused with `--type given twice`
+$ soft-foundry change new demo3 '--title=Demo three' --scope=lib/**
+created changes/demo3 with 16 phase directories
+branch: main
+scope: lib/**
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+assert pass: AC-042 --title= and --scope= forms accepted
+# scratch repository: /tmp/sf-eval3/repos/eval-014-summary
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+$ soft-foundry change summary
+change: c1
+phase: evaluate (status: in_progress, risk: TBD, track: gated)
+phase-status: intake complete
+phase-status: discover complete
+phase-status: specify complete
+phase-status: threat_model complete
+phase-status: plan complete
+phase-status: implement complete
+phase-status: verify complete
+phase-status: evaluate pending
+phase-status: attack pending
+phase-status: remediate pending
+phase-status: document pending
+phase-status: index pending
+phase-status: observe pending
+phase-status: review pending
+phase-status: judge pending
+phase-status: learn pending
+findings: none
+blocking: malformed (06-verification: String, expected a list)
+owed: none
+exit 0
+
+assert pass: AC-043 prints `blocking: malformed (06-verification: String, expected a list)` and exits 0
+
+# EVAL-014: PASS (12 assertions passed, 0 failed)

@@ -1,0 +1,68 @@
+# EVAL-002: Sealing refuses an incomplete handoff, uncommitted code, and a failing gate, committing nothing (AC-002, AC-003, AC-004)
+# driver: evidence/journeys-driver.rb, run 2026-10-30T01:16:58Z at 87d7b8f0e9e6
+
+# scratch repository: /tmp/sf-eval3/repos/eval-002-refuse
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+# intake handoff left in_progress
+$ soft-foundry phase seal intake
+[stderr] c1: cannot seal intake: 00-intake/handoff.yml says status in_progress; set it complete (with commit_sha, completed_at, and outputs) when the phase's work is done, then seal
+exit 1
+
+assert pass: AC-003 exit 1
+assert pass: AC-003 names status in_progress and says to complete the handoff first
+assert pass: AC-003 nothing committed
+assert pass: AC-003 refusal is one line
+# now intake complete but request.md keeps the template placeholder
+$ soft-foundry phase seal intake
+00-intake  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass waivers permitted: nothing waived
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✗ fail no placeholders: TBD remains in: request.md
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: f1a413b1205685fb23b9acfb2d12cac261b3e75a
+  ✓ pass commit lineage: reaches HEAD f1a413b12056
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: first phase
+  ✓ pass content clean
+c1: 00-intake is not sealed: its gate fails; nothing was committed
+exit 2
+
+assert pass: AC-002 exit 2
+assert pass: AC-002 gate printed with `no placeholders` failing
+assert pass: AC-002 git log unchanged
+assert pass: AC-002 metadata unchanged (current_phase intake, status intake)
+# a second record where implement is complete on disk and lib/app.rb has an uncommitted edit
+# scratch repository: /tmp/sf-eval3/repos/eval-002-dirty
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+$ soft-foundry phase seal implement
+[stderr] c1: cannot seal implement: uncommitted application, test, or infrastructure paths: lib/app.rb; commit the code first, since commit_sha describes committed code
+exit 1
+
+assert pass: AC-004 exit 1
+assert pass: AC-004 names lib/app.rb and says to commit the code first
+assert pass: AC-004 nothing committed
+# an untracked test file is refused the same way
+$ soft-foundry phase seal implement
+[stderr] c1: cannot seal implement: uncommitted application, test, or infrastructure paths: test/new_test.rb; commit the code first, since commit_sha describes committed code
+exit 1
+
+assert pass: AC-004 (untracked test file) exit 1 naming test/new_test.rb
+
+# EVAL-002: PASS (12 assertions passed, 0 failed)

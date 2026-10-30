@@ -1,0 +1,84 @@
+# EVAL-006: The runner seals a phase its fresh session completed, never one left in progress; the prompt says so (AC-011, AC-012, AC-015)
+# driver: evidence/journeys-driver.rb, run 2026-10-30T01:17:29Z at 87d7b8f0e9e6
+
+# scratch repository: /tmp/sf-eval3/repos/eval-006-run
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+$ soft-foundry phase run verify --shell claude --dry-run   # AC-015: the prompt the runner would send
+would run verify of c1 with: claude -p --session-id 9b7244ed-329e-4dbc-a56f-e227b42e3ad3 --name c1/verify <prompt>
+--- prompt ---
+You are a fresh-context agent running one lifecycle phase of a Soft Foundry change, and nothing else.
+
+Change: c1 (branch change/c1)
+Phase: verify (changes/c1/06-verification/)
+Skill: verification (profile reasoning_high)
+
+1. Read AGENTS.md and .ai/README.md. Then load only this phase's skill contract: .ai/skills/verification/skill.yml, .ai/skills/verification/SKILL.md, .ai/skills/verification/permissions.yml, .ai/skills/verification/requirements.yml, .ai/skills/verification/completion.yml.
+2. Do the phase's work as the skill describes, reading the earlier phases under changes/c1/ that the skill's permissions.yml allows. Write only where that file allows; the runtime guard enforces it where installed and it is policy everywhere else.
+3. When the work is done, fill changes/c1/06-verification/handoff.yml: status complete, commit_sha (the HEAD the outputs describe), completed_at, resolved_model (provider and model actually used), outputs, findings for later phases, and next. Do not edit executed_by; the runner writes it.
+4. Do not alter any other phase's evidence or handoff, do not weaken requirements to obtain a pass, and do not run `soft-foundry phase run` yourself. If the work cannot be completed, set status blocked with the reason under blocking rather than pretending.
+5. Stop when the handoff is written, and do not commit. The runner gates your output with `soft-foundry gate verify` and, when it passes, seals the phase (`soft-foundry phase seal verify`: one commit of the phase directory and the record's metadata).
+[stderr] ! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the verification skill's permissions (`soft-foundry hooks install --claude`)
+exit 0
+
+assert pass: dry run exits 0
+assert pass: AC-015 the prompt's last step says the runner seals the phase and the session must not commit
+$ SF_EVAL_BEHAVIOUR=complete soft-foundry phase run verify --shell claude   # the fake shell completes the phase
+billing: subscription (no ANTHROPIC_API_KEY in the environment, so claude bills to its own login); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+running verify of c1 in a fresh claude session (verification skill); executed_by recorded in changes/c1/06-verification/handoff.yml
+claude exited 0
+06-verification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: eafb5798ac2845abfcd0beea7acdbad702297554
+  ✓ pass commit lineage: descends from 05-implementation at dc6158ff41c1; reaches HEAD eafb5798ac28
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since eafb5798ac28; specification unchanged since eafb5798ac28
+  - skip red evidence: no check records a red_commit
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass test results recorded: 1 check, 1 pass
+  ✓ pass criteria covered: 1 criterion named by verification checks
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/
+sealed 06-verification at 61051b3f4631
+[stderr] ! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the verification skill's permissions (`soft-foundry hooks install --claude`)
+exit 0
+
+assert pass: AC-011 runner exits 0
+assert pass: AC-011 HEAD is `Record c1 verify`
+assert pass: AC-011 commit holds 06-verification/** and metadata.yml
+assert pass: AC-011 executed_by shows finished_at and exit_status 0 from `soft-foundry phase run`
+assert pass: branch_resolved true stamped by the seal
+assert pass: sealed line printed
+assert pass: AC-015 the prompt the session received ends with the seal/do-not-commit step
+$ SF_EVAL_BEHAVIOUR=in_progress soft-foundry phase run evaluate --shell claude   # the fake shell leaves the handoff in_progress
+billing: subscription (no ANTHROPIC_API_KEY in the environment, so claude bills to its own login); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+running evaluate of c1 in a fresh claude session (evaluation skill); executed_by recorded in changes/c1/07-evaluation/handoff.yml
+claude exited 0
+07-evaluation  in_progress  PASS
+  ✓ pass handoff identity
+  ! warn phase in progress: not yet gated
+07-evaluation is not sealed: the session left its handoff in_progress; complete it and run `soft-foundry phase seal evaluate`, or run the phase again
+[stderr] ! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the evaluation skill's permissions (`soft-foundry hooks install --claude`)
+exit 2
+
+assert pass: AC-012 runner exits 2
+assert pass: AC-012 HEAD unchanged
+assert pass: AC-012 output says the phase was not sealed and why
+
+# EVAL-006: PASS (12 assertions passed, 0 failed)

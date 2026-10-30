@@ -1,0 +1,137 @@
+# EVAL-009: A commit_sha older than the predecessor's or off the branch fails lineage; a stacked record is measured on its own branch (AC-022, AC-023, AC-024)
+# driver: evidence/journeys-driver.rb, run 2026-10-30T01:18:34Z at 87d7b8f0e9e6
+
+# scratch repository: /tmp/sf-eval3/repos/eval-009-lineage
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+# intake's commit_sha is 35a317d98a49 (sealed at X, the commit after it); discover's commit_sha is set to 5cacab30b034, the parent
+$ soft-foundry phase seal intake
+note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/
+sealed 00-intake at 45cd246776de
+exit 0
+
+$ soft-foundry gate discover
+01-discovery  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: repository-context.md, affected-components.md, dependencies.md, unknowns.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 5cacab30b034fa8d25a0465c9fbccea631ae192a
+  ✗ fail commit lineage: 00-intake recorded 35a317d98a49, which is not an ancestor of this phase's commit_sha 5cacab30b034; a phase's commit_sha is the HEAD its outputs describe, which follows its predecessor's
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 00-intake
+  ✓ pass content clean
+exit 2
+
+assert pass: AC-022 `commit lineage` fails naming both SHAs and `not an ancestor`
+assert pass: AC-022 gate exits 2
+# the literal AC-022 fixture (intake sealed at X, discover at X's parent) cannot fail: a sealed handoff's commit_sha always precedes its sealing commit X, so X's parent is where intake's commit_sha already is
+# scratch repository: /tmp/sf-eval3/repos/eval-009-unrelated
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+# a side branch forked after implement's commit: the predecessor relation holds, the tip relation does not
+$ soft-foundry gate verify
+06-verification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 9e58455a73a29cd5f3f1f17d83bee90c0e403633
+  ✗ fail commit lineage: commit_sha 9e58455a73a2 is not an ancestor of HEAD e366884ca8b6; the evidence commit must be in this record's history
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since 9e58455a73a2; specification unchanged since e366884ca8b6
+  - skip red evidence: no check records a red_commit
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass test results recorded: 1 check, 1 pass
+  ✓ pass criteria covered: 1 criterion named by verification checks
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+exit 2
+
+assert pass: AC-023 `commit lineage` fails: the commit is not an ancestor of the measuring tip
+# an orphan commit (unrelated history) fails the same check on the predecessor relation first, since neither relation holds
+$ soft-foundry gate verify
+06-verification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 20e0cc1b67c56eae1202e518a93688175e17ed9c
+  ✗ fail commit lineage: 05-implementation recorded e326d1c7eb8d, which is not an ancestor of this phase's commit_sha 20e0cc1b67c5; a phase's commit_sha is the HEAD its outputs describe, which follows its predecessor's
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since 20e0cc1b67c5; specification unchanged since e366884ca8b6
+  - skip red evidence: no check records a red_commit
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass test results recorded: 1 check, 1 pass
+  ✓ pass criteria covered: 1 criterion named by verification checks
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+exit 2
+
+assert pass: AC-023 (orphan commit) `commit lineage` fails with `not an ancestor`
+# scratch repository: /tmp/sf-eval3/repos/eval-009-stacked
+$ soft-foundry change new lower   # create the record
+created changes/lower with 16 phase directories
+branch: change/lower
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+# upper is stacked on change/lower; a code commit lands on upper after lower's evidence
+$ soft-foundry change new upper
+created changes/upper with 16 phase directories
+branch: change/upper
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+$ soft-foundry gate verify --change lower   # from branch change/upper
+06-verification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 30958c298bda92004858c49808536e23c03f7598
+  ✓ pass commit lineage: descends from 05-implementation at 30958c298bda; reaches the branch tip 3a5ab8b2b46c; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since 30958c298bda on branch change/lower; specification unchanged since 3a5ab8b2b46c
+  - skip red evidence: no check records a red_commit
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass test results recorded: 1 check, 1 pass
+  ✓ pass criteria covered: 1 criterion named by verification checks
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+exit 0
+
+assert pass: AC-024 `commit lineage` passes for lower, measured against change/lower's tip
+assert pass: AC-024 `evidence current` also passes (upper's code change is not lower's)
+assert pass: AC-024 gate exits 0
+
+# EVAL-009: PASS (7 assertions passed, 0 failed)

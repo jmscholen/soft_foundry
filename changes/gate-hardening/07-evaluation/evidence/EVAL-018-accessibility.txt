@@ -1,0 +1,541 @@
+# EVAL-018: Every new refusal and gate line is plain one-line text with a word outcome, repository-relative paths, 12-character SHAs, no colour (REQ-032)
+# driver: evidence/journeys-driver.rb, run 2026-10-30T01:22:23Z at 87d7b8f0e9e6
+
+# scratch repository: /tmp/sf-eval3/repos/eval-018-a11y
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+$ soft-foundry phase seal intake   # refusal, piped (not a TTY)
+[stderr] c1: cannot seal intake: 00-intake/handoff.yml says status in_progress; set it complete (with commit_sha, completed_at, and outputs) when the phase's work is done, then seal
+exit 1
+
+assert pass: refusal: one line, names the file and the status found and the next action
+$ soft-foundry phase seal intake
+note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/
+sealed 00-intake at 6a8b81341112
+exit 0
+
+assert pass: sealed line shows a 12-character SHA
+$ soft-foundry change status --json
+{
+  "slug": "c1",
+  "title": "c1",
+  "status": "in_progress",
+  "current_phase": "discover",
+  "risk": "TBD",
+  "type": "TBD",
+  "closed": false,
+  "released": false,
+  "open_items": 0,
+  "version": 1,
+  "generated_at": "2026-10-30T01:22:25Z",
+  "branch": "change/c1",
+  "scope": [],
+  "created_at": "2026-10-30T01:22:24Z",
+  "surfaces": {
+    "application": false,
+    "database": false,
+    "infrastructure": false,
+    "security": false,
+    "accessibility": false,
+    "observability": false,
+    "policy": false
+  },
+  "track": {
+    "name": "gated",
+    "defined": true,
+    "exploring_stage": false,
+    "exploring": false,
+    "iterations": 0,
+    "last_deployed": null,
+    "vetted": null,
+    "forced_by_risk": null
+  },
+  "merged_unclosed": false,
+  "release": null,
+  "phase_reopenings": [],
+  "failed": false,
+  "stale": false,
+  "skipped_phases": [],
+  "human_decisions": [],
+  "undischarged": [],
+  "gates": [
+    {
+      "phase": "intake",
+      "output": "00-intake",
+      "skill": "intake",
+      "status": "complete",
+      "state": "pass",
+      "skip_reason": null,
+      "skip_rationale": null,
+      "started_at": "2026-01-01T00:00:00Z",
+      "completed_at": "2026-01-01T00:00:00Z",
+      "commit_sha": "f7cddc9629b67b6cfb3ad3b71d643420dbe600cd",
+      "executed_by": null,
+      "blocking": [],
+      "findings": [],
+      "checks": [
+        {
+          "name": "handoff identity",
+          "outcome": "pass",
+          "detail": ""
+        },
+        {
+          "name": "track permitted",
+          "outcome": "pass",
+          "detail": "gated"
+        },
+        {
+          "name": "waivers permitted",
+          "outcome": "pass",
+          "detail": "nothing waived"
+        },
+        {
+          "name": "required files present",
+          "outcome": "pass",
+          "detail": "request.md, assumptions.md, handoff.yml"
+        },
+        {
+          "name": "structured files parse",
+          "outcome": "pass",
+          "detail": "handoff.yml"
+        },
+        {
+          "name": "no placeholders",
+          "outcome": "pass",
+          "detail": ""
+        },
+        {
+          "name": "no blocking conditions",
+          "outcome": "pass",
+          "detail": ""
+        },
+        {
+          "name": "commit_sha recorded",
+          "outcome": "pass",
+          "detail": "f7cddc9629b67b6cfb3ad3b71d643420dbe600cd"
+        },
+        {
+          "name": "commit lineage",
+          "outcome": "pass",
+          "detail": "reaches HEAD 6a8b81341112; recorded with this commit_sha"
+        },
+        {
+          "name": "completed_at recorded",
+          "outcome": "pass",
+          "detail": "2026-01-01T00:00:00Z"
+        },
+        {
+          "name": "predecessor complete",
+          "outcome": "pass",
+          "detail": "first phase"
+        },
+        {
+          "name": "content clean",
+          "outcome": "pass",
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "phase": "discover",
+      "output": "01-discovery",
+      "skill": "repository-discovery",
+      "status": "pending",
+      "state": "pending",
+      "skip_reason": null,
+      "skip_rationale": null,
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "executed_by": null,
+      "blocking": [],
+      "findings": [],
+      "checks": [
+        {
+          "name": "phase pending",
+          "outcome": "skip",
+          "detail": "not started"
+        }
+      ]
+    },
+    {
+      "phase": "specify",
+      "output": "02-specification",
+      "skill": "specification",
+      "status": "pending",
+      "state": "pending",
+      "skip_reason": null,
+      "skip_rationale": null,
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "executed_by": null,
+      "blocking": [],
+      "findings": [],
+      "checks": [
+        {
+          "name": "phase pending",
+          "outcome": "skip",
+          "detail": "not started"
+        }
+      ]
+    },
+    {
+      "phase": "threat_model",
+      "output": "03-threat-model",
+      "skill": "threat-modeling",
+      "status": "pending",
+      "state": "pending",
+      "skip_reason": null,
+      "skip_rationale": null,
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "executed_by": null,
+      "blocking": [],
+      "findings": [],
+      "checks": [
+        {
+          "name": "phase pending",
+          "outcome": "skip",
+          "detail": "not started"
+        }
+      ]
+    },
+    {
+      "phase": "plan",
+      "output": "04-plan",
+      "skill": "planning",
+      "status": "pending",
+      "state": "pending",
+      "skip_reason": null,
+      "skip_rationale": null,
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "executed_by": null,
+      "blocking": [],
+      "findings": [],
+      "checks": [
+        {
+          "name": "phase pending",
+          "outcome": "skip",
+          "detail": "not started"
+        }
+      ]
+    },
+    {
+      "phase": "implement",
+      "output": "05-implementation",
+      "skill": "implementation",
+      "status": "pending",
+      "state": "pending",
+      "skip_reason": null,
+      "skip_rationale": null,
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "executed_by": null,
+      "blocking": [],
+      "findings": [],
+      "checks": [
+        {
+          "name": "phase pending",
+          "outcome": "skip",
+          "detail": "not started"
+        }
+      ]
+    },
+    {
+      "phase": "verify",
+      "output": "06-verification",
+      "skill": "verification",
+      "status": "pending",
+      "state": "pending",
+      "skip_reason": null,
+      "skip_rationale": null,
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "executed_by": null,
+      "blocking": [],
+      "findings": [],
+      "checks": [
+        {
+          "name": "phase pending",
+          "outcome": "skip",
+          "detail": "not started"
+        }
+      ]
+    },
+    {
+      "phase": "evaluate",
+      "output": "07-evaluation",
+      "skill": "evaluation",
+      "status": "pending",
+      "state": "pending",
+      "skip_reason": null,
+      "skip_rationale": null,
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "executed_by": null,
+      "blocking": [],
+      "findings": [],
+      "checks": [
+        {
+          "name": "phase pending",
+          "outcome": "skip",
+          "detail": "not started"
+        }
+      ]
+    },
+    {
+      "phase": "attack",
+      "output": "08-attack",
+      "skill": "adversarial-testing",
+      "status": "pending",
+      "state": "pending",
+      "skip_reason": null,
+      "skip_rationale": null,
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "executed_by": null,
+      "blocking": [],
+      "findings": [],
+      "checks": [
+        {
+          "name": "phase pending",
+          "outcome": "skip",
+          "detail": "not started"
+        }
+      ]
+    },
+    {
+      "phase": "remediate",
+      "output": "09-remediation",
+      "skill": "remediation",
+      "status": "pending",
+      "state": "pending",
+      "skip_reason": "optional",
+      "skip_rationale": null,
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "executed_by": null,
+      "blocking": [],
+      "findings": [],
+      "checks": [
+        {
+          "name": "phase pending",
+          "outcome": "skip",
+          "detail": "not started"
+        }
+      ]
+    },
+    {
+      "phase": "document",
+      "output": "10-user-documentation",
+      "skill": "product-documentation",
+      "status": "pending",
+      "state": "pending",
+      "skip_reason": "optional",
+      "skip_rationale": null,
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "executed_by": null,
+      "blocking": [],
+      "findings": [],
+      "checks": [
+        {
+          "name": "phase pending",
+          "outcome": "skip",
+          "detail": "not started"
+        }
+      ]
+    },
+    {
+      "phase": "index",
+      "output": "11-faq-index",
+      "skill": "faq-indexing",
+      "status": "pending",
+      "state": "pending",
+      "skip_reason": "optional",
+      "skip_rationale": null,
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "executed_by": null,
+      "blocking": [],
+      "findings": [],
+      "checks": [
+        {
+          "name": "phase pending",
+          "outcome": "skip",
+          "detail": "not started"
+        }
+      ]
+    },
+    {
+      "phase": "observe",
+      "output": "12-observability",
+      "skill": "observability",
+      "status": "pending",
+      "state": "pending",
+      "skip_reason": "optional",
+      "skip_rationale": null,
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "executed_by": null,
+      "blocking": [],
+      "findings": [],
+      "checks": [
+        {
+          "name": "phase pending",
+          "outcome": "skip",
+          "detail": "not started"
+        }
+      ]
+    },
+    {
+      "phase": "review",
+      "output": "13-review",
+      "skill": "review",
+      "status": "pending",
+      "state": "pending",
+      "skip_reason": null,
+      "skip_rationale": null,
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "executed_by": null,
+      "blocking": [],
+      "findings": [],
+      "checks": [
+        {
+          "name": "phase pending",
+          "outcome": "skip",
+          "detail": "not started"
+        }
+      ]
+    },
+    {
+      "phase": "judge",
+      "output": "14-judgment",
+      "skill": "final-judgment",
+      "status": "pending",
+      "state": "pending",
+      "skip_reason": null,
+      "skip_rationale": null,
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "executed_by": null,
+      "blocking": [],
+      "findings": [],
+      "checks": [
+        {
+          "name": "phase pending",
+          "outcome": "skip",
+          "detail": "not started"
+        }
+      ]
+    },
+    {
+      "phase": "learn",
+      "output": "15-learning",
+      "skill": "learning",
+      "status": "pending",
+      "state": "pending",
+      "skip_reason": null,
+      "skip_rationale": null,
+      "started_at": null,
+      "completed_at": null,
+      "commit_sha": null,
+      "executed_by": null,
+      "blocking": [],
+      "findings": [],
+      "checks": [
+        {
+          "name": "phase pending",
+          "outcome": "skip",
+          "detail": "not started"
+        }
+      ]
+    }
+  ],
+  "advisories": [],
+  "timeline": [
+    {
+      "at": "2026-01-01T00:00:00Z",
+      "kind": "started",
+      "phase": "intake",
+      "label": "00-intake started"
+    },
+    {
+      "at": "2026-01-01T00:00:00Z",
+      "kind": "completed",
+      "phase": "intake",
+      "label": "00-intake completed"
+    },
+    {
+      "at": "2026-10-30T01:22:24Z",
+      "kind": "created",
+      "phase": null,
+      "label": "change record created"
+    }
+  ],
+  "spend": {
+    "totals": {
+      "tokens_in": 0,
+      "tokens_out": 0,
+      "estimated_usd": null,
+      "entries_missing_cost": 0,
+      "over_cap": false,
+      "needs_approval": false
+    },
+    "policy": {
+      "max_usd_per_change": 50.0,
+      "max_usd_per_phase": 5.0,
+      "require_human_approval_above_usd": 20.0
+    },
+    "by_phase": [],
+    "entries": []
+  },
+  "recorded_sessions": []
+}
+exit 0
+
+assert pass: change status --json carries the full 40-character recorded commit
+$ NO_COLOR=1 soft-foundry gate discover   # lineage failure under NO_COLOR
+01-discovery  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: repository-context.md, affected-components.md, dependencies.md, unknowns.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 53fa4039eb720be8812f42ee1aadf0ca7b7ad3c8
+  ✗ fail commit lineage: 00-intake recorded f7cddc9629b6, which is not an ancestor of this phase's commit_sha 53fa4039eb72; a phase's commit_sha is the HEAD its outputs describe, which follows its predecessor's
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 00-intake
+  ✓ pass content clean
+exit 2
+
+assert pass: gate line carries a word (fail) beside the glyph
+assert pass: SHAs in the gate line are 12 characters, not 40
+assert FAIL: the lineage line names the check, the value found and the next action (  ✗ fail commit lineage: 00-intake recorded f7cddc9629b6, which is not an ancestor of this phase's commit_sha 53fa4039eb72; a phase's commit_sha is the HEAD its outputs describe, which follows its predecessor's)
+assert pass: meaning survives stripping non-ASCII: the word fail remains
+assert pass: no ANSI escapes in any captured output
+assert pass: paths in the gate output are repository-relative (no scratch prefix)
+# every transcript in evidence/ is scanned for ANSI escapes by the driver's final step
+
+# EVAL-018: FAIL (8 assertions passed, 1 failed)

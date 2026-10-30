@@ -1,0 +1,106 @@
+# EVAL-010: A failing or unrun check must be named in blocking or a finding (AC-025, AC-026, AC-027)
+# driver: evidence/journeys-driver.rb, run 2026-10-30T01:18:39Z at 87d7b8f0e9e6
+
+# scratch repository: /tmp/sf-eval3/repos/eval-010-results
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+$ soft-foundry gate verify
+06-verification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: f091eec847637c2e217daf705418c132ebf84f3e
+  ✓ pass commit lineage: descends from 05-implementation at 052379cfb020; reaches HEAD f091eec84763
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since f091eec84763; specification unchanged since f091eec84763
+  - skip red evidence: no check records a red_commit
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+  - skip protection stated: the repository profile declares no access_control
+  ✗ fail test results recorded: CHECK-002 (fail) did not pass and no blocking entry or finding names it; a check that did not pass is redone, or named in the handoff's blocking list or in a finding so the record says so
+  ✓ pass criteria covered: 1 criterion named by verification checks
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+exit 2
+
+assert pass: AC-025 fails naming CHECK-002
+$ soft-foundry gate verify
+06-verification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: f091eec847637c2e217daf705418c132ebf84f3e
+  ✓ pass commit lineage: descends from 05-implementation at 052379cfb020; reaches HEAD f091eec84763
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since f091eec84763; specification unchanged since f091eec84763
+  - skip red evidence: no check records a red_commit
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass test results recorded: 2 checks, 1 pass; acknowledged: CHECK-002 (fail)
+  ✓ pass criteria covered: 1 criterion named by verification checks
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+exit 0
+
+assert pass: AC-026 passes with a detail naming the acknowledged check
+$ soft-foundry gate verify
+06-verification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: f091eec847637c2e217daf705418c132ebf84f3e
+  ✓ pass commit lineage: descends from 05-implementation at 052379cfb020; reaches HEAD f091eec84763
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since f091eec84763; specification unchanged since f091eec84763
+  - skip red evidence: no check records a red_commit
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+  - skip protection stated: the repository profile declares no access_control
+  ✗ fail test results recorded: CHECK-003 (skipped) did not pass and no blocking entry or finding names it; a check that did not pass is redone, or named in the handoff's blocking list or in a finding so the record says so
+  ✓ pass criteria covered: 1 criterion named by verification checks
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+exit 2
+
+assert pass: AC-027 a skipped check with criteria, unacknowledged, fails naming CHECK-003
+$ soft-foundry gate verify
+06-verification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: f091eec847637c2e217daf705418c132ebf84f3e
+  ✓ pass commit lineage: descends from 05-implementation at 052379cfb020; reaches HEAD f091eec84763
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since f091eec84763; specification unchanged since f091eec84763
+  - skip red evidence: no check records a red_commit
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+  - skip protection stated: the repository profile declares no access_control
+  ✗ fail test results recorded: tests.yml checks is empty; record each check run as id, kind, command, result (pass | fail | error | skipped), evidence, criteria
+  ! warn criteria covered: AC-001 named by no verification check's criteria; an evaluation journey may cover it, or the judgment sets it aside with a reason in evidence.yml criteria_not_covered
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+exit 2
+
+assert pass: an empty checks list fails
+
+# EVAL-010: PASS (4 assertions passed, 0 failed)
