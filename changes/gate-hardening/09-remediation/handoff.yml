@@ -1,15 +1,16 @@
 ---
 phase: '09-remediation'
 skill: remediation
-status: pending
-commit_sha:
+status: complete
+commit_sha: 39d7e4fd288812a82b99ce3118d06d7719a6904b
 started_at: '2026-10-29T11:33:00Z'
-completed_at:
+completed_at: '2026-10-29T23:30:00Z'
 resolved_model:
   profile: coding_high
   provider: anthropic
   model: claude-fable-5-1
-outputs: []
+outputs:
+  - summary.md
 blocking: []
 findings:
 - id: REM-001
@@ -38,6 +39,12 @@ findings:
     second pass (RED d6c2748, GREEN c5c20b4): the seal follows a loop phase''s `next`
     transition when that phase is not complete. The first seal commit c02a761 stays
     in history; this handoff is recorded at the second.'
+- id: REM-005
+  severity: minor
+  summary: 'Second pass (RED cf7b76b, GREEN 39d7e4f) closes ATK-010 (major: recorded_commit now prefers the Record <slug> <phase> seal commit), ATK-011 (a reopened phase must differ in evidence), ATK-012, ATK-013, and takes ATK-006 (check warns on a missing enforcement policy) and ATK-007 (the seal names hand-edited metadata keys). Verification should include test/remediation_gate_hardening_two_test.rb with red_commit cf7b76b; attack should rerun ATTACK-023 and ATTACK-024 against this code.'
+- id: REM-006
+  severity: minor
+  summary: 'Evidence invalidated a second time by `phase reopen verify` (reason ATK-010): verification (sealed 5db4836), evaluation (its session was killed, exit 137, twice), attack (complete, unsealed) and this phase. Behaviour change for review: a phase reopened and rerun with byte-identical evidence now fails commit lineage. ATK-003 and the ATK-009 residue remain carried.'
 next: verify
 notes: |-
   Remediation performed by the session that implemented the change, which is what the remediation skill is for (it writes code). current_phase was set to remediate, and back after the reopen moved it to verify, with shell commands (guard limitation recorded in 01-discovery). This phase did not read 07-evaluation/evidence or 08-attack/evidence beyond the attack handoff's findings, which are its input. Reopened once (2026-10-29T16:24Z) for the advance! fix and sealed again.

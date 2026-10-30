@@ -39,3 +39,18 @@ Every commit-bound phase: `06-verification` (sealed at `303a48f`), `07-evaluatio
 
 ## Required reruns
 Verification, evaluation and attack, in that order (evaluation and attack in parallel), against the commit this phase's handoff names; then review and judgment.
+
+## Second pass: the rerun's findings (ATK-010 to ATK-013, and ATK-006, ATK-007)
+The attack rerun at `5db4836` found the first pass's own gap. RED `cf7b76b` (`test/remediation_gate_hardening_two_test.rb`, eight tests, all failing there), GREEN `39d7e4f`.
+
+- **ATK-010 (major), remediated.** `recorded_commit` took the newest commit touching the handoff, so a hand commit of a rewritten `commit_sha` became the record. It now prefers the newest commit whose subject is `Record <slug> <phase>`, the seal's own; a record with no seal commit for the phase (made before `phase seal`) keeps the old rule.
+- **ATK-011, remediated.** A reopening licenses a moved `commit_sha` only when some evidence file under the phase directory, other than `handoff.yml`, differs from the record. A structured file that differs only in `commit_sha` counts as unchanged. The old test of the reopen path (`remediation_gate_hardening_test`) now appends a rerun line to `results.md`, as a real rerun would.
+- **ATK-012, remediated.** The recorded and on-disk `commit_sha` are compared as resolved commits; the refusal prints both raw strings.
+- **ATK-013, remediated.** An id is delimited by not being followed by a word character, `/`, `-` or `.digit`; a reason is a string of at least two distinct words; a manifest whose every file is empty fails. The structure-only limit stays: two different words of no content pass.
+- **ATK-006, remediated as a warning.** `check` warns when `policies/enforcement.yml` is missing and says what that costs. It is not an error: older installs lack the file, and REQ-014 states the default.
+- **ATK-007, remediated as a note.** The seal names metadata keys other than the ones the tool moves that differ from the committed file, so a hand edit to `risk` or `skipped_phases` is stated at the commit that honours it.
+
+Not remediated, unchanged: ATK-003 (runner design change) and the ATK-009 residue above. Behaviour change worth review: a phase reopened and rerun with byte-identical evidence now fails commit lineage; the fix is a rerun that produces new output.
+
+## Evidence invalidated (second time)
+`phase reopen verify` (2026-10-29, reason ATK-010) reset verification (sealed `5db4836`), evaluation, attack (complete, unsealed) and this phase. Their files are kept for the reruns. Required reruns: verify, then evaluate and attack, review, judgment.
