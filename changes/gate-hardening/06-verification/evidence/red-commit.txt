@@ -1,12 +1,11 @@
-CHECK-009: RED commit shape and RED-state runs. HEAD d8b621d6347231eb773243159833f7f870aeef93, started 2026-10-29T20:25:14Z
-ASDF_RUBY_VERSION=3.3.1 exported so the /tmp worktrees use the same Ruby as the repository (asdf would otherwise pick its global Ruby there)
+CHECK-009: RED commit shape and RED-state runs. HEAD ff5c175da3ed6144208d5375dd7bd125ae4202bc, started 2026-10-30T00:24:23Z
+ASDF_RUBY_VERSION=3.3.1 exported so the /tmp worktrees use the repository's Ruby
 every run: env -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u XAI_API_KEY -u GEMINI_API_KEY -u GOOGLE_API_KEY -u SOFT_FOUNDRY_PHASE -u SOFT_FOUNDRY_PARALLEL -u SOFT_FOUNDRY_GUARD bundle exec ruby -Ilib -Itest -e 'ARGV.each { |f| require File.expand_path(f) }' <test files>, in a detached git worktree of the commit under /tmp, removed afterwards; transcripts in red-run-<sha>.txt
 
 === git show --stat 9a96f45
 9a96f459d945c829688761e85a8bda164f7b9d4b
 Jeff Scholen 2026-10-28T22:07:25-04:00
 RED: gate hardening tests, failing before implementation
-
 
  test/fixture_completion_test.rb |  50 ++++++
  test/gate_checks_test.rb        | 376 ++++++++++++++++++++++++++++++++++++++++
@@ -22,76 +21,27 @@ RED: gate hardening tests, failing before implementation
 Jeff Scholen 2026-10-29T07:35:26-04:00
 RED: remediation tests for the attack findings on gate-hardening
 
-
  test/remediation_gate_hardening_test.rb | 129 ++++++++++++++++++++++++++++++++
  1 file changed, 129 insertions(+)
 --- 4d7392a is an ancestor of HEAD: yes
---- lib/ files changed between 4d7392a and HEAD: lib/soft_foundry/change_record.rb lib/soft_foundry/gate.rb lib/soft_foundry/phase_seal.rb 
+--- lib/ files changed between 4d7392a and HEAD: lib/soft_foundry/change_record.rb lib/soft_foundry/check.rb lib/soft_foundry/gate.rb lib/soft_foundry/git.rb lib/soft_foundry/phase_seal.rb 
 
 === git show --stat d6c2748
 d6c2748fecf66a029d0ecb905c4165e48f5d3740
 Jeff Scholen 2026-10-29T12:24:33-04:00
 RED: sealing remediation must return the record to verify
 
-
  test/remediation_gate_hardening_test.rb | 11 +++++++++++
  1 file changed, 11 insertions(+)
 --- d6c2748 is an ancestor of HEAD: yes
---- lib/ files changed between d6c2748 and HEAD: lib/soft_foundry/phase_seal.rb 
+--- lib/ files changed between d6c2748 and HEAD: lib/soft_foundry/change_record.rb lib/soft_foundry/check.rb lib/soft_foundry/gate.rb lib/soft_foundry/git.rb lib/soft_foundry/phase_seal.rb 
 
-=== git show --stat c30af60
-c30af60717f2701055a272e9173581a4d36cd999
-Jeff Scholen 2026-10-29T07:44:13-04:00
-GREEN: remediate the attack findings on gate-hardening
+=== git show --stat cf7b76b
+cf7b76bc49a69d355453da2d9052076275522b2c
+Jeff Scholen 2026-10-29T19:54:37-04:00
+RED: a hand-committed commit_sha rewrite, empty reruns, loose ids and reasons, a missing policy, hand-edited metadata
 
-
- lib/soft_foundry/change_record.rb | 22 ++++++++++++++++++++++
- lib/soft_foundry/gate.rb          | 24 ++++++++++++++++++++----
- lib/soft_foundry/phase_seal.rb    |  5 +++++
- test/phase_seal_test.rb           |  7 ++++---
- 4 files changed, 51 insertions(+), 7 deletions(-)
---- c30af60 is an ancestor of HEAD: yes
---- lib/ files changed between c30af60 and HEAD: lib/soft_foundry/phase_seal.rb 
-
-=== git show --stat c5c20b4
-c5c20b4dd3dfceeb13637b6d1b15601949fd8658
-Jeff Scholen 2026-10-29T12:25:21-04:00
-GREEN: the seal follows a loop phase's next transition
-
-
- lib/soft_foundry/phase_seal.rb | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
---- c5c20b4 is an ancestor of HEAD: yes
---- lib/ files changed between c5c20b4 and HEAD: 
-
-=== ancestry order: 9a96f45 -> 15e6d92 (implement sealed) -> 4d7392a -> c30af60 -> d6c2748 -> c5c20b4 -> d8b621d
-9a96f45 precedes 15e6d92: yes
-15e6d92 precedes 4d7392a: yes
-4d7392a precedes c30af60: yes
-c30af60 precedes d6c2748: yes
-d6c2748 precedes c5c20b4: yes
-c5c20b4 precedes d8b621d: yes
-
-=== run at 9a96f45 (9a96f45): test/phase_seal_test.rb test/gate_checks_test.rb test/fixture_completion_test.rb test/phase_run_sealing_test.rb test/gate_hardening_cli_test.rb
-59 runs, 82 assertions, 53 failures, 4 errors, 0 skips
-exit=1
---- transcript: evidence/red-run-9a96f45.txt
-
-=== run at 4d7392a (4d7392a): test/remediation_gate_hardening_test.rb
-6 runs, 7 assertions, 6 failures, 0 errors, 0 skips
-exit=1
---- transcript: evidence/red-run-4d7392a.txt
-
-=== run at d6c2748 (d6c2748): test/remediation_gate_hardening_test.rb
-7 runs, 34 assertions, 1 failures, 0 errors, 0 skips
-exit=1
---- transcript: evidence/red-run-d6c2748.txt
-
-=== run at d8b621d6347231eb773243159833f7f870aeef93 (head): test/phase_seal_test.rb test/gate_checks_test.rb test/fixture_completion_test.rb test/phase_run_sealing_test.rb test/gate_hardening_cli_test.rb test/remediation_gate_hardening_test.rb test/git_hook_env_test.rb
-69 runs, 347 assertions, 0 failures, 0 errors, 0 skips
-exit=0
---- transcript: evidence/red-run-head.txt
-
-worktrees after cleanup:
-/Users/jscholen-iou/dev/soft_foundry  d8b621d [change/gate-hardening]
-finished 2026-10-29T20:29:43Z
+ test/remediation_gate_hardening_two_test.rb        | 146 +++++++++++++++++++++
+ 6 files changed, 306 insertions(+), 99 deletions(-)
+--- cf7b76b is an ancestor of HEAD: yes
+--- lib/ files changed between cf7b76b and HEAD: lib/soft_foundry/change_record.rb lib/soft_foundry/check.rb lib/soft_foundry/gate.rb lib/soft_foundry/git.rb lib/soft_foundry/phase_seal.rb 

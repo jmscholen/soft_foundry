@@ -1,4 +1,4 @@
-CHECK-004: ruby -Ilib exe/soft-foundry eval (env -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u XAI_API_KEY -u GEMINI_API_KEY -u GOOGLE_API_KEY -u SOFT_FOUNDRY_PHASE -u SOFT_FOUNDRY_PARALLEL -u SOFT_FOUNDRY_GUARD); HEAD d8b621d6347231eb773243159833f7f870aeef93; 2026-10-29T20:24:50Z
+# HEAD ff5c175da3ed6144208d5375dd7bd125ae4202bc; env -u (ANTHROPIC_API_KEY OPENAI_API_KEY XAI_API_KEY GEMINI_API_KEY GOOGLE_API_KEY SOFT_FOUNDRY_PHASE SOFT_FOUNDRY_PARALLEL SOFT_FOUNDRY_GUARD) ruby -Ilib exe/soft-foundry eval
 ✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
 ✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
 ✓ pass eval commit-sha-older-than-predecessor: discover commit lineage fail, as expected
@@ -29,4 +29,4 @@ CHECK-004: ruby -Ilib exe/soft-foundry eval (env -u ANTHROPIC_API_KEY -u OPENAI_
 ✓ pass eval test-result-fail-unacknowledged: verify test results recorded fail, as expected
 ✓ pass eval verdict-unfilled: judge verdict recorded fail, as expected
 ✓ pass eval: 28 passed, 0 failed, 0 errors, 1 skipped
-exit=0  finished 2026-10-29T20:25:19Z
+exit 0

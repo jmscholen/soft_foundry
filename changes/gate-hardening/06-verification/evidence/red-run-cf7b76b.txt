@@ -1,0 +1,57 @@
+ruby: ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23]; commit cf7b76bc49a69d355453da2d9052076275522b2c; files: test/remediation_gate_hardening_two_test.rb; started 2026-10-30T00:25:26Z
+Run options: --seed 18296
+
+# Running:
+
+FFFFFFFF
+
+Finished in 8.145934s, 0.9821 runs/s, 1.2276 assertions/s.
+
+  1) Failure:
+RemediationGateHardeningTwoTest#test_a_manifest_of_only_empty_files_fails [test/remediation_gate_hardening_two_test.rb:118]:
+unlisted: evidence/recorded.txt (no artifact names it).
+Expected: :fail
+  Actual: :warn
+
+  2) Failure:
+RemediationGateHardeningTwoTest#test_repeated_or_non_string_reasons_are_refused [test/remediation_gate_hardening_two_test.rb:88]:
+reason "no no": 2 criteria: 1 covered, 1 set aside with a reason (AC-002).
+Expected: :fail
+  Actual: :pass
+
+  3) Failure:
+RemediationGateHardeningTwoTest#test_a_hand_committed_commit_sha_rewrite_is_refused [test/remediation_gate_hardening_two_test.rb:45]:
+descends from 05-implementation at 3a910a5d0034; reaches HEAD 9e98645cce2a; recorded with this commit_sha.
+Expected: :fail
+  Actual: :pass
+
+  4) Failure:
+RemediationGateHardeningTwoTest#test_seal_names_hand_edited_metadata_keys [test/remediation_gate_hardening_two_test.rb:143]:
+note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/locks/c1.lock
+sealed 00-intake at 334161b21503
+
+
+  5) Failure:
+RemediationGateHardeningTwoTest#test_a_reopening_without_changed_evidence_does_not_license_the_rewrite [test/remediation_gate_hardening_two_test.rb:60]:
+descends from 05-implementation at c89df4bca1b2; reaches HEAD 44eb422aa4db.
+Expected: :fail
+  Actual: :pass
+
+  6) Failure:
+RemediationGateHardeningTwoTest#test_an_abbreviated_recorded_commit_sha_is_accepted [test/remediation_gate_hardening_two_test.rb:75]:
+commit_sha is be6a3b8c55e5 but this phase was recorded at cf64c982af88 with commit_sha be6a3b8c55e5 and has not been reopened since; evidence is replaced by `soft-foundry phase reopen verify --reason TEXT` and a rerun, never by rewriting the commit it names.
+Expected: :pass
+  Actual: :fail
+
+  7) Failure:
+RemediationGateHardeningTwoTest#test_an_id_followed_by_a_dot_digit_or_slash_does_not_acknowledge_it [test/remediation_gate_hardening_two_test.rb:101]:
+CHECK-1.5 is slow.
+Expected: :fail
+  Actual: :pass
+
+  8) Failure:
+RemediationGateHardeningTwoTest#test_check_warns_when_the_enforcement_policy_is_missing [test/remediation_gate_hardening_two_test.rb:129]:
+[]
+
+8 runs, 10 assertions, 8 failures, 0 errors, 0 skips
+exit=1

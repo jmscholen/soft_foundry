@@ -1,4 +1,4 @@
-CHECK-011: every planned test method in 04-plan/testing.md's coverage table, looked up at HEAD d8b621d6347231eb773243159833f7f870aeef93 under its planned file and, failing that, anywhere under test/ (script kept outside the repository, /tmp/sf-verify-planned-tests.rb, its text in this file below); 2026-10-29T20:24:24Z
+CHECK-011: planned tests looked up at HEAD ff5c175da3ed6144208d5375dd7bd125ae4202bc; script /tmp/sf-verify2/planned.rb, text at the end; 2026-10-30T00:23:55Z
 51 planned test methods in the coverage table
 present in planned file   test/gate_checks_test.rb#test_criteria_set_aside_with_reason_pass_and_blank_reason_fails
 present in planned file   test/gate_checks_test.rb#test_fail_result_named_in_finding_passes
@@ -51,7 +51,7 @@ present in another file   test_run_does_not_seal_in_progress_handoff (planned te
 present in another file   test_run_seals_passing_phase (planned test/phase_runner_test.rb; found in test/phase_run_sealing_test.rb)
 present in another file   test_unicode_blank_discharged_at_is_open (planned test/cli_change_release_test.rb; found in test/gate_hardening_cli_test.rb)
 MISSING                   test/harness_eval_test.rb#test_lint_accepts_new_check_names
---- remediation tests (not in the plan's table; RED 4d7392a and d6c2748):
+--- remediation tests (not in the plan's table):
 test/remediation_gate_hardening_test.rb#test_rewriting_a_recorded_commit_sha_forward_is_refused_until_the_phase_is_reopened
 test/remediation_gate_hardening_test.rb#test_fail_acknowledgement_matches_whole_ids
 test/remediation_gate_hardening_test.rb#test_hollow_reasons_and_unknown_criteria_are_refused
@@ -59,6 +59,14 @@ test/remediation_gate_hardening_test.rb#test_empty_artifacts_list_fails
 test/remediation_gate_hardening_test.rb#test_seal_names_a_missing_record_branch
 test/remediation_gate_hardening_test.rb#test_sealing_remediation_returns_the_record_to_verify
 test/remediation_gate_hardening_test.rb#test_fresh_session_stamp_must_be_a_real_runner
+test/remediation_gate_hardening_two_test.rb#test_a_hand_committed_commit_sha_rewrite_is_refused
+test/remediation_gate_hardening_two_test.rb#test_a_reopening_without_changed_evidence_does_not_license_the_rewrite
+test/remediation_gate_hardening_two_test.rb#test_an_abbreviated_recorded_commit_sha_is_accepted
+test/remediation_gate_hardening_two_test.rb#test_repeated_or_non_string_reasons_are_refused
+test/remediation_gate_hardening_two_test.rb#test_an_id_followed_by_a_dot_digit_or_slash_does_not_acknowledge_it
+test/remediation_gate_hardening_two_test.rb#test_a_manifest_of_only_empty_files_fails
+test/remediation_gate_hardening_two_test.rb#test_check_warns_when_the_enforcement_policy_is_missing
+test/remediation_gate_hardening_two_test.rb#test_seal_names_hand_edited_metadata_keys
 --- summary: 35 in planned file, 15 in another file, 1 missing
 exit=1
 
@@ -85,7 +93,7 @@ puts "#{planned.size} planned test methods in the coverage table"
 status[:planned].sort.each { |s| puts "present in planned file   #{s}" }
 status[:elsewhere].sort.each { |s| puts "present in another file   #{s}" }
 status[:missing].sort.each { |s| puts "MISSING                   #{s}" }
-puts "--- remediation tests (not in the plan's table; RED 4d7392a and d6c2748):"
-File.read("test/remediation_gate_hardening_test.rb").scan(/^\s*def (test_\w+)/).flatten.each { |m| puts "test/remediation_gate_hardening_test.rb##{m}" }
+puts "--- remediation tests (not in the plan's table):"
+Dir["test/remediation_gate_hardening*_test.rb"].sort.each { |f| File.read(f).scan(/^\s*def (test_\w+)/).flatten.each { |m| puts "#{f}##{m}" } }
 puts "--- summary: #{status[:planned].size} in planned file, #{status[:elsewhere].size} in another file, #{status[:missing].size} missing"
 exit(status[:missing].empty? ? 0 : 1)

@@ -1,6 +1,6 @@
-CHECK-010 (AC-019): Gate::CHECKS from the loaded library at HEAD d8b621d6347231eb773243159833f7f870aeef93; 2026-10-29T20:24:23Z
-command: ruby -Ilib -e 'require "soft_foundry"; SoftFoundry::Gate::CHECKS.each { |name, description| puts name }' and a lookup of the seven names
---- 32 entries (name: description):
+CHECK-010 (AC-019): Gate::CHECKS at HEAD ff5c175da3ed6144208d5375dd7bd125ae4202bc; 2026-10-30T00:23:56Z
+command: ruby -Ilib -e 'require "soft_foundry"; SoftFoundry::Gate::CHECKS.each { |name, description| puts "#{name}: #{description}" }'
+--- entries (name: description):
 handoff present: The phase directory has a handoff.yml.
 handoff status: The handoff's status is one of pending, in_progress, complete, blocked.
 phase pending: The phase has not started, so there is nothing to gate.
@@ -33,7 +33,7 @@ instincts valid: The instincts the learning phase recorded are well formed.
 findings explained: Every review finding above minor names the failure it prevents.
 panel recorded: A phase run as a panel has a draft per member, a non-empty ARGUMENT.md, an outcome, and every draft cited in its outputs.
 content clean: The phase's files carry no invisible text or secret-shaped strings.
---- the seven names:
+--- lookup of the seven names:
 present  structured files parse
 present  commit lineage
 present  test results recorded
@@ -41,4 +41,3 @@ present  criteria covered
 present  evidence manifest verified
 present  verdict recorded
 present  fresh session recorded
-exit=0

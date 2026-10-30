@@ -1,11 +1,11 @@
-ruby in worktree: ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23]; commit d6c2748fecf66a029d0ecb905c4165e48f5d3740; files: test/remediation_gate_hardening_test.rb; started 2026-10-29T20:26:25Z
-Run options: --seed 19807
+ruby: ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23]; commit d6c2748fecf66a029d0ecb905c4165e48f5d3740; files: test/remediation_gate_hardening_test.rb; started 2026-10-30T00:25:13Z
+Run options: --seed 11866
 
 # Running:
 
-..F....
+......F
 
-Finished in 13.196658s, 0.5304 runs/s, 2.5764 assertions/s.
+Finished in 11.445386s, 0.6116 runs/s, 2.9706 assertions/s.
 
   1) Failure:
 RemediationGateHardeningTest#test_sealing_remediation_returns_the_record_to_verify [test/remediation_gate_hardening_test.rb:122]:

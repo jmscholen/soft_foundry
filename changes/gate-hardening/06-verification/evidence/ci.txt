@@ -1,4 +1,4 @@
-CHECK-005: ruby -Ilib exe/soft-foundry ci (env -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u XAI_API_KEY -u GEMINI_API_KEY -u GOOGLE_API_KEY -u SOFT_FOUNDRY_PHASE -u SOFT_FOUNDRY_PARALLEL -u SOFT_FOUNDRY_GUARD); HEAD d8b621d6347231eb773243159833f7f870aeef93; 2026-10-29T20:25:19Z
+# HEAD ff5c175da3ed6144208d5375dd7bd125ae4202bc; env -u (ANTHROPIC_API_KEY OPENAI_API_KEY XAI_API_KEY GEMINI_API_KEY GOOGLE_API_KEY SOFT_FOUNDRY_PHASE SOFT_FOUNDRY_PARALLEL SOFT_FOUNDRY_GUARD) ruby -Ilib exe/soft-foundry ci
 ✓ pass control plane: 16 phases, 17 skills, no errors
 ✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
 ✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
@@ -56,7 +56,7 @@ change gate-hardening
   ✓ pass no placeholders
   ✓ pass no blocking conditions
   ✓ pass commit_sha recorded: 3e5627dc3d9c0ff1791ad938462ba800f67087b0
-  ✓ pass commit lineage: reaches HEAD d8b621d63472; recorded with this commit_sha
+  ✓ pass commit lineage: reaches HEAD ff5c175da3ed; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-10-29T01:42:00Z
   ✓ pass predecessor complete: first phase
   ✓ pass content clean
@@ -67,7 +67,7 @@ change gate-hardening
   ✓ pass no placeholders
   ✓ pass no blocking conditions
   ✓ pass commit_sha recorded: a0a8460fcc5efd55a3a4f450e60cf65e79725e3b
-  ✓ pass commit lineage: descends from 00-intake at 3e5627dc3d9c; reaches HEAD d8b621d63472; recorded with this commit_sha
+  ✓ pass commit lineage: descends from 00-intake at 3e5627dc3d9c; reaches HEAD ff5c175da3ed; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-10-29T01:46:00Z
   ✓ pass predecessor complete: 00-intake
   ✓ pass content clean
@@ -78,7 +78,7 @@ change gate-hardening
   ✓ pass no placeholders
   ✓ pass no blocking conditions
   ✓ pass commit_sha recorded: 914a34deb2b249a48bd7612a65684fecb5f20b87
-  ✓ pass commit lineage: descends from 01-discovery at a0a8460fcc5e; reaches HEAD d8b621d63472; recorded with this commit_sha
+  ✓ pass commit lineage: descends from 01-discovery at a0a8460fcc5e; reaches HEAD ff5c175da3ed; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-10-29T01:53:00Z
   ✓ pass predecessor complete: 01-discovery
   ✓ pass specification locked: locked at 829441a628bc, the commit that recorded it
@@ -90,7 +90,7 @@ change gate-hardening
   ✓ pass no placeholders
   ✓ pass no blocking conditions
   ✓ pass commit_sha recorded: 829441a628bc8c0dd184477fb80def40267f572a
-  ✓ pass commit lineage: descends from 02-specification at 914a34deb2b2; reaches HEAD d8b621d63472; recorded with this commit_sha
+  ✓ pass commit lineage: descends from 02-specification at 914a34deb2b2; reaches HEAD ff5c175da3ed; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-10-29T01:57:00Z
   ✓ pass predecessor complete: 02-specification
   ✓ pass content clean
@@ -101,7 +101,7 @@ change gate-hardening
   ✓ pass no placeholders
   ✓ pass no blocking conditions
   ✓ pass commit_sha recorded: 3b72c429a815bb4d25d816a6e7187db6a762c1ee
-  ✓ pass commit lineage: descends from 03-threat-model at 829441a628bc; reaches HEAD d8b621d63472; recorded with this commit_sha
+  ✓ pass commit lineage: descends from 03-threat-model at 829441a628bc; reaches HEAD ff5c175da3ed; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-10-29T02:01:00Z
   ✓ pass predecessor complete: 03-threat-model
   ✓ pass content clean
@@ -112,7 +112,7 @@ change gate-hardening
   ✓ pass no placeholders
   ✓ pass no blocking conditions
   ✓ pass commit_sha recorded: c02528c5e9e91dcfa4624f176af54436ae1f25eb
-  ✓ pass commit lineage: descends from 04-plan at 3b72c429a815; reaches HEAD d8b621d63472; recorded with this commit_sha
+  ✓ pass commit lineage: descends from 04-plan at 3b72c429a815; reaches HEAD ff5c175da3ed; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-10-29T06:20:00Z
   ✓ pass predecessor complete: 04-plan
   ✓ pass content clean
@@ -125,9 +125,9 @@ change gate-hardening
   ✓ pass structured files parse: handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: c5c20b4dd3dfceeb13637b6d1b15601949fd8658
-  ✓ pass commit lineage: descends from 05-implementation at c02528c5e9e9; reaches HEAD d8b621d63472; recorded with this commit_sha
-  ✓ pass completed_at recorded: 2026-10-29T16:27:00Z
+  ✓ pass commit_sha recorded: 39d7e4fd288812a82b99ce3118d06d7719a6904b
+  ✓ pass commit lineage: descends from 05-implementation at c02528c5e9e9; reaches HEAD ff5c175da3ed; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-29T23:30:00Z
   ✓ pass predecessor complete: 05-implementation
   ✓ pass content clean
 advisory: 1 issue to address before gate-hardening goes live (informational, does not block the gate)
@@ -188,4 +188,4 @@ change update-release-asset-name (closed, skipped)
 change upstream-failure-reporting (closed, skipped)
 
 ✓ ci passed
-exit=0  finished 2026-10-29T20:25:56Z
+exit 0
