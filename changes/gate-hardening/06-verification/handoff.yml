@@ -1,18 +1,15 @@
 ---
 phase: 06-verification
 skill: verification
-status: complete
-commit_sha: ff5c175da3ed6144208d5375dd7bd125ae4202bc
-started_at: '2026-10-29T20:20:19Z'
-completed_at: '2026-10-30T01:25:00Z'
+status: pending
+commit_sha:
+started_at:
+completed_at:
 resolved_model:
   profile: reasoning_high
   provider: anthropic
   model: claude-sonnet-5-5
-outputs:
-- results.md
-- tests.yml
-- evidence/manifest.yml
+outputs: []
 blocking: []
 findings:
 - id: VER-001
@@ -87,14 +84,6 @@ notes: |-
   Fresh session started by `soft-foundry phase run verify` (executed_by below), rerunning verification after the second remediation (phase_reopenings 2026-10-29T23:53:33Z, ATK-010). Every command ran with the branch's own code via `ruby -Ilib exe/soft-foundry` and with provider keys and SOFT_FOUNDRY_* unset (`env -u`; the list is the first line of each transcript), except CHECK-002 which sets the AC-048 names. The RED-state runs used detached git worktrees of 9a96f45, 4d7392a, d6c2748, cf7b76b and HEAD under /tmp (removed afterwards; `git worktree list` shows only this worktree) and helper scripts under /tmp/sf-verify2. The two full suites ran one after the other with nothing else of this session running. All evidence files were regenerated at HEAD, so every sha256 differs from the previous run; the two first-attempt transcripts of the previous run were deleted as stale. Nothing outside this phase directory was written in the repository; no code or test was changed. The working tree holds uncommitted evidence of the evaluation and attack phases (their reruns were in progress); this phase did not read it, and lib/, test/ and .ai/ are clean against HEAD. The guard checks Bash against deny sets only, so the declared read set was honoured as policy (00-intake, 01-discovery, 07-evaluation and 08-attack were not read, which is why VER-006 is indirect). Character scan of the evidence: no invisible, bidirectional, zero-width or control character.
   reopened 2026-10-29T11:35:26Z (manual): evidence files kept for reference; rerun this phase (remediation of 08-attack findings ATK-001 to ATK-009: verification, evaluation and attack are redone after the fix)
   reopened 2026-10-29T23:53:33Z (manual): evidence files kept for reference; rerun this phase (ATK-010 (major): the ATK-001 fix is bypassed by a hand-committed handoff; remediating it with ATK-011, 012, 013, 006, 007)
+  reopened 2026-10-30T01:42:57Z (manual): evidence files kept for reference; rerun this phase (EVAL-017 (gate git cost over the REQ-036 bound) and EVAL-018 (lineage failure without a next action): third remediation pass)
 executed_by:
-  runner: soft-foundry phase run
-  shell: claude
-  fresh_context: true
-  started_at: '2026-10-30T00:21:48Z'
-  finished_at: '2026-10-30T01:15:58Z'
-  exit_status: 0
-  previous_phase: verify
-  session_id: 44d571c2-78c2-4ddd-8adb-b4a449052a33
-  cwd: "/Users/jscholen-iou/dev/soft_foundry"
 branch_resolved: true

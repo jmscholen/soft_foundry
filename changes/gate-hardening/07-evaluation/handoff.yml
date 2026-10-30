@@ -1,19 +1,15 @@
 ---
 phase: 07-evaluation
 skill: evaluation
-status: complete
-commit_sha: 87d7b8f0e9e6bbf05f765d35d0a4b56af324ec13
-started_at: '2026-10-29T22:00:50Z'
-completed_at: '2026-10-30T01:23:29Z'
+status: pending
+commit_sha:
+started_at:
+completed_at:
 resolved_model:
   profile: reasoning_high
   provider: anthropic
   model: claude-sonnet-5-5
-outputs:
-- evaluation-plan.md
-- journeys.yml
-- results.md
-- evidence/manifest.yml
+outputs: []
 blocking: []
 findings:
 - 'EVAL-017/019 (major, AC-052 timing clause, REQ-036): gate all on this record takes
@@ -37,14 +33,6 @@ notes: |-
   reopened 2026-10-29T23:53:33Z (manual): evidence files kept for reference; rerun this phase (ATK-010 (major): the ATK-001 fix is bypassed by a hand-committed handoff; remediating it with ATK-011, 012, 013, 006, 007)
 
   Completed by the session already named in executed_by; the guard could not stop Bash writes outside the phase directory, so that boundary was held by policy. Scratch repositories live under /tmp/sf-eval3.
+  reopened 2026-10-30T01:42:57Z (manual): evidence files kept for reference; rerun this phase (EVAL-017 (gate git cost over the REQ-036 bound) and EVAL-018 (lineage failure without a next action): third remediation pass)
 executed_by:
-  runner: soft-foundry phase run
-  shell: claude
-  fresh_context: true
-  started_at: '2026-10-30T01:16:29Z'
-  finished_at: '2026-10-30T01:24:08Z'
-  exit_status: 0
-  previous_phase: evaluate
-  session_id: 2de85aed-5756-41b9-b6ba-7f41452745a4
-  cwd: "/Users/jscholen-iou/dev/soft_foundry"
 branch_resolved: true

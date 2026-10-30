@@ -9,7 +9,7 @@ type: feature
 risk: high
 track: gated
 status: in_progress
-current_phase: attack
+current_phase: remediate
 created_at: 2026-10-29 01:34:20.000000000 Z
 scope: []
 surfaces:
@@ -95,5 +95,31 @@ phase_reopenings:
       status: complete
       commit_sha: c5c20b4dd3dfceeb13637b6d1b15601949fd8658
       completed_at: '2026-10-29T16:27:00Z'
+      session_id:
+- at: '2026-10-30T01:42:57Z'
+  phase: verify
+  reset:
+  - verify
+  - evaluate
+  - remediate
+  from_commit: f0b256b214a246b775838ff691ca69b5fe941c2c
+  reason: 'EVAL-017 (gate git cost over the REQ-036 bound) and EVAL-018 (lineage failure
+    without a next action): third remediation pass'
+  source: manual
+  previous:
+    verify:
+      status: complete
+      commit_sha: ff5c175da3ed6144208d5375dd7bd125ae4202bc
+      completed_at: '2026-10-30T01:25:00Z'
+      session_id: 44d571c2-78c2-4ddd-8adb-b4a449052a33
+    evaluate:
+      status: complete
+      commit_sha: 87d7b8f0e9e6bbf05f765d35d0a4b56af324ec13
+      completed_at: '2026-10-30T01:23:29Z'
+      session_id: 2de85aed-5756-41b9-b6ba-7f41452745a4
+    remediate:
+      status: complete
+      commit_sha: 39d7e4fd288812a82b99ce3118d06d7719a6904b
+      completed_at: '2026-10-29T23:30:00Z'
       session_id:
 skipped_phases: []
