@@ -1,4 +1,4 @@
-# HEAD ff5c175da3ed6144208d5375dd7bd125ae4202bc; learn promote --dry-run
+# HEAD dccdd8c7171d1c53d40d52cb5209cff1dd0c1ce4; learn promote --dry-run
 - skip a-hook-decides-or-refuses-never-raises: already in .ai/rules/learned.md
 - skip bind-waivers-to-risk-and-never-waive-the-verdict: already in .ai/rules/learned.md
 - skip run-the-lifecycle-in-block-mode-before-trusting-a-warn-mode-control: already in .ai/rules/learned.md
@@ -64,4 +64,4 @@
 - skip escape-invisible-chars-in-tests: confidence 0.60 is below 0.80
 - skip summary-never-says-none-for-unknown-shape: confidence 0.60 is below 0.80
 exit 0
-ids       52 missing=0
+lookup: 52 already-promoted ids, each present in .ai/rules/learned.md, 0 missing; 12 skip lines below 0.80 confidence

@@ -1,21 +1,22 @@
-# HEAD ff5c175da3ed6144208d5375dd7bd125ae4202bc
+# HEAD dccdd8c7171d1c53d40d52cb5209cff1dd0c1ce4
 ## git diff main -- lib/ | grep -nE '^\+.*(net/http|open-uri|socket|SOFT_FOUNDRY_GUARD|enforcement\.yml)'
-157:+      return [Finding.new(:warning, "policies/enforcement.yml is missing: the guard mode defaults to warn, so a review or judgment from the implementing session is advised, never refused; add it with `guard: {mode: block}` to require a fresh session")] unless File.exist?(path)
-412:+    # (.ai/policies/enforcement.yml guard.mode), or the default. Never the
-416:+      path = File.join(dir, "policies", "enforcement.yml")
+161:+      return [Finding.new(:warning, "policies/enforcement.yml is missing: the guard mode defaults to warn, so a review or judgment from the implementing session is advised, never refused; add it with `guard: {mode: block}` to require a fresh session")] unless File.exist?(path)
+416:+    # (.ai/policies/enforcement.yml guard.mode), or the default. Never the
+420:+      path = File.join(dir, "policies", "enforcement.yml")
 (grep exit 0)
 ## require lines for net/http, open-uri, socket in lib/ (whole tree)
+lib/soft_foundry/ui/server.rb:7:require "socket"
 lib/soft_foundry/updater.rb:4:require "net/http"
 lib/soft_foundry/provider.rb:4:require "net/http"
-lib/soft_foundry/ui/server.rb:7:require "socket"
 ## net/http|open-uri|socket require lines added vs main
 (grep exit 1)
 ## SOFT_FOUNDRY_GUARD / local override in gate.rb phase_seal.rb control_plane.rb change_record.rb
+lib/soft_foundry/gate.rb:236:    # override phrase or fetch-and-execute command is a warning, since a
+lib/soft_foundry/gate.rb:401:    # Honors `after` overrides, globally optional phases, a change's own
 lib/soft_foundry/control_plane.rb:123:    # machine-local override or the environment: the gate reads what the
 lib/soft_foundry/control_plane.rb:259:    # Groups that repository.yml may never override: they protect policy and
 lib/soft_foundry/control_plane.rb:277:    def override_path_groups
 lib/soft_foundry/control_plane.rb:278:      @override_path_groups ||= begin
 lib/soft_foundry/control_plane.rb:288:      @path_groups ||= default_path_groups.merge(override_path_groups.reject { |g, _| PROTECTED_GROUPS.include?(g) })
-lib/soft_foundry/gate.rb:232:    # override phrase or fetch-and-execute command is a warning, since a
-lib/soft_foundry/gate.rb:397:    # Honors `after` overrides, globally optional phases, a change's own
-(grep exit 0)
+## lines added to lib/ since ff5c175 matching the same pattern
+(grep exit 1)

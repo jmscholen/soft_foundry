@@ -1,45 +1,45 @@
-ruby: ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23]; commit 4d7392a6eb3089e3612011f8cefa4bed5169edcb; files: test/remediation_gate_hardening_test.rb; started 2026-10-30T00:25:05Z
-Run options: --seed 50194
+ruby: ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23]; commit 4d7392a6eb3089e3612011f8cefa4bed5169edcb; files: test/remediation_gate_hardening_test.rb; started 2026-10-30T01:47:25Z
+Run options: --seed 35041
 
 # Running:
 
 FFFFFF
 
-Finished in 6.257992s, 0.9588 runs/s, 1.1186 assertions/s.
+Finished in 6.594784s, 0.9098 runs/s, 1.0614 assertions/s.
 
   1) Failure:
-RemediationGateHardeningTest#test_fresh_session_stamp_must_be_a_real_runner [test/remediation_gate_hardening_test.rb:124]:
+RemediationGateHardeningTest#test_rewriting_a_recorded_commit_sha_forward_is_refused_until_the_phase_is_reopened [test/remediation_gate_hardening_test.rb:35]:
+descends from 05-implementation at 532437003049; reaches HEAD 1e1f66af8ba8.
 Expected: :fail
   Actual: :pass
 
   2) Failure:
-RemediationGateHardeningTest#test_hollow_reasons_and_unknown_criteria_are_refused [test/remediation_gate_hardening_test.rb:79]:
-reason "-": 2 criteria: 1 covered, 1 set aside with a reason (AC-002).
-Expected: :fail
-  Actual: :pass
+RemediationGateHardeningTest#test_seal_names_a_missing_record_branch [test/remediation_gate_hardening_test.rb:110]:
+sealed 00-intake at 1e5c289ddb9c
+
 
   3) Failure:
-RemediationGateHardeningTest#test_rewriting_a_recorded_commit_sha_forward_is_refused_until_the_phase_is_reopened [test/remediation_gate_hardening_test.rb:35]:
-descends from 05-implementation at a0f3710989b0; reaches HEAD d1f5df903b40.
-Expected: :fail
-  Actual: :pass
-
-  4) Failure:
-RemediationGateHardeningTest#test_fail_acknowledgement_matches_whole_ids [test/remediation_gate_hardening_test.rb:63]:
-2 checks, 1 pass; acknowledged: CHECK-1 (fail).
-Expected: :fail
-  Actual: :pass
-
-  5) Failure:
 RemediationGateHardeningTest#test_empty_artifacts_list_fails [test/remediation_gate_hardening_test.rb:96]:
 unlisted: evidence/recorded.txt (no artifact names it).
 Expected: :fail
   Actual: :warn
 
-  6) Failure:
-RemediationGateHardeningTest#test_seal_names_a_missing_record_branch [test/remediation_gate_hardening_test.rb:110]:
-sealed 00-intake at 0b7892adfd5a
+  4) Failure:
+RemediationGateHardeningTest#test_hollow_reasons_and_unknown_criteria_are_refused [test/remediation_gate_hardening_test.rb:79]:
+reason "-": 2 criteria: 1 covered, 1 set aside with a reason (AC-002).
+Expected: :fail
+  Actual: :pass
 
+  5) Failure:
+RemediationGateHardeningTest#test_fresh_session_stamp_must_be_a_real_runner [test/remediation_gate_hardening_test.rb:124]:
+Expected: :fail
+  Actual: :pass
+
+  6) Failure:
+RemediationGateHardeningTest#test_fail_acknowledgement_matches_whole_ids [test/remediation_gate_hardening_test.rb:63]:
+2 checks, 1 pass; acknowledged: CHECK-1 (fail).
+Expected: :fail
+  Actual: :pass
 
 6 runs, 7 assertions, 6 failures, 0 errors, 0 skips
 exit=1

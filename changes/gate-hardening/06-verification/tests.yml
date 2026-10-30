@@ -1,14 +1,14 @@
 # `soft-foundry change size --phase verify` computed full_at_verify (no scope
 # declared: whole-repository scope is sized at the largest size).
 size: full_at_verify
-# The full suite run on this tree (git rev-parse HEAD^{tree} at ff5c175da3ed6144208d5375dd7bd125ae4202bc), provider
+# The full suite run on this tree (git rev-parse HEAD^{tree} at dccdd8c7171d1c53d40d52cb5209cff1dd0c1ce4), provider
 # keys and SOFT_FOUNDRY_* unset, run alone: the RED-state worktree runs finished
 # before it started and nothing else of this session ran beside it. A record of
 # a run, not a test result: the transcript is evidence/full-suite.txt. The
 # working tree also holds uncommitted evidence of the evaluation and attack
 # phases; lib/, test/ and .ai/ are clean against HEAD (git status --short).
 full_suite:
-  tree: 9af076471f76ed4e8c17e64a2fa7fcae9306a051
+  tree: 33bd93c6f7f2a11d91cf7599c78e6ae6c20dd737
   command: "bundle exec rake test (env -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u XAI_API_KEY -u GEMINI_API_KEY -u GOOGLE_API_KEY -u SOFT_FOUNDRY_PHASE -u SOFT_FOUNDRY_PARALLEL -u SOFT_FOUNDRY_GUARD), run alone"
   outcome: passed
 checks:
@@ -74,7 +74,7 @@ checks:
     protection: not_applicable
   - id: CHECK-009
     kind: custom
-    command: "RED commit shape: git show --stat and ancestry for 9a96f45, 4d7392a, d6c2748, cf7b76b and the GREEN commits c30af60, c5c20b4, 39d7e4f; the RED files run at 9a96f45, 4d7392a, d6c2748 and cf7b76b in detached worktrees under /tmp (.ai/rules/testing.md: each test exists and fails before its implementation)"
+    command: "RED commit shape: git show --stat and ancestry for 9a96f45, 4d7392a, d6c2748, cf7b76b a930c57 and the GREEN commits c30af60, c5c20b4, 39d7e4f, c664d12; the RED files run at 9a96f45, 4d7392a, d6c2748 and cf7b76b in detached worktrees under /tmp (.ai/rules/testing.md: each test exists and fails before its implementation)"
     result: pass
     evidence: evidence/red-commit.txt
     criteria: []
@@ -97,7 +97,7 @@ checks:
     protection: not_applicable
   - id: CHECK-012
     kind: tests
-    command: "the five RED files of 9a96f45, the two remediation files and test/git_hook_env_test.rb run at HEAD ff5c175 in a detached worktree (GREEN confirmation of the files the RED commits hold, outside the full suite's ordering)"
+    command: "the five RED files of 9a96f45, the two remediation files and test/git_hook_env_test.rb run at HEAD dccdd8c in a detached worktree (GREEN confirmation of the files the RED commits hold, outside the full suite's ordering)"
     result: pass
     evidence: evidence/red-run-head.txt
     criteria: []
@@ -106,10 +106,19 @@ checks:
     protection: not_applicable
   - id: CHECK-013
     kind: tests
-    command: "test/remediation_gate_hardening_two_test.rb (eight tests: the ATK-010 to ATK-013 and ATK-006/007 fixes) run at cf7b76b (all 8 fail) and at HEAD ff5c175 (inside CHECK-012, 0 failures)"
+    command: "test/remediation_gate_hardening_two_test.rb (eight tests: the ATK-010 to ATK-013 and ATK-006/007 fixes) run at cf7b76b (all 8 fail) and at HEAD dccdd8c (inside CHECK-012, 0 failures)"
     result: pass
     evidence: evidence/red-run-head.txt
     criteria: []
     red_commit: cf7b76bc49a69d355453da2d9052076275522b2c
     test_path: test/remediation_gate_hardening_two_test.rb
+    protection: not_applicable
+  - id: CHECK-014
+    kind: tests
+    command: "test/remediation_gate_hardening_three_test.rb (three tests: EVAL-017 one HEAD read per gate run, EVAL-018 lineage failures name a next action) run at a930c57 (2 of 3 fail) and at HEAD dccdd8c (0 failures)"
+    result: pass
+    evidence: evidence/red-run-three-dccdd8c.txt
+    criteria: []
+    red_commit: a930c577030910d6ae46fa2e897466da42f5357d
+    test_path: test/remediation_gate_hardening_three_test.rb
     protection: not_applicable
