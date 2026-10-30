@@ -43,6 +43,9 @@ class RemediationGateHardeningTest < Minitest::Test
       code, _out, err = run_cli(dir, "phase", "reopen", "verify", "--reason", "code changed")
       assert_equal 0, code, err
       complete_phase!(record, "verify", sha: head(dir))
+      # The rerun's evidence differs from the record (ATK-011).
+      results = phase_file(record, "verify", "results.md")
+      File.write(results, "#{File.read(results)}\nRerun at #{head(dir)[0, 12]}\n")
       lineage = check(dir, record, "verify", "commit lineage")
       assert_equal :pass, lineage.outcome, lineage.detail
     end

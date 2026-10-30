@@ -45,9 +45,11 @@ module SoftFoundry
       if (sha = sealed_at(phase))
         return Result.new(outcome: :already_sealed, sha: sha, lines: ["already sealed at #{sha[0, 12]} (#{phase.output} and metadata.yml are unchanged since)"], gate: gate)
       end
+      edited = hand_edited_metadata_keys
       advance!(phase)
       notes = unrelated_dirty_paths(phase).first(5)
       lines = notes.empty? ? [] : ["note: left uncommitted (outside this phase and the record's metadata): #{notes.join(', ')}"]
+      lines << "note: metadata.yml also carries uncommitted edits to #{edited.join(', ')}, which this seal commits; the gate honours them from now on (ATK-007)" unless edited.empty?
       branch = @record.git_branch
       current = @git.branch.to_s
       if current != branch && @git.branch_tip(branch).nil?
@@ -73,6 +75,21 @@ module SoftFoundry
     private
 
     def record_prefix = "changes/#{@record.slug}/"
+
+    # Keys the tool itself moves while a change runs; any other key that
+    # differs from the committed metadata.yml was edited by hand.
+    TOOL_KEYS = %w[status current_phase phase_reopenings reopenings vetted].freeze
+
+    def hand_edited_metadata_keys
+      rel = "#{record_prefix}metadata.yml"
+      return [] if @git.dirty_under(rel).empty?
+      committed = YAML.safe_load(@git.blob(@git.head_sha, rel).to_s, permitted_classes: [Time, Date], aliases: true)
+      now = @record.metadata
+      return [] unless committed.is_a?(Hash)
+      (committed.keys | now.keys).reject { |k| TOOL_KEYS.include?(k) || committed[k] == now[k] }.sort
+    rescue Psych::Exception, GitError, TargetError
+      []
+    end
 
     def refusal(phase)
       return "not a git repository; a seal is a commit" unless @git.repository?

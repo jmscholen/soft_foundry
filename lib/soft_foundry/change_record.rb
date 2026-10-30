@@ -208,7 +208,10 @@ module SoftFoundry
     def recorded_commit(phase, git:)
       return nil unless phase_status(phase) == "complete" && git.repository?
       rel = "changes/#{slug}/#{phase.output}/handoff.yml"
-      sha = git.last_commit_for(rel)
+      # The commit the tool made when it sealed the phase; a hand commit of
+      # the handoff is not the record (ATK-010). A record with no seal commit
+      # for the phase predates `phase seal`, so its newest commit stands.
+      sha = git.last_commit_with_subject(rel, "Record #{slug} #{phase.id}") || git.last_commit_for(rel)
       return nil unless sha
       data = YAML.safe_load(git.blob(sha, rel).to_s, permitted_classes: [Time, Date], aliases: true)
       data.is_a?(Hash) && data["status"] == "complete" ? sha : nil

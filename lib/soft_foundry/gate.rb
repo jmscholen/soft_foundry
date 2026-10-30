@@ -468,17 +468,55 @@ module SoftFoundry
         return Check.new(LINEAGE_CHECK, :fail, "commit_sha #{sha[0, 12]} is not an ancestor of #{at_head ? 'HEAD' : "the record branch's tip"} #{tip[0, 12]}; the evidence commit must be in this record's history")
       end
       facts << "reaches #{at_head ? 'HEAD' : 'the branch tip'} #{tip[0, 12]}"
-      # A recorded phase's commit_sha moves only through a reopening: a
-      # forward rewrite would make stale evidence read current (ATK-001).
+      # A recorded phase's commit_sha moves only through a reopening that
+      # reran the phase: a forward rewrite would make stale evidence read
+      # current (ATK-001), a hand commit of it is not the record (ATK-010),
+      # and a reopening whose evidence files did not change reran nothing
+      # (ATK-011).
       recorded_at = recorded_commit(phase)
       recorded_sha = recorded_at && @record.recorded_handoff(phase, git: @git)&.fetch("commit_sha", nil).to_s
-      if recorded_sha && !recorded_sha.empty? && recorded_sha != sha && !@record.reopened_since?(phase, recorded_at, git: @git)
-        return Check.new(LINEAGE_CHECK, :fail, "commit_sha is #{sha[0, 12]} but this phase was recorded at #{recorded_at[0, 12]} with commit_sha #{recorded_sha[0, 12]} and has not been reopened since; evidence is replaced by `soft-foundry phase reopen #{phase.id} --reason TEXT` and a rerun, never by rewriting the commit it names")
+      same = recorded_sha && !recorded_sha.empty? && (recorded_sha == sha || (@git.resolve_commit(recorded_sha) && @git.resolve_commit(recorded_sha) == @git.resolve_commit(sha)))
+      if recorded_sha && !recorded_sha.empty? && !same
+        unless @record.reopened_since?(phase, recorded_at, git: @git)
+          return Check.new(LINEAGE_CHECK, :fail, "commit_sha is #{sha} but this phase was recorded at #{recorded_at[0, 12]} with commit_sha #{recorded_sha}, and has not been reopened since; evidence is replaced by `soft-foundry phase reopen #{phase.id} --reason TEXT` and a rerun, never by rewriting the commit it names")
+        end
+        unless evidence_changed_since?(phase, recorded_at)
+          return Check.new(LINEAGE_CHECK, :fail, "commit_sha is #{sha} but this phase was recorded at #{recorded_at[0, 12]} with commit_sha #{recorded_sha}; it was reopened, yet no evidence file under #{phase.output}/ other than handoff.yml differs from that record, so nothing was rerun; redo the phase's work before moving its commit_sha")
+        end
       end
-      facts << "recorded with this commit_sha" if recorded_sha == sha
+      facts << "recorded with this commit_sha" if same
       Check.new(LINEAGE_CHECK, :pass, facts.join("; "))
     rescue TargetError, GitError => e
       Check.new(LINEAGE_CHECK, :fail, e.message)
+    end
+
+    # True when a file under the phase directory, other than the handoff,
+    # was added, removed or changed since commit `since`. A structured file
+    # whose only difference is a commit_sha counts as unchanged: restamping
+    # the commit is not rerunning the phase.
+    def evidence_changed_since?(phase, since)
+      prefix = "changes/#{@record.slug}/#{phase.output}/"
+      @git.changed_since(since).any? do |p|
+        next false unless p.start_with?(prefix) && p != "#{prefix}handoff.yml"
+        path = File.join(@record.root, p)
+        old = @git.blob(since, p)
+        now = File.file?(path) ? File.read(path) : nil
+        next true if old.nil? || now.nil?
+        p.end_with?(".yml") ? without_commit_sha(old) != without_commit_sha(now) : old != now
+      end
+    end
+
+    def without_commit_sha(text)
+      strip = lambda do |v|
+        case v
+        when Hash then v.reject { |k, _| k == "commit_sha" }.transform_values(&strip)
+        when Array then v.map(&strip)
+        else v
+        end
+      end
+      strip.call(YAML.safe_load(text, permitted_classes: [Time, Date], aliases: true))
+    rescue Psych::Exception
+      text
     end
 
     # tests.yml records every check with a result, and a check that did not
@@ -502,7 +540,7 @@ module SoftFoundry
       named = (Array(handoff["blocking"]).map(&:to_s) + Array(handoff["findings"]).flat_map { |f| f.is_a?(Hash) ? [f["id"].to_s, f["summary"].to_s] : [f.to_s] }).join("\n")
       not_passed = checks.select { |c| %w[fail error].include?(c["result"]) || (c["result"] == "skipped" && !Array(c["criteria"]).empty?) }
       # The whole id, so CHECK-1 is not acknowledged by a line about CHECK-10 (ATK-004).
-      unnamed = not_passed.reject { |c| named.match?(/(?<![\w-])#{Regexp.escape(c['id'].to_s)}(?![\w-])/) }
+      unnamed = not_passed.reject { |c| named.match?(/(?<![\w-])#{Regexp.escape(c['id'].to_s)}(?![\w\/-]|\.\w)/) }
       unless unnamed.empty?
         list = unnamed.map { |c| "#{c['id']} (#{c['result']})" }.join(", ")
         return Check.new(RESULTS_CHECK, :fail, "#{list} did not pass and no blocking entry or finding names #{unnamed.size == 1 ? 'it' : 'them'}; a check that did not pass is redone, or named in the handoff's blocking list or in a finding so the record says so")
@@ -528,7 +566,8 @@ module SoftFoundry
       covered = by_checks | criteria_named(journeys_yml, "journeys")
       aside = Array(judgment_evidence_safe["criteria_not_covered"]).select { |e| e.is_a?(Hash) }
       # A reason is at least two words of letters; "-", "n/a" or one bare word vouch for nothing (ATK-005).
-      bad = aside.select { |e| Text.blank?(e["reason"]) || e["reason"].to_s.match?(PLACEHOLDER) || e["reason"].to_s.scan(/\p{L}{2,}/).size < 2 }.map { |e| e["id"].to_s }
+      # It is a string of at least two different words (ATK-013).
+      bad = aside.select { |e| !e["reason"].is_a?(String) || Text.blank?(e["reason"]) || e["reason"].match?(PLACEHOLDER) || e["reason"].downcase.scan(/\p{L}{2,}/).uniq.size < 2 }.map { |e| e["id"].to_s }
       return Check.new(CRITERIA_CHECK, :fail, "criteria_not_covered sets #{bad.join(', ')} aside without a reason of at least two words; give each a reason or cover it") unless bad.empty?
       aside_ids = aside.map { |e| e["id"].to_s }
       unknown = aside_ids - ids
@@ -587,6 +626,7 @@ module SoftFoundry
       return Check.new(MANIFEST_CHECK, :fail, "evidence/manifest.yml lists no artifact; a phase whose evidence is the point names at least one file with its sha256 (ATK-008)") if artifacts.empty?
       inside = File.expand_path(dir)
       listed = []
+      sizes = []
       problems = artifacts.each_with_index.filter_map do |a, i|
         next "artifact ##{i + 1} is not a mapping" unless a.is_a?(Hash)
         rel = a["path"].to_s
@@ -598,12 +638,14 @@ module SoftFoundry
         next "#{rel}: file is missing" unless File.exist?(full)
         next "#{rel}: resolves outside #{phase.output}/" unless File.realpath(full).start_with?("#{File.realpath(dir)}/")
         next "#{rel}: not a regular file" unless File.file?(full)
+        sizes << File.size(full)
         actual = Digest::SHA256.file(full).hexdigest
         recorded = a["sha256"].to_s.strip.downcase
         next if actual == recorded
         "#{rel}: sha256 recorded #{recorded.empty? ? '(none)' : recorded[0, 12]}, file has #{actual[0, 12]}; regenerate the manifest after the evidence is final"
       end
       return Check.new(MANIFEST_CHECK, :fail, problems.join("; ")) unless problems.empty?
+      return Check.new(MANIFEST_CHECK, :fail, "every file the manifest lists is empty; evidence names at least one file with content (ATK-013)") if sizes.all?(&:zero?)
       evidence_dir = File.join(dir, "evidence")
       present = Dir.glob("**/*", base: evidence_dir).select { |f| File.file?(File.join(evidence_dir, f)) }.map { |f| "evidence/#{f}" }
       unlisted = present - ["evidence/manifest.yml"] - listed

@@ -258,7 +258,9 @@ module SoftFoundry
     # but when present its mode must be one the guard understands.
     def check_enforcement
       path = File.join(@plane.dir, "policies", "enforcement.yml")
-      return [] unless File.exist?(path)
+      # Without the policy the guard mode defaults to warn, and the gate's
+      # `fresh session recorded` check skips (ATK-006).
+      return [Finding.new(:warning, "policies/enforcement.yml is missing: the guard mode defaults to warn, so a review or judgment from the implementing session is advised, never refused; add it with `guard: {mode: block}` to require a fresh session")] unless File.exist?(path)
       data = YAML.safe_load_file(path) || {}
       mode = data.dig("guard", "mode")
       return [] if mode.nil? || Guard::MODES.include?(mode.to_s)

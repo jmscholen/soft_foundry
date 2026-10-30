@@ -82,7 +82,7 @@ class RemediationGateHardeningTwoTest < Minitest::Test
       edit_yaml(record, "specify", "acceptance-criteria.yml") do |a|
         a["criteria"] << { "id" => "AC-002", "requirements" => ["REQ-001"], "given" => "g", "when" => "w", "then" => "t", "verified_by" => [] }
       end
-      ["no no", "xx yy xx", %w[needs production], { "needs" => "production" }].each do |reason|
+      ["no no", "no no no", %w[needs production], { "needs" => "production" }].each do |reason|
         edit_yaml(record, "judge", "evidence.yml") { |e| e["criteria_not_covered"] = [{ "id" => "AC-002", "reason" => reason }] }
         covered = check(dir, record, "judge", "criteria covered")
         assert_equal :fail, covered.outcome, "reason #{reason.inspect}: #{covered.detail}"

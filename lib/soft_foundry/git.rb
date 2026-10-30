@@ -154,6 +154,22 @@ module SoftFoundry
       ok && !out.strip.empty? ? out.strip : nil
     end
 
+    # The newest commit touching `path` whose subject is exactly `subject`
+    # (the message a seal gives its commit), or nil.
+    def last_commit_with_subject(path, subject)
+      out, ok = run("log", "--format=%H%x09%s", "--", path)
+      return nil unless ok
+      line = out.lines(chomp: true).find { |l| l.split("\t", 2).last == subject }
+      line&.split("\t", 2)&.first
+    end
+
+    # The full hash of the commit `sha` names (abbreviated or not), or nil.
+    def resolve_commit(sha)
+      return nil unless sha.to_s.match?(/\A[0-9a-fA-F]{4,40}\z/)
+      out, ok = run("rev-parse", "--verify", "--quiet", "#{sha}^{commit}")
+      ok && !out.strip.empty? ? out.strip : nil
+    end
+
     # The contents of `path` at commit `sha`, or nil when absent there.
     def blob(sha, path)
       out, ok = run("show", "#{sha}:#{path}")
