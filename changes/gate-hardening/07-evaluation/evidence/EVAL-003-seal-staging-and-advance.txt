@@ -1,7 +1,7 @@
 # EVAL-003: Sealing stages only its own paths and advances current_phase past waived phases and into judged (AC-006, AC-007, AC-008)
-# driver: evidence/journeys-driver.rb, run 2026-10-30T01:17:00Z at 87d7b8f0e9e6
+# driver: evidence/journeys-driver.rb, run 2026-10-30T02:26:05Z at b871187a6bf2
 
-# scratch repository: /tmp/sf-eval3/repos/eval-003-plant
+# scratch repository: /tmp/sf-eval4/repos/eval-003-plant
 $ soft-foundry change new c1   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1
@@ -11,8 +11,8 @@ billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, X
 exit 0
 
 $ soft-foundry phase seal plan
-note: left uncommitted (outside this phase and the record's metadata): changes/c1/06-verification/evidence/planted.txt, .soft-foundry/
-sealed 04-plan at d57636762350
+note: left uncommitted (outside this phase and the record's metadata): changes/c1/06-verification/evidence/planted.txt, .ai/skills/evaluation/.soft-foundry/, .soft-foundry/
+sealed 04-plan at bb8cf7afe473
 exit 0
 
 assert pass: AC-006 exit 0
@@ -32,7 +32,7 @@ exit 0
 
 assert pass: AC-006 planted file still untracked
 assert pass: AC-006 note names the planted path
-# scratch repository: /tmp/sf-eval3/repos/eval-003-judge
+# scratch repository: /tmp/sf-eval4/repos/eval-003-judge
 $ soft-foundry change new c1   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1
@@ -42,14 +42,14 @@ billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, X
 exit 0
 
 $ soft-foundry phase seal judge
-note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/
-sealed 14-judgment at 3f745a50eeb0
+note: left uncommitted (outside this phase and the record's metadata): .ai/skills/evaluation/.soft-foundry/, .soft-foundry/
+sealed 14-judgment at 5f8c156ab87e
 exit 0
 
 assert pass: AC-007 exit 0
 assert pass: AC-007 status judged, current_phase learn
 assert pass: AC-007 judge handoff carries branch_resolved true
-# scratch repository: /tmp/sf-eval3/repos/eval-003-waived
+# scratch repository: /tmp/sf-eval4/repos/eval-003-waived
 $ soft-foundry change new c1 --risk medium   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1
@@ -60,8 +60,8 @@ billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, X
 exit 0
 
 $ soft-foundry phase seal intake
-note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/
-sealed 00-intake at d7a99afc8a59
+note: left uncommitted (outside this phase and the record's metadata): .ai/skills/evaluation/.soft-foundry/, .soft-foundry/
+sealed 00-intake at fdad19c46f3c
 exit 0
 
 assert pass: AC-008 exit 0

@@ -1,7 +1,7 @@
 # EVAL-018: Every new refusal and gate line is plain one-line text with a word outcome, repository-relative paths, 12-character SHAs, no colour (REQ-032)
-# driver: evidence/journeys-driver.rb, run 2026-10-30T01:22:23Z at 87d7b8f0e9e6
+# driver: evidence/journeys-driver.rb, run 2026-10-30T02:28:36Z at b871187a6bf2
 
-# scratch repository: /tmp/sf-eval3/repos/eval-018-a11y
+# scratch repository: /tmp/sf-eval4/repos/eval-018-a11y
 $ soft-foundry change new c1   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1
@@ -16,8 +16,8 @@ exit 1
 
 assert pass: refusal: one line, names the file and the status found and the next action
 $ soft-foundry phase seal intake
-note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/
-sealed 00-intake at 6a8b81341112
+note: left uncommitted (outside this phase and the record's metadata): .ai/skills/evaluation/.soft-foundry/, .soft-foundry/
+sealed 00-intake at 8b7aec82679f
 exit 0
 
 assert pass: sealed line shows a 12-character SHA
@@ -33,10 +33,10 @@ $ soft-foundry change status --json
   "released": false,
   "open_items": 0,
   "version": 1,
-  "generated_at": "2026-10-30T01:22:25Z",
+  "generated_at": "2026-10-30T02:28:37Z",
   "branch": "change/c1",
   "scope": [],
-  "created_at": "2026-10-30T01:22:24Z",
+  "created_at": "2026-10-30T02:28:36Z",
   "surfaces": {
     "application": false,
     "database": false,
@@ -75,7 +75,7 @@ $ soft-foundry change status --json
       "skip_rationale": null,
       "started_at": "2026-01-01T00:00:00Z",
       "completed_at": "2026-01-01T00:00:00Z",
-      "commit_sha": "f7cddc9629b67b6cfb3ad3b71d643420dbe600cd",
+      "commit_sha": "90ba857a5206a75dfb1cc00e65d6a4fbc55935a1",
       "executed_by": null,
       "blocking": [],
       "findings": [],
@@ -118,12 +118,12 @@ $ soft-foundry change status --json
         {
           "name": "commit_sha recorded",
           "outcome": "pass",
-          "detail": "f7cddc9629b67b6cfb3ad3b71d643420dbe600cd"
+          "detail": "90ba857a5206a75dfb1cc00e65d6a4fbc55935a1"
         },
         {
           "name": "commit lineage",
           "outcome": "pass",
-          "detail": "reaches HEAD 6a8b81341112; recorded with this commit_sha"
+          "detail": "reaches HEAD 8b7aec82679f; recorded with this commit_sha"
         },
         {
           "name": "completed_at recorded",
@@ -488,7 +488,7 @@ $ soft-foundry change status --json
       "label": "00-intake completed"
     },
     {
-      "at": "2026-10-30T01:22:24Z",
+      "at": "2026-10-30T02:28:36Z",
       "kind": "created",
       "phase": null,
       "label": "change record created"
@@ -523,8 +523,8 @@ $ NO_COLOR=1 soft-foundry gate discover   # lineage failure under NO_COLOR
   ✓ pass structured files parse: handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 53fa4039eb720be8812f42ee1aadf0ca7b7ad3c8
-  ✗ fail commit lineage: 00-intake recorded f7cddc9629b6, which is not an ancestor of this phase's commit_sha 53fa4039eb72; a phase's commit_sha is the HEAD its outputs describe, which follows its predecessor's
+  ✓ pass commit_sha recorded: 37f1fd4cbeddd32471ebcfb0e3ad5ae6f72e478d
+  ✗ fail commit lineage: 00-intake recorded 90ba857a5206, which is not an ancestor of this phase's commit_sha 37f1fd4cbedd; a phase's commit_sha is the HEAD its outputs describe, which follows its predecessor's; rerun this phase from the current HEAD (`soft-foundry phase reopen discover --reason TEXT`), or reseal the predecessor if it was the one rewritten
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 00-intake
   ✓ pass content clean
@@ -532,10 +532,10 @@ exit 2
 
 assert pass: gate line carries a word (fail) beside the glyph
 assert pass: SHAs in the gate line are 12 characters, not 40
-assert FAIL: the lineage line names the check, the value found and the next action (  ✗ fail commit lineage: 00-intake recorded f7cddc9629b6, which is not an ancestor of this phase's commit_sha 53fa4039eb72; a phase's commit_sha is the HEAD its outputs describe, which follows its predecessor's)
+assert pass: the lineage line names the check, the value found and the next action
 assert pass: meaning survives stripping non-ASCII: the word fail remains
 assert pass: no ANSI escapes in any captured output
 assert pass: paths in the gate output are repository-relative (no scratch prefix)
 # every transcript in evidence/ is scanned for ANSI escapes by the driver's final step
 
-# EVAL-018: FAIL (8 assertions passed, 1 failed)
+# EVAL-018: PASS (9 assertions passed, 0 failed)

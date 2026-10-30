@@ -1,7 +1,7 @@
 # EVAL-015: branch_resolved false is measured at HEAD; git: as a string is a gate line; reopen clears started_at; blank discharged_at is open; check names forced_by_risk; symlinked handoff refused (AC-044 to AC-047, AC-049)
-# driver: evidence/journeys-driver.rb, run 2026-10-30T01:19:07Z at 87d7b8f0e9e6
+# driver: evidence/journeys-driver.rb, run 2026-10-30T02:27:52Z at b871187a6bf2
 
-# scratch repository: /tmp/sf-eval3/repos/eval-015-ghost
+# scratch repository: /tmp/sf-eval4/repos/eval-015-ghost
 $ soft-foundry change new c1   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1
@@ -11,9 +11,9 @@ billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, X
 exit 0
 
 $ soft-foundry phase seal verify
-note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/
+note: left uncommitted (outside this phase and the record's metadata): .ai/skills/evaluation/.soft-foundry/, .soft-foundry/
 note: the record's branch change/ghost does not exist; this seal commits to the checked-out branch change/c1; create change/ghost here or correct git.branch in metadata.yml (ATK-002)
-sealed 06-verification at 7e920ee25abe
+sealed 06-verification at 3ad78164597e
 exit 0
 
 assert pass: AC-044 seal verify exits 0 on the checked-out branch (the record's branch does not exist)
@@ -25,11 +25,11 @@ $ soft-foundry gate verify   # change/ghost now exists at the sealing commit; HE
   ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 1fe11a24da54be21ed853da8293178fc59868c4f
-  ✓ pass commit lineage: descends from 05-implementation at d080c2ce3a09; reaches HEAD 6519c64c3e6c; recorded with this commit_sha
+  ✓ pass commit_sha recorded: 74392cc19a00f40b5ff7b4542db6f2440dfb6cbc
+  ✓ pass commit lineage: descends from 05-implementation at 79817cdd3e28; reaches HEAD 9571b47af0aa; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 05-implementation
-  ✗ fail evidence current: STALE: code changed since 1fe11a24da54: lib/app.rb
+  ✗ fail evidence current: STALE: code changed since 74392cc19a00: lib/app.rb
   - skip red evidence: no check records a red_commit
   - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
   - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
@@ -41,7 +41,7 @@ $ soft-foundry gate verify   # change/ghost now exists at the sealing commit; HE
 exit 2
 
 assert pass: AC-044 `evidence current` measures HEAD and reports STALE
-# scratch repository: /tmp/sf-eval3/repos/eval-015-gitstring
+# scratch repository: /tmp/sf-eval4/repos/eval-015-gitstring
 $ soft-foundry change new c1   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1
@@ -57,7 +57,7 @@ $ soft-foundry gate verify
   ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: ed5ed483b87a1cdc697b4cbee4b0f4fcf74fb1cf
+  ✓ pass commit_sha recorded: f7afde424c299b3504dc5faccfd6c7729f5c2899
   ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not string; restore the git: block
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 05-implementation
@@ -74,7 +74,7 @@ exit 2
 
 assert pass: AC-045 a fail line names metadata.yml git and says it must be a mapping with branch and worktree; exit 2
 assert pass: AC-045 no Ruby backtrace
-# scratch repository: /tmp/sf-eval3/repos/eval-015-reopen
+# scratch repository: /tmp/sf-eval4/repos/eval-015-reopen
 $ soft-foundry change new c1   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1
@@ -90,7 +90,7 @@ phase reopen: reset verify
 exit 0
 
 assert pass: AC-046 after reopen, verify started_at is null
-# scratch repository: /tmp/sf-eval3/repos/eval-015-nbsp
+# scratch repository: /tmp/sf-eval4/repos/eval-015-nbsp
 $ soft-foundry change new c1   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1
@@ -102,7 +102,7 @@ exit 0
 $ soft-foundry change release --item 'OBS-1=watch the error rate for a week'
 c1: released
 released: c1: 1 open item(s): OBS-1
-released: c1: recorded at 2026-10-30T01:19:12Z (commit 514df16f944b)
+released: c1: recorded at 2026-10-30T02:27:57Z (commit f64aa79d272b)
 exit 0
 
 assert pass: change release exits 0
@@ -140,14 +140,14 @@ $ soft-foundry change close c1
 exit 1
 
 assert pass: AC-046 change close refuses naming OBS-1
-# scratch repository: /tmp/sf-eval3/repos/eval-015-forced
+# scratch repository: /tmp/sf-eval4/repos/eval-015-forced
 $ soft-foundry check
 ✗ error workflow: tracks.forced_by_risk names hihg, which `change new --risk` does not allow (low, medium, high); a renamed key would stop forcing the track
 ✗ fail control plane: 1 error(s)
 exit 2
 
 assert pass: AC-047 check fails naming forced_by_risk and hihg
-# scratch repository: /tmp/sf-eval3/repos/eval-015-symlink
+# scratch repository: /tmp/sf-eval4/repos/eval-015-symlink
 $ soft-foundry change new c1   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1

@@ -1,7 +1,7 @@
 # EVAL-007: A parallel run seals each passing phase in order, leaves a blocked one, hides --env values, and is visible in ps (AC-013, AC-014, AC-055, REV-007)
-# driver: evidence/journeys-driver.rb, run 2026-10-30T01:17:32Z at 87d7b8f0e9e6
+# driver: evidence/journeys-driver.rb, run 2026-10-30T02:26:33Z at b871187a6bf2
 
-# scratch repository: /tmp/sf-eval3/repos/eval-007-par
+# scratch repository: /tmp/sf-eval4/repos/eval-007-par
 $ soft-foundry change new c1   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1
@@ -21,15 +21,15 @@ phase evaluate: claude exited 0
   ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 35eef0989683c0ba3417ecf1061d4696bc1652d1
-  ✓ pass commit lineage: descends from 06-verification at ca79b1d06ca3; reaches HEAD 35eef0989683
+  ✓ pass commit_sha recorded: 1cdc4493689094b99ddd9d26c8f0aff8a3fb6fe4
+  ✓ pass commit lineage: descends from 06-verification at 1ba1690b09d4; reaches HEAD 1cdc44936890
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 06-verification
-  ✓ pass evidence current: no code changes since 35eef0989683; specification unchanged since 35eef0989683
+  ✓ pass evidence current: no code changes since 1cdc44936890; specification unchanged since 1cdc44936890
   ✓ pass evidence manifest verified: 1 artifact matches
   ✓ pass content clean
 note: left uncommitted (outside this phase and the record's metadata): changes/c1/08-attack/attack-plan.md, changes/c1/08-attack/cases.yml, changes/c1/08-attack/evidence/manifest.yml, changes/c1/08-attack/handoff.yml, changes/c1/08-attack/results.md
-sealed 07-evaluation at 3a6bdcf416bf
+sealed 07-evaluation at 93e932521153
 phase evaluate: pass
 phase attack: claude exited 0
 08-attack  complete  PASS
@@ -38,15 +38,15 @@ phase attack: claude exited 0
   ✓ pass structured files parse: cases.yml, evidence/manifest.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 35eef0989683c0ba3417ecf1061d4696bc1652d1
-  ✓ pass commit lineage: descends from 07-evaluation at 35eef0989683; reaches HEAD 3a6bdcf416bf
+  ✓ pass commit_sha recorded: 1cdc4493689094b99ddd9d26c8f0aff8a3fb6fe4
+  ✓ pass commit lineage: descends from 07-evaluation at 1cdc44936890; reaches HEAD 93e932521153
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 07-evaluation
-  ✓ pass evidence current: no code changes since 35eef0989683; specification unchanged since 35eef0989683
+  ✓ pass evidence current: no code changes since 1cdc44936890; specification unchanged since 1cdc44936890
   ✓ pass evidence manifest verified: 1 artifact matches
   ✓ pass content clean
-note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/
-sealed 08-attack at 4f87393460d1
+note: left uncommitted (outside this phase and the record's metadata): .ai/skills/evaluation/.soft-foundry/, .soft-foundry/
+sealed 08-attack at 26e5fc027101
 phase attack: pass
 parallel: 2 phases run, 2 passed and sealed, 0 failed
 [stderr] ! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the evaluation skill's permissions (`soft-foundry hooks install --claude`)
@@ -56,9 +56,9 @@ exit 0
 
 assert pass: AC-014 runner exits 0
 $ git log '--format=%h %s' -n 3
-4f87393 Record c1 attack
-3a6bdcf Record c1 evaluate
-35eef09 phases complete: intake discover specify threat_model plan implement verify
+26e5fc0 Record c1 attack
+93e9325 Record c1 evaluate
+1cdc449 phases complete: intake discover specify threat_model plan implement verify
 exit 0
 
 assert pass: AC-014 two commits: `Record c1 evaluate` then `Record c1 attack`
@@ -69,17 +69,17 @@ $ soft-foundry gate attack
   ✓ pass structured files parse: cases.yml, evidence/manifest.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 35eef0989683c0ba3417ecf1061d4696bc1652d1
-  ✓ pass commit lineage: descends from 07-evaluation at 35eef0989683; reaches HEAD 4f87393460d1; recorded with this commit_sha
+  ✓ pass commit_sha recorded: 1cdc4493689094b99ddd9d26c8f0aff8a3fb6fe4
+  ✓ pass commit lineage: descends from 07-evaluation at 1cdc44936890; reaches HEAD 26e5fc027101; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 07-evaluation
-  ✓ pass evidence current: no code changes since 35eef0989683; specification unchanged since 35eef0989683
+  ✓ pass evidence current: no code changes since 1cdc44936890; specification unchanged since 1cdc44936890
   ✓ pass evidence manifest verified: 1 artifact matches
   ✓ pass content clean
 exit 0
 
 assert pass: AC-014 gate attack exits 0 with predecessor complete and commit lineage passing
-# scratch repository: /tmp/sf-eval3/repos/eval-007-par-blocked
+# scratch repository: /tmp/sf-eval4/repos/eval-007-par-blocked
 $ soft-foundry change new c1   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1
@@ -99,15 +99,15 @@ phase evaluate: claude exited 0
   ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 9b7ea144b5edf3e6e9a1f3b6aa9f1d07de4da2b3
-  ✓ pass commit lineage: descends from 06-verification at 6f47bb3f824d; reaches HEAD 9b7ea144b5ed
+  ✓ pass commit_sha recorded: 20b847beb49d60635ac1dae1c5ab9e6c3b57950d
+  ✓ pass commit lineage: descends from 06-verification at 37d1f0671403; reaches HEAD 20b847beb49d
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 06-verification
-  ✓ pass evidence current: no code changes since 9b7ea144b5ed; specification unchanged since 9b7ea144b5ed
+  ✓ pass evidence current: no code changes since 20b847beb49d; specification unchanged since 20b847beb49d
   ✓ pass evidence manifest verified: 1 artifact matches
   ✓ pass content clean
-note: left uncommitted (outside this phase and the record's metadata): changes/c1/08-attack/handoff.yml, .soft-foundry/
-sealed 07-evaluation at e6ad89032495
+note: left uncommitted (outside this phase and the record's metadata): changes/c1/08-attack/handoff.yml, .ai/skills/evaluation/.soft-foundry/, .soft-foundry/
+sealed 07-evaluation at 7207c847fdf1
 phase evaluate: pass
 phase attack: claude exited 0
 08-attack  blocked  PASS
@@ -127,7 +127,7 @@ assert pass: AC-013 output names both outcomes
 assert pass: AC-013 attack handoff is blocked
 assert pass: AC-055 hunter2 appears nowhere in the runner's or sealing output
 assert pass: the sessions did receive SECRET (names recorded by the fake shell)
-# scratch repository: /tmp/sf-eval3/repos/eval-007-par-fail
+# scratch repository: /tmp/sf-eval4/repos/eval-007-par-fail
 $ soft-foundry change new c1   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1
@@ -161,7 +161,7 @@ exit 1
 
 assert pass: AC-055 failing sessions: runner exits non-zero and prints no hunter2
 # REV-007: ps during a parallel run (sessions sleep 20 s)
-# scratch repository: /tmp/sf-eval3/repos/eval-007-par-ps
+# scratch repository: /tmp/sf-eval4/repos/eval-007-par-ps
 $ soft-foundry change new c1   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1
@@ -171,19 +171,20 @@ billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, X
 exit 0
 
 $ soft-foundry ps   # while the parallel run is in flight
-running: 5 soft-foundry processes
+running: 6 soft-foundry processes
   pid 98677  ui  port 0  in /private/tmp/evalrun/c1r  since 2026-10-26T15:29:19Z
   pid 3634  ui  port 0  in /private/tmp/evalrun/c1r  since 2026-10-26T16:28:29Z
   pid 98496  ui  port 0  in /private/tmp/evalrun/c1r  since 2026-10-26T20:06:11Z
-  pid 98279  phase run evaluate  change gate-hardening  shell claude (session pid 98290)  in /Users/jscholen-iou/dev/soft_foundry  since 2026-10-30T01:16:29Z
-  pid 2547  phase run evaluate,attack  change c1  shell claude (session pid 2552)  in this repository  since 2026-10-30T01:17:40Z
+  pid 4663  phase run attack  change engagement-mcp  shell claude (session pid 4671)  in /Users/jscholen-iou/dev/ai_projects/my_ai-engagement-mcp  since 2026-10-30T02:20:57Z
+  pid 16693  phase run evaluate  change gate-hardening  shell claude (session pid 16705)  in /Users/jscholen-iou/dev/soft_foundry  since 2026-10-30T02:25:38Z
+  pid 19742  phase run evaluate,attack  change c1  shell claude (session pid 19749)  in this repository  since 2026-10-30T02:26:40Z
 sessions: 3 coding shells open in Soft Foundry repositories
   pid 78736  claude  terminal ttys017  no change record for its branch  branch main  in /Users/jscholen-iou/dev/ai_projects/my_ai  since 2026-10-28T15:18:50Z
   pid 88573  grok  terminal ttys003  change dark-mode (phase intake, intake)  branch dark-mode  in /Users/jscholen-iou/dev/ai_projects/gov_pipeline  since 2026-10-28T15:27:00Z
   pid 76932  claude  terminal ttys007  change gate-hardening (phase evaluate, in_progress)  branch change/gate-hardening  in /Users/jscholen-iou/dev/soft_foundry  since 2026-10-29T00:34:50Z
 recorded as started by phase run with no process found: 2
-  ! warn change c1 phase evaluate: started 2026-10-30T01:17:41Z (claude) and never finished; the session may have been interrupted
-  ! warn change c1 phase attack: started 2026-10-30T01:17:41Z (claude) and never finished; the session may have been interrupted
+  ! warn change c1 phase evaluate: started 2026-10-30T02:26:40Z (claude) and never finished; the session may have been interrupted
+  ! warn change c1 phase attack: started 2026-10-30T02:26:40Z (claude) and never finished; the session may have been interrupted
 exit 0
 
 assert pass: ps lists the phase run naming both phases (evaluate,attack)
@@ -198,15 +199,15 @@ assert pass: ps lists the phase run naming both phases (evaluate,attack)
 #     ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
 #     ✓ pass no placeholders
 #     ✓ pass no blocking conditions
-#     ✓ pass commit_sha recorded: 7fc9c021f71d3ea7ce8630dc790a9e19a0c8d94e
-#     ✓ pass commit lineage: descends from 06-verification at 65974efc3d15; reaches HEAD 7fc9c021f71d
+#     ✓ pass commit_sha recorded: d1e40176e065a1971764bf17f289a46ec2718d92
+#     ✓ pass commit lineage: descends from 06-verification at e7ac706c5e20; reaches HEAD d1e40176e065
 #     ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
 #     ✓ pass predecessor complete: 06-verification
-#     ✓ pass evidence current: no code changes since 7fc9c021f71d; specification unchanged since 7fc9c021f71d
+#     ✓ pass evidence current: no code changes since d1e40176e065; specification unchanged since d1e40176e065
 #     ✓ pass evidence manifest verified: 1 artifact matches
 #     ✓ pass content clean
 #   note: left uncommitted (outside this phase and the record's metadata): changes/c1/08-attack/attack-plan.md, changes/c1/08-attack/cases.yml, changes/c1/08-attack/evidence/manifest.yml, changes/c1/08-attack/handoff.yml, changes/c1/08-attack/results.md
-#   sealed 07-evaluation at 6063dab8c730
+#   sealed 07-evaluation at fe3481ccae80
 #   phase evaluate: pass
 #   phase attack: claude exited 0
 #   08-attack  complete  PASS
@@ -215,15 +216,15 @@ assert pass: ps lists the phase run naming both phases (evaluate,attack)
 #     ✓ pass structured files parse: cases.yml, evidence/manifest.yml, handoff.yml
 #     ✓ pass no placeholders
 #     ✓ pass no blocking conditions
-#     ✓ pass commit_sha recorded: 7fc9c021f71d3ea7ce8630dc790a9e19a0c8d94e
-#     ✓ pass commit lineage: descends from 07-evaluation at 7fc9c021f71d; reaches HEAD 6063dab8c730
+#     ✓ pass commit_sha recorded: d1e40176e065a1971764bf17f289a46ec2718d92
+#     ✓ pass commit lineage: descends from 07-evaluation at d1e40176e065; reaches HEAD fe3481ccae80
 #     ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
 #     ✓ pass predecessor complete: 07-evaluation
-#     ✓ pass evidence current: no code changes since 7fc9c021f71d; specification unchanged since 7fc9c021f71d
+#     ✓ pass evidence current: no code changes since d1e40176e065; specification unchanged since d1e40176e065
 #     ✓ pass evidence manifest verified: 1 artifact matches
 #     ✓ pass content clean
-#   note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/
-#   sealed 08-attack at 813eac0d65ac
+#   note: left uncommitted (outside this phase and the record's metadata): .ai/skills/evaluation/.soft-foundry/, .soft-foundry/
+#   sealed 08-attack at 81e4fbeb9085
 #   phase attack: pass
 #   parallel: 2 phases run, 2 passed and sealed, 0 failed
 assert pass: the sleeping run sealed both phases

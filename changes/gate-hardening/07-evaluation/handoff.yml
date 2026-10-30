@@ -1,32 +1,30 @@
 ---
 phase: 07-evaluation
 skill: evaluation
-status: pending
-commit_sha:
-started_at:
-completed_at:
+status: complete
+commit_sha: b871187a6bf28f6e2fc4730920a099c0bde9f580
+started_at: '2026-10-30T02:25:38Z'
+completed_at: '2026-10-30T02:29:13Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
   model: claude-sonnet-5-5
-outputs: []
+outputs:
+- evaluation-plan.md
+- journeys.yml
+- results.md
+- evidence/manifest.yml
 blocking: []
 findings:
-- 'EVAL-017/019 (major, AC-052 timing clause, REQ-036): gate all on this record takes
-  3.43 s vs 1.08 s pre-change (ratio 3.16, bound is under 2); 220 git subprocesses
-  vs 60. Needs remediation (cache SHA/tip resolution across checks) or a recorded
-  decision on the bound.'
-- 'EVAL-018 (minor, REQ-032): the commit lineage failure line names the check and
-  both 12-character SHAs but gives no next action.'
-- 'EVAL-001 to EVAL-016: all 18 journeys exercising AC-001 to AC-047, AC-049, AC-052
-  (smoke) and AC-055 pass at 87d7b8f; AC-019, AC-048, AC-050, AC-051, AC-053, AC-054
-  belong to verify, attack or documentation and were not journeys.'
+- All 19 journeys (EVAL-001 to EVAL-019) pass at b871187a6bf2, covering AC-001 to
+  AC-047, AC-049, AC-052 and AC-055; this clears EVAL-017/019 (gate all 1.42 s vs
+  1.18 s, ratio 1.20; 71 git calls vs 64) and EVAL-018 (lineage failure names a next
+  action).
+- AC-019, AC-048, AC-050, AC-051, AC-053, AC-054 belong to verify, attack or documentation
+  and were not journeys.
 - AC-022 literal fixture cannot fail (sealed commit_sha precedes the sealing commit);
   EVAL-009 exercises the intent with an older commit. The specification wording may
   be tightened.
-- 'Driver corrections made this run (no expectation weakened): --help exit status
-  is 1 on both gems, change status takes a positional slug, lineage fixture uses the
-  first commit.'
 next: attack
 notes: |-
   reopened 2026-10-29T11:35:26Z (manual): evidence files kept for reference; rerun this phase (remediation of 08-attack findings ATK-001 to ATK-009: verification, evaluation and attack are redone after the fix)
@@ -35,4 +33,13 @@ notes: |-
   Completed by the session already named in executed_by; the guard could not stop Bash writes outside the phase directory, so that boundary was held by policy. Scratch repositories live under /tmp/sf-eval3.
   reopened 2026-10-30T01:42:57Z (manual): evidence files kept for reference; rerun this phase (EVAL-017 (gate git cost over the REQ-036 bound) and EVAL-018 (lineage failure without a next action): third remediation pass)
 executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-10-30T02:25:38Z'
+  finished_at: '2026-10-30T02:29:20Z'
+  exit_status: 0
+  previous_phase: evaluate
+  session_id: de35e951-5c99-4f43-af3a-517e07ed5313
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"
 branch_resolved: true

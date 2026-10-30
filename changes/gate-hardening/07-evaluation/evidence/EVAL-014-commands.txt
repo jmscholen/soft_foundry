@@ -1,7 +1,7 @@
 # EVAL-014: gate exit 3, close refuses BLOCKED, change new takes --flag=value, summary names malformed lists (AC-039 to AC-043)
-# driver: evidence/journeys-driver.rb, run 2026-10-30T01:18:59Z at 87d7b8f0e9e6
+# driver: evidence/journeys-driver.rb, run 2026-10-30T02:27:46Z at b871187a6bf2
 
-# scratch repository: /tmp/sf-eval3/repos/eval-014-cmds
+# scratch repository: /tmp/sf-eval4/repos/eval-014-cmds
 $ soft-foundry change new c1   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1
@@ -31,8 +31,8 @@ $ soft-foundry gate all
   ✓ pass structured files parse: handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 17c489c9a5c91c5a2e3f2e269438501cedca56a6
-  ✓ pass commit lineage: reaches HEAD 6831d6af4313; recorded with this commit_sha
+  ✓ pass commit_sha recorded: 030d45c9e412782b09a41d8bff9b4d4091a2a31f
+  ✓ pass commit lineage: reaches HEAD b8b5df1b675d; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: first phase
   ✓ pass content clean
@@ -42,8 +42,8 @@ $ soft-foundry gate all
   ✓ pass structured files parse: handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 17c489c9a5c91c5a2e3f2e269438501cedca56a6
-  ✓ pass commit lineage: descends from 00-intake at 17c489c9a5c9; reaches HEAD 6831d6af4313; recorded with this commit_sha
+  ✓ pass commit_sha recorded: 030d45c9e412782b09a41d8bff9b4d4091a2a31f
+  ✓ pass commit lineage: descends from 00-intake at 030d45c9e412; reaches HEAD b8b5df1b675d; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 00-intake
   ✓ pass content clean
@@ -53,11 +53,11 @@ $ soft-foundry gate all
   ✓ pass structured files parse: requirements.yml, acceptance-criteria.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 17c489c9a5c91c5a2e3f2e269438501cedca56a6
-  ✓ pass commit lineage: descends from 01-discovery at 17c489c9a5c9; reaches HEAD 6831d6af4313; recorded with this commit_sha
+  ✓ pass commit_sha recorded: 030d45c9e412782b09a41d8bff9b4d4091a2a31f
+  ✓ pass commit lineage: descends from 01-discovery at 030d45c9e412; reaches HEAD b8b5df1b675d; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 01-discovery
-  ✓ pass specification locked: locked at 6831d6af4313, the commit that recorded it
+  ✓ pass specification locked: locked at b8b5df1b675d, the commit that recorded it
   ✓ pass content clean
 03-threat-model  complete  PASS
   ✓ pass handoff identity
@@ -65,8 +65,8 @@ $ soft-foundry gate all
   ✓ pass structured files parse: threats.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 17c489c9a5c91c5a2e3f2e269438501cedca56a6
-  ✓ pass commit lineage: descends from 02-specification at 17c489c9a5c9; reaches HEAD 6831d6af4313; recorded with this commit_sha
+  ✓ pass commit_sha recorded: 030d45c9e412782b09a41d8bff9b4d4091a2a31f
+  ✓ pass commit lineage: descends from 02-specification at 030d45c9e412; reaches HEAD b8b5df1b675d; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 02-specification
   ✓ pass content clean
@@ -76,8 +76,8 @@ $ soft-foundry gate all
   ✓ pass structured files parse: handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 17c489c9a5c91c5a2e3f2e269438501cedca56a6
-  ✓ pass commit lineage: descends from 03-threat-model at 17c489c9a5c9; reaches HEAD 6831d6af4313; recorded with this commit_sha
+  ✓ pass commit_sha recorded: 030d45c9e412782b09a41d8bff9b4d4091a2a31f
+  ✓ pass commit lineage: descends from 03-threat-model at 030d45c9e412; reaches HEAD b8b5df1b675d; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 03-threat-model
   ✓ pass content clean
@@ -87,8 +87,8 @@ $ soft-foundry gate all
   ✓ pass structured files parse: handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 17c489c9a5c91c5a2e3f2e269438501cedca56a6
-  ✓ pass commit lineage: descends from 04-plan at 17c489c9a5c9; reaches HEAD 6831d6af4313; recorded with this commit_sha
+  ✓ pass commit_sha recorded: 030d45c9e412782b09a41d8bff9b4d4091a2a31f
+  ✓ pass commit lineage: descends from 04-plan at 030d45c9e412; reaches HEAD b8b5df1b675d; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 04-plan
   ✓ pass content clean
@@ -287,7 +287,7 @@ $ soft-foundry gate --help
 exit 1
 
 # observation: `gate --help` is read as a phase name; the codes live in the top-level --help entry above
-# scratch repository: /tmp/sf-eval3/repos/eval-014-close-blocked
+# scratch repository: /tmp/sf-eval4/repos/eval-014-close-blocked
 $ soft-foundry change new c1   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1
@@ -307,7 +307,7 @@ c1: closed
 exit 0
 
 assert pass: AC-040 --force closes
-# scratch repository: /tmp/sf-eval3/repos/eval-014-close-residual
+# scratch repository: /tmp/sf-eval4/repos/eval-014-close-residual
 $ soft-foundry change new c1   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1
@@ -321,7 +321,7 @@ c1: closed
 exit 0
 
 assert pass: AC-041 APPROVED_WITH_RESIDUAL_RISK closes as today
-# scratch repository: /tmp/sf-eval3/repos/eval-014-new-flags
+# scratch repository: /tmp/sf-eval4/repos/eval-014-new-flags
 $ soft-foundry change new demo --type=fix --risk=low --track=gated
 created changes/demo with 16 phase directories
 branch: main
@@ -348,7 +348,7 @@ billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, X
 exit 0
 
 assert pass: AC-042 --title= and --scope= forms accepted
-# scratch repository: /tmp/sf-eval3/repos/eval-014-summary
+# scratch repository: /tmp/sf-eval4/repos/eval-014-summary
 $ soft-foundry change new c1   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1

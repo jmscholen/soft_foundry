@@ -1,7 +1,7 @@
 # EVAL-001: A phase session seals its finished phase; a rerun is a no-op (AC-001, AC-005, AC-009)
-# driver: evidence/journeys-driver.rb, run 2026-10-30T01:16:56Z at 87d7b8f0e9e6
+# driver: evidence/journeys-driver.rb, run 2026-10-30T02:26:01Z at b871187a6bf2
 
-# scratch repository: /tmp/sf-eval3/repos/eval-001-seal
+# scratch repository: /tmp/sf-eval4/repos/eval-001-seal
 $ soft-foundry change new c1   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1
@@ -12,15 +12,15 @@ exit 0
 
 # intake is complete on disk and uncommitted; notes.txt is an uncommitted scratch file outside code and the record
 $ soft-foundry phase seal intake   # persona: phase session
-note: left uncommitted (outside this phase and the record's metadata): notes.txt, .soft-foundry/
-sealed 00-intake at 4a55a5e35c8d
+note: left uncommitted (outside this phase and the record's metadata): notes.txt, .ai/skills/evaluation/.soft-foundry/, .soft-foundry/
+sealed 00-intake at 21752e723f5f
 exit 0
 
 assert pass: AC-001 exit 0
 assert pass: AC-001 output line is `sealed 00-intake at <12-char sha>`
 $ git log '--format=%h %s' -n 2
-4a55a5e Record c1 intake
-49881c9 record c1
+21752e7 Record c1 intake
+01295ee record c1
 exit 0
 
 $ git show --name-only --format= HEAD
@@ -41,7 +41,7 @@ exit 0
 assert pass: AC-005 notes.txt still untracked
 assert pass: no ANSI escape in the output
 $ soft-foundry phase seal intake   # run again: nothing changed since
-already sealed at 4a55a5e35c8d (00-intake and metadata.yml are unchanged since)
+already sealed at 21752e723f5f (00-intake and metadata.yml are unchanged since)
 exit 0
 
 assert pass: AC-009 exit 0
@@ -54,14 +54,14 @@ change:
   id: c1
   title: c1
 git:
-  worktree: "/private/tmp/sf-eval3/repos/eval-001-seal"
+  worktree: "/private/tmp/sf-eval4/repos/eval-001-seal"
   branch: change/c1
 type: TBD
 risk: TBD
 track: gated
 status: in_progress
 current_phase: discover
-created_at: 2026-10-30 01:16:56.000000000 Z
+created_at: 2026-10-30 02:26:02.000000000 Z
 scope: []
 surfaces:
   application: false

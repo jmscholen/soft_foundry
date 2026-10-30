@@ -1,5 +1,5 @@
 # EVAL-016: App-wide smoke test in this repository: help, check, status, gate all, summary, ci (REQ-028, AC-052 ci clause)
-# driver: evidence/journeys-driver.rb, run 2026-10-30T01:21:45Z at 87d7b8f0e9e6
+# driver: evidence/journeys-driver.rb, run 2026-10-30T02:28:02Z at b871187a6bf2
 
 # persona: maintainer in the real checkout; every command read-only
 $ soft-foundry --help
@@ -204,7 +204,7 @@ $ soft-foundry gate all --change gate-hardening
   ✓ pass no placeholders
   ✓ pass no blocking conditions
   ✓ pass commit_sha recorded: 3e5627dc3d9c0ff1791ad938462ba800f67087b0
-  ✓ pass commit lineage: reaches HEAD 87d7b8f0e9e6; recorded with this commit_sha
+  ✓ pass commit lineage: reaches HEAD b871187a6bf2; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-10-29T01:42:00Z
   ✓ pass predecessor complete: first phase
   ✓ pass content clean
@@ -215,7 +215,7 @@ $ soft-foundry gate all --change gate-hardening
   ✓ pass no placeholders
   ✓ pass no blocking conditions
   ✓ pass commit_sha recorded: a0a8460fcc5efd55a3a4f450e60cf65e79725e3b
-  ✓ pass commit lineage: descends from 00-intake at 3e5627dc3d9c; reaches HEAD 87d7b8f0e9e6; recorded with this commit_sha
+  ✓ pass commit lineage: descends from 00-intake at 3e5627dc3d9c; reaches HEAD b871187a6bf2; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-10-29T01:46:00Z
   ✓ pass predecessor complete: 00-intake
   ✓ pass content clean
@@ -226,7 +226,7 @@ $ soft-foundry gate all --change gate-hardening
   ✓ pass no placeholders
   ✓ pass no blocking conditions
   ✓ pass commit_sha recorded: 914a34deb2b249a48bd7612a65684fecb5f20b87
-  ✓ pass commit lineage: descends from 01-discovery at a0a8460fcc5e; reaches HEAD 87d7b8f0e9e6; recorded with this commit_sha
+  ✓ pass commit lineage: descends from 01-discovery at a0a8460fcc5e; reaches HEAD b871187a6bf2; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-10-29T01:53:00Z
   ✓ pass predecessor complete: 01-discovery
   ✓ pass specification locked: locked at 829441a628bc, the commit that recorded it
@@ -238,7 +238,7 @@ $ soft-foundry gate all --change gate-hardening
   ✓ pass no placeholders
   ✓ pass no blocking conditions
   ✓ pass commit_sha recorded: 829441a628bc8c0dd184477fb80def40267f572a
-  ✓ pass commit lineage: descends from 02-specification at 914a34deb2b2; reaches HEAD 87d7b8f0e9e6; recorded with this commit_sha
+  ✓ pass commit lineage: descends from 02-specification at 914a34deb2b2; reaches HEAD b871187a6bf2; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-10-29T01:57:00Z
   ✓ pass predecessor complete: 02-specification
   ✓ pass content clean
@@ -249,7 +249,7 @@ $ soft-foundry gate all --change gate-hardening
   ✓ pass no placeholders
   ✓ pass no blocking conditions
   ✓ pass commit_sha recorded: 3b72c429a815bb4d25d816a6e7187db6a762c1ee
-  ✓ pass commit lineage: descends from 03-threat-model at 829441a628bc; reaches HEAD 87d7b8f0e9e6; recorded with this commit_sha
+  ✓ pass commit lineage: descends from 03-threat-model at 829441a628bc; reaches HEAD b871187a6bf2; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-10-29T02:01:00Z
   ✓ pass predecessor complete: 03-threat-model
   ✓ pass content clean
@@ -260,7 +260,7 @@ $ soft-foundry gate all --change gate-hardening
   ✓ pass no placeholders
   ✓ pass no blocking conditions
   ✓ pass commit_sha recorded: c02528c5e9e91dcfa4624f176af54436ae1f25eb
-  ✓ pass commit lineage: descends from 04-plan at 3b72c429a815; reaches HEAD 87d7b8f0e9e6; recorded with this commit_sha
+  ✓ pass commit lineage: descends from 04-plan at 3b72c429a815; reaches HEAD b871187a6bf2; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-10-29T06:20:00Z
   ✓ pass predecessor complete: 04-plan
   ✓ pass content clean
@@ -270,18 +270,18 @@ $ soft-foundry gate all --change gate-hardening
   ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: ff5c175da3ed6144208d5375dd7bd125ae4202bc
-  ✓ pass commit lineage: descends from 05-implementation at c02528c5e9e9; reaches HEAD 87d7b8f0e9e6; recorded with this commit_sha
-  ✓ pass completed_at recorded: 2026-10-30T01:25:00Z
+  ✓ pass commit_sha recorded: dccdd8c7171d1c53d40d52cb5209cff1dd0c1ce4
+  ✓ pass commit lineage: descends from 05-implementation at c02528c5e9e9; reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-30T02:30:00Z
   ✓ pass predecessor complete: 05-implementation
-  ✓ pass evidence current: no code changes since ff5c175da3ed; specification unchanged since 829441a628bc
-  ✓ pass red evidence: CHECK-001: 9a96f459d945 -> ff5c175da3ed (test/phase_seal_test.rb); CHECK-002: 9a96f459d945 -> ff5c175da3ed (test/gate_checks_test.rb); CHECK-009: d6c2748fecf6 -> ff5c175da3ed (test/remediation_gate_hardening_test.rb); CHECK-012: 4d7392a6eb30 -> ff5c175da3ed (test/remediation_gate_hardening_test.rb); CHECK-013: cf7b76bc49a6 -> ff5c175da3ed (test/remediation_gate_hardening_two_test.rb)
+  ✓ pass evidence current: no code changes since dccdd8c7171d; specification unchanged since 829441a628bc
+  ✓ pass red evidence: CHECK-001: 9a96f459d945 -> dccdd8c7171d (test/phase_seal_test.rb); CHECK-002: 9a96f459d945 -> dccdd8c7171d (test/gate_checks_test.rb); CHECK-009: d6c2748fecf6 -> dccdd8c7171d (test/remediation_gate_hardening_test.rb); CHECK-012: 4d7392a6eb30 -> dccdd8c7171d (test/remediation_gate_hardening_test.rb); CHECK-013: cf7b76bc49a6 -> dccdd8c7171d (test/remediation_gate_hardening_two_test.rb); CHECK-014: a930c5770309 -> dccdd8c7171d (test/remediation_gate_hardening_three_test.rb)
   - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
-  ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 9af076471f76, outcome passed (a record, not a test result)
+  ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 33bd93c6f7f2, outcome passed (a record, not a test result)
   - skip protection stated: the repository profile declares no access_control
-  ✓ pass test results recorded: 13 checks, 12 pass; acknowledged: CHECK-011 (fail)
+  ✓ pass test results recorded: 14 checks, 13 pass; acknowledged: CHECK-011 (fail)
   ! warn criteria covered: AC-053, AC-054 named by no verification check's criteria; an evaluation journey may cover them, or the judgment sets them aside with a reason in evidence.yml criteria_not_covered
-  ✓ pass evidence manifest verified: 16 artifacts match
+  ✓ pass evidence manifest verified: 18 artifacts match
   ✓ pass content clean
 07-evaluation  in_progress  PASS
   ✓ pass handoff identity
@@ -294,9 +294,9 @@ $ soft-foundry gate all --change gate-hardening
   ✓ pass structured files parse: handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 39d7e4fd288812a82b99ce3118d06d7719a6904b
-  ✓ pass commit lineage: descends from 05-implementation at c02528c5e9e9; reaches HEAD 87d7b8f0e9e6; recorded with this commit_sha
-  ✓ pass completed_at recorded: 2026-10-29T23:30:00Z
+  ✓ pass commit_sha recorded: c664d12240e31d6a51ad2f38a8b59ff2188643a6
+  ✓ pass commit lineage: descends from 05-implementation at c02528c5e9e9; reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-30T03:30:00Z
   ✓ pass predecessor complete: 05-implementation
   ✓ pass content clean
 10-user-documentation  pending  SKIP
@@ -348,8 +348,9 @@ findings: threat_model 5 (major 1, minor 4)
 findings: plan 4 (major 2, minor 2)
 findings: implement 6 (minor 6)
 findings: verify 9 (minor 9)
+findings: evaluate 5 (unspecified 5)
 findings: attack 8 (major 1, minor 7)
-findings: remediate 6 (minor 6)
+findings: remediate 7 (minor 7)
 blocking: none
 owed: advisory accessibility: the accessibility review (13-review/accessibility.md) has not run yet
 exit 0
@@ -413,7 +414,7 @@ change gate-hardening
   ✓ pass no placeholders
   ✓ pass no blocking conditions
   ✓ pass commit_sha recorded: 3e5627dc3d9c0ff1791ad938462ba800f67087b0
-  ✓ pass commit lineage: reaches HEAD 87d7b8f0e9e6; recorded with this commit_sha
+  ✓ pass commit lineage: reaches HEAD b871187a6bf2; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-10-29T01:42:00Z
   ✓ pass predecessor complete: first phase
   ✓ pass content clean
@@ -424,7 +425,7 @@ change gate-hardening
   ✓ pass no placeholders
   ✓ pass no blocking conditions
   ✓ pass commit_sha recorded: a0a8460fcc5efd55a3a4f450e60cf65e79725e3b
-  ✓ pass commit lineage: descends from 00-intake at 3e5627dc3d9c; reaches HEAD 87d7b8f0e9e6; recorded with this commit_sha
+  ✓ pass commit lineage: descends from 00-intake at 3e5627dc3d9c; reaches HEAD b871187a6bf2; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-10-29T01:46:00Z
   ✓ pass predecessor complete: 00-intake
   ✓ pass content clean
@@ -435,7 +436,7 @@ change gate-hardening
   ✓ pass no placeholders
   ✓ pass no blocking conditions
   ✓ pass commit_sha recorded: 914a34deb2b249a48bd7612a65684fecb5f20b87
-  ✓ pass commit lineage: descends from 01-discovery at a0a8460fcc5e; reaches HEAD 87d7b8f0e9e6; recorded with this commit_sha
+  ✓ pass commit lineage: descends from 01-discovery at a0a8460fcc5e; reaches HEAD b871187a6bf2; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-10-29T01:53:00Z
   ✓ pass predecessor complete: 01-discovery
   ✓ pass specification locked: locked at 829441a628bc, the commit that recorded it
@@ -447,7 +448,7 @@ change gate-hardening
   ✓ pass no placeholders
   ✓ pass no blocking conditions
   ✓ pass commit_sha recorded: 829441a628bc8c0dd184477fb80def40267f572a
-  ✓ pass commit lineage: descends from 02-specification at 914a34deb2b2; reaches HEAD 87d7b8f0e9e6; recorded with this commit_sha
+  ✓ pass commit lineage: descends from 02-specification at 914a34deb2b2; reaches HEAD b871187a6bf2; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-10-29T01:57:00Z
   ✓ pass predecessor complete: 02-specification
   ✓ pass content clean
@@ -458,7 +459,7 @@ change gate-hardening
   ✓ pass no placeholders
   ✓ pass no blocking conditions
   ✓ pass commit_sha recorded: 3b72c429a815bb4d25d816a6e7187db6a762c1ee
-  ✓ pass commit lineage: descends from 03-threat-model at 829441a628bc; reaches HEAD 87d7b8f0e9e6; recorded with this commit_sha
+  ✓ pass commit lineage: descends from 03-threat-model at 829441a628bc; reaches HEAD b871187a6bf2; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-10-29T02:01:00Z
   ✓ pass predecessor complete: 03-threat-model
   ✓ pass content clean
@@ -469,7 +470,7 @@ change gate-hardening
   ✓ pass no placeholders
   ✓ pass no blocking conditions
   ✓ pass commit_sha recorded: c02528c5e9e91dcfa4624f176af54436ae1f25eb
-  ✓ pass commit lineage: descends from 04-plan at 3b72c429a815; reaches HEAD 87d7b8f0e9e6; recorded with this commit_sha
+  ✓ pass commit lineage: descends from 04-plan at 3b72c429a815; reaches HEAD b871187a6bf2; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-10-29T06:20:00Z
   ✓ pass predecessor complete: 04-plan
   ✓ pass content clean
@@ -479,18 +480,18 @@ change gate-hardening
   ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: ff5c175da3ed6144208d5375dd7bd125ae4202bc
-  ✓ pass commit lineage: descends from 05-implementation at c02528c5e9e9; reaches HEAD 87d7b8f0e9e6; recorded with this commit_sha
-  ✓ pass completed_at recorded: 2026-10-30T01:25:00Z
+  ✓ pass commit_sha recorded: dccdd8c7171d1c53d40d52cb5209cff1dd0c1ce4
+  ✓ pass commit lineage: descends from 05-implementation at c02528c5e9e9; reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-30T02:30:00Z
   ✓ pass predecessor complete: 05-implementation
-  ✓ pass evidence current: no code changes since ff5c175da3ed; specification unchanged since 829441a628bc
-  ✓ pass red evidence: CHECK-001: 9a96f459d945 -> ff5c175da3ed (test/phase_seal_test.rb); CHECK-002: 9a96f459d945 -> ff5c175da3ed (test/gate_checks_test.rb); CHECK-009: d6c2748fecf6 -> ff5c175da3ed (test/remediation_gate_hardening_test.rb); CHECK-012: 4d7392a6eb30 -> ff5c175da3ed (test/remediation_gate_hardening_test.rb); CHECK-013: cf7b76bc49a6 -> ff5c175da3ed (test/remediation_gate_hardening_two_test.rb)
+  ✓ pass evidence current: no code changes since dccdd8c7171d; specification unchanged since 829441a628bc
+  ✓ pass red evidence: CHECK-001: 9a96f459d945 -> dccdd8c7171d (test/phase_seal_test.rb); CHECK-002: 9a96f459d945 -> dccdd8c7171d (test/gate_checks_test.rb); CHECK-009: d6c2748fecf6 -> dccdd8c7171d (test/remediation_gate_hardening_test.rb); CHECK-012: 4d7392a6eb30 -> dccdd8c7171d (test/remediation_gate_hardening_test.rb); CHECK-013: cf7b76bc49a6 -> dccdd8c7171d (test/remediation_gate_hardening_two_test.rb); CHECK-014: a930c5770309 -> dccdd8c7171d (test/remediation_gate_hardening_three_test.rb)
   - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
-  ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 9af076471f76, outcome passed (a record, not a test result)
+  ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 33bd93c6f7f2, outcome passed (a record, not a test result)
   - skip protection stated: the repository profile declares no access_control
-  ✓ pass test results recorded: 13 checks, 12 pass; acknowledged: CHECK-011 (fail)
+  ✓ pass test results recorded: 14 checks, 13 pass; acknowledged: CHECK-011 (fail)
   ! warn criteria covered: AC-053, AC-054 named by no verification check's criteria; an evaluation journey may cover them, or the judgment sets them aside with a reason in evidence.yml criteria_not_covered
-  ✓ pass evidence manifest verified: 16 artifacts match
+  ✓ pass evidence manifest verified: 18 artifacts match
   ✓ pass content clean
 07-evaluation  in_progress  PASS
   ✓ pass handoff identity
@@ -501,9 +502,9 @@ change gate-hardening
   ✓ pass structured files parse: handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 39d7e4fd288812a82b99ce3118d06d7719a6904b
-  ✓ pass commit lineage: descends from 05-implementation at c02528c5e9e9; reaches HEAD 87d7b8f0e9e6; recorded with this commit_sha
-  ✓ pass completed_at recorded: 2026-10-29T23:30:00Z
+  ✓ pass commit_sha recorded: c664d12240e31d6a51ad2f38a8b59ff2188643a6
+  ✓ pass commit lineage: descends from 05-implementation at c02528c5e9e9; reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-30T03:30:00Z
   ✓ pass predecessor complete: 05-implementation
   ✓ pass content clean
 advisory: 1 issue to address before gate-hardening goes live (informational, does not block the gate)
@@ -568,6 +569,6 @@ exit 0
 
 assert pass: ci exits 0 (check, gate cases, every record)
 assert pass: ci prints `(closed, skipped)` for closed records
-# ci wall time 31.1 s
+# ci wall time 22.3 s
 
 # EVAL-016: PASS (13 assertions passed, 0 failed)

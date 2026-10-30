@@ -1,7 +1,7 @@
 # EVAL-006: The runner seals a phase its fresh session completed, never one left in progress; the prompt says so (AC-011, AC-012, AC-015)
-# driver: evidence/journeys-driver.rb, run 2026-10-30T01:17:29Z at 87d7b8f0e9e6
+# driver: evidence/journeys-driver.rb, run 2026-10-30T02:26:31Z at b871187a6bf2
 
-# scratch repository: /tmp/sf-eval3/repos/eval-006-run
+# scratch repository: /tmp/sf-eval4/repos/eval-006-run
 $ soft-foundry change new c1   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1
@@ -11,7 +11,7 @@ billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, X
 exit 0
 
 $ soft-foundry phase run verify --shell claude --dry-run   # AC-015: the prompt the runner would send
-would run verify of c1 with: claude -p --session-id 9b7244ed-329e-4dbc-a56f-e227b42e3ad3 --name c1/verify <prompt>
+would run verify of c1 with: claude -p --session-id ab125d30-91cd-49cb-a4bd-f752b9723635 --name c1/verify <prompt>
 --- prompt ---
 You are a fresh-context agent running one lifecycle phase of a Soft Foundry change, and nothing else.
 
@@ -40,11 +40,11 @@ claude exited 0
   ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: eafb5798ac2845abfcd0beea7acdbad702297554
-  ✓ pass commit lineage: descends from 05-implementation at dc6158ff41c1; reaches HEAD eafb5798ac28
+  ✓ pass commit_sha recorded: 9787de4b10aab405b08a0491f2d9ccec31072fd9
+  ✓ pass commit lineage: descends from 05-implementation at 7555a137d57f; reaches HEAD 9787de4b10aa
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 05-implementation
-  ✓ pass evidence current: no code changes since eafb5798ac28; specification unchanged since eafb5798ac28
+  ✓ pass evidence current: no code changes since 9787de4b10aa; specification unchanged since 9787de4b10aa
   - skip red evidence: no check records a red_commit
   - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
   - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
@@ -53,8 +53,8 @@ claude exited 0
   ✓ pass criteria covered: 1 criterion named by verification checks
   ✓ pass evidence manifest verified: 1 artifact matches
   ✓ pass content clean
-note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/
-sealed 06-verification at 61051b3f4631
+note: left uncommitted (outside this phase and the record's metadata): .ai/skills/evaluation/.soft-foundry/, .soft-foundry/
+sealed 06-verification at af1611a3c9e8
 [stderr] ! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the verification skill's permissions (`soft-foundry hooks install --claude`)
 exit 0
 

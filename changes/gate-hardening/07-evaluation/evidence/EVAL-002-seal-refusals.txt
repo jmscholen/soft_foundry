@@ -1,7 +1,7 @@
 # EVAL-002: Sealing refuses an incomplete handoff, uncommitted code, and a failing gate, committing nothing (AC-002, AC-003, AC-004)
-# driver: evidence/journeys-driver.rb, run 2026-10-30T01:16:58Z at 87d7b8f0e9e6
+# driver: evidence/journeys-driver.rb, run 2026-10-30T02:26:03Z at b871187a6bf2
 
-# scratch repository: /tmp/sf-eval3/repos/eval-002-refuse
+# scratch repository: /tmp/sf-eval4/repos/eval-002-refuse
 $ soft-foundry change new c1   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1
@@ -29,8 +29,8 @@ $ soft-foundry phase seal intake
   ✓ pass structured files parse: handoff.yml
   ✗ fail no placeholders: TBD remains in: request.md
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: f1a413b1205685fb23b9acfb2d12cac261b3e75a
-  ✓ pass commit lineage: reaches HEAD f1a413b12056
+  ✓ pass commit_sha recorded: 3f2854b331ae11ebfd1c183b98de2d211877f4c2
+  ✓ pass commit lineage: reaches HEAD 3f2854b331ae
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: first phase
   ✓ pass content clean
@@ -42,7 +42,7 @@ assert pass: AC-002 gate printed with `no placeholders` failing
 assert pass: AC-002 git log unchanged
 assert pass: AC-002 metadata unchanged (current_phase intake, status intake)
 # a second record where implement is complete on disk and lib/app.rb has an uncommitted edit
-# scratch repository: /tmp/sf-eval3/repos/eval-002-dirty
+# scratch repository: /tmp/sf-eval4/repos/eval-002-dirty
 $ soft-foundry change new c1   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1

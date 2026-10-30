@@ -1,7 +1,7 @@
 # EVAL-013: The judgment must say one permitted word; review and judgment must carry the runner's stamp when the policy is block (AC-034 to AC-038)
-# driver: evidence/journeys-driver.rb, run 2026-10-30T01:18:53Z at 87d7b8f0e9e6
+# driver: evidence/journeys-driver.rb, run 2026-10-30T02:27:42Z at b871187a6bf2
 
-# scratch repository: /tmp/sf-eval3/repos/eval-013-verdict
+# scratch repository: /tmp/sf-eval4/repos/eval-013-verdict
 $ soft-foundry change new c1   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1
@@ -17,11 +17,11 @@ $ soft-foundry gate judge
   ✓ pass structured files parse: evidence.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 57343a3b0e54e6b110cc74317480222052b44efa
-  ✓ pass commit lineage: descends from 13-review at 57343a3b0e54; reaches HEAD 80ef2d196f98; recorded with this commit_sha
+  ✓ pass commit_sha recorded: d8ef973ca3a0cb770437f3d93de0832a4eeb1852
+  ✓ pass commit lineage: descends from 13-review at d8ef973ca3a0; reaches HEAD f689be95adc6; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 13-review
-  ✓ pass evidence current: no code changes since 57343a3b0e54; specification unchanged since 80ef2d196f98
+  ✓ pass evidence current: no code changes since d8ef973ca3a0; specification unchanged since f689be95adc6
   ✓ pass criteria covered: 1 criterion: 1 covered
   ✓ pass verdict recorded: BLOCKED
   ✓ pass fresh session recorded: soft-foundry phase run (harness)
@@ -36,11 +36,11 @@ $ soft-foundry gate judge
   ✓ pass structured files parse: evidence.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 57343a3b0e54e6b110cc74317480222052b44efa
-  ✓ pass commit lineage: descends from 13-review at 57343a3b0e54; reaches HEAD 80ef2d196f98; recorded with this commit_sha
+  ✓ pass commit_sha recorded: d8ef973ca3a0cb770437f3d93de0832a4eeb1852
+  ✓ pass commit lineage: descends from 13-review at d8ef973ca3a0; reaches HEAD f689be95adc6; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 13-review
-  ✓ pass evidence current: no code changes since 57343a3b0e54; specification unchanged since 80ef2d196f98
+  ✓ pass evidence current: no code changes since d8ef973ca3a0; specification unchanged since f689be95adc6
   ✓ pass criteria covered: 1 criterion: 1 covered
   ✗ fail verdict recorded: 14-judgment/final.md's Outcome section names none or several of APPROVED, APPROVED_WITH_RESIDUAL_RISK, BLOCKED, REJECTED; state exactly one
   ✓ pass fresh session recorded: soft-foundry phase run (harness)
@@ -57,11 +57,11 @@ $ soft-foundry gate review
   ✓ pass structured files parse: handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 57343a3b0e54e6b110cc74317480222052b44efa
-  ✓ pass commit lineage: descends from 08-attack at 57343a3b0e54; reaches HEAD 80ef2d196f98; recorded with this commit_sha
+  ✓ pass commit_sha recorded: d8ef973ca3a0cb770437f3d93de0832a4eeb1852
+  ✓ pass commit lineage: descends from 08-attack at d8ef973ca3a0; reaches HEAD f689be95adc6; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 08-attack
-  ✓ pass evidence current: no code changes since 57343a3b0e54; specification unchanged since 80ef2d196f98
+  ✓ pass evidence current: no code changes since d8ef973ca3a0; specification unchanged since f689be95adc6
   ✗ fail fresh session recorded: no fresh-context session is recorded in executed_by, and the repository's guard policy is block; run `soft-foundry phase run review` so the phase is done in a fresh session and stamped by the runner
   ✓ pass findings explained: no findings above minor
   ✓ pass content clean
@@ -77,11 +77,11 @@ $ soft-foundry gate review
   ✓ pass structured files parse: handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 57343a3b0e54e6b110cc74317480222052b44efa
-  ✓ pass commit lineage: descends from 08-attack at 57343a3b0e54; reaches HEAD 80ef2d196f98; recorded with this commit_sha
+  ✓ pass commit_sha recorded: d8ef973ca3a0cb770437f3d93de0832a4eeb1852
+  ✓ pass commit lineage: descends from 08-attack at d8ef973ca3a0; reaches HEAD f689be95adc6; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 08-attack
-  ✓ pass evidence current: no code changes since 57343a3b0e54; specification unchanged since 80ef2d196f98
+  ✓ pass evidence current: no code changes since d8ef973ca3a0; specification unchanged since f689be95adc6
   - skip fresh session recorded: the repository's guard policy is warn, so the fresh-context advisory applies instead
   ✓ pass findings explained: no findings above minor
   ✓ pass content clean
@@ -98,11 +98,11 @@ $ soft-foundry gate judge   # machine-local override says off; judge has the run
   ✓ pass structured files parse: evidence.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 57343a3b0e54e6b110cc74317480222052b44efa
-  ✓ pass commit lineage: descends from 13-review at 57343a3b0e54; reaches HEAD 80ef2d196f98; recorded with this commit_sha
+  ✓ pass commit_sha recorded: d8ef973ca3a0cb770437f3d93de0832a4eeb1852
+  ✓ pass commit lineage: descends from 13-review at d8ef973ca3a0; reaches HEAD f689be95adc6; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 13-review
-  ✓ pass evidence current: no code changes since 57343a3b0e54; specification unchanged since 80ef2d196f98
+  ✓ pass evidence current: no code changes since d8ef973ca3a0; specification unchanged since f689be95adc6
   ✓ pass criteria covered: 1 criterion: 1 covered
   ✓ pass verdict recorded: APPROVED
   ✓ pass fresh session recorded: soft-foundry phase run (harness)
@@ -119,11 +119,11 @@ $ soft-foundry gate judge   # override still off, stamp removed
   ✓ pass structured files parse: evidence.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 57343a3b0e54e6b110cc74317480222052b44efa
-  ✓ pass commit lineage: descends from 13-review at 57343a3b0e54; reaches HEAD 80ef2d196f98; recorded with this commit_sha
+  ✓ pass commit_sha recorded: d8ef973ca3a0cb770437f3d93de0832a4eeb1852
+  ✓ pass commit lineage: descends from 13-review at d8ef973ca3a0; reaches HEAD f689be95adc6; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 13-review
-  ✓ pass evidence current: no code changes since 57343a3b0e54; specification unchanged since 80ef2d196f98
+  ✓ pass evidence current: no code changes since d8ef973ca3a0; specification unchanged since f689be95adc6
   ✓ pass criteria covered: 1 criterion: 1 covered
   ✓ pass verdict recorded: APPROVED
   ✗ fail fresh session recorded: no fresh-context session is recorded in executed_by, and the repository's guard policy is block; run `soft-foundry phase run judge` so the phase is done in a fresh session and stamped by the runner
@@ -141,11 +141,11 @@ $ SOFT_FOUNDRY_GUARD=off soft-foundry gate judge   # the environment override is
   ✓ pass structured files parse: evidence.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 57343a3b0e54e6b110cc74317480222052b44efa
-  ✓ pass commit lineage: descends from 13-review at 57343a3b0e54; reaches HEAD 80ef2d196f98; recorded with this commit_sha
+  ✓ pass commit_sha recorded: d8ef973ca3a0cb770437f3d93de0832a4eeb1852
+  ✓ pass commit lineage: descends from 13-review at d8ef973ca3a0; reaches HEAD f689be95adc6; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 13-review
-  ✓ pass evidence current: no code changes since 57343a3b0e54; specification unchanged since 80ef2d196f98
+  ✓ pass evidence current: no code changes since d8ef973ca3a0; specification unchanged since f689be95adc6
   ✓ pass criteria covered: 1 criterion: 1 covered
   ✓ pass verdict recorded: APPROVED
   ✗ fail fresh session recorded: no fresh-context session is recorded in executed_by, and the repository's guard policy is block; run `soft-foundry phase run judge` so the phase is done in a fresh session and stamped by the runner

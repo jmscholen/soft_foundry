@@ -1,19 +1,11 @@
 # EVAL-019: git subprocesses in `gate all` on this record, this branch against the pre-change gem (REQ-036, AC-052 timing clause)
-# measured by hand at 87d7b8f0e9e6: a `git` shim first on PATH appends its arguments to a log, then execs /usr/bin/git
+# measured by hand at b871187a6bf2: a `git` shim first on PATH appends its arguments to a log, then execs /usr/bin/git
 
-$ PATH=/tmp/shim:$PATH soft-foundry gate all --change gate-hardening     # this branch
-git calls: 220
-  79 rev-parse
-  40 log
-  36 cat-file
-  35 show
-  21 merge-base
-   7 diff
-   2 status
+$ GITLOG=log PATH=/tmp/sf-shim:$PATH ruby -Ilib exe/soft-foundry gate all --change gate-hardening     # this branch
+git calls: 71
+  71 -C
 
-$ PATH=/tmp/shim:$PATH /tmp/sf-eval-pre/run gate all --change gate-hardening   # pre-change gem 0.22.0
-git calls: 60
+$ GITLOG=log PATH=/tmp/sf-shim:$PATH soft_foundry-0.22.0/exe/soft-foundry gate all --change gate-hardening   # pre-change gem 0.22.0
+git calls: 64
 
-timing, three runs each (EVAL-017): this branch median 3.43 s, pre-change 1.08 s, ratio 3.16
-REQ-036 allows `ancestor?` (two calls per phase) and one `rev-parse` for the tip beyond today's calls.
-The observed increase is 160 calls over 16 phases, of which 10 are pending and skipped, far above that allowance.
+timing, three runs each (EVAL-017): this branch median 1.42 s, pre-change 1.18 s, ratio 1.20 (bound: under 2)

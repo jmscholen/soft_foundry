@@ -1,5 +1,5 @@
 ---
-commit_sha: 87d7b8f0e9e6bbf05f765d35d0a4b56af324ec13
+commit_sha: b871187a6bf28f6e2fc4730920a099c0bde9f580
 journeys:
 - id: EVAL-001
   criteria:
@@ -281,10 +281,10 @@ journeys:
   steps:
   - see evidence/EVAL-017-performance.txt for each command, its output and exit code
   assertions:
-  - every assertion line in the transcript passes (fail)
+  - every assertion line in the transcript passes (pass)
   evidence:
   - evidence/EVAL-017-performance.txt
-  result: fail
+  result: pass
 - id: EVAL-018
   criteria:
   - AC-052
@@ -296,10 +296,10 @@ journeys:
   - see evidence/EVAL-018-accessibility.txt for each command, its output and exit
     code
   assertions:
-  - every assertion line in the transcript passes (fail)
+  - every assertion line in the transcript passes (pass)
   evidence:
   - evidence/EVAL-018-accessibility.txt
-  result: fail
+  result: pass
 - id: EVAL-019
   criteria:
   - AC-052
@@ -310,7 +310,7 @@ journeys:
   - see evidence/EVAL-019-git-call-count.txt for each command, its output and exit
     code
   assertions:
-  - every assertion line in the transcript passes (fail)
+  - every assertion line in the transcript passes (pass)
   evidence:
   - evidence/EVAL-019-git-call-count.txt
-  result: fail
+  result: pass

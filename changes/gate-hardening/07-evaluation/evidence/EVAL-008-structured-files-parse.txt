@@ -1,7 +1,7 @@
 # EVAL-008: The gate names a structured file that does not parse, and never re-gates a closed record (AC-018, AC-020, AC-021)
-# driver: evidence/journeys-driver.rb, run 2026-10-30T01:18:03Z at 87d7b8f0e9e6
+# driver: evidence/journeys-driver.rb, run 2026-10-30T02:27:01Z at b871187a6bf2
 
-# scratch repository: /tmp/sf-eval3/repos/eval-008-parse
+# scratch repository: /tmp/sf-eval4/repos/eval-008-parse
 $ soft-foundry change new c1   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1
@@ -17,8 +17,8 @@ $ soft-foundry gate specify
   ✗ fail structured files parse: 02-specification/requirements.yml: line 3, column 41: mapping values are not allowed in this context
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: dd93448549b76733b27f84505f4b65df523ebb41
-  ✓ pass commit lineage: descends from 01-discovery at 99cdc2507352; reaches HEAD dd93448549b7
+  ✓ pass commit_sha recorded: 26ed01b360e1875c622d48ecac65798abf183d5c
+  ✓ pass commit lineage: descends from 01-discovery at 938043c85400; reaches HEAD 26ed01b360e1
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 01-discovery
   ! warn specification locked: not yet locked: the completed specification is not committed; the lock takes effect at the commit that records 02-specification/handoff.yml as complete
@@ -34,8 +34,8 @@ $ soft-foundry phase seal specify
   ✗ fail structured files parse: 02-specification/requirements.yml: line 3, column 41: mapping values are not allowed in this context
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: dd93448549b76733b27f84505f4b65df523ebb41
-  ✓ pass commit lineage: descends from 01-discovery at 99cdc2507352; reaches HEAD dd93448549b7
+  ✓ pass commit_sha recorded: 26ed01b360e1875c622d48ecac65798abf183d5c
+  ✓ pass commit lineage: descends from 01-discovery at 938043c85400; reaches HEAD 26ed01b360e1
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 01-discovery
   ! warn specification locked: not yet locked: the completed specification is not committed; the lock takes effect at the commit that records 02-specification/handoff.yml as complete
@@ -44,7 +44,7 @@ c1: 02-specification is not sealed: its gate fails; nothing was committed
 exit 2
 
 assert pass: AC-020 phase seal specify exits 2 and commits nothing
-# scratch repository: /tmp/sf-eval3/repos/eval-008-manifest-seq
+# scratch repository: /tmp/sf-eval4/repos/eval-008-manifest-seq
 $ soft-foundry change new c1   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1
@@ -60,11 +60,11 @@ $ soft-foundry gate verify
   ✗ fail structured files parse: 06-verification/evidence/manifest.yml: expected a mapping at the top level, found array
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: 492385da1b770adeadf894609809bebc1cdf268f
-  ✓ pass commit lineage: descends from 05-implementation at c446b499e27d; reaches HEAD 492385da1b77
+  ✓ pass commit_sha recorded: d0bf493a0855571557a9435ed71ed0504415c91b
+  ✓ pass commit lineage: descends from 05-implementation at 3d51cecd6e30; reaches HEAD d0bf493a0855
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 05-implementation
-  ✓ pass evidence current: no code changes since 492385da1b77; specification unchanged since 492385da1b77
+  ✓ pass evidence current: no code changes since d0bf493a0855; specification unchanged since d0bf493a0855
   - skip red evidence: no check records a red_commit
   - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
   - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
@@ -76,7 +76,7 @@ $ soft-foundry gate verify
 exit 2
 
 assert pass: AC-021 fails naming evidence/manifest.yml and `expected a mapping`
-# scratch repository: /tmp/sf-eval3/repos/eval-008-closed
+# scratch repository: /tmp/sf-eval4/repos/eval-008-closed
 $ soft-foundry change new c1   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1
@@ -92,11 +92,11 @@ $ soft-foundry gate specify --change c1
   - skip structured files parse: closed record: not re-gated
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: ab63ea5116cc4c79360c744a318f47c89cdda5ba
+  ✓ pass commit_sha recorded: 99a04ed6d39153188834c78b29d054655cfed5ec
   - skip commit lineage: closed record: not re-gated
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 01-discovery
-  ✗ fail specification locked: changed since the specification was recorded at 6dc11805d1de: changes/c1/02-specification/requirements.yml; a specification change after the lock is a recorded requirement change: rerun the specification phase (its handoff re-binds the lock), after which every commit-bound phase is stale and must be redone against the new criteria
+  ✗ fail specification locked: changed since the specification was recorded at dc4c32ede747: changes/c1/02-specification/requirements.yml; a specification change after the lock is a recorded requirement change: rerun the specification phase (its handoff re-binds the lock), after which every commit-bound phase is stale and must be redone against the new criteria
   ✓ pass content clean
 exit 2
 

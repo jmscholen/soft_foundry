@@ -1,7 +1,7 @@
 # EVAL-010: A failing or unrun check must be named in blocking or a finding (AC-025, AC-026, AC-027)
-# driver: evidence/journeys-driver.rb, run 2026-10-30T01:18:39Z at 87d7b8f0e9e6
+# driver: evidence/journeys-driver.rb, run 2026-10-30T02:27:31Z at b871187a6bf2
 
-# scratch repository: /tmp/sf-eval3/repos/eval-010-results
+# scratch repository: /tmp/sf-eval4/repos/eval-010-results
 $ soft-foundry change new c1   # create the record
 created changes/c1 with 16 phase directories
 branch: change/c1
@@ -17,11 +17,11 @@ $ soft-foundry gate verify
   ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: f091eec847637c2e217daf705418c132ebf84f3e
-  ✓ pass commit lineage: descends from 05-implementation at 052379cfb020; reaches HEAD f091eec84763
+  ✓ pass commit_sha recorded: 333ab6933d2312fd3e7e860346fe7bd7e1a16633
+  ✓ pass commit lineage: descends from 05-implementation at 88eeca222441; reaches HEAD 333ab6933d23
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 05-implementation
-  ✓ pass evidence current: no code changes since f091eec84763; specification unchanged since f091eec84763
+  ✓ pass evidence current: no code changes since 333ab6933d23; specification unchanged since 333ab6933d23
   - skip red evidence: no check records a red_commit
   - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
   - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
@@ -40,11 +40,11 @@ $ soft-foundry gate verify
   ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: f091eec847637c2e217daf705418c132ebf84f3e
-  ✓ pass commit lineage: descends from 05-implementation at 052379cfb020; reaches HEAD f091eec84763
+  ✓ pass commit_sha recorded: 333ab6933d2312fd3e7e860346fe7bd7e1a16633
+  ✓ pass commit lineage: descends from 05-implementation at 88eeca222441; reaches HEAD 333ab6933d23
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 05-implementation
-  ✓ pass evidence current: no code changes since f091eec84763; specification unchanged since f091eec84763
+  ✓ pass evidence current: no code changes since 333ab6933d23; specification unchanged since 333ab6933d23
   - skip red evidence: no check records a red_commit
   - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
   - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
@@ -63,11 +63,11 @@ $ soft-foundry gate verify
   ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: f091eec847637c2e217daf705418c132ebf84f3e
-  ✓ pass commit lineage: descends from 05-implementation at 052379cfb020; reaches HEAD f091eec84763
+  ✓ pass commit_sha recorded: 333ab6933d2312fd3e7e860346fe7bd7e1a16633
+  ✓ pass commit lineage: descends from 05-implementation at 88eeca222441; reaches HEAD 333ab6933d23
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 05-implementation
-  ✓ pass evidence current: no code changes since f091eec84763; specification unchanged since f091eec84763
+  ✓ pass evidence current: no code changes since 333ab6933d23; specification unchanged since 333ab6933d23
   - skip red evidence: no check records a red_commit
   - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
   - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
@@ -86,11 +86,11 @@ $ soft-foundry gate verify
   ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
   ✓ pass no placeholders
   ✓ pass no blocking conditions
-  ✓ pass commit_sha recorded: f091eec847637c2e217daf705418c132ebf84f3e
-  ✓ pass commit lineage: descends from 05-implementation at 052379cfb020; reaches HEAD f091eec84763
+  ✓ pass commit_sha recorded: 333ab6933d2312fd3e7e860346fe7bd7e1a16633
+  ✓ pass commit lineage: descends from 05-implementation at 88eeca222441; reaches HEAD 333ab6933d23
   ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
   ✓ pass predecessor complete: 05-implementation
-  ✓ pass evidence current: no code changes since f091eec84763; specification unchanged since f091eec84763
+  ✓ pass evidence current: no code changes since 333ab6933d23; specification unchanged since 333ab6933d23
   - skip red evidence: no check records a red_commit
   - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
   - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
