@@ -54,3 +54,14 @@ Not remediated, unchanged: ATK-003 (runner design change) and the ATK-009 residu
 
 ## Evidence invalidated (second time)
 `phase reopen verify` (2026-10-29, reason ATK-010) reset verification (sealed `5db4836`), evaluation, attack (complete, unsealed) and this phase. Their files are kept for the reruns. Required reruns: verify, then evaluate and attack, review, judgment.
+
+## Third pass: the evaluation's findings (EVAL-017, EVAL-018)
+Evaluation, run alone at `87d7b8f`, passed 16 of 19 journeys. Two findings were real. RED `a930c57` (`test/remediation_gate_hardening_three_test.rb`, three tests, two failing there), GREEN `c664d12`.
+
+- **EVAL-017, remediated (REQ-036, AC-052).** `gate all` on this record took 3.4 s and 220 git calls against 1.08 s and 60 for the pre-change gem (259 calls, 3.7 s when remeasured at HEAD). Causes: `recorded_commit` ran `git log` twice and parsed the blob twice per use, `repository?` and `head_sha` ran once per check, and ancestry and blob reads repeated. Now the seal commit comes from one `git log`, memoized per phase and HEAD; answers about a commit named by its full hash (exists, ancestor, blob) are memoized for the life of the `Git` object, since they cannot change; HEAD, the branch, branch tips and `repository?` are cached only inside `Git#observing`, which `Gate#evaluate` and `evaluate_all` open, so a later read sees any commit made since. After: 78 calls, 1.3 s, about 1.2 times the 1.08 s baseline.
+- **EVAL-018, remediated (REQ-032).** The two lineage failures that gave a reason and no action now end with the `phase reopen` command, or checking out the record's branch.
+
+Behaviour change: a `Git` object no longer re-reads HEAD while a gate run is open. The runner and the seal open none around a session, so a commit made during a session is seen by the seal that follows.
+
+## Evidence invalidated (third time)
+`phase reopen verify` reset verification (sealed `87d7b8f`), evaluation (sealed `f0b256b`) and this phase. Required reruns: verify, evaluate, attack, then review and judgment. The evaluation's journeys and driver are kept for the rerun; EVAL-017 should be remeasured.
