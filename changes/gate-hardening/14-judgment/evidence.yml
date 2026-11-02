@@ -1,30 +1,76 @@
-commit_judged: TBD
+commit_judged: 5c87870433214069d91efd14fc43d36a73933f97
 phases:
   - phase: 06-verification
-    commit_sha: TBD
-    current: TBD   # true when commit_sha matches the judged commit for all code paths
-    result: TBD
+    commit_sha: dccdd8c7171d1c53d40d52cb5209cff1dd0c1ce4
+    current: true   # code unchanged under lib/ test/ .ai/ exe/ docs/ between this commit and the judged commit
+    result: "pass except CHECK-011 (one planned unit test never written, AC-019); 902 runs, 0 failures"
   - phase: 07-evaluation
-    commit_sha: TBD
-    current: TBD
-    result: TBD
+    commit_sha: b871187a6bf28f6e2fc4730920a099c0bde9f580
+    current: true
+    result: "pass: 19 of 19 journeys"
   - phase: 08-attack
-    commit_sha: TBD
-    current: TBD
-    result: TBD
+    commit_sha: 47583efe394ea04c1605d5c1536b0e560f86eb37
+    current: true
+    result: "ATK-014 major open; ATK-015 to ATK-018, ATK-003, ATK-009 minor; earlier ATK-001 to ATK-013 closed"
   - phase: 13-review
-    commit_sha: TBD
-    current: TBD
-    result: TBD
-unresolved_findings: []
+    commit_sha: 5eb5b1a2a04b72e7d78591808177ce516dc6e06c
+    current: true
+    result: "no blocking findings; REV-001 major (ATK-014), REV-002 to REV-011 minor"
+unresolved_findings:
+  - id: ATK-014
+    severity: major
+    disposition: accepted for release as a named open item (see final.md and residual-risk.md)
+  - id: ATK-015
+    severity: minor
+    disposition: accepted, structure-only limit
+  - id: ATK-016
+    severity: minor
+    disposition: carried, follow-up change
+  - id: ATK-017
+    severity: minor
+    disposition: carried, follow-up change
+  - id: ATK-018
+    severity: minor
+    disposition: accepted, structure-only limit
+  - id: ATK-003
+    severity: minor
+    disposition: carried
+  - id: ATK-009
+    severity: minor
+    disposition: carried
+  - id: VER-002
+    severity: minor
+    disposition: carried, missing unit test for AC-019
+  - id: VER-003
+    severity: minor
+    disposition: carried, test isolation
+  - id: REV-005
+    severity: minor
+    disposition: carried
+  - id: REV-006
+    severity: minor
+    disposition: carried
+  - id: REV-008
+    severity: minor
+    disposition: accessibility advisory, address before go-live
+  - id: REV-009
+    severity: minor
+    disposition: accessibility advisory, address before go-live
+  - id: REV-010
+    severity: minor
+    disposition: carried
+  - id: REV-011
+    severity: minor
+    disposition: carried
+# AC-053 and AC-054 are named by no verification check or evaluation journey.
+criteria_not_covered:
+  - id: AC-053
+    reason: answered by the attack phase (ATTACK-001 to ATTACK-029 against scratch repositories), not by a verification check or journey
+  - id: AC-054
+    reason: answered by this judgment itself, which records the outcome and residual risk in final.md and residual-risk.md
 # Acceptance criteria or judgment conditions left unsatisfied pending a
 # real-world event (production observation, etc.) rather than more
-# repository evidence, e.g.:
-#   - id: AC-060
-#     description: each fix observed corrected on production
-# `soft-foundry change close` refuses to close this change while any id
-# here lacks a human confirmation - via --confirm ID, or a PR comment
-# reading "CONFIRMED: <id>" (see `soft-foundry change request-discharge`)
-# - and then moves it into `discharged` with the confirmation source.
+# repository evidence. None: every open item above can be settled in the
+# repository by a follow-up change.
 undischarged: []
 discharged: []
