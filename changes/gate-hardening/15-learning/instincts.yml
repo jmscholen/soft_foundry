@@ -5,11 +5,46 @@
 # .ai/rules/learned.md, and only through a change record on a change
 # branch, never by the change that learned them. An empty list is a valid
 # answer; a malformed entry fails the learning gate.
-instincts: []
-# - id: kebab-case-unique-id
-#   trigger: when ... (the situation an agent will recognise)
-#   action: do ... (one thing, imperative)
-#   confidence: 0.8          # 0.0 to 1.0; promotion threshold is policy
-#   domain: testing          # git | testing | security | review | ...
-#   evidence:
-#     - finding: REV-001     # a finding id, phase, or path in this record
+instincts:
+  - id: name-the-forgeable-signal
+    trigger: when a fix adds a check that reads a commit subject, a field in a record file, or any other value a committer can write
+    action: state which value the check trusts and add a case showing what a hand edit of it does, before calling the finding closed
+    confidence: 0.85
+    domain: security
+    evidence:
+      - finding: ATK-014
+  - id: measure-git-calls-with-the-check
+    trigger: when a new gate check shells out to git
+    action: count git calls and wall time of the whole gate before and after, and keep them inside the specification's bound
+    confidence: 0.8
+    domain: performance
+    evidence:
+      - finding: EVAL-017
+  - id: refusals-end-with-an-action
+    trigger: when writing a gate or command refusal message
+    action: end it with the exact command or edit that resolves it
+    confidence: 0.8
+    domain: review
+    evidence:
+      - finding: EVAL-018
+  - id: scrub-git-env-in-scratch-repos
+    trigger: when code or a test runs git in a scratch repository from inside a git hook
+    action: clear GIT_DIR, GIT_WORK_TREE and GIT_INDEX_FILE for the child process
+    confidence: 0.9
+    domain: git
+    evidence:
+      - phase: 05-implementation
+  - id: serial-evidence-sessions
+    trigger: when running two fresh agent sessions or two full test suites in the same worktree
+    action: run them one after the other, because a parallel run was killed twice and overlapping suites share a temp directory
+    confidence: 0.6
+    domain: testing
+    evidence:
+      - finding: VER-003
+  - id: use-the-new-tool-on-its-own-change
+    trigger: when a change introduces a lifecycle command such as phase seal
+    action: run that command on the change's own record as early as the tests allow, since sealing found two defects in it
+    confidence: 0.7
+    domain: process
+    evidence:
+      - finding: REM-004
