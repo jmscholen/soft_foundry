@@ -1,0 +1,69 @@
+completed evaluate at 7a16cdd365d9
+HEAD 040a7bb
+== 1a: SOFT_FOUNDRY_PHASE=implement seals evaluate
+$ env SOFT_FOUNDRY_PHASE=implement /tmp/sf-attack2/bin/sf-env phase seal evaluate
+c1: cannot seal evaluate: this session is running implement, so it may seal only implement; a phase is sealed by the session that did its work or by the runner
+[exit 1]
+--- git log
+040a7bb evaluate complete on disk
+7a16cdd phases complete through verify
+e26e293 record
+b0fc78b initial
+--- git status
+--- metadata
+status: in_progress
+current_phase: evaluate
+== 1b: SOFT_FOUNDRY_PHASE=verify (predecessor) seals evaluate
+$ env SOFT_FOUNDRY_PHASE=verify /tmp/sf-attack2/bin/sf-env phase seal evaluate
+c1: cannot seal evaluate: this session is running verify, so it may seal only verify; a phase is sealed by the session that did its work or by the runner
+[exit 1]
+--- git log
+040a7bb evaluate complete on disk
+7a16cdd phases complete through verify
+e26e293 record
+b0fc78b initial
+--- git status
+--- metadata
+status: in_progress
+current_phase: evaluate
+== 1c: SOFT_FOUNDRY_PHASE='evaluate ' (trailing space) seals evaluate
+$ env SOFT_FOUNDRY_PHASE=evaluate  /tmp/sf-attack2/bin/sf-env phase seal evaluate
+c1: cannot seal evaluate: this session is running evaluate , so it may seal only evaluate ; a phase is sealed by the session that did its work or by the runner
+[exit 1]
+--- git log
+040a7bb evaluate complete on disk
+7a16cdd phases complete through verify
+e26e293 record
+b0fc78b initial
+--- git status
+--- metadata
+status: in_progress
+current_phase: evaluate
+== 1d: SOFT_FOUNDRY_PHASE=Evaluate (case) seals evaluate
+$ env SOFT_FOUNDRY_PHASE=Evaluate /tmp/sf-attack2/bin/sf-env phase seal evaluate
+c1: cannot seal evaluate: this session is running Evaluate, so it may seal only Evaluate; a phase is sealed by the session that did its work or by the runner
+[exit 1]
+--- git log
+040a7bb evaluate complete on disk
+7a16cdd phases complete through verify
+e26e293 record
+b0fc78b initial
+--- git status
+--- metadata
+status: in_progress
+current_phase: evaluate
+== 1e: SOFT_FOUNDRY_PHASE= (empty: the accepted residual, a shell that unset it) seals evaluate
+$ env SOFT_FOUNDRY_PHASE= /tmp/sf-attack2/bin/sf-env phase seal evaluate
+note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/locks/c1.lock
+sealed 07-evaluation at 3e84ec3463ea
+[exit 0]
+--- git log
+3e84ec3 Record c1 evaluate
+040a7bb evaluate complete on disk
+7a16cdd phases complete through verify
+e26e293 record
+b0fc78b initial
+--- git status
+--- metadata
+status: in_progress
+current_phase: attack

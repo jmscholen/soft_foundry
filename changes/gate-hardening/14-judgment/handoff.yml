@@ -1,0 +1,45 @@
+---
+phase: 14-judgment
+skill: final-judgment
+status: complete
+commit_sha: 5c87870433214069d91efd14fc43d36a73933f97
+started_at: '2026-11-02T19:26:57Z'
+completed_at: '2026-11-02T19:35:00Z'
+resolved_model:
+  profile: judgment_high
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- changes/gate-hardening/14-judgment/final.md
+- changes/gate-hardening/14-judgment/residual-risk.md
+- changes/gate-hardening/14-judgment/evidence.yml
+blocking: []
+findings:
+- id: JDG-001
+  severity: major
+  summary: 'Outcome APPROVED_WITH_RESIDUAL_RISK. ATK-014 (REV-001), seal identity
+    by commit subject, stays open: not a regression against main and the specification
+    says a committer can still fake a pass, so it is released as a named open item
+    (soft-foundry change release --item ATK-014=...). Follow-up change: bind the seal
+    to a trailer only the tool writes.'
+- id: JDG-002
+  severity: minor
+  summary: 'Minor items carried to learning and follow-ups: ATK-015 to ATK-018, ATK-003,
+    ATK-009, VER-002, VER-003, REV-005, REV-006, REV-008 to REV-011. Phases 10, 11
+    and 12 never ran; confirm docs/user/ covers phase seal and the lineage refusals
+    before release (AC-051).'
+next: learn
+notes: |-
+  Judgment reads the earlier phase handoffs, results, the review files and the code diff stat only; it ran no tests and wrote nothing outside 14-judgment. Evidence is current: git diff --stat dccdd8c HEAD over lib test .ai exe docs is empty, so all four evidence phases describe the code at c664d12. Guard limitation: Bash is checked against deny sets only, so the read set (no 09-remediation evidence, no harness evals) was honoured as policy.
+  reopened 2026-11-02T19:26:50Z (manual): evidence files kept for reference; rerun this phase (gate failed on criteria covered: AC-053 and AC-054 are named by no verification check or evaluation journey; set each aside in evidence.yml criteria_not_covered with a reason of at least two words, or cover it. Keep the verdict, residuals and ATK-014 reasoning.)
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-11-02T19:26:57Z'
+  finished_at: '2026-11-02T19:27:32Z'
+  exit_status: 0
+  previous_phase: judge
+  session_id: 65d26846-5345-42fa-84ac-a85f81996898
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"
+branch_resolved: true

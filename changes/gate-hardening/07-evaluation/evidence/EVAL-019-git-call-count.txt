@@ -1,0 +1,11 @@
+# EVAL-019: git subprocesses in `gate all` on this record, this branch against the pre-change gem (REQ-036, AC-052 timing clause)
+# measured by hand at b871187a6bf2: a `git` shim first on PATH appends its arguments to a log, then execs /usr/bin/git
+
+$ GITLOG=log PATH=/tmp/sf-shim:$PATH ruby -Ilib exe/soft-foundry gate all --change gate-hardening     # this branch
+git calls: 71
+  71 -C
+
+$ GITLOG=log PATH=/tmp/sf-shim:$PATH soft_foundry-0.22.0/exe/soft-foundry gate all --change gate-hardening   # pre-change gem 0.22.0
+git calls: 64
+
+timing, three runs each (EVAL-017): this branch median 1.42 s, pre-change 1.18 s, ratio 1.20 (bound: under 2)

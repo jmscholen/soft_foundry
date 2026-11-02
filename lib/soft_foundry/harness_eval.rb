@@ -4,6 +4,7 @@ require "yaml"
 require "json"
 require "time"
 require "date"
+require "digest"
 require "tmpdir"
 require "fileutils"
 require "open3"
@@ -44,12 +45,86 @@ module SoftFoundry
     # an invisible character, built here so that no case file carries one
     # (the control-plane scan would refuse it).
     COMMIT_TOKEN = "${COMMIT}"
+    # The scratch repository's first commit, before the record existed: a
+    # commit a case can name as "older than the predecessor's".
+    BASE_TOKEN = "${BASE}"
     APP_FILE_TOKEN = "${APP_FILE}"
     CANARIES = {
       "${CANARY_AWS}" => "AKIA#{'IOSFODNN7EXAMPLE'}",
       "${CANARY_OPENAI}" => "sk-#{'canary'}#{'0' * 26}",
       "${INVISIBLE_ZWSP}" => [0x200B].pack("U")
     }.freeze
+
+    # The evidence file the fixture writes and lists in a phase's manifest.
+    FIXTURE_EVIDENCE = "evidence/recorded.txt"
+    FIXTURE_STAMP = "2026-01-01T00:00:00Z"
+    # Per structured file: the list key, the passing result, the results
+    # the templates allow.
+    FIXTURE_RESULTS = {
+      "tests.yml" => ["checks", "pass", %w[pass fail error skipped]],
+      "journeys.yml" => ["journeys", "pass", %w[pass fail blocked]],
+      "cases.yml" => ["cases", "denied", %w[denied violated blocked_by_provider blocked_by_scope]]
+    }.freeze
+
+    # Completes a phase the way a finished session would, with values the
+    # gate accepts: placeholders filled, the template check passing with
+    # its criterion, one evidence file whose digest the manifest records,
+    # the template journey passing, the judgment APPROVED, and (with
+    # `runner`) an executed_by stamp shaped like the runner's on a
+    # commit-bound phase. Shared by the harness evals and the test suite
+    # so a planted record means the same thing in both. `fill: false`
+    # leaves the templates' placeholders in place.
+    def self.complete_phase!(record, phase, sha, fill: true, runner: true, now: FIXTURE_STAMP)
+      phase = record.control_plane.phase(phase.to_s) || raise(ArgumentError, "unknown phase #{phase.inspect}") unless phase.is_a?(ControlPlane::Phase)
+      dir = record.phase_dir(phase)
+      if fill
+        Dir.glob("**/*", base: dir).each do |rel|
+          path = File.join(dir, rel)
+          next unless File.file?(path) && rel != "handoff.yml"
+          File.write(path, SoftFoundry.read_text(path).gsub(/\bTBD\b/, "recorded"))
+        end
+        fill_structured!(dir, sha)
+      end
+      h = record.handoff(phase) || {}
+      h.merge!("status" => "complete", "commit_sha" => sha, "started_at" => now, "completed_at" => now,
+               "resolved_model" => { "profile" => h.dig("resolved_model", "profile"), "provider" => "harness", "model" => "planted" }, "blocking" => [])
+      if runner && record.control_plane.skill(phase.skill).commit_bound?
+        h["executed_by"] = { "runner" => "soft-foundry phase run", "shell" => "harness", "fresh_context" => true, "started_at" => now,
+                             "finished_at" => now, "exit_status" => 0, "previous_phase" => nil, "session_id" => nil, "cwd" => record.root }
+      end
+      File.write(record.handoff_path(phase), YAML.dump(h))
+    end
+
+    # The structured files a filled template leaves with placeholder words
+    # where the gate reads a value: results, evidence paths, the manifest
+    # digest, and the judgment word.
+    def self.fill_structured!(dir, sha)
+      produced = nil
+      FIXTURE_RESULTS.each do |name, (key, passing, allowed)|
+        path = File.join(dir, name)
+        next unless File.file?(path)
+        data = YAML.safe_load_file(path, permitted_classes: [Time, Date], aliases: true)
+        next unless data.is_a?(Hash) && data[key].is_a?(Array)
+        data["commit_sha"] = sha
+        data[key].each do |entry|
+          next unless entry.is_a?(Hash)
+          entry["result"] = passing unless allowed.include?(entry["result"].to_s)
+          entry["evidence"] = entry["evidence"].is_a?(Array) ? [FIXTURE_EVIDENCE] : FIXTURE_EVIDENCE if entry.key?("evidence")
+          entry["criteria"] = ["AC-001"] if entry.key?("criteria") && Array(entry["criteria"]).empty?
+          produced ||= entry["id"].to_s
+        end
+        File.write(path, YAML.dump(data))
+      end
+      manifest = File.join(dir, "evidence", "manifest.yml")
+      if File.file?(manifest)
+        file = File.join(dir, FIXTURE_EVIDENCE)
+        File.write(file, "recorded by the phase-completion fixture\n")
+        File.write(manifest, YAML.dump("commit_sha" => sha, "artifacts" => [{ "path" => FIXTURE_EVIDENCE, "produced_by" => produced || "recorded", "sha256" => Digest::SHA256.file(file).hexdigest }]))
+      end
+      final = File.join(dir, "final.md")
+      return unless File.file?(final)
+      File.write(final, SoftFoundry.read_text(final).sub(/^## Outcome[ \t]*\n.*?(?=^## |\z)/m, "## Outcome\nAPPROVED\n\n"))
+    end
 
     Case = Data.define(:id, :kind, :description, :phase, :record, :repository, :application, :profile, :expect, :path)
     Result = Data.define(:id, :kind, :outcome, :detail, :phase, :check, :expected, :observed, :shell, :model, :matched) do
@@ -327,6 +402,7 @@ module SoftFoundry
         git(scratch, "config", "maintenance.auto", "false")
         git(scratch, "add", "-A")
         git(scratch, "commit", "-q", "-m", "base")
+        base = git(scratch, "rev-parse", "HEAD").strip
         slug = "eval-#{kase.id}"
         git(scratch, "checkout", "-q", "-b", "change/#{slug}")
         app_files = Hash(kase.application["files"])
@@ -360,7 +436,7 @@ module SoftFoundry
         git(scratch, "add", "-A")
         git(scratch, "commit", "-q", "-m", "record #{slug}")
         bound = git(scratch, "rev-parse", "HEAD").strip
-        tokens = { COMMIT_TOKEN => bound, APP_FILE_TOKEN => app_file }.merge(CANARIES)
+        tokens = { COMMIT_TOKEN => bound, BASE_TOKEN => base, APP_FILE_TOKEN => app_file }.merge(CANARIES)
 
         complete = Array(spec["complete"]).map(&:to_s)
         plane.phases.select { |p| complete.include?(p.id) }.each { |p| complete_phase!(record, p, bound) }
@@ -384,18 +460,7 @@ module SoftFoundry
         [record, bound]
       end
 
-      def complete_phase!(record, phase, sha)
-        dir = record.phase_dir(phase)
-        Dir.glob("**/*", base: dir).each do |rel|
-          path = File.join(dir, rel)
-          next unless File.file?(path) && rel != "handoff.yml"
-          File.write(path, SoftFoundry.read_text(path).gsub(/\bTBD\b/, "recorded"))
-        end
-        h = record.handoff(phase) || {}
-        h.merge!("status" => "complete", "commit_sha" => sha, "started_at" => "2026-01-01T00:00:00Z", "completed_at" => "2026-01-01T00:00:00Z",
-                 "resolved_model" => { "profile" => h.dig("resolved_model", "profile"), "provider" => "harness", "model" => "planted" }, "blocking" => [])
-        File.write(record.handoff_path(phase), YAML.dump(h))
-      end
+      def complete_phase!(record, phase, sha) = HarnessEval.complete_phase!(record, phase, sha)
 
       def substitute(value, tokens)
         case value
@@ -436,8 +501,11 @@ module SoftFoundry
         File.join(glob.delete_suffix("/**"), name)
       end
 
+      # Git::CLEAN_ENV: `ci` runs these cases from the pre-commit hook, where
+      # GIT_INDEX_FILE names the committing repository's index, and a scratch
+      # repository's `add` must not write into it.
       def git(dir, *args)
-        out, err, status = Open3.capture3({ "GIT_DIR" => nil, "GIT_WORK_TREE" => nil }, "git", "-C", dir, *args)
+        out, err, status = Open3.capture3(Git::CLEAN_ENV, "git", "-C", dir, *args)
         raise "git #{args.first} failed: #{err.strip}" unless status.success?
         out
       end

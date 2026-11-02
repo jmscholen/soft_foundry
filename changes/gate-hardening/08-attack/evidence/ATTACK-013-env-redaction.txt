@@ -1,0 +1,39 @@
+== 13a: phase run evaluate attack --parallel --env SECRET=hunter2 --shell claude with a fake claude on PATH that exits 1
+[exit 1]
+-- occurrences of hunter2 in the runner's output: 0
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the evaluation skill's permissions (`soft-foundry hooks install --claude`)
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the adversarial-testing skill's permissions (`soft-foundry hooks install --claude`)
+billing: subscription (no ANTHROPIC_API_KEY in the environment, so claude bills to its own login); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+parallel: running evaluate, attack of c1 at once, each in its own fresh session; executed_by recorded in each handoff
+phase evaluate: claude exited 1
+07-evaluation  in_progress  PASS
+  ! warn phase in progress: not yet gated
+phase evaluate: not sealed
+phase evaluate: fail
+phase attack: claude exited 1
+08-attack  in_progress  PASS
+  ! warn phase in progress: not yet gated
+phase attack: not sealed
+phase attack: fail
+parallel: 2 phases run, 0 passed and sealed, 2 failed
+-- fake shell log:
+fake claude ran: phase=evaluate SECRET-set=yes args=6
+fake claude ran: phase=attack SECRET-set=yes args=6
+== 13b: the fake shell is not executable (spawn fails): error path
+/tmp/sf-attack2/bin/sf: line 5: exec: env: not found
+-- occurrences of hunter2: 0
+== 13c: --env given without NAME= (the whole text is a credential), given twice, with a NUL, and SOFT_FOUNDRY_ namespace
+-- --env hunter2
+soft-foundry: --env takes NAME=VALUE (a variable name, an equals sign, then its value; {phase} in the value becomes the phase id)
+-- --env SECRET=a --env SECRET=b
+soft-foundry: environment variable SECRET is given twice; give each --env name once
+-- --env SOFT_FOUNDRY_PHASE=attack
+soft-foundry: environment variable name SOFT_FOUNDRY_PHASE begins SOFT_FOUNDRY_, which is reserved for soft-foundry
+-- --env bad name=x
+soft-foundry: unknown phase 'name=x'; lifecycle phases: intake, discover, specify, threat_model, plan, implement, verify, evaluate, attack, remediate, document, index, observe, review, judge, learn
+== 13d: --dry-run names variables, not values
+0
+parallel: would set SECRET, SOFT_FOUNDRY_PHASE, SOFT_FOUNDRY_PARALLEL in each session (values are not shown)
+== 13e: a value that is a substring of normal output ('phase'), to see what redaction does to the message
+/tmp/sf-attack2/bin/sf: line 5: exec: env: not found

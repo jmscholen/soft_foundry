@@ -115,6 +115,22 @@ module SoftFoundry
     def rules = workflow.fetch("rules", {})
     def judgments = Array(workflow["judgments"])
 
+    GUARD_MODES = %w[warn block off].freeze
+    GUARD_DEFAULT_MODE = "warn"
+
+    # The guard mode the repository's own policy declares
+    # (.ai/policies/enforcement.yml guard.mode), or the default. Never the
+    # machine-local override or the environment: the gate reads what the
+    # repository asks of its records, not what one machine relaxed.
+    def enforcement_mode
+      path = File.join(dir, "policies", "enforcement.yml")
+      return GUARD_DEFAULT_MODE unless File.file?(path)
+      value = (YAML.safe_load_file(path) || {}).dig("guard", "mode").to_s.strip.downcase
+      GUARD_MODES.include?(value) ? value : GUARD_DEFAULT_MODE
+    rescue Psych::Exception
+      GUARD_DEFAULT_MODE
+    end
+
     # Phases no declared risk may waive through skipped_phases: review
     # looks at the work from outside it and judgment is the verdict.
     NEVER_WAIVED = %w[review judge].freeze

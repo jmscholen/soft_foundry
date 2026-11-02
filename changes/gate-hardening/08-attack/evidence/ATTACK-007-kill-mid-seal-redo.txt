@@ -1,0 +1,55 @@
+== 7a redo: evaluate handoff complete on disk and NOT committed (as after a real session); SIGKILL the process group 1.5 s into a seal whose hook sleeps 4 s
+completed evaluate at 7a16cdd365d9
+ M changes/c1/07-evaluation/evaluation-plan.md
+ M changes/c1/07-evaluation/evidence/manifest.yml
+ M changes/c1/07-evaluation/handoff.yml
+ M changes/c1/07-evaluation/journeys.yml
+ M changes/c1/07-evaluation/results.md
+?? changes/c1/07-evaluation/evidence/recorded.txt
+seal process exit 137
+--- state: 7a16cdd phases complete through verify | staged: changes/c1/07-evaluation/evaluation-plan.md changes/c1/07-evaluation/evidence/manifest.yml changes/c1/07-evaluation/evidence/recorded.txt changes/c1/07-evaluation/handoff.yml changes/c1/07-evaluation/journeys.yml changes/c1/07-evaluation/results.md changes/c1/metadata.yml  | index.lock: present | metadata current_phase: current_phase: attack | branch_resolved: branch_resolved: true
+-- gate attack in the half-state (attack complete on disk, uncommitted):
+08-attack  complete  FAIL
+  ✗ fail predecessor complete: 07-evaluation is complete but not recorded in git; run `soft-foundry phase seal evaluate` so the record's history carries it (the specification lock and the plan diff base are read from that commit)
+-- change status in the half-state:
+c1: c1  [status: in_progress, phase: attack, risk: TBD]
+  07-evaluation          complete     ok
+  08-attack              complete     FAIL: predecessor complete
+-- rerun seal with the stale index.lock in place:
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+note: left uncommitted (outside this phase and the record's metadata): changes/c1/08-attack/attack-plan.md, changes/c1/08-attack/cases.yml, changes/c1/08-attack/evidence/manifest.yml, changes/c1/08-attack/handoff.yml, changes/c1/08-attack/results.md
+c1: 07-evaluation is not sealed: git add failed: fatal: Unable to create '/tmp/sf-attack2/repos/a007r/.git/index.lock': File exists.
+Another git process seems to be running in this repository, e.g.
+an editor opened by 'git commit'. Please make sure all processes
+are terminated then try again. If it still fails, a git process
+may have crashed in this repository earlier:
+remove the file manually to continue.
+metadata.yml is advanced in the worktree; fix the cause and run `soft-foundry phase seal evaluate` again to complete the seal
+[exit 2]
+--- state: 7a16cdd phases complete through verify | staged: changes/c1/07-evaluation/evaluation-plan.md changes/c1/07-evaluation/evidence/manifest.yml changes/c1/07-evaluation/evidence/recorded.txt changes/c1/07-evaluation/handoff.yml changes/c1/07-evaluation/journeys.yml changes/c1/07-evaluation/results.md changes/c1/metadata.yml  | index.lock: present | metadata current_phase: current_phase: review | branch_resolved: branch_resolved: true
+-- remove index.lock (as git's text says) and rerun:
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+note: left uncommitted (outside this phase and the record's metadata): changes/c1/08-attack/attack-plan.md, changes/c1/08-attack/cases.yml, changes/c1/08-attack/evidence/manifest.yml, changes/c1/08-attack/handoff.yml, changes/c1/08-attack/results.md
+sealed 07-evaluation at 4a15312b69b4
+[exit 0]
+--- state: 4a15312 Record c1 evaluate | staged:  | index.lock: absent | metadata current_phase: current_phase: review | branch_resolved: branch_resolved: true
+-- commit content:
+Record c1 evaluate
+ changes/c1/07-evaluation/evaluation-plan.md    |  4 +-
+ changes/c1/07-evaluation/evidence/manifest.yml |  9 ++--
+ changes/c1/07-evaluation/evidence/recorded.txt |  1 +
+ changes/c1/07-evaluation/handoff.yml           | 46 ++++++++++----------
+ changes/c1/07-evaluation/journeys.yml          | 25 ++++++-----
+ changes/c1/07-evaluation/results.md            |  8 ++--
+ changes/c1/metadata.yml                        | 60 +++++---------------------
+== 7e: SIGKILL during the git add window instead (hook 0, kill at 0.35 s, 20 attempts; report any half-state seen)
+try 1 (killed at 0.31s): phases complete through verify | staged=[] | index.lock=absent | current_phase: evaluate | 1 stamped
+try 2 (killed at 0.32s): phases complete through verify | staged=[] | index.lock=absent | current_phase: evaluate | 1 stamped
+try 3 (killed at 0.33s): phases complete through verify | staged=[] | index.lock=absent | current_phase: evaluate | 1 stamped
+try 4 (killed at 0.34s): phases complete through verify | staged=[] | index.lock=absent | current_phase: evaluate | 1 stamped
+try 5 (killed at 0.35s): phases complete through verify | staged=[] | index.lock=absent | current_phase: evaluate | 1 stamped
+try 6 (killed at 0.36s): phases complete through verify | staged=[] | index.lock=absent | current_phase: evaluate | 1 stamped
+try 7 (killed at 0.37s): phases complete through verify | staged=[] | index.lock=absent | current_phase: evaluate | 1 stamped
+try 8 (killed at 0.38s): phases complete through verify | staged=[] | index.lock=absent | current_phase: evaluate | 1 stamped
+try 9 (killed at 0.39s): phases complete through verify | staged=[] | index.lock=absent | current_phase: evaluate | 1 stamped
+try 10 (killed at 0.310s): phases complete through verify | staged=[] | index.lock=absent | current_phase: evaluate | 1 stamped

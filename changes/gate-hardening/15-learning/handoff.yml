@@ -1,0 +1,28 @@
+# Phase handoff. One per phase directory. The gate checker validates this file.
+phase: 15-learning
+skill: learning
+status: complete
+commit_sha: 3ee9bb898d8b34062ffeabd019581abd11754605
+started_at: '2026-11-02T20:00:00Z'
+completed_at: '2026-11-02T20:20:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+  - findings.md
+  - proposed-rules.md
+  - proposed-evals.md
+  - instincts.yml
+blocking: []               # unresolved blocking conditions; must be empty when complete
+findings: []               # items for downstream phases: {id, severity, summary}; a review's
+                           # findings above minor also carry failure: (the concrete input
+                           # or state and the wrong result it leads to)
+next: done
+notes: "Written by the session that implemented the change: runner refuses `phase run learn` on a judged change, so learning is done in-session. Six instincts, none promoted (promotion goes through a later change record). Guard limitation as recorded in 01-discovery."
+# Written by `soft-foundry phase run`, never by the agent: how this phase was
+# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
+# session_id, cwd).
+# A review or judgment phase completed without it is advised as having been
+# performed by whatever session was already open.
+executed_by: null

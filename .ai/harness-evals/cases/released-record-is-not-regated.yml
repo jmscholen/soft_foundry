@@ -1,0 +1,15 @@
+id: released-record-is-not-regated
+kind: gate
+description: A released record is read by the gate that finished it; a specification file that would fail the parse check today does not fail the phase (REQ-007).
+record:
+  risk: medium
+  status: released
+  complete: [intake, discover, specify, threat_model, plan, implement, verify, evaluate, attack, review, judge, learn]
+  files:
+    02-specification/requirements.yml: |
+      requirements:
+        - id: REQ-001
+          statement: fail closed: when it cannot tell
+expect:
+  phase: specify
+  outcome: pass

@@ -1,0 +1,25 @@
+id: criteria-uncovered-at-judgment
+kind: gate
+description: An acceptance criterion named by no verification check or evaluation journey, and not set aside with a reason, fails the judgment (criteria covered, REQ-011).
+record:
+  risk: medium
+  complete: [intake, discover, specify, threat_model, plan, implement, verify, evaluate, attack, review, judge]
+  files:
+    02-specification/acceptance-criteria.yml: |
+      criteria:
+        - id: AC-001
+          requirements: [REQ-001]
+          given: recorded
+          when: recorded
+          then: recorded
+          verified_by: []
+        - id: AC-002
+          requirements: [REQ-001]
+          given: recorded
+          when: recorded
+          then: recorded
+          verified_by: []
+expect:
+  phase: judge
+  check: criteria covered
+  outcome: fail

@@ -132,7 +132,7 @@ class SnapshotTest < Minitest::Test
       assert_equal "complete", intake["status"]
       assert_equal "pass", intake["state"]
       assert_equal "pass", intake["checks"].find { |c| c["name"] == "required files present" }["outcome"]
-      assert_equal "2026-09-09T00:00:00Z", intake["completed_at"]
+      assert_equal SoftFoundry::HarnessEval::FIXTURE_STAMP, intake["completed_at"]
 
       assert_equal "pending", gate(change, "discover")["state"]
       specify = gate(change, "specify")
@@ -407,10 +407,12 @@ class SnapshotTest < Minitest::Test
       FileUtils.mkdir_p(File.join(dir, "changes", "linked"))
       File.symlink(outside, File.join(dir, "changes", "linked", "metadata.yml"))
 
+      # A symlinked record file is refused before it is read (REQ-034), so
+      # the plain name is the link's, and the linked text never surfaces.
       row = snapshot.board["changes"].find { |c| c["slug"] == "linked" }
-      assert_equal "changes/linked/metadata.yml is not a mapping", row["error"]
-      error = assert_raises(RuntimeError) { snapshot.change("linked") }
-      assert_equal "changes/linked/metadata.yml is not a mapping", error.message
+      assert_includes row["error"], "changes/linked/metadata.yml is a symlink"
+      error = assert_raises(RuntimeError, SoftFoundry::RecordFileError) { snapshot.change("linked") }
+      assert_includes error.message, "changes/linked/metadata.yml is a symlink"
       refute_includes JSON.generate(snapshot.board), "secret line"
     end
   end

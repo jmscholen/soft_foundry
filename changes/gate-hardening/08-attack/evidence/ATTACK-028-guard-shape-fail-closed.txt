@@ -1,0 +1,13 @@
+== 9a: block-mode misspellings of the policy shape vs the fresh-session check on review (completed without executed_by)
+-- mode: block
+  - skip fresh session recorded: the repository's guard policy is warn, so the fresh-context advisory applies instead
+-- guard: block
+-- guard: {}
+  - skip fresh session recorded: the repository's guard policy is warn, so the fresh-context advisory applies instead
+-- guard: {mode: block}
+  ✗ fail fresh session recorded: no fresh-context session is recorded in executed_by, and the repository's guard policy is block; run `soft-foundry phase run review` so the phase is done in a fresh session and stamped by the runner
+
+$ printf "version: 1\nguard: block\n" > .ai/policies/enforcement.yml
+$ sf gate review; sf check
+soft-foundry: String does not have #dig method
+[gate review exit 1; gate all exit 1; phase seal review exit 1; check: same line]

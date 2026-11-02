@@ -1,0 +1,33 @@
+# Phase handoff. One per phase directory. The gate checker validates this file.
+phase: 00-intake
+skill: intake
+status: complete
+commit_sha: 3e5627dc3d9c0ff1791ad938462ba800f67087b0
+started_at: '2026-10-29T01:34:20Z'
+completed_at: '2026-10-29T01:42:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+  - request.md
+  - assumptions.md
+blocking: []
+findings:
+  - id: INT-001
+    severity: minor
+    summary: Five YAML files in closed records do not parse today (scoped-verification requirements.yml, journeys.yml, evidence/manifest.yml; phase-lifecycle-controls threats.yml; an archived init-command previous/ tests.yml). The parse check this change adds must not re-gate closed records; whether `ci` re-gates them today is a discovery question.
+  - id: INT-002
+    severity: minor
+    summary: The baseline full suite on main at 3e5627d, run with provider keys and SOFT_FOUNDRY_PHASE unset, was still running when intake completed. Discovery records its result before any requirement depends on it.
+  - id: INT-003
+    severity: minor
+    summary: The guard refused two intake-session shell commands that named lib/ and .ai/policies/enforcement.yml, as its permissions require. The ci-on-closed-records and change_base questions are deferred to discovery, which may read code.
+next: discover
+notes: "Intake performed by the session that opened the change, as the lifecycle expects. No person committed a phase; the record is sealed by the same session, which is the practice this change makes mechanical."
+# Written by `soft-foundry phase run`, never by the agent: how this phase was
+# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
+# session_id, cwd).
+# A review or judgment phase completed without it is advised as having been
+# performed by whatever session was already open.
+executed_by: null

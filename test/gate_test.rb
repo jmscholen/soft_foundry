@@ -71,7 +71,8 @@ class GateTest < Minitest::Test
     with_record do |dir, plane, record, gate|
       sha = head(dir)
       plane.phases.take(7).each { |p| complete_phase!(record, p.id, sha: sha) } # intake..verify
-      refute gate.evaluate("verify").failed?
+      commit_all(dir, "phases through verify")
+      refute gate.evaluate("verify").failed?, gate.evaluate("verify").checks.map { |c| "#{c.name}: #{c.detail}" }.join("\n")
 
       File.write(File.join(dir, "lib", "app.rb"), "puts 2\n")
       result = gate.evaluate("verify")
@@ -108,6 +109,7 @@ class GateRemediationTest < Minitest::Test
       h.merge!("status" => "blocked", "blocking" => ["EVAL-001 failed"])
       File.write(path, YAML.dump(h))
       complete_phase!(record, "remediate", sha: sha)
+      commit_all(dir, "phases")
       result = gate.evaluate("remediate")
       refute result.failed?, result.checks.map { |c| "#{c.name}: #{c.detail}" }.join("\n")
       assert_includes result.checks.find { |c| c.name == "predecessor complete" }.detail, "05-implementation"
@@ -121,9 +123,11 @@ class GateRemediationTest < Minitest::Test
       gate = SoftFoundry::Gate.new(record, git: SoftFoundry::Git.new(dir))
       sha = head(dir)
       %w[intake discover specify threat_model plan implement verify evaluate remediate].each { |id| complete_phase!(record, id, sha: sha) }
+      commit_all(dir, "through remediate")
       refute gate.evaluate("remediate").failed?, "attack pending must not block a completed remediation"
       complete_phase!(record, "attack", sha: sha)
       complete_phase!(record, "document", sha: sha)
+      commit_all(dir, "attack and document")
       refute gate.evaluate("document").failed?
     end
   end
@@ -135,6 +139,7 @@ class GateRemediationTest < Minitest::Test
       gate = SoftFoundry::Gate.new(record, git: SoftFoundry::Git.new(dir))
       sha = head(dir)
       %w[intake discover specify threat_model plan implement verify evaluate attack document].each { |id| complete_phase!(record, id, sha: sha) }
+      commit_all(dir, "phases")
       result = gate.evaluate("document")
       refute result.failed?, result.checks.map { |c| "#{c.name}: #{c.detail}" }.join("\n")
       assert_includes result.checks.find { |c| c.name == "predecessor complete" }.detail, "08-attack"
@@ -166,6 +171,7 @@ class GateSkippedPhasesTest < Minitest::Test
       File.write(record.dir + "/metadata.yml", YAML.dump(m))
       gate = SoftFoundry::Gate.new(record, git: SoftFoundry::Git.new(dir))
       complete_phase!(record, "specify", sha: sha)
+      commit_all(dir, "intake and specify")
       result = gate.evaluate("specify")
       refute result.failed?, result.checks.map { |c| "#{c.name}: #{c.detail}" }.join("\n")
       assert_includes result.checks.find { |c| c.name == "predecessor complete" }.detail, "00-intake"

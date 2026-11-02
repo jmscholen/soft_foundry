@@ -86,6 +86,11 @@ module SoftFoundry
       if named.is_a?(Hash) && named.keys.map(&:to_s).sort != ChangeRecord::RISKS.sort
         findings << Finding.new(:error, "workflow: waivable_by_risk names risks #{named.keys.join(', ')} but `change new --risk` allows #{ChangeRecord::RISKS.join(', ')}; make them agree")
       end
+      forced = @plane.workflow.dig("tracks", "forced_by_risk")
+      unknown = forced.is_a?(Hash) ? forced.keys.map(&:to_s) - ChangeRecord::RISKS : []
+      unless unknown.empty?
+        findings << Finding.new(:error, "workflow: tracks.forced_by_risk names #{unknown.join(', ')}, which `change new --risk` does not allow (#{ChangeRecord::RISKS.join(', ')}); a renamed key would stop forcing the track")
+      end
       findings
     end
 
@@ -253,7 +258,9 @@ module SoftFoundry
     # but when present its mode must be one the guard understands.
     def check_enforcement
       path = File.join(@plane.dir, "policies", "enforcement.yml")
-      return [] unless File.exist?(path)
+      # Without the policy the guard mode defaults to warn, and the gate's
+      # `fresh session recorded` check skips (ATK-006).
+      return [Finding.new(:warning, "policies/enforcement.yml is missing: the guard mode defaults to warn, so a review or judgment from the implementing session is advised, never refused; add it with `guard: {mode: block}` to require a fresh session")] unless File.exist?(path)
       data = YAML.safe_load_file(path) || {}
       mode = data.dig("guard", "mode")
       return [] if mode.nil? || Guard::MODES.include?(mode.to_s)

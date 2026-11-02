@@ -17,6 +17,13 @@ phases:
     current: TBD
     result: TBD
 unresolved_findings: []
+# Acceptance criteria named by no verification check's `criteria` and no
+# evaluation journey's `criteria`, each set aside with a reason. The gate's
+# `criteria covered` check fails the judgment for any criterion that is
+# neither covered nor listed here with a non-blank reason, e.g.:
+#   - id: AC-012
+#     reason: needs a production observation; carried as release item OBS-1
+criteria_not_covered: []
 # Acceptance criteria or judgment conditions left unsatisfied pending a
 # real-world event (production observation, etc.) rather than more
 # repository evidence, e.g.:

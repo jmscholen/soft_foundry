@@ -1,0 +1,11 @@
+ruby: ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23]; commit dccdd8c7171d1c53d40d52cb5209cff1dd0c1ce4; files: test/remediation_gate_hardening_three_test.rb; started 2026-10-30T02:23:58Z
+Run options: --seed 34839
+
+# Running:
+
+...
+
+Finished in 3.615264s, 0.8298 runs/s, 1.6596 assertions/s.
+
+3 runs, 6 assertions, 0 failures, 0 errors, 0 skips
+exit=0

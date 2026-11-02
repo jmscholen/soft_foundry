@@ -1,0 +1,5 @@
+# HEAD dccdd8c7171d1c53d40d52cb5209cff1dd0c1ce4; merge base 3e5627dc3d9c0ff1791ad938462ba800f67087b0
+## git diff main --name-only -- changes/ | grep -v '^changes/gate-hardening/'
+(exit of grep 1; 1 = none)
+## git status --short -- changes/ outside this record
+(exit of grep 1; 1 = none)

@@ -159,7 +159,7 @@ module SoftFoundry
         2. Do the phase's work as the skill describes, reading the earlier phases under changes/#{@record.slug}/ that the skill's permissions.yml allows. Write only where that file allows; the runtime guard enforces it where installed and it is policy everywhere else.
         3. When the work is done, fill changes/#{@record.slug}/#{phase.output}/handoff.yml: status complete, commit_sha (the HEAD the outputs describe), completed_at, resolved_model (provider and model actually used), outputs, findings for later phases, and next. Do not edit executed_by; the runner writes it.
         4. Do not alter any other phase's evidence or handoff, do not weaken requirements to obtain a pass, and do not run `soft-foundry phase run` yourself. If the work cannot be completed, set status blocked with the reason under blocking rather than pretending.
-        5. Stop when the handoff is written. `soft-foundry gate #{phase.id}` will be run on your output afterwards.
+        5. Stop when the handoff is written, and do not commit. The runner gates your output with `soft-foundry gate #{phase.id}` and, when it passes, seals the phase (`soft-foundry phase seal #{phase.id}`: one commit of the phase directory and the record's metadata).
       PROMPT
       return base unless parallel_head
 

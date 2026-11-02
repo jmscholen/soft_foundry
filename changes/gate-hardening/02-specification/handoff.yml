@@ -1,0 +1,38 @@
+# Phase handoff. One per phase directory. The gate checker validates this file.
+phase: 02-specification
+skill: specification
+status: complete
+commit_sha: 914a34deb2b249a48bd7612a65684fecb5f20b87
+started_at: '2026-10-29T01:47:00Z'
+completed_at: '2026-10-29T01:53:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+  - specification.md
+  - requirements.yml
+  - acceptance-criteria.yml
+  - readiness.md
+blocking: []
+findings:
+  - id: SPEC-001
+    severity: minor
+    summary: "36 requirements, 55 acceptance criteria; every requirement is named by at least one criterion and no criterion names an unknown requirement (checked with a script before completion). Both YAML files load with YAML.safe_load, which is the check REQ-008 adds."
+  - id: SPEC-002
+    severity: major
+    summary: "REQ-006 (a predecessor must be recorded in git) and REQ-014 (fresh session required in block mode) change what existing fixtures and harness-eval planting must do: complete_phase! and HarnessEval#plant complete phases on disk without committing or stamping executed_by. The plan must decide whether those helpers commit per phase and stamp a runner-shaped executed_by, or whether the tests build records through phase seal."
+  - id: SPEC-003
+    severity: minor
+    summary: "REQ-020 (branch_resolved) is the owed mitigation from scoped-verification REV-001 as that judgment phrased it; the threat model should state why recording the measure at seal time does not reopen the stacked-change breakage the three earlier attempts caused."
+  - id: SPEC-004
+    severity: minor
+    summary: "surfaces.accessibility and surfaces.security are set true on metadata.yml at this phase (CLI output a person reads; a control is being hardened). change new had left both false."
+next: threat_model
+notes: "Specification performed by the session that opened the change. current_phase advanced from discover to specify, and the two surfaces set, with shell commands (no skill may write metadata.yml with a file tool; recorded as a guard limitation in 01-discovery/handoff.yml). The specification locks at the commit that records this handoff."
+# Written by `soft-foundry phase run`, never by the agent: how this phase was
+# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
+# session_id, cwd).
+# A review or judgment phase completed without it is advised as having been
+# performed by whatever session was already open.
+executed_by: null

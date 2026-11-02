@@ -1,0 +1,67 @@
+CHECK-009: RED commit shape and RED-state runs. HEAD dccdd8c7171d1c53d40d52cb5209cff1dd0c1ce4, started 2026-10-30T01:46:39Z
+ASDF_RUBY_VERSION=3.3.1 exported so the /tmp worktrees use the repository's Ruby
+every run: env -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u XAI_API_KEY -u GEMINI_API_KEY -u GOOGLE_API_KEY -u SOFT_FOUNDRY_PHASE -u SOFT_FOUNDRY_PARALLEL -u SOFT_FOUNDRY_GUARD bundle exec ruby -Ilib -Itest -e 'ARGV.each { |f| require File.expand_path(f) }' <test files>, in a detached git worktree of the commit under /tmp, removed afterwards; transcripts in red-run-<sha>.txt
+
+=== git show --stat 9a96f45
+9a96f459d945c829688761e85a8bda164f7b9d4b
+Jeff Scholen 2026-10-28T22:07:25-04:00
+RED: gate hardening tests, failing before implementation
+
+ test/fixture_completion_test.rb |  50 ++++++
+ test/gate_checks_test.rb        | 376 ++++++++++++++++++++++++++++++++++++++++
+ test/gate_hardening_cli_test.rb | 175 +++++++++++++++++++
+ test/phase_run_sealing_test.rb  | 136 +++++++++++++++
+ test/phase_seal_test.rb         | 212 ++++++++++++++++++++++
+ 5 files changed, 949 insertions(+)
+--- 9a96f45 is an ancestor of HEAD: yes
+--- lib/ files changed between 9a96f45 and HEAD: lib/soft_foundry/change_record.rb lib/soft_foundry/change_summary.rb lib/soft_foundry/check.rb lib/soft_foundry/cli.rb lib/soft_foundry/control_plane.rb lib/soft_foundry/gate.rb lib/soft_foundry/git.rb lib/soft_foundry/harness_eval.rb lib/soft_foundry/phase_reopen.rb lib/soft_foundry/phase_runner.rb lib/soft_foundry/phase_seal.rb lib/soft_foundry/processes.rb lib/soft_foundry/record_file.rb lib/soft_foundry/scope.rb lib/soft_foundry/text.rb 
+
+=== git show --stat 4d7392a
+4d7392a6eb3089e3612011f8cefa4bed5169edcb
+Jeff Scholen 2026-10-29T07:35:26-04:00
+RED: remediation tests for the attack findings on gate-hardening
+
+ test/remediation_gate_hardening_test.rb | 129 ++++++++++++++++++++++++++++++++
+ 1 file changed, 129 insertions(+)
+--- 4d7392a is an ancestor of HEAD: yes
+--- lib/ files changed between 4d7392a and HEAD: lib/soft_foundry/change_record.rb lib/soft_foundry/check.rb lib/soft_foundry/gate.rb lib/soft_foundry/git.rb lib/soft_foundry/phase_seal.rb 
+
+=== git show --stat d6c2748
+d6c2748fecf66a029d0ecb905c4165e48f5d3740
+Jeff Scholen 2026-10-29T12:24:33-04:00
+RED: sealing remediation must return the record to verify
+
+ test/remediation_gate_hardening_test.rb | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+--- d6c2748 is an ancestor of HEAD: yes
+--- lib/ files changed between d6c2748 and HEAD: lib/soft_foundry/change_record.rb lib/soft_foundry/check.rb lib/soft_foundry/gate.rb lib/soft_foundry/git.rb lib/soft_foundry/phase_seal.rb 
+
+=== git show --stat cf7b76b
+cf7b76bc49a69d355453da2d9052076275522b2c
+Jeff Scholen 2026-10-29T19:54:37-04:00
+RED: a hand-committed commit_sha rewrite, empty reruns, loose ids and reasons, a missing policy, hand-edited metadata
+
+ test/remediation_gate_hardening_two_test.rb        | 146 +++++++++++++++++++++
+ 6 files changed, 306 insertions(+), 99 deletions(-)
+--- cf7b76b is an ancestor of HEAD: yes
+--- lib/ files changed between cf7b76b and HEAD: lib/soft_foundry/change_record.rb lib/soft_foundry/check.rb lib/soft_foundry/gate.rb lib/soft_foundry/git.rb lib/soft_foundry/phase_seal.rb 
+
+=== git show --stat a930c57 (RED) and c664d12 (GREEN)
+a930c577030910d6ae46fa2e897466da42f5357d
+Jeff Scholen 2026-10-29T21:43:21-04:00
+RED: one gate run reads HEAD once; a lineage failure names a next action
+
+ test/remediation_gate_hardening_three_test.rb      | 53 ++++++++++++++++++++++
+ 5 files changed, 110 insertions(+), 44 deletions(-)
+c664d12240e31d6a51ad2f38a8b59ff2188643a6
+Jeff Scholen 2026-10-29T21:43:43-04:00
+GREEN: gate reads HEAD, tips and recorded commits once per run; lineage failures name a next action
+
+ lib/soft_foundry/change_record.rb |  6 +++-
+ lib/soft_foundry/gate.rb          | 12 +++++---
+ lib/soft_foundry/git.rb           | 65 +++++++++++++++++++++++++++++++--------
+ 3 files changed, 65 insertions(+), 18 deletions(-)
+--- a930c57 is an ancestor of HEAD: yes
+--- a930c57 precedes c664d12: yes
+--- lib/ files changed between a930c57 and HEAD: 
+--- red-run-three-a930c57.txt: 3 runs, 5 assertions, 2 failures, 0 errors, 0 skips; red-run-three-dccdd8c.txt: 3 runs, 6 assertions, 0 failures, 0 errors, 0 skips

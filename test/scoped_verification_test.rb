@@ -70,8 +70,14 @@ class ScopedVerificationTest < Minitest::Test
   def check(gate, name, phase: "verify") = gate.evaluate(phase).checks.find { |c| c.name == name }
   def current(gate) = check(gate, CHECK)
 
+  # A minimal tests.yml for a scope or sizing scenario: the gate's test
+  # results check needs one recorded check, which the fixture's passing
+  # check supplies unless the test writes its own.
+  PASSING_CHECK = { "id" => "CHECK-001", "kind" => "tests", "command" => "bin/rails test", "result" => "pass",
+                    "evidence" => SoftFoundry::HarnessEval::FIXTURE_EVIDENCE, "criteria" => ["AC-001"] }.freeze
+
   def write_tests_yml(record, data)
-    File.write(File.join(record.dir, "06-verification", "tests.yml"), YAML.dump(data))
+    File.write(File.join(record.dir, "06-verification", "tests.yml"), YAML.dump({ "checks" => [PASSING_CHECK] }.merge(data)))
   end
 
   def tree(dir, sha = "HEAD") = sh(dir, "git", "rev-parse", "#{sha}^{tree}").strip

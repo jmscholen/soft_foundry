@@ -1,0 +1,20 @@
+== X2: a session for change c1 (SOFT_FOUNDRY_PHASE=intake) seals record c2's intake; c2's branch does not exist, so the branch check cannot refuse
+c2 branch:   branch: change/c2
+$ env SOFT_FOUNDRY_PHASE=intake /tmp/sf-attack2/bin/sf-env phase seal intake --change c2
+note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/locks/c2.lock
+note: the record's branch change/c2 does not exist; this seal commits to the checked-out branch change/c1; create change/c2 here or correct git.branch in metadata.yml (ATK-002)
+sealed 00-intake at 12c0820f0c4b
+[exit 0]
+12c0820 Record c2 intake HEAD -> change/c1
+aafa96d record c2 
+== X3: what the gate's JSON looks like and where the session id is shown
+3:require "json"
+333:        json = flag("--json")
+335:        json ? status_json(slug) : status(slug)
+339:        if flag("--json")
+653:    def status_json(slug)
+835:    # `eval [--live] [--shell S] [--case ID]... [--json] [-- shell args]`:
+841:      json = flag("--json")
+854:        @out.puts eval_line(r) unless json
+-- change_summary.rb mentions of session/executed:
+-- advisory.rb mentions of session id:

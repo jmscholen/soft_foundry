@@ -1,0 +1,50 @@
+# Phase handoff. One per phase directory. The gate checker validates this file.
+phase: 01-discovery
+skill: repository-discovery
+status: complete
+commit_sha: a0a8460fcc5efd55a3a4f450e60cf65e79725e3b
+started_at: '2026-10-29T01:43:00Z'
+completed_at: '2026-10-29T01:46:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+  - repository-context.md
+  - affected-components.md
+  - dependencies.md
+  - unknowns.md
+blocking: []
+findings:
+  - id: DISC-001
+    severity: minor
+    summary: "`ci` skips closed and released records (cli.rb:856-), so a parse check on complete phases cannot break the pre-commit hook on history; `change status` still gates a closed record (cli.rb:617-624), which the specification must decide on (unknowns.md, row 1)."
+  - id: DISC-002
+    severity: major
+    summary: "Nothing in the tool commits a change record. `phase run` stamps executed_by and gates with Gate#evaluate; the prompt ends at 'stop when the handoff is written'; the parallel prompt forbids committing. The specification lock and Scope#change_base both rest on recorded_commit, which is nil until a handoff is committed by someone. This is the mechanism intake item 1 replaces."
+  - id: DISC-003
+    severity: major
+    summary: "No skill may write changes/<slug>/metadata.yml with a file tool (no permissions.yml names it; the guard refused an Edit from intake on this change), so an in-session agent advances current_phase only from the shell. The sealing command must advance current_phase and status itself."
+  - id: DISC-004
+    severity: minor
+    summary: "Baseline full suite on main at 3e5627d with provider keys and SOFT_FOUNDRY_PHASE unset: 822 runs, 6228 assertions, 0 failures, 0 errors, 769 s. Closes INT-002."
+  - id: DISC-005
+    severity: minor
+    summary: "ChangeRecord#judgment_outcome already returns the single verdict word from final.md's Outcome section and is used only by change release; FinishedFixture already parametrizes that section. The verdict check and the close refusal reuse both."
+  - id: DISC-006
+    severity: minor
+    summary: "phase run gates through Gate#evaluate directly (cli.rb:1143, 1282, 1380), never the gate command's exit code, and ci hides skipped results; a distinct exit code for an explicitly named non-complete phase affects neither. phase-lifecycle-controls REQ-023 forbade changing what a pending gate means; the specification must state that the printed SKIP line is unchanged and only the process exit differs."
+  - id: DISC-007
+    severity: minor
+    summary: "test_helper's complete_phase! writes a complete handoff without committing, and LifecycleFixture commits once after all completions. Requiring a recorded predecessor will touch every fixture that gates a later phase after on-disk completion; the count is unknown until the RED commit (unknowns.md, row 3)."
+  - id: DISC-008
+    severity: minor
+    summary: "learn promote --dry-run would add about twenty instincts at or above 0.80, including verify-specification-yaml-parses-before-lock (0.85), which is intake item 3; seven are already in .ai/rules/learned.md."
+next: specify
+notes: "Discovery performed by the session that opened the change. Guard limitation recorded per AGENTS.md step 11: current_phase was advanced from intake to discover with a shell command because no skill may write metadata.yml with a file tool; the guard checks Bash against deny sets only, and metadata.yml is in none. The same will be true at every phase boundary until the sealing command exists. .ai/harness-evals/ was not opened."
+# Written by `soft-foundry phase run`, never by the agent: how this phase was
+# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
+# session_id, cwd).
+# A review or judgment phase completed without it is advised as having been
+# performed by whatever session was already open.
+executed_by: null

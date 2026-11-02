@@ -1,0 +1,153 @@
+# Threats to the sealing command and the checks REQ-001 to REQ-036 add.
+# Categories follow the template vocabulary. Statements are quoted.
+threats:
+  - id: THREAT-001
+    requirements: [REQ-001, REQ-025]
+    category: authorization
+    attacker: "a phase session under the guard"
+    goal: "seal a phase other than its own, so the implementing session records verification it wrote"
+    vector: "run `soft-foundry phase seal verify` from the implementation session; the guard checks Bash against deny sets and the command names no denied path"
+    impact: "high: separation of duties for a commit-bound phase defeated by one command"
+    likelihood: "medium: it is the natural shortcut for a session that wants to finish"
+    mitigation: MIT-001
+    attack_case_required: true
+  - id: THREAT-002
+    requirements: [REQ-014]
+    category: authentication
+    attacker: "a committer"
+    goal: "pass `fresh session recorded` without a fresh session"
+    vector: "write executed_by with runner soft-foundry phase run and fresh_context true into the review handoff by hand"
+    impact: "high for the record's claim; the gate cannot tell"
+    likelihood: "low: needs a person to write a false runner stamp into a committed file"
+    mitigation: MIT-002
+    attack_case_required: true
+  - id: THREAT-003
+    requirements: [REQ-009]
+    category: replay
+    attacker: "a session or committer"
+    goal: "move the staleness baseline back so later code is outside the measured range"
+    vector: "record an older commit_sha, or one on another branch, in a commit-bound handoff"
+    impact: "high: stale evidence reads current"
+    likelihood: "medium: it is what an agent does when it copies a SHA from an earlier handoff"
+    mitigation: MIT-003
+    attack_case_required: true
+  - id: THREAT-004
+    requirements: [REQ-012, REQ-034]
+    category: file
+    attacker: "a session or committer"
+    goal: "make the manifest check read, hash, or block on a file outside the phase directory"
+    vector: "an artifacts[].path of ../../, an absolute path, a symlinked artifact, or a FIFO"
+    impact: "medium: information about files outside the record (a digest), or a hung gate"
+    likelihood: "low"
+    mitigation: MIT-004
+    attack_case_required: true
+  - id: THREAT-005
+    requirements: [REQ-010]
+    category: authorization
+    attacker: "a session"
+    goal: "record a failing or unrun test as acceptable"
+    vector: "write result pass over a failure, or acknowledge a fail with a finding that names the id in passing"
+    impact: "high for the record's claim; structurally undetectable"
+    likelihood: "medium"
+    mitigation: MIT-005
+    attack_case_required: true
+  - id: THREAT-006
+    requirements: [REQ-011]
+    category: authorization
+    attacker: "a session"
+    goal: "set a criterion aside without a reason"
+    vector: "criteria_not_covered with a reason of whitespace, Unicode blanks, or a placeholder word"
+    impact: "medium: a criterion nobody checked passes judgment"
+    likelihood: "medium"
+    mitigation: MIT-006
+    attack_case_required: true
+  - id: THREAT-007
+    requirements: [REQ-034, REQ-019]
+    category: file
+    attacker: "a committer"
+    goal: "have the seal commit, or the summary print, content from another file"
+    vector: "replace handoff.yml or metadata.yml with a symlink"
+    impact: "medium: a sealing commit that records another phase's handoff under this phase's path"
+    likelihood: "low"
+    mitigation: MIT-007
+    attack_case_required: true
+  - id: THREAT-008
+    requirements: [REQ-021]
+    category: dependency
+    attacker: "a session or a malformed record"
+    goal: "make the gate raise instead of refuse, so a script reading the exit sees 1 and no gate line"
+    vector: "git as a string or a list in metadata.yml; a YAML error class other than SyntaxError; a commit_sha git cannot resolve"
+    impact: "low: the gate does not pass, but the operator gets a backtrace"
+    likelihood: "low"
+    mitigation: MIT-008
+    attack_case_required: true
+  - id: THREAT-009
+    requirements: [REQ-006]
+    category: authorization
+    attacker: "a session or committer"
+    goal: "carry on past a phase that is complete on disk and never recorded"
+    vector: "write a complete handoff and do not seal; or commit it by hand with --no-verify"
+    impact: "high for the lock and the diff base when unrecorded; nil when committed by hand (a committed handoff is recorded, which the model accepts)"
+    likelihood: "high before this change (it was the default); low after"
+    mitigation: MIT-009
+    attack_case_required: true
+  - id: THREAT-010
+    requirements: [REQ-008, REQ-036]
+    category: resource_exhaustion
+    attacker: "a committer"
+    goal: "make the gate slow or large"
+    vector: "an alias-heavy YAML document in a required file; a manifest naming a very large file"
+    impact: "low to medium: a slow pre-commit, not a false pass"
+    likelihood: "low"
+    mitigation: MIT-010
+    attack_case_required: true
+  - id: THREAT-011
+    requirements: [REQ-003, REQ-004, REQ-025]
+    category: concurrency
+    attacker: "two processes"
+    goal: "corrupt the record or double-commit"
+    vector: "two phase seal runs on one phase; a manual seal during phase run; a held or symlinked lock file"
+    impact: "medium: a torn metadata write or an unexpected commit"
+    likelihood: "low"
+    mitigation: MIT-011
+    attack_case_required: true
+  - id: THREAT-012
+    requirements: [REQ-004, REQ-025]
+    category: concurrency
+    attacker: "a crash or a kill"
+    goal: "leave the record half-sealed"
+    vector: "SIGKILL between the metadata write and the commit, or during the commit"
+    impact: "medium: metadata says the next phase while history does not"
+    likelihood: "low"
+    mitigation: MIT-012
+    attack_case_required: true
+  - id: THREAT-013
+    requirements: [REQ-001, REQ-033]
+    category: isolation
+    attacker: "a session or person on the wrong branch"
+    goal: "commit record B's phase into branch A's history"
+    vector: "phase seal --change B while branch A is checked out"
+    impact: "medium: a record's history lands on a branch that will not carry it; recorded_commit for B is on A"
+    likelihood: "medium in a stacked-change workflow"
+    mitigation: MIT-013
+    attack_case_required: true
+  - id: THREAT-014
+    requirements: [REQ-035, REQ-032]
+    category: secrets
+    attacker: "the environment and hostile file content"
+    goal: "leak an --env value in sealing output, or carry a script tag from a YAML key into the ui page"
+    vector: "parallel sealing messages; Psych error text echoing a key; check detail rendered by soft-foundry ui"
+    impact: "medium"
+    likelihood: "low"
+    mitigation: MIT-014
+    attack_case_required: true
+  - id: THREAT-015
+    requirements: [REQ-014]
+    category: authorization
+    attacker: "a committer"
+    goal: "turn the fresh-session check off"
+    vector: "commit guard.mode warn into .ai/policies/enforcement.yml, or set a machine-local override"
+    impact: "medium: the check becomes advisory again"
+    likelihood: "low: the policy file is protected from every skill, so only a person can, in a visible commit; the override is ignored by the gate"
+    mitigation: MIT-015
+    attack_case_required: true

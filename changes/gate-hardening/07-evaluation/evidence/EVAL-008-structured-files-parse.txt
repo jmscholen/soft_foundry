@@ -1,0 +1,143 @@
+# EVAL-008: The gate names a structured file that does not parse, and never re-gates a closed record (AC-018, AC-020, AC-021)
+# driver: evidence/journeys-driver.rb, run 2026-10-30T02:27:01Z at b871187a6bf2
+
+# scratch repository: /tmp/sf-eval4/repos/eval-008-parse
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+$ soft-foundry gate specify
+02-specification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+  ✗ fail structured files parse: 02-specification/requirements.yml: line 3, column 41: mapping values are not allowed in this context
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 26ed01b360e1875c622d48ecac65798abf183d5c
+  ✓ pass commit lineage: descends from 01-discovery at 938043c85400; reaches HEAD 26ed01b360e1
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 01-discovery
+  ! warn specification locked: not yet locked: the completed specification is not committed; the lock takes effect at the commit that records 02-specification/handoff.yml as complete
+  ✓ pass content clean
+exit 2
+
+assert pass: AC-020 `structured files parse` fails naming 02-specification/requirements.yml and a line
+assert pass: AC-020 no Ruby backtrace
+$ soft-foundry phase seal specify
+02-specification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+  ✗ fail structured files parse: 02-specification/requirements.yml: line 3, column 41: mapping values are not allowed in this context
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 26ed01b360e1875c622d48ecac65798abf183d5c
+  ✓ pass commit lineage: descends from 01-discovery at 938043c85400; reaches HEAD 26ed01b360e1
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 01-discovery
+  ! warn specification locked: not yet locked: the completed specification is not committed; the lock takes effect at the commit that records 02-specification/handoff.yml as complete
+  ✓ pass content clean
+c1: 02-specification is not sealed: its gate fails; nothing was committed
+exit 2
+
+assert pass: AC-020 phase seal specify exits 2 and commits nothing
+# scratch repository: /tmp/sf-eval4/repos/eval-008-manifest-seq
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+$ soft-foundry gate verify
+06-verification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✗ fail structured files parse: 06-verification/evidence/manifest.yml: expected a mapping at the top level, found array
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: d0bf493a0855571557a9435ed71ed0504415c91b
+  ✓ pass commit lineage: descends from 05-implementation at 3d51cecd6e30; reaches HEAD d0bf493a0855
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since d0bf493a0855; specification unchanged since d0bf493a0855
+  - skip red evidence: no check records a red_commit
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass test results recorded: 1 check, 1 pass
+  ✓ pass criteria covered: 1 criterion named by verification checks
+  ✗ fail evidence manifest verified: evidence/manifest.yml artifacts is missing; list each evidence file with path, produced_by, sha256
+  ✓ pass content clean
+exit 2
+
+assert pass: AC-021 fails naming evidence/manifest.yml and `expected a mapping`
+# scratch repository: /tmp/sf-eval4/repos/eval-008-closed
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+$ soft-foundry gate specify --change c1
+02-specification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+  - skip structured files parse: closed record: not re-gated
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 99a04ed6d39153188834c78b29d054655cfed5ec
+  - skip commit lineage: closed record: not re-gated
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 01-discovery
+  ✗ fail specification locked: changed since the specification was recorded at dc4c32ede747: changes/c1/02-specification/requirements.yml; a specification change after the lock is a recorded requirement change: rerun the specification phase (its handoff re-binds the lock), after which every commit-bound phase is stale and must be redone against the new criteria
+  ✓ pass content clean
+exit 2
+
+assert pass: AC-018 closed record: `structured files parse` skips with `closed record: not re-gated`
+$ soft-foundry ci
+✓ pass control plane: 16 phases, 17 skills, no errors
+✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
+✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
+✓ pass eval commit-sha-older-than-predecessor: discover commit lineage fail, as expected
+✓ pass eval control-well-formed: verify pass, as expected
+✓ pass eval criteria-uncovered-at-judgment: judge criteria covered fail, as expected
+✓ pass eval evidence-manifest-digest-mismatch: verify evidence manifest verified fail, as expected
+✓ pass eval evidence-manifest-path-escapes-phase: verify evidence manifest verified fail, as expected
+✓ pass eval evidence-stale-after-code-change: verify evidence current fail, as expected
+✓ pass eval full-suite-record-names-wrong-tree: verify full-suite run recorded (record check, not a test result) fail, as expected
+✓ pass eval hardening-while-exploring: implement not exploring fail, as expected
+✓ pass eval invisible-text-in-evidence: verify content clean fail, as expected
+✓ pass eval judgment-waived: intake waivers permitted fail, as expected
+✓ pass eval placeholder-left-in-evidence: verify no placeholders fail, as expected
+✓ pass eval predecessor-complete-but-unrecorded: discover predecessor complete fail, as expected
+✓ pass eval red-commit-is-the-green-commit: verify red evidence fail, as expected
+✓ pass eval released-record-is-not-regated: specify pass, as expected
+✓ pass eval review-finding-without-failure: review findings explained fail, as expected
+✓ pass eval review-without-fresh-session-in-block-mode: review fresh session recorded fail, as expected
+✓ pass eval scope-narrowed-after-evidence-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-change-claimed-by-other-record-stays-current: verify evidence current pass, as expected
+✓ pass eval scoped-change-in-scope-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-unclaimed-code-change-stales-record: verify evidence current fail, as expected
+✓ pass eval secret-shape-in-evidence: verify content clean fail, as expected
+✓ pass eval shared-core-change-stales-scoped-record: verify evidence current fail, as expected
+✓ pass eval specification-does-not-parse: specify structured files parse fail, as expected
+✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
+✓ pass eval test-result-fail-unacknowledged: verify test results recorded fail, as expected
+✓ pass eval verdict-unfilled: judge verdict recorded fail, as expected
+✓ pass eval: 28 passed, 0 failed, 0 errors, 1 skipped
+
+change c1 (closed, skipped)
+
+✓ ci passed
+exit 0
+
+assert pass: AC-018 ci prints `(closed, skipped)` and exits 0
+
+# EVAL-008: PASS (6 assertions passed, 0 failed)

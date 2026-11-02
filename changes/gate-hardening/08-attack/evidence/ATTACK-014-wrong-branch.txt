@@ -1,0 +1,54 @@
+completed evaluate at 7a16cdd365d9
+on other
+== 14a: phase seal evaluate --change c1 from branch other (record branch change/c1 exists)
+$ /tmp/sf-attack2/bin/sf phase seal evaluate --change c1
+c1: cannot seal evaluate: the checked-out branch is other, not the record's change/c1; check out change/c1 (or its worktree) to seal
+[exit 1]
+--- git log
+86d6f05 evaluate complete on disk
+7a16cdd phases complete through verify
+e26e293 record
+b0fc78b initial
+--- git status
+--- metadata
+status: in_progress
+current_phase: evaluate
+== 14b: same from a detached HEAD
+$ /tmp/sf-attack2/bin/sf phase seal evaluate --change c1
+c1: cannot seal evaluate: the checked-out branch is HEAD, not the record's change/c1; check out change/c1 (or its worktree) to seal
+[exit 1]
+== 14c: record branch deleted: the branch does not exist, does the seal say so?
+Deleted branch change/c1 (was 86d6f05).
+$ /tmp/sf-attack2/bin/sf phase seal evaluate --change c1
+note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/locks/c1.lock
+note: the record's branch change/c1 does not exist; this seal commits to the checked-out branch other; create change/c1 here or correct git.branch in metadata.yml (ATK-002)
+sealed 07-evaluation at f6caf9ec2098
+[exit 0]
+--- git log
+f6caf9e Record c1 evaluate
+86d6f05 evaluate complete on disk
+7a16cdd phases complete through verify
+e26e293 record
+b0fc78b initial
+--- git status
+--- metadata
+status: in_progress
+current_phase: attack
+f6caf9e Record c1 evaluate HEAD -> other
+86d6f05 evaluate complete on disk 
+7a16cdd phases complete through verify 
+== 14d: the record branch now exists only as origin/change/c1 (a remote-tracking ref) at an older commit
+completed evaluate at 7a16cdd365d9
+Deleted branch change/c1 (was a8d98ad).
+$ /tmp/sf-attack2/bin/sf phase seal evaluate --change c1
+c1: cannot seal evaluate: the checked-out branch is other, not the record's change/c1; check out change/c1 (or its worktree) to seal
+[exit 1]
+--- git log
+a8d98ad evaluate complete on disk
+7a16cdd phases complete through verify
+e26e293 record
+b0fc78b initial
+--- git status
+--- metadata
+status: in_progress
+current_phase: evaluate

@@ -1,0 +1,27 @@
+== 16c: id 'e' (error); a finding whose summary is 'done'
+06-verification  complete  FAIL
+  ✗ fail test results recorded: e (error) did not pass and no blocking entry or finding names it; a check that did not pass is redone, or named in the handoff's blocking list or in a finding so the record says so
+== 16d: CHECK-001 fail named only in blocking
+06-verification  complete  FAIL
+  ✗ fail no blocking conditions: complete with unresolved: CHECK-001 failed
+  ✓ pass test results recorded: 1 check, 0 pass; acknowledged: CHECK-001 (fail)
+== 16e: skipped with criteria, unnamed; then skipped with criteria: []
+06-verification  complete  FAIL
+  ✗ fail test results recorded: CHECK-001 (skipped) did not pass and no blocking entry or finding names it; a check that did not pass is redone, or named in the handoff's blocking list or in a finding so the record says so
+06-verification  complete  PASS
+  ✓ pass test results recorded: 1 check, 0 pass
+  ! warn criteria covered: AC-001 named by no verification check's criteria; an evaluation journey may cover it, or the judgment sets it aside with a reason in evidence.yml criteria_not_covered
+== 16f: result PASS (uppercase), passed, and missing
+06-verification  complete  FAIL
+  ✗ fail test results recorded: CHECK-001 has result '', not one of pass, fail, error, skipped; record each check run as id, kind, command, result (pass | fail | error | skipped), evidence, criteria
+06-verification  complete  FAIL
+  ✗ fail test results recorded: CHECK-001 has result '', not one of pass, fail, error, skipped; record each check run as id, kind, command, result (pass | fail | error | skipped), evidence, criteria
+06-verification  complete  FAIL
+  ✗ fail test results recorded: CHECK-001 has result 'nil', not one of pass, fail, error, skipped; record each check run as id, kind, command, result (pass | fail | error | skipped), evidence, criteria
+== 16g: checks is a mapping; a check is a string; two checks share an id (one fail, one pass)
+06-verification  complete  FAIL
+  ✗ fail test results recorded: tests.yml checks is a hash, not a list; record each check run as id, kind, command, result (pass | fail | error | skipped), evidence, criteria
+06-verification  complete  FAIL
+  ✗ fail test results recorded: check #1 is not a mapping; record each check run as id, kind, command, result (pass | fail | error | skipped), evidence, criteria
+06-verification  complete  PASS
+  ✓ pass test results recorded: 2 checks, 1 pass; acknowledged: CHECK-001 (fail)

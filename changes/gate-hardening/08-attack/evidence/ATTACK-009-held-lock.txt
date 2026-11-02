@@ -1,0 +1,21 @@
+completed evaluate at 7a16cdd365d9
+lock path: .soft-foundry/locks/c1.lock
+holder: locked
+== 9a: phase seal evaluate while another process holds the lock (timed)
+soft-foundry: could not lock /private/tmp/sf-attack2/repos/a009/.soft-foundry/locks/c1.lock within 10 seconds: another soft-foundry command holds it; wait for it to finish and rerun
+real 10.30
+user 0.18
+sys 0.07
+[exit 1]
+--- state: bbcc25b evaluate complete on disk | staged:  | index.lock: absent | metadata current_phase: current_phase: evaluate | branch_resolved: 
+== 9b: gate evaluate while the lock is held (reads take no lock?)
+real 0.53
+user 0.26
+sys 0.15
+07-evaluation  complete  PASS
+== 9c: phase reopen while the lock is held
+real 10.23
+user 0.15
+sys 0.06
+-- holder released; rerun seal:
+[exit 0]

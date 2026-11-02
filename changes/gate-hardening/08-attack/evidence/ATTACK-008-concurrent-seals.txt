@@ -1,0 +1,53 @@
+completed evaluate at 7a16cdd365d9
+== seal 1 (exit 0):
+note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/locks/c1.lock
+sealed 07-evaluation at 9f82b19accfd
+== seal 2 (exit 2):
+note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/locks/c1.lock
+c1: 07-evaluation is not sealed: git add failed: fatal: Unable to create '/tmp/sf-attack2/repos/a008/.git/index.lock': File exists.
+
+Another git process seems to be running in this repository, e.g.
+an editor opened by 'git commit'. Please make sure all processes
+are terminated then try again. If it still fails, a git process
+may have crashed in this repository earlier:
+remove the file manually to continue.
+metadata.yml is advanced in the worktree; fix the cause and run `soft-foundry phase seal evaluate` again to complete the seal
+--- state: 9f82b19 Record c1 evaluate | staged:  | index.lock: absent | metadata current_phase: current_phase: attack | branch_resolved: branch_resolved: true
+-- Record commits: 1
+/Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych/class_loader.rb:100:in `find': Tried to load unspecified class: Time (Psych::DisallowedClass)
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych/class_loader.rb:29:in `load'
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych/scalar_scanner.rb:116:in `parse_time'
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych/scalar_scanner.rb:60:in `tokenize'
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych/visitors/to_ruby.rb:69:in `deserialize'
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych/visitors/to_ruby.rb:133:in `visit_Psych_Nodes_Scalar'
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych/visitors/visitor.rb:30:in `visit'
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych/visitors/visitor.rb:6:in `accept'
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych/visitors/to_ruby.rb:39:in `accept'
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych/visitors/to_ruby.rb:390:in `block in revive_hash'
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych/visitors/to_ruby.rb:388:in `each'
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych/visitors/to_ruby.rb:388:in `each_slice'
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych/visitors/to_ruby.rb:388:in `revive_hash'
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych/visitors/to_ruby.rb:172:in `visit_Psych_Nodes_Mapping'
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych/visitors/visitor.rb:30:in `visit'
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych/visitors/visitor.rb:6:in `accept'
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych/visitors/to_ruby.rb:39:in `accept'
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych/visitors/to_ruby.rb:349:in `visit_Psych_Nodes_Document'
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych/visitors/visitor.rb:30:in `visit'
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych/visitors/visitor.rb:6:in `accept'
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych/visitors/to_ruby.rb:39:in `accept'
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych.rb:335:in `safe_load'
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych.rb:370:in `load'
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych.rb:718:in `block in load_file'
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych.rb:717:in `open'
+	from /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/psych-5.4.0/lib/psych.rb:717:in `load_file'
+	from -e:1:in `<main>'
+== 8b: a manual seal racing phase run's own seal: phase run evaluate with a fake shell that completes the handoff, while a manual seal fires 0.5 s later
+manual seal exit 0
+phase run exit 1
+-- phase run output:
+c1: cannot run evaluate: 07-evaluation is already complete; rerun it only after the work it rests on has changed (the gate will say when it is stale)
+-- manual seal output:
+note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/locks/c1.lock
+sealed 07-evaluation at f797d4da2824
+--- state: f797d4d Record c1 evaluate | staged:  | index.lock: absent | metadata current_phase: current_phase: attack | branch_resolved: branch_resolved: true
+-- Record commits: 1

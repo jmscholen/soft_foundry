@@ -1,0 +1,56 @@
+# Every regular file under evidence/ with its SHA-256. A gitignored, untracked guard-baseline directory (evidence/.soft-foundry, left by an earlier session) is not evidence and is not listed (handoff notes).
+artifacts:
+  - path: evidence/check.txt
+    produced_by: "CHECK-003: the control-plane check command"
+    sha256: 8859f226db5688d415006be1a46037ae78f336283ec33586b7dd257a51e8d409
+  - path: evidence/ci.txt
+    produced_by: "CHECK-005: the ci command"
+    sha256: 23f3ff4f2c6e269637dbbce3cb732dff0f4782f88ac003ec0130e9e20493c38d
+  - path: evidence/closed-records-diff.txt
+    produced_by: "CHECK-006: git diff main --name-only -- changes/ and git status --short -- changes/ outside this record"
+    sha256: 644e9b96bdfc006fbfbd513008d930d59a6568ba321f04d1a9e9f248ab4f88c1
+  - path: evidence/diff-grep.txt
+    produced_by: "CHECK-008: git diff main -- lib/ piped to grep, and whole-tree greps of lib/"
+    sha256: 7cc696e3df98c9d69219de4d28c5bfc8b7a5db494cfe4ab3fd2cc9aeb87f1abe
+  - path: evidence/eval.txt
+    produced_by: "CHECK-004: the harness eval command"
+    sha256: 0d515726f4ee1e08020cdc41e2b3fd01cc74a21062ca8e3e71a53fa95332e6cf
+  - path: evidence/full-suite.txt
+    produced_by: "CHECK-001: the full suite, clean environment, run alone"
+    sha256: d5a6e7d4c861e148a6052538dbe04e067c82b7a38e3689084046239e89107381
+  - path: evidence/gate-checks.txt
+    produced_by: "CHECK-010: Gate::CHECKS listed from the loaded library"
+    sha256: 0c1eeec358a3dcf67737054599ba88c49b7d5589cbd0bb97703c295b13fac105
+  - path: evidence/learn-promote-dry-run.txt
+    produced_by: "CHECK-007: learn promote --dry-run and the lookup of each reported id in learned.md"
+    sha256: 6861d555641e03d1fa21db9325c526ac4d4cf919c1565ebdadd178aaf57b5fa8
+  - path: evidence/planned-tests.txt
+    produced_by: "CHECK-011: planned test methods looked up at HEAD (script text at the end)"
+    sha256: b5651f4338c999822283a56c727dcdd6f11a2cbdc8844c3242685d088c54b4be
+  - path: evidence/red-commit.txt
+    produced_by: "CHECK-009: RED commit shape and ancestry for 9a96f45, 4d7392a, d6c2748, cf7b76b, a930c57"
+    sha256: 248a25183479957fce4e3a4bd5cdcc5da8b3d5878d6e3943ecfd8f138885eddc
+  - path: evidence/red-run-4d7392a.txt
+    produced_by: "CHECK-009: the remediation RED file run at 4d7392a"
+    sha256: 13d12cdf26bf570949fa701844891dea1308e6cd20b718d3443377296fc08642
+  - path: evidence/red-run-9a96f45.txt
+    produced_by: "CHECK-009: the five original RED files run at 9a96f45 in a detached worktree"
+    sha256: 04064597c19f33780558222462ef3269df3ddb4ac43d77dca898ad7675f82e21
+  - path: evidence/red-run-cf7b76b.txt
+    produced_by: "CHECK-009: test/remediation_gate_hardening_two_test.rb run at cf7b76b"
+    sha256: e2a528360af21eae25947745727718416f72e19eb0e0549c867a221647cd6e53
+  - path: evidence/red-run-d6c2748.txt
+    produced_by: "CHECK-009: the remediation RED file run at d6c2748"
+    sha256: ff5fa64c2b2bafcc62367c42f9cf19534ed446929911a433469b381e3c200d52
+  - path: evidence/red-run-head.txt
+    produced_by: "CHECK-012: the RED files plus git_hook_env_test run at HEAD in a detached worktree"
+    sha256: 0a847f3e2189a3c7257698ce2266d5bdb072460d4c17da7dd2ae4a792fc67743
+  - path: evidence/red-run-three-a930c57.txt
+    produced_by: "CHECK-014: test/remediation_gate_hardening_three_test.rb run at RED a930c57"
+    sha256: 80f1947ac775de1ad04e927c4e3dac348fa8ff2766c6149ba3938bb3f2be779a
+  - path: evidence/red-run-three-dccdd8c.txt
+    produced_by: "CHECK-014: test/remediation_gate_hardening_three_test.rb run at HEAD"
+    sha256: fab870db8138f823a6cb92fc70641d330a02add39bfabb40e2ee666f9722258a
+  - path: evidence/suite-phase-env.txt
+    produced_by: "CHECK-002: the full suite under SOFT_FOUNDRY_PHASE=verify ANTHROPIC_API_KEY=x, run alone (AC-048)"
+    sha256: 0d8f40f0e728a1fc3db01f4dba80590fdc165215041c3095dec1d3c68d1c45f8

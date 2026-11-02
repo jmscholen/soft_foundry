@@ -1,0 +1,35 @@
+CHECK-010 (AC-019): Gate::CHECKS at HEAD dccdd8c7171d1c53d40d52cb5209cff1dd0c1ce4; 2026-10-30T01:46:38Z
+command: ruby -Ilib -e 'require "soft_foundry"; SoftFoundry::Gate::CHECKS.each { |name, description| puts "#{name}: #{description}" }'
+--- entries (name: description):
+handoff present: The phase directory has a handoff.yml.
+handoff status: The handoff's status is one of pending, in_progress, complete, blocked.
+phase pending: The phase has not started, so there is nothing to gate.
+phase in progress: The phase is being worked on and is not gated until it is complete.
+blocking recorded: A blocked phase names what is blocking it.
+handoff identity: The handoff names this phase and the skill the workflow assigns to it.
+track permitted: The change's track is defined, has an exploring stage if the change is exploring, and is the one its risk forces.
+waivers permitted: Every phase in skipped_phases is optional or one the change's declared risk may waive (.ai/workflow.yml waivable_by_risk); review and judgment are never waived.
+not exploring: No phase from implementation onward is complete while the change is still exploring.
+required files present: Every file the skill's completion.yml requires exists.
+structured files parse: Every required .yml file of the phase, and evidence/manifest.yml when present, loads as a YAML mapping; a file that does not is named with the parser's line. Shape only: no field is read.
+no placeholders: No required file still contains a TBD placeholder.
+no blocking conditions: The handoff lists no unresolved blocking condition.
+commit_sha recorded: The handoff is bound to a commit that exists in this repository.
+commit lineage: The handoff's commit_sha descends from (or equals) the predecessor phase's, and HEAD (or the record's branch tip) descends from it, so an older commit cannot move the staleness baseline back.
+completed_at recorded: The handoff records when the phase was completed.
+predecessor complete: The phase before this one is complete and recorded in git (`soft-foundry phase seal`); optional, waived, and track-optional phases are stepped over.
+evidence current: No application, test, or infrastructure code changed after the commit this evidence describes, and the specification was not re-recorded after it.
+specification locked: The specification is unchanged since it was recorded (the commit that recorded the completed phase, or the vetted commit on an iterative change).
+red evidence: Each test named with a red_commit existed before the implementation and code changed after it.
+check size matches diff: The check size recorded in tests.yml is not smaller than the size computed from the diff and the declared scope, shared core and access-control globs.
+protection stated: When the repository profile declares access_control and a changed path matches, tests.yml states the protection of its checks: one check in_force, or every check states a value with a note. Presence only; whether a claim is true is for review.
+full-suite run recorded (record check, not a test result): A full-suite run recorded in tests.yml (or cited from another record) names the tree of the evidence commit, with a recorded outcome of passed. A record check: Soft Foundry never runs the suite, and a pass here is not a test result.
+test results recorded: tests.yml lists at least one check with id, kind, command, and a result of pass, fail, error, or skipped; a check that did not pass (or was skipped with criteria) is named in the handoff's blocking list or a finding. A record check: whether the result is true is for review.
+criteria covered: Every acceptance criterion in the locked specification is named by a verification check's criteria (a warning at verification), or by a check or an evaluation journey, or is set aside in 14-judgment/evidence.yml criteria_not_covered with a reason (a failure at judgment). Names only: not whether the check exercises the criterion.
+evidence manifest verified: Every artifact evidence/manifest.yml lists exists under the phase directory and its SHA-256 matches; a file under evidence/ no artifact names is a warning.
+verdict recorded: 14-judgment/final.md's Outcome section names exactly one of the permitted judgments.
+fresh session recorded: When the repository's guard policy is block, review and judgment record a fresh-context session (executed_by written by `soft-foundry phase run`); in warn or off mode the advisory applies instead. The stamp, not the session, is verified.
+instincts valid: The instincts the learning phase recorded are well formed.
+findings explained: Every review finding above minor names the failure it prevents.
+panel recorded: A phase run as a panel has a draft per member, a non-empty ARGUMENT.md, an outcome, and every draft cited in its outputs.
+content clean: The phase's files carry no invisible text or secret-shaped strings.

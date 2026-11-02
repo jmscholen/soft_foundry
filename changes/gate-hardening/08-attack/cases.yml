@@ -1,0 +1,614 @@
+---
+commit_sha: 47583efe394ea04c1605d5c1536b0e560f86eb37
+size: full_route_sweep
+authorization_envelope:
+  target: 'soft-foundry phase seal, phase run (single and --parallel), gate, change
+    close, change summary, change status, ci, and the ui snapshot, from this branch''s
+    code at 47583ef (the third remediation pass: GREEN c664d12 on top of 39d7e4f,
+    c30af60 and c5c20b4; earlier attack runs were at 303a48f and 5db4836)'
+  environment: local
+  authorized_by: the change record (03-threat-model/attack-surface.md names each case,
+    09-remediation/summary.md names what to retest) and the soft-foundry phase run
+    session that started this rerun
+  allowed_surfaces:
+  - scratch git repositories under /tmp/sf-attack2/repos/, one per case, built by
+    evidence/scripts/build.rb from a copy of this repository's .ai/
+  - killing a sealing process, deleting branches, planting symlinks, FIFOs, hard links,
+    oversized and alias-heavy files, and a fake claude on PATH, inside those repositories
+  - the branch's own code via ruby -I<lib> exe/soft-foundry, read-only
+  prohibited_surfaces:
+  - any write in this repository outside changes/gate-hardening/08-attack/
+  - git commit or staging in this repository
+  - the parallel evaluation phase's files
+  - the network, real credentials, provider calls, any system that is not a scratch
+    copy
+  data_constraints: synthetic records only; the one secret-like value is the literal
+    hunter2 given to --env in a scratch run
+  network_constraints: none used; no command reaches the network
+  destructive_actions: allowed inside the scratch repositories only
+cases:
+- id: ATTACK-001
+  threat: THREAT-001
+  violation_attempted: seal a phase from a session whose SOFT_FOUNDRY_PHASE names
+    another phase
+  starting_privilege: a phase session under the guard with evaluate complete on disk
+    and committed
+  steps:
+  - SOFT_FOUNDRY_PHASE=implement phase seal evaluate; then =verify, ='evaluate ' (trailing
+    space), =Evaluate, and empty
+  expected_safe_behavior: refusal naming both phases, exit 1, nothing committed; the
+    empty marker is the accepted residual and seals
+  observed: every non-matching value refused with 'this session is running X, so it
+    may seal only X', exit 1, no commit, metadata unchanged; the empty marker sealed
+    (expected residual)
+  result: denied
+  evidence:
+  - evidence/ATTACK-001-session-marker.txt
+- id: ATTACK-002
+  threat: THREAT-007
+  violation_attempted: have the seal commit or the gate read another file in place
+    of 07-evaluation/handoff.yml
+  starting_privilege: a committer on change/c1
+  steps:
+  - replace handoff.yml with a symlink to ../06-verification/handoff.yml, to /etc/hosts,
+    and a dangling one; run phase seal, gate, change summary, change status
+  - replace the whole 07-evaluation directory with a symlink to 06-verification; run
+    phase seal and gate
+  expected_safe_behavior: seal refuses naming the path; gate fails; summary notes
+    it; no commit
+  observed: seal refused 'is a symlink; a record file must be a regular file', exit
+    1; gate failed 'handoff present'; summary printed 'evaluate unreadable' and the
+    note; the symlinked directory was refused by the safe-write layer and failed 'handoff
+    identity' (the message carries an absolute path, ATK-009)
+  result: denied
+  evidence:
+  - evidence/ATTACK-002-handoff-symlink.txt
+- id: ATTACK-003
+  threat: THREAT-007
+  violation_attempted: have the seal commit, or the commands read, a metadata.yml
+    that lives elsewhere
+  starting_privilege: a committer on change/c1
+  steps:
+  - replace changes/c1/metadata.yml with a symlink to a copy under /tmp; run phase
+    seal, gate, change summary, change status, gate all, ci
+  expected_safe_behavior: every command refuses or fails naming the path; nothing
+    committed
+  observed: phase seal, gate, change status, gate all and ci each printed one line
+    naming the symlink and exited 1; change summary printed the note and exited 0;
+    no commit
+  result: denied
+  evidence:
+  - evidence/ATTACK-003-metadata-symlink.txt
+- id: ATTACK-004
+  threat: THREAT-004
+  violation_attempted: make evidence manifest verified read, hash, or block on a file
+    outside the phase directory, or vouch for nothing
+  starting_privilege: a committer editing 07-evaluation/evidence/manifest.yml
+  steps:
+  - 'artifact paths ../../05-implementation/log.md, /etc/hosts, a symlink to /etc/hosts,
+    a FIFO (20 s alarm), a directory, a hard link to lib/app.rb, evidence/ itself
+    a symlink to a directory outside the repository, evidence/../handoff.yml with
+    an upper-case digest, artifacts: [], artifacts as a string, a list-shaped manifest,
+    a symlinked manifest, a 200 MB artifact (timed)'
+  expected_safe_behavior: escapes, symlinks, FIFOs and directories fail with the path
+    and the reason; no hang; a regular file inside the phase directory passes; the
+    gate stays fast
+  observed: 'each escape failed naming the path (path resolves outside 07-evaluation/,
+    is a symlink, not a regular file, resolves outside); the FIFO returned at once;
+    the hard link passed (its content is inside the phase directory); evidence/../handoff.yml
+    with an upper-case digest passed; artifacts: [] now FAILS (lists no artifact,
+    ATK-008 remediated); the string, list and symlinked manifests failed; 200 MB hashed
+    in under a second at about 42 MB. A manifest listing one zero-byte file passes
+    (ATTACK-025c; now refused)'
+  result: denied
+  evidence:
+  - evidence/ATTACK-004-manifest-paths.txt
+  - evidence/ATTACK-004g-005c-005g-close-redo.txt
+- id: ATTACK-005
+  threat: THREAT-003
+  violation_attempted: bind evidence to a commit that is older than the predecessor's,
+    on another branch, or newer than the evidence so that stale evidence reads current
+  starting_privilege: a session or committer writing 07-evaluation/handoff.yml commit_sha
+  steps:
+  - commit_sha = the initial commit (older than verify's); commit_sha = a commit on
+    branch stray; equal to the predecessor's; 7-character; upper-case; predecessor's
+    own commit_sha deadbeef
+  - seal evaluate at HEAD; commit a code change; gate (stale); rewrite commit_sha
+    to the new HEAD; gate; phase seal evaluate again
+  expected_safe_behavior: older and unreachable SHAs fail commit lineage; equal and
+    abbreviated pass at a first seal; a recorded phase's commit_sha cannot be moved
+    forward without a reopening, however the rewrite reaches history
+  observed: 'older and unreachable SHAs failed; equal passed. Forward rewrite of a
+    tool-sealed phase after a code change, left uncommitted: commit lineage now FAILS
+    naming both SHAs and phase reopen, and phase seal refuses (ATK-001 remediated
+    for this route, ATTACK-004g-005c-005g-close-redo.txt 5g). The same rewrite committed
+    by hand first now fails too (ATTACK-023 4a, ATK-010 closed); the refusals now end
+    with the action to take (EVAL-018 closed). The hand commit made under the subject
+    Record c1 evaluate passes (ATTACK-026, ATK-014)'
+  result: violated
+  evidence:
+  - evidence/ATTACK-005-commit-lineage.txt
+  - evidence/ATTACK-004g-005c-005g-close-redo.txt
+- id: ATTACK-006
+  threat: THREAT-002
+  violation_attempted: pass fresh session recorded on review without a fresh session
+  starting_privilege: a committer with review complete by hand and no executed_by
+  steps:
+  - 'write executed_by with runner soft-foundry phase run, fresh_context true and
+    an invented session id; gate review; change summary; soft-foundry sessions; variants:
+    runner with a --fake suffix, fresh_context as the string true, a leading space,
+    upper case'
+  expected_safe_behavior: the forged stamp passes (accepted at TB-4); stamp variants
+    that are not the runner's two names fail
+  observed: the forged stamp with the exact runner name passed (accepted); the --fake
+    suffix now FAILS (exact names, ATK-009 item remediated); the string, leading space
+    and upper case failed. change summary still prints no session id, so the MIT-002
+    cross-check is manual (carried)
+  result: denied
+  evidence:
+  - evidence/ATTACK-019-006-011-policy-stamp-predecessor.txt
+  - evidence/ATTACK-021-json-summary.txt
+- id: ATTACK-007
+  threat: THREAT-012
+  violation_attempted: leave the record half-sealed by killing phase seal between
+    the metadata write and the commit
+  starting_privilege: a process with kill rights over the sealing process; evaluate
+    complete on disk and not committed
+  steps:
+  - install a pre-commit hook that sleeps 4 s; start phase seal evaluate in its own
+    process group; SIGKILL the group at 1.5 s; inspect; complete attack on disk and
+    gate it; rerun phase seal; remove .git/index.lock; rerun
+  - same with SIGKILL of only the Ruby parent; a hook that exits 1; a pre-planted
+    .git/index.lock; ten kills at 0.31 to 0.40 s
+  expected_safe_behavior: no commit; downstream gates fail predecessor complete; a
+    rerun completes the seal; nothing but the phase and metadata is committed
+  observed: 'after the group kill: metadata advanced, branch_resolved stamped, the
+    phase and metadata staged, no commit, a stale .git/index.lock; gate attack failed
+    ''predecessor complete: 07-evaluation is complete but not recorded in git''; the
+    rerun refused with git''s index.lock text (exit 2, ''metadata.yml is advanced
+    in the worktree; fix the cause''); after removing index.lock by hand the rerun
+    sealed exactly 07-evaluation and metadata.yml. Parent-only kill: git finished
+    the commit, the rerun said already sealed. Hook refusal: exit 2, rerun sealed.
+    Early kills: no half-state'
+  result: denied
+  evidence:
+  - evidence/ATTACK-007-kill-mid-seal.txt
+  - evidence/ATTACK-007-kill-mid-seal-redo.txt
+- id: ATTACK-008
+  threat: THREAT-011
+  violation_attempted: double-commit or tear the record with two seals of one phase
+    at once, or a manual seal during phase run
+  starting_privilege: two processes on the same worktree
+  steps:
+  - two phase seal evaluate processes started together with a 2 s hook
+  - phase run evaluate --shell claude with a fake claude that completes the handoff
+    and sleeps 2 s; a manual phase seal at 1.0 s; again at 2.6 s
+  expected_safe_behavior: one Record commit; the loser sees already sealed or a reported
+    commit failure with exit 2
+  observed: 'two seals: one sealed, the other exit 2 on git''s index.lock, one Record
+    commit, metadata consistent. Manual seal at 2.6 s (during the runner''s seal):
+    same, one commit. Manual seal at 1.0 s (session still open): the manual seal committed,
+    then the runner''s finish! stamp dirtied the handoff and the runner sealed again:
+    two ''Record c1 evaluate'' commits, record consistent (ATK-003). The loser''s
+    message says metadata is advanced in the worktree although the winner committed
+    it'
+  result: violated
+  evidence:
+  - evidence/ATTACK-008-concurrent-seals.txt
+  - evidence/ATTACK-008-runner-race-redo.txt
+- id: ATTACK-009
+  threat: THREAT-011
+  violation_attempted: seal or reopen while another process holds the record lock
+  starting_privilege: a process holding flock on the record's lock file for 25 s
+  steps:
+  - hold the lock; time phase seal evaluate, gate evaluate, phase reopen verify; release;
+    rerun seal
+  expected_safe_behavior: writes wait then refuse naming the lock; reads proceed;
+    nothing torn
+  observed: 'phase seal exited 1 after 10.26 s (''could not lock ... within 10 seconds:
+    another soft-foundry command holds it''); phase reopen the same after 10.22 s;
+    gate read in 0.43 s; after release the seal succeeded; the lock path is printed
+    absolute (ATK-009)'
+  result: denied
+  evidence:
+  - evidence/ATTACK-009-held-lock.txt
+- id: ATTACK-010
+  threat: THREAT-011
+  violation_attempted: make the lock open write through a symlink or a non-file, or
+    into a redirected directory
+  starting_privilege: a committer with write access to the locks directory
+  steps:
+  - lock file as a symlink to changes/c1/metadata.yml, to /etc/hosts, dangling; lock
+    path a directory; locks directory a symlink to /tmp; locks directory unwritable;
+    clean rerun
+  expected_safe_behavior: each refused before any write; metadata.yml untouched
+  observed: "'is a symlink; refusing to write through it', 'exists but is not a regular
+    file', 'is a symlink; refusing to use it', 'is not writable', each exit 1; metadata.yml
+    byte-identical; clean rerun sealed"
+  result: denied
+  evidence:
+  - evidence/ATTACK-010-symlinked-lock.txt
+- id: ATTACK-011
+  threat: THREAT-009
+  violation_attempted: carry on past a phase that is complete on disk and never recorded
+  starting_privilege: a session or committer
+  steps:
+  - evaluate complete, committed with --no-verify, no seal; attack complete; gate
+    attack
+  - evaluate complete on disk only; gate attack; phase seal attack
+  - evaluate committed complete then edited to in_progress on disk; gate attack
+  expected_safe_behavior: an uncommitted predecessor fails predecessor complete naming
+    phase seal evaluate; a hand-committed one is recorded (accepted)
+  observed: 'hand-committed: predecessor complete passed (as the model accepts); uncommitted:
+    failed naming ''soft-foundry phase seal evaluate'' and phase seal attack refused
+    with exit 2; edited back: ''is in_progress'''
+  result: denied
+  evidence:
+  - evidence/ATTACK-019-006-011-policy-stamp-predecessor.txt
+- id: ATTACK-012
+  threat: THREAT-010
+  violation_attempted: make the gate slow or large with alias-heavy or oversized YAML
+  starting_privilege: a committer editing 06-verification/tests.yml and handoff.yml
+  steps:
+  - one anchored check and 9,999 aliases in checks; nested alias expansion 10^7 and
+    10^9; a 50 MB string scalar in handoff.yml; each timed with /usr/bin/time -l under
+    a 120 s alarm
+  expected_safe_behavior: bounded time and memory; no hang
+  observed: '10,000 aliases: 0.51 s, 46 MB, ''10000 checks, 10000 pass''; 10^7 and
+    10^9: 0.4 s, 41 MB (Psych shares the aliased object); change summary 0.17 s; 50
+    MB scalar: 8.82 s, 497 MB, gate passed; nothing hung'
+  result: denied
+  evidence:
+  - evidence/ATTACK-012-yaml-aliases.txt
+- id: ATTACK-013
+  threat: THREAT-014
+  violation_attempted: make the parallel sealing path print an --env value
+  starting_privilege: a person running phase run with a fake claude on PATH
+  steps:
+  - phase run evaluate attack --parallel --env SECRET=hunter2 --shell claude with
+    a fake claude that exits 1; with a non-executable one; --dry-run; --env hunter2;
+    the same name twice; a SOFT_FOUNDRY_ name; a value equal to 'phase' and to 'c1';
+    grep every output for the value
+  expected_safe_behavior: no output carries the value; refusals name the variable,
+    not the text
+  observed: 0 occurrences of hunter2 in every run; the fake shell logged that SECRET
+    reached it; spawn failure printed 'claude is not installed or not on PATH'; --dry-run
+    says 'values are not shown'; --env hunter2 was refused without echoing it; duplicate
+    and reserved names refused by name
+  result: denied
+  evidence:
+  - evidence/ATTACK-013-env-redaction.txt
+  - evidence/ATTACK-013-env-redaction-redo.txt
+- id: ATTACK-014
+  threat: THREAT-013
+  violation_attempted: commit record c1's phase into another branch's history
+  starting_privilege: a person on branch other (or detached) running phase seal evaluate
+    --change c1
+  steps:
+  - from branch other; from a detached HEAD; after deleting change/c1; with change/c1
+    existing only as origin/change/c1 at an older commit
+  expected_safe_behavior: refusal naming both branches; when the record's branch does
+    not exist the seal says so
+  observed: denied from branch other, from a detached HEAD, and when the record branch
+    exists only as origin/change/c1; with the record branch deleted the seal still
+    lands on the checked-out branch but now prints a note naming the missing branch
+    and the branch committed to (ATK-002 remediated)
+  result: denied
+  evidence:
+  - evidence/ATTACK-014-wrong-branch.txt
+- id: ATTACK-015
+  threat: THREAT-014
+  violation_attempted: carry a script tag from a YAML key or check id into the gate
+    line and the ui page
+  starting_privilege: a committer editing 06-verification/tests.yml
+  steps:
+  - top-level key <script>alert(1)</script>; check id <img src=x onerror=alert(1)>
+    with result fail; gate; the Snapshot change JSON the ui serves; a syntax error
+    after the key; read app.js add, el and linkify
+  expected_safe_behavior: the detail reaches the page as text, never as markup
+  observed: the gate line and the JSON detail carry the id verbatim; app.js inserts
+    details through document.createTextNode (add, el text:, linkify returns strings
+    and anchor elements), so the browser renders text; the Psych error named line
+    2 column 28, not the key
+  result: denied
+  evidence:
+  - evidence/ATTACK-015-hostile-keys-ui.txt
+- id: ATTACK-016
+  threat: THREAT-005
+  violation_attempted: record a failing or unrun test as acceptable
+  starting_privilege: a session editing 06-verification/tests.yml and its handoff
+  steps:
+  - CHECK-001 fail with a finding that mentions CHECK-001 in an unrelated sentence;
+    CHECK-1 fail and CHECK-10 pass with a finding naming only CHECK-10; id e with
+    result error and a finding 'done'; a fail named only in blocking; skipped with
+    and without criteria; results PASS, passed, missing; checks as a mapping; a check
+    as a string; two checks sharing an id
+  expected_safe_behavior: a fail must be named (names only, accepted); results outside
+    the vocabulary fail; shape errors fail
+  observed: the unrelated sentence acknowledged the fail (accepted); CHECK-10 no longer
+    acknowledges CHECK-1 and done no longer acknowledges e (ATK-004 remediated); CHECK-1.5
+    and CHECK-1/2 no longer name CHECK-1 (ATTACK-025b, ATK-013 closed); an empty or missing id fails check has no id; blocking-only acknowledgement
+    passed the check but failed no blocking conditions; skipped with criteria unnamed
+    failed; PASS, passed and missing failed; mapping and string shapes failed
+  result: denied
+  evidence:
+  - evidence/ATTACK-016-fail-acknowledged.txt
+  - evidence/ATTACK-016-fail-acknowledged-redo.txt
+- id: ATTACK-017
+  threat: THREAT-006
+  violation_attempted: set a criterion aside without a reason at judgment
+  starting_privilege: a session editing 14-judgment/evidence.yml with AC-001 uncovered
+  steps:
+  - 'criteria_not_covered reason of three spaces, two U+00A0, one U+200B, the template
+    placeholder word alone, the placeholder word followed by '': ask later'', ''-'',
+    ''n/a'', ''.'', ''because''; an id that is not a criterion plus a bare string;
+    the key as a mapping and as a string; a failing journey naming AC-001'
+  expected_safe_behavior: blank and placeholder reasons fail naming the id
+  observed: 'spaces, U+00A0, U+200B, the placeholder word alone and with : ask later,
+    -, n/a, ., and because now all fail (at least two words of letters, ATK-005 remediated);
+    an id that is not a criterion now fails naming it; mapping and string shapes were
+    ignored (AC-001 failed); a failing journey covered AC-001 (names only, as specified).
+    no no, a list or a mapping of two words now fail; xx yy still passes (ATTACK-025a,
+    ATK-013 residue). Hidden-character payloads are shown escaped'
+  result: denied
+  evidence:
+  - evidence/ATTACK-017-criteria-verdict.txt
+- id: ATTACK-018
+  threat: THREAT-008
+  violation_attempted: make the gate or the seal raise instead of refuse
+  starting_privilege: a committer editing changes/c1/metadata.yml
+  steps:
+  - 'git: a string; git: []; git: (empty); git: 7; branch: [a, b]; a metadata.yml
+    that does not parse; run phase seal, gate, change summary, change status, gate
+    all, ci'
+  expected_safe_behavior: a refusal or fail line naming the file and the next step,
+    never a backtrace
+  observed: 'each non-mapping gave ''git must be a mapping with branch and worktree,
+    not <type>; restore the git: block'' as a seal refusal and as commit lineage and
+    evidence current fail lines; branch: [a, b] read as a declaration change (STALE);
+    the unparseable file gave one Psych line and exit 1 from seal and gate, ''is not
+    valid YAML'' from ci, and ''(<unknown>)'' from change summary (ATK-009); no backtrace
+    anywhere'
+  result: denied
+  evidence:
+  - evidence/ATTACK-018-git-not-mapping.txt
+- id: ATTACK-019
+  threat: THREAT-015
+  violation_attempted: turn fresh session recorded off from outside the repository
+    policy
+  starting_privilege: a person with the shell and the worktree; review complete by
+    hand without executed_by
+  steps:
+  - 'gate review under the block policy; with SOFT_FOUNDRY_GUARD=warn; with a machine-local
+    override file set to warn; with the repository policy edited to warn and committed;
+    with the policy file deleted; malformed; mode: BLOCK'
+  expected_safe_behavior: only the repository policy decides; env and local override
+    are ignored; a policy edit is a visible commit
+  observed: block policy failed the check; the environment variable and the override
+    file were ignored (still failed, doctor showed the override in effect for the
+    guard); the hand-edited policy made the check skip with the advisory standing
+    (accepted); a deleted or malformed policy file also made it skip because the default
+    mode is warn (ATK-006; check now warns on a missing file and errors on a malformed
+    one, ATTACK-026 7g); BLOCK read as block; a guard that is a scalar crashes the gate
+    and check fail-closed (ATTACK-028)
+  result: denied
+  evidence:
+  - evidence/ATTACK-019-006-011-policy-stamp-predecessor.txt
+- id: ATTACK-020
+  threat: THREAT-001
+  violation_attempted: get something other than the phase's own work into the seal
+    commit, or past the seal's entry refusals
+  starting_privilege: a session or committer on change/c1 with evaluate complete
+  steps:
+  - 'edit metadata.yml by hand (risk: low; skipped_phases waiving attack with a rationale)
+    and seal evaluate; inspect the commit'
+  - plant metadata.yml.soft-foundry-tmp as a file and handoff.yml.soft-foundry-tmp
+    as a symlink; --change ../c1 and c1/../../etc; phase 'evaluate;id'; status Complete
+    and 'complete '; dirty lib/app.rb, an ignored lib/secret.rb, an untracked test
+    file
+  expected_safe_behavior: the seal commits only the phase and metadata; refusals name
+    the cause; nothing committed
+  observed: the hand edit was committed under 'Record c1 evaluate' and honoured at
+    once (current_phase moved to review, skipping attack); the first seal rewrote
+    metadata.yml without the template's comments (64 lines changed) so the edit sits
+    in a large diff (ATK-007; the seal now prints a note naming the edited key, ATTACK-026 7f). Every planted sibling, slug, phase name, status and
+    code path was refused with exit 1 and no commit (planted-sibling messages carry
+    absolute paths, ATK-009)
+  result: violated
+  evidence:
+  - evidence/ATTACK-020-seal-entry-extras.txt
+- id: ATTACK-021
+  threat: THREAT-013
+  violation_attempted: seal another record's phase from a session, and check what
+    the gate exposes as JSON
+  starting_privilege: a session on change/c1 whose marker is intake; record c2 declared
+    on change/c2, a branch that does not exist
+  steps:
+  - SOFT_FOUNDRY_PHASE=intake phase seal intake --change c2 from change/c1; gate --json;
+    change status --json; change summary with a stamped review
+  expected_safe_behavior: the seal refuses or says the record's branch does not exist;
+    the checks are available as JSON with name, outcome and detail
+  observed: sealed Record c2 intake onto change/c1 with a session whose marker is
+    intake; the seal now prints a note that c2 branch does not exist and which branch
+    it committed to (ATK-002 remediated), but it still commits; gate --json is an
+    unknown option (the specification names it); change status --json carries every
+    check; change summary prints no session id (carried)
+  result: denied
+  evidence:
+  - evidence/ATTACK-021-cross-record-and-json.txt
+  - evidence/ATTACK-021-json-summary.txt
+- id: ATTACK-022
+  threat: THREAT-008
+  violation_attempted: pass verdict recorded with an ambiguous or absent word, and
+    close a BLOCKED or REJECTED change
+  starting_privilege: a session editing 14-judgment/final.md; a maintainer running
+    change close
+  steps:
+  - 'Outcome section: APPROVED; APPROVED and BLOCKED; approved; NOT_APPROVED; not
+    APPROVED; APPROVED_WITH_RESIDUAL_RISK (not APPROVED outright); BLOCKED twice with
+    REJECTED between; empty; the word under a Verdict heading'
+  - 'judged record with BLOCKED then REJECTED: change close c1; change close c1 --force'
+  expected_safe_behavior: exactly one configured word passes; close refuses naming
+    the phase to return to; --force closes
+  observed: 'only APPROVED and ''not APPROVED'' passed (the latter as APPROVED: content
+    is not read, as specified); every other variant failed naming the four words;
+    close refused BLOCKED naming remediate and REJECTED naming intake, exit 1; --force
+    closed'
+  result: denied
+  evidence:
+  - evidence/ATTACK-017-criteria-verdict.txt
+  - evidence/ATTACK-004g-005c-005g-close-redo.txt
+- id: ATTACK-023
+  threat: THREAT-003
+  violation_attempted: rebind a tool-sealed phase to a newer commit so stale evidence
+    reads current, by routes the ATK-001 fix does not name
+  starting_privilege: a committer on change/c1 after phase seal evaluate and a later
+    code change
+  steps:
+  - rewrite commit_sha to HEAD and commit the handoff by hand (message tweak notes);
+    gate evaluate; phase seal evaluate
+  - add a phase_reopenings entry (reset evaluate, from_commit HEAD, source manual)
+    to metadata.yml, rewrite commit_sha, gate, phase seal
+  - reopen entries naming another phase (reset attack) or an old from_commit; abbreviated
+    and upper-case forms of the recorded SHA; the legitimate path phase reopen then
+    completing again with the tool
+  expected_safe_behavior: every rewrite without a recorded, evidenced reopening fails
+    commit lineage naming both SHAs; the legitimate reopen and rerun seals
+  observed: 'hand-committed rewrite (message tweak notes): commit lineage FAILS naming both
+    SHAs, phase reopen and the recorded commit (ATK-010 closed for this route). Forged
+    phase_reopenings entry: commit lineage fails, no evidence file under 07-evaluation/
+    other than handoff.yml differs from the record (ATK-011 closed for this route). Entries
+    for another phase or with an old from_commit are refused. The abbreviated form of
+    the recorded SHA passes and the upper-case form passes (resolved commits are compared,
+    ATK-012 closed). A reopen followed by a tool completion at the new HEAD that changes
+    no evidence beyond commit_sha is refused too (the stated behaviour change). The rewrite
+    committed under the subject Record c1 evaluate is ATTACK-026 (violated)'
+  result: denied
+  evidence:
+  - evidence/ATTACK-023-lineage-rebind.txt
+- id: ATTACK-024
+  threat: THREAT-003
+  violation_attempted: use the real reopening as the licence to rewrite commit_sha
+    with no rerun
+  starting_privilege: a committer on change/c1 after phase seal evaluate and a later
+    code change
+  steps:
+  - phase reopen evaluate --reason TEXT; then restore status complete, completed_at
+    and commit_sha to HEAD in handoff.yml by hand; phase seal evaluate
+  expected_safe_behavior: a reopening followed by a rerun seals; a reopening followed
+    by only a hand edit of the handoff is refused
+  observed: phase seal refuses, commit lineage fail line says no evidence file under
+    07-evaluation/ other than handoff.yml differs from that record, so nothing was
+    rerun; nothing committed (ATK-011 closed for this route; the one-newline boundary
+    is ATTACK-027)
+  result: denied
+  evidence:
+  - evidence/ATTACK-024-reopen-rewrite.txt
+- id: ATTACK-025
+  threat: THREAT-005, THREAT-006, THREAT-004, THREAT-013
+  violation_attempted: slip past the four other remediations at their boundaries
+  starting_privilege: a session editing the phase files
+  steps:
+  - 'criteria_not_covered reasons: n/a n/a, no no, xx yy, a list, a mapping, two accented
+    words, 42, true; ids nil, a list, lower case, trailing space'
+  - 'fail acknowledgement: CHECK-1.5, CHECK-1/2, CHECK-10, check-1, preCHECK-1, empty,
+    nil and blank ids, a regex-special id, a non-breaking hyphen'
+  - manifest with one zero-byte artifact; artifacts [nil], [{}], [[]]
+  - git.branch values --all, -q, HEAD, refs/heads/change/c1, ../c1, with a trailing
+    --, c1:x, @{-1}, @
+  - remediation sealed after verify
+  expected_safe_behavior: hollow reasons, neighbouring ids, empty manifests and option-like
+    branch names are refused or inert
+  observed: n/a n/a, no no, -, 42, true, a two-word list, a two-word mapping and two
+    accented words of one repeated word now fail (at least two distinct words); xx yy
+    still passes (ATK-013 residue, two different words of no content). CHECK-10, CHECK-1.5,
+    CHECK-1/2, check-1, preCHECK-1 and the non-breaking hyphen no longer acknowledge
+    CHECK-1. Empty, nil and blank check ids fail check has no id. A one-entry manifest
+    of a zero-byte file fails (every file the manifest lists is empty); [nil], [{}],
+    [[]] fail. Every git.branch edit only staled the evidence (declaration changed) and
+    sealed nothing; no option text reached git. Sealing remediate after a hand commit
+    is reported already sealed at the hand commit (ATTACK-029)'
+  result: denied
+  evidence:
+  - evidence/ATTACK-025-fix-boundaries.txt
+- id: ATTACK-026
+  threat: THREAT-003
+  violation_attempted: make the hand commit of a rewritten commit_sha the recorded
+    commit by giving it the seal's own subject
+  starting_privilege: a committer on change/c1 after phase seal evaluate and a later
+    code change
+  steps:
+  - rewrite commit_sha to HEAD in 07-evaluation/handoff.yml and commit it with the
+    message Record c1 evaluate; gate evaluate; phase seal evaluate
+  - the same with an empty commit titled Record c1 evaluate after a plain hand commit
+    of the rewrite
+  - ATK-006/007 checks from the remediation, policy deleted, malformed, misspelled;
+    hand edit of risk before a seal
+  expected_safe_behavior: a commit that only a person made is not taken for the seal's;
+    commit lineage fails naming both SHAs
+  observed: 'the rewrite committed under the subject Record c1 evaluate is the recorded
+    commit (the newest commit with that subject that touches the handoff): commit
+    lineage passes (recorded with this commit_sha), evidence current passes, the gate
+    passes and phase seal says already sealed. An empty commit with that subject after
+    a plain hand commit does not count (the handoff is not touched). ATK-006: check
+    now warns that enforcement.yml is missing and errors on a malformed one; ATK-007:
+    the seal prints a note naming risk when it commits a hand edit; both work. gate
+    all on the scratch record takes 0.6 s.'
+  result: violated
+  evidence:
+  - evidence/ATTACK-026-forged-subject-and-third-pass.txt
+- id: ATTACK-027
+  threat: THREAT-003
+  violation_attempted: license a hand-rewritten commit_sha by changing one byte of
+    evidence
+  starting_privilege: a committer on change/c1 after phase seal evaluate and a later
+    code change
+  steps:
+  - phase reopen evaluate; restore status, completed_at and commit_sha to HEAD by
+    hand; append one newline to results.md; phase seal evaluate
+  expected_safe_behavior: the structure cannot tell a rerun from a newline; the finding
+    records the boundary
+  observed: 'phase seal made a second Record commit (diff of the phase: handoff.yml
+    and one added blank line in results.md); the code change since the first seal
+    is covered by evidence that was never rerun. The remediation states this as the
+    structure-only limit.'
+  result: violated
+  evidence:
+  - evidence/ATTACK-027-structure-only-rerun-and-policy-shape.txt
+- id: ATTACK-028
+  threat: THREAT-008, THREAT-015
+  violation_attempted: make the gate raise or skip through the shape of policies/enforcement.yml
+  starting_privilege: a committer to a protected path (visible in review)
+  steps:
+  - 'guard as a scalar (guard: block), a missing guard key (mode: block at top level,
+    guard: {}), mode spellings blokc, BLOCK and block with a trailing space; then
+    gate review, check and phase seal'
+  expected_safe_behavior: a malformed policy is refused with its file and key named,
+    or read as the documented default; never an unexplained crash and never a silent
+    downgrade
+  observed: 'mode spellings are an error from check naming the key (good). guard:
+    block makes gate review, gate all, phase seal review and check exit 1 with one
+    line, String does not have #dig method, naming no file (fail-closed, unhelpful).
+    mode: block at top level and guard: {} are read as warn with no warning from check,
+    so fresh session recorded skips on a review completed without executed_by.'
+  result: violated
+  evidence:
+  - evidence/ATTACK-028-guard-shape-fail-closed.txt
+  - evidence/ATTACK-027-structure-only-rerun-and-policy-shape.txt
+- id: ATTACK-029
+  threat: THREAT-009
+  violation_attempted: have a phase that never went through the tool reported as sealed
+  starting_privilege: a committer on change/c1, remediation completed on disk and
+    committed by hand
+  steps:
+  - complete 06-verification through the tool; complete 09-remediation on disk, commit
+    it by hand; phase seal remediate (twice)
+  expected_safe_behavior: either a seal commit is made or the refusal says no Record
+    commit exists
+  observed: phase seal prints already sealed at <the hand commit> (09-remediation
+    and metadata.yml are unchanged since) and exits 0 both times; no Record commit
+    exists for the phase and current_phase stays evaluate. The legacy rule (a phase
+    with no seal commit keeps the newest-commit rule) is the cause.
+  result: violated
+  evidence:
+  - evidence/ATTACK-025-fix-boundaries.txt

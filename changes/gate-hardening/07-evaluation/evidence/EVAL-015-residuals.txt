@@ -1,0 +1,196 @@
+# EVAL-015: branch_resolved false is measured at HEAD; git: as a string is a gate line; reopen clears started_at; blank discharged_at is open; check names forced_by_risk; symlinked handoff refused (AC-044 to AC-047, AC-049)
+# driver: evidence/journeys-driver.rb, run 2026-10-30T02:27:52Z at b871187a6bf2
+
+# scratch repository: /tmp/sf-eval4/repos/eval-015-ghost
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+$ soft-foundry phase seal verify
+note: left uncommitted (outside this phase and the record's metadata): .ai/skills/evaluation/.soft-foundry/, .soft-foundry/
+note: the record's branch change/ghost does not exist; this seal commits to the checked-out branch change/c1; create change/ghost here or correct git.branch in metadata.yml (ATK-002)
+sealed 06-verification at 3ad78164597e
+exit 0
+
+assert pass: AC-044 seal verify exits 0 on the checked-out branch (the record's branch does not exist)
+assert pass: AC-044 sealed handoff has branch_resolved false
+$ soft-foundry gate verify   # change/ghost now exists at the sealing commit; HEAD has newer code
+06-verification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 74392cc19a00f40b5ff7b4542db6f2440dfb6cbc
+  ✓ pass commit lineage: descends from 05-implementation at 79817cdd3e28; reaches HEAD 9571b47af0aa; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✗ fail evidence current: STALE: code changed since 74392cc19a00: lib/app.rb
+  - skip red evidence: no check records a red_commit
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass test results recorded: 1 check, 1 pass
+  ✓ pass criteria covered: 1 criterion named by verification checks
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+exit 2
+
+assert pass: AC-044 `evidence current` measures HEAD and reports STALE
+# scratch repository: /tmp/sf-eval4/repos/eval-015-gitstring
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+$ soft-foundry gate verify
+06-verification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: f7afde424c299b3504dc5faccfd6c7729f5c2899
+  ✗ fail commit lineage: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not string; restore the git: block
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✗ fail evidence current: changes/c1/metadata.yml: git must be a mapping with branch and worktree, not string; restore the git: block
+  - skip red evidence: no check records a red_commit
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass test results recorded: 1 check, 1 pass
+  ✓ pass criteria covered: 1 criterion named by verification checks
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+exit 2
+
+assert pass: AC-045 a fail line names metadata.yml git and says it must be a mapping with branch and worktree; exit 2
+assert pass: AC-045 no Ruby backtrace
+# scratch repository: /tmp/sf-eval4/repos/eval-015-reopen
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+assert pass: verify handoff has started_at before reopen
+$ soft-foundry phase reopen verify --reason x
+phase reopen: reopened verify (manual)
+phase reopen: reset verify
+exit 0
+
+assert pass: AC-046 after reopen, verify started_at is null
+# scratch repository: /tmp/sf-eval4/repos/eval-015-nbsp
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+$ soft-foundry change release --item 'OBS-1=watch the error rate for a week'
+c1: released
+released: c1: 1 open item(s): OBS-1
+released: c1: recorded at 2026-10-30T02:27:57Z (commit f64aa79d272b)
+exit 0
+
+assert pass: change release exits 0
+$ soft-foundry change status c1
+c1: c1  [status: released, phase: learn, risk: TBD]
+  track: gated
+  released: c1: 1 open item(s): OBS-1
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-evaluation          complete     ok
+  08-attack              complete     ok
+  09-remediation         pending      
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              complete     ok
+  14-judgment            complete     ok
+  15-learning            complete     ok
+exit 0
+
+assert pass: AC-046 change status reports OBS-1 open
+$ soft-foundry check
+✗ error changes/c1/metadata.yml: release item "OBS-1" has a blank discharged_at (a discharge records a time; remove the key to leave the item open)
+✗ fail control plane: 1 error(s)
+exit 2
+
+assert pass: AC-046 check reports the blank discharged_at (fails or names OBS-1)
+$ soft-foundry change close c1
+[stderr] c1: cannot close: released with 1 open item(s) OBS-1; discharge each with `soft-foundry change discharge ID --note TEXT`, or pass --force to close anyway
+exit 1
+
+assert pass: AC-046 change close refuses naming OBS-1
+# scratch repository: /tmp/sf-eval4/repos/eval-015-forced
+$ soft-foundry check
+✗ error workflow: tracks.forced_by_risk names hihg, which `change new --risk` does not allow (low, medium, high); a renamed key would stop forcing the track
+✗ fail control plane: 1 error(s)
+exit 2
+
+assert pass: AC-047 check fails naming forced_by_risk and hihg
+# scratch repository: /tmp/sf-eval4/repos/eval-015-symlink
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+$ soft-foundry phase seal intake
+[stderr] c1: cannot seal intake: changes/c1/00-intake/handoff.yml is a symlink; a record file must be a regular file (replace the link with the file itself)
+exit 1
+
+assert pass: AC-049 phase seal intake refuses naming the symlink; nothing committed
+$ soft-foundry change summary
+change: c1
+phase: specify (status: in_progress, risk: TBD, track: gated)
+phase-status: intake unreadable
+phase-status: discover complete
+phase-status: specify pending
+phase-status: threat_model pending
+phase-status: plan pending
+phase-status: implement pending
+phase-status: verify pending
+phase-status: evaluate pending
+phase-status: attack pending
+phase-status: remediate pending
+phase-status: document pending
+phase-status: index pending
+phase-status: observe pending
+phase-status: review pending
+phase-status: judge pending
+phase-status: learn pending
+note: intake handoff.yml is a symlink; the summary reads only regular record files
+findings: none
+blocking: none
+note: advisories could not be read (changes/c1/00-intake/handoff.yml is a symlink; a record file must be a regular file (replace the link with the file itself))
+exit 0
+
+assert pass: AC-049 change summary refuses naming the symlink
+$ soft-foundry phase seal specify
+[stderr] c1: cannot seal specify: changes/c1/metadata.yml is a symlink; a record file must be a regular file (replace the link with the file itself)
+exit 1
+
+assert pass: AC-049 a symlinked metadata.yml is refused too
+
+# EVAL-015: PASS (15 assertions passed, 0 failed)

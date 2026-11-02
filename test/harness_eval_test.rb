@@ -118,15 +118,19 @@ class HarnessEvalTest < Minitest::Test
     end
   end
 
-  def test_a_case_whose_gate_raises_is_an_error_and_leaves_no_scratch_repository
+  # An unreadable handoff is a gate line (handoff present), not an
+  # exception (REQ-021); the case fails plainly and the scratch repository
+  # is still removed.
+  def test_a_case_with_an_unreadable_handoff_fails_plainly_and_leaves_no_scratch_repository
     broken = gate_case("broken-handoff", phase: "verify", check: "evidence current", outcome: "fail",
                        record: { "later_files" => { "06-verification/handoff.yml" => ": : : not yaml\n  - [\n" } })
     with_cases([broken]) do |dir|
       before = scratch_dirs.size
       code, out = eval_cli(dir)
       assert_equal 2, code, out
-      assert_includes out, "✗ error eval broken-handoff:"
-      assert_equal before, scratch_dirs.size, "the scratch repository is removed even when the case raises"
+      assert_includes out, "✗ fail eval broken-handoff:"
+      assert_includes out, "handoff present"
+      assert_equal before, scratch_dirs.size, "the scratch repository is removed when the case fails"
     end
   end
 

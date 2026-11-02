@@ -1,0 +1,224 @@
+completed evaluate at 7a16cdd365d9
+== 4a: ../../05-implementation/log.md
+$ /tmp/sf-attack2/bin/sf gate evaluate
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD f606143db5ce; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✓ pass evidence current: no code changes since 7a16cdd365d9; specification unchanged since 7a16cdd365d9
+  ✗ fail evidence manifest verified: ../../05-implementation/log.md: path resolves outside 07-evaluation/
+  ✓ pass content clean
+[exit 2]
+== 4b: absolute path
+$ /tmp/sf-attack2/bin/sf gate evaluate
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD f606143db5ce; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✓ pass evidence current: no code changes since 7a16cdd365d9; specification unchanged since 7a16cdd365d9
+  ✗ fail evidence manifest verified: /etc/hosts: path resolves outside 07-evaluation/
+  ✓ pass content clean
+[exit 2]
+== 4c: symlinked artifact inside evidence/ pointing outside
+$ /tmp/sf-attack2/bin/sf gate evaluate
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD f606143db5ce; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✓ pass evidence current: no code changes since 7a16cdd365d9; specification unchanged since 7a16cdd365d9
+  ✗ fail evidence manifest verified: evidence/link.txt: is a symlink; evidence files are regular files
+  ✓ pass content clean
+[exit 2]
+== 4d: FIFO artifact (a hang would show as a timeout here)
+$ perl -e alarm 20; exec @ARGV -- /tmp/sf-attack2/bin/sf gate evaluate
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD f606143db5ce; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✓ pass evidence current: no code changes since 7a16cdd365d9; specification unchanged since 7a16cdd365d9
+  ✗ fail evidence manifest verified: evidence/pipe.txt: not a regular file
+  ✓ pass content clean
+[exit 2]
+== 4e: directory as artifact
+$ /tmp/sf-attack2/bin/sf gate evaluate
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD f606143db5ce; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✓ pass evidence current: no code changes since 7a16cdd365d9; specification unchanged since 7a16cdd365d9
+  ✗ fail evidence manifest verified: evidence: not a regular file
+  ✓ pass content clean
+[exit 2]
+== 4f: hard link to a file outside the phase directory
+$ /tmp/sf-attack2/bin/sf gate evaluate
+07-evaluation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD f606143db5ce; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✓ pass evidence current: no code changes since 7a16cdd365d9; specification unchanged since 7a16cdd365d9
+  ! warn evidence manifest verified: unlisted: evidence/recorded.txt (no artifact names it)
+  ✓ pass content clean
+[exit 0]
+== 4g: evidence/ directory itself is a symlink to another directory
+$ /tmp/sf-attack2/bin/sf gate evaluate
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD f606143db5ce; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✓ pass evidence current: no code changes since 7a16cdd365d9; specification unchanged since 7a16cdd365d9
+  ✗ fail evidence manifest verified: evidence/hard.rb: file is missing
+  ✓ pass content clean
+[exit 2]
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD f606143db5ce; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✓ pass evidence current: no code changes since 7a16cdd365d9; specification unchanged since 7a16cdd365d9
+  ✗ fail evidence manifest verified: evidence/hard.rb: file is missing
+  ✓ pass content clean
+c1: 07-evaluation is not sealed: its gate fails; nothing was committed
+[exit 2]
+--- git log
+f606143 evaluate complete on disk
+7a16cdd phases complete through verify
+e26e293 record
+b0fc78b initial
+--- git status
+ D changes/c1/07-evaluation/evidence/manifest.yml
+ D changes/c1/07-evaluation/evidence/recorded.txt
+ M changes/c1/07-evaluation/handoff.yml
+?? changes/c1/07-evaluation/evidence
+--- metadata
+status: in_progress
+current_phase: evaluate
+== 4h: path inside the phase dir but outside evidence/ (evidence/../handoff.yml) and a case-mangled digest
+$ /tmp/sf-attack2/bin/sf gate evaluate
+07-evaluation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD f606143db5ce; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✓ pass evidence current: no code changes since 7a16cdd365d9; specification unchanged since 7a16cdd365d9
+  ! warn evidence manifest verified: unlisted: evidence/recorded.txt (no artifact names it)
+  ✓ pass content clean
+[exit 0]
+== 4i: recorded.txt unlisted, manifest lists nothing
+$ /tmp/sf-attack2/bin/sf gate evaluate
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD f606143db5ce; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✓ pass evidence current: no code changes since 7a16cdd365d9; specification unchanged since 7a16cdd365d9
+  ✗ fail evidence manifest verified: evidence/manifest.yml lists no artifact; a phase whose evidence is the point names at least one file with its sha256 (ATK-008)
+  ✓ pass content clean
+[exit 2]
+== 4j: manifest artifacts is a string; manifest is a list; manifest is a symlink
+$ /tmp/sf-attack2/bin/sf gate evaluate
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD f606143db5ce; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✓ pass evidence current: no code changes since 7a16cdd365d9; specification unchanged since 7a16cdd365d9
+  ✗ fail evidence manifest verified: evidence/manifest.yml artifacts is not a list; list each evidence file with path, produced_by, sha256
+  ✓ pass content clean
+[exit 2]
+$ /tmp/sf-attack2/bin/sf gate evaluate
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✗ fail structured files parse: 07-evaluation/evidence/manifest.yml: expected a mapping at the top level, found array
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD f606143db5ce; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✓ pass evidence current: no code changes since 7a16cdd365d9; specification unchanged since 7a16cdd365d9
+  ✗ fail evidence manifest verified: evidence/manifest.yml artifacts is missing; list each evidence file with path, produced_by, sha256
+  ✓ pass content clean
+[exit 2]
+$ /tmp/sf-attack2/bin/sf gate evaluate
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✗ fail structured files parse: 07-evaluation/evidence/manifest.yml: 07-evaluation/evidence/manifest.yml is a symlink; a record file must be a regular file (replace the link with the file itself)
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7a16cdd365d942a62b0fcce2eeb9f20559be527e
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD f606143db5ce; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✓ pass evidence current: no code changes since 7a16cdd365d9; specification unchanged since 7a16cdd365d9
+  ✗ fail evidence manifest verified: evidence/manifest.yml: 07-evaluation/evidence/manifest.yml is a symlink; a record file must be a regular file (replace the link with the file itself)
+  ✓ pass content clean
+[exit 2]
+== 4k: a 200 MB evidence file listed: time the gate
+  ! warn evidence manifest verified: unlisted: evidence/recorded.txt (no artifact names it)
+        0.60 real         0.37 user         0.17 sys
+            42123264  maximum resident set size

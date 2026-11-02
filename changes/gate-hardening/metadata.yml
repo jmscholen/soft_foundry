@@ -1,0 +1,141 @@
+---
+change:
+  id: gate-hardening
+  title: gate-hardening
+git:
+  worktree: "/Users/jscholen-iou/dev/soft_foundry"
+  branch: change/gate-hardening
+type: feature
+risk: high
+track: gated
+status: judged
+current_phase: learn
+created_at: 2026-10-29 01:34:20.000000000 Z
+scope: []
+surfaces:
+  application: false
+  database: false
+  infrastructure: false
+  security: true
+  accessibility: true
+  observability: false
+  policy: false
+human_decisions: []
+vetted:
+reopenings: []
+phase_reopenings:
+- at: '2026-10-29T11:35:26Z'
+  phase: verify
+  reset:
+  - verify
+  - evaluate
+  - attack
+  from_commit: 303a48f7f1f543aebed9f3cce84e6934d2af3eb2
+  reason: 'remediation of 08-attack findings ATK-001 to ATK-009: verification, evaluation
+    and attack are redone after the fix'
+  source: manual
+  previous:
+    verify:
+      status: complete
+      commit_sha: 15e6d923296135a660f6648b635a61edf93433a2
+      completed_at: '2026-10-29T06:50:00Z'
+      session_id: f8adcb9f-b0bd-479f-bccc-6df99d1a8fc9
+    evaluate:
+      status: in_progress
+      commit_sha:
+      completed_at:
+      session_id: 296fed4e-4f98-4179-ab9a-5cf4caa6ec24
+    attack:
+      status: complete
+      commit_sha: 303a48f7f1f543aebed9f3cce84e6934d2af3eb2
+      completed_at: '2026-10-29T11:32:00Z'
+      session_id: df7eadf4-1c50-4e9a-8df2-330875d658ad
+- at: '2026-10-29T16:24:15Z'
+  phase: remediate
+  reset:
+  - remediate
+  from_commit: c02a76113cd6153ece1d1dce45a945b02c63b93c
+  reason: PhaseSeal#advance! ignored the remediate -> verify transition and set current_phase
+    to review (found by sealing remediation); fixed in a second remediation pass
+  source: manual
+  previous:
+    remediate:
+      status: complete
+      commit_sha: c30af60717f2701055a272e9173581a4d36cd999
+      completed_at: '2026-10-29T16:04:00Z'
+      session_id:
+- at: '2026-10-29T23:53:33Z'
+  phase: verify
+  reset:
+  - verify
+  - evaluate
+  - attack
+  - remediate
+  from_commit: 5db483653a8eb1301cc926c4b2adca7b2363769d
+  reason: 'ATK-010 (major): the ATK-001 fix is bypassed by a hand-committed handoff;
+    remediating it with ATK-011, 012, 013, 006, 007'
+  source: manual
+  previous:
+    verify:
+      status: complete
+      commit_sha: d8b621d6347231eb773243159833f7f870aeef93
+      completed_at: '2026-10-29T22:00:00Z'
+      session_id: '0990f0cf-b8da-43d0-bfe0-af7a6cb15027'
+    evaluate:
+      status: in_progress
+      commit_sha:
+      completed_at:
+      session_id: 590522cf-3895-4ab4-8842-ebbe3d3a9fc1
+    attack:
+      status: complete
+      commit_sha: 5db483653a8eb1301cc926c4b2adca7b2363769d
+      completed_at: '2026-10-29T22:11:14Z'
+      session_id: 386203a2-6648-4b68-af46-697f4ccf986e
+    remediate:
+      status: complete
+      commit_sha: c5c20b4dd3dfceeb13637b6d1b15601949fd8658
+      completed_at: '2026-10-29T16:27:00Z'
+      session_id:
+- at: '2026-10-30T01:42:57Z'
+  phase: verify
+  reset:
+  - verify
+  - evaluate
+  - remediate
+  from_commit: f0b256b214a246b775838ff691ca69b5fe941c2c
+  reason: 'EVAL-017 (gate git cost over the REQ-036 bound) and EVAL-018 (lineage failure
+    without a next action): third remediation pass'
+  source: manual
+  previous:
+    verify:
+      status: complete
+      commit_sha: ff5c175da3ed6144208d5375dd7bd125ae4202bc
+      completed_at: '2026-10-30T01:25:00Z'
+      session_id: 44d571c2-78c2-4ddd-8adb-b4a449052a33
+    evaluate:
+      status: complete
+      commit_sha: 87d7b8f0e9e6bbf05f765d35d0a4b56af324ec13
+      completed_at: '2026-10-30T01:23:29Z'
+      session_id: 2de85aed-5756-41b9-b6ba-7f41452745a4
+    remediate:
+      status: complete
+      commit_sha: 39d7e4fd288812a82b99ce3118d06d7719a6904b
+      completed_at: '2026-10-29T23:30:00Z'
+      session_id:
+- at: '2026-11-02T19:26:50Z'
+  phase: judge
+  reset:
+  - judge
+  from_commit: 5c87870433214069d91efd14fc43d36a73933f97
+  reason: 'gate failed on criteria covered: AC-053 and AC-054 are named by no verification
+    check or evaluation journey; set each aside in evidence.yml criteria_not_covered
+    with a reason of at least two words, or cover it. Keep the verdict, residuals
+    and ATK-014 reasoning.'
+  source: manual
+  previous:
+    judge:
+      status: complete
+      commit_sha: 5c87870433214069d91efd14fc43d36a73933f97
+      completed_at: '2026-11-02T19:26:30Z'
+      session_id: aff1d290-8f81-47a3-8641-83bbc181f2d0
+skipped_phases: []

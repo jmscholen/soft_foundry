@@ -50,7 +50,7 @@ expect:
   outcome: fail               # pass | fail
 ```
 
-Tokens in file contents: `${COMMIT}` (the commit the phases were bound to), `${APP_FILE}` (a code file in the `APP` group, also usable as a path key), `${CANARY_AWS}` and `${CANARY_OPENAI}` (secret-shaped canaries) and `${INVISIBLE_ZWSP}` (a zero-width space), which the runner builds so that no case file carries one. Paths are relative, inside the tree, and never traverse upward; a case may write at most 200 files.
+Tokens in file contents: `${COMMIT}` (the commit the phases were bound to), `${BASE}` (the scratch repository's first commit, older than the record, for a lineage case), `${APP_FILE}` (a code file in the `APP` group, also usable as a path key), `${CANARY_AWS}` and `${CANARY_OPENAI}` (secret-shaped canaries) and `${INVISIBLE_ZWSP}` (a zero-width space), which the runner builds so that no case file carries one. Paths are relative, inside the tree, and never traverse upward; a case may write at most 200 files.
 
 A live case names the `phase` to run and plants application files before the record exists:
 

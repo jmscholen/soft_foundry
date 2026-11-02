@@ -7,24 +7,50 @@ require_relative "control_plane"
 module SoftFoundry
   # Thin wrapper over the git CLI for the few facts the harness needs.
   class Git
+    # The variables git exports to a hook, and that a shell may set,
+    # cleared from every git call so the target directory alone decides
+    # which repository, index and object store are touched. Inside a
+    # pre-commit hook GIT_INDEX_FILE names the committing repository's
+    # (temporary) index; a scratch repository's `add` that inherited it
+    # wrote its records there (found by the first `phase seal`).
+    CLEAN_ENV = { "GIT_DIR" => nil, "GIT_WORK_TREE" => nil, "GIT_INDEX_FILE" => nil, "GIT_OBJECT_DIRECTORY" => nil,
+                  "GIT_ALTERNATE_OBJECT_DIRECTORIES" => nil, "GIT_COMMON_DIR" => nil, "GIT_PREFIX" => nil, "GIT_NAMESPACE" => nil }.freeze
+
     def initialize(root)
       @root = File.expand_path(root)
     end
 
     def repository?
-      run("rev-parse", "--is-inside-work-tree").first.strip == "true"
+      observed(:repository) { run("rev-parse", "--is-inside-work-tree").first.strip == "true" }
     rescue Errno::ENOENT
       false
     end
 
+    # Runs the block with HEAD, the branch and branch tips read once. The
+    # repository is not expected to move inside it; the cache is dropped on
+    # the way out, so a later read sees any commit made since.
+    def observing
+      return yield if @observed
+      @observed = {}
+      begin
+        yield
+      ensure
+        @observed = nil
+      end
+    end
+
     def head_sha
-      out, ok = run("rev-parse", "HEAD")
-      ok ? out.strip : nil
+      observed(:head) do
+        out, ok = run("rev-parse", "HEAD")
+        ok ? out.strip : nil
+      end
     end
 
     def branch
-      out, ok = run("rev-parse", "--abbrev-ref", "HEAD")
-      ok ? out.strip : nil
+      observed(:branch) do
+        out, ok = run("rev-parse", "--abbrev-ref", "HEAD")
+        ok ? out.strip : nil
+      end
     end
 
     # The committer identity configured for this repository, or nil.
@@ -46,7 +72,9 @@ module SoftFoundry
     end
 
     def commit?(sha)
+      return true if fixed?(sha) && memo[[:commit, sha.to_s]]
       _, ok = run("cat-file", "-e", "#{sha}^{commit}")
+      memo[[:commit, sha.to_s]] = true if ok && fixed?(sha)
       ok
     end
 
@@ -62,7 +90,10 @@ module SoftFoundry
     # already been merged.
     def ancestor?(sha, ref)
       return false unless sha.to_s.match?(/\A[0-9a-f]{7,40}\z/) && ref.to_s != ""
+      # Between two named commits the answer never changes.
+      return memo[[:ancestor, sha, ref]] if fixed?(sha) && fixed?(ref) && memo.key?([:ancestor, sha, ref])
       _, ok = run("merge-base", "--is-ancestor", sha, ref)
+      memo[[:ancestor, sha, ref]] = ok if fixed?(sha) && fixed?(ref)
       ok
     end
 
@@ -145,9 +176,29 @@ module SoftFoundry
       ok && !out.strip.empty? ? out.strip : nil
     end
 
+    # The newest commit touching `path` whose subject is exactly `subject`
+    # (the message a seal gives its commit); the newest commit touching it
+    # when none has that subject, or nil, from one git call.
+    def last_commit_with_subject(path, subject)
+      out, ok = run("log", "--format=%H%x09%s", "--", path)
+      return nil unless ok
+      rows = out.lines(chomp: true).map { |l| l.split("\t", 2) }
+      (rows.find { |_, s| s == subject } || rows.first)&.first
+    end
+
+    # The full hash of the commit `sha` names (abbreviated or not), or nil.
+    def resolve_commit(sha)
+      return nil unless sha.to_s.match?(/\A[0-9a-fA-F]{4,40}\z/)
+      out, ok = run("rev-parse", "--verify", "--quiet", "#{sha}^{commit}")
+      ok && !out.strip.empty? ? out.strip : nil
+    end
+
     # The contents of `path` at commit `sha`, or nil when absent there.
     def blob(sha, path)
+      key = [:blob, sha.to_s, path]
+      return memo[key] if fixed?(sha) && memo.key?(key)
       out, ok = run("show", "#{sha}:#{path}")
+      memo[key] = ok ? out : nil if fixed?(sha)
       ok ? out : nil
     end
 
@@ -155,12 +206,13 @@ module SoftFoundry
     # CI checkout that fetched every branch still finds it. Nil if neither.
     def branch_tip(name)
       return nil if name.to_s.strip.empty? || name.to_s == "HEAD"
-      ["refs/heads/#{name}", "refs/remotes/origin/#{name}"].each do |ref|
-        next unless ref?(ref)
-        out, ok = run("rev-parse", ref)
-        return out.strip if ok
+      observed([:tip, name.to_s]) do
+        ["refs/heads/#{name}", "refs/remotes/origin/#{name}"].each do |ref|
+          next unless ref?(ref)
+          out, ok = run("rev-parse", ref)
+          break out.strip if ok
+        end.then { |r| r.is_a?(String) ? r : nil }
       end
-      nil
     end
 
     # Modified, staged, untracked, and ignored paths. Ignored directories are
@@ -171,7 +223,37 @@ module SoftFoundry
       out.lines(chomp: true).map { |line| line[3..].to_s.split(" -> ").last }
     end
 
+    # Stages exactly `paths` (by name, never -A) and commits them with
+    # `message`, letting the repository's hooks run. Returns the new HEAD.
+    # GitError with git's own output (the hook's refusal included) when
+    # either step fails, so the caller can show it.
+    def commit!(message, paths:)
+      add_out, add_err, add_ok = Open3.capture3(CLEAN_ENV, "git", "-C", @root, "add", "--", *paths)
+      raise GitError, "git add failed: #{(add_err + add_out).strip}" unless add_ok.success?
+      out, err, ok = Open3.capture3(CLEAN_ENV, "git", "-C", @root, "commit", "-q", "-m", message, "--only", "--", *paths)
+      raise GitError, "git commit failed:\n#{(err + out).strip}" unless ok.success?
+      head_sha
+    end
+
+    # Dirty, untracked or ignored paths under `prefix` (a directory, with
+    # its trailing slash) or equal to it.
+    def dirty_under(prefix)
+      dirty_paths.select { |p| p == prefix || p.start_with?(prefix) }
+    end
+
     private
+
+    # Answers about a commit named by its full hash cannot change while this
+    # object lives, so the gate asks git once per question (REQ-036).
+    def memo = (@memo ||= {})
+
+    def observed(key)
+      return yield unless @observed
+      return @observed[key] if @observed.key?(key)
+      @observed[key] = yield
+    end
+
+    def fixed?(sha) = sha.to_s.match?(/\A[0-9a-f]{40}\z/)
 
     def hash!(sha)
       value = sha.to_s
@@ -199,10 +281,8 @@ module SoftFoundry
       ok
     end
 
-    # GIT_DIR and GIT_WORK_TREE are cleared so the target directory alone
-    # decides which repository is inspected.
     def run(*args)
-      out, _err, status = Open3.capture3({ "GIT_DIR" => nil, "GIT_WORK_TREE" => nil }, "git", "-C", @root, *args)
+      out, _err, status = Open3.capture3(CLEAN_ENV, "git", "-C", @root, *args)
       [out, status.success?]
     end
   end

@@ -11,6 +11,15 @@ commit_sha: TBD
 #   outcome: passed
 # full_suite:
 #   cite: <slug of another change record>
+# The gate reads every check (`test results recorded`): id, kind, command,
+# and a result of pass | fail | error | skipped. A check whose result is
+# fail or error, or skipped while naming criteria, must be named by id in
+# the handoff's `blocking` list or in a finding, or the phase does not
+# pass. Every acceptance criterion should appear in some check's
+# `criteria` (`criteria covered` warns here and fails at judgment unless
+# an evaluation journey covers it or the judgment sets it aside with a
+# reason). The manifest under evidence/ is recomputed (`evidence manifest
+# verified`): list each file with its SHA-256 after it is final.
 checks:
   - id: CHECK-001
     kind: tests   # tests | lint | static_analysis | security_scan | iac_validate | migration_check | custom

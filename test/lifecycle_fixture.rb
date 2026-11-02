@@ -32,8 +32,7 @@ module LifecycleFixture
   end
 
   def with_clean_env(extra = {}, &block)
-    with_env({ "ANTHROPIC_API_KEY" => nil, "OPENAI_API_KEY" => nil, "XAI_API_KEY" => nil, "OPENROUTER_API_KEY" => nil,
-               "SOFT_FOUNDRY_BILLING" => nil, "SOFT_FOUNDRY_PHASE" => nil, "SOFT_FOUNDRY_PARALLEL" => nil }.merge(extra), &block)
+    with_env(FoundryFixture::SESSION_ENV.merge(extra), &block)
   end
 
   def run_cli(dir, *args, **opts)

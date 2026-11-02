@@ -1,0 +1,65 @@
+# EVAL-004: A refused pre-commit hook leaves the seal resumable; the real hook's cost is measured (AC-010, REQ-036)
+# driver: evidence/journeys-driver.rb, run 2026-10-30T02:26:09Z at b871187a6bf2
+
+# scratch repository: /tmp/sf-eval4/repos/eval-004-hook
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+$ soft-foundry phase seal intake   # hook exits 1
+note: left uncommitted (outside this phase and the record's metadata): .ai/skills/evaluation/.soft-foundry/, .soft-foundry/
+c1: 00-intake is not sealed: git commit failed:
+pre-commit: refusing for the evaluation
+metadata.yml is advanced in the worktree; fix the cause and run `soft-foundry phase seal intake` again to complete the seal
+exit 2
+
+assert pass: AC-010 exit 2
+assert pass: AC-010 the hook's output is shown
+assert pass: AC-010 says metadata is advanced and to run seal again
+assert pass: AC-010 no commit
+assert pass: AC-010 worktree metadata shows current_phase discover
+$ soft-foundry phase seal intake   # hook removed
+note: left uncommitted (outside this phase and the record's metadata): .ai/skills/evaluation/.soft-foundry/, .soft-foundry/
+sealed 00-intake at 98ae4b7957e8
+exit 0
+
+assert pass: AC-010 second seal exits 0 and commits
+# the real hook: `soft-foundry hooks install` puts a pre-commit that runs `soft-foundry ci` (this checkout's code via PATH)
+$ soft-foundry hooks install
+installed .git/hooks/pre-commit
+exit 0
+
+assert pass: hooks install exits 0
+--- the installed pre-commit hook ---
+#!/bin/sh
+# soft-foundry:pre-commit
+# Validates the .ai/ control plane and every change record before commit.
+if [ -x exe/soft-foundry ] && [ -f lib/soft_foundry.rb ]; then
+  exec ruby -Ilib exe/soft-foundry ci
+elif command -v soft-foundry >/dev/null 2>&1; then
+  exec soft-foundry ci
+else
+  echo "soft-foundry not found; skipping control-plane checks" >&2
+fi
+---
+
+$ soft-foundry phase seal discover   # seal with the ci hook running
+note: left uncommitted (outside this phase and the record's metadata): .ai/skills/evaluation/.soft-foundry/, .soft-foundry/
+sealed 01-discovery at d7e8e734a4fd
+exit 0
+
+assert pass: seal with the real hook exits 0
+assert pass: the hook ran (marker written by the hook)
+$ soft-foundry phase seal specify   # seal with no hook
+note: left uncommitted (outside this phase and the record's metadata): .ai/skills/evaluation/.soft-foundry/, .soft-foundry/
+sealed 02-specification at 19a249ec14fc
+exit 0
+
+assert pass: seal without the hook exits 0
+# timing: seal with ci hook 15.8 s; seal without hook 0.6 s; hook cost 15.2 s (the price of ci: check + 28 gate cases + every record's gate)
+
+# EVAL-004: PASS (10 assertions passed, 0 failed)

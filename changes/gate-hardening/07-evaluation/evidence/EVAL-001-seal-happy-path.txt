@@ -1,0 +1,82 @@
+# EVAL-001: A phase session seals its finished phase; a rerun is a no-op (AC-001, AC-005, AC-009)
+# driver: evidence/journeys-driver.rb, run 2026-10-30T02:26:01Z at b871187a6bf2
+
+# scratch repository: /tmp/sf-eval4/repos/eval-001-seal
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+# intake is complete on disk and uncommitted; notes.txt is an uncommitted scratch file outside code and the record
+$ soft-foundry phase seal intake   # persona: phase session
+note: left uncommitted (outside this phase and the record's metadata): notes.txt, .ai/skills/evaluation/.soft-foundry/, .soft-foundry/
+sealed 00-intake at 21752e723f5f
+exit 0
+
+assert pass: AC-001 exit 0
+assert pass: AC-001 output line is `sealed 00-intake at <12-char sha>`
+$ git log '--format=%h %s' -n 2
+21752e7 Record c1 intake
+01295ee record c1
+exit 0
+
+$ git show --name-only --format= HEAD
+changes/c1/00-intake/assumptions.md
+changes/c1/00-intake/handoff.yml
+changes/c1/00-intake/request.md
+changes/c1/metadata.yml
+exit 0
+
+assert pass: AC-001 commit message is `Record c1 intake`
+assert pass: AC-001 the commit contains only 00-intake/** and metadata.yml
+assert pass: AC-001 metadata current_phase is discover and status in_progress
+assert pass: AC-005 notes.txt is named in a note line and left uncommitted
+$ git status --porcelain
+?? notes.txt
+exit 0
+
+assert pass: AC-005 notes.txt still untracked
+assert pass: no ANSI escape in the output
+$ soft-foundry phase seal intake   # run again: nothing changed since
+already sealed at 21752e723f5f (00-intake and metadata.yml are unchanged since)
+exit 0
+
+assert pass: AC-009 exit 0
+assert pass: AC-009 output is `already sealed at <sha>`
+assert pass: AC-009 no new commit
+assert pass: sealed handoff of a non-commit-bound phase carries no branch_resolved key
+--- changes/c1/metadata.yml ---
+---
+change:
+  id: c1
+  title: c1
+git:
+  worktree: "/private/tmp/sf-eval4/repos/eval-001-seal"
+  branch: change/c1
+type: TBD
+risk: TBD
+track: gated
+status: in_progress
+current_phase: discover
+created_at: 2026-10-30 02:26:02.000000000 Z
+scope: []
+surfaces:
+  application: false
+  database: false
+  infrastructure: false
+  security: false
+  accessibility: false
+  observability: false
+  policy: false
+human_decisions: []
+vetted:
+reopenings: []
+phase_reopenings: []
+skipped_phases: []
+---
+
+
+# EVAL-001: PASS (12 assertions passed, 0 failed)

@@ -10,6 +10,7 @@ require_relative "record_lock"
 require_relative "safe_write"
 require_relative "advisory"
 require_relative "declarations"
+require_relative "record_file"
 
 module SoftFoundry
   # A durable `changes/<slug>/` record initialized from control-plane templates.
@@ -61,7 +62,16 @@ module SoftFoundry
 
     def handoff(phase)
       path = handoff_path(phase)
-      File.exist?(path) ? load(path) : nil
+      File.exist?(path) || File.symlink?(path) ? load(path) : nil
+    end
+
+    # metadata.yml's git.branch. A `git:` that is not a mapping is the
+    # record's fault and is named as such, so a gate check or command
+    # prints a line instead of a Ruby error (REQ-021).
+    def git_branch
+      git = metadata["git"]
+      raise TargetError, "changes/#{slug}/metadata.yml: git must be a mapping with branch and worktree, not #{git.nil? ? 'nothing' : git.class.name.downcase}; restore the git: block" unless git.is_a?(Hash)
+      git["branch"].to_s
     end
 
     def phase_status(phase)
@@ -110,7 +120,7 @@ module SoftFoundry
     def self.discharged?(item)
       return false unless item.is_a?(Hash)
       value = item["discharged_at"]
-      value.respond_to?(:strftime) || (value.is_a?(String) && !value.strip.empty?)
+      value.respond_to?(:strftime) || (value.is_a?(String) && !Text.blank?(value))
     end
 
     def open_release_items = release_items.reject { |i| self.class.discharged?(i) }
@@ -198,12 +208,41 @@ module SoftFoundry
     def recorded_commit(phase, git:)
       return nil unless phase_status(phase) == "complete" && git.repository?
       rel = "changes/#{slug}/#{phase.output}/handoff.yml"
-      sha = git.last_commit_for(rel)
+      # The commit the tool made when it sealed the phase; a hand commit of
+      # the handoff is not the record (ATK-010). A record with no seal commit
+      # for the phase predates `phase seal`, so its newest commit stands.
+      # Asked of git once per phase and HEAD (REQ-036).
+      @sealed ||= {}
+      key = [phase.id, git.head_sha]
+      @sealed[key] = git.last_commit_with_subject(rel, "Record #{slug} #{phase.id}") unless @sealed.key?(key)
+      sha = @sealed[key]
       return nil unless sha
       data = YAML.safe_load(git.blob(sha, rel).to_s, permitted_classes: [Time, Date], aliases: true)
       data.is_a?(Hash) && data["status"] == "complete" ? sha : nil
     rescue Psych::Exception
       nil
+    end
+
+    # The handoff as it was at the commit that recorded the phase complete,
+    # or nil when the phase is not recorded.
+    def recorded_handoff(phase, git:)
+      sha = recorded_commit(phase, git: git)
+      return nil unless sha
+      data = YAML.safe_load(git.blob(sha, "changes/#{slug}/#{phase.output}/handoff.yml").to_s, permitted_classes: [Time, Date], aliases: true)
+      data.is_a?(Hash) ? data : nil
+    rescue Psych::Exception
+      nil
+    end
+
+    # True when `phase_reopenings` shows this phase reset at or after
+    # commit `since`: the recorded way a recorded phase's evidence is
+    # replaced (`phase reopen`, or the runner's automatic reopen).
+    def reopened_since?(phase, since, git:)
+      Array(metadata["phase_reopenings"]).any? do |entry|
+        next false unless entry.is_a?(Hash) && Array(entry["reset"]).map(&:to_s).include?(phase.id)
+        from = entry["from_commit"].to_s
+        from.match?(/\A[0-9a-f]{7,40}\z/) && git.commit?(from) && (from.start_with?(since) || since.start_with?(from) || git.ancestor?(since, from))
+      end
     end
 
     # The person's recorded acceptance on an exploring track, or nil.
@@ -482,8 +521,10 @@ module SoftFoundry
       YAML.dump(text).sub(/\A--- ?/, "").chomp
     end
 
+    # Record files are read through RecordFile, which refuses a symlink or
+    # a non-regular file in place of the record's own (REQ-034).
     def load(path)
-      YAML.safe_load_file(path, permitted_classes: [Time, Date], aliases: true) || {}
+      RecordFile.load_yaml(path, path.delete_prefix("#{root}/"))
     end
   end
 end

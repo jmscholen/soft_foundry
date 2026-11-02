@@ -1,0 +1,17 @@
+id: evidence-manifest-path-escapes-phase
+kind: gate
+description: A manifest artifact whose path resolves outside the phase directory is refused rather than read (evidence manifest verified, REQ-012, REQ-034).
+record:
+  risk: medium
+  complete: [intake, discover, specify, threat_model, plan, implement, verify]
+  files:
+    06-verification/evidence/manifest.yml: |
+      commit_sha: ${COMMIT}
+      artifacts:
+        - path: ../../05-implementation/log.md
+          produced_by: CHECK-001
+          sha256: 0000000000000000000000000000000000000000000000000000000000000000
+expect:
+  phase: verify
+  check: evidence manifest verified
+  outcome: fail

@@ -1,0 +1,119 @@
+---
+phase: 13-review
+skill: review
+status: complete
+commit_sha: 5eb5b1a2a04b72e7d78591808177ce516dc6e06c
+started_at: '2026-11-02T19:22:49Z'
+completed_at: '2026-11-02T19:25:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-sonnet-5-5
+outputs:
+- functional.md
+- architecture.md
+- security.md
+- accessibility.md
+- policy-conformance.md
+- infrastructure.md
+- operations.md
+- consolidated.md
+blocking: []
+findings:
+- id: REV-001
+  severity: major
+  summary: The ATK-010 fix identifies the seal commit by its subject line alone (ATK-014).
+    A committer who rewrites a sealed phase's commit_sha and commits only the handoff
+    as `Record <slug> <phase>` makes that commit the recorded one.
+  failure: 'Evaluate is sealed, code changes, the committer sets commit_sha to HEAD
+    and commits handoff.yml with the subject `Record c1 evaluate`: commit lineage
+    says "recorded with this commit_sha", evidence current passes, the gate passes
+    and phase seal prints already sealed, so stale evidence reads current. Not blocking
+    because the pre-change gate accepted the same hand commit, and the specification
+    says a committer can still fake a pass. Fix by binding the seal to something only
+    the tool writes (a trailer) or by requiring a phase_reopenings entry with changed
+    evidence before commit_sha moves.'
+- id: REV-002
+  severity: minor
+  summary: phase seal answers `already sealed` for a phase committed by hand with
+    no Record commit (ATK-017).
+  failure: '09-remediation complete on disk and hand-committed: `phase seal remediate`
+    exits 0 naming the hand commit, writes no Record commit and leaves current_phase
+    unchanged, so the user believes the tool sealed it.'
+- id: REV-003
+  severity: minor
+  summary: Planned test harness_eval_test#test_lint_accepts_new_check_names (AC-019)
+    was never written (verification CHECK-011).
+  failure: 'None reachable today: AC-019 is covered by check, eval and the checks
+    listing.'
+- id: REV-004
+  severity: minor
+  summary: A rerun is any changed byte and a two-word meaningless criteria_not_covered
+    reason passes (ATK-015, ATK-018), the accepted structure-only limit.
+  failure: After phase reopen, restoring status and commit_sha by hand and appending
+    a newline to results.md seals over code that was never rerun.
+- id: REV-005
+  severity: minor
+  summary: Git carries two caches (observing per run, memo for 40-hex SHAs) that are
+    correct only because full hashes name immutable objects.
+  failure: None reachable by current callers.
+- id: REV-006
+  severity: minor
+  summary: PhaseSeal TOOL_KEYS duplicates which metadata keys the tool moves.
+  failure: A newly tool-moved key makes the seal print a spurious hand-edited note;
+    no gate result changes.
+- id: REV-007
+  severity: minor
+  summary: 'enforcement.yml shape (ATK-016): scalar guard aborts with an unnamed #dig
+    error; top-level mode: block and guard: {} read as warn silently.'
+  failure: 'A maintainer writes `mode: block` at the top level, believes fresh sessions
+    are required, and a review completed without executed_by passes because fresh
+    session recorded skips.'
+- id: REV-008
+  severity: minor
+  summary: Absolute paths in lock and safe-write refusals and (<unknown>) in change
+    summary for unparseable metadata (ATK-009 residue). Accessibility advisory, repository-relative
+    path rule and REQ-032.
+  failure: A CI log shows machine-specific absolute paths, and the (<unknown>) line
+    names no file to fix.
+- id: REV-009
+  severity: minor
+  summary: Lineage failure lines are long single lines. Accessibility advisory, CLI
+    line-oriented rule.
+  failure: A narrow terminal wraps the line; meaning survives.
+- id: REV-010
+  severity: minor
+  summary: A killed seal leaves .git/index.lock to be removed by hand and no message
+    says so.
+  failure: The next phase seal fails with git's lock error and no Soft Foundry next
+    action.
+- id: REV-011
+  severity: minor
+  summary: A manual phase seal during an open phase run session yields two Record
+    commits (ATK-003, carried).
+  failure: History carries a duplicate seal commit; no gate result is wrong.
+next: judge
+notes: 'Review performed by a fresh session started by soft-foundry phase run. Code
+  read at HEAD 5eb5b1a (lib changed last at c664d12): phase_seal.rb, gate.rb lineage
+  check, change_record.rb recorded_commit/recorded_handoff/reopened_since?, git.rb.
+  The suite, eval and the attack scripts were not rerun by this phase; their results
+  are taken from the 06, 07 and 08 handoffs and results files. Accessibility: surfaces.accessibility
+  is true, conforms with advisories (go-live, not blocking). Policy: surfaces.policy
+  is false, N/A with the examination stated; no policy text owed, no awaiting_human
+  parking. Infrastructure: N/A, no IaC touched. No access_control is declared in .ai/repository.yml,
+  so the protection parity check does not apply. The attack handoff proposed next:
+  remediate for ATK-014; this review rates it major rather than blocking (no regression
+  against main) and leaves the choice, including BLOCKED, to judgment. Guard limitation:
+  Bash is checked against deny sets only, so the write boundary for 13-review was
+  honoured as policy.'
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-11-02T19:22:49Z'
+  finished_at: '2026-11-02T19:24:49Z'
+  exit_status: 0
+  previous_phase: review
+  session_id: ef19be55-f477-450b-9015-95c636fda827
+  cwd: "/Users/jscholen-iou/dev/soft_foundry"
+branch_resolved: true

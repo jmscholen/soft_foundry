@@ -1,0 +1,679 @@
+# EVAL-017: gate all on this change's record: this branch against the pre-change gem (AC-052 timing clause, REQ-036)
+# driver: evidence/journeys-driver.rb, run 2026-10-30T02:28:28Z at b871187a6bf2
+
+# pre-change executable: "/Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/soft_foundry-0.22.0/exe/soft-foundry" (soft_foundry gem 0.22.0 from main, which has neither phase_seal.rb nor the seven checks)
+$ soft-foundry gate all --change gate-hardening   # this branch
+00-intake  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass waivers permitted: nothing waived
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 3e5627dc3d9c0ff1791ad938462ba800f67087b0
+  ✓ pass commit lineage: reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-29T01:42:00Z
+  ✓ pass predecessor complete: first phase
+  ✓ pass content clean
+01-discovery  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: repository-context.md, affected-components.md, dependencies.md, unknowns.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: a0a8460fcc5efd55a3a4f450e60cf65e79725e3b
+  ✓ pass commit lineage: descends from 00-intake at 3e5627dc3d9c; reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-29T01:46:00Z
+  ✓ pass predecessor complete: 00-intake
+  ✓ pass content clean
+02-specification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+  ✓ pass structured files parse: requirements.yml, acceptance-criteria.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 914a34deb2b249a48bd7612a65684fecb5f20b87
+  ✓ pass commit lineage: descends from 01-discovery at a0a8460fcc5e; reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-29T01:53:00Z
+  ✓ pass predecessor complete: 01-discovery
+  ✓ pass specification locked: locked at 829441a628bc, the commit that recorded it
+  ✓ pass content clean
+03-threat-model  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: attack-surface.md, trust-boundaries.md, threats.yml, mitigations.md, handoff.yml
+  ✓ pass structured files parse: threats.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 829441a628bc8c0dd184477fb80def40267f572a
+  ✓ pass commit lineage: descends from 02-specification at 914a34deb2b2; reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-29T01:57:00Z
+  ✓ pass predecessor complete: 02-specification
+  ✓ pass content clean
+04-plan  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: implementation.md, testing.md, rollout.md, rollback.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 3b72c429a815bb4d25d816a6e7187db6a762c1ee
+  ✓ pass commit lineage: descends from 03-threat-model at 829441a628bc; reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-29T02:01:00Z
+  ✓ pass predecessor complete: 03-threat-model
+  ✓ pass content clean
+05-implementation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: c02528c5e9e91dcfa4624f176af54436ae1f25eb
+  ✓ pass commit lineage: descends from 04-plan at 3b72c429a815; reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-29T06:20:00Z
+  ✓ pass predecessor complete: 04-plan
+  ✓ pass content clean
+06-verification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: dccdd8c7171d1c53d40d52cb5209cff1dd0c1ce4
+  ✓ pass commit lineage: descends from 05-implementation at c02528c5e9e9; reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-30T02:30:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since dccdd8c7171d; specification unchanged since 829441a628bc
+  ✓ pass red evidence: CHECK-001: 9a96f459d945 -> dccdd8c7171d (test/phase_seal_test.rb); CHECK-002: 9a96f459d945 -> dccdd8c7171d (test/gate_checks_test.rb); CHECK-009: d6c2748fecf6 -> dccdd8c7171d (test/remediation_gate_hardening_test.rb); CHECK-012: 4d7392a6eb30 -> dccdd8c7171d (test/remediation_gate_hardening_test.rb); CHECK-013: cf7b76bc49a6 -> dccdd8c7171d (test/remediation_gate_hardening_two_test.rb); CHECK-014: a930c5770309 -> dccdd8c7171d (test/remediation_gate_hardening_three_test.rb)
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 33bd93c6f7f2, outcome passed (a record, not a test result)
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass test results recorded: 14 checks, 13 pass; acknowledged: CHECK-011 (fail)
+  ! warn criteria covered: AC-053, AC-054 named by no verification check's criteria; an evaluation journey may cover them, or the judgment sets them aside with a reason in evidence.yml criteria_not_covered
+  ✓ pass evidence manifest verified: 18 artifacts match
+  ✓ pass content clean
+07-evaluation  in_progress  PASS
+  ✓ pass handoff identity
+  ! warn phase in progress: not yet gated
+08-attack  pending  SKIP
+  - skip phase pending: not started
+09-remediation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: summary.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: c664d12240e31d6a51ad2f38a8b59ff2188643a6
+  ✓ pass commit lineage: descends from 05-implementation at c02528c5e9e9; reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-30T03:30:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass content clean
+10-user-documentation  pending  SKIP
+  - skip phase pending: not started
+11-faq-index  pending  SKIP
+  - skip phase pending: not started
+12-observability  pending  SKIP
+  - skip phase pending: not started
+13-review  pending  SKIP
+  - skip phase pending: not started
+14-judgment  pending  SKIP
+  - skip phase pending: not started
+15-learning  pending  SKIP
+  - skip phase pending: not started
+advisory: 1 issue to address before gate-hardening goes live (informational, does not block the gate)
+  ! warn accessibility: the accessibility review (13-review/accessibility.md) has not run yet
+exit 0
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/soft_foundry-0.22.0/exe/soft-foundry gate all --change gate-hardening   # pre-change gem
+00-intake  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass waivers permitted: nothing waived
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 3e5627dc3d9c0ff1791ad938462ba800f67087b0
+  ✓ pass completed_at recorded: 2026-10-29T01:42:00Z
+  ✓ pass predecessor complete: first phase
+  ✓ pass content clean
+01-discovery  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: repository-context.md, affected-components.md, dependencies.md, unknowns.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: a0a8460fcc5efd55a3a4f450e60cf65e79725e3b
+  ✓ pass completed_at recorded: 2026-10-29T01:46:00Z
+  ✓ pass predecessor complete: 00-intake
+  ✓ pass content clean
+02-specification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 914a34deb2b249a48bd7612a65684fecb5f20b87
+  ✓ pass completed_at recorded: 2026-10-29T01:53:00Z
+  ✓ pass predecessor complete: 01-discovery
+  ✓ pass specification locked: locked at 829441a628bc, the commit that recorded it
+  ✓ pass content clean
+03-threat-model  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: attack-surface.md, trust-boundaries.md, threats.yml, mitigations.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 829441a628bc8c0dd184477fb80def40267f572a
+  ✓ pass completed_at recorded: 2026-10-29T01:57:00Z
+  ✓ pass predecessor complete: 02-specification
+  ✓ pass content clean
+04-plan  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: implementation.md, testing.md, rollout.md, rollback.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 3b72c429a815bb4d25d816a6e7187db6a762c1ee
+  ✓ pass completed_at recorded: 2026-10-29T02:01:00Z
+  ✓ pass predecessor complete: 03-threat-model
+  ✓ pass content clean
+05-implementation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: c02528c5e9e91dcfa4624f176af54436ae1f25eb
+  ✓ pass completed_at recorded: 2026-10-29T06:20:00Z
+  ✓ pass predecessor complete: 04-plan
+  ✓ pass content clean
+06-verification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: dccdd8c7171d1c53d40d52cb5209cff1dd0c1ce4
+  ✓ pass completed_at recorded: 2026-10-30T02:30:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since dccdd8c7171d; specification unchanged since 829441a628bc
+  ✓ pass red evidence: CHECK-001: 9a96f459d945 -> dccdd8c7171d (test/phase_seal_test.rb); CHECK-002: 9a96f459d945 -> dccdd8c7171d (test/gate_checks_test.rb); CHECK-009: d6c2748fecf6 -> dccdd8c7171d (test/remediation_gate_hardening_test.rb); CHECK-012: 4d7392a6eb30 -> dccdd8c7171d (test/remediation_gate_hardening_test.rb); CHECK-013: cf7b76bc49a6 -> dccdd8c7171d (test/remediation_gate_hardening_two_test.rb); CHECK-014: a930c5770309 -> dccdd8c7171d (test/remediation_gate_hardening_three_test.rb)
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 33bd93c6f7f2, outcome passed (a record, not a test result)
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass content clean
+07-evaluation  in_progress  PASS
+  ✓ pass handoff identity
+  ! warn phase in progress: not yet gated
+08-attack  pending  SKIP
+  - skip phase pending: not started
+09-remediation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: summary.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: c664d12240e31d6a51ad2f38a8b59ff2188643a6
+  ✓ pass completed_at recorded: 2026-10-30T03:30:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass content clean
+10-user-documentation  pending  SKIP
+  - skip phase pending: not started
+11-faq-index  pending  SKIP
+  - skip phase pending: not started
+12-observability  pending  SKIP
+  - skip phase pending: not started
+13-review  pending  SKIP
+  - skip phase pending: not started
+14-judgment  pending  SKIP
+  - skip phase pending: not started
+15-learning  pending  SKIP
+  - skip phase pending: not started
+advisory: 1 issue to address before gate-hardening goes live (informational, does not block the gate)
+  ! warn accessibility: the accessibility review (13-review/accessibility.md) has not run yet
+exit 0
+
+$ soft-foundry gate all --change gate-hardening   # this branch
+00-intake  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass waivers permitted: nothing waived
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 3e5627dc3d9c0ff1791ad938462ba800f67087b0
+  ✓ pass commit lineage: reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-29T01:42:00Z
+  ✓ pass predecessor complete: first phase
+  ✓ pass content clean
+01-discovery  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: repository-context.md, affected-components.md, dependencies.md, unknowns.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: a0a8460fcc5efd55a3a4f450e60cf65e79725e3b
+  ✓ pass commit lineage: descends from 00-intake at 3e5627dc3d9c; reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-29T01:46:00Z
+  ✓ pass predecessor complete: 00-intake
+  ✓ pass content clean
+02-specification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+  ✓ pass structured files parse: requirements.yml, acceptance-criteria.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 914a34deb2b249a48bd7612a65684fecb5f20b87
+  ✓ pass commit lineage: descends from 01-discovery at a0a8460fcc5e; reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-29T01:53:00Z
+  ✓ pass predecessor complete: 01-discovery
+  ✓ pass specification locked: locked at 829441a628bc, the commit that recorded it
+  ✓ pass content clean
+03-threat-model  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: attack-surface.md, trust-boundaries.md, threats.yml, mitigations.md, handoff.yml
+  ✓ pass structured files parse: threats.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 829441a628bc8c0dd184477fb80def40267f572a
+  ✓ pass commit lineage: descends from 02-specification at 914a34deb2b2; reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-29T01:57:00Z
+  ✓ pass predecessor complete: 02-specification
+  ✓ pass content clean
+04-plan  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: implementation.md, testing.md, rollout.md, rollback.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 3b72c429a815bb4d25d816a6e7187db6a762c1ee
+  ✓ pass commit lineage: descends from 03-threat-model at 829441a628bc; reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-29T02:01:00Z
+  ✓ pass predecessor complete: 03-threat-model
+  ✓ pass content clean
+05-implementation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: c02528c5e9e91dcfa4624f176af54436ae1f25eb
+  ✓ pass commit lineage: descends from 04-plan at 3b72c429a815; reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-29T06:20:00Z
+  ✓ pass predecessor complete: 04-plan
+  ✓ pass content clean
+06-verification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: dccdd8c7171d1c53d40d52cb5209cff1dd0c1ce4
+  ✓ pass commit lineage: descends from 05-implementation at c02528c5e9e9; reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-30T02:30:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since dccdd8c7171d; specification unchanged since 829441a628bc
+  ✓ pass red evidence: CHECK-001: 9a96f459d945 -> dccdd8c7171d (test/phase_seal_test.rb); CHECK-002: 9a96f459d945 -> dccdd8c7171d (test/gate_checks_test.rb); CHECK-009: d6c2748fecf6 -> dccdd8c7171d (test/remediation_gate_hardening_test.rb); CHECK-012: 4d7392a6eb30 -> dccdd8c7171d (test/remediation_gate_hardening_test.rb); CHECK-013: cf7b76bc49a6 -> dccdd8c7171d (test/remediation_gate_hardening_two_test.rb); CHECK-014: a930c5770309 -> dccdd8c7171d (test/remediation_gate_hardening_three_test.rb)
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 33bd93c6f7f2, outcome passed (a record, not a test result)
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass test results recorded: 14 checks, 13 pass; acknowledged: CHECK-011 (fail)
+  ! warn criteria covered: AC-053, AC-054 named by no verification check's criteria; an evaluation journey may cover them, or the judgment sets them aside with a reason in evidence.yml criteria_not_covered
+  ✓ pass evidence manifest verified: 18 artifacts match
+  ✓ pass content clean
+07-evaluation  in_progress  PASS
+  ✓ pass handoff identity
+  ! warn phase in progress: not yet gated
+08-attack  pending  SKIP
+  - skip phase pending: not started
+09-remediation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: summary.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: c664d12240e31d6a51ad2f38a8b59ff2188643a6
+  ✓ pass commit lineage: descends from 05-implementation at c02528c5e9e9; reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-30T03:30:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass content clean
+10-user-documentation  pending  SKIP
+  - skip phase pending: not started
+11-faq-index  pending  SKIP
+  - skip phase pending: not started
+12-observability  pending  SKIP
+  - skip phase pending: not started
+13-review  pending  SKIP
+  - skip phase pending: not started
+14-judgment  pending  SKIP
+  - skip phase pending: not started
+15-learning  pending  SKIP
+  - skip phase pending: not started
+advisory: 1 issue to address before gate-hardening goes live (informational, does not block the gate)
+  ! warn accessibility: the accessibility review (13-review/accessibility.md) has not run yet
+exit 0
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/soft_foundry-0.22.0/exe/soft-foundry gate all --change gate-hardening   # pre-change gem
+00-intake  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass waivers permitted: nothing waived
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 3e5627dc3d9c0ff1791ad938462ba800f67087b0
+  ✓ pass completed_at recorded: 2026-10-29T01:42:00Z
+  ✓ pass predecessor complete: first phase
+  ✓ pass content clean
+01-discovery  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: repository-context.md, affected-components.md, dependencies.md, unknowns.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: a0a8460fcc5efd55a3a4f450e60cf65e79725e3b
+  ✓ pass completed_at recorded: 2026-10-29T01:46:00Z
+  ✓ pass predecessor complete: 00-intake
+  ✓ pass content clean
+02-specification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 914a34deb2b249a48bd7612a65684fecb5f20b87
+  ✓ pass completed_at recorded: 2026-10-29T01:53:00Z
+  ✓ pass predecessor complete: 01-discovery
+  ✓ pass specification locked: locked at 829441a628bc, the commit that recorded it
+  ✓ pass content clean
+03-threat-model  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: attack-surface.md, trust-boundaries.md, threats.yml, mitigations.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 829441a628bc8c0dd184477fb80def40267f572a
+  ✓ pass completed_at recorded: 2026-10-29T01:57:00Z
+  ✓ pass predecessor complete: 02-specification
+  ✓ pass content clean
+04-plan  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: implementation.md, testing.md, rollout.md, rollback.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 3b72c429a815bb4d25d816a6e7187db6a762c1ee
+  ✓ pass completed_at recorded: 2026-10-29T02:01:00Z
+  ✓ pass predecessor complete: 03-threat-model
+  ✓ pass content clean
+05-implementation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: c02528c5e9e91dcfa4624f176af54436ae1f25eb
+  ✓ pass completed_at recorded: 2026-10-29T06:20:00Z
+  ✓ pass predecessor complete: 04-plan
+  ✓ pass content clean
+06-verification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: dccdd8c7171d1c53d40d52cb5209cff1dd0c1ce4
+  ✓ pass completed_at recorded: 2026-10-30T02:30:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since dccdd8c7171d; specification unchanged since 829441a628bc
+  ✓ pass red evidence: CHECK-001: 9a96f459d945 -> dccdd8c7171d (test/phase_seal_test.rb); CHECK-002: 9a96f459d945 -> dccdd8c7171d (test/gate_checks_test.rb); CHECK-009: d6c2748fecf6 -> dccdd8c7171d (test/remediation_gate_hardening_test.rb); CHECK-012: 4d7392a6eb30 -> dccdd8c7171d (test/remediation_gate_hardening_test.rb); CHECK-013: cf7b76bc49a6 -> dccdd8c7171d (test/remediation_gate_hardening_two_test.rb); CHECK-014: a930c5770309 -> dccdd8c7171d (test/remediation_gate_hardening_three_test.rb)
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 33bd93c6f7f2, outcome passed (a record, not a test result)
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass content clean
+07-evaluation  in_progress  PASS
+  ✓ pass handoff identity
+  ! warn phase in progress: not yet gated
+08-attack  pending  SKIP
+  - skip phase pending: not started
+09-remediation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: summary.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: c664d12240e31d6a51ad2f38a8b59ff2188643a6
+  ✓ pass completed_at recorded: 2026-10-30T03:30:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass content clean
+10-user-documentation  pending  SKIP
+  - skip phase pending: not started
+11-faq-index  pending  SKIP
+  - skip phase pending: not started
+12-observability  pending  SKIP
+  - skip phase pending: not started
+13-review  pending  SKIP
+  - skip phase pending: not started
+14-judgment  pending  SKIP
+  - skip phase pending: not started
+15-learning  pending  SKIP
+  - skip phase pending: not started
+advisory: 1 issue to address before gate-hardening goes live (informational, does not block the gate)
+  ! warn accessibility: the accessibility review (13-review/accessibility.md) has not run yet
+exit 0
+
+$ soft-foundry gate all --change gate-hardening   # this branch
+00-intake  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass waivers permitted: nothing waived
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 3e5627dc3d9c0ff1791ad938462ba800f67087b0
+  ✓ pass commit lineage: reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-29T01:42:00Z
+  ✓ pass predecessor complete: first phase
+  ✓ pass content clean
+01-discovery  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: repository-context.md, affected-components.md, dependencies.md, unknowns.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: a0a8460fcc5efd55a3a4f450e60cf65e79725e3b
+  ✓ pass commit lineage: descends from 00-intake at 3e5627dc3d9c; reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-29T01:46:00Z
+  ✓ pass predecessor complete: 00-intake
+  ✓ pass content clean
+02-specification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+  ✓ pass structured files parse: requirements.yml, acceptance-criteria.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 914a34deb2b249a48bd7612a65684fecb5f20b87
+  ✓ pass commit lineage: descends from 01-discovery at a0a8460fcc5e; reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-29T01:53:00Z
+  ✓ pass predecessor complete: 01-discovery
+  ✓ pass specification locked: locked at 829441a628bc, the commit that recorded it
+  ✓ pass content clean
+03-threat-model  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: attack-surface.md, trust-boundaries.md, threats.yml, mitigations.md, handoff.yml
+  ✓ pass structured files parse: threats.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 829441a628bc8c0dd184477fb80def40267f572a
+  ✓ pass commit lineage: descends from 02-specification at 914a34deb2b2; reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-29T01:57:00Z
+  ✓ pass predecessor complete: 02-specification
+  ✓ pass content clean
+04-plan  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: implementation.md, testing.md, rollout.md, rollback.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 3b72c429a815bb4d25d816a6e7187db6a762c1ee
+  ✓ pass commit lineage: descends from 03-threat-model at 829441a628bc; reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-29T02:01:00Z
+  ✓ pass predecessor complete: 03-threat-model
+  ✓ pass content clean
+05-implementation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: c02528c5e9e91dcfa4624f176af54436ae1f25eb
+  ✓ pass commit lineage: descends from 04-plan at 3b72c429a815; reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-29T06:20:00Z
+  ✓ pass predecessor complete: 04-plan
+  ✓ pass content clean
+06-verification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: dccdd8c7171d1c53d40d52cb5209cff1dd0c1ce4
+  ✓ pass commit lineage: descends from 05-implementation at c02528c5e9e9; reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-30T02:30:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since dccdd8c7171d; specification unchanged since 829441a628bc
+  ✓ pass red evidence: CHECK-001: 9a96f459d945 -> dccdd8c7171d (test/phase_seal_test.rb); CHECK-002: 9a96f459d945 -> dccdd8c7171d (test/gate_checks_test.rb); CHECK-009: d6c2748fecf6 -> dccdd8c7171d (test/remediation_gate_hardening_test.rb); CHECK-012: 4d7392a6eb30 -> dccdd8c7171d (test/remediation_gate_hardening_test.rb); CHECK-013: cf7b76bc49a6 -> dccdd8c7171d (test/remediation_gate_hardening_two_test.rb); CHECK-014: a930c5770309 -> dccdd8c7171d (test/remediation_gate_hardening_three_test.rb)
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 33bd93c6f7f2, outcome passed (a record, not a test result)
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass test results recorded: 14 checks, 13 pass; acknowledged: CHECK-011 (fail)
+  ! warn criteria covered: AC-053, AC-054 named by no verification check's criteria; an evaluation journey may cover them, or the judgment sets them aside with a reason in evidence.yml criteria_not_covered
+  ✓ pass evidence manifest verified: 18 artifacts match
+  ✓ pass content clean
+07-evaluation  in_progress  PASS
+  ✓ pass handoff identity
+  ! warn phase in progress: not yet gated
+08-attack  pending  SKIP
+  - skip phase pending: not started
+09-remediation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: summary.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: c664d12240e31d6a51ad2f38a8b59ff2188643a6
+  ✓ pass commit lineage: descends from 05-implementation at c02528c5e9e9; reaches HEAD b871187a6bf2; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-10-30T03:30:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass content clean
+10-user-documentation  pending  SKIP
+  - skip phase pending: not started
+11-faq-index  pending  SKIP
+  - skip phase pending: not started
+12-observability  pending  SKIP
+  - skip phase pending: not started
+13-review  pending  SKIP
+  - skip phase pending: not started
+14-judgment  pending  SKIP
+  - skip phase pending: not started
+15-learning  pending  SKIP
+  - skip phase pending: not started
+advisory: 1 issue to address before gate-hardening goes live (informational, does not block the gate)
+  ! warn accessibility: the accessibility review (13-review/accessibility.md) has not run yet
+exit 0
+
+$ /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/lib/ruby/gems/3.3.0/gems/soft_foundry-0.22.0/exe/soft-foundry gate all --change gate-hardening   # pre-change gem
+00-intake  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass waivers permitted: nothing waived
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 3e5627dc3d9c0ff1791ad938462ba800f67087b0
+  ✓ pass completed_at recorded: 2026-10-29T01:42:00Z
+  ✓ pass predecessor complete: first phase
+  ✓ pass content clean
+01-discovery  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: repository-context.md, affected-components.md, dependencies.md, unknowns.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: a0a8460fcc5efd55a3a4f450e60cf65e79725e3b
+  ✓ pass completed_at recorded: 2026-10-29T01:46:00Z
+  ✓ pass predecessor complete: 00-intake
+  ✓ pass content clean
+02-specification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 914a34deb2b249a48bd7612a65684fecb5f20b87
+  ✓ pass completed_at recorded: 2026-10-29T01:53:00Z
+  ✓ pass predecessor complete: 01-discovery
+  ✓ pass specification locked: locked at 829441a628bc, the commit that recorded it
+  ✓ pass content clean
+03-threat-model  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: attack-surface.md, trust-boundaries.md, threats.yml, mitigations.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 829441a628bc8c0dd184477fb80def40267f572a
+  ✓ pass completed_at recorded: 2026-10-29T01:57:00Z
+  ✓ pass predecessor complete: 02-specification
+  ✓ pass content clean
+04-plan  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: implementation.md, testing.md, rollout.md, rollback.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 3b72c429a815bb4d25d816a6e7187db6a762c1ee
+  ✓ pass completed_at recorded: 2026-10-29T02:01:00Z
+  ✓ pass predecessor complete: 03-threat-model
+  ✓ pass content clean
+05-implementation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: c02528c5e9e91dcfa4624f176af54436ae1f25eb
+  ✓ pass completed_at recorded: 2026-10-29T06:20:00Z
+  ✓ pass predecessor complete: 04-plan
+  ✓ pass content clean
+06-verification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: dccdd8c7171d1c53d40d52cb5209cff1dd0c1ce4
+  ✓ pass completed_at recorded: 2026-10-30T02:30:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since dccdd8c7171d; specification unchanged since 829441a628bc
+  ✓ pass red evidence: CHECK-001: 9a96f459d945 -> dccdd8c7171d (test/phase_seal_test.rb); CHECK-002: 9a96f459d945 -> dccdd8c7171d (test/gate_checks_test.rb); CHECK-009: d6c2748fecf6 -> dccdd8c7171d (test/remediation_gate_hardening_test.rb); CHECK-012: 4d7392a6eb30 -> dccdd8c7171d (test/remediation_gate_hardening_test.rb); CHECK-013: cf7b76bc49a6 -> dccdd8c7171d (test/remediation_gate_hardening_two_test.rb); CHECK-014: a930c5770309 -> dccdd8c7171d (test/remediation_gate_hardening_three_test.rb)
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 33bd93c6f7f2, outcome passed (a record, not a test result)
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass content clean
+07-evaluation  in_progress  PASS
+  ✓ pass handoff identity
+  ! warn phase in progress: not yet gated
+08-attack  pending  SKIP
+  - skip phase pending: not started
+09-remediation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: summary.md, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: c664d12240e31d6a51ad2f38a8b59ff2188643a6
+  ✓ pass completed_at recorded: 2026-10-30T03:30:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass content clean
+10-user-documentation  pending  SKIP
+  - skip phase pending: not started
+11-faq-index  pending  SKIP
+  - skip phase pending: not started
+12-observability  pending  SKIP
+  - skip phase pending: not started
+13-review  pending  SKIP
+  - skip phase pending: not started
+14-judgment  pending  SKIP
+  - skip phase pending: not started
+15-learning  pending  SKIP
+  - skip phase pending: not started
+advisory: 1 issue to address before gate-hardening goes live (informational, does not block the gate)
+  ! warn accessibility: the accessibility review (13-review/accessibility.md) has not run yet
+exit 0
+
+# this branch: 1.43, 1.42, 1.40 (median 1.42 s)
+# pre-change gem: 1.46, 1.12, 1.18 (median 1.18 s)
+# ratio branch/pre-change: 1.20
+assert pass: AC-052 timed gate all is under twice the pre-change wall time
+
+# EVAL-017: PASS (1 assertions passed, 0 failed)

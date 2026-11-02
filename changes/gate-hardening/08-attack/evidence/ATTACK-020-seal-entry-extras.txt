@@ -1,0 +1,152 @@
+completed evaluate at 7a16cdd365d9
+== X1a: planted metadata.yml.soft-foundry-tmp sibling
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+soft-foundry: /private/tmp/sf-attack2/repos/ax1/changes/c1/metadata.yml.soft-foundry-tmp already exists (planted or leftover temporary file); remove it and rerun
+[exit 1]
+--- git log
+693faa1 evaluate complete on disk
+7a16cdd phases complete through verify
+e26e293 record
+b0fc78b initial
+--- git status
+ M changes/c1/07-evaluation/handoff.yml
+?? changes/c1/metadata.yml.soft-foundry-tmp
+--- metadata
+status: in_progress
+current_phase: evaluate
+== X1b: planted handoff.yml.soft-foundry-tmp as a symlink to metadata.yml
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+soft-foundry: /private/tmp/sf-attack2/repos/ax1/changes/c1/07-evaluation/handoff.yml.soft-foundry-tmp already exists (planted or leftover temporary file); remove it and rerun
+[exit 1]
+--- git log
+693faa1 evaluate complete on disk
+7a16cdd phases complete through verify
+e26e293 record
+b0fc78b initial
+--- git status
+ M changes/c1/07-evaluation/handoff.yml
+?? changes/c1/07-evaluation/handoff.yml.soft-foundry-tmp
+--- metadata
+status: in_progress
+current_phase: evaluate
+== X1c: --change with a traversal slug
+$ /tmp/sf-attack2/bin/sf phase seal evaluate --change ../c1
+soft-foundry: invalid change slug '../c1'
+[exit 1]
+$ /tmp/sf-attack2/bin/sf phase seal evaluate --change c1/../../etc
+soft-foundry: invalid change slug 'c1/../../etc'
+[exit 1]
+$ /tmp/sf-attack2/bin/sf phase seal evaluate;id
+soft-foundry: unknown phase 'evaluate;id'; lifecycle phases: intake, discover, specify, threat_model, plan, implement, verify, evaluate, attack, remediate, document, index, observe, review, judge, learn
+[exit 1]
+== X1d: handoff status 'Complete' and 'complete ' (not the word)
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+c1: cannot seal evaluate: 07-evaluation/handoff.yml says status Complete; set it complete (with commit_sha, completed_at, and outputs) when the phase's work is done, then seal
+[exit 1]
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+c1: cannot seal evaluate: 07-evaluation/handoff.yml says status complete ; set it complete (with commit_sha, completed_at, and outputs) when the phase's work is done, then seal
+[exit 1]
+== X1e: a hand edit to metadata.yml (skipped_phases, risk) rides into the seal commit
+ changes/c1/07-evaluation/handoff.yml | 1 +
+ changes/c1/metadata.yml              | 4 ++--
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/locks/c1.lock
+note: metadata.yml also carries uncommitted edits to risk, skipped_phases, which this seal commits; the gate honours them from now on (ATK-007)
+sealed 07-evaluation at 9d4d181dcd4c
+[exit 0]
+--- git log
+9d4d181 Record c1 evaluate
+693faa1 evaluate complete on disk
+7a16cdd phases complete through verify
+e26e293 record
+b0fc78b initial
+--- git status
+--- metadata
+status: in_progress
+current_phase: review
+    Record c1 evaluate
+
+ changes/c1/07-evaluation/handoff.yml |  1 +
+ changes/c1/metadata.yml              | 64 ++++++++----------------------------
+ 2 files changed, 15 insertions(+), 50 deletions(-)
+-  worktree: /tmp/sf-attack2/repos/template
++  worktree: "/tmp/sf-attack2/repos/template"
+-type: TBD                  # feature | fix | refactor | docs | infrastructure | security | chore
+-risk: TBD                  # low | medium | high; a high risk change is always on the gated track (.ai/workflow.yml tracks.forced_by_risk)
+-track: gated            # gated | iterative (.ai/workflow.yml tracks:); set by `change new --track`
++type: TBD
++risk: low
++track: gated
+-current_phase: evaluate
+-created_at: 2026-10-30T02:30:14Z
+-scope: []                  # optional path globs this change owns; empty means the whole repository. Evidence goes stale only for code inside this scope or the repository's shared_core, and the checks are sized from the diff (.ai/policies/check-sizing.yml)
++current_phase: review
++created_at: 2026-10-30 02:30:14.000000000 Z
++scope: []
+-  accessibility: false    # true when a person perceives or operates the result (UI, CLI output, documents); loads .ai/rules/accessibility.md and enables the go-live accessibility advisories. Set automatically by `change new` when the repository profile records a user-facing framework.
++  accessibility: false
+-  policy: false           # true when the change alters what the application collects, shares, retains, protects, or promises in its privacy policy, security policy, or terms; loads .ai/rules/policy-conformance.md and enables the go-live policy advisories. Set automatically by `change new` when the repository profile records a published policy document.
+-
+-# Human-boundary decisions this change required (.ai/policies/human-boundaries.yml),
+-# each recorded once a person made it. While a decision the review says is owed
+-# has no entry here, the change is parked with status: awaiting_human.
++  policy: false
+-# - boundary: legal commitment
+-#   subject: privacy policy, clause 4 (third-party analytics recipient)
+-#   decided_by: TBD
+-#   decided_at: TBD
+-#   decision: approved | declined
+-
+-# Iterative track only. `soft-foundry change vet` records the person's
+-# acceptance of the explored feature and the commit the specification
+-# locked at; from then on the phases from implement onward apply as on the
+-# gated track. `change reopen` clears it, resets those phases to pending,
+-# and appends the reopening here so the history stays in the record.
+-vetted: null
+-# vetted:
+-#   at: 2026-09-16T00:00:00Z
+-#   by: name
+-#   commit: sha
++vetted:
+-# - at: 2026-09-16T00:00:00Z
+-#   from_commit: sha the change had been vetted at
+-#   reason: why the person sent it back to exploring
+-# One entry per `phase reopen` or automatic reopen by `phase run` (a stale
+-# complete phase):
+-# - at: 2026-09-16T00:00:00Z
+-#   phase: verify
+-#   reset: [verify, evaluate]      # phases returned to pending, files kept
+-#   from_commit: sha
+-#   reason: why the phase was reopened
+-#   source: manual                 # manual | auto
+-#   previous: complete             # the phase's status before the reset
+-# `release:` is added by `change release`; an absent key is valid, an empty
+-# one is not.
+-
+-# Phases the harness would otherwise require, deliberately not run for
+-# this change, each with a non-empty rationale. An entry with an empty
+-# rationale does not count as a skip - the phase stays required.
+-skipped_phases: []
+-# - phase: threat_model
+-#   rationale: TBD
++skipped_phases:
++  rationale: smuggled in the seal commit
+== X1f: seal again (already sealed path)
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+already sealed at 9d4d181dcd4c (07-evaluation and metadata.yml are unchanged since)
+[exit 0]
+== X1g: dirty lib/ after seal: seal attack with uncommitted code
+completed attack at 9d4d181dcd4c
+$ /tmp/sf-attack2/bin/sf phase seal attack
+c1: cannot seal attack: uncommitted application, test, or infrastructure paths: lib/app.rb; commit the code first, since commit_sha describes committed code
+[exit 1]
+Updated 1 path from the index
+== X1h: ignored-but-present code path
+$ /tmp/sf-attack2/bin/sf phase seal attack
+c1: cannot seal attack: uncommitted application, test, or infrastructure paths: lib/secret.rb; commit the code first, since commit_sha describes committed code
+[exit 1]
+== X1i: untracked file under a directory the globs cover (test/)
+$ /tmp/sf-attack2/bin/sf phase seal attack
+c1: cannot seal attack: uncommitted application, test, or infrastructure paths: test/planted_test.rb; commit the code first, since commit_sha describes committed code
+[exit 1]

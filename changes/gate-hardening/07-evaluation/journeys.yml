@@ -1,0 +1,316 @@
+---
+commit_sha: b871187a6bf28f6e2fc4730920a099c0bde9f580
+journeys:
+- id: EVAL-001
+  criteria:
+  - AC-001
+  - AC-005
+  - AC-009
+  persona: maintainer or phase session or runner or CI, driven through the real command
+    line
+  starting_state: throwaway fixture repository built by evidence/journeys-driver.rb
+    (or this checkout for EVAL-016, 017)
+  steps:
+  - see evidence/EVAL-001-seal-happy-path.txt for each command, its output and exit
+    code
+  assertions:
+  - every assertion line in the transcript passes (pass)
+  evidence:
+  - evidence/EVAL-001-seal-happy-path.txt
+  result: pass
+- id: EVAL-002
+  criteria:
+  - AC-002
+  - AC-003
+  - AC-004
+  persona: maintainer or phase session or runner or CI, driven through the real command
+    line
+  starting_state: throwaway fixture repository built by evidence/journeys-driver.rb
+    (or this checkout for EVAL-016, 017)
+  steps:
+  - see evidence/EVAL-002-seal-refusals.txt for each command, its output and exit
+    code
+  assertions:
+  - every assertion line in the transcript passes (pass)
+  evidence:
+  - evidence/EVAL-002-seal-refusals.txt
+  result: pass
+- id: EVAL-003
+  criteria:
+  - AC-006
+  - AC-007
+  - AC-008
+  persona: maintainer or phase session or runner or CI, driven through the real command
+    line
+  starting_state: throwaway fixture repository built by evidence/journeys-driver.rb
+    (or this checkout for EVAL-016, 017)
+  steps:
+  - see evidence/EVAL-003-seal-staging-and-advance.txt for each command, its output
+    and exit code
+  assertions:
+  - every assertion line in the transcript passes (pass)
+  evidence:
+  - evidence/EVAL-003-seal-staging-and-advance.txt
+  result: pass
+- id: EVAL-004
+  criteria:
+  - AC-010
+  persona: maintainer or phase session or runner or CI, driven through the real command
+    line
+  starting_state: throwaway fixture repository built by evidence/journeys-driver.rb
+    (or this checkout for EVAL-016, 017)
+  steps:
+  - see evidence/EVAL-004-seal-hook-refusal.txt for each command, its output and exit
+    code
+  assertions:
+  - every assertion line in the transcript passes (pass)
+  evidence:
+  - evidence/EVAL-004-seal-hook-refusal.txt
+  result: pass
+- id: EVAL-005
+  criteria:
+  - AC-016
+  - AC-017
+  persona: maintainer or phase session or runner or CI, driven through the real command
+    line
+  starting_state: throwaway fixture repository built by evidence/journeys-driver.rb
+    (or this checkout for EVAL-016, 017)
+  steps:
+  - see evidence/EVAL-005-predecessor-recorded.txt for each command, its output and
+    exit code
+  assertions:
+  - every assertion line in the transcript passes (pass)
+  evidence:
+  - evidence/EVAL-005-predecessor-recorded.txt
+  result: pass
+- id: EVAL-006
+  criteria:
+  - AC-011
+  - AC-012
+  - AC-015
+  persona: maintainer or phase session or runner or CI, driven through the real command
+    line
+  starting_state: throwaway fixture repository built by evidence/journeys-driver.rb
+    (or this checkout for EVAL-016, 017)
+  steps:
+  - see evidence/EVAL-006-runner-seals.txt for each command, its output and exit code
+  assertions:
+  - every assertion line in the transcript passes (pass)
+  evidence:
+  - evidence/EVAL-006-runner-seals.txt
+  result: pass
+- id: EVAL-007
+  criteria:
+  - AC-013
+  - AC-014
+  - AC-055
+  persona: maintainer or phase session or runner or CI, driven through the real command
+    line
+  starting_state: throwaway fixture repository built by evidence/journeys-driver.rb
+    (or this checkout for EVAL-016, 017)
+  steps:
+  - see evidence/EVAL-007-runner-parallel.txt for each command, its output and exit
+    code
+  assertions:
+  - every assertion line in the transcript passes (pass)
+  evidence:
+  - evidence/EVAL-007-runner-parallel.txt
+  result: pass
+- id: EVAL-008
+  criteria:
+  - AC-018
+  - AC-020
+  - AC-021
+  persona: maintainer or phase session or runner or CI, driven through the real command
+    line
+  starting_state: throwaway fixture repository built by evidence/journeys-driver.rb
+    (or this checkout for EVAL-016, 017)
+  steps:
+  - see evidence/EVAL-008-structured-files-parse.txt for each command, its output
+    and exit code
+  assertions:
+  - every assertion line in the transcript passes (pass)
+  evidence:
+  - evidence/EVAL-008-structured-files-parse.txt
+  result: pass
+- id: EVAL-009
+  criteria:
+  - AC-022
+  - AC-023
+  - AC-024
+  persona: maintainer or phase session or runner or CI, driven through the real command
+    line
+  starting_state: throwaway fixture repository built by evidence/journeys-driver.rb
+    (or this checkout for EVAL-016, 017)
+  steps:
+  - see evidence/EVAL-009-commit-lineage.txt for each command, its output and exit
+    code
+  assertions:
+  - every assertion line in the transcript passes (pass)
+  evidence:
+  - evidence/EVAL-009-commit-lineage.txt
+  result: pass
+- id: EVAL-010
+  criteria:
+  - AC-025
+  - AC-026
+  - AC-027
+  persona: maintainer or phase session or runner or CI, driven through the real command
+    line
+  starting_state: throwaway fixture repository built by evidence/journeys-driver.rb
+    (or this checkout for EVAL-016, 017)
+  steps:
+  - see evidence/EVAL-010-test-results-recorded.txt for each command, its output and
+    exit code
+  assertions:
+  - every assertion line in the transcript passes (pass)
+  evidence:
+  - evidence/EVAL-010-test-results-recorded.txt
+  result: pass
+- id: EVAL-011
+  criteria:
+  - AC-028
+  - AC-029
+  - AC-030
+  persona: maintainer or phase session or runner or CI, driven through the real command
+    line
+  starting_state: throwaway fixture repository built by evidence/journeys-driver.rb
+    (or this checkout for EVAL-016, 017)
+  steps:
+  - see evidence/EVAL-011-criteria-covered.txt for each command, its output and exit
+    code
+  assertions:
+  - every assertion line in the transcript passes (pass)
+  evidence:
+  - evidence/EVAL-011-criteria-covered.txt
+  result: pass
+- id: EVAL-012
+  criteria:
+  - AC-031
+  - AC-032
+  - AC-033
+  persona: maintainer or phase session or runner or CI, driven through the real command
+    line
+  starting_state: throwaway fixture repository built by evidence/journeys-driver.rb
+    (or this checkout for EVAL-016, 017)
+  steps:
+  - see evidence/EVAL-012-evidence-manifest.txt for each command, its output and exit
+    code
+  assertions:
+  - every assertion line in the transcript passes (pass)
+  evidence:
+  - evidence/EVAL-012-evidence-manifest.txt
+  result: pass
+- id: EVAL-013
+  criteria:
+  - AC-034
+  - AC-035
+  - AC-036
+  - AC-037
+  - AC-038
+  persona: maintainer or phase session or runner or CI, driven through the real command
+    line
+  starting_state: throwaway fixture repository built by evidence/journeys-driver.rb
+    (or this checkout for EVAL-016, 017)
+  steps:
+  - see evidence/EVAL-013-verdict-and-fresh-session.txt for each command, its output
+    and exit code
+  assertions:
+  - every assertion line in the transcript passes (pass)
+  evidence:
+  - evidence/EVAL-013-verdict-and-fresh-session.txt
+  result: pass
+- id: EVAL-014
+  criteria:
+  - AC-039
+  - AC-040
+  - AC-041
+  - AC-042
+  - AC-043
+  persona: maintainer or phase session or runner or CI, driven through the real command
+    line
+  starting_state: throwaway fixture repository built by evidence/journeys-driver.rb
+    (or this checkout for EVAL-016, 017)
+  steps:
+  - see evidence/EVAL-014-commands.txt for each command, its output and exit code
+  assertions:
+  - every assertion line in the transcript passes (pass)
+  evidence:
+  - evidence/EVAL-014-commands.txt
+  result: pass
+- id: EVAL-015
+  criteria:
+  - AC-044
+  - AC-045
+  - AC-046
+  - AC-047
+  - AC-049
+  persona: maintainer or phase session or runner or CI, driven through the real command
+    line
+  starting_state: throwaway fixture repository built by evidence/journeys-driver.rb
+    (or this checkout for EVAL-016, 017)
+  steps:
+  - see evidence/EVAL-015-residuals.txt for each command, its output and exit code
+  assertions:
+  - every assertion line in the transcript passes (pass)
+  evidence:
+  - evidence/EVAL-015-residuals.txt
+  result: pass
+- id: EVAL-016
+  criteria:
+  - AC-052
+  persona: maintainer or phase session or runner or CI, driven through the real command
+    line
+  starting_state: throwaway fixture repository built by evidence/journeys-driver.rb
+    (or this checkout for EVAL-016, 017)
+  steps:
+  - see evidence/EVAL-016-smoke-this-repository.txt for each command, its output and
+    exit code
+  assertions:
+  - every assertion line in the transcript passes (pass)
+  evidence:
+  - evidence/EVAL-016-smoke-this-repository.txt
+  result: pass
+- id: EVAL-017
+  criteria:
+  - AC-052
+  persona: maintainer or phase session or runner or CI, driven through the real command
+    line
+  starting_state: throwaway fixture repository built by evidence/journeys-driver.rb
+    (or this checkout for EVAL-016, 017)
+  steps:
+  - see evidence/EVAL-017-performance.txt for each command, its output and exit code
+  assertions:
+  - every assertion line in the transcript passes (pass)
+  evidence:
+  - evidence/EVAL-017-performance.txt
+  result: pass
+- id: EVAL-018
+  criteria:
+  - AC-052
+  persona: maintainer or phase session or runner or CI, driven through the real command
+    line
+  starting_state: throwaway fixture repository built by evidence/journeys-driver.rb
+    (or this checkout for EVAL-016, 017)
+  steps:
+  - see evidence/EVAL-018-accessibility.txt for each command, its output and exit
+    code
+  assertions:
+  - every assertion line in the transcript passes (pass)
+  evidence:
+  - evidence/EVAL-018-accessibility.txt
+  result: pass
+- id: EVAL-019
+  criteria:
+  - AC-052
+  persona: maintainer
+  starting_state: throwaway fixture repository built by evidence/journeys-driver.rb
+    (or this checkout for EVAL-016, 017)
+  steps:
+  - see evidence/EVAL-019-git-call-count.txt for each command, its output and exit
+    code
+  assertions:
+  - every assertion line in the transcript passes (pass)
+  evidence:
+  - evidence/EVAL-019-git-call-count.txt
+  result: pass

@@ -1,0 +1,19 @@
+== 13b redo: the fake shell is not executable (spawn fails): error path
+[exit 1] hunter2 occurrences: 0
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the evaluation skill's permissions (`soft-foundry hooks install --claude`)
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the adversarial-testing skill's permissions (`soft-foundry hooks install --claude`)
+parallel: running evaluate, attack of c1 at once, each in its own fresh session; executed_by recorded in each handoff
+phase evaluate: could not run: claude is not installed or not on PATH
+phase evaluate: claude exited 1
+07-evaluation  in_progress  PASS
+  ! warn phase in progress: not yet gated
+phase evaluate: not sealed
+== 13e redo: value 'phase' (a substring of normal output)
+[exit 1]
+phase evaluate: claude exited 1
+  ! warn phase in progress: not yet gated
+phase evaluate: not sealed
+phase evaluate: fail
+phase attack: claude exited 1
+  ! warn phase in progress: not yet gated
+== 13f: a value that equals the slug 'c1'

@@ -93,7 +93,7 @@ class PhaseRunParallelTest < Minitest::Test
         overlap << (barrier.size >= 2)
         0
       end
-      assert_equal 0, code, out
+      assert_equal 2, code, out # the stubs write no handoff, so nothing is sealed (REQ-005); overlap is the point
       assert_equal [true, true], [overlap.pop, overlap.pop]
     end
   end
@@ -107,7 +107,7 @@ class PhaseRunParallelTest < Minitest::Test
       assert_equal 0, code, out
       lines = out.lines.map(&:chomp)
       assert_equal ["phase evaluate: pass", "phase attack: pass"], lines.grep(/\Aphase (evaluate|attack): (pass|fail)\z/)
-      assert_includes lines, "parallel: 2 phases run, 2 passed, 0 failed"
+      assert_includes lines, "parallel: 2 phases run, 2 passed and sealed, 0 failed"
       assert(lines.grep(/\A(phase |parallel:|warn:)/).all?(&:ascii_only?), "new lines carry no non-ASCII")
     end
   end
@@ -128,7 +128,7 @@ class PhaseRunParallelTest < Minitest::Test
       assert_includes out, "phase evaluate: pass"
       assert_includes out, "phase attack: fail"
       assert_equal "complete", record.phase_status(record.control_plane.phase("evaluate"))
-      assert_includes out, "parallel: 2 phases run, 1 passed, 1 failed"
+      assert_includes out, "parallel: 2 phases run, 1 passed and sealed, 1 failed"
     end
   end
 
@@ -212,7 +212,7 @@ class PhaseRunParallelTest < Minitest::Test
     with_parallel_record do |dir, _record|
       refuse(dir, "attack", "--shell", "claude", /predecessor 07-evaluation is pending/)
       code, out, launches = run_parallel(dir, "evaluate", "attack", "--parallel", "--shell", "claude")
-      assert_equal 0, code, out
+      assert_equal 2, code, out # accepted and run; the stub sessions write no handoff, so nothing is sealed (REQ-005)
       assert_equal 2, launches.size
     end
   end
@@ -234,7 +234,7 @@ class PhaseRunParallelTest < Minitest::Test
     with_parallel_record do |dir, _record|
       code, out, launches = run_parallel(dir, "evaluate", "attack", "--parallel", "--shell", "claude",
                                          "--env", "DATABASE_URL=db_{phase}", "--env", "PLAIN=same")
-      assert_equal 0, code, out
+      assert_equal 2, code, out # no handoff written by the stubs, so nothing is sealed (REQ-005)
       by = launches.to_h { |l| [phase_of(l), l.env] }
       assert_equal "db_evaluate", by["evaluate"]["DATABASE_URL"]
       assert_equal "db_attack", by["attack"]["DATABASE_URL"]
@@ -246,7 +246,7 @@ class PhaseRunParallelTest < Minitest::Test
   def test_a_parallel_run_without_env_warns_that_isolation_is_the_adopters
     with_parallel_record do |dir, _record|
       code, out, = run_parallel(dir, "evaluate", "attack", "--parallel", "--shell", "claude")
-      assert_equal 0, code
+      assert_equal 2, code # the stubs write no handoff, so nothing is sealed (REQ-005); the warning is the point
       assert_match(/^warn: .*isolation .*adopter's responsibility/, out)
       _, out, = run_parallel(dir, "evaluate", "attack", "--parallel", "--shell", "claude", "--env", "A=1", "--dry-run")
       refute_match(/^warn: .*isolation/, out)
@@ -287,7 +287,7 @@ class PhaseRunParallelTest < Minitest::Test
   def test_a_single_phase_run_also_takes_env_and_leaves_the_parallel_flag_unset
     with_parallel_record(complete: THROUGH_VERIFY + %w[evaluate]) do |dir, _record|
       code, out, launches = run_parallel(dir, "attack", "--shell", "claude", "--env", "DB=db_{phase}")
-      assert_equal 0, code, out
+      assert_equal 2, code, out # no handoff written, so not sealed (REQ-005)
       assert_equal "db_attack", launches.first.env["DB"]
       refute launches.first.env.key?("SOFT_FOUNDRY_PARALLEL")
     end
@@ -295,11 +295,11 @@ class PhaseRunParallelTest < Minitest::Test
 
   # --- commits and the record -------------------------------------------------------
 
-  def test_sessions_are_told_the_start_head_and_not_to_commit_and_the_runner_commits_nothing
+  def test_sessions_are_told_the_start_head_and_not_to_commit_and_an_unsealed_run_commits_nothing
     with_parallel_record do |dir, _record|
       start = head(dir)
       code, out, launches = run_parallel(dir, "evaluate", "attack", "--parallel", "--shell", "claude")
-      assert_equal 0, code, out
+      assert_equal 2, code, out # the stubs write no handoff: nothing to seal, nothing committed (REQ-005)
       assert(launches.all? { |l| l.prompt.include?("commit_sha is #{start}") && l.prompt.include?("do not commit") })
       assert_equal start, head(dir)
       refute_match(/^warn: .*HEAD/, out)
@@ -351,7 +351,7 @@ class PhaseRunParallelTest < Minitest::Test
       File.write(File.join(dir, "lib", "app.rb"), "puts 2\n")
       commit_all(dir, "code changed")
       code, out, launches = run_parallel(dir, "evaluate", "attack", "--parallel", "--shell", "claude")
-      assert_equal 0, code, out
+      assert_equal 2, code, out # reopened and run; the stubs write no handoff, so nothing is sealed (REQ-005)
       assert_equal 2, launches.size
       entries = record.metadata["phase_reopenings"]
       assert_equal 1, entries.size, "evaluate's reopen resets attack, so attack is not reopened again"
@@ -365,6 +365,7 @@ class PhaseRunParallelTest < Minitest::Test
 
   def test_twenty_simultaneous_finishes_lose_no_update
     with_parallel_record do |dir, record|
+      start = head(dir)
       20.times do |n|
         gate = Queue.new
         code, out, = run_parallel(dir, "evaluate", "attack", "--parallel", "--shell", "claude") do |launch|
@@ -381,7 +382,8 @@ class PhaseRunParallelTest < Minitest::Test
           assert_equal 0, h.dig("executed_by", "exit_status"), "run #{n} #{id}"
         end
         assert_equal "review", record.metadata["current_phase"]
-        sh(dir, "git", "checkout", "-q", "--", "changes")
+        # Each run sealed both phases into history; the next run starts from the same commit.
+        sh(dir, "git", "reset", "-q", "--hard", start)
         sh(dir, "git", "clean", "-fdq", "--", "changes")
       end
     end

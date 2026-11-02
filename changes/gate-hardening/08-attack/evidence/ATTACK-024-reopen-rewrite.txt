@@ -1,0 +1,37 @@
+== 6a: phase reopen evaluate, then hand-restore status complete, completed_at and the new commit_sha with no rerun, then phase seal
+sealed 07-evaluation at b23598d498ca
+$ /tmp/sf-attack2/bin/sf phase reopen evaluate --reason code changed after evaluate
+phase reopen: reopened evaluate (manual)
+phase reopen: reset evaluate
+[exit 0]
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+07-evaluation  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: evaluation-plan.md, journeys.yml, results.md, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: journeys.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 6f42d46089a3acbe426a2a39843ecc2fab8d3612
+  ✗ fail commit lineage: commit_sha is 6f42d46089a3acbe426a2a39843ecc2fab8d3612 but this phase was recorded at b23598d498ca with commit_sha 7a16cdd365d942a62b0fcce2eeb9f20559be527e; it was reopened, yet no evidence file under 07-evaluation/ other than handoff.yml differs from that record, so nothing was rerun; redo the phase's work before moving its commit_sha
+  ✓ pass completed_at recorded: 2026-10-29T12:00:00Z
+  ✓ pass predecessor complete: 06-verification
+  ✓ pass evidence current: no code changes since 6f42d46089a3; specification unchanged since 7a16cdd365d9
+  ✓ pass evidence manifest verified: 1 artifact matches
+  ✓ pass content clean
+c1: 07-evaluation is not sealed: its gate fails; nothing was committed
+[exit 2]
+--- git log
+6f42d46 change the code after evaluation
+b23598d Record c1 evaluate
+a43c75b evaluate complete on disk
+7a16cdd phases complete through verify
+e26e293 record
+--- git status
+ M changes/c1/07-evaluation/handoff.yml
+ M changes/c1/metadata.yml
+--- metadata
+status: in_progress
+current_phase: evaluate
+6f42d46 change the code after evaluation
+b23598d Record c1 evaluate
+a43c75b evaluate complete on disk

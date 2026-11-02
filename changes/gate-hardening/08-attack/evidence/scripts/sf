@@ -1,0 +1,6 @@
+#!/bin/sh
+# Runs the branch's own soft-foundry against the current directory with a
+# session-clean environment (SOFT_FOUNDRY_* and provider keys unset) unless
+# the case sets them explicitly before calling.
+exec env -u SOFT_FOUNDRY_PHASE -u SOFT_FOUNDRY_PARALLEL -u SOFT_FOUNDRY_GUARD -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u XAI_API_KEY -u GEMINI_API_KEY -u GOOGLE_API_KEY -u OPENROUTER_API_KEY \
+  /Users/jscholen-iou/.asdf/installs/ruby/3.3.1/bin/ruby -I/Users/jscholen-iou/dev/soft_foundry/lib /Users/jscholen-iou/dev/soft_foundry/exe/soft-foundry "$@"

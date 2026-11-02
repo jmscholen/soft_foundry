@@ -1,0 +1,46 @@
+== gate usage
+soft-foundry: Usage: soft-foundry gate <phase|all> [--change SLUG]
+== gate all --json head
+00-intake  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass waivers permitted: nothing waived
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no bloc
+== gate review --json head
+13-review  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: functional.md, architecture.md, security.md, accessibility.md, policy-conformance.md, infrastructure.md, operations.md, consolidated.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no p
+== change summary (review has a forged executed_by stamp)
+change: c1
+phase: review (status: in_progress, risk: TBD, track: gated)
+phase-status: intake complete
+phase-status: discover complete
+phase-status: specify complete
+phase-status: threat_model complete
+phase-status: plan complete
+phase-status: implement complete
+phase-status: verify complete
+phase-status: evaluate complete
+phase-status: attack complete
+phase-status: remediate pending
+phase-status: document pending
+phase-status: index pending
+phase-status: observe pending
+phase-status: review complete
+phase-status: judge pending
+phase-status: learn pending
+findings: none
+blocking: none
+owed: none
+== change status advisories
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              complete     FAIL: fresh session recorded
+  14-judgment            pending      
+  15-learning            pending      

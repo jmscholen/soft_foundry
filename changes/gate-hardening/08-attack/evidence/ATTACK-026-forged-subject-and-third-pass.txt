@@ -1,0 +1,102 @@
+== 7a: ATK-010 fix bypass: the hand commit of the rewritten commit_sha is given the seal's own subject 'Record c1 evaluate'
+sealed 07-evaluation at 80e827d2f363
+07-evaluation  complete  PASS
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD 5004d98b8d51; recorded with this commit_sha
+  ✓ pass evidence current: no code changes since 5941b4076ef8; specification unchanged since 7a16cdd365d9
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+already sealed at 5004d98b8d51 (07-evaluation and metadata.yml are unchanged since)
+[exit 0]
+--- git log
+5004d98 Record c1 evaluate
+5941b40 change the code after evaluation
+80e827d Record c1 evaluate
+80e2285 evaluate complete on disk
+7a16cdd phases complete through verify
+--- git status
+--- metadata
+status: in_progress
+current_phase: attack
+== 7b: same, forged subject on an empty commit that follows a plain hand commit of the rewrite
+sealed 07-evaluation at 53301d540712
+07-evaluation  complete  FAIL
+  ✗ fail commit lineage: commit_sha is 877d4fbb1510c6bd82da746c070c4788b0ac81cd but this phase was recorded at 53301d540712 with commit_sha 7a16cdd365d942a62b0fcce2eeb9f20559be527e, and has not been reopened since; evidence is replaced by `soft-foundry phase reopen evaluate --reason TEXT` and a rerun, never by rewriting the commit it names
+  ✓ pass evidence current: no code changes since 877d4fbb1510; specification unchanged since 7a16cdd365d9
+== 7c: same, the forged-subject commit is made the way the tool would: handoff + metadata only, with a reopen first
+sealed 07-evaluation at 9de2b1e83929
+$ /tmp/sf-attack2/bin/sf phase reopen evaluate --reason code changed after evaluate
+phase reopen: reopened evaluate (manual)
+phase reopen: reset evaluate
+[exit 0]
+-- 7c: a one-newline append to results.md is the only 'rerun'
+  ✓ pass commit lineage: descends from 06-verification at e26e29393970; reaches HEAD 829a0acf51bd
+c1: 07-evaluation is not sealed: its gate fails; nothing was committed
+--- git log
+829a0ac change the code after evaluation
+9de2b1e Record c1 evaluate
+563b60a evaluate complete on disk
+7a16cdd phases complete through verify
+e26e293 record
+--- git status
+ M changes/c1/07-evaluation/handoff.yml
+ M changes/c1/07-evaluation/results.md
+ M changes/c1/metadata.yml
+--- metadata
+status: in_progress
+current_phase: evaluate
+== 7d: a phase committed by hand, never sealed: seal says what, and does the next phase's predecessor check pass
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/locks/c1.lock
+sealed 07-evaluation at e00b7478b079
+[exit 0]
+e00b747 Record c1 evaluate
+406d254 evaluate complete on disk
+7a16cdd phases complete through verify
+  ✓ pass commit lineage: descends from 07-evaluation at 7a16cdd365d9; reaches HEAD 826fd5419ad4; recorded with this commit_sha
+  ✓ pass predecessor complete: 07-evaluation
+== 7e: the same with the subject forged on a record that never went through the tool (hand 'Record c1 evaluate' empty commit)
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/locks/c1.lock
+sealed 07-evaluation at b3aa18a11892
+[exit 0]
+--- git log
+b3aa18a Record c1 evaluate
+e55a25f Record c1 evaluate
+7a16cdd phases complete through verify
+e26e293 record
+b0fc78b initial
+--- git status
+--- metadata
+status: in_progress
+current_phase: attack
+== 7f: ATK-007: hand edit of risk and skipped_phases rides into the seal; does the note name it
+$ /tmp/sf-attack2/bin/sf phase seal evaluate
+note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/locks/c1.lock
+note: metadata.yml also carries uncommitted edits to risk, which this seal commits; the gate honours them from now on (ATK-007)
+sealed 07-evaluation at 4fd89b3a7a2d
+[exit 0]
+Record c1 evaluate
+
+ changes/c1/07-evaluation/handoff.yml | 1 +
+ changes/c1/metadata.yml              | 4 ++--
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+== 7g: ATK-006: policies/enforcement.yml missing, empty, unparseable, mode block, then check and gate review
+-- original:
+version: 1
+
+# Runtime enforcement of skill permissions. Each skill's permissions.yml
+# declares what it may read and write; `soft-foundry guard` is a
+# PreToolUse hook (`soft-foundry hooks install --claude`) that checks a
+# coding shell's tool calls against the active skill's sets. The active
+# skill is the current phase's, or the track's stage skill while a change
+# is exploring. Outside a change branch nothing is guarded.
+#
+#   warn   report the violation to the shell and let the call through,
+#          logging it to .soft-foundry/guard.log (machine-local)
+#   block  refuse the call (the hook exits 2 with the reason)
+! warning policies/enforcement.yml is missing: the guard mode defaults to warn, so a review or judgment from the implementing session is advised, never refused; add it with `guard: {mode: block}` to require a fresh session
+✓ pass control plane: 16 phases, 17 skills, no errors
+✗ error policies/enforcement.yml is not valid YAML: (/private/tmp/sf-attack2/repos/a034/.ai/policies/enforcement.yml): did not find expected ',' or ']' while parsing a flow sequence at line 1 column 7
+✗ fail control plane: 1 error(s)
+✓ pass control plane: 16 phases, 17 skills, no errors
+== 7h: EVAL-017 / REQ-036: gate all call count and time at this HEAD (scratch, 11 phases)
+real	0m0.598s

@@ -1,0 +1,83 @@
+# EVAL-005: A predecessor complete only on disk is refused until sealed; waived predecessors are stepped over (AC-016, AC-017)
+# driver: evidence/journeys-driver.rb, run 2026-10-30T02:26:28Z at b871187a6bf2
+
+# scratch repository: /tmp/sf-eval4/repos/eval-005-pred
+$ soft-foundry change new c1   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+$ soft-foundry gate discover
+01-discovery  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: repository-context.md, affected-components.md, dependencies.md, unknowns.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: ac0e8206c45970cada9d379dfad212232dbae446
+  ✓ pass commit lineage: descends from 00-intake at ac0e8206c459; reaches HEAD ac0e8206c459
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✗ fail predecessor complete: 00-intake is complete but not recorded in git; run `soft-foundry phase seal intake` so the record's history carries it (the specification lock and the plan diff base are read from that commit)
+  ✓ pass content clean
+exit 2
+
+assert pass: AC-016 gate discover exits 2
+assert pass: AC-016 `predecessor complete` fails naming `soft-foundry phase seal intake`
+$ soft-foundry phase seal intake
+note: left uncommitted (outside this phase and the record's metadata): changes/c1/01-discovery/affected-components.md, changes/c1/01-discovery/dependencies.md, changes/c1/01-discovery/handoff.yml, changes/c1/01-discovery/repository-context.md, changes/c1/01-discovery/unknowns.md
+sealed 00-intake at 73dc54ed1275
+exit 0
+
+assert pass: seal intake exits 0
+$ soft-foundry gate discover
+01-discovery  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: repository-context.md, affected-components.md, dependencies.md, unknowns.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: ac0e8206c45970cada9d379dfad212232dbae446
+  ✓ pass commit lineage: descends from 00-intake at ac0e8206c459; reaches HEAD 73dc54ed1275
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 00-intake
+  ✓ pass content clean
+exit 0
+
+assert pass: AC-016 after sealing intake, `predecessor complete` passes
+# scratch repository: /tmp/sf-eval4/repos/eval-005-lowrisk
+$ soft-foundry change new c1 --risk low   # create the record
+created changes/c1 with 16 phase directories
+branch: change/c1
+risk: low
+track: gated
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+exit 0
+
+$ soft-foundry phase seal intake
+note: left uncommitted (outside this phase and the record's metadata): .ai/skills/evaluation/.soft-foundry/, .soft-foundry/
+sealed 00-intake at 2f034f738ea2
+exit 0
+
+assert pass: intake sealed; current_phase jumps to implement
+$ soft-foundry gate implement
+05-implementation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 2f034f738ea26b2d12cdb956113c61e6a8d3527a
+  ✓ pass commit lineage: descends from 00-intake at b65ed98d7305; reaches HEAD 2f034f738ea2
+  ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+  ✓ pass predecessor complete: 00-intake
+  ✓ pass content clean
+exit 0
+
+assert pass: AC-017 `predecessor complete` passes naming intake
+assert pass: AC-017 gate implement exits 0
+
+# EVAL-005: PASS (7 assertions passed, 0 failed)
