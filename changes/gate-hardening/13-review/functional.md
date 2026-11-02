@@ -1,12 +1,15 @@
 # Functional Review
 
 ## Scope reviewed
-TBD
+Reviewed at HEAD 5eb5b1a against `02-specification` (REQ-001 to REQ-036): `lib/soft_foundry/phase_seal.rb`, the `Gate` lineage check (`gate.rb` 455-520), `ChangeRecord#recorded_commit`, `recorded_handoff`, `reopened_since?`, and `Git#last_commit_with_subject`, `commit!`, `dirty_under`. Evidence read: 06-verification (902 runs, 0 failures; CHECK-011 one planned test missing), 07-evaluation (19 of 19 journeys pass, EVAL-017 ratio 1.20 against the bound of 2), 08-attack (ATK-014 to ATK-018 open, ATK-003 and ATK-009 carried), 09-remediation. The attack ran at HEAD 47583ef; later commits are Record commits only.
 
 ## Findings
 | ID | Severity | Location | Finding | Failure it prevents | Rule or requirement |
 | --- | --- | --- | --- | --- | --- |
-| REV-TBD | blocking / major / minor | TBD | TBD | TBD: the concrete input or state and the wrong result (required for blocking and major) | TBD |
+| REV-001 | major | `change_record.rb` `recorded_commit`, `git.rb` `last_commit_with_subject` | The ATK-010 fix identifies the seal commit by its subject line alone, which any committer can write. This is ATK-014, open in the attack handoff. | A committer rewrites a sealed evaluate handoff's `commit_sha` to HEAD after a code change and commits only that file as `Record c1 evaluate`. That commit becomes the recorded one, so `commit lineage` says "recorded with this commit_sha", `evidence current` passes, the gate passes and `phase seal` prints `already sealed`. Stale evidence reads current again (ATTACK-026 7a). Not blocking: before this change a hand commit of the handoff had the same effect, so the gate is no weaker than `main`, and the specification's boundary is that a committer can still fake a pass. The ATK-001/ATK-010 remediation is incomplete for the named route. | REQ-009, ATK-010, "make an edit that fakes a pass detectable" (specification, Personas) |
+| REV-002 | minor | `phase_seal.rb` `sealed_at` | `phase seal` answers `already sealed at <sha>` for a phase committed by hand that has no Record commit (ATK-017). | 09-remediation is complete on disk and hand-committed: `phase seal remediate` exits 0 with the hand commit's SHA, writes no Record commit, and `current_phase` stays on the old phase. The user believes the tool sealed it. | REQ-005 |
+| REV-003 | minor | `06-verification` CHECK-011 | `harness_eval_test#test_lint_accepts_new_check_names` (AC-019) was planned and never written; four verification runs report it. | A change to `harness_eval` lint of check names would not fail that test. AC-019 is covered by `check`, `eval` and the checks listing, so no behaviour is unguarded today. | AC-019, 04-plan testing |
+| REV-004 | minor | `gate.rb` `evidence_changed_since?`, ATK-015, ATK-018 | A rerun is any changed byte, and a `criteria_not_covered` reason of two meaningless words passes. Both are the stated structure-only limit of the gate. | After `phase reopen`, restoring status and `commit_sha` by hand and appending a newline to results.md seals over code that was never rerun. | REQ-010, REQ-013; `soft-foundry-gate-scope` |
 
 ## Conformance
-TBD or N/A with justification
+Conforms with findings. 36 requirements are implemented and exercised by the suite and 19 journeys. REV-001 is a major residual for judgment to weigh; it is not a regression.

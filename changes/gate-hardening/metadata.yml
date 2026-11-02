@@ -9,7 +9,7 @@ type: feature
 risk: high
 track: gated
 status: in_progress
-current_phase: review
+current_phase: judge
 created_at: 2026-10-29 01:34:20.000000000 Z
 scope: []
 surfaces:
