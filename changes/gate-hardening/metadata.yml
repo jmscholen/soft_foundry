@@ -8,7 +8,7 @@ git:
 type: feature
 risk: high
 track: gated
-status: judged
+status: released
 current_phase: learn
 created_at: 2026-10-29 01:34:20.000000000 Z
 scope: []
@@ -139,3 +139,15 @@ phase_reopenings:
       completed_at: '2026-11-02T19:26:30Z'
       session_id: aff1d290-8f81-47a3-8641-83bbc181f2d0
 skipped_phases: []
+release:
+  at: '2026-11-03T15:19:54Z'
+  commit: f761e7eade3092d4b7e3e6eaaef8067833f33a7c
+  items:
+  - id: ATK-014
+    description: 'accepted as residual risk by the maintainer: the Record <slug> <phase>
+      seal subject can be forged by a committer; the pre-change gate allowed the same
+      hand commit; discharge when a tool-written seal trailer lands'
+  - id: FOLLOWUP-1
+    description: 'follow-up change: ATK-016 malformed enforcement.yml crash, ATK-017
+      already-sealed after a hand commit, seal trailer, VER-002 lint test, VER-003
+      suite temp-dir isolation, docs/user coverage of phase seal'
