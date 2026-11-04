@@ -1,0 +1,29 @@
+# Phase handoff. One per phase directory. The gate checker validates this file.
+phase: 05-implementation
+skill: implementation
+status: complete
+commit_sha: 804c24a
+# Written by `soft-foundry phase seal` on a commit-bound phase: whether
+# metadata.git.branch resolved to a ref when the phase was sealed. False
+# means the checked-out HEAD, not a branch created later, is the measure
+# for "evidence current". Never written by the agent.
+# branch_resolved: true
+started_at: 2026-11-04T18:45:10Z
+completed_at: 2026-11-04T18:45:10Z
+resolved_model:
+  profile: coding_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs: [log.md, decisions.md, deviations.md]
+blocking: []               # unresolved blocking conditions; must be empty when complete
+findings: []               # items for downstream phases: {id, severity, summary}; a review's
+                           # findings above minor also carry failure: (the concrete input
+                           # or state and the wrong result it leads to)
+next: verify
+notes: "Chore: no RED commit. Suite before commit: 902 runs, 0 failures, provider keys unset. Run by the implementing session; not verification evidence."
+# Written by `soft-foundry phase run`, never by the agent: how this phase was
+# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
+# session_id, cwd).
+# A review or judgment phase completed without it is advised as having been
+# performed by whatever session was already open.
+executed_by: null
