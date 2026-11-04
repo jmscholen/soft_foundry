@@ -1,0 +1,12 @@
+installed guard hook in .claude/settings.json (PreToolUse: Edit|Write|MultiEdit|NotebookEdit|Read|Grep|Glob|Bash)
+installed post-call check in .claude/settings.json (PostToolUse: Bash; restores the guard's own configuration if a command changed it)
+guard mode: block (repository policy (.ai/policies/enforcement.yml))
+install rc=0
+✓ pass pre-commit hook
+✓ pass guard hook (claude: installed, codex: not installed; mode: block, repository policy (.ai/policies/enforcement.yml))
+✓ pass local runtime
+! warn session hook (not installed; optional: `soft-foundry hooks install --sessions` records every coding session so it can be found and resumed)
+doctor rc=
+help rc=1
+no-args rc=0
+doctor with guard rc=0

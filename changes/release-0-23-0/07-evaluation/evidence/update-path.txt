@@ -1,0 +1,32 @@
+--- install the real 0.22.0
+Successfully installed soft_foundry-0.22.0
+1 gem installed
+version: 0.22.0
+0.22.0 has phase_seal.rb: 0
+--- 0.22.0: real read-only check against GitHub (latest there is still v0.17.0)
+current: 0.22.0
+latest:  0.17.0
+up to date
+rc=0
+--- 0.22.0 updater: real download path, on the real v0.17.0 asset (redirects, name)
+fetched="0.17.0" err=nil asset=soft_foundry-0.17.0.gem
+downloaded soft_foundry-0.17.0.gem 161280 bytes
+rc=0
+--- 0.22.0 updater: GitHub's response stubbed as the v0.23.0 release, real gem install
+current=0.22.0 latest=0.23.0 update_available=true error=nil
+install ok=true
+Successfully installed soft_foundry-0.23.0
+Parsing documentation for soft_foundry-0.23.0
+Installing ri documentation for soft_foundry-0.23.0
+Done installing documentation for soft_foundry after 0 seconds
+1 gem installed
+rc=0
+--- result on the throwaway GEM_HOME
+version: 0.23.0
+soft_foundry (0.23.0, 0.22.0)
+phase_seal.rb bytes=8369
+current: 0.23.0
+latest:  0.17.0
+up to date
+rc=0 (v0.17.0 is older than 0.23.0: up to date, not a downgrade)
+gem-vs-tree lib diff: 0 files

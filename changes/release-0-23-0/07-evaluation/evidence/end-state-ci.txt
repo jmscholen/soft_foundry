@@ -1,0 +1,9 @@
+A sealed phases only, six waived dirs absent: ci rc=2 ; failing handoff/pred lines: 7
+  ✗ fail handoff present: 01-discovery/handoff.yml is missing
+  ✗ fail handoff present: 02-specification/handoff.yml is missing
+  ✗ fail handoff present: 03-threat-model/handoff.yml is missing
+  ✗ fail handoff present: 04-plan/handoff.yml is missing
+  ✗ fail predecessor complete: 04-plan is missing
+  ✗ fail handoff present: 08-attack/handoff.yml is missing
+  ✗ fail handoff present: 15-learning/handoff.yml is missing
+B plus the six waived dirs: ci rc=0 ; failing handoff/pred lines: 0

@@ -1,0 +1,72 @@
+commit_sha: 16bd5f7e0e036f0be98cad675b1c341f9f15d907
+size: full_route_sweep
+# No journey names AC-001: it is the unfilled template's placeholder, and the
+# specify phase is waived. Requirement IDs come from 00-intake/request.md.
+journeys:
+  - id: EVAL-001
+    criteria: [REQ-REL-001]
+    persona: Adopter using the installed 0.23.0 gem in a new repository
+    starting_state: The 0.23.0 gem built by EVAL-002 installed in a throwaway GEM_HOME; a scratch git repository; a throwaway HOME; empty environment
+    steps:
+      - Run every top-level command and every subcommand, success paths plus refusals, from the installed gem
+      - Run `init`, `onboard`, `doctor`, `change new`, `gate`, `scan`, `learn`, `budget`, `ps`, `sessions`, `resume`, `session log`, `guard`, `eval`, `ci`, `update`, `shell` (stubbed), and `ui`
+      - Reinstall the guard and rerun `doctor`
+    assertions:
+      - Every route exits as its documented behaviour says, with no crash text
+      - The installed gem reports 0.23.0
+      - Each `ui` API route answers 401 without the token and 200 with it
+    evidence: [evidence/route-sweep.txt, evidence/doctor-with-guard.txt, evidence/scripts/sweep.sh]
+    result: pass
+  - id: EVAL-002
+    criteria: [REQ-REL-003]
+    persona: Maintainer whose tag starts the release workflow
+    starting_state: A depth-1 fetch of HEAD at a scratch-only tag v0.23.0, detached, as actions/checkout does; no global git identity; no provider keys
+    steps:
+      - Run the steps of `.github/workflows/release.yml` in order, except `gh release create`
+      - Repeat the tag check with a mismatched tag
+      - Run the full suite again in a runner-like environment after the first run's failures traced to the rehearsal's setup
+    assertions:
+      - The matching tag passes and a mismatched tag is refused
+      - The full suite passes on a shallow, detached checkout
+      - "`gem build` succeeds and `soft_foundry-*.gem` matches exactly one file"
+    evidence: [evidence/tag-path-first-run.txt, evidence/tag-path-suite-rerun.txt, evidence/scripts/tag-path.sh, evidence/scripts/suite2.sh]
+    result: pass
+  - id: EVAL-003
+    criteria: [REQ-REL-004]
+    persona: Adopter on 0.22.0 taking the update
+    starting_state: The real cached 0.22.0 gem in a throwaway GEM_HOME, which has no phase_seal.rb
+    steps:
+      - Run 0.22.0's `update` against real GitHub (read-only)
+      - Run 0.22.0's real download path on the real v0.17.0 asset
+      - Run 0.22.0's updater with GitHub's response stubbed as the v0.23.0 release and the download stubbed to the rehearsed gem; `gem install` is real
+    assertions:
+      - 0.22.0 sees 0.23.0 as newer and installs it
+      - The installed gem reports 0.23.0, contains lib/soft_foundry/phase_seal.rb, and its lib matches the tree
+      - With v0.17.0 still latest, `update` on 0.23.0 says up to date and does not downgrade
+    evidence: [evidence/update-path.txt, evidence/scripts/update.sh]
+    result: pass
+  - id: EVAL-004
+    criteria: [REQ-REL-002]
+    persona: Maintainer opening the pull request
+    starting_state: A clean full-history clone of HEAD, which is what the ci workflow sees; then the same clone with this record's later phases added, as sealing would leave it
+    steps:
+      - Run `soft-foundry ci` on the clean checkout
+      - Add the phases that will be sealed and run it again
+      - Add the six waived phase directories and run it again
+    assertions:
+      - The branch as it would be pushed passes `ci`
+    evidence: [evidence/clean-checkout-ci.txt, evidence/clean-checkout-ci-full.txt, evidence/end-state-ci.txt]
+    result: fail
+  - id: EVAL-005
+    criteria: [REQ-REL-002, REQ-REL-003, REQ-REL-004]
+    persona: Maintainer and adopter on the real release
+    starting_state: Not reached. It needs judgment, then the person's go-ahead to push, merge, and tag
+    steps:
+      - Merge through a pull request
+      - Push tag v0.23.0 on the merged commit and watch the workflow
+      - Run `soft-foundry update --yes` outside any `bundle exec` environment and inspect the installed gem
+    assertions:
+      - The GitHub release carries soft_foundry-0.23.0.gem
+      - The machine's installed gem is 0.23.0 and contains lib/soft_foundry/phase_seal.rb
+    evidence: []
+    result: blocked
