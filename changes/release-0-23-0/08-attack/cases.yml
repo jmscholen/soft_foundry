@@ -1,0 +1,21 @@
+commit_sha: TBD
+authorization_envelope:
+  target: TBD
+  environment: TBD          # local | ephemeral | test | staging | production
+  authorized_by: TBD
+  allowed_surfaces: []
+  prohibited_surfaces: []
+  data_constraints: TBD
+  network_constraints: TBD
+  destructive_actions: prohibited
+cases:
+  - id: ATTACK-001
+    threat: THREAT-001
+    violation_attempted: TBD
+    starting_privilege: TBD
+    steps:
+      - TBD
+    expected_safe_behavior: TBD
+    observed: TBD
+    result: TBD   # denied | violated | blocked_by_provider | blocked_by_scope
+    evidence: [evidence/TBD]
