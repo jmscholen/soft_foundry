@@ -1,0 +1,29 @@
+# Phase handoff. One per phase directory. The gate checker validates this file.
+phase: 00-intake
+skill: intake
+status: complete
+commit_sha: ada9411ec80566b129cf8b8a3031807739304d8e
+# Written by `soft-foundry phase seal` on a commit-bound phase: whether
+# metadata.git.branch resolved to a ref when the phase was sealed. False
+# means the checked-out HEAD, not a branch created later, is the measure
+# for "evidence current". Never written by the agent.
+# branch_resolved: true
+started_at: 2026-11-04T18:11:44Z
+completed_at: 2026-11-04T18:11:44Z
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs: [request.md, assumptions.md, skipped_phases.yml]
+blocking: []               # unresolved blocking conditions; must be empty when complete
+findings: []               # items for downstream phases: {id, severity, summary}; a review's
+                           # findings above minor also carry failure: (the concrete input
+                           # or state and the wrong result it leads to)
+next: implement
+notes: "skipped_phases.yml holds the waivers; the guard refuses metadata.yml to intake, so the person applies them."
+# Written by `soft-foundry phase run`, never by the agent: how this phase was
+# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
+# session_id, cwd).
+# A review or judgment phase completed without it is advised as having been
+# performed by whatever session was already open.
+executed_by: null

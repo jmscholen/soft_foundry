@@ -1,0 +1,44 @@
+---
+change:
+  id: release-0-23-0
+  title: release-0-23-0
+git:
+  worktree: "/Users/jscholen-iou/dev/soft_foundry/.claude/worktrees/precommit-ci-scope"
+  branch: change/release-0-23-0
+type: chore
+risk: low
+track: gated
+status: in_progress
+current_phase: implement
+created_at: 2026-11-04 18:10:04.000000000 Z
+scope: []
+surfaces:
+  application: false
+  database: false
+  infrastructure: false
+  security: false
+  accessibility: false
+  observability: false
+  policy: false
+human_decisions: []
+vetted:
+reopenings: []
+phase_reopenings: []
+skipped_phases:
+- phase: discover
+  rationale: Repository already discovered; a release touches one constant and the
+    release path is documented in README.md and the release workflow.
+- phase: specify
+  rationale: Intake captures the requirements with stable IDs REQ-REL-001..004 at
+    sufficient granularity for a version bump.
+- phase: threat_model
+  rationale: No new surface; the only application edit is the version constant, and
+    the code it releases was threat modelled in changes/gate-hardening.
+- phase: plan
+  rationale: A one-line bump; the order of the release steps is the documented path.
+- phase: attack
+  rationale: No new surface; changes/gate-hardening attacked the code this release
+    carries.
+- phase: learn
+  rationale: Nothing to learn in a one-line bump unless the release path fails; a
+    failure is recorded in evaluation.
