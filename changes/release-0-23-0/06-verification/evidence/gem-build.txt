@@ -1,0 +1,11 @@
+$ gem build soft_foundry.gemspec -o /var/folders/v8/684xdbm92vz7dz03clwvpmvr0000gn/T/tmp.FkkGK2bZAz/soft_foundry-0.23.0.gem
+WARNING:  licenses is empty, but is recommended. Use an license identifier from
+https://spdx.org/licenses or 'Nonstandard' for a nonstandard license,
+or set it to nil if you don't want to specify a license.
+WARNING:  no homepage specified
+WARNING:  See https://guides.rubygems.org/specification-reference/ for help
+  Successfully built RubyGem
+  Name: soft_foundry
+  Version: 0.23.0
+  File: soft_foundry-0.23.0.gem
+exit status: 0
