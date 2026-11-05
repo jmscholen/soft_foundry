@@ -1,0 +1,16 @@
+$ git diff main --stat -- . ':!changes/release-0-23-0'
+ lib/soft_foundry/version.rb | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+$ git diff main -- lib/soft_foundry/version.rb
+diff --git a/lib/soft_foundry/version.rb b/lib/soft_foundry/version.rb
+index a700e6a..83712d1 100644
+--- a/lib/soft_foundry/version.rb
++++ b/lib/soft_foundry/version.rb
+@@ -1,5 +1,5 @@
+ # frozen_string_literal: true
+ 
+ module SoftFoundry
+-  VERSION = "0.22.0"
++  VERSION = "0.23.0"
+ end
+$ git status --short -- . ':!changes/release-0-23-0'

@@ -1,0 +1,23 @@
+commit_sha: f6d6dc23e8e3624a45e397ac579d5c416260acaa
+artifacts:
+  - path: evidence/check.txt
+    produced_by: "CHECK-002: the control-plane check command"
+    sha256: 10b0d3ba77ff6d169c39b5fa99527eacad32257ce3bf22aea46e58dc131d5049
+  - path: evidence/ci.txt
+    produced_by: "CHECK-004: the ci command"
+    sha256: 2c157f65b132a97dba55128d815142f3f3b7b5306653ea51c718e09e1c6e694e
+  - path: evidence/diff.txt
+    produced_by: "CHECK-007: git diff main and git status outside this record"
+    sha256: d460a34456c80397ea0a3e88647c9563ffb8a238f4d9a44f3c788bbac2e50b5b
+  - path: evidence/eval.txt
+    produced_by: "CHECK-003: the harness eval command"
+    sha256: 10a4990e4bbd9173151a0151b65048cdc6850d79fccc333fea263e2bcd0abcf2
+  - path: evidence/full-suite.txt
+    produced_by: "CHECK-001: the full suite, clean environment, run alone"
+    sha256: bff23c9b583d0b9ad1f86c76e735b304f718f8403efb2abfba8e01a3201c99b0
+  - path: evidence/gem-build.txt
+    produced_by: "CHECK-006: gem build into a temporary directory"
+    sha256: 5da9a3c240aa7b9eea5ac7c29a21a1b543db6dae36128906a53f6176fe158ee5
+  - path: evidence/version.txt
+    produced_by: "CHECK-005: the version command"
+    sha256: ac75832a928ce47832acc665b3b3b1888229c010ba201416620edf2474e1934c

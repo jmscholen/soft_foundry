@@ -1,0 +1,55 @@
+commit_sha: f6d6dc23e8e3624a45e397ac579d5c416260acaa
+# `soft-foundry change size --phase verify` computed full_at_verify (no scope
+# declared: whole-repository scope is sized at the largest size).
+size: full_at_verify
+# The full suite on this tree (git rev-parse HEAD^{tree} at f6d6dc2), provider
+# keys and SOFT_FOUNDRY_* unset, run alone. A record of a run, not a test
+# result: the transcript is evidence/full-suite.txt.
+full_suite:
+  tree: 3c50e183e994853d3f0ff581bd02c39fc64e005f
+  command: "bundle exec rake test (env -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u XAI_API_KEY -u GEMINI_API_KEY -u GOOGLE_API_KEY -u SOFT_FOUNDRY_BILLING -u SOFT_FOUNDRY_PHASE -u SOFT_FOUNDRY_PARALLEL -u SOFT_FOUNDRY_GUARD), run alone"
+  outcome: passed
+# No acceptance criteria exist: the specify phase is waived in metadata.yml.
+checks:
+  - id: CHECK-001
+    kind: tests
+    command: "bundle exec rake test, with provider keys and SOFT_FOUNDRY_* unset, run alone (the recorded full-suite run)"
+    result: pass
+    evidence: evidence/full-suite.txt
+    criteria: []
+  - id: CHECK-002
+    kind: custom
+    command: "ruby -Ilib exe/soft-foundry check"
+    result: pass
+    evidence: evidence/check.txt
+    criteria: []
+  - id: CHECK-003
+    kind: custom
+    command: "ruby -Ilib exe/soft-foundry eval (every gate case; the one live case skipped)"
+    result: pass
+    evidence: evidence/eval.txt
+    criteria: []
+  - id: CHECK-004
+    kind: custom
+    command: "ruby -Ilib exe/soft-foundry ci"
+    result: pass
+    evidence: evidence/ci.txt
+    criteria: []
+  - id: CHECK-005
+    kind: custom
+    command: "ruby -Ilib exe/soft-foundry version (prints 0.23.0, the value the release workflow compares to the tag)"
+    result: pass
+    evidence: evidence/version.txt
+    criteria: []
+  - id: CHECK-006
+    kind: custom
+    command: "gem build soft_foundry.gemspec -o <temporary directory> (builds soft_foundry 0.23.0; two metadata warnings, license and homepage)"
+    result: pass
+    evidence: evidence/gem-build.txt
+    criteria: []
+  - id: CHECK-007
+    kind: custom
+    command: "git diff main and git status --short, excluding this record (only lib/soft_foundry/version.rb differs)"
+    result: pass
+    evidence: evidence/diff.txt
+    criteria: []

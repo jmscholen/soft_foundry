@@ -1,0 +1,77 @@
+---
+phase: 07-evaluation
+skill: evaluation
+status: complete
+commit_sha: 16bd5f7e0e036f0be98cad675b1c341f9f15d907
+started_at: '2026-11-04T19:05:08Z'
+completed_at: '2026-11-04T19:45:19Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+- evaluation-plan.md
+- journeys.yml
+- results.md
+- evidence/manifest.yml
+blocking: []
+findings:
+- id: EVAL-F-001
+  severity: major
+  summary: The branch fails `soft-foundry ci` on a clean checkout. `phase seal` commits
+    only its own phase directory and metadata.yml, so the six waived directories (01,
+    02, 03, 04, 08, 15) stay untracked. The worktree hides this because they exist
+    on disk. They must be committed before the push. No code change is needed for
+    this release, though sealing or `ci` could catch it in a later change.
+  failure: Sealing every remaining phase and pushing gives the PR 6 `handoff present`
+    failures and 1 `predecessor complete` failure, so `ci` exits 2. REQ-REL-002 cannot
+    merge green. EVAL-004 records it.
+- id: EVAL-F-002
+  severity: major
+  summary: REQ-REL-002, 003 and 004 are unproven. EVAL-005 is blocked until judgment
+    and the person's go-ahead to push, merge and tag. EVAL-002 and EVAL-003 are rehearsals.
+    The judgment should carry them as release items through `change release`, not
+    treat them as met.
+  failure: If the rehearsals are read as proof, a change could close with no GitHub
+    release attached, or with a real `update --yes` that was never run.
+- id: EVAL-F-003
+  severity: minor
+  summary: Check REQ-REL-004 outside any `bundle exec` environment. Inside a `phase
+    run` session, `soft-foundry version` and `gem list` report the worktree's 0.23.0
+    while the installed gem is 0.22.0, because BUNDLE_GEMFILE and RUBYOPT leak from
+    the runner. Verification's CHECK-005 is unaffected, because it ran the local library
+    on purpose.
+- id: EVAL-F-004
+  severity: minor
+  summary: AC-001 (VER-002) is the unfilled template's placeholder, and no journey
+    names it. Once 02-specification is committed the judgment gate will read it, so
+    the judgment needs it in 14-judgment/evidence.yml criteria_not_covered with the
+    waiver as the reason.
+- id: EVAL-F-005
+  severity: minor
+  summary: Three small behaviours, none from this change. `soft-foundry help` prints
+    usage and exits 1. PhaseRunnerTest fails on a machine with codex but not claude
+    on PATH, and ProcessesTest fails with HOME under a symlink. The guard refuses
+    a Bash command containing a double-quoted leading tilde with an ArgumentError
+    (it fails closed).
+next: attack
+notes: The phase's first pass read 00-intake and 05-implementation, which this skill's
+  permissions.yml read set does not list. It was not refused because Bash is checked
+  against deny sets only. REQ-REL-001..004 in the journeys come from 00-intake, the
+  only place the waived specification's requirements exist. The guard refused one
+  command naming its own configuration file, which was then left unread, and one it
+  could not parse, whose pattern was dropped. All journeys ran in scratch directories,
+  nothing was pushed or tagged on the real repository, and the machine's gems were
+  not changed. Attack is waived, so `next` keeps the template's value for the runner
+  to advance.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-11-04T19:05:08Z'
+  finished_at: '2026-11-04T19:45:38Z'
+  exit_status: 0
+  previous_phase: evaluate
+  session_id: 8f04f129-3f9e-484f-aa86-8cddd0e0d70e
+  cwd: "/Users/jscholen-iou/dev/soft_foundry/.claude/worktrees/precommit-ci-scope"
+branch_resolved: true

@@ -1,0 +1,4 @@
+clean checkout of 16bd5f7, full history, detached: ci rc=2
+76:change release-0-23-0
+119:  ✓ pass evidence current: no code changes since f6d6dc23e8e3 on branch change/release-0-23-0
+179:✗ ci failed

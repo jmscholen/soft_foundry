@@ -1,0 +1,3 @@
+$ env -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u XAI_API_KEY -u GEMINI_API_KEY -u GOOGLE_API_KEY -u SOFT_FOUNDRY_BILLING -u SOFT_FOUNDRY_PHASE -u SOFT_FOUNDRY_PARALLEL -u SOFT_FOUNDRY_GUARD ruby -Ilib exe/soft-foundry check
+✓ pass control plane: 16 phases, 17 skills, no errors
+exit status: 0

@@ -1,0 +1,67 @@
+---
+phase: 13-review
+skill: review
+status: complete
+commit_sha: 6ef1950a3ea79270fb650c0b26866092cd1e982d
+started_at: '2026-11-04T19:46:11Z'
+completed_at: '2026-11-04T19:54:58Z'
+resolved_model:
+  profile: reasoning_high
+  provider: xai
+  model: grok-4.7
+outputs:
+- functional.md
+- architecture.md
+- security.md
+- accessibility.md
+- policy-conformance.md
+- infrastructure.md
+- operations.md
+- consolidated.md
+blocking: []
+findings:
+- id: REV-001
+  severity: major
+  summary: A clean checkout fails soft-foundry ci until every phase directory is in
+    the commit. phase seal commits only the phase it finishes, and the gate fails
+    handoff present before it honors a waiver.
+  failure: A pull request from a commit that lacks the untracked phase directories
+    runs .github/workflows/ci.yml, which runs bundle exec rake ci. soft-foundry ci
+    exits 2 on handoff present. At HEAD 6ef1950 only 00, 05, 06, and 07 are tracked.
+    EVAL-004's clean checkout of 16bd5f7 exited 2, and end-state-ci.txt exits 2 when
+    the six waived directories are still absent. REQ-REL-002 cannot merge green.
+- id: REV-002
+  severity: major
+  summary: REQ-REL-002, REQ-REL-003, and REQ-REL-004 are rehearsals. EVAL-005 (merge,
+    tag, GitHub release, and update --yes) has not run. Judgment should carry them
+    as open release items.
+  failure: A judgment that treats EVAL-002 and EVAL-003 as meeting those requirements
+    can close the change while GitHub's latest release is still v0.17.0. An adopter
+    on 0.22.0 who runs soft-foundry update --yes stays on 0.22.0, and that gem has
+    no lib/soft_foundry/phase_seal.rb.
+- id: REV-003
+  severity: major
+  summary: Committing the waived 02-specification directory puts template criterion
+    AC-001 in front of the judgment gate. No check or journey names it.
+  failure: gate judge fails criteria covered on AC-001 unless 14-judgment/evidence.yml
+    sets it aside under criteria_not_covered with a reason of at least two words.
+    The specify phase was waived and the criterion was never written.
+next: judge
+notes: 'No blocking findings, so next is judge. Implement recorded provider anthropic;
+  remediate did not run; this review used xai. surfaces.accessibility and surfaces.policy
+  are false. No policy text change is owed. Rules loaded from the repository profile:
+  general, architecture, ruby, security, errors, dependencies, git, testing, observability,
+  learned, plus accessibility, policy-conformance, infrastructure, and access-control-parity
+  (no access_control globs). Optional phases 09-12 are still pending scaffolds. executed_by
+  was left as the runner wrote it. No application code was edited.'
+executed_by:
+  runner: soft-foundry phase run
+  shell: grok
+  fresh_context: true
+  started_at: '2026-11-04T19:46:11Z'
+  finished_at: '2026-11-04T19:55:36Z'
+  exit_status: 0
+  previous_phase: review
+  session_id: 12923df7-bb6f-4e59-ad2e-4c6c1a13f703
+  cwd: "/Users/jscholen-iou/dev/soft_foundry/.claude/worktrees/precommit-ci-scope"
+branch_resolved: true

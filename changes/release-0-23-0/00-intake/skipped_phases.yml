@@ -1,0 +1,13 @@
+skipped_phases:
+- phase: discover
+  rationale: Repository already discovered; a release touches one constant and the release path is documented in README.md and the release workflow.
+- phase: specify
+  rationale: Intake captures the requirements with stable IDs REQ-REL-001..004 at sufficient granularity for a version bump.
+- phase: threat_model
+  rationale: No new surface; the only application edit is the version constant, and the code it releases was threat modelled in changes/gate-hardening.
+- phase: plan
+  rationale: A one-line bump; the order of the release steps is the documented path.
+- phase: attack
+  rationale: No new surface; changes/gate-hardening attacked the code this release carries.
+- phase: learn
+  rationale: Nothing to learn in a one-line bump unless the release path fails; a failure is recorded in evaluation.

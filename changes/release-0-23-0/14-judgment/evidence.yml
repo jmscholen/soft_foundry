@@ -1,0 +1,141 @@
+commit_judged: 72cc1e95d224fdcf2421e275dd68912f9df6f850
+phases:
+  - phase: 00-intake
+    commit_sha: ada9411ec80566b129cf8b8a3031807739304d8e
+    current: true
+    result: complete
+    note: "REQ-REL-001..004 live here because specify is waived. Waivers recorded. Gate passes at the judged commit, including waivers permitted at low risk."
+  - phase: 01-discovery
+    commit_sha: null
+    current: true
+    result: skipped
+    note: "Pending, named in skipped_phases with a rationale. Low risk may waive discover. Directory is in 72cc1e9. No discovery evidence to go stale."
+  - phase: 02-specification
+    commit_sha: null
+    current: true
+    result: skipped
+    note: "Pending, waived at low risk. Scaffold acceptance-criteria.yml still defines AC-001. Set aside below. Directory is in 72cc1e9."
+  - phase: 03-threat-model
+    commit_sha: null
+    current: true
+    result: skipped
+    note: "Pending, waived at low risk. Rationale: the version constant is the only application edit. Directory is in 72cc1e9."
+  - phase: 04-plan
+    commit_sha: null
+    current: true
+    result: skipped
+    note: "Pending, waived at low risk. 05-implementation/log.md records the one-line bump. Directory is in 72cc1e9."
+  - phase: 05-implementation
+    commit_sha: 804c24a
+    current: true
+    result: complete
+    note: "VERSION 0.22.0 to 0.23.0. That blob is unchanged from the bump through the judged commit. No deviations. Gate passes. Provider anthropic."
+  - phase: 06-verification
+    commit_sha: f6d6dc23e8e3624a45e397ac579d5c416260acaa
+    current: true
+    result: complete
+    note: "Code paths match the judged commit. CHECK-001..007 pass. Full suite 902 runs, 0 failures, tree 3c50e183e994853d3f0ff581bd02c39fc64e005f. Gate passes, with the AC-001 warning this file closes. Fresh session, provider anthropic."
+  - phase: 07-evaluation
+    commit_sha: 16bd5f7e0e036f0be98cad675b1c341f9f15d907
+    current: true
+    result: complete
+    note: "Code paths match the judged commit. EVAL-001 pass. EVAL-002 and EVAL-003 are rehearsals and pass as rehearsals. EVAL-004 fail at that commit; 72cc1e9 later added the missing directories. EVAL-005 blocked. Gate passes. Fresh session, provider anthropic."
+  - phase: 08-attack
+    commit_sha: null
+    current: true
+    result: skipped
+    note: "Pending, waived at low risk. No new surface in the diff. Security review conforms. Directory is in 72cc1e9. No attack evidence to go stale."
+  - phase: 09-remediation
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Optional and pending. Review recorded no blocking finding. Remediation cannot push, merge, tag, or commit other phase directories. Directory is in 72cc1e9."
+  - phase: 10-user-documentation
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Optional and pending. The version token is the only user-visible change. README already documents update. Directory is in 72cc1e9."
+  - phase: 11-faq-index
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Optional and pending. No new FAQ. Directory is in 72cc1e9."
+  - phase: 12-observability
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Optional and pending. surfaces.observability is false. No new runtime failure mode. Directory is in 72cc1e9."
+  - phase: 13-review
+    commit_sha: 6ef1950a3ea79270fb650c0b26866092cd1e982d
+    current: true
+    result: complete
+    note: "Sealed as 977d8ee. No code diff from the review commit to the judged commit. The record layout did change in 72cc1e9, which closes the untracked-directory half of REV-001. No blocking findings. Three majors accounted below. Fresh session, provider xai, different from implementation. Gate passes."
+  - phase: 15-learning
+    commit_sha: null
+    current: true
+    result: skipped
+    note: "Pending, waived at low risk. EVAL-004's release-path failure is recorded in evaluation and weighed here. Directory is in 72cc1e9."
+criteria_not_covered:
+  - id: AC-001
+    reason: "Specify was waived. This scaffold criterion was never written and names REQ-001, which is not one of the release requirements."
+undischarged:
+  - id: REL-002
+    description: "Merge change/release-0-23-0 to main through a pull request. Push the commit that seals 14-judgment. A clean checkout of 72cc1e9 alone fails ci because 14-judgment/handoff.yml is absent. GitHub Actions has not run on this branch."
+  - id: REL-003
+    description: "Tag v0.23.0 on the merged commit so the release workflow publishes a GitHub release whose asset is soft_foundry-0.23.0.gem. Latest release on 2026-11-04 is v0.17.0. The rehearsal stopped before gh release create and ran on macOS."
+  - id: REL-004
+    description: "Run soft-foundry update --yes outside any bundle exec session. The installed gem must be 0.23.0 and must contain lib/soft_foundry/phase_seal.rb. The rehearsal stubbed GitHub. Inside bundle exec, version can print the worktree's 0.23.0 while the installed gem is still 0.22.0."
+discharged: []
+unresolved_findings:
+  - id: REV-001
+    severity: major
+    source: 13-review
+    disposition: closed_by_commit_72cc1e9
+    summary: "Untracked phase directories failed a clean checkout. 72cc1e9 adds the waived and unused templates. The seal of this phase adds 14-judgment. Push that seal. See REL-002."
+  - id: EVAL-F-001
+    severity: major
+    source: 07-evaluation
+    disposition: closed_by_commit_72cc1e9
+    summary: "Same clean-checkout hole as REV-001, recorded as EVAL-004's fail. The journey result stays fail. The judged commit has the directories EVAL-004 was missing."
+  - id: REV-002
+    severity: major
+    source: 13-review
+    disposition: accepted_residual_risk
+    undischarged: [REL-002, REL-003, REL-004]
+    summary: "REQ-REL-002, REQ-REL-003, and REQ-REL-004 are rehearsals plus work the person still has to do. They are open release conditions, not treated as met."
+  - id: EVAL-F-002
+    severity: major
+    source: 07-evaluation
+    disposition: accepted_residual_risk
+    undischarged: [REL-002, REL-003, REL-004]
+    summary: "EVAL-005 has not run. EVAL-002 and EVAL-003 do not prove the merge, the tag, or the real update."
+  - id: REV-003
+    severity: major
+    source: 13-review
+    disposition: closed_in_judgment
+    summary: "AC-001 is set aside under criteria_not_covered. The specify phase was waived and the criterion was never written."
+  - id: VER-002
+    severity: info
+    source: 06-verification
+    disposition: closed_in_judgment
+    summary: "Same scaffold criterion as REV-003. Set aside here with the waiver as the reason."
+  - id: EVAL-F-004
+    severity: minor
+    source: 07-evaluation
+    disposition: closed_in_judgment
+    summary: "Same scaffold criterion as REV-003. No journey names AC-001."
+  - id: EVAL-F-003
+    severity: minor
+    source: 07-evaluation
+    disposition: folded_into_REL-004
+    summary: "Check the real update outside bundle exec. Inside one, version can print the worktree gem."
+  - id: EVAL-F-005
+    severity: minor
+    source: 07-evaluation
+    disposition: pre_existing_not_carried
+    summary: "help exits 1, and two rehearsal failures traced to PATH and HOME. Not from the version constant."
+  - id: VER-001
+    severity: info
+    source: 06-verification
+    disposition: pre_existing_not_carried
+    summary: "gem build warns of no license and no homepage. The gem builds. The warnings predate this change."

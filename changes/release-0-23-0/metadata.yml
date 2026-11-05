@@ -1,0 +1,67 @@
+---
+change:
+  id: release-0-23-0
+  title: release-0-23-0
+git:
+  worktree: "/Users/jscholen-iou/dev/soft_foundry/.claude/worktrees/precommit-ci-scope"
+  branch: change/release-0-23-0
+type: chore
+risk: low
+track: gated
+status: released
+current_phase: learn
+created_at: 2026-11-04 18:10:04.000000000 Z
+scope: []
+surfaces:
+  application: false
+  database: false
+  infrastructure: false
+  security: false
+  accessibility: false
+  observability: false
+  policy: false
+human_decisions: []
+vetted:
+reopenings: []
+phase_reopenings: []
+skipped_phases:
+- phase: discover
+  rationale: Repository already discovered; a release touches one constant and the
+    release path is documented in README.md and the release workflow.
+- phase: specify
+  rationale: Intake captures the requirements with stable IDs REQ-REL-001..004 at
+    sufficient granularity for a version bump.
+- phase: threat_model
+  rationale: No new surface; the only application edit is the version constant, and
+    the code it releases was threat modelled in changes/gate-hardening.
+- phase: plan
+  rationale: A one-line bump; the order of the release steps is the documented path.
+- phase: attack
+  rationale: No new surface; changes/gate-hardening attacked the code this release
+    carries.
+- phase: learn
+  rationale: Nothing to learn in a one-line bump unless the release path fails; a
+    failure is recorded in evaluation.
+release:
+  at: '2026-11-05T15:42:46Z'
+  commit: 1ed01ea76e5bc859d39be372e76529a00aceeba4
+  items:
+  - id: REL-005
+    description: Confirm ci is green on main after the merge and after the tag
+  - id: REL-002
+    description: Merge change/release-0-23-0 to main through a pull request. Push
+      the commit that seals 14-judgment. A clean checkout of 72cc1e9 alone fails ci
+      because 14-judgment/handoff.yml is absent. GitHub Actions has not run on this
+      branch.
+    from: judgment
+  - id: REL-003
+    description: Tag v0.23.0 on the merged commit so the release workflow publishes
+      a GitHub release whose asset is soft_foundry-0.23.0.gem. Latest release on 2026-11-04
+      is v0.17.0. The rehearsal stopped before gh release create and ran on macOS.
+    from: judgment
+  - id: REL-004
+    description: Run soft-foundry update --yes outside any bundle exec session. The
+      installed gem must be 0.23.0 and must contain lib/soft_foundry/phase_seal.rb.
+      The rehearsal stubbed GitHub. Inside bundle exec, version can print the worktree's
+      0.23.0 while the installed gem is still 0.22.0.
+    from: judgment

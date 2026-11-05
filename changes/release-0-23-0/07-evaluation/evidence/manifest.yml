@@ -1,0 +1,41 @@
+commit_sha: 16bd5f7e0e036f0be98cad675b1c341f9f15d907
+artifacts:
+  - path: evidence/route-sweep.txt
+    journey: EVAL-001
+    sha256: 22f79af0dd697e5cc5325c19d4d92b26032234303849db12f25d246d66fcdb85
+  - path: evidence/doctor-with-guard.txt
+    journey: EVAL-001
+    sha256: 4e4da4cc261d079562b92fbad6c98b345680dddfc6cb669a85a8a1dc6f7bfa61
+  - path: evidence/scripts/sweep.sh
+    journey: EVAL-001
+    sha256: ed0cebacda29b1cda2044df50b43b46ed7077c4e6d21ffd62b74bd5b3b379195
+  - path: evidence/scripts/clean.sh
+    journey: EVAL-001
+    sha256: ef67ce4a6574867400da842ad1670fc6e7a3e9d45123f72af5b7c4865c5a8636
+  - path: evidence/tag-path-first-run.txt
+    journey: EVAL-002
+    sha256: f8141794777c594ecd5b25ec604831e537979b21abf4ce1b3af7c6b906664833
+  - path: evidence/tag-path-suite-rerun.txt
+    journey: EVAL-002
+    sha256: d27afa9a8569407b8e6fb0c8a6882717809e68939e090b5686dc0b203a6a13c2
+  - path: evidence/scripts/tag-path.sh
+    journey: EVAL-002
+    sha256: 0163eefd0108a8296ad82c13745d616856ab4d0d06419c3fd9cd8768b40cbb3d
+  - path: evidence/scripts/suite2.sh
+    journey: EVAL-002
+    sha256: e396b3938488f2ad4a946c6306f2c0537f28358a652c3590cad50986e8c45738
+  - path: evidence/update-path.txt
+    journey: EVAL-003
+    sha256: 4e4aeffbbae914304bda87998366154e26710f2522d36cb5a57fd9172c5de214
+  - path: evidence/scripts/update.sh
+    journey: EVAL-003
+    sha256: acf22b612bb424c0e44dd14609dfcf00729967b33863863c397b61e01974abcd
+  - path: evidence/clean-checkout-ci.txt
+    journey: EVAL-004
+    sha256: d956d4adbc9ee2e175570d3c9b8fd8969a2f6086bc1df4b1195958bc9a5f273c
+  - path: evidence/clean-checkout-ci-full.txt
+    journey: EVAL-004
+    sha256: 1771c1da69cc44a2265a3004f632e34c14a05452106a3c461713e8e2b643ecf9
+  - path: evidence/end-state-ci.txt
+    journey: EVAL-004
+    sha256: 562ed514a7822be0585bef8d56861e0e4325ca68c529565b57c25bb00faf5319
