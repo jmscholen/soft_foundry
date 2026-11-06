@@ -9,7 +9,7 @@ git:
 type: docs
 risk: low
 track: gated
-status: judged
+status: released
 current_phase: learn
 created_at: 2026-11-06 12:14:04.000000000 Z
 scope: []
@@ -60,3 +60,44 @@ skipped_phases:
   rationale: A documentation catch-up; what it teaches (conditions of approval owed
     by a maintainer stay open until someone owns them) is recorded in the intake and
     the judgment.
+release:
+  at: '2026-11-06T13:32:19Z'
+  commit: 5f408add22ed7eca2fefaf725795a916a3076f38
+  items:
+  - id: GDH-4
+    description: Merge change/guard-docs-and-hooks to main through PR and confirm
+      ci is green on main after the merge
+  - id: GDH-1
+    description: 'REQ-GDH-003 read by the maintainer at merge: the six lines b9f4d7c
+      added to .ai/harness-evals/README.md say an unattended Claude Code live eval
+      needs shell arguments to write the phase directory, and give the invocation
+      (eval --live --shell claude --case <case> -- --allowedTools "Read Write Edit
+      Glob Grep Bash" --permission-mode acceptEdits). No skill in the lifecycle may
+      read the file.'
+    from: judgment
+  - id: GDH-2
+    description: 'The off-mode override text corrected, or made true by code first
+      (REV-GDH-001). In README.md "Mode" and "The post-call restore" and in docs/user/guard-hook.md
+      "Change the mode on your machine": say the file override cannot hold off while
+      the hook is installed, because the first shell command''s post-call check removes
+      it and reports a tamper; give SOFT_FOUNDRY_GUARD=off, with no override file
+      present and no uncommitted edit of .ai/policies/enforcement.yml, as the way,
+      noting both are removed or reverted under it; keep mode: "warn" in the file
+      as working; say the post-call restore runs on every branch and the pre-call
+      guard disengages at status judged (REV-GDH-002); hedge the Grok post-call sentence
+      (REV-GDH-004). Alternatively, land the code fix first (record the baseline in
+      off mode, or skip the post-call check in off mode, in cli.rb guard and guard_after)
+      and describe that behaviour. FAQ-GDH-002 in 10-user-documentation/ repeats the
+      instruction; the index phase runs after this. A documentation-phase reopen or
+      a later record may do the text; remediation cannot (its write set is code and
+      denies docs/).'
+    from: judgment
+  - id: GDH-3
+    description: 'Maintainer edit of the header of .ai/policies/enforcement.yml (protected
+      policy, REQ-GDH-002): say off must be quoted in a file because a bare off is
+      YAML''s boolean false and the file is then ignored (EVAL-F-001, REV-GDH-005);
+      replace "outside a change branch nothing is guarded" with where the post-call
+      restore runs (every branch) and when the pre-call guard disengages (status judged)
+      (REV-GDH-002); and describe the off-mode behaviour as it stands once GDH-2 is
+      settled.'
+    from: judgment
