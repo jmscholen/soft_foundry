@@ -1,6 +1,65 @@
+# Search records handed to the faq-indexing phase. Every answer is grounded in
+# the EVAL ids named; "factory-readiness EVAL-004" is that record's journey
+# (changes/factory-readiness/07-evaluation/journeys.yml), the only source
+# for the live-eval invocation, which this record did not run.
 records:
-  - id: TBD
-    question: TBD
-    answer: TBD
-    source_evals: []
-    docs_path: TBD
+  - id: FAQ-GDH-001
+    question: My repository has had the guard hook for a while. Why are Grep and Glob not checked, and why was a change to the guard's configuration during a shell command not restored?
+    answer: The hook predates 0.21.0 (matcher without Grep and Glob, no PostToolUse entry). Run `soft-foundry hooks install --claude` again; it replaces the matcher with Edit|Write|MultiEdit|NotebookEdit|Read|Grep|Glob|Bash, adds the PostToolUse entry running `guard --after`, keeps other hooks and keys, and changes nothing on a second run. `doctor` reports installed either way because it checks presence, not the matcher.
+    source_evals: [EVAL-003, EVAL-002]
+    docs_path: docs/user/guard-hook.md
+  - id: FAQ-GDH-002
+    question: 'I wrote `mode: off` in .soft-foundry/enforcement.yml and the guard still blocks. Why?'
+    answer: 'YAML reads a bare off as the boolean false, which is not a mode, so the file is ignored and the repository policy applies. Write it quoted, `mode: "off"`, or set SOFT_FOUNDRY_GUARD=off, which needs no quoting and wins over both files. `doctor` names the source in effect.'
+    source_evals: [EVAL-005, EVAL-004]
+    docs_path: docs/user/guard-hook.md
+  - id: FAQ-GDH-003
+    question: The guard refused `cd /tmp 2>/dev/null && ls` as "could not be decided". Is that a bypass?
+    answer: No. The guard fails closed and refuses what it cannot decide. Today a cd or pushd that leaves the repository followed by another token in the same segment, typically a redirection, is refused; `cd /tmp && ls`, `cd /tmp; ls` and `cd lib 2>/dev/null && ls` are decided. The defect is recorded for a later change.
+    source_evals: [EVAL-004]
+    docs_path: docs/user/guard-hook.md
+  - id: FAQ-GDH-004
+    question: Why was `cat .claude/settings.json` or `tail .soft-foundry/guard.log` refused when the Read tool reads the same file?
+    answer: The guard's own configuration (.ai/policies/enforcement.yml, everything under .soft-foundry/, and the hook entries in .claude/settings.json, .claude/settings.local.json and .codex/hooks.json) may not be named in a shell command by any skill. Read is checked against deny_read only, so the Read tool is allowed.
+    source_evals: [EVAL-001, EVAL-004]
+    docs_path: docs/user/guard-hook.md
+  - id: FAQ-GDH-005
+    question: How do I check that the guard is installed and which mode is in effect?
+    answer: 'Run `soft-foundry doctor`. The guard line reads `pass guard hook (claude: installed, codex: installed; mode: block, repository policy (.ai/policies/enforcement.yml))`, with `not installed` for a host without the entry; with neither it is `fail` and names the install command. The mode source is repository policy, machine-local override (.soft-foundry/enforcement.yml), or the SOFT_FOUNDRY_GUARD environment variable.'
+    source_evals: [EVAL-002, EVAL-003, EVAL-004]
+    docs_path: docs/user/guard-hook.md
+  - id: FAQ-GDH-006
+    question: I edited the guard's configuration in my own shell and the next command restored it, reporting tamper. Why?
+    answer: A shell command was interrupted before its post-call check and left a baseline in .soft-foundry/guard-baseline.yml. One older than thirty minutes is refreshed at the next shell call; inside that window a hand edit is read as a change during a call. Run `soft-foundry guard --after` once before editing (it consumes the baseline and prints nothing when nothing changed), or rerun `hooks install`, which clears it. An edit made between two commands with no baseline pending stands.
+    source_evals: [EVAL-004, EVAL-003, factory-readiness EVAL-F7]
+    docs_path: docs/user/guard-hook.md
+  - id: FAQ-GDH-007
+    question: soft-foundry eval --live --shell claude fails with "0 findings recorded". Did the review miss the defect?
+    answer: 'No. The unattended Claude Code session found it but could not write the phase directory. Pass the shell''s own flags after `--`: `soft-foundry eval --live --shell claude --case review-finds-planted-defect -- --allowedTools "Read Write Edit Glob Grep Bash" --permission-mode acceptEdits`.'
+    source_evals: [factory-readiness EVAL-004]
+    docs_path: docs/user/guard-hook.md
+  - id: FAQ-GDH-008
+    question: Does Codex get the post-call restore?
+    answer: No. `hooks install --codex` writes a PreToolUse entry only (matcher Bash|apply_patch|Edit|Write). The restore is installed for Claude Code and for Grok, which runs the Claude Code entry from .claude/settings.json.
+    source_evals: [EVAL-002, EVAL-003]
+    docs_path: docs/user/guard-hook.md
+  - id: FAQ-GDH-009
+    question: An Edit failed with "String to replace not found" and there is no guard line for it. Did the guard miss it?
+    answer: No. Claude Code validates an Edit before it runs PreToolUse hooks, so an Edit that cannot apply never reaches the guard and nothing is written. A write that can apply is shown to the guard and refused when the skill may not write there.
+    source_evals: [EVAL-001]
+    docs_path: docs/user/guard-hook.md
+  - id: FAQ-GDH-010
+    question: A shell command naming a file under .ai/policies/ that does not exist was refused. Why?
+    answer: Protected policy and harness material (.ai/policies/, .ai/harness-evals/) are refused by name in a shell command, whether or not the file exists.
+    source_evals: [EVAL-001]
+    docs_path: docs/user/guard-hook.md
+  - id: FAQ-GDH-011
+    question: What does a refusal tell me, and where is it recorded?
+    answer: 'Every refusal names the tool, the path, the skill, the mode, and where the override is documented, and is one line in the machine-local .soft-foundry/guard.log, such as `2026-11-06T12:41:45Z block Grep skill=evaluation paths=.ai/harness-evals searches inside evaluation''s deny_read set`. In warn mode the line starts `! warn guard:` and the call runs. Read the log with the Read tool, not from the shell.'
+    source_evals: [EVAL-001, EVAL-004, EVAL-009]
+    docs_path: docs/user/guard-hook.md
+  - id: FAQ-GDH-012
+    question: Is anything guarded on main, or after a change is closed?
+    answer: No. The guard resolves the active skill from the branch's change record and its current_phase; outside a change branch, or once the change is closed, every call is allowed.
+    source_evals: [EVAL-004]
+    docs_path: docs/user/guard-hook.md

@@ -24,7 +24,21 @@ surfaces:
 human_decisions: []
 vetted:
 reopenings: []
-phase_reopenings: []
+phase_reopenings:
+- at: '2026-11-06T13:10:36Z'
+  phase: document
+  reset:
+  - document
+  from_commit: 1f3a0594f22143d1c00836f46c2d9e76a0815fae
+  reason: 'Gate failed ''no placeholders'': the session''s handoff notes quote the
+    placeholder word while describing its own check; redo the phase'
+  source: manual
+  previous:
+    document:
+      status: complete
+      commit_sha: 1f3a0594f22143d1c00836f46c2d9e76a0815fae
+      completed_at: '2026-11-06T13:12:00Z'
+      session_id: 65ee0afe-626a-42bb-97ad-2566a878e268
 skipped_phases:
 - phase: discover
   rationale: Repository discovered in changes/factory-readiness and kept current since;
