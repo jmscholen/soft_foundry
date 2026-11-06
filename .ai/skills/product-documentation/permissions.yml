@@ -7,6 +7,7 @@ read:
 write:
   - "changes/${CHANGE}/10-user-documentation/**"
   - "docs/user/**"
+  - "README.md"
 deny_read:
   - "${HARNESS_EVALS}"
 deny_write:
