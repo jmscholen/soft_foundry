@@ -1,0 +1,27 @@
+CHECK-009: the header comment of .ai/policies/enforcement.yml (as of commit
+b9f4d7c, unchanged at 6af7142) read with the Read tool and its checkable
+claims matched against the code on this branch. REQ-GDH-002. The file was
+not named in any shell command (the guard refuses protected policy in Bash).
+
+Setting: guard.mode: block  -> unchanged (the only key; the rest is comment).
+
+| Claim in the header | Where it is checked | Match |
+| --- | --- | --- |
+| `soft-foundry guard` is a PreToolUse hook installed by `hooks install --claude`; the active skill is the current phase's | hooks.rb:69 install_claude; the hook ran in this session with the verification skill (CHECK-007) | yes |
+| Modes warn / block / off; block is repository policy; `.soft-foundry/enforcement.yml` or SOFT_FOUNDRY_GUARD override it, the variable winning | guard.rb:30-33 POLICY, LOCAL, ENV_VAR; guard.rb:47-59 Guard.mode reads the variable first, then the local file, then the policy | yes |
+| The guard's own configuration cannot be written from inside a guarded session | observed: Bash naming the settings file refused (CHECK-007); test/factory_readiness_test.rb `--after` cases | yes |
+| Edit, Write, MultiEdit, NotebookEdit checked against write and deny_write | guard.rb:38 WRITE_TOOLS; observed: Write outside the repository refused, Write into 06-verification allowed | yes |
+| Read checked against deny_read only | guard.rb:40 READ_TOOLS; observed: Read of enforcement.yml and the hook settings allowed | yes |
+| Grep and Glob checked against deny_read by path and a glob pattern's static prefix | guard.rb:41 SEARCH_TOOLS, guard.rb:260; test/factory_readiness_test.rb:565-571; observed: both refused into .ai/harness-evals (CHECK-007) | yes |
+| Paths judged after symlinks resolve | guard.rb:419-446 realpath | yes |
+| Bash read segment by segment, following cd and pushd | guard.rb:501-503 | yes |
+| Bash refused when it names a deny_read path, protected policy, harness material, or the guard's own configuration; may name what the skill may read | observed: git, bundle and exe/soft-foundry commands allowed; the settings file refused (CHECK-007) | yes |
+| A call the guard cannot decide (unknown ~user, NUL byte) is refused | guard.rb:136 | yes |
+| The guard's own configuration is this file, `.soft-foundry/`, and the hook entries in .claude/settings.json, .claude/settings.local.json, .codex/hooks.json | guard.rb:30-32; hooks.rb:55-67 claude_settings_path(local:), codex_hooks_path; cli.rb:1527 `guard --after` | yes |
+| A PostToolUse hook (`guard --after`, installed by `hooks install --claude`) records the configuration before each shell command and restores what the command changed | hooks.rb:69 (after: true), hooks.rb:86 GUARD_AFTER_ID, cli.rb:949, guard.rb:161 check_after!; the committed settings carry the PostToolUse entry (CHECK-006) | yes |
+| What can still get past it: a change between commands in the maintainer's shell, a detached process, one command rewriting configuration and baseline, a committed weak policy, a root-wide read | stated limits; test/factory_readiness_test.rb:571 and :743 cover the root-wide search and the maintainer's own command | consistent, not exhaustively testable here |
+| "block since 0.21.0" | no CHANGELOG in the repository; not checked by verification, left to review | not checked |
+
+Not exercised by verification: the post-call restore itself (it would mean
+changing the guard's configuration from a shell command, which this skill may
+not do); it is covered by the suite in CHECK-001.

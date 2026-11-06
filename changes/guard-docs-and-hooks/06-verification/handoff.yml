@@ -1,29 +1,72 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 06-verification
 skill: verification
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-# Written by `soft-foundry phase seal` on a commit-bound phase: whether
-# metadata.git.branch resolved to a ref when the phase was sealed. False
-# means the checked-out HEAD, not a branch created later, is the measure
-# for "evidence current". Never written by the agent.
-# branch_resolved: true
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 6af71429ad5313d70abe93aa0978a40d5a17d966
+started_at: '2026-11-06T12:17:29Z'
+completed_at: '2026-11-06T12:38:30Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- results.md
+- tests.yml
+- evidence/manifest.yml
+- evidence/full-suite.txt
+- evidence/check.txt
+- evidence/eval.txt
+- evidence/ci.txt
+- evidence/doctor.txt
+- evidence/hooks-match.rb
+- evidence/hooks-match.txt
+- evidence/guard-live.txt
+- evidence/diff.txt
+- evidence/enforcement-header.txt
+blocking: []
+findings:
+- id: VER-001
+  severity: info
+  summary: CHECK-005, soft-foundry doctor, exits 2 in this fresh checkout on three
+    machine-local checks (no .ai/manifest.yml, no git pre-commit hook, no .soft-foundry/runtime.yml)
+    that predate and are unrelated to this change. The guard-hook line, the one REQ-GDH-001
+    bears on, passes (claude and codex installed, mode block from repository policy).
+    Not blocking; review may want to confirm doctor passes on a maintainer's machine.
+- id: VER-002
+  severity: info
+  summary: REQ-GDH-003 (.ai/harness-evals/README.md) cannot be read by verification,
+    review, or judgment (deny_read on harness evals). git shows the file gained six
+    lines in b9f4d7c; its content falls to the maintainer at merge. Judgment should
+    name this as a condition it could not check.
+- id: VER-003
+  severity: info
+  summary: REQ-GDH-004 (README.md) is not yet written; the documentation phase follows
+    verification. A DOCS edit does not stale this evidence, so evaluation and review
+    must read the README once it exists rather than rely on this phase.
+- id: VER-004
+  severity: info
+  summary: The gate warns that AC-001 is uncovered. The specify phase is waived, so
+    no real criterion exists; the ID is the unfilled template in 02-specification.
+    Evaluation or judgment must cover it or set it aside with a reason.
 next: evaluate
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: Full suite passed on tree 82a4bbdc with provider keys and SOFT_FOUNDRY_* unset,
+  run alone (rake invoked by its gem path; this machine has no rake shim). The live
+  harness eval was skipped. 00-intake/request.md and assumptions.md were read for
+  REQ-GDH-001..005 because the specify phase is waived and 02-specification holds
+  only the template; intake is outside this skill's read list but in no deny set.
+  Other records' verification files were read for format only. The guard ran in block
+  mode throughout and refused four calls, kept as evidence/guard-live.txt; the hooks-match.rb
+  helper lives under evidence/ because the guard refuses writes outside the repository.
+  Bash is checked against deny sets only, so the read and write limits were otherwise
+  followed as policy.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-11-06T12:17:29Z'
+  finished_at: '2026-11-06T12:38:43Z'
+  exit_status: 0
+  previous_phase: verify
+  session_id: 6a357b86-7d3a-4067-9b7a-7bb9c8650128
+  cwd: "/home/user/soft_foundry"
+branch_resolved: true
