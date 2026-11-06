@@ -1,12 +1,131 @@
-commit_sha: TBD
+commit_sha: 2af76ba9b26be41af5bcafa12ee56eda635f6c77
+size: full_route_sweep
+# No journey names AC-001: it is the unfilled template's placeholder, and the
+# specify phase is waived. Requirement IDs come from 00-intake/request.md.
+# Every journey ran against this checkout's library (ruby -I<repo>/lib
+# <repo>/exe/soft-foundry), in this session or in a scratch repository under
+# the system temp directory; this repository's own guard configuration was
+# never written or named in a shell command.
 journeys:
   - id: EVAL-001
-    criteria: [AC-001]
-    persona: TBD
-    starting_state: TBD
+    criteria: [REQ-GDH-001, REQ-GDH-002]
+    persona: Agent session on this branch, evaluation skill active, the committed hook in effect
+    starting_state: A fresh Claude Code session started by `soft-foundry phase run evaluate` at commit 2af76ba; .claude/settings.json as committed in b9f4d7c; mode block from repository policy
     steps:
-      - TBD
+      - Run a Bash command naming .ai/policies/enforcement.yml, .claude/settings.json and .codex/hooks.json
+      - Run a Bash command naming files under .ai/policies
+      - Grep with path .ai/harness-evals; Glob with pattern .ai/harness-evals/**/*.yml
+      - Write a probe file into the session scratchpad outside the repository
+      - Write a new file into 02-specification (this skill's deny_write set)
+      - Read .claude/settings.json, .codex/hooks.json, .ai/policies/enforcement.yml and .soft-foundry/guard.log; Write under 07-evaluation; run git, bundle and the tool from Bash
     assertions:
-      - TBD
-    evidence: [evidence/TBD]
-    result: TBD   # pass | fail | blocked
+      - Each of the six calls is refused before it runs, with a message naming the tool, the path, the skill, the mode, and where the maintainer's override is documented
+      - The Grep and Glob refusals show the committed matcher covers both tools
+      - The reads of the configuration, the writes under 07-evaluation and the shell commands naming no denied path are allowed
+      - Every refusal appears in .soft-foundry/guard.log with skill=evaluation
+    evidence: [evidence/guard-live.txt]
+    result: pass
+  - id: EVAL-002
+    criteria: [REQ-GDH-001]
+    persona: Maintainer on this checkout
+    starting_state: This checkout at 2af76ba, hooks as committed, no machine-local override
+    steps:
+      - Run `soft-foundry doctor` piped to a file
+      - Read the committed .claude/settings.json and .codex/hooks.json with the Read tool
+      - Install the hooks with the library into a throwaway directory and compare the JSON with the committed files (verification's hooks-match.rb, rerun)
+    assertions:
+      - 'The guard hook line reads `pass guard hook (claude: installed, codex: installed; mode: block, repository policy (.ai/policies/enforcement.yml))`'
+      - The committed PreToolUse matcher is Edit|Write|MultiEdit|NotebookEdit|Read|Grep|Glob|Bash and a PostToolUse entry with matcher Bash runs `guard --after`
+      - Both committed files equal a fresh install
+    evidence: [evidence/doctor.txt, evidence/hooks-match.txt]
+    result: pass
+  - id: EVAL-003
+    criteria: [REQ-GDH-001]
+    persona: Maintainer rerunning `hooks install --claude` on an existing repository
+    starting_state: A scratch repository with this checkout's control plane and a .claude/settings.json in the pre-b9f4d7c shape (matcher without Grep and Glob, no PostToolUse) plus an unrelated hook entry and an unrelated key; a stale guard baseline file
+    steps:
+      - Run `soft-foundry doctor`, then `hooks install --claude`, then `doctor` again
+      - Run `hooks install --claude` a second time
+      - Run `hooks install --codex`, `hooks install --claude --local`, `hooks uninstall --claude --local`, `hooks uninstall --claude`, `hooks uninstall --codex`, with `doctor` after each removal
+    assertions:
+      - After the rerun exactly one guard entry exists, its matcher gains Grep and Glob, a PostToolUse entry runs guard --after, and the guard entries equal this repository's committed ones
+      - The unrelated hook and key survive; the stale baseline is cleared by the maintainer's own install
+      - The second install leaves the file byte-identical
+      - .codex/hooks.json equals this repository's committed file; uninstall removes only Soft Foundry's entries; doctor's fail line names the command to run
+    evidence: [evidence/hooks-upgrade.txt, evidence/scripts/hooks-upgrade.sh]
+    result: pass
+  - id: EVAL-004
+    criteria: [REQ-GDH-002]
+    persona: Reader checking each claim in the header of .ai/policies/enforcement.yml against the guard
+    starting_state: A scratch repository with this checkout's control plane, hooks installed, a change record on branch change/demo at the implement phase (status in_progress), mode block from repository policy
+    steps:
+      - Feed 72 hook payloads to `soft-foundry guard` and 9 to `guard --after`, one per claim, and check 13 file states between them (guard-claims.sh)
+      - Feed 24 shell commands with globs, absolute paths and cd out of the root (glob-outside.sh)
+    assertions:
+      - Edit, Write, MultiEdit, NotebookEdit are refused outside the write set and inside deny_write; Read only inside deny_read; Grep and Glob by path and static prefix; a symlink is judged by what it resolves to
+      - A shell command is refused when it names a deny_read path, a deny_write path the skill may not read, protected policy or harness material, or the guard's own configuration, after cd and pushd, through globs and braces, and by absolute path; it is allowed when it names only what the skill may read
+      - An unknown ~user, a NUL byte, and unreadable stdin are refused
+      - A shell call records a baseline; a change to the policy, the override and the hook settings during the call is restored byte for byte and refused with the mode read after the restore; a missing baseline falls back to the committed policy; a change between calls stands; a stale baseline is refreshed; a write-tool call records none
+      - warn reports and allows, block refuses, SOFT_FOUNDRY_GUARD wins over the override, an unknown value is ignored, doctor names the source
+      - On main, or with the change closed, nothing is guarded; Codex array commands and apply_patch, and Grok's tool names, are checked
+    evidence: [evidence/guard-claims.txt, evidence/scripts/guard-claims.sh, evidence/glob-outside.txt, evidence/scripts/glob-outside.sh]
+    result: pass
+  - id: EVAL-005
+    criteria: [REQ-GDH-002]
+    persona: Maintainer turning the guard off in a file, as the header spells the value
+    starting_state: Throwaway directories holding a policy file and an override file
+    steps:
+      - 'Write `mode: off` unquoted in the policy; read Guard.mode'
+      - 'Write `mode: off` unquoted in the override under a block policy; read Guard.mode'
+      - 'Repeat both with `mode: "off"` quoted, and with SOFT_FOUNDRY_GUARD=off'
+    assertions:
+      - The mode reported is off in every case, as the header's list of modes (warn, block, off) says
+    evidence: [evidence/yaml-off.txt, evidence/scripts/yaml-off.rb]
+    result: fail
+  - id: EVAL-006
+    criteria: [REQ-GDH-003]
+    persona: Reader of .ai/harness-evals/README.md
+    starting_state: This checkout at 2af76ba
+    steps:
+      - Read the file
+    assertions:
+      - The file says an unattended Claude Code live eval needs shell arguments to write the phase directory, with the invocation
+    evidence: []
+    result: blocked
+  - id: EVAL-007
+    criteria: [REQ-GDH-004]
+    persona: Reader of README.md looking for the guard's current behaviour
+    starting_state: README.md at 2af76ba; the documentation phase, which writes the owed text, follows this phase
+    steps:
+      - Search the README for each item REQ-GDH-004 lists (Grep and Glob, how a shell command is read, fail closed, .soft-foundry/ as configuration, the post-call restore, rerunning hooks install on an existing repository, guard --after after an interrupted command, the live-eval shell arguments)
+      - Read the guard section as it stands
+    assertions:
+      - The README says each item
+    evidence: [evidence/readme-state.txt]
+    result: blocked
+  - id: EVAL-008
+    criteria: [REQ-GDH-005]
+    persona: Maintainer using every route of the CLI, and the branch's own checks
+    starting_state: A scratch repository with a throwaway HOME, a stub claude on PATH, the library from this checkout; and this checkout itself
+    steps:
+      - Run every top-level command and every subcommand, success paths plus refusals, from the library (sweep.sh); model-spending routes with --dry-run; shell against the stub; ui with its API routes
+      - Run `soft-foundry check`, `eval` and `ci` on this checkout
+      - Diff this branch against main outside changes/
+    assertions:
+      - Every route exits as its documented behaviour says, with no crash text and no ANSI escape in piped output
+      - check, eval and ci pass on this checkout
+      - Only .ai/harness-evals/README.md, .ai/policies/enforcement.yml and .claude/settings.json differ from main
+    evidence: [evidence/route-sweep.txt, evidence/scripts/sweep.sh, evidence/update-route.txt, evidence/check-eval-ci.txt]
+    result: pass
+  - id: EVAL-009
+    criteria: [REQ-GDH-001, REQ-GDH-002]
+    persona: A person reading CLI output, including through a screen reader or a CI log
+    starting_state: The outputs of EVAL-001, 002, 003, 004 and 008
+    steps:
+      - Check every outcome line of doctor, hooks install, the guard's refusals and the sweep for an outcome word, a stable prefix, and the absence of ANSI escapes when piped
+      - Check that no route prompted (every route ran with stdin closed)
+      - Check that each refusal and each doctor fail line says what to do next
+    assertions:
+      - The CLI output rules of .ai/rules/accessibility.md hold; no interactive control exists for keyboard or focus rules to apply to
+    evidence: [evidence/doctor.txt, evidence/route-sweep.txt, evidence/guard-claims.txt, evidence/hooks-upgrade.txt]
+    result: pass

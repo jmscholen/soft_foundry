@@ -1,0 +1,186 @@
+== scratch repository with this checkout's control plane, a change record on branch change/demo at the implement phase
+-- hooks install (prints the mode in effect and where it comes from)
+installed guard hook in .claude/settings.json (PreToolUse: Edit|Write|MultiEdit|NotebookEdit|Read|Grep|Glob|Bash)
+installed post-call check in .claude/settings.json (PostToolUse: Bash; restores the guard's own configuration if a command changed it)
+guard mode: block (repository policy (.ai/policies/enforcement.yml))
+installed guard hook in .codex/hooks.json (PreToolUse: Bash|apply_patch|Edit|Write)
+codex runs a project hook only after you review and trust it: open codex in this repository and run /hooks
+guard mode: block (repository policy (.ai/policies/enforcement.yml))
+active skill: implementation (writes lib, test, 05-implementation; deny_write .ai, docs, evidence phases; deny_read .ai/harness-evals and the evaluation/attack evidence)
+mode: ✓ pass guard hook (claude: installed, codex: installed; mode: block, repository policy (.ai/policies/enforcement.yml))
+== claim: Edit, Write, MultiEdit, NotebookEdit are checked against the write and deny_write sets
+ok         rc=0 expect=0 | Write lib/app.rb (write set)
+ok         rc=0 expect=0 | Edit test/app_test.rb (write set)
+ok         rc=2 expect=2 | Write .ai/rules/ruby.md (deny_write, the README's example)
+      ✗ fail guard: Write .ai/rules/ruby.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is docum
+ok         rc=2 expect=2 | MultiEdit docs/index.md (deny_write)
+      ✗ fail guard: MultiEdit docs/index.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is docum
+ok         rc=2 expect=2 | NotebookEdit changes/demo/06-verification/x.ipynb (deny_write)
+      ✗ fail guard: NotebookEdit changes/demo/06-verification/x.ipynb is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machi
+ok         rc=2 expect=2 | Write changes/demo/07-evaluation/results.md (another phase's evidence)
+      ✗ fail guard: Write changes/demo/07-evaluation/results.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-loc
+ok         rc=2 expect=2 | Write README.md (not in the write set)
+      ✗ fail guard: Write README.md is not in implementation's write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is documented in 
+== claim: Read is checked against deny_read only (read lists are advisory context)
+ok         rc=0 expect=0 | Read lib/app.rb
+ok         rc=0 expect=0 | Read docs/index.md (not in implementation's read list, not denied)
+ok         rc=2 expect=2 | Read .ai/harness-evals/README.md (deny_read)
+      ✗ fail guard: Read .ai/harness-evals/README.md is in implementation's deny_read set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override 
+ok         rc=2 expect=2 | Read changes/demo/07-evaluation/evidence/x.txt (deny_read)
+      ✗ fail guard: Read changes/demo/07-evaluation/evidence/x.txt is in implementation's deny_read set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-l
+== claim: Grep and Glob are checked against deny_read by their path and a glob pattern's static prefix
+ok         rc=0 expect=0 | Grep path lib
+ok         rc=2 expect=2 | Grep path .ai/harness-evals
+      ✗ fail guard: Grep .ai/harness-evals searches inside implementation's deny_read set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override 
+ok         rc=0 expect=0 | Glob pattern lib/**/*.rb
+ok         rc=2 expect=2 | Glob pattern .ai/harness-evals/**/*.yml (static prefix)
+      ✗ fail guard: Glob .ai/harness-evals searches inside implementation's deny_read set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override 
+ok         rc=2 expect=2 | Glob pattern **/*.yml with path .ai/harness-evals
+      ✗ fail guard: Glob .ai/harness-evals searches inside implementation's deny_read set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override 
+== claim: paths are judged after symlinks resolve
+ok         rc=2 expect=2 | Read link/README.md where link -> .ai/harness-evals
+      ✗ fail guard: Read .ai/harness-evals/README.md is in implementation's deny_read set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override 
+ok         rc=2 expect=2 | Grep path link
+      ✗ fail guard: Grep .ai/harness-evals searches inside implementation's deny_read set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override 
+== claim: Bash is read segment by segment, following cd and pushd, expanding globs and braces
+ok         rc=2 expect=2 | Bash cat .ai/harness-evals/README.md (deny_read path)
+      ✗ fail guard: Bash .ai/harness-evals/README.md names protected policy or harness material; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement
+ok         rc=2 expect=2 | Bash cd .ai && cat harness-evals/README.md (cd followed)
+      ✗ fail guard: Bash .ai/harness-evals/README.md names protected policy or harness material; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement
+ok         rc=2 expect=2 | Bash pushd .ai/harness-evals && ls (pushd followed)
+      ✗ fail guard: Bash .ai/harness-evals, .ai/harness-evals/ls names protected policy or harness material; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies
+ok         rc=2 expect=2 | Bash cd lib && cd .. && cd .ai/policies && sed -i s/block/warn/ enforcement.yml (own configuration through cd)
+      ✗ fail guard: Bash .ai/policies/enforcement.yml names the guard's own configuration; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; 
+ok         rc=2 expect=2 | Bash cat .ai/harness-evals/*.md (glob expanded)
+      ✗ fail guard: Bash .ai/harness-evals/README.md names protected policy or harness material; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement
+ok         rc=2 expect=2 | Bash cat .ai/{README.md,harness-evals/README.md} (brace expanded)
+      ✗ fail guard: Bash .ai/harness-evals/README.md names protected policy or harness material; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement
+ok         rc=0 expect=0 | Bash cat lib/{app,other}.rb (brace expanded to readable paths)
+== claim: Bash is refused when it names a deny_read path, a deny_write path the skill may not read, protected policy or harness material, or the guard's own configuration; it may name what the skill may read
+ok         rc=0 expect=0 | Bash cat lib/app.rb && bundle exec rake test (readable paths)
+ok         rc=0 expect=0 | Bash cat .ai/workflow.yml (control plane is readable)
+ok         rc=2 expect=2 | Bash cat .ai/policies/budget.yml (protected policy)
+      ✗ fail guard: Bash .ai/policies/budget.yml names protected policy or harness material; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml
+ok         rc=2 expect=2 | Bash ls .ai/harness-evals (harness material)
+      ✗ fail guard: Bash .ai/harness-evals names protected policy or harness material; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a ma
+ok         rc=2 expect=2 | Bash cat changes/demo/07-evaluation/results.md (deny_write the skill may not read)
+      ✗ fail guard: Bash changes/demo/07-evaluation/results.md names a path implementation may neither read nor write (a shell command may name what the skill may read); the implementation skill's permissions.yml does not allow it (mo
+ok         rc=2 expect=2 | Bash cat .ai/policies/enforcement.yml (own configuration)
+      ✗ fail guard: Bash .ai/policies/enforcement.yml names the guard's own configuration; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; 
+ok         rc=2 expect=2 | Bash cat .claude/settings.json (own configuration)
+      ✗ fail guard: Bash .claude/settings.json names the guard's own configuration; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maint
+ok         rc=2 expect=2 | Bash cat .claude/settings.local.json (own configuration)
+      ✗ fail guard: Bash .claude/settings.local.json names the guard's own configuration; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a
+ok         rc=2 expect=2 | Bash cat .codex/hooks.json (own configuration)
+      ✗ fail guard: Bash .codex/hooks.json names the guard's own configuration; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintaine
+ok         rc=2 expect=2 | Bash ls .soft-foundry (own configuration: everything under .soft-foundry/)
+      ✗ fail guard: Bash .soft-foundry names the guard's own configuration; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's 
+ok         rc=2 expect=2 | Bash tail .soft-foundry/guard.log (own configuration)
+      ✗ fail guard: Bash .soft-foundry/guard.log names the guard's own configuration; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a mai
+ok         rc=2 expect=2 | Bash cat /tmp/sf-eval-guard-iE7t/app/.ai/policies/enforcement.yml (absolute path into the root)
+      ✗ fail guard: Bash .ai/policies/enforcement.yml names the guard's own configuration; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; 
+ok         rc=2 expect=2 | Bash cd /tmp && cat /tmp/sf-eval-guard-iE7t/app/.ai/policies/budget.yml (absolute path after leaving the root)
+      ✗ fail guard: Bash .ai/policies/budget.yml names protected policy or harness material; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml
+== claim: a call the guard cannot decide (an unknown ~user, a NUL byte) is refused
+ok         rc=2 expect=2 | Bash cat ~nosuchuser_zz/x (unknown ~user)
+      ✗ fail guard: Bash could not be decided (ArgumentError: user nosuchuser_zz doesn't exist); refusing it; the guard refuses what it cannot decide (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is
+ok         rc=2 expect=2 | Bash with a NUL byte in the command
+      ✗ fail guard: Bash could not be decided (ArgumentError: path name contains null byte); refusing it; the guard refuses what it cannot decide (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is doc
+ok         rc=2 expect=2 | malformed stdin (not JSON)
+      ✗ fail guard: could not read the tool call from stdin; refusing it
+ok         rc=2 expect=2 | payload without tool_name
+      ✗ fail guard: could not read the tool call from stdin; refusing it
+== claim: the guard's own configuration cannot be written from inside a guarded session (write tools)
+ok         rc=2 expect=2 | Write .ai/policies/enforcement.yml
+      ✗ fail guard: Write .ai/policies/enforcement.yml is the guard's own configuration; no skill may write it; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's ma
+ok         rc=2 expect=2 | Edit .soft-foundry/enforcement.yml
+      ✗ fail guard: Edit .soft-foundry/enforcement.yml is the guard's own configuration; no skill may write it; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's ma
+ok         rc=2 expect=2 | Write .claude/settings.json
+      ✗ fail guard: Write .claude/settings.json is the guard's own configuration; no skill may write it; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-l
+ok         rc=2 expect=2 | Write .claude/settings.local.json
+      ✗ fail guard: Write .claude/settings.local.json is the guard's own configuration; no skill may write it; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's mac
+ok         rc=2 expect=2 | Write .codex/hooks.json
+      ✗ fail guard: Write .codex/hooks.json is the guard's own configuration; no skill may write it; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local
+ok         rc=2 expect=2 | Write .soft-foundry/guard-baseline.yml
+      ✗ fail guard: Write .soft-foundry/guard-baseline.yml is the guard's own configuration; no skill may write it; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer'
+== claim: the guard records its configuration before each shell command and, as the PostToolUse hook, restores whatever the command changed and refuses
+UNEXPECTED | no baseline before the first shell call (hooks install cleared it)
+ok         rc=0 expect=0 | pre-call: Bash echo hi (records the baseline, allows the call)
+ok         | baseline recorded at .soft-foundry/guard-baseline.yml
+-- the call, spelled however it likes, downgrades the guard: mode off in the policy, an override file, a hook entry removed
+   mode during the call: mode: warn, default)
+ok         rc=2 expect=2 | post-call: guard --after restores and refuses (reads the mode after restoring)
+      ✗ fail guard: .ai/policies/enforcement.yml, .soft-foundry/enforcement.yml, .claude/settings.json changed during the tool call and were restored to the state before it (tamper logged to .soft-foundry/guard.log; mode: block)
+ok         | policy restored byte for byte
+ok         | hook settings restored byte for byte
+ok         | the override that did not exist before the call is removed
+ok         | the baseline is consumed by the check
+ok         | mode back to block
+ok         rc=0 expect=0 | post-call with nothing changed and no baseline is quiet
+-- a baseline missing after a call (removed during it): the committed policy is the fallback
+ok         rc=0 expect=0 | pre-call: Bash echo hi
+ok         rc=2 expect=2 | post-call with the baseline gone: restored from git HEAD, the note says so
+      ✗ fail guard: .ai/policies/enforcement.yml changed during the tool call and was restored to the state before it; the pre-call baseline was missing, so the committed policy was used and the machine-local override removed (tamper 
+ok         | policy restored from the commit
+-- a change made between calls, in the maintainer's own shell, stands
+ok         rc=0 expect=0 | pre-call: Bash echo hi (the override is now the baseline)
+ok         rc=0 expect=0 | post-call: nothing changed during the call, quiet
+ok         | the maintainer's override stands
+-- a stale baseline left by an interrupted call is refreshed at the next shell call (BASELINE_MAX_AGE 1800 s)
+ok         rc=0 expect=0 | pre-call: Bash echo hi
+ok         rc=0 expect=0 | pre-call again with a 40-minute-old baseline
+ok         | the stale baseline was rewritten
+ok         rc=0 expect=0 | post-call: quiet
+-- only a shell call records a baseline
+UNEXPECTED rc=0 expect=2 | Write .ai/rules/ruby.md (a write tool call)
+      ! warn guard: Write .ai/rules/ruby.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: warn, logged to .soft-foundry/guard.log)
+ok         | no baseline after a write-tool call
+== claim: warn reports and lets the call through; block refuses; off says nothing; the override and the variable, the variable winning
+-- machine-local override .soft-foundry/enforcement.yml says warn (written by the maintainer between calls)
+   doctor: mode: warn, machine-local override (.soft-foundry/enforcement.yml))
+ok         rc=0 expect=0 | Write .ai/rules/ruby.md under the override: reported with '! warn', exit 0
+      ! warn guard: Write .ai/rules/ruby.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: warn, logged to .soft-foundry/guard.log)
+ok         rc=2 expect=2 | same call with SOFT_FOUNDRY_GUARD=block: the variable wins over the override
+      ✗ fail guard: Write .ai/rules/ruby.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is docum
+ok         rc=0 expect=0 | same call with SOFT_FOUNDRY_GUARD=off: silent, exit 0
+ok         rc=0 expect=0 | SOFT_FOUNDRY_GUARD=nonsense is ignored: the override (warn) applies
+      ! warn guard: Write .ai/rules/ruby.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: warn, logged to .soft-foundry/guard.log)
+   doctor with SOFT_FOUNDRY_GUARD=off: mode: off, SOFT_FOUNDRY_GUARD environment variable)
+   doctor after the override is removed: mode: block, repository policy (.ai/policies/enforcement.yml))
+ok         rc=2 expect=2 | Write .ai/rules/ruby.md under repository policy again: refused
+      ✗ fail guard: Write .ai/rules/ruby.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is docum
+== claim: outside a change branch, or once a change is closed, nothing is guarded
+ok         rc=0 expect=0 | Write .ai/rules/ruby.md on main (no change record for the branch)
+ok         rc=0 expect=0 | Write .ai/rules/ruby.md with the change closed
+ok         rc=2 expect=2 | Write .ai/rules/ruby.md with the change in progress again
+      ✗ fail guard: Write .ai/rules/ruby.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is docum
+== claim (README): Codex sends Bash with command as an array and file edits as apply_patch; Grok sends write, search_replace, read_file, run_terminal_command
+ok         rc=2 expect=2 | Bash command as an array naming harness material
+      ✗ fail guard: Bash .ai/harness-evals/README.md names protected policy or harness material; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement
+ok         rc=2 expect=2 | apply_patch updating .ai/rules/ruby.md
+      ✗ fail guard: apply_patch .ai/rules/ruby.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is
+ok         rc=0 expect=0 | apply_patch adding lib/new.rb
+ok         rc=2 expect=2 | write (Grok) to .ai/rules/ruby.md
+      ✗ fail guard: write .ai/rules/ruby.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is docum
+ok         rc=2 expect=2 | search_replace (Grok) on docs/index.md
+      ✗ fail guard: search_replace docs/index.md is in implementation's deny_write set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is 
+ok         rc=2 expect=2 | read_file (Grok) target_file .ai/harness-evals/README.md
+      ✗ fail guard: read_file .ai/harness-evals/README.md is in implementation's deny_read set; the implementation skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local over
+ok         rc=2 expect=2 | run_terminal_command (Grok) cat .ai/harness-evals/README.md
+      ✗ fail guard: run_terminal_command .ai/harness-evals/README.md names protected policy or harness material; no skill may touch it from the shell; the implementation skill's permissions.yml does not allow it (mode: block, .ai/poli
+ok         rc=0 expect=0 | WebFetch (not a guarded tool)
+== the machine-local guard log (scratch repository): every non-allow decision and every tamper
+      2026-11-06T12:48:11Z warn Write skill=implementation paths=.ai/rules/ruby.md is in implementation's deny_write set
+      2026-11-06T12:48:12Z warn Write skill=implementation paths=.ai/rules/ruby.md is in implementation's deny_write set
+      2026-11-06T12:48:12Z block Write skill=implementation paths=.ai/rules/ruby.md is in implementation's deny_write set
+      2026-11-06T12:48:12Z warn Write skill=implementation paths=.ai/rules/ruby.md is in implementation's deny_write set
+      2026-11-06T12:48:13Z block Write skill=implementation paths=.ai/rules/ruby.md is in implementation's deny_write set
+      2026-11-06T12:48:13Z block Write skill=implementation paths=.ai/rules/ruby.md is in implementation's deny_write set
+      2026-11-06T12:48:14Z block Bash skill=implementation paths=.ai/harness-evals/README.md names protected policy or harness material; no skill may touch it from the shell
+      2026-11-06T12:48:14Z block apply_patch skill=implementation paths=.ai/rules/ruby.md is in implementation's deny_write set
+      2026-11-06T12:48:14Z block write skill=implementation paths=.ai/rules/ruby.md is in implementation's deny_write set
+      2026-11-06T12:48:14Z block search_replace skill=implementation paths=docs/index.md is in implementation's deny_write set
+      2026-11-06T12:48:14Z block read_file skill=implementation paths=.ai/harness-evals/README.md is in implementation's deny_read set
+      2026-11-06T12:48:15Z block run_terminal_command skill=implementation paths=.ai/harness-evals/README.md names protected policy or harness material; no skill may touch it from the shell
+SUMMARY pass=84 unexpected=2
+script exit=1

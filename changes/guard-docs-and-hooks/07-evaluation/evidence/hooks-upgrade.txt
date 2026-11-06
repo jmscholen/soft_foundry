@@ -1,0 +1,42 @@
+== the settings file as this repository had it before b9f4d7c: the old matcher, no PostToolUse, plus an unrelated hook and an unrelated key that must survive
+-- doctor before the rerun
+✓ pass guard hook (claude: installed, codex: not installed; mode: block, repository policy (.ai/policies/enforcement.yml))
+   PreToolUse matcher before: ["WebFetch", "Edit|Write|MultiEdit|NotebookEdit|Read|Bash"]
+   PostToolUse before: 0
+== soft-foundry hooks install --claude on the existing repository (its output):
+   installed guard hook in .claude/settings.json (PreToolUse: Edit|Write|MultiEdit|NotebookEdit|Read|Grep|Glob|Bash)
+   installed post-call check in .claude/settings.json (PostToolUse: Bash; restores the guard's own configuration if a command changed it)
+   guard mode: block (repository policy (.ai/policies/enforcement.yml))
+ok         | exactly one guard entry in PreToolUse
+ok         | the PreToolUse matcher now reads Edit|Write|MultiEdit|NotebookEdit|Read|Grep|Glob|Bash
+ok         | a PostToolUse entry with matcher Bash runs guard --after
+ok         | the unrelated WebFetch hook is kept
+ok         | the unrelated permissions key is kept
+ok         | the guard entries equal this repository's committed .claude/settings.json entries
+ok         | a baseline left by an interrupted call is cleared by the maintainer's own install
+-- doctor after the rerun
+✓ pass guard hook (claude: installed, codex: not installed; mode: block, repository policy (.ai/policies/enforcement.yml))
+== running it a second time changes nothing
+ok         | second install leaves the file identical
+== --codex writes the same hook into .codex/hooks.json; it equals this repository's committed file
+   installed guard hook in .codex/hooks.json (PreToolUse: Bash|apply_patch|Edit|Write)
+   codex runs a project hook only after you review and trust it: open codex in this repository and run /hooks
+   guard mode: block (repository policy (.ai/policies/enforcement.yml))
+ok         | .codex/hooks.json equals the committed one (JSON compared)
+== --claude --local writes .claude/settings.local.json; doctor still reports installed
+   installed guard hook in .claude/settings.local.json (PreToolUse: Edit|Write|MultiEdit|NotebookEdit|Read|Grep|Glob|Bash)
+   installed post-call check in .claude/settings.local.json (PostToolUse: Bash; restores the guard's own configuration if a command changed it)
+   guard mode: block (repository policy (.ai/policies/enforcement.yml))
+ok         | settings.local.json carries the guard
+   removed guard hook from .claude/settings.local.json
+== hooks uninstall --claude removes only Soft Foundry's entries
+   removed guard hook from .claude/settings.json
+ok         | no guard entry left
+ok         | PostToolUse removed when empty
+ok         | the unrelated WebFetch hook is still there
+-- doctor with the Claude hook removed (codex still installed)
+✓ pass guard hook (claude: not installed, codex: installed; mode: block, repository policy (.ai/policies/enforcement.yml))
+-- doctor with no hook installed (the line says what to run)
+✗ fail guard hook (claude: not installed, codex: not installed; mode: block, repository policy (.ai/policies/enforcement.yml)); install with `soft-foundry hooks install --claude` or `--codex`
+SUMMARY pass=13 unexpected=0
+script exit=0
