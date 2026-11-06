@@ -1,12 +1,19 @@
 # Operations Review
 
 ## Scope reviewed
-TBD
+- The operational procedures the documentation now gives a maintainer: installing or rerunning `hooks install --claude` and `--codex`, reading `doctor`, changing the mode on one machine, recovering after an interrupted shell command (`guard --after` once), reading a refusal and the guard log, running a live harness eval unattended. Each was matched to the code path it names (`cli.rb` `hooks`, `doctor`, `guard`, `guard_after`, `eval_command`) and to evaluation EVAL-002, EVAL-003, EVAL-004, EVAL-005 and factory-readiness EVAL-004.
+- This repository's own operational state: `doctor` (verification CHECK-005, evaluation `doctor.txt`) reports `pass guard hook (claude: installed, codex: installed; mode: block, repository policy (.ai/policies/enforcement.yml))`; the three failing lines are machine-local (no `.ai/manifest.yml`, no pre-commit hook, no `.soft-foundry/runtime.yml` in a fresh checkout) and predate the change (VER-001).
+- The header of `.ai/policies/enforcement.yml` as the statement an operator of the guard reads first.
+- `12-observability` is pending and unwaived; `surfaces.observability` is false and the change has no service. The guard log is the operational signal and is unchanged.
 
 ## Findings
 | ID | Severity | Location | Finding | Failure it prevents | Rule or requirement |
 | --- | --- | --- | --- | --- | --- |
-| REV-TBD | blocking / major / minor | TBD | TBD | TBD: the concrete input or state and the wrong result (required for blocking and major) | TBD |
+| REV-GDH-001 | major (see functional.md) | "Change the mode on your machine" | The documented procedure for turning the guard off on one machine through the override file does not survive the first shell command of a hook-equipped session (probe case A). The working procedure today is `SOFT_FOUNDRY_GUARD=off` with no override file present and no uncommitted edit to the policy (cases B and C show both are removed or reverted under the variable), or `mode: "warn"` in the override, which works (case D). Until the code is fixed, the text should say so. | See functional.md. | REQ-GDH-004 |
+| REV-GDH-005 | minor | `.ai/policies/enforcement.yml` header, lines 13 and 8 | The header lists `off` among the file's values without saying it must be quoted (EVAL-F-001, DOC-F-003) and says "Outside a change branch nothing is guarded" (REV-GDH-002: the post-call restore runs on every branch). Protected policy: a maintainer edit, owed at merge or in the record that fixes REV-GDH-001, when the header should also describe the off-mode behaviour as it then is. | An operator reading the canonical statement writes `mode: off` unquoted and the file is ignored (fails toward the stricter mode); or expects silence on `main` and meets the restore. Minor. | REQ-GDH-002 |
+| REV-GDH-010 | minor (informational) | `cli.rb` `doctor`, `hooks.rb` `installed_at` | `doctor` reports `installed` by the presence of a guard entry in `PreToolUse`, not by its matcher or the `PostToolUse` entry, so a pre-0.21.0 install reads `pass`. The README and the user page say so plainly and give the rerun as the remedy; intake names a detecting check as a non-goal (factory-readiness REV-001 proposal). Recorded for the later record. | An operator trusts `doctor` and keeps running the old matcher without Grep, Glob or the restore. The documentation mitigates it; a check would close it. | Operational visibility (`.ai/rules/observability.md`, failure detection) |
+
+Checked and conforming: the rerun procedure (EVAL-003: one guard entry, matcher replaced, `PostToolUse` added, unrelated hooks and keys kept, stale baseline cleared, idempotent); `doctor`'s fail line names the install command; `guard --after` with nothing to restore exits 0 and prints nothing (probe case D; REV-GDH-003 notes the log line when the baseline is missing); the live-eval `--` passthrough exists (`cli.rb` 845 to 848) and the flags quoted come from factory-readiness EVAL-004 run 2, the one run that exercised them. Rollback of the change is `git revert` of two commits; the hook rerun is idempotent and `hooks uninstall` removes only Soft Foundry's entries.
 
 ## Conformance
-TBD or N/A with justification
+Conforms with one major (REV-GDH-001, shared with functional.md) and one minor finding. Every other procedure the documentation gives was traced to the code and to a passing journey.
