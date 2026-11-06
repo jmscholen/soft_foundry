@@ -1,0 +1,12 @@
+commit_sha: TBD
+journeys:
+  - id: EVAL-001
+    criteria: [AC-001]
+    persona: TBD
+    starting_state: TBD
+    steps:
+      - TBD
+    assertions:
+      - TBD
+    evidence: [evidence/TBD]
+    result: TBD   # pass | fail | blocked
