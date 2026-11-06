@@ -1,0 +1,48 @@
+---
+change:
+  id: guard-docs-and-hooks
+  title: 'Discharge the factory-readiness conditions of approval: guard documentation
+    and this repository''s hook install'
+git:
+  worktree: "/home/user/soft_foundry"
+  branch: change/guard-docs-and-hooks
+type: docs
+risk: low
+track: gated
+status: in_progress
+current_phase: implement
+created_at: 2026-11-06 12:14:04.000000000 Z
+scope: []
+surfaces:
+  application: false
+  database: false
+  infrastructure: false
+  security: false
+  accessibility: true
+  observability: false
+  policy: false
+human_decisions: []
+vetted:
+reopenings: []
+phase_reopenings: []
+skipped_phases:
+- phase: discover
+  rationale: Repository discovered in changes/factory-readiness and kept current since;
+    this change adds no technology and touches documentation and a hook settings file.
+- phase: specify
+  rationale: Intake carries the requirements with stable ids REQ-GDH-001..005 at the
+    granularity of a documentation change.
+- phase: threat_model
+  rationale: No new surface. The hook entries are the ones hooks install writes in
+    every repository, and the guard code they run was threat modelled and attacked
+    in changes/factory-readiness.
+- phase: plan
+  rationale: Three files applied by one maintainer commit and one README edit in the
+    documentation phase; the order is in intake.
+- phase: attack
+  rationale: No code changes; the behaviour the text describes was attacked in five
+    rounds in changes/factory-readiness and gate-hardening.
+- phase: learn
+  rationale: A documentation catch-up; what it teaches (conditions of approval owed
+    by a maintainer stay open until someone owns them) is recorded in the intake and
+    the judgment.
