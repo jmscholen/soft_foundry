@@ -1,0 +1,21 @@
+command: git diff --stat main...HEAD -- . ':!changes'   (HEAD 6af71429ad5313d70abe93aa0978a40d5a17d966; main 3fd048c2202dc009afcb04371437719fd0dd3144)
+ .ai/harness-evals/README.md  |  6 ++++++
+ .ai/policies/enforcement.yml | 29 +++++++++++++++++++++++++----
+ .claude/settings.json        | 13 ++++++++++++-
+ 3 files changed, 43 insertions(+), 5 deletions(-)
+
+command: git diff --stat main...HEAD -- lib test exe Rakefile Gemfile soft_foundry.gemspec .github
+(empty above means no application, test, or CI change: REQ-GDH-005)
+
+command: git status --short
+ M changes/guard-docs-and-hooks/06-verification/handoff.yml
+?? changes/guard-docs-and-hooks/06-verification/evidence/diff.txt
+?? changes/guard-docs-and-hooks/06-verification/evidence/full-suite.txt
+?? changes/guard-docs-and-hooks/06-verification/evidence/guard-live.txt
+?? changes/guard-docs-and-hooks/06-verification/evidence/hooks-match.rb
+
+command: git log --oneline main..HEAD
+6af7142 Add guard-docs-and-hooks phase templates for waived and unused phases
+563469c Record guard-docs-and-hooks implement
+11ef559 Record guard-docs-and-hooks intake
+b9f4d7c Maintainer: install the Grep/Glob matcher and post-call restore here; describe the guard in the policy header; note live-eval shell arguments

@@ -1,0 +1,50 @@
+commit_sha: 2af76ba9b26be41af5bcafa12ee56eda635f6c77
+artifacts:
+  - path: evidence/guard-live.txt
+    journey: EVAL-001
+    sha256: 63a7cf9134c7c093fa78b6c196900bbc01aa8a26b5e2014dbe454c486f2485f8
+  - path: evidence/doctor.txt
+    journey: EVAL-002
+    sha256: a00314fb6f33678fc6685f47ca12f8547c014a5fdbe344d7438a014f06208e3e
+  - path: evidence/hooks-match.txt
+    journey: EVAL-002
+    sha256: cf9fe8e75b5c1d73690f2ecdfd0897ebf16c32b0b1824ae97c576295fb32770f
+  - path: evidence/hooks-upgrade.txt
+    journey: EVAL-003
+    sha256: 242d4245089116f0c61687457657ff1386d2c210a8a94267364be6c8ce6da790
+  - path: evidence/scripts/hooks-upgrade.sh
+    journey: EVAL-003
+    sha256: ea5849390b122f371771b2891e73bd3ec928e26a179e88c87f10cc939d1a321a
+  - path: evidence/guard-claims.txt
+    journey: EVAL-004
+    sha256: 5c010c95c777a108dac621fd92d519285c080bed4021cc52f41dfe35a8bdd57e
+  - path: evidence/scripts/guard-claims.sh
+    journey: EVAL-004
+    sha256: 565221fd1d3d5fa5dfe614fbc616c74b257b3dadf165f040224ed7a14662f31d
+  - path: evidence/glob-outside.txt
+    journey: EVAL-004
+    sha256: 1d62f0468ff74290512086b4f401943eec33280319ea9a410bbd847405fd5506
+  - path: evidence/scripts/glob-outside.sh
+    journey: EVAL-004
+    sha256: 4873144845817c158fdb05a3e9d3788b31e5341cd6742b74a1bda6121adc879e
+  - path: evidence/yaml-off.txt
+    journey: EVAL-005
+    sha256: b8381f74aa5f69776ee2afc92457e2d1ef3260ce6550be523f68812184c2e5b4
+  - path: evidence/scripts/yaml-off.rb
+    journey: EVAL-005
+    sha256: 229373d7e5851594fcc64217ca35fa2f7945e70765e987940e2d04b2338138eb
+  - path: evidence/readme-state.txt
+    journey: EVAL-007
+    sha256: 1f387745862db30bac3f7849e0dc1d6d72275f84df0d92d35523464ed2dab944
+  - path: evidence/route-sweep.txt
+    journey: EVAL-008
+    sha256: 862bba0e401c149597620f921c44c7cf2c94af71b6b8bc6198802d4060107edc
+  - path: evidence/scripts/sweep.sh
+    journey: EVAL-008
+    sha256: 537afda9a2efdc7abd703fadea45fee1cef1cce0af88456f5ab46e311f2e0d04
+  - path: evidence/update-route.txt
+    journey: EVAL-008
+    sha256: 7da08383971a8febeb9f4588f113eddcf87ff629300d12fb96e8deefd6d51334
+  - path: evidence/check-eval-ci.txt
+    journey: EVAL-008
+    sha256: d93e44bccfb89758c02c2f3b3a4832172f1419017fd2385517faf214cd9a611c

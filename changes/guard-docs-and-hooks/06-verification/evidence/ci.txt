@@ -1,0 +1,151 @@
+command: ruby -Ilib exe/soft-foundry ci   (HEAD 6af71429ad5313d70abe93aa0978a40d5a17d966)
+
+✓ pass control plane: 16 phases, 17 skills, no errors
+✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
+✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
+✓ pass eval commit-sha-older-than-predecessor: discover commit lineage fail, as expected
+✓ pass eval control-well-formed: verify pass, as expected
+✓ pass eval criteria-uncovered-at-judgment: judge criteria covered fail, as expected
+✓ pass eval evidence-manifest-digest-mismatch: verify evidence manifest verified fail, as expected
+✓ pass eval evidence-manifest-path-escapes-phase: verify evidence manifest verified fail, as expected
+✓ pass eval evidence-stale-after-code-change: verify evidence current fail, as expected
+✓ pass eval full-suite-record-names-wrong-tree: verify full-suite run recorded (record check, not a test result) fail, as expected
+✓ pass eval hardening-while-exploring: implement not exploring fail, as expected
+✓ pass eval invisible-text-in-evidence: verify content clean fail, as expected
+✓ pass eval judgment-waived: intake waivers permitted fail, as expected
+✓ pass eval placeholder-left-in-evidence: verify no placeholders fail, as expected
+✓ pass eval predecessor-complete-but-unrecorded: discover predecessor complete fail, as expected
+✓ pass eval red-commit-is-the-green-commit: verify red evidence fail, as expected
+✓ pass eval released-record-is-not-regated: specify pass, as expected
+✓ pass eval review-finding-without-failure: review findings explained fail, as expected
+✓ pass eval review-without-fresh-session-in-block-mode: review fresh session recorded fail, as expected
+✓ pass eval scope-narrowed-after-evidence-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-change-claimed-by-other-record-stays-current: verify evidence current pass, as expected
+✓ pass eval scoped-change-in-scope-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-unclaimed-code-change-stales-record: verify evidence current fail, as expected
+✓ pass eval secret-shape-in-evidence: verify content clean fail, as expected
+✓ pass eval shared-core-change-stales-scoped-record: verify evidence current fail, as expected
+✓ pass eval specification-does-not-parse: specify structured files parse fail, as expected
+✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
+✓ pass eval test-result-fail-unacknowledged: verify test results recorded fail, as expected
+✓ pass eval verdict-unfilled: judge verdict recorded fail, as expected
+✓ pass eval: 28 passed, 0 failed, 0 errors, 1 skipped
+
+change accessibility-advisory (closed, skipped)
+
+change budget-and-openrouter (closed, skipped)
+
+change budget-billing-awareness (closed, skipped)
+
+change change-close-command (closed, skipped)
+
+change control-plane-scan (closed, skipped)
+
+change cross-cli-hooks (closed, skipped)
+
+change cross-provider-review (closed, skipped)
+
+change factory-readiness (closed, skipped)
+
+change gate-hardening (released, not re-gated)
+  released: gate-hardening: 2 open item(s): ATK-014, FOLLOWUP-1
+advisory: gate-hardening is released with 2 open item(s) to discharge before it is closed (informational, does not block the gate)
+  ! warn owed ATK-014: accepted as residual risk by the maintainer: the Record <slug> <phase> seal subject can be forged by a committer; the pre-change gate allowed the same hand commit; discharge when a tool-written seal trailer lands
+  ! warn owed FOLLOWUP-1: follow-up change: ATK-016 malformed enforcement.yml crash, ATK-017 already-sealed after a hand commit, seal trailer, VER-002 lint test, VER-003 suite temp-dir isolation, docs/user coverage of phase seal
+
+change guard-docs-and-hooks
+00-intake  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass waivers permitted: risk low
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: b9f4d7c6b28aa67dee795d06ed8b4486ffdb2bdc
+  ✓ pass commit lineage: reaches HEAD 6af71429ad53; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-11-06T12:15:39Z
+  ✓ pass predecessor complete: first phase
+  ✓ pass content clean
+05-implementation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 11ef55913291c06ed12e86f670b69f1d67f23477
+  ✓ pass commit lineage: descends from 00-intake at b9f4d7c6b28a; reaches HEAD 6af71429ad53; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-11-06T12:17:00Z
+  ✓ pass predecessor complete: 00-intake
+  ✓ pass content clean
+06-verification  in_progress  PASS
+  ✓ pass handoff identity
+  ! warn phase in progress: not yet gated
+advisory: 2 issues to address before guard-docs-and-hooks goes live (informational, does not block the gate)
+  ! warn accessibility: no accessibility requirements were recorded: the specification phase was skipped, so there is nothing for review to check conformance against
+  ! warn accessibility: the accessibility review (13-review/accessibility.md) has not run yet
+
+change init-command (closed, skipped)
+
+change learning-instincts (closed, skipped)
+
+change lifecycle-tracks (closed, skipped)
+
+change maturity-onboarding (closed, skipped)
+
+change maturity-report (closed, skipped)
+
+change observability-standard-dashboard (closed, skipped)
+
+change panel-phases (closed, skipped)
+
+change phase-lifecycle-controls (closed, skipped)
+
+change phase-runner (closed, skipped)
+
+change policy-conformance (closed, skipped)
+
+change red-green-evidence (closed, skipped)
+
+change release-0-23-0 (released, not re-gated)
+  released: release-0-23-0: 4 open item(s): REL-005, REL-002, REL-003, REL-004
+advisory: release-0-23-0 is released with 4 open item(s) to discharge before it is closed (informational, does not block the gate)
+  ! warn owed REL-005: Confirm ci is green on main after the merge and after the tag
+  ! warn owed REL-002: Merge change/release-0-23-0 to main through a pull request. Push the commit that seals 14-judgment. A clean checkout of 72cc1e9 alone fails ci because 14-judgment/handoff.yml is absent. GitHub Actions has not run on this branch.
+  ! warn owed REL-003: Tag v0.23.0 on the merged commit so the release workflow publishes a GitHub release whose asset is soft_foundry-0.23.0.gem. Latest release on 2026-11-04 is v0.17.0. The rehearsal stopped before gh release create and ran on macOS.
+  ! warn owed REL-004: Run soft-foundry update --yes outside any bundle exec session. The installed gem must be 0.23.0 and must contain lib/soft_foundry/phase_seal.rb. The rehearsal stubbed GitHub. Inside bundle exec, version can print the worktree's 0.23.0 while the installed gem is still 0.22.0.
+
+change runtime-guard (closed, skipped)
+
+change scoped-verification (closed, skipped)
+
+change security-policy-not-applicable (closed, skipped)
+
+change self-update (closed, skipped)
+
+change session-id-quoting (closed, skipped)
+
+change session-ledger (closed, skipped)
+
+change small-process-fixes (closed, skipped)
+
+change ui-explainer-timeline (closed, skipped)
+
+change ui-links (closed, skipped)
+
+change ui-processes (closed, skipped)
+
+change ui-repositories (closed, skipped)
+
+change ui-server (closed, skipped)
+
+change ui-snapshot (closed, skipped)
+
+change update-from-github (closed, skipped)
+
+change update-release-asset-name (closed, skipped)
+
+change upstream-failure-reporting (closed, skipped)
+
+✓ ci passed
+exit: 0

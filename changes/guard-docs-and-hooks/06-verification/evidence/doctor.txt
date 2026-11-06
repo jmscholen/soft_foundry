@@ -1,0 +1,14 @@
+command: ruby -Ilib exe/soft-foundry doctor   (HEAD 6af71429ad5313d70abe93aa0978a40d5a17d966)
+
+✓ pass git repository
+✓ pass AGENTS.md
+✓ pass .ai/README.md
+✓ pass .ai/workflow.yml
+✓ pass .ai/paths.yml
+✓ pass control plane check
+✗ fail .ai/manifest.yml
+✗ fail pre-commit hook
+✓ pass guard hook (claude: installed, codex: installed; mode: block, repository policy (.ai/policies/enforcement.yml))
+✗ fail local runtime
+! warn session hook (not installed; optional: `soft-foundry hooks install --sessions` records every coding session so it can be found and resumed)
+exit: 2

@@ -1,0 +1,35 @@
+CHECK-007: the installed guard hook observed live in this verification session
+(Claude Code, fresh session started by `soft-foundry phase run verify` after
+commit b9f4d7c, so the hook settings that commit installed were in effect).
+Each line below is the PreToolUse hook's reply, copied verbatim from the tool
+error the session received. Mode: block (repository policy).
+
+1. Bash naming the guard's own configuration (a `cat` of the Claude hook
+   settings file inside a diagnostic command) was refused before it ran:
+
+PreToolUse:Bash hook error: [command hook]: ✗ fail guard: Bash .claude/settings.json names the guard's own configuration; no skill may touch it from the shell; the verification skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is documented in README.md)
+
+2. Grep with path `.ai/harness-evals` (the skill's deny_read set) was refused,
+   which shows the PreToolUse matcher now covers Grep:
+
+PreToolUse:Grep hook error: [command hook]: ✗ fail guard: Grep .ai/harness-evals searches inside verification's deny_read set; the verification skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is documented in README.md)
+
+3. Glob with pattern `.ai/harness-evals/**/*.yml` was refused, which shows the
+   matcher now covers Glob:
+
+PreToolUse:Glob hook error: [command hook]: ✗ fail guard: Glob .ai/harness-evals searches inside verification's deny_read set; the verification skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is documented in README.md)
+
+4. Write outside the repository (a helper script into the session scratchpad)
+   was refused; the script was placed under this phase's evidence/ instead:
+
+PreToolUse:Write hook error: [command hook]: ✗ fail guard: Write /tmp/claude-0/-home-user-soft-foundry/6a357b86-7d3a-4067-9b7a-7bb9c8650128/scratchpad/hooks_match.rb outside the repository; no skill may write there; the verification skill's permissions.yml does not allow it (mode: block, .ai/policies/enforcement.yml; a maintainer's machine-local override is documented in README.md)
+
+Allowed calls in the same session, for contrast: Read of .claude/settings.json,
+.codex/hooks.json and .ai/policies/enforcement.yml (Read is checked against
+deny_read only); Grep over lib/ and test/; Bash running git, bundle and
+`ruby -Ilib exe/soft-foundry` commands that name no denied path.
+
+Not exercised here: the PostToolUse `guard --after` restore. Exercising it
+means changing the guard's configuration from a shell command, which this
+skill may not do; the behaviour is covered by the suite
+(test/factory_readiness_test.rb, the `--after` cases) run as CHECK-001.

@@ -21,9 +21,30 @@ version: 1
 #
 # Edit, Write, MultiEdit, and NotebookEdit are checked against the write
 # and deny_write sets; Read against deny_read only, since read lists are
-# advisory context. Bash is checked against the deny sets only: the guard
-# cannot know what a command writes, so it refuses commands that name a
-# denied path and passes everything else. A deny that the guard cannot
-# see remains policy the agent must honor, as AGENTS.md says.
+# advisory context; Grep and Glob against deny_read by their path (and a
+# glob pattern's static prefix). Paths are judged after symlinks resolve.
+#
+# Bash is a heuristic, since the guard cannot know what a command writes.
+# A command is read segment by segment, following cd and pushd, expanding
+# globs and braces. It is refused when it names a path the skill may not
+# read, a deny_write path the skill may not read, protected policy or
+# harness material, or the guard's own configuration; a command may name
+# what the skill may read, so evidence phases can run tests and the tool.
+# A call the guard cannot decide (an unknown ~user, a NUL byte) is refused.
+#
+# The guard's own configuration is this file, everything under
+# .soft-foundry/, and the hook entries in .claude/settings.json,
+# .claude/settings.local.json, and .codex/hooks.json; no skill may write
+# it. Because a shell command can always be spelled so that no token names
+# a file, the guard also records that configuration before each shell
+# command and, as a PostToolUse hook (`soft-foundry guard --after`,
+# installed by `hooks install --claude`), restores whatever the command
+# changed and refuses. A change made between commands, in the maintainer's
+# own shell, stands. A detached process, a single command that rewrites
+# both the configuration and the baseline, a committed weak policy, and a
+# root-wide read can still get past it: the gate's staleness check and
+# review are the backstop, and an OS sandbox is the complete answer. A deny
+# that the guard cannot see remains policy the agent must honor, as
+# AGENTS.md says.
 guard:
   mode: block

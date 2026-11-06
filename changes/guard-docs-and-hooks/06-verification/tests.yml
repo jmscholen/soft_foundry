@@ -1,0 +1,74 @@
+commit_sha: 6af71429ad5313d70abe93aa0978a40d5a17d966
+# `soft-foundry change size --phase verify` computed full_at_verify (no scope
+# declared: whole-repository scope is sized at the largest size).
+size: full_at_verify
+# The full suite on this tree (git rev-parse HEAD^{tree} at 6af7142), provider
+# keys and SOFT_FOUNDRY_* unset, run alone. A record of a run, not a test
+# result: the transcript is evidence/full-suite.txt. The rake executable was
+# invoked by its gem path because this machine's rbenv global is `system` and
+# has no rake shim; the task and test files are the Rakefile's.
+full_suite:
+  tree: 82a4bbdc844f58ade9f4a029c9a930d72eb8727f
+  command: "bundle exec rake test (as bundle exec ruby <rake 13.4.2 gem exe> test; env -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u XAI_API_KEY -u GEMINI_API_KEY -u GOOGLE_API_KEY -u SOFT_FOUNDRY_BILLING -u SOFT_FOUNDRY_PHASE -u SOFT_FOUNDRY_PARALLEL -u SOFT_FOUNDRY_GUARD), run alone"
+  outcome: passed
+# No acceptance criteria exist: the specify phase is waived in metadata.yml and
+# the requirements are REQ-GDH-001..005 in 00-intake/request.md. Each check
+# names the requirement it bears on in its command text instead.
+# No check has a red_commit: a documentation change with no test first.
+# The repository profile declares no access_control globs, so no check
+# carries `protection`.
+checks:
+  - id: CHECK-001
+    kind: tests
+    command: "bundle exec rake test, provider keys and SOFT_FOUNDRY_* unset, run alone (the recorded full-suite run; REQ-GDH-005)"
+    result: pass
+    evidence: evidence/full-suite.txt
+    criteria: []
+  - id: CHECK-002
+    kind: custom
+    command: "ruby -Ilib exe/soft-foundry check (REQ-GDH-005)"
+    result: pass
+    evidence: evidence/check.txt
+    criteria: []
+  - id: CHECK-003
+    kind: custom
+    command: "ruby -Ilib exe/soft-foundry eval (every gate case; the one live case skipped; REQ-GDH-005)"
+    result: pass
+    evidence: evidence/eval.txt
+    criteria: []
+  - id: CHECK-004
+    kind: custom
+    command: "ruby -Ilib exe/soft-foundry ci (REQ-GDH-005)"
+    result: pass
+    evidence: evidence/ci.txt
+    criteria: []
+  - id: CHECK-005
+    kind: custom
+    command: "ruby -Ilib exe/soft-foundry doctor (REQ-GDH-001: the guard hook line reports claude and codex installed, mode block from repository policy; the command as a whole exits 2 on three machine-local checks unrelated to this change, see VER-001)"
+    result: fail
+    evidence: evidence/doctor.txt
+    criteria: []
+  - id: CHECK-006
+    kind: custom
+    command: "bundle exec ruby -Ilib evidence/hooks-match.rb . (installs the hooks with SoftFoundry::Hooks into a throwaway directory and compares the JSON with the committed .claude/settings.json and .codex/hooks.json; REQ-GDH-001)"
+    result: pass
+    evidence: evidence/hooks-match.txt
+    criteria: []
+  - id: CHECK-007
+    kind: custom
+    command: "the installed guard observed live in this session: Bash naming the hook settings refused; Grep and Glob into .ai/harness-evals refused; Write outside the repository refused (REQ-GDH-001)"
+    result: pass
+    evidence: evidence/guard-live.txt
+    criteria: []
+  - id: CHECK-008
+    kind: custom
+    command: "git diff --stat main...HEAD excluding changes/, and for lib test exe Rakefile Gemfile gemspec .github; git status --short (REQ-GDH-005: only the three files of b9f4d7c differ from main, no code)"
+    result: pass
+    evidence: evidence/diff.txt
+    criteria: []
+  - id: CHECK-009
+    kind: custom
+    command: "the header of .ai/policies/enforcement.yml read with the Read tool and each checkable claim matched against lib/soft_foundry/guard.rb, hooks.rb, cli.rb, the suite, and the live behaviour in CHECK-007; guard.mode still block (REQ-GDH-002)"
+    result: pass
+    evidence: evidence/enforcement-header.txt
+    criteria: []

@@ -1,0 +1,105 @@
+---
+phase: 10-user-documentation
+skill: product-documentation
+status: complete
+commit_sha: 1f3a0594f22143d1c00836f46c2d9e76a0815fae
+started_at: '2026-11-06T13:10:44Z'
+completed_at: '2026-11-06T13:35:00Z'
+resolved_model:
+  profile: writing_medium
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- instructions.md
+- faq.md
+- search-records.yml
+- handoff.yml
+- "../../../README.md"
+- "../../../docs/user/guard-hook.md"
+- "../../../docs/user/README.md"
+blocking: []
+findings:
+- id: DOC-F-001
+  severity: info
+  summary: 'README.md now carries the text REQ-GDH-004 owes, for review to read against
+    each item (EVAL-F-003): in "Runtime enforcement: the guard hook" the Grep and
+    Glob matcher and the PostToolUse entry (opening paragraph and the "Rerun hooks
+    install" paragraph), how a shell command is read and what it may name ("How a
+    shell command is read"), fail closed with the undecidable cd-plus-redirection
+    case (same paragraph), the guard''s own configuration including everything under
+    .soft-foundry/ ("The guard''s own configuration"), the post-call restore, the
+    interrupted-command rule with `soft-foundry guard --after` once before a hand
+    edit, and what still gets past it ("The post-call restore, and its limits"), the
+    quoted `mode: "off"` ("Mode"), and current refusal and log lines; in "Proving
+    the gate: harness evals" the live-eval shell arguments with the invocation. The
+    same content, task by task, is in docs/user/guard-hook.md, indexed from docs/user/README.md.
+    .ai/rules/accessibility.md document rules: heading hierarchy kept (no #### added;
+    bold lead-ins inside the ### section), every command in a code block, one table
+    with a header row for the refusal messages in the user page, link text names the
+    page.'
+- id: DOC-F-002
+  severity: minor
+  summary: 'Four claims in the new text rest on evidence outside this record''s passing
+    journeys, named here so review checks them against the code or accepts the source:
+    (a) the live-eval invocation `eval --live --shell claude --case review-finds-planted-defect
+    -- --allowedTools "Read Write Edit Glob Grep Bash" --permission-mode acceptEdits`
+    and the `0 findings recorded` failure without it, from changes/factory-readiness/07-evaluation
+    EVAL-004 runs 1 and 2 (this record''s EVAL-008 did not run eval --live); (b) the
+    thirty-minute baseline age: this record''s EVAL-004 observed only that a forty-minute-old
+    baseline is refreshed (guard-claims.txt names BASELINE_MAX_AGE 1800 s), while
+    "kept while younger" rests on factory-readiness REM-005 and REM-006 (RED 7533d7d,
+    9252178); (c) the list of what still gets past the restore (detached process,
+    one command rewriting configuration and baseline, committed weak policy, same-command
+    latitude, root-wide reads, variables and command substitution), from the header
+    of .ai/policies/enforcement.yml and factory-readiness ATK-F1, ATK-F9, ATK-F10;
+    (d) the Grok sentences kept unchanged from the existing README (trust step, tool
+    names) were exercised here only as hook payloads (EVAL-004 lines 157 to 169),
+    not on a Grok shell.'
+- id: DOC-F-003
+  severity: minor
+  summary: 'EVAL-F-001 carried into the documentation: README.md and docs/user/guard-hook.md
+    say to write `mode: "off"` quoted in the policy or the override because a bare
+    off is read as the boolean false and the file is ignored. The header of .ai/policies/enforcement.yml
+    still lists off among the file''s values without saying so; that is protected
+    policy, a maintainer edit this skill may not make. Judgment should name it as
+    owed at merge, or a later code record can accept the YAML boolean.'
+- id: DOC-F-004
+  severity: info
+  summary: 'EVAL-F-002 is documented as current behaviour: a cd or pushd out of the
+    repository followed by another token in the same segment is refused as undecidable,
+    with the decided spelling given (`cd /tmp && ls`). README.md, the user page, and
+    FAQ-GDH-003 call it a defect recorded for a later change; the record that fixes
+    it must revise those three places.'
+- id: DOC-F-005
+  severity: info
+  summary: 'Stale documentation found and resolved: the README guard section at 2af76ba
+    ("passes everything else", no Grep, Glob, post-call restore, guard --after, interrupted
+    command, shell reading, undecidable call, .soft-foundry/ as a whole, or rerun
+    of hooks install) and the harness-evals section (no live-eval shell arguments),
+    both per EVAL-007 readme-state.txt, are replaced. No earlier page existed under
+    docs/user/. REQ-GDH-003 (.ai/harness-evals/README.md) is denied to this skill,
+    as to every skill (EVAL-006 blocked); the README does not describe that file''s
+    contents, and the maintainer checks it at merge.'
+- id: DOC-F-006
+  severity: info
+  summary: 'For the index phase: search-records.yml holds twelve records FAQ-GDH-001..012,
+    every answer citing the EVAL ids that demonstrate it, all with docs_path docs/user/guard-hook.md;
+    FAQ-GDH-006 and FAQ-GDH-007 cite factory-readiness journeys (EVAL-F7, EVAL-004)
+    in source_evals, spelled with that prefix, because this record has no journey
+    for them. The intake phase has no FAQ; the README''s "Agent: next implementation
+    milestone" section (lines 5 to 14) still names changes/init-command as the next
+    milestone and is outside this change''s requirements, left as it is.'
+next: index
+notes: |-
+  Second run of this phase after the manual reopen at 2026-11-06T13:10:36Z: the first run's gate failed its placeholder check because the handoff notes quoted the template's placeholder marker while describing the check; the outputs were otherwise accepted and were kept. This run re-read every claim in README.md, docs/user/guard-hook.md, docs/user/README.md, instructions.md, faq.md and search-records.yml against the evaluation evidence (hooks-upgrade.txt, hooks-match.txt, doctor.txt, guard-live.txt, guard-claims.txt, glob-outside.txt, yaml-off.txt, readme-state.txt) and found each supported; nothing in the outputs changed, and only this handoff was rewritten.
+  Grounding: every claim in the outputs is traced to a journey in 07-evaluation/journeys.yml and its evidence file, or to the factory-readiness record where named (DOC-F-002). Files read outside this skill's read list but in no deny set, as evaluation also noted: 00-intake/request.md and assumptions.md (REQ-GDH-001..005; the specify phase is waived and 02-specification/ holds the unfilled template), changes/factory-readiness/ (07-evaluation results and the two live-eval evidence files, 09-remediation/summary.md, 14-judgment/final.md: the origin of the conditions this change discharges and the only evidence for the live-eval invocation), and README.md (this skill's own write target). Files written outside the phase directory, all in the write set: README.md (guard section replaced, one paragraph and one code block added to the harness-evals section), docs/user/guard-hook.md (new), docs/user/README.md (a Pages table added). In the first run one Bash command was refused by the committed hook because it named .claude/settings.json and .codex/hooks.json in a cat; it was dropped, and the committed hook entries are taken from EVAL-002 hooks-match.txt instead. soft-foundry is not on PATH and this skill may not name lib/ or exe/ from the shell; this run used `bundle exec soft-foundry gate document` to show the checks without sealing. The phase files, README.md and docs/user were searched for the template's placeholder marker and for invisible characters (none in either). Bash is checked against deny sets only, so the read and write limits were otherwise followed as policy. The guard ran in block mode throughout. 08-attack/results.md is the unfilled template (attack waived), so no attack evidence was used.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-11-06T13:10:44Z'
+  finished_at: '2026-11-06T13:13:06Z'
+  exit_status: 0
+  previous_phase: document
+  session_id: 5ce3183e-5eb9-4715-b427-157449b42ba5
+  cwd: "/home/user/soft_foundry"
