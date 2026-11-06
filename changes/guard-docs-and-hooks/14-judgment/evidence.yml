@@ -1,37 +1,228 @@
-commit_judged: TBD
+commit_judged: 91b170067ebf07eb00e77432d9dc8638bc9d90f5
+# No application, test, or infrastructure code differs from main, and none
+# changed after any commit-bound phase's commit: git diff of lib, test, exe,
+# Rakefile, Gemfile, the gemspec, .github and infra is empty from 6af7142,
+# 2af76ba and 5b2a028 to the judged commit. The content under judgment is
+# the maintainer commit b9f4d7c (hook settings, protected policy header,
+# harness-eval note) and the documentation commit 5b2a028 (README.md,
+# docs/user/README.md, docs/user/guard-hook.md), both unchanged since.
 phases:
+  - phase: 00-intake
+    commit_sha: b9f4d7c6b28aa67dee795d06ed8b4486ffdb2bdc
+    current: true
+    result: complete
+    note: "REQ-GDH-001..005 live here because specify is waived. Waivers recorded in skipped_phases.yml and metadata.yml; the gate reports waivers permitted at low risk. Interactive session."
+  - phase: 01-discovery
+    commit_sha: null
+    current: true
+    result: skipped
+    note: "Waived at low risk with a rationale. No discovery evidence to go stale. Directory is in the judged commit."
+  - phase: 02-specification
+    commit_sha: null
+    current: true
+    result: skipped
+    note: "Waived at low risk. The scaffold acceptance-criteria.yml still defines AC-001, set aside below."
+  - phase: 03-threat-model
+    commit_sha: null
+    current: true
+    result: skipped
+    note: "Waived at low risk: no new surface; the guard was threat modelled and attacked in factory-readiness."
+  - phase: 04-plan
+    commit_sha: null
+    current: true
+    result: skipped
+    note: "Waived at low risk; the order of the steps is in intake."
+  - phase: 05-implementation
+    commit_sha: 11ef55913291c06ed12e86f670b69f1d67f23477
+    current: true
+    result: complete
+    note: "No code change (REQ-GDH-005). Records the maintainer commit b9f4d7c as REQ-GDH-001..003 and two deviations, both accepted by review (REV-GDH-009). Interactive session, provider anthropic."
   - phase: 06-verification
-    commit_sha: TBD
-    current: TBD   # true when commit_sha matches the judged commit for all code paths
-    result: TBD
+    commit_sha: 6af71429ad5313d70abe93aa0978a40d5a17d966
+    current: true
+    result: complete
+    note: "Code paths match the judged commit. CHECK-001..004, 006..009 pass; CHECK-005 (doctor) fails on three machine-local lines unrelated to the change while the guard-hook line passes (VER-001). Full suite 902 runs, 0 failures, tree 82a4bbdc844f58ade9f4a029c9a930d72eb8727f. Fresh session, provider anthropic, claude-fable-5-1."
   - phase: 07-evaluation
-    commit_sha: TBD
-    current: TBD
-    result: TBD
+    commit_sha: 2af76ba9b26be41af5bcafa12ee56eda635f6c77
+    current: true
+    result: complete
+    note: "Code paths match the judged commit. EVAL-001..004, 008, 009 pass; EVAL-005 fail (unquoted off, EVAL-F-001); EVAL-006 blocked (REQ-GDH-003 denied); EVAL-007 blocked (README written later; review found every item present at 5b2a028). Fresh session, provider anthropic, claude-fable-5-1."
   - phase: 08-attack
-    commit_sha: TBD
-    current: TBD
-    result: TBD
+    commit_sha: null
+    current: true
+    result: skipped
+    note: "Waived at low risk: no code change; the described behaviour was attacked in factory-readiness and gate-hardening. Security review conforms."
+  - phase: 09-remediation
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Optional and pending. Review recorded no blocking finding. Its write set is code, which REQ-GDH-005 forbids, and it may write neither docs/ nor README.md, so the text correction REV-GDH-001 needs is carried as condition GDH-2 rather than a BLOCKED loop."
+  - phase: 10-user-documentation
+    commit_sha: 1f3a0594f22143d1c00836f46c2d9e76a0815fae
+    current: true
+    result: complete
+    note: "Sealed as 972125d after one manual reopen (handoff notes only; outputs unchanged). Its README.md and docs/user files were committed as 5b2a028, which review examined and which is unchanged at the judged commit. Fresh session, provider anthropic, claude-fable-5-1."
+  - phase: 11-faq-index
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Optional and pending, unwaived. Twelve FAQ records are ready in 10-user-documentation/search-records.yml; nothing in the deliverable depends on the index. FAQ-GDH-002 repeats the off-mode instruction GDH-2 corrects, so run the index after that correction."
+  - phase: 12-observability
+    commit_sha: null
+    current: true
+    result: pending_optional
+    note: "Optional and pending, unwaived. surfaces.observability is false; no service, no code, the guard log unchanged. Nothing owed."
   - phase: 13-review
-    commit_sha: TBD
-    current: TBD
-    result: TBD
-unresolved_findings: []
+    commit_sha: 5b2a028811fedb857d4f7a4e8c5a41a81c430340
+    current: true
+    result: complete
+    note: "Sealed as 91b1700, the judged commit. No blocking finding; one major (REV-GDH-001) accounted below. Fresh session stamped by the runner, provider anthropic, claude-fable-5-1, the same provider as implementation (the gate's advisory; the runner's choice)."
+  - phase: 15-learning
+    commit_sha: null
+    current: true
+    result: skipped
+    note: "Waived at low risk; what it teaches is recorded in intake and in final.md."
+unresolved_findings:
+  - id: REV-GDH-001
+    severity: major
+    source: 13-review
+    disposition: accepted_residual_risk
+    undischarged: [GDH-2]
+    summary: "The documented file override mode: \"off\" is deleted by the first shell command's post-call check, which reports a tamper and leaves the mode at block; SOFT_FOUNDRY_GUARD=off removes an override file or reverts an uncommitted policy edit. Code root cause in cli.rb guard (returns in off mode before record_baseline!) and guard_after (check_after! unconditional), out of scope under REQ-GDH-005. Fails toward the stricter mode; the variable route is documented beside it. The text correction or the code fix is GDH-2."
+  - id: REV-GDH-005
+    severity: minor
+    source: 13-review
+    disposition: accepted_residual_risk
+    undischarged: [GDH-3]
+    summary: "The protected header lists off without saying it must be quoted and says nothing is guarded outside a change branch. Maintainer edit, GDH-3."
+  - id: EVAL-F-001
+    severity: minor
+    source: 07-evaluation
+    disposition: accepted_residual_risk
+    undischarged: [GDH-3]
+    summary: "EVAL-005 fail: unquoted off in a file is YAML's false and ignored. README and user page now say to quote it (DOC-F-003); the header does not, GDH-3. Accepting the boolean is for a later code record."
+  - id: REV-GDH-007
+    severity: minor
+    source: 13-review
+    disposition: accepted_residual_risk
+    undischarged: [GDH-1]
+    summary: "REQ-GDH-003 (.ai/harness-evals/README.md) is unread by every phase (also VER-002, EVAL-F-004). The maintainer reads it at merge, GDH-1."
+  - id: REV-GDH-002
+    severity: minor
+    source: 13-review
+    disposition: accepted_residual_risk
+    undischarged: [GDH-2, GDH-3]
+    summary: "Scope wording: the post-call restore runs on every branch and the pre-call guard disengages at judged. Wording corrected with GDH-2 and GDH-3; the code decision is for a later record."
+  - id: REV-GDH-004
+    severity: minor
+    source: 13-review
+    disposition: accepted_residual_risk
+    undischarged: [GDH-2]
+    summary: "The Grok post-call claim is unobserved. Hedged with GDH-2's text revision."
+  - id: REV-GDH-003
+    severity: minor
+    source: 13-review
+    disposition: accepted_later_record
+    summary: "A tamper log line with nothing restored when the baseline is missing. Wording or code, later record; no wrong action."
+  - id: EVAL-F-002
+    severity: minor
+    source: 07-evaluation
+    disposition: accepted_later_record
+    summary: "cd or pushd out of the repository followed by another token in the same segment is refused as undecidable (NoMethodError in shell_paths). Fails closed; documented as current behaviour; the fixing record revises README, the user page and FAQ-GDH-003 (DOC-F-004)."
+  - id: REV-GDH-006
+    severity: minor
+    source: 13-review
+    disposition: accepted_advisory
+    summary: "README guard section sub-topics are bold lead-ins, not headings (WCAG 2.2 1.3.1, 2.4.6). The user page is navigable by heading. Go-live advisory."
+  - id: REV-GDH-008
+    severity: minor
+    source: 13-review
+    disposition: accepted_later_record
+    summary: "test_fresh_session_ignores_machine_override writes off unquoted and so tests an override not in effect. Out of scope; later record."
+  - id: REV-GDH-010
+    severity: minor
+    source: 13-review
+    disposition: accepted_later_record
+    summary: "doctor reports presence of the guard entry, not the matcher or the PostToolUse entry. Documented with the rerun; intake non-goal; later record."
+  - id: REV-GDH-009
+    severity: minor
+    source: 13-review
+    disposition: closed_by_review
+    summary: "The two implementation deviations (maintainer commit b9f4d7c outside the lifecycle; the session copying intake's waivers and the accessibility surface into metadata.yml) are accepted by review."
+  - id: DOC-F-002
+    severity: minor
+    source: 10-user-documentation
+    disposition: closed_by_review
+    summary: "Four claims resting on factory-readiness evidence: the live-eval invocation, the baseline age and the limits list were traced to code or that record by review; the Grok sentence is REV-GDH-004."
+  - id: DOC-F-003
+    severity: minor
+    source: 10-user-documentation
+    disposition: folded_into_GDH-3
+    summary: "The header's unquoted off, the same item as REV-GDH-005."
+  - id: DOC-F-004
+    severity: info
+    source: 10-user-documentation
+    disposition: accepted_later_record
+    summary: "The record that fixes EVAL-F-002 revises README, the user page and FAQ-GDH-003."
+  - id: DOC-F-006
+    severity: info
+    source: 10-user-documentation
+    disposition: carried_to_index_phase
+    summary: "Twelve FAQ records ready for 11-faq-index, which is pending optional; run it after GDH-2."
+  - id: EVAL-F-006
+    severity: info
+    source: 07-evaluation
+    disposition: closed_by_documentation
+    summary: "An Edit that cannot apply never reaches the hook; not a bypass; documented in the README."
+  - id: EVAL-F-003
+    severity: info
+    source: 07-evaluation
+    disposition: closed_by_review
+    summary: "README not evaluable at 2af76ba; review found every REQ-GDH-004 item present at 5b2a028."
+  - id: VER-003
+    severity: info
+    source: 06-verification
+    disposition: closed_by_review
+    summary: "Same as EVAL-F-003: the README written later was read by review."
+  - id: VER-002
+    severity: info
+    source: 06-verification
+    disposition: folded_into_GDH-1
+    summary: "REQ-GDH-003 unread; same as REV-GDH-007 and EVAL-F-004."
+  - id: EVAL-F-004
+    severity: info
+    source: 07-evaluation
+    disposition: folded_into_GDH-1
+    summary: "REQ-GDH-003 unread; same as REV-GDH-007."
+  - id: VER-004
+    severity: info
+    source: 06-verification
+    disposition: closed_in_judgment
+    summary: "AC-001 is the specify scaffold; set aside under criteria_not_covered."
+  - id: EVAL-F-005
+    severity: info
+    source: 07-evaluation
+    disposition: closed_in_judgment
+    summary: "No journey names AC-001; set aside under criteria_not_covered."
+  - id: VER-001
+    severity: info
+    source: 06-verification
+    disposition: pre_existing_not_carried
+    summary: "doctor exits 2 on three machine-local checks of a fresh checkout that predate the change; the guard-hook line passes."
 # Acceptance criteria named by no verification check's `criteria` and no
-# evaluation journey's `criteria`, each set aside with a reason. The gate's
-# `criteria covered` check fails the judgment for any criterion that is
-# neither covered nor listed here with a non-blank reason, e.g.:
-#   - id: AC-012
-#     reason: needs a production observation; carried as release item OBS-1
-criteria_not_covered: []
-# Acceptance criteria or judgment conditions left unsatisfied pending a
-# real-world event (production observation, etc.) rather than more
-# repository evidence, e.g.:
-#   - id: AC-060
-#     description: each fix observed corrected on production
-# `soft-foundry change close` refuses to close this change while any id
-# here lacks a human confirmation - via --confirm ID, or a PR comment
-# reading "CONFIRMED: <id>" (see `soft-foundry change request-discharge`)
-# - and then moves it into `discharged` with the confirmation source.
-undischarged: []
+# evaluation journey's `criteria`, each set aside with a reason.
+criteria_not_covered:
+  - id: AC-001
+    reason: "Specify is waived at low risk. This is the unfilled scaffold criterion: its scenario was never written, and it names REQ-001, which is not one of REQ-GDH-001..005. Checks and journeys name the requirements from 00-intake/request.md instead."
+# Conditions left unsatisfied pending a person's act rather than more
+# repository evidence. `soft-foundry change close` refuses while any id
+# here lacks a human confirmation (--confirm ID, or a PR comment reading
+# "CONFIRMED: <id>"), and then moves it into `discharged`.
+undischarged:
+  - id: GDH-1
+    description: "REQ-GDH-003 read by the maintainer at merge: the six lines b9f4d7c added to .ai/harness-evals/README.md say an unattended Claude Code live eval needs shell arguments to write the phase directory, and give the invocation (eval --live --shell claude --case <case> -- --allowedTools \"Read Write Edit Glob Grep Bash\" --permission-mode acceptEdits). No skill in the lifecycle may read the file."
+  - id: GDH-2
+    description: "The off-mode override text corrected, or made true by code first (REV-GDH-001). In README.md \"Mode\" and \"The post-call restore\" and in docs/user/guard-hook.md \"Change the mode on your machine\": say the file override cannot hold off while the hook is installed, because the first shell command's post-call check removes it and reports a tamper; give SOFT_FOUNDRY_GUARD=off, with no override file present and no uncommitted edit of .ai/policies/enforcement.yml, as the way, noting both are removed or reverted under it; keep mode: \"warn\" in the file as working; say the post-call restore runs on every branch and the pre-call guard disengages at status judged (REV-GDH-002); hedge the Grok post-call sentence (REV-GDH-004). Alternatively, land the code fix first (record the baseline in off mode, or skip the post-call check in off mode, in cli.rb guard and guard_after) and describe that behaviour. FAQ-GDH-002 in 10-user-documentation/ repeats the instruction; the index phase runs after this. A documentation-phase reopen or a later record may do the text; remediation cannot (its write set is code and denies docs/)."
+  - id: GDH-3
+    description: "Maintainer edit of the header of .ai/policies/enforcement.yml (protected policy, REQ-GDH-002): say off must be quoted in a file because a bare off is YAML's boolean false and the file is then ignored (EVAL-F-001, REV-GDH-005); replace \"outside a change branch nothing is guarded\" with where the post-call restore runs (every branch) and when the pre-call guard disengages (status judged) (REV-GDH-002); and describe the off-mode behaviour as it stands once GDH-2 is settled."
 discharged: []

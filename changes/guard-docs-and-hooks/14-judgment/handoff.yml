@@ -1,29 +1,84 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 14-judgment
 skill: final-judgment
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-# Written by `soft-foundry phase seal` on a commit-bound phase: whether
-# metadata.git.branch resolved to a ref when the phase was sealed. False
-# means the checked-out HEAD, not a branch created later, is the measure
-# for "evidence current". Never written by the agent.
-# branch_resolved: true
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 91b170067ebf07eb00e77432d9dc8638bc9d90f5
+started_at: '2026-11-06T13:25:27Z'
+completed_at: '2026-11-06T13:31:00Z'
 resolved_model:
   profile: judgment_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- final.md
+- residual-risk.md
+- evidence.yml
+blocking: []
+findings:
+- id: JUDG-001
+  severity: major
+  summary: 'Outcome APPROVED_WITH_RESIDUAL_RISK at 91b1700. Three conditions are undischarged
+    in evidence.yml and block change close until a person confirms each: GDH-1 (the
+    maintainer reads .ai/harness-evals/README.md at merge for REQ-GDH-003, which no
+    skill may read), GDH-2 (the off-mode override text in README.md and docs/user/guard-hook.md
+    corrected, or the code fix landed first: with mode: "off" in the override the
+    pre-call hook records no baseline and the post-call check deletes the override
+    and reports a tamper, REV-GDH-001), GDH-3 (a maintainer edit of the protected
+    header of .ai/policies/enforcement.yml: off must be quoted in a file, and the
+    scope statement, REV-GDH-005 and REV-GDH-002). change release carries the three
+    as items.'
+- id: JUDG-002
+  severity: minor
+  summary: 'For a later code record, none a condition of this change: the off-mode
+    post-call behaviour (record the baseline in off mode or skip the post-call check
+    in off mode, cli.rb guard and guard_after); the cd or pushd out of the repository
+    followed by another token raising NoMethodError in shell_paths (EVAL-F-002; that
+    record revises README, the user page and FAQ-GDH-003); the tamper log line with
+    nothing restored (REV-GDH-003); the pre-call guard disengaging at status judged
+    so learn runs unguarded (REV-GDH-002); test_fresh_session_ignores_machine_override
+    writing off unquoted (REV-GDH-008); accepting the YAML boolean off (EVAL-F-001);
+    doctor reporting an old matcher as installed (REV-GDH-010).'
+- id: JUDG-003
+  severity: minor
+  summary: 'Pending optional phases disposed: 11-faq-index owes nothing to the deliverable
+    and is run after GDH-2 because FAQ-GDH-002 repeats the instruction GDH-2 corrects;
+    12-observability owes nothing (no service, no code, guard log unchanged); 09-remediation
+    has no blocking finding and could not reach the text (write set is code, denies
+    docs/, README.md in no group it may write), which is why the judgment is not BLOCKED.
+    Accessibility advisory REV-GDH-006 (README sub-topics as bold lead-ins, not headings)
+    accepted; the user page is navigable by heading.'
 next: learn
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: 'Fresh session (soft-foundry phase run judge, Claude Code), final-judgment
+  skill only, guard in block mode throughout. The committed hook refused one shell
+  command in this session, a git rev-parse that named .claude/settings.json and .ai/policies/enforcement.yml
+  to compare blobs; the comparison was redone with git diff --stat over the code directories
+  and git show --stat of the two content commits, which name the files only in their
+  output. Every phase under changes/guard-docs-and-hooks was read; the maintainer
+  commit was read through git show --stat only, so the harness-evals hunk, which this
+  skill may not read, was never shown. 00-intake/request.md and assumptions.md are
+  the source of REQ-GDH-001..005 because specify is waived. Files read outside this
+  skill''s read list but in no deny set: changes/release-0-23-0/14-judgment for the
+  shape of a judgment record, and README.md and docs/user/guard-hook.md (the deliverable;
+  README.md is in no path group). REV-GDH-001 was confirmed against lib/soft_foundry/cli.rb
+  (guard returns at mode off before record_baseline!; guard_after calls check_after!
+  unconditionally) and the review''s probe output; no evidence was created and nothing
+  outside 14-judgment/ was written. Code currency was checked by this session: git
+  diff of lib, test, exe, Rakefile, Gemfile, the gemspec, .github and infra is empty
+  from each of 6af7142, 2af76ba and 5b2a028 to HEAD. soft-foundry is not on PATH;
+  change status and gate judge were run as ruby -Ilib exe/soft-foundry. The runner
+  started this session on anthropic, the same provider as implementation; the skill
+  prefers another provider and the choice was the runner''s, not this session''s.
+  Bash is checked against deny sets only, so the read and write limits were otherwise
+  followed as policy. The outputs contain no hidden characters and no placeholder
+  text.'
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-11-06T13:25:27Z'
+  finished_at: '2026-11-06T13:31:57Z'
+  exit_status: 0
+  previous_phase: judge
+  session_id: baa31bad-9c72-4482-9150-fe424548dbbf
+  cwd: "/home/user/soft_foundry"
+branch_resolved: true
