@@ -1,0 +1,4 @@
+phase: attack
+size: full_route_sweep
+scope: whole repository
+reason: no scope declared: whole-repository scope is sized at the largest size

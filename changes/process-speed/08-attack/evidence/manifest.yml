@@ -1,0 +1,14 @@
+commit_sha: 46201881662c294728a2fc94d268b6cfadd4cb59
+artifacts:
+  - path: evidence/attack_probe_test.rb
+    case: ATTACK-001..ATTACK-016
+    produced_by: "the attack probes (first run's twenty cases plus ATTACK-012..016 added in this rerun); run as ruby -Ilib -Itest changes/process-speed/08-attack/evidence/attack_probe_test.rb -v --seed 1. ATTACK-011's escape payloads are built in the script with \\u001b and \\u0007 escapes, never pasted raw."
+    sha256: 0282dab3bc2db60de1dc7be00098fa5ac7a078e749c18f0c24d6954b843f3cfd
+  - path: evidence/probe-run.txt
+    case: ATTACK-001..ATTACK-016
+    produced_by: "output of the probe run above at 4620188 (code identical to 0c213b4 and a37d580), with provider keys and SOFT_FOUNDRY_PHASE unset; the home directory and temp paths are redacted to ~ and <tmp>"
+    sha256: 12523fcef9c90ecf7a775743cab2e1e48d52bb9c34acbb0abac93fc8c7a3b3a6
+  - path: evidence/change-size.txt
+    case: sizing
+    produced_by: "ruby -Ilib exe/soft-foundry change size --phase attack, at 4620188"
+    sha256: 10635ce4bceb3785302839be9deb5822d042114ca511603bc6eabc007f0e3a58
