@@ -1,0 +1,27 @@
+# Phase handoff. One per phase directory. The gate checker validates this file.
+phase: 04-plan
+skill: planning
+status: complete
+commit_sha: 1e7686d20a5aa90d70e4b6aa32f3ec7a1b3dbd5d
+started_at: '2026-11-14T02:55:00Z'
+completed_at: '2026-11-14T02:52:28Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+  - implementation.md
+  - testing.md
+  - rollout.md
+  - rollback.md
+blocking: []
+findings:
+  - id: PLAN-001
+    severity: minor
+    summary: Control-plane text (workflow.yml, policies, skills, templates, schemas, harness-eval cases) and README.md are outside implementation's write set. The maintainer must set the documented warn-mode override for that step and remove it after; the implementation handoff lists every file written under it.
+  - id: PLAN-002
+    severity: minor
+    summary: The rules version (rules 2) comes from the change metadata template. This record was created before the template changes, so it stays legacy under its own rules, consistent with the intake constraint that this change runs under the rules on main.
+next: implement
+notes: "Plan by the session that opened the change."
+executed_by: null
