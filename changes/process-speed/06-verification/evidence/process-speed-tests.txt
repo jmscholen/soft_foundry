@@ -1,0 +1,53 @@
+### bundle exec ruby -Ilib -Itest test/process_speed_test.rb -v
+Run options: -v --seed 1029
+
+# Running:
+
+ProcessSpeedTest#test_rules_version_removed_after_intake_fails_the_first_phase = 0.65 s = .
+ProcessSpeedTest#test_docs_only_remediation_seal_refuses_a_code_change = 1.27 s = .
+ProcessSpeedTest#test_cap_refusal_reads_without_color_or_non_ascii = 0.83 s = .
+ProcessSpeedTest#test_reopen_below_the_cap_is_permitted = 0.96 s = .
+ProcessSpeedTest#test_missing_or_unknown_tier_fails_the_specify_gate = 0.91 s = .
+ProcessSpeedTest#test_review_and_judge_gates_fail_above_the_cap_without_a_decision = 1.94 s = .
+ProcessSpeedTest#test_a_reject_decision_never_lets_a_round_through = 1.12 s = .
+ProcessSpeedTest#test_change_new_declares_the_rules_version = 0.41 s = .
+ProcessSpeedTest#test_person_checks_are_not_criteria_and_become_release_items = 2.01 s = .
+ProcessSpeedTest#test_sealing_a_third_round_without_a_reopen_is_refused = 1.10 s = .
+ProcessSpeedTest#test_the_cap_does_not_apply_to_a_legacy_record = 0.82 s = .
+ProcessSpeedTest#test_documentation_paths = 0.34 s = .
+ProcessSpeedTest#test_reopen_at_the_cap_is_refused_and_parks_the_change = 0.90 s = .
+ProcessSpeedTest#test_documentation_only_diff_gets_the_smaller_size = 0.90 s = .
+ProcessSpeedTest#test_new_checks_skip_on_a_legacy_record = 1.35 s = .
+ProcessSpeedTest#test_must_count_over_the_risk_cap_fails = 1.06 s = .
+ProcessSpeedTest#test_docs_only_reopen_keeps_verify_evaluate_and_attack = 0.92 s = .
+ProcessSpeedTest#test_specify_is_never_a_default_waiver = 0.48 s = .
+ProcessSpeedTest#test_docs_only_remediation_seal_allows_documentation = 1.40 s = .
+ProcessSpeedTest#test_blocked_judgment_must_name_a_must_criterion_or_a_blocking_finding = 1.89 s = .
+ProcessSpeedTest#test_specify_needs_an_approval_matching_the_must_set = 1.09 s = .
+ProcessSpeedTest#test_uncovered_should_warns_and_uncovered_must_fails_at_judgment = 1.18 s = .
+ProcessSpeedTest#test_outside_change_finding_needs_a_follow_up_and_paths_outside_the_diff = 1.62 s = .
+ProcessSpeedTest#test_round_count_takes_the_larger_of_commits_and_reopenings = 0.88 s = .
+ProcessSpeedTest#test_a_cap_decision_lets_one_more_round_through = 0.98 s = .
+ProcessSpeedTest#test_low_risk_steps_over_waivable_phases_unless_run_phases_asks = 0.60 s = .
+
+Finished in 27.612379s, 0.9416 runs/s, 5.8669 assertions/s.
+
+26 runs, 162 assertions, 0 failures, 0 errors, 0 skips
+exit=0
+### bundle exec ruby -Ilib -Itest test/cli_process_speed_test.rb -v
+Run options: -v --seed 15525
+
+# Running:
+
+CliProcessSpeedTest#test_phase_run_auto_reopen_at_the_cap_starts_no_session = 1.29 s = .
+CliProcessSpeedTest#test_reopen_docs_only_from_the_command_line = 0.88 s = .
+CliProcessSpeedTest#test_reopen_at_the_cap_exits_non_zero_and_names_the_decisions = 0.94 s = .
+CliProcessSpeedTest#test_check_lints_the_convergence_keys = 0.45 s = .
+CliProcessSpeedTest#test_outside_change_finding_is_listed_as_a_follow_up = 1.88 s = .
+CliProcessSpeedTest#test_phase_run_does_not_start_a_session_for_a_parked_change = 0.78 s = .
+CliProcessSpeedTest#test_docs_only_is_refused_for_another_phase = 0.71 s = .
+
+Finished in 6.940149s, 1.0086 runs/s, 5.0431 assertions/s.
+
+7 runs, 35 assertions, 0 failures, 0 errors, 0 skips
+exit=0

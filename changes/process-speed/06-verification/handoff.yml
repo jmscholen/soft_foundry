@@ -1,0 +1,69 @@
+---
+phase: 06-verification
+skill: verification
+status: complete
+commit_sha: 9473ac341f075abcf3b65ac2723da9ed541cda15
+started_at: '2026-11-14T04:38:50Z'
+completed_at: '2026-11-14T04:59:12Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+- results.md
+- tests.yml
+- evidence/manifest.yml
+- evidence/rake-test.txt
+- evidence/process-speed-tests.txt
+- evidence/check.txt
+- evidence/ci.txt
+- evidence/ac001-legacy-gate.txt
+- evidence/ac017-coverage.txt
+- evidence/ac016-skill-text.txt
+blocking: []
+findings:
+- id: VER-001
+  severity: minor
+  summary: AC-017's documentation part (a documentation line for every new check)
+    was not checked here. Verification may not read DOCS and the guard refused it.
+    CHECKS entries and passing eval gate cases were confirmed for all six new checks
+    (CHECK-007). Documentation or review should confirm the documentation lines.
+- id: VER-002
+  severity: minor
+  summary: AC-012 (should) names specify among the default waivers. DEV-004, a maintainer
+    decision, made specify never a default waiver, and test_specify_is_never_a_default_waiver
+    asserts that. The criterion as worded is not met. Judgment should read DEV-004.
+- id: VER-003
+  severity: minor
+  summary: AC-019 (should) covers every new refusal, warning and advisory line, but
+    only the remediation-cap refusal is tested under NO_COLOR with non-ASCII stripped
+    (test_cap_refusal_reads_without_color_or_non_ascii). The other new messages are
+    untested for this.
+- id: VER-004
+  severity: minor
+  summary: 'AC-016 (should): adversarial-testing/SKILL.md aims the attack at must
+    criteria and modified code and routes out-of-change findings to follow-ups. It
+    does not state REQ-013''s ''report everything else as advisory'' outright. The
+    other six skills state their rule.'
+next: evaluate
+notes: 'Full suite on tree 1bcdad4 (HEAD 9473ac3, code identical to a37d580): 935
+  runs, 6885 assertions, 0 failures, 0 errors, 0 skips. MAILTRAP_API_KEY, PERSONAL_SENDGRID_API_KEY
+  and SOFT_FOUNDRY_PHASE were unset and no provider keys were present. CHECK-006 gated
+  readme-workflow-visuals in the main checkout, which is on that branch and has another
+  session''s uncommitted evaluation edits. Gating only reads, and nothing there was
+  changed. Its review and judgment are pending, so the cap, blocked-basis and outside-change
+  skips on a legacy record are shown by unit tests (CHECK-002). The RED commits were
+  confirmed to contain their test files with lib/ changing afterwards; they were not
+  checked out and run. The guard (block mode) refused shell commands naming .ai/harness-evals/cases
+  and docs/; neither was read. Eval results come from soft-foundry ci output.'
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-11-14T04:38:50Z'
+  finished_at: '2026-11-14T04:59:41Z'
+  exit_status: 0
+  previous_phase: verify
+  session_id: 22b03515-216e-4594-b163-2b68076b7070
+  cwd: "/Users/jscholen-iou/dev/soft_foundry/.claude/worktrees/process-speed"
+branch_resolved: true

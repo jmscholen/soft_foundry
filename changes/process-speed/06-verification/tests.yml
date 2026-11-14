@@ -1,0 +1,70 @@
+commit_sha: 9473ac341f075abcf3b65ac2723da9ed541cda15   # HEAD, "Record process-speed implement"; code identical to a37d580 (the diff between them is the record only)
+size: full_at_verify   # computed by `soft-foundry change size --phase verify`: no scope declared, whole-repository scope is sized at the largest size
+full_suite:
+  tree: 1bcdad4a6603f16cd582863dd8ed8360255282ef   # git rev-parse 9473ac3^{tree}
+  command: bundle exec rake test (MAILTRAP_API_KEY, PERSONAL_SENDGRID_API_KEY, SOFT_FOUNDRY_PHASE unset; no provider keys set)
+  outcome: passed   # 935 runs, 6885 assertions, 0 failures, 0 errors, 0 skips (evidence/rake-test.txt)
+checks:
+  - id: CHECK-001
+    kind: tests
+    command: bundle exec rake test   # full suite, keys and SOFT_FOUNDRY_PHASE unset
+    result: pass   # 935 runs, 6885 assertions, 0 failures, 0 errors, 0 skips; 1114.8 s
+    evidence: evidence/rake-test.txt
+    criteria: [AC-018]
+  - id: CHECK-002
+    kind: tests
+    command: bundle exec ruby -Ilib -Itest test/process_speed_test.rb -v
+    result: pass   # 26 runs, 162 assertions, 0 failures, 0 errors, 0 skips
+    evidence: evidence/process-speed-tests.txt
+    # AC-001 test_change_new_declares_the_rules_version, test_new_checks_skip_on_a_legacy_record, test_rules_version_removed_after_intake_fails_the_first_phase
+    # AC-002 test_reopen_at_the_cap_is_refused_and_parks_the_change; AC-004 test_review_and_judge_gates_fail_above_the_cap_without_a_decision, test_a_cap_decision_lets_one_more_round_through, test_a_reject_decision_never_lets_a_round_through, test_sealing_a_third_round_without_a_reopen_is_refused
+    # AC-005 test_missing_or_unknown_tier_fails_the_specify_gate; AC-006 test_must_count_over_the_risk_cap_fails; AC-007 test_specify_needs_an_approval_matching_the_must_set
+    # AC-008 test_uncovered_should_warns_and_uncovered_must_fails_at_judgment; AC-009 test_person_checks_are_not_criteria_and_become_release_items
+    # AC-010 test_blocked_judgment_must_name_a_must_criterion_or_a_blocking_finding; AC-011 test_outside_change_finding_needs_a_follow_up_and_paths_outside_the_diff
+    # AC-012 test_low_risk_steps_over_waivable_phases_unless_run_phases_asks, test_specify_is_never_a_default_waiver (behaviour narrowed by DEV-004; see VER-002)
+    # AC-013 test_documentation_only_diff_gets_the_smaller_size, test_documentation_paths; AC-014 test_docs_only_reopen_keeps_verify_evaluate_and_attack
+    # AC-015 test_docs_only_remediation_seal_refuses_a_code_change, test_docs_only_remediation_seal_allows_documentation; AC-019 test_cap_refusal_reads_without_color_or_non_ascii (cap refusal only; see VER-003)
+    criteria: [AC-001, AC-002, AC-004, AC-005, AC-006, AC-007, AC-008, AC-009, AC-010, AC-011, AC-012, AC-013, AC-014, AC-015, AC-019]
+    red_commit: 83cf46a
+    test_path: test/process_speed_test.rb
+  - id: CHECK-003
+    kind: tests
+    command: bundle exec ruby -Ilib -Itest test/cli_process_speed_test.rb -v
+    result: pass   # 7 runs, 35 assertions, 0 failures, 0 errors, 0 skips
+    evidence: evidence/process-speed-tests.txt
+    # AC-002 test_reopen_at_the_cap_exits_non_zero_and_names_the_decisions; AC-003 test_phase_run_auto_reopen_at_the_cap_starts_no_session (reached through a stale verify, DEV-001)
+    # AC-011 test_outside_change_finding_is_listed_as_a_follow_up; AC-014 test_reopen_docs_only_from_the_command_line, test_docs_only_is_refused_for_another_phase
+    # AC-017 support: test_check_lints_the_convergence_keys; parked runs: test_phase_run_does_not_start_a_session_for_a_parked_change
+    criteria: [AC-002, AC-003, AC-011, AC-014]
+    red_commit: f5c3032
+    test_path: test/cli_process_speed_test.rb
+  - id: CHECK-004
+    kind: static_analysis
+    command: ruby -Ilib exe/soft-foundry check
+    result: pass   # control plane: 16 phases, 17 skills, no errors
+    evidence: evidence/check.txt
+    criteria: [AC-018]
+  - id: CHECK-005
+    kind: custom
+    command: ruby -Ilib exe/soft-foundry ci   # lints the control plane, runs the harness evals, gates every record
+    result: pass   # eval: 35 passed, 0 failed, 0 errors, 1 skipped (live case); every record passes; this record's new checks skip as legacy
+    evidence: evidence/ci.txt
+    criteria: [AC-017, AC-018]
+  - id: CHECK-006
+    kind: custom
+    command: soft-foundry gate all --change readme-workflow-visuals, in that branch's checkout (3aa69a7), once with its own code and once with this branch's code (ruby -I<worktree>/lib <worktree>/exe/soft-foundry)
+    result: pass   # every phase outcome identical (both exit 0); the only difference is three "skip ... legacy record" lines (rules kept, criteria tiered, must criteria approved). Review and judgment are pending on that record, so the cap, blocked-basis and outside-change skips are shown by CHECK-002 instead
+    evidence: evidence/ac001-legacy-gate.txt
+    criteria: [AC-001]
+  - id: CHECK-007
+    kind: custom
+    command: for each new check, Gate::CHECKS.key? and the passing eval gate cases naming it in evidence/ci.txt
+    result: pass   # all six have a CHECKS entry and at least one passing gate case. The documentation leg of AC-017 was NOT checked: verification may not read DOCS (see VER-001)
+    evidence: evidence/ac017-coverage.txt
+    criteria: [AC-017]
+  - id: CHECK-008
+    kind: custom
+    command: git diff 2ee7f7f 9473ac3 -- the seven SKILL.md files REQ-013 names, read against REQ-013
+    result: pass   # each states its rule; adversarial-testing aims at must criteria and modified code but does not say in so many words that everything else is advisory (see VER-004)
+    evidence: evidence/ac016-skill-text.txt
+    criteria: [AC-016]

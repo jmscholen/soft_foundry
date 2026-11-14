@@ -1,0 +1,76 @@
+### AC-016 inspection: git diff 2ee7f7f..9473ac3 of the seven SKILL.md files (REQ-013 rule per skill)
+diff --git a/.ai/skills/adversarial-testing/SKILL.md b/.ai/skills/adversarial-testing/SKILL.md
+index 122e371..9326412 100644
+--- a/.ai/skills/adversarial-testing/SKILL.md
++++ b/.ai/skills/adversarial-testing/SKILL.md
+@@ -29,6 +29,8 @@ EVALUATION asks whether legitimate behavior succeeds. ATTACK asks whether illegi
+ 
+ This phase prefers a fresh session: `soft-foundry phase run attack` starts one with only this skill in its prompt and records `executed_by` in the handoff; an attack completed by the session that implemented the change is advised on every gate run.
+ 
++On a record under the convergence rules, direct the attack at what the change modified and at its must acceptance criteria. A weakness in code the change did not modify is still worth reporting: mark the finding `outside_change: true`, name the `paths` it concerns and a `follow_up`, and it is carried as a follow-up instead of blocking this change (the gate's `outside-change findings` check refuses the mark on a path this change modified).
++
+ Run `soft-foundry change size --phase attack` and attack what it names; record the size with the evidence. `touched_doors_plus_smoke` means the doors the change touches plus a sign-in and app-wide smoke test; `full_route_sweep` means every route.
+ 
+ Payloads that contain invisible, zero-width, bidirectional or control characters are written into evidence as visible escapes (for example `<U+200B>` for a zero-width space or `<U+202E>` for a right-to-left override) or are built inside a script with an escape such as `\u{200B}`, never pasted raw. A raw hidden character in evidence fails the `content clean` gate. Record in the manifest or notes that a payload is shown escaped.
+diff --git a/.ai/skills/evaluation/SKILL.md b/.ai/skills/evaluation/SKILL.md
+index eeb5c2d..922cb04 100644
+--- a/.ai/skills/evaluation/SKILL.md
++++ b/.ai/skills/evaluation/SKILL.md
+@@ -4,4 +4,6 @@ Validate that the feature behaves as intended from the user's perspective. Prefe
+ 
+ This phase prefers a fresh session: `soft-foundry phase run evaluate` starts one with only this skill in its prompt and records `executed_by` in the handoff; an evaluation completed by the session that implemented the change is advised on every gate run.
+ 
++On a record under the convergence rules, aim the journeys at the must acceptance criteria the person approved; cover should criteria when the size allows. Anything else you find is reported as an advisory finding, never as a reason the change fails.
++
+ Run `soft-foundry change size --phase evaluate` and do the journeys it names; record the size with the evidence. `touched_doors_plus_smoke` means the journeys the change touches plus a sign-in and app-wide smoke test; `full_route_sweep` means every route.
+diff --git a/.ai/skills/final-judgment/SKILL.md b/.ai/skills/final-judgment/SKILL.md
+index 6915b4f..491cd5c 100644
+--- a/.ai/skills/final-judgment/SKILL.md
++++ b/.ai/skills/final-judgment/SKILL.md
+@@ -1,2 +1,4 @@
+ # Final Judgment
+ Consume the specification, implementation state, verification, evaluation, attack, documentation, observability, and review evidence. Do not create missing evidence or repair implementation. Decide only: APPROVED, APPROVED_WITH_RESIDUAL_RISK, BLOCKED, or REJECTED.
++
++On a record under the convergence rules (`rules: 2` in metadata.yml), the change is held to what a person approved: its must acceptance criteria. BLOCKED rests only on an unmet must criterion or a review finding of severity blocking that names a failure and is not marked `outside_change`; list each in `14-judgment/evidence.yml` under `blocked_by`, and the gate's `blocked basis` check refuses anything else. An unmet should criterion, a minor or major finding, and a finding about code this change did not modify are residual risk or follow-ups, not reasons to block. A statement the specification never asked for is not a defect of this change. When the record has used its remediation rounds (`remediation.max_rounds` in `.ai/workflow.yml`), do not route it back to remediation: say what a person must decide (accept_residual, narrow, reject) under the boundary `remediation cap`.
+diff --git a/.ai/skills/product-documentation/SKILL.md b/.ai/skills/product-documentation/SKILL.md
+index f137992..2be06af 100644
+--- a/.ai/skills/product-documentation/SKILL.md
++++ b/.ai/skills/product-documentation/SKILL.md
+@@ -1,2 +1,4 @@
+ # Product Documentation
+ Convert successfully evaluated user behavior into accurate user instructions. Ground claims in passing EVAL journeys and their evidence; do not document behavior merely because code or a plan suggests it exists. Identify documentation invalidated by changed journeys.
++
++Write bounded claims: say what the tool checks and under which conditions, and name known gaps, instead of absolutes such as "cannot", "never" or "always". "The guard checks calls made from the repository root; a shell that changes directory is not guarded" survives an attack; "cannot be reached from inside a guarded session" does not.
+diff --git a/.ai/skills/remediation/SKILL.md b/.ai/skills/remediation/SKILL.md
+index 9446e66..9955cd8 100644
+--- a/.ai/skills/remediation/SKILL.md
++++ b/.ai/skills/remediation/SKILL.md
+@@ -1,2 +1,6 @@
+ # Remediation
+ Repair findings from verification, evaluation, attack, or review without altering their evidence or expected outcomes. Record root cause and remediation. After any implementation change, downstream validation evidence becomes stale and applicable stages must rerun.
++
++Fix what blocks: unmet must criteria, and blocking and major findings that name a failure. Carry minor findings forward in the summary instead of rewriting text that then needs checking again; every rewritten sentence is a new claim. Fix the smallest thing that resolves the finding: narrow or remove a claim rather than add a qualified one. A finding marked `outside_change` belongs to its follow-up, not to this round.
++
++On a record under the convergence rules, a change may seal `remediation.max_rounds` rounds (`.ai/workflow.yml`) before a person decides; the tool refuses a further round and parks the change at `awaiting_human`. When the fix changes documentation alone, the person may reopen with `soft-foundry phase reopen remediate --docs-only`: verification, evaluation and attack keep their evidence, and the seal refuses any path outside documentation.
+diff --git a/.ai/skills/review/SKILL.md b/.ai/skills/review/SKILL.md
+index 6d9a978..d3220f9 100644
+--- a/.ai/skills/review/SKILL.md
++++ b/.ai/skills/review/SKILL.md
+@@ -12,6 +12,8 @@ A review finding may not be suppressed merely because the implementation agent i
+ 
+ Every finding states the failure it prevents: the concrete input or state, and the wrong result it leads to. A finding that cannot name one is minor at most. Every finding above minor carries it in the handoff as `failure:`, whatever its severity word, and the gate's `findings explained` check fails without it. Findings that only ask for defensive additions are not blocking or major by default: extra validation, rescues, retries, or nil checks for states the code cannot reach. A reviewer who wants one anyway names the input that reaches the state. A reviewer will always find something; the point is the failures that would happen, not the code that could be more cautious.
+ 
++On a record under the convergence rules, severity blocking is for an unmet must criterion or a failure in what this change modified. A finding about code the change did not modify is marked `outside_change: true` with the `paths` it concerns and a `follow_up`; it never blocks this change. Do not treat a statement the specification never asked for as blocking.
++
+ Prefer to review on a different provider from the one that implemented or remediated the change (`prefer_different_provider_from` in `skill.yml`). `soft-foundry phase run review` chooses one when `--shell` is not given.
+ 
+ Payloads that contain invisible, zero-width, bidirectional or control characters are written into evidence as visible escapes (for example `<U+200B>` for a zero-width space or `<U+202E>` for a right-to-left override) or are built inside a script with an escape such as `\u{200B}`, never pasted raw. A raw hidden character in evidence fails the `content clean` gate. Record in the manifest or notes that a payload is shown escaped.
+diff --git a/.ai/skills/specification/SKILL.md b/.ai/skills/specification/SKILL.md
+index bf3db0e..995fe5c 100644
+--- a/.ai/skills/specification/SKILL.md
++++ b/.ai/skills/specification/SKILL.md
+@@ -1,2 +1,4 @@
+ # Specification
+ Translate validated intent and discovery into testable requirements. Cover user behavior, accessibility, authentication, authorization, data, failure behavior, performance, operations, and applicable infrastructure. Requirements must be implementation-independent and traceable. Accessibility requirements follow `.ai/rules/accessibility.md`: at least one `category: accessibility` requirement whenever the change declares `surfaces.accessibility: true`, otherwise a statement of why nothing a person perceives or operates changes. Policy requirements follow `.ai/rules/policy-conformance.md`: at least one `category: policy` requirement whenever the change declares `surfaces.policy: true`, naming what the change collects, shares, retains, or promises differently and which published document and clause covers it, otherwise a statement of why nothing the application's privacy policy, security policy, or terms cover changes.
++
++On a record under the convergence rules (`rules: 2`), each acceptance criterion carries `tier: must` or `tier: should`. Must criteria are what the change promises: only they can block review or judgment, their number is capped by the declared risk (`must_criteria_cap` in `.ai/workflow.yml`), and the specification does not seal until a person records the exact list under `human_decisions` (boundary `must criteria approval`). Put a criterion in must when missing it would be a real failure of the change's purpose, security or data; everything else is should. A check only a person can make (open a published page, look at a render on a hosting site) is not a criterion: list it under `person_checks`, and `change release` carries it as a release item. Hold each criterion to the case it names. Do not write a catch-all rule that makes every statement in the code or the documentation binding ("any statement the code does not support is a defect"): it cannot be met, and it turns each later finding into a new round. Write bounded claims: what is checked, under which conditions, and the known gaps.

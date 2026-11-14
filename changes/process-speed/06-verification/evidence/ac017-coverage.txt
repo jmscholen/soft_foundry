@@ -1,0 +1,8 @@
+### AC-017 (partial): each new check vs Gate::CHECKS and passing soft-foundry eval gate cases (from ci.txt).
+### Documentation leg not checked: verification's permissions.yml does not grant read on DOCS.
+rules kept | CHECKS: yes | eval cases passing: rules-version-dropped-after-intake 
+criteria tiered | CHECKS: yes | eval cases passing: criteria-untiered-at-specify must-criteria-over-risk-cap 
+must criteria approved | CHECKS: yes | eval cases passing: must-criteria-unapproved 
+remediation within cap | CHECKS: yes | eval cases passing: remediation-over-cap-without-decision 
+blocked basis | CHECKS: yes | eval cases passing: blocked-judgment-without-basis 
+outside-change findings | CHECKS: yes | eval cases passing: outside-change-finding-without-follow-up 

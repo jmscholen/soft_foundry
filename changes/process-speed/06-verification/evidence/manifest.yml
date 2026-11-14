@@ -1,0 +1,23 @@
+commit_sha: 9473ac341f075abcf3b65ac2723da9ed541cda15
+artifacts:
+  - path: evidence/rake-test.txt
+    produced_by: "bundle exec rake test (full suite, keys and SOFT_FOUNDRY_PHASE unset)"
+    sha256: d4e169ef457ad3b7fb479c118ea846b3eabe9c763b0e8df0852b9438c8312542
+  - path: evidence/process-speed-tests.txt
+    produced_by: "bundle exec ruby -Ilib -Itest test/process_speed_test.rb -v; test/cli_process_speed_test.rb -v"
+    sha256: 1fc8f2f4c9875850a5790f414f5838ce5759f3d86c1dcf20e540201f29820c69
+  - path: evidence/check.txt
+    produced_by: "ruby -Ilib exe/soft-foundry check"
+    sha256: b187f92e8fb8fa649980f39a10bc13376df0e77b6a37211ff689aee4e20b15a1
+  - path: evidence/ci.txt
+    produced_by: "ruby -Ilib exe/soft-foundry ci"
+    sha256: cbe10a47941600376776305d8dfa057f76ad0aedb4baeea5811db7ba5e725df8
+  - path: evidence/ac001-legacy-gate.txt
+    produced_by: "soft-foundry gate all --change readme-workflow-visuals, old code against new code"
+    sha256: dc150170b6ae6c74476e19505dd86067cd15c737fbc17e9a8a2a3c3b137632e7
+  - path: evidence/ac017-coverage.txt
+    produced_by: "Gate::CHECKS and eval gate cases per new check"
+    sha256: 05a5806301c7b3a211fe5bc59c2599621fe9b98183a5ebe9a65ac1b277468873
+  - path: evidence/ac016-skill-text.txt
+    produced_by: "git diff 2ee7f7f 9473ac3 of seven SKILL.md files"
+    sha256: 54da11a95fc28eaae10babb16eceb157ee0b9390f282c0167ec88ebef2faaf4f
