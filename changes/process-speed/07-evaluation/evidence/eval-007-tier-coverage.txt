@@ -1,0 +1,10 @@
+## AC-008: one should criterion uncovered, every must covered
+14-judgment  complete  PASS
+  ! warn criteria covered: should criterion AC-002 named by no verification check or evaluation journey; reported, not blocking (every must criterion is covered)
+## AC-008: add a must criterion AC-003 that no check or journey names
+0
+## AC-008: add a must criterion AC-003 that no check or journey names
+14-judgment  complete  FAIL
+  ✗ fail criteria covered: AC-003 named by no verification check or evaluation journey and not set aside in 14-judgment/evidence.yml criteria_not_covered with a reason
+## AC-009: verify and judgment criteria checks with two person_checks named by no criterion
+  ! warn criteria covered: AC-002, AC-003 named by no verification check's criteria; an evaluation journey may cover them, or the judgment sets them aside with a reason in evidence.yml criteria_not_covered

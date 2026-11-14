@@ -1,0 +1,62 @@
+commit_sha: 0c213b4c26aca56a5a4f686bfc4ebf0018be4297
+artifacts:
+  - path: evidence/eval-001-tiers.txt
+    journey: EVAL-001
+    sha256: f853dd3606f8dc6de68222163a62d0aaa0c93780d4644cb8c4438316c03b954b
+  - path: evidence/eval-002-must-cap.txt
+    journey: EVAL-002
+    sha256: e56cb521c8bc814d06a5f0f4ddcb3d71f8f6f41ba9940422a4c537de558becb2
+  - path: evidence/eval-003-approval.txt
+    journey: EVAL-003
+    sha256: 8edd045b78b6055e5080c0d3620364e1cdf636043579edd6378110186c69102f
+  - path: evidence/eval-004-cap-refusal.txt
+    journey: EVAL-004
+    sha256: 5a1968833b785407a9a68f38dbf02079c9e74ee2063521be4a5e2cf925881726
+  - path: evidence/eval-004a-round-count-wording.txt
+    journey: EVAL-004
+    sha256: 54cdd5f14418b89182040d2d29bd6756d444e33b6f048a4190db8312a1a32e81
+  - path: evidence/eval-005-auto-reopen.txt
+    journey: EVAL-005
+    sha256: 315751a0b073294f57ab8dd28d44cb5aee32587b307bba50e956bdc923c84829
+  - path: evidence/eval-006-cap-decision.txt
+    journey: EVAL-006
+    sha256: c969bd716984dd9aedbb5c9254b534893a64fe0a726e7166bc91578d15530a93
+  - path: evidence/eval-007-tier-coverage.txt
+    journey: EVAL-007
+    sha256: 1eecc30f3753d99092d3a348e80e13d5810c0a16f0f18d47480d57a056b19e1f
+  - path: evidence/eval-008-person-checks-release.txt
+    journey: EVAL-008
+    sha256: 9ef7c74b8f5b867287a81e8f1222be6cbbcf7097bcd19e9953cf6c4670f1ea10
+  - path: evidence/eval-009-blocked-basis.txt
+    journey: EVAL-009
+    sha256: e9c3969a32c24aa02f94a9f2fd4fda6f43552e496c03b6f7ea3fd6292dc3950f
+  - path: evidence/eval-010-outside-change.txt
+    journey: EVAL-010
+    sha256: 19ab265f9138dcd9cc34eb532019f9f226085deb32e084cd7b8086d91c680a91
+  - path: evidence/eval-011-docs-only.txt
+    journey: EVAL-011
+    sha256: 89de1d5678111bb1d10a4469e01aebc264eda18040b9527b361fb2e8b4656ba1
+  - path: evidence/eval-012-docs-sizing.txt
+    journey: EVAL-012
+    sha256: a8bfae6c43d573f921794d24d737e45cfd87029da2096583edf1023a45c29d4c
+  - path: evidence/eval-013-default-waivers.txt
+    journey: EVAL-013
+    sha256: 88e76297ccf5468fe296900af55f29554585d5720dfd23999b7cad72696226aa
+  - path: evidence/eval-014-legacy-record.txt
+    journey: EVAL-014
+    sha256: 496b926219601f43f8d110546ffe9faa5a0ae32d11cc4699933218554967b777
+  - path: evidence/eval-015-smoke.txt
+    journey: EVAL-015
+    sha256: 0fc3f0950686b6d32456a96f1d1f0fa4270ab2c78dee5cfd65ed1866375bf7b2
+  - path: evidence/eval-016-no-color-ascii.txt
+    journey: EVAL-016
+    sha256: 507dc09109c0b93801729ff80b414bf2a77d7e846456df86da404ccabc88c46d
+  - path: evidence/tools/build.rb
+    journey: all
+    sha256: 83f744cb9c3517c5074a349b4135f1ea53112ed21573f0c91d69e9723200879c
+  - path: evidence/tools/complete.rb
+    journey: all
+    sha256: 4ca5ccadd52cd152627b352de9db1f9da28589d3a75f784fd571cabd2d24c283
+  - path: evidence/tools/env.sh
+    journey: all
+    sha256: 15bfd6ee51824c8e77c82d36202ec5cb1eed6198d194018f6800604ca1fd9a07

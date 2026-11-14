@@ -1,0 +1,9 @@
+## status set back to in_progress without a decision; code changed; phase run verify (stale) would reopen automatically
+  ✗ fail evidence current: STALE: code changed since 223f86484ce6: lib/app.rb
+! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the verification skill's permissions (`soft-foundry hooks install --claude`)
+billing: subscription (no ANTHROPIC_API_KEY in the environment, so claude bills to its own login); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+soft-foundry: c1 has sealed 2 remediation rounds, the limit in .ai/workflow.yml (remediation.max_rounds: 2); another round needs a person's decision. The change is parked: status is awaiting_human. A person records under human_decisions in metadata.yml: boundary: remediation cap, rounds: 2, decision: accept_residual (judge with the open findings as residual risk), narrow (record a requirement change that narrows the claim, then remediate once more) or reject (judge it REJECTED); then sets status back to in_progress
+exit=1
+session launched: no
+12:status: awaiting_human

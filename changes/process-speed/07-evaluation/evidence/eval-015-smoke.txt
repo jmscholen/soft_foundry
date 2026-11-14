@@ -1,0 +1,19 @@
+## smoke: check on the branch's control plane
+✓ pass control plane: 16 phases, 17 skills, no errors
+## check lints malformed convergence keys (scratch copy)
+✗ error .ai/workflow.yml remediation.max_rounds must be a whole number of 1 or more; it is 0
+✗ error .ai/workflow.yml default_waivers must be a list of risks; it is "low"
+✗ fail control plane: 2 error(s)
+exit=0
+## gate fails closed with a malformed cap key
+## help lists --docs-only
+73:  soft-foundry phase reopen <phase> --reason TEXT [--docs-only] [--change SLUG]
+81:                                          --docs-only (remediate only) verify, evaluate and attack keep
+## parked record in status --json
+status: awaiting_human
+{'status': 'awaiting_human', 'current_phase': 'verify'}
+## gate fails closed with remediation.max_rounds: 0 (record c1, review complete)
+13-review  complete  FAIL
+  ✗ fail remediation within cap: .ai/workflow.yml remediation.max_rounds must be a whole number of 1 or more; it is 0
+soft-foundry: c1 is awaiting_human, so a phase cannot be reopened: a person must record the decision under human_decisions in metadata.yml first
+exit=1

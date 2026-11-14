@@ -1,0 +1,6 @@
+## four must, risk low
+  ✗ fail criteria tiered: 4 must criteria, more than the 3 .ai/workflow.yml must_criteria_cap allows at risk low; move the rest to should, or raise the risk
+## three must, risk low
+  ✓ pass criteria tiered: 3 must, 1 should (cap 3 at risk low)
+## four must, risk medium
+  ✓ pass criteria tiered: 4 must, 1 should (cap 8 at risk medium)

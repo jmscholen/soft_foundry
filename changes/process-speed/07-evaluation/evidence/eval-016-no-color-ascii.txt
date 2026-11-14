@@ -1,0 +1,43 @@
+## AC-019: every captured line, NO_COLOR=1 was set for all runs; ESC sequences:
+0
+## lines containing non-ASCII, shown with non-ASCII stripped
+   fail must criteria approved: no approval of the must criteria is recorded; a person records under human_decisions: boundary: must criteria approval, criteria: [AC-001, AC-002], decision: approved
+   fail must criteria approved: the approval does not match the must criteria (not approved: AC-002); a person records under human_decisions: boundary: must criteria approval, criteria: [AC-001, AC-002], decision: approved
+   fail must criteria approved: the approval does not match the must criteria (approved but not must: AC-003); a person records under human_decisions: boundary: must criteria approval, criteria: [AC-001, AC-002], decision: approved
+   pass must criteria approved: 2 must criteria approved by Maintainer
+   fail evidence current: STALE: code changed since 223f86484ce6: lib/app.rb
+   fail blocked basis: BLOCKED names nothing in 14-judgment/evidence.yml blocked_by; list the must criteria or blocking review findings it rests on
+   fail blocked basis: AC-002 is a should criterion, which never blocks; a BLOCKED judgment rests on must criteria or blocking findings
+   fail blocked basis: REV-001 is marked outside_change, so it is a follow-up, not a reason to block; a BLOCKED judgment rests on must criteria or blocking findings
+   pass blocked basis: BLOCKED by AC-001
+   pass commit lineage: descends from 09-remediation at 50dfd8954095; reaches HEAD cdbc3ca07811; recorded with this commit_sha
+   pass predecessor complete: 09-remediation
+   pass remediation within cap: 3 remediation rounds (limit 2, beyond it by a person's decision)
+   pass remediation within cap: 3 remediation rounds (limit 2, beyond it by a person's decision)
+   fail remediation within cap: 3 remediation rounds sealed, beyond the limit of 2, with no decision for round 3; a person records boundary: remediation cap, rounds: 2, decision: accept_residual or narrow
+   fail remediation within cap: 3 remediation rounds sealed, beyond the limit of 2, with no decision for round 3; a person records boundary: remediation cap, rounds: 2, decision: accept_residual or narrow
+   pass content clean
+   pass outside-change findings: 1 finding carried as follow-ups: REV-001
+   fail outside-change findings: REV-001 names no follow_up
+   fail outside-change findings: REV-001 concerns lib/app.rb, which this change modified; it is this change's finding
+   pass criteria covered: 1 criterion named by verification checks
+   pass criteria covered: 1 criterion: 1 covered
+ pass control plane: 16 phases, 17 skills, no errors
+ error .ai/workflow.yml remediation.max_rounds must be a whole number of 1 or more; it is 0
+ error .ai/workflow.yml default_waivers must be a list of risks; it is "low"
+ fail control plane: 2 error(s)
+   fail remediation within cap: .ai/workflow.yml remediation.max_rounds must be a whole number of 1 or more; it is 0
+   fail criteria covered: AC-003 named by no verification check or evaluation journey and not set aside in 14-judgment/evidence.yml criteria_not_covered with a reason
+   pass handoff identity
+   pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+   pass structured files parse: requirements.yml, acceptance-criteria.yml, handoff.yml
+   fail no placeholders: TBD remains in: specification.md, requirements.yml, readiness.md
+   pass no blocking conditions
+   fail commit_sha recorded: missing or malformed
+   fail completed_at recorded
+   fail predecessor complete: 00-intake is pending
+   fail criteria tiered: AC-001 (no tier), AC-002 (tier maybe): every criterion carries tier must or should (must | should)
+   fail must criteria approved: no approval of the must criteria is recorded; a person records under human_decisions: boundary: must criteria approval, criteria: [], decision: approved
+   pass content clean
+   pass waivers permitted: default waivers at risk low: discover, threat_model, plan, learn (name a phase under run_phases to run it)
+   pass waivers permitted: nothing waived

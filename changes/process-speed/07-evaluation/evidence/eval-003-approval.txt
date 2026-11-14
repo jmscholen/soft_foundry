@@ -1,0 +1,14 @@
+## no entry
+  ✗ fail must criteria approved: no approval of the must criteria is recorded; a person records under human_decisions: boundary: must criteria approval, criteria: [AC-001, AC-002], decision: approved
+seal exit=2
+demo: 02-specification is not sealed: its gate fails; nothing was committed
+## only AC-001
+  ✗ fail must criteria approved: the approval does not match the must criteria (not approved: AC-002); a person records under human_decisions: boundary: must criteria approval, criteria: [AC-001, AC-002], decision: approved
+seal exit=2
+demo: 02-specification is not sealed: its gate fails; nothing was committed
+## extra AC-003
+  ✗ fail must criteria approved: the approval does not match the must criteria (approved but not must: AC-003); a person records under human_decisions: boundary: must criteria approval, criteria: [AC-001, AC-002], decision: approved
+## exact
+  ✓ pass must criteria approved: 2 must criteria approved by Maintainer
+## commits after seal attempts
+32ff017 initial

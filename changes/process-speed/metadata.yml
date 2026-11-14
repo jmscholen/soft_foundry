@@ -9,7 +9,7 @@ type: feature
 risk: high
 track: gated
 status: in_progress
-current_phase: evaluate
+current_phase: attack
 created_at: 2026-11-14 01:51:41.000000000 Z
 scope: []
 surfaces:
@@ -52,5 +52,20 @@ human_decisions:
   decision: approved
 vetted:
 reopenings: []
-phase_reopenings: []
+phase_reopenings:
+- at: '2026-11-14T14:47:44Z'
+  phase: attack
+  reset:
+  - attack
+  from_commit: 0c213b4c26aca56a5a4f686bfc4ebf0018be4297
+  reason: 'parallel seal ordering: the pre-commit ci refused evaluate''s seal while
+    attack was complete; reopened so evaluate seals first, attack reruns (maintainer
+    decision)'
+  source: manual
+  previous:
+    attack:
+      status: complete
+      commit_sha: 0c213b4c26aca56a5a4f686bfc4ebf0018be4297
+      completed_at: '2026-11-14T05:09:52Z'
+      session_id: 78f412c4-044f-4e8b-b616-e5abc3906d09
 skipped_phases: []

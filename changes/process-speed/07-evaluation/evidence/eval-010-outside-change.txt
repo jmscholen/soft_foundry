@@ -1,0 +1,12 @@
+## AC-011: REV-001 outside_change with follow_up and paths
+13-review  complete  PASS
+  ✓ pass outside-change findings: 1 finding carried as follow-ups: REV-001
+  ! warn follow-up: REV-001 (13-review) concerns code outside this change: an old helper outside this change mishandles empty input; carried to open an issue against the helper
+  ! warn follow-up: REV-001 (13-review) concerns code outside this change: an old helper outside this change mishandles empty input; carried to open an issue against the helper
+## AC-011: REV-001 outside_change without follow_up
+13-review  complete  FAIL
+  ✗ fail outside-change findings: REV-001 names no follow_up
+  ! warn follow-up: REV-001 (13-review) concerns code outside this change: an old helper outside this change mishandles empty input; carried to (no follow_up named)
+## outside_change naming a path this change modified (lib/app.rb changed on the branch)
+  ✗ fail outside-change findings: REV-001 concerns lib/app.rb, which this change modified; it is this change's finding
+  ! warn follow-up: REV-001 (13-review) concerns code outside this change: an old helper outside this change mishandles empty input; carried to open an issue against the helper

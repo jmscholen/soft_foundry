@@ -1,0 +1,35 @@
+## maintainer records the cap decision (narrow, rounds 2) and resumes
+human_decisions:
+- boundary: remediation cap
+  subject: c1 third round
+  rounds: 2
+  decided_by: Maintainer
+  decided_at: 2026-11-14
+  decision: narrow
+- boundary: must criteria approval
+12:status: in_progress
+phase reopen: reopened remediate (manual)
+phase reopen: reset verify
+phase reopen: reset evaluate
+phase reopen: reset attack
+phase reopen: reset remediate
+phase reopen: reset review
+phase reopen: reset judge
+reopen exit=0
+sealed 09-remediation at ed742c5c4699
+## review and judgment gates WITH the decision (3 rounds sealed)
+13-review  complete  PASS
+  ✓ pass commit lineage: descends from 09-remediation at 50dfd8954095; reaches HEAD cdbc3ca07811; recorded with this commit_sha
+  ✓ pass predecessor complete: 09-remediation
+  ✓ pass remediation within cap: 3 remediation rounds (limit 2, beyond it by a person's decision)
+14-judgment  complete  PASS
+  ✓ pass remediation within cap: 3 remediation rounds (limit 2, beyond it by a person's decision)
+## same gates WITHOUT the decision
+0
+13-review  complete  FAIL
+  ✗ fail remediation within cap: 3 remediation rounds sealed, beyond the limit of 2, with no decision for round 3; a person records boundary: remediation cap, rounds: 2, decision: accept_residual or narrow
+14-judgment  complete  FAIL
+  ✗ fail remediation within cap: 3 remediation rounds sealed, beyond the limit of 2, with no decision for round 3; a person records boundary: remediation cap, rounds: 2, decision: accept_residual or narrow
+## a fourth reopen with only the rounds-2 decision
+soft-foundry: c1 has sealed 3 remediation rounds, the limit in .ai/workflow.yml (remediation.max_rounds: 2); another round needs a person's decision. The change is parked: status is awaiting_human. A person records under human_decisions in metadata.yml: boundary: remediation cap, rounds: 3, decision: accept_residual (judge with the open findings as residual risk), narrow (record a requirement change that narrows the claim, then remediate once more) or reject (judge it REJECTED); then sets status back to in_progress
+exit=1

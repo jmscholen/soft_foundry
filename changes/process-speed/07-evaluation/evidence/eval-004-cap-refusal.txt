@@ -1,0 +1,26 @@
+## round 1: remediation work and seal
+sealed 09-remediation at 89f9b003ba8e
+## round 2: maintainer reopens after a second BLOCKED judgment, remediates, seals
+phase reopen: reopened remediate (manual)
+phase reopen: reset verify
+phase reopen: reset evaluate
+phase reopen: reset attack
+phase reopen: reset remediate
+phase reopen: reset review
+phase reopen: reset judge
+reopen exit=0
+sealed 09-remediation at 223f86484ce6
+223f864 Record c1 remediate
+89f9b00 Record c1 remediate
+7481599 phases complete
+f83e98f record
+## round 3 attempted by the maintainer: two rounds sealed, judgment BLOCKED
+soft-foundry: c1 has sealed 2 remediation rounds, the limit in .ai/workflow.yml (remediation.max_rounds: 2); another round needs a person's decision. The change is parked: status is awaiting_human. A person records under human_decisions in metadata.yml: boundary: remediation cap, rounds: 2, decision: accept_residual (judge with the open findings as residual risk), narrow (record a requirement change that narrows the claim, then remediate once more) or reject (judge it REJECTED); then sets status back to in_progress
+exit=1
+handoffs unchanged: yes
+ changes/c1/metadata.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+12:status: awaiting_human
+## phase run while parked (AC-003 neighbour)
+c1: cannot run review: change c1 is awaiting_human: a person records the decision it is parked on under human_decisions in metadata.yml and sets status back to in_progress; no session starts until then
+exit=1
