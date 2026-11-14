@@ -1057,7 +1057,7 @@ module SoftFoundry
     end
 
     PHASE_RUN_USAGE = "soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex|grok | --panel SHELL,SHELL[,...] [--max-rounds N] [--shell-arg SHELL=ARG]...] [--dry-run] [-- shell args...]"
-    PHASE_REOPEN_USAGE = "soft-foundry phase reopen <phase> --reason TEXT [--change SLUG]"
+    PHASE_REOPEN_USAGE = "soft-foundry phase reopen <phase> --reason TEXT [--docs-only] [--change SLUG]"
     PHASE_SEAL_USAGE = "soft-foundry phase seal <phase> [--change SLUG]"
     PHASE_USAGE = "#{PHASE_RUN_USAGE}\n       #{PHASE_REOPEN_USAGE}\n       #{PHASE_SEAL_USAGE}"
 
@@ -1067,18 +1067,20 @@ module SoftFoundry
       target = @argv.shift or raise ArgumentError, "Usage: #{PHASE_REOPEN_USAGE}"
       slug = option("--change") || current_slug
       reason = option("--reason")
+      docs_only = flag("--docs-only")
       raise TargetError, "unknown option(s): #{@argv.join(' ')}" unless @argv.empty?
       raise ArgumentError, "--reason is required: say why the phase is being reopened (it is kept in the record)" if reason.nil?
 
       record = load_record(slug)
       phase = plane.phase(target) or raise TargetError, "unknown phase '#{target}'; lifecycle phases: #{plane.phases.map(&:id).join(', ')}"
-      result = PhaseReopen.new(@root, plane: plane, git: git, record: record).call(phase, reason: reason)
+      result = PhaseReopen.new(@root, plane: plane, git: git, record: record).call(phase, reason: reason, docs_only: docs_only)
       print_reopen(result)
       0
     end
 
     def print_reopen(result, automatic: nil)
       label = automatic ? "automatic: #{automatic}" : "manual"
+      label += ", documentation-only: verify, evaluate and attack evidence kept; the remediation seal refuses any path outside documentation" if result.entry["docs_only"]
       @out.puts "phase reopen: reopened #{result.phase.id} (#{label})"
       result.reset.each { |p| @out.puts "phase reopen: reset #{p.id}" }
     end
@@ -1883,11 +1885,16 @@ module SoftFoundry
           soft-foundry phase run <phase> --env NAME=VALUE ...
                                                   --env also applies to a single phase: the variable is in that
                                                   session's environment only, and its value is never printed
-          soft-foundry phase reopen <phase> --reason TEXT [--change SLUG]
+          soft-foundry phase reopen <phase> --reason TEXT [--docs-only] [--change SLUG]
                                                   reset the phase and everything downstream to pending so each
                                                   can be run again (any track); evidence files are kept and the
                                                   reset is recorded in phase_reopenings. A stale complete phase
-                                                  given to `phase run` is reopened automatically
+                                                  given to `phase run` is reopened automatically. Past the
+                                                  remediation cap (.ai/workflow.yml remediation.max_rounds) a
+                                                  reset that includes remediation is refused and the change
+                                                  parks at awaiting_human until a person decides. With
+                                                  --docs-only (remediate only) verify, evaluate and attack keep
+                                                  their evidence and the seal refuses non-documentation paths
           soft-foundry phase seal <phase> [--change SLUG]
                                                   end a phase: gate it and, when every check passes, commit
                                                   its directory and the record's metadata as `Record <slug>

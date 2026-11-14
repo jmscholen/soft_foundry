@@ -1,0 +1,18 @@
+id: outside-change-finding-without-follow-up
+kind: gate
+description: A review finding marked outside_change with no follow_up or paths fails review (outside-change findings, REQ-009).
+record:
+  risk: high
+  complete: [intake, discover, specify, threat_model, plan, implement, verify, evaluate, attack, review]
+  handoff:
+    review:
+      findings:
+        - id: REV-001
+          severity: major
+          summary: planted finding about code the change did not modify
+          failure: a session in a subdirectory is not guarded
+          outside_change: true
+expect:
+  phase: review
+  check: outside-change findings
+  outcome: fail

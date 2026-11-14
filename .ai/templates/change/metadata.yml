@@ -63,3 +63,9 @@ phase_reopenings: []
 skipped_phases: []
 # - phase: threat_model
 #   rationale: TBD
+
+# Convergence rules (`rules:` above, written by `change new`). At a risk
+# listed in .ai/workflow.yml default_waivers, the phases that risk may waive
+# are stepped over unless named here.
+run_phases: []
+# - attack

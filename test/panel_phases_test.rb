@@ -15,7 +15,10 @@ class PanelPhasesTest < Minitest::Test
       cli(dir, "change", "new", slug)
       record = SoftFoundry::ChangeRecord.new(dir, slug, control_plane: SoftFoundry::ControlPlane.new(dir))
       meta = File.join(record.dir, "metadata.yml")
-      File.write(meta, File.read(meta).sub(/^status: intake.*$/, "status: in_progress").sub(/^current_phase: intake.*$/, "current_phase: discover"))
+      # A legacy record: these tests are about panel mechanics, and under
+      # the convergence rules a specification also needs a person's
+      # must-list approval before it seals (tested in process_speed_test).
+      File.write(meta, File.read(meta).sub(/^status: intake.*$/, "status: in_progress").sub(/^current_phase: intake.*$/, "current_phase: discover").sub(/^rules: .*\n/, ""))
       commit_all(dir, "record")
       %w[intake discover].each { |id| complete_phase!(record, id, sha: head(dir)) }
       commit_all(dir, "intake and discovery")

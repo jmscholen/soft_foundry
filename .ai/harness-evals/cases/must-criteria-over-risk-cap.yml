@@ -1,0 +1,17 @@
+id: must-criteria-over-risk-cap
+kind: gate
+description: A low-risk change that promises four must criteria, one more than the low-risk cap, fails the specification (criteria tiered, REQ-004).
+record:
+  risk: low
+  complete: [intake, specify]
+  files:
+    02-specification/acceptance-criteria.yml: |
+      criteria:
+        - {id: AC-001, tier: must, requirements: [REQ-001], given: recorded, when: recorded, then: recorded, verified_by: []}
+        - {id: AC-002, tier: must, requirements: [REQ-001], given: recorded, when: recorded, then: recorded, verified_by: []}
+        - {id: AC-003, tier: must, requirements: [REQ-001], given: recorded, when: recorded, then: recorded, verified_by: []}
+        - {id: AC-004, tier: must, requirements: [REQ-001], given: recorded, when: recorded, then: recorded, verified_by: []}
+expect:
+  phase: specify
+  check: criteria tiered
+  outcome: fail

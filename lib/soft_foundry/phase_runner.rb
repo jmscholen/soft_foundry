@@ -114,6 +114,9 @@ module SoftFoundry
       return "change #{@record.slug} is exploring; the exploring stage is worked with the person, not by a runner (run `change vet` first)" if @record.exploring?
       status = @record.metadata["status"].to_s
       return "change #{@record.slug} is #{status}" if %w[closed released judged].include?(status)
+      if status == "awaiting_human"
+        return "change #{@record.slug} is awaiting_human: a person records the decision it is parked on under human_decisions in metadata.yml and sets status back to in_progress; no session starts until then"
+      end
       # A complete phase is rerun only once the work it rests on has
       # changed, which the gate reports as stale evidence.
       if @record.phase_status(phase) == "complete" && !stale_complete?(phase)

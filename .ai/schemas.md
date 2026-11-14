@@ -54,6 +54,23 @@ Created from `.ai/templates/handoff.yml`. Field semantics:
 - The verification phase carries a `red evidence` check over the checks in `06-verification/tests.yml` that name a `red_commit` (optionally with `test_path`): each must be a commit that precedes `commit_sha`, hold the test file, and be followed by an `APP` or `INFRA` change before `commit_sha`. Checks without `red_commit` are skipped; the test is not re-run at the RED commit.
 - The verification phase carries a `check size matches diff` check and a `full-suite run recorded (record check, not a test result)` check over `06-verification/tests.yml`. `size:` must be at least the size `soft-foundry change size --phase verify` computes from the diff, the declared `scope`, `shared_core`, and `.ai/policies/check-sizing.yml`. An optional `full_suite:` block records a run by the git tree hash of the evidence commit (`tree`, `command`, `outcome`), or cites another record's run with `cite: <slug>` for the same tree; a mismatched tree, a recorded outcome other than `passed`, or uncommitted code fails the check. A passing full-suite check shows that a recorded run names this tree with a recorded outcome, not that the suite passed; Soft Foundry never runs the application's tests.
 
+### Convergence rules (`rules: 2`)
+
+`change new` writes `rules: 2` into metadata.yml; a record without it is legacy, and each check below reports skip with "legacy record". Values live in `.ai/workflow.yml` (`remediation.max_rounds`, `must_criteria_cap`, `default_waivers`) and are linted by `check`.
+
+- Fields. `acceptance-criteria.yml` criteria carry `tier: must | should`, and a top-level `person_checks: [{id, description}]` lists checks only a person can make (never criteria; `change release` carries each as an item with `from: person_check`). `metadata.yml` may carry `run_phases: [phase ids]`. `14-judgment/evidence.yml` carries `blocked_by: [ids]` on a BLOCKED judgment. A review or attack finding may carry `outside_change: true` with `follow_up:` and `paths: [...]`. A `phase_reopenings` entry made with `--docs-only` carries `docs_only: true`. `human_decisions` boundaries: `must criteria approval` (`criteria: [ids]`, `decision: approved`) and `remediation cap` (`rounds: N`, `decision: accept_residual | narrow | reject`).
+- Remediation rounds are the larger of the `Record <slug> remediate` commits reachable from the record's branch (or HEAD) and the `phase_reopenings` entries that reset a complete remediation. With `max_rounds` sealed, a reset that includes remediation (manual or automatic) and the remediation seal are refused, and status becomes `awaiting_human`, unless a `remediation cap` decision for that count says `accept_residual` or `narrow`. `phase run` starts no session while a record is `awaiting_human`.
+- `rules kept` (first phase): a record whose intake seal declared `rules` still declares it.
+- `criteria tiered` (specify): every criterion has a tier; the must count is within `must_criteria_cap` for the declared risk (an unclassified risk warns and applies no cap).
+- `must criteria approved` (specify): a `must criteria approval` decision lists exactly the must criteria.
+- `remediation within cap` (review, judge): every round beyond the limit has a decision.
+- `blocked basis` (judge): a BLOCKED judgment's `blocked_by` names only must criteria or review findings of severity blocking with a failure, not marked `outside_change`.
+- `outside-change findings` (attack, review): a finding marked `outside_change` names a `follow_up` and `paths`, none changed in the change's diff since the plan commit. Such findings are listed as follow-up advisories.
+- `criteria covered` at judgment fails only for an uncovered must criterion; an uncovered should criterion warns.
+- Default waivers: at a risk in `default_waivers`, the phases `waivable_by_risk` lists are stepped over unless named in `run_phases`; `waivers permitted` lists them.
+- Sizing: when every changed path is documentation (the `DOCS` group, Markdown at the repository root, or the change's own record; never `.ai/`), verify, evaluate and attack get the smaller size.
+- `phase reopen remediate --docs-only` keeps verify, evaluate and attack complete; the remediation seal then refuses any path outside documentation changed since the reopen.
+
 A stale or failed gate must be resolved by rerunning the phase, never by editing the handoff.
 
 ## Go-live advisories

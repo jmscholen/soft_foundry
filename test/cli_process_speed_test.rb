@@ -62,7 +62,10 @@ class CliProcessSpeedTest < Minitest::Test
       File.write(File.join(dir, "lib", "app.rb"), "puts 9\n")
       commit_all(dir, "code after remediation")
       launched = false
-      code, out, err = run_cli(dir, "phase", "run", "remediate", "--shell", "claude", runner: ->(_l) { launched = true; 0 })
+      # Remediation is not commit-bound, so it is never stale itself; the
+      # automatic reopen that reaches it is a stale verify, whose reset
+      # includes remediation (deviation DEV-001 from AC-003's wording).
+      code, out, err = run_cli(dir, "phase", "run", "verify", "--shell", "claude", runner: ->(_l) { launched = true; 0 })
       refute_equal 0, code, out + err
       refute launched
       assert_includes out + err, "remediation cap"

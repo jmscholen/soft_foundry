@@ -9,7 +9,11 @@
 #   by no active record, makes it the larger size.
 # evaluate, attack: the smaller size only when the record declares a scope, the
 #   repository declares access_control globs, and no changed path matches them.
-# Absence of a declaration never reduces checking.
+# Absence of a declaration never reduces checking, with one exception
+# computed from the diff, never declared: on a record under the
+# convergence rules (rules: 2), when every changed path is documentation
+# (the DOCS group, Markdown at the repository root, or the change's own
+# record; never .ai/), verify, evaluate and attack get the smaller size.
 sizes:
   verify: [targeted_plus_full_before_merge, full_at_verify]
   evaluate: [touched_doors_plus_smoke, full_route_sweep]

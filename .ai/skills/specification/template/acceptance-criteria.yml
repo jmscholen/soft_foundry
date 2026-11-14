@@ -1,10 +1,19 @@
 # Each criterion must be testable and map to at least one requirement.
 # Criteria are locked once specification completes; changing them requires a
 # recorded requirement change, never a downstream edit.
+# tier: must (a promise; can block; capped by risk; approved by a person
+# under human_decisions) or should (reported, never blocking).
 criteria:
   - id: AC-001
+    tier: TBD
     requirements: [REQ-001]
     given: TBD
     when: TBD
     then: TBD
     verified_by: []   # test names, EVAL IDs, or ATTACK IDs, filled by later phases
+
+# Checks only a person can make (open a published page, look at a render).
+# Not criteria; `change release` carries each as a release item.
+person_checks: []
+# - id: PC-001
+#   description: what the person checks, and where

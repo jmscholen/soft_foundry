@@ -1,0 +1,15 @@
+id: remediation-over-cap-without-decision
+kind: gate
+description: A change with three sealed remediation rounds and no person's remediation-cap decision fails review (remediation within cap, REQ-003).
+record:
+  risk: high
+  complete: [intake, discover, specify, threat_model, plan, implement, verify, evaluate, attack, remediate, review]
+  metadata:
+    phase_reopenings:
+      - {phase: remediate, reset: [verify, remediate], previous: {remediate: {status: complete}}}
+      - {phase: remediate, reset: [verify, remediate], previous: {remediate: {status: complete}}}
+      - {phase: remediate, reset: [verify, remediate], previous: {remediate: {status: complete}}}
+expect:
+  phase: review
+  check: remediation within cap
+  outcome: fail

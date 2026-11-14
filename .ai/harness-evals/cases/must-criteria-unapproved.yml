@@ -1,0 +1,15 @@
+id: must-criteria-unapproved
+kind: gate
+description: A must criterion the person's recorded approval does not list fails the specification (must criteria approved, REQ-005).
+record:
+  risk: high
+  complete: [intake, discover, specify]
+  files:
+    02-specification/acceptance-criteria.yml: |
+      criteria:
+        - {id: AC-001, tier: must, requirements: [REQ-001], given: recorded, when: recorded, then: recorded, verified_by: []}
+        - {id: AC-002, tier: must, requirements: [REQ-001], given: recorded, when: recorded, then: recorded, verified_by: []}
+expect:
+  phase: specify
+  check: must criteria approved
+  outcome: fail

@@ -1,0 +1,21 @@
+id: blocked-judgment-without-basis
+kind: gate
+description: A BLOCKED judgment that names no must criterion or blocking finding in evidence.yml blocked_by fails the judgment (blocked basis, REQ-008).
+record:
+  risk: high
+  complete: [intake, discover, specify, threat_model, plan, implement, verify, evaluate, attack, review, judge]
+  files:
+    14-judgment/final.md: |
+      # Final Judgment
+
+      ## Outcome
+      BLOCKED
+
+      ## Reason
+      A sentence the specification never asked for overstates the code.
+    14-judgment/evidence.yml: |
+      blocked_by: []
+expect:
+  phase: judge
+  check: blocked basis
+  outcome: fail

@@ -153,3 +153,27 @@ tracks:
   # `change new --track` asked for; the gate reports the conflict.
   forced_by_risk:
     high: gated
+
+# Convergence rules (changes/process-speed). They apply to a record that
+# declares `rules: 2` in its metadata.yml (written by `change new`); a
+# record without it is legacy and keeps the rules it was created under.
+#
+# remediation.max_rounds: sealed remediation rounds a change may run
+#   before a person decides. Past it, a reset that includes remediation
+#   (manual or automatic) and the remediation seal are refused and the
+#   change parks at awaiting_human until human_decisions records boundary
+#   "remediation cap", the round count, and accept_residual, narrow or
+#   reject. The review and judgment gates check the same count.
+# must_criteria_cap: the most acceptance criteria of tier must a change of
+#   each declared risk may promise; only must criteria can block, and a
+#   person approves the list before the specification seals (boundary
+#   "must criteria approval").
+# default_waivers: risks whose waivable_by_risk phases are stepped over
+#   unless the record names them under run_phases.
+remediation:
+  max_rounds: 2
+must_criteria_cap:
+  low: 3
+  medium: 8
+  high: 15
+default_waivers: [low]

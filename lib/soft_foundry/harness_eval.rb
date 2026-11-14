@@ -211,6 +211,9 @@ module SoftFoundry
           problems << "record.handoff.#{id} must be a mapping" unless value.is_a?(Hash)
         end
         problems.concat(scope_problems("record.scope", record["scope"])) if record.key?("scope")
+        %w[metadata later_metadata].each do |key|
+          problems << "record.#{key} must be a mapping of metadata.yml keys" if record.key?(key) && !record[key].is_a?(Hash)
+        end
         if record.key?("siblings")
           siblings = record["siblings"]
           if siblings.is_a?(Array)
@@ -466,11 +469,13 @@ module SoftFoundry
           File.write(record.handoff_path(phase), YAML.dump(h.merge(substitute(merge, tokens))))
         end
         Hash(spec["files"]).each { |rel, content| write_file(record.dir, rel, substitute(content, tokens), app_file: app_file) }
+        merge_metadata!(record, substitute(spec["metadata"], tokens)) if spec.key?("metadata")
         unless spec["commit"] == false
           git(scratch, "add", "-A")
           git(scratch, "commit", "-q", "-m", "record #{slug} phases", "--allow-empty")
         end
         Hash(spec["later_files"]).each { |rel, content| write_file(record.dir, rel, substitute(content, tokens), app_file: app_file) }
+        merge_metadata!(record, substitute(spec["later_metadata"], tokens)) if spec.key?("later_metadata")
         repo_files = Hash(kase.repository["files"])
         repo_files.each { |rel, content| write_file(scratch, rel, substitute(content, tokens), app_file: app_file) }
         if kase.repository["commit"] == true && !repo_files.empty?
@@ -481,6 +486,14 @@ module SoftFoundry
       end
 
       def complete_phase!(record, phase, sha) = HarnessEval.complete_phase!(record, phase, sha)
+
+      # record.metadata / record.later_metadata: keys merged into the
+      # planted metadata.yml; a null value removes the key.
+      def merge_metadata!(record, keys)
+        record.update_metadata do |m|
+          Hash(keys).each { |k, v| v.nil? ? m.delete(k.to_s) : m[k.to_s] = v }
+        end
+      end
 
       def substitute(value, tokens)
         case value
