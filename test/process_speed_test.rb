@@ -7,7 +7,7 @@ require_relative "lifecycle_fixture"
 # findings, default low-risk waivers, documentation-only sizing and the
 # documentation-only reopen.
 class ProcessSpeedTest < Minitest::Test
-  include LifecycleFixture
+  include FinishedFixture
 
   MUSTS = %w[AC-001 AC-002].freeze
 
@@ -18,6 +18,12 @@ class ProcessSpeedTest < Minitest::Test
       m["rules"] = 2
       m["risk"] = risk if risk
     end
+  end
+
+  # A commit even when the step left nothing new to stage.
+  def commit_any!(dir, msg)
+    sh(dir, "git", "add", "-A")
+    sh(dir, "git", "commit", "-q", "--allow-empty", "-m", msg)
   end
 
   def plane(dir) = SoftFoundry::ControlPlane.new(dir)
@@ -158,6 +164,7 @@ class ProcessSpeedTest < Minitest::Test
 
   def test_the_cap_does_not_apply_to_a_legacy_record
     with_lifecycle_record(complete: LIFECYCLE + %w[remediate]) do |dir, record|
+      record.update_metadata { |m| m.delete("rules") }
       sealed_rounds!(dir, record, 3)
       assert_includes reopen(dir, record, "remediate").reset.map(&:id), "remediate"
     end
@@ -167,7 +174,7 @@ class ProcessSpeedTest < Minitest::Test
     with_lifecycle_record(complete: LIFECYCLE - %w[review judge], current_phase: "remediate") do |dir, record|
       new_rules!(record)
       sealed_rounds!(dir, record, 2)
-      commit_all(dir, "rules")
+      commit_any!(dir, "rules")
       complete_phase!(record, "remediate", sha: head(dir))
       result = seal(dir, record, "remediate")
       assert_equal :refused, result.outcome
@@ -254,15 +261,21 @@ class ProcessSpeedTest < Minitest::Test
   # --- REQ-007 person checks ------------------------------------------------
 
   def test_person_checks_are_not_criteria_and_become_release_items
-    with_finished_record do |dir, record|
+    with_lifecycle_record(complete: [], current_phase: "learn") do |dir, record|
       new_rules!(record, risk: "high")
       criteria!(record, [["AC-001", "must"]], person_checks: [{ "id" => "PC-001", "description" => "open the page" }, { "id" => "PC-002", "description" => "look at the render" }])
       approve!(record, %w[AC-001])
-      commit_all(dir, "person checks")
+      commit_all(dir, "tiered criteria")
+      FinishedFixture::ALL_REQUIRED.each { |id| complete_phase!(record, id, sha: head(dir)) }
+      # The fill replaces placeholder words; the tiered criteria are written back in the same commit.
+      criteria!(record, [["AC-001", "must"]], person_checks: [{ "id" => "PC-001", "description" => "open the page" }, { "id" => "PC-002", "description" => "look at the render" }])
+      final = File.join(record.phase_dir(record.control_plane.phase("judge")), "final.md")
+      File.write(final, File.read(final).sub(/^## Outcome\n.*$/, "## Outcome\nAPPROVED"))
+      commit_all(dir, "finish c1")
       c = check(gate(dir, record, "judge"), "criteria covered")
       refute_includes c.detail.to_s, "PC-00"
       code, _out, err = run_cli(dir, "change", "release", "--item", "GOLIVE-1=flip the flag")
-      assert_equal 0, code, err
+      assert_equal 0, code, err + gate(dir, record, "specify").checks.select { |x| x.outcome == :fail }.map { |x| "#{x.name}: #{x.detail}" }.join("\n")
       ids = record.metadata.dig("release", "items").map { |i| i["id"] }
       assert_includes ids, "PC-001"
       assert_includes ids, "PC-002"
@@ -355,7 +368,7 @@ class ProcessSpeedTest < Minitest::Test
   def test_documentation_only_diff_gets_the_smaller_size
     with_lifecycle_record(complete: LIFECYCLE - %w[verify evaluate attack review judge]) do |dir, record|
       new_rules!(record)
-      commit_all(dir, "Record c1 plan")
+      commit_any!(dir, "Record c1 plan")
       File.write(File.join(dir, "README.md"), "# readme\n")
       FileUtils.mkdir_p(File.join(dir, "docs"))
       File.write(File.join(dir, "docs", "guide.md"), "guide\n")
@@ -390,9 +403,9 @@ class ProcessSpeedTest < Minitest::Test
     with_lifecycle_record(complete: LIFECYCLE + %w[remediate]) do |dir, record|
       new_rules!(record)
       sealed_rounds!(dir, record, 1)
-      commit_all(dir, "rules")
+      commit_any!(dir, "rules")
       reopen(dir, record, "remediate", docs_only: true)
-      commit_all(dir, "reopened")
+      commit_any!(dir, "reopened")
       File.write(File.join(dir, "lib", "app.rb"), "puts 4\n")
       commit_all(dir, "code under docs-only")
       complete_phase!(record, "remediate", sha: head(dir))
@@ -407,9 +420,9 @@ class ProcessSpeedTest < Minitest::Test
     with_lifecycle_record(complete: LIFECYCLE + %w[remediate]) do |dir, record|
       new_rules!(record)
       sealed_rounds!(dir, record, 1)
-      commit_all(dir, "rules")
+      commit_any!(dir, "rules")
       reopen(dir, record, "remediate", docs_only: true)
-      commit_all(dir, "reopened")
+      commit_any!(dir, "reopened")
       File.write(File.join(dir, "README.md"), "# fixed wording\n")
       commit_all(dir, "wording")
       complete_phase!(record, "remediate", sha: head(dir))

@@ -39,12 +39,21 @@ module SoftFoundry
       lifecycle!
       gates!
       given = parse(specs)
-      raise ArgumentError, "--item is required: name at least one thing still owed, as --item ID=DESCRIPTION (for example --item GOLIVE-1='switch the flag on')" if given.empty?
+      # REQ-007: checks only a person can make are carried as release
+      # items, unless --item names them already.
+      person = ProcessRules.new(@record).person_checks.filter_map do |c|
+        id = c["id"].to_s.strip
+        next if given.any? { |i| i["id"] == id }
+
+        { "id" => id, "description" => c["description"].to_s.strip.empty? ? "a check only a person can make (02-specification person_checks)" : c["description"].to_s, "from" => "person_check" }
+      end
+      raise ArgumentError, "--item is required: name at least one thing still owed, as --item ID=DESCRIPTION (for example --item GOLIVE-1='switch the flag on')" if given.empty? && person.empty?
       carried = @record.undischarged_acceptance.filter_map do |item|
         next unless item.is_a?(Hash) && item["id"].to_s.strip != ""
 
         { "id" => item["id"].to_s, "description" => item["description"].to_s.strip.empty? ? "carried from the final judgment's undischarged conditions" : item["description"].to_s, "from" => "judgment" }
       end
+      carried += person
       clash = (given + carried).map { |i| i["id"] }.tally.find { |_, n| n > 1 }
       raise ArgumentError, "item id #{clash.first} appears twice (a final-judgment undischarged condition keeps its own id); use a different id" if clash
 

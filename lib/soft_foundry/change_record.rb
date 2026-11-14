@@ -10,6 +10,7 @@ require_relative "record_lock"
 require_relative "safe_write"
 require_relative "advisory"
 require_relative "declarations"
+require_relative "process_rules"
 require_relative "record_file"
 
 module SoftFoundry
@@ -274,8 +275,12 @@ module SoftFoundry
 
     # A phase that may legitimately stay pending for this change: globally
     # optional, waived with rationale, or not required by the track.
+    # A low-risk record under the convergence rules also steps over the
+    # phases its risk may waive unless run_phases asks for them
+    # (ProcessRules#default_waivers).
     def skippable?(phase)
-      phase.optional || skipped_with_rationale.include?(phase.id) || Array(track_definition&.optional).include?(phase.id)
+      phase.optional || skipped_with_rationale.include?(phase.id) || Array(track_definition&.optional).include?(phase.id) ||
+        ProcessRules.new(self).default_waivers.include?(phase.id)
     end
 
     # The commit_sha of the most-recently-completed phase, or nil if none
@@ -418,6 +423,7 @@ module SoftFoundry
                      "CHANGE" => slug, "TITLE" => title, "BRANCH" => branch, "WORKTREE" => worktree, "CREATED_AT" => now.utc.iso8601,
                      "TRACK" => track, "STATUS" => definition.exploring? ? "exploring" : "intake",
                      "CURRENT_PHASE" => definition.exploring? ? "implement" : "intake")
+      declare_rules!
       declare_surfaces!
       if definition.exploring?
         target = File.join(dir, definition.output)
@@ -434,6 +440,17 @@ module SoftFoundry
                        "PHASE" => phase.output, "SKILL" => skill.name, "PROFILE" => skill.profile.to_s,
                        "NEXT" => next_phase_id(phase))
       end
+    end
+
+    # Every record `change new` makes declares the convergence rules
+    # (ProcessRules::VERSION). A text edit, so the template comments survive.
+    def declare_rules!
+      path = File.join(dir, "metadata.yml")
+      body = SoftFoundry.read_text(path)
+      return if body.match?(/^rules:/)
+      line = "rules: #{ProcessRules::VERSION}                # convergence rules (changes/process-speed); a record without it is legacy\n"
+      body = body.match?(/^type:/) ? body.sub(/^type:/) { "#{line}type:" } : "#{line}#{body}"
+      File.write(path, body)
     end
 
     # The scope given to `change new --scope`, as a text edit so the

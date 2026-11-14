@@ -84,6 +84,7 @@ module SoftFoundry
           File.write(path, SoftFoundry.read_text(path).gsub(/\bTBD\b/, "recorded"))
         end
         fill_structured!(dir, sha)
+        fill_tiers!(record, dir) if phase.id == "specify"
       end
       h = record.handoff(phase) || {}
       h.merge!("status" => "complete", "commit_sha" => sha, "started_at" => now, "completed_at" => now,
@@ -124,6 +125,25 @@ module SoftFoundry
       final = File.join(dir, "final.md")
       return unless File.file?(final)
       File.write(final, SoftFoundry.read_text(final).sub(/^## Outcome[ \t]*\n.*?(?=^## |\z)/m, "## Outcome\nAPPROVED\n\n"))
+    end
+
+    # A planted specification on a record under the convergence rules:
+    # an untiered or placeholder criterion becomes must, and the planted
+    # approval names exactly the must criteria (decided_by: harness), so
+    # the specify gate accepts the plant as it accepts filled evidence.
+    def self.fill_tiers!(record, dir)
+      return unless ProcessRules.applies?(record.metadata)
+      path = File.join(dir, "acceptance-criteria.yml")
+      return unless File.file?(path)
+      data = YAML.safe_load_file(path, permitted_classes: [Time, Date], aliases: true)
+      return unless data.is_a?(Hash) && data["criteria"].is_a?(Array)
+      data["criteria"].each { |c| c["tier"] = "must" if c.is_a?(Hash) && !ProcessRules::TIERS.include?(c["tier"].to_s) }
+      File.write(path, YAML.dump(data))
+      musts = data["criteria"].filter_map { |c| c["id"].to_s if c.is_a?(Hash) && c["tier"] == "must" }
+      record.update_metadata do |m|
+        decisions = Array(m["human_decisions"]).reject { |d| d.is_a?(Hash) && d["boundary"] == ProcessRules::APPROVAL_BOUNDARY }
+        m["human_decisions"] = decisions + [{ "boundary" => ProcessRules::APPROVAL_BOUNDARY, "criteria" => musts, "decided_by" => "harness", "decided_at" => FIXTURE_STAMP, "decision" => "approved" }]
+      end
     end
 
     Case = Data.define(:id, :kind, :description, :phase, :record, :repository, :application, :profile, :expect, :path)

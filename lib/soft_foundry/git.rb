@@ -186,6 +186,16 @@ module SoftFoundry
       (rows.find { |_, s| s == subject } || rows.first)&.first
     end
 
+    # How many commits reachable from `ref` have exactly `subject`; 0 when
+    # git cannot answer (an unknown ref). One git call, observed once per
+    # gate evaluation.
+    def count_subject(subject, ref = "HEAD")
+      observed([:count_subject, subject, ref.to_s]) do
+        out, ok = run("log", "--format=%s", ref.to_s, "--")
+        ok ? out.lines(chomp: true).count { |s| s == subject } : 0
+      end
+    end
+
     # The full hash of the commit `sha` names (abbreviated or not), or nil.
     def resolve_commit(sha)
       return nil unless sha.to_s.match?(/\A[0-9a-fA-F]{4,40}\z/)
