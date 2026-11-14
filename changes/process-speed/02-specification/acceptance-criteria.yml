@@ -1,0 +1,146 @@
+# Each criterion must be testable and map to at least one requirement.
+# Criteria are locked once specification completes; changing them requires a
+# recorded requirement change, never a downstream edit.
+#
+# tier (applied here ahead of the rule this change builds): must criteria are
+# the change's promises and may block; should criteria are reported, never
+# blocking. Must count 12, under the high-risk cap of 15 this change proposes.
+criteria:
+  - id: AC-001
+    tier: must
+    requirements: [REQ-001, REQ-015]
+    given: a record created by `change new` after this change, and readme-workflow-visuals as it stands on its branch
+    when: the new record's metadata is read and `soft-foundry gate` runs on the old record
+    then: the new record declares the rules version, and every new check reports skip with "legacy record" on the old one, with no outcome changed
+    verified_by: []
+  - id: AC-002
+    tier: must
+    requirements: [REQ-002]
+    given: a fixture record with two sealed remediation rounds and a BLOCKED judgment
+    when: "`soft-foundry phase reopen remediate --reason TEXT` runs"
+    then: it exits non-zero, no handoff changes, status is awaiting_human, and the output names accept_residual, narrow and reject and the boundary to record
+    verified_by: []
+  - id: AC-003
+    tier: should
+    requirements: [REQ-002]
+    given: the same fixture with remediation complete and its evidence stale
+    when: "`soft-foundry phase run remediate` would reopen it automatically"
+    then: the automatic reopen is refused the same way and the runner starts no session
+    verified_by: []
+  - id: AC-004
+    tier: must
+    requirements: [REQ-003, REQ-017]
+    given: a fixture with three sealed remediation rounds
+    when: the review and judgment gates run without, and then with, a human_decisions entry (boundary remediation cap, a decision, rounds 2)
+    then: both gates fail without it, naming the boundary, and pass the cap check with it; a reopen after the entry is permitted once more
+    verified_by: []
+  - id: AC-005
+    tier: must
+    requirements: [REQ-004]
+    given: a new-rules specification with a criterion lacking tier, and one with tier "maybe"
+    when: the specify gate runs
+    then: it fails naming each criterion and the allowed tiers
+    verified_by: []
+  - id: AC-006
+    tier: must
+    requirements: [REQ-004]
+    given: a low-risk new-rules specification with four must criteria
+    when: the specify gate runs
+    then: it fails naming the count, the cap of 3 and where the cap is set; with three must criteria it passes that check
+    verified_by: []
+  - id: AC-007
+    tier: must
+    requirements: [REQ-005, REQ-017]
+    given: a new-rules specification whose must ids are AC-001 and AC-002
+    when: the specify gate runs and `phase seal specify` is attempted with no approval entry, with an entry listing only AC-001, and with an entry listing exactly AC-001 and AC-002
+    then: the first two fail and refuse the seal, naming the missing or extra ids; the third passes the approval check
+    verified_by: []
+  - id: AC-008
+    tier: must
+    requirements: [REQ-006]
+    given: a new-rules record at judgment with one uncovered should criterion and every must criterion covered
+    when: the judgment gate runs
+    then: the criteria check warns naming the should criterion and does not fail; with an uncovered must criterion it fails
+    verified_by: []
+  - id: AC-009
+    tier: must
+    requirements: [REQ-007]
+    given: a specification with two person_checks entries and no criterion naming them
+    when: the verify and judgment criteria checks run, and `change release` runs on the judged record with no --item for them
+    then: neither check counts the person checks as criteria, and the release block carries one item per person check
+    verified_by: []
+  - id: AC-010
+    tier: must
+    requirements: [REQ-008, REQ-009]
+    given: a new-rules record whose final.md says BLOCKED
+    when: the judgment gate runs with evidence.yml blocked_by empty, naming a should criterion, naming a finding marked outside_change, and naming an unmet must criterion
+    then: the first three fail naming what is wrong; the fourth passes the blocked-basis check
+    verified_by: []
+  - id: AC-011
+    tier: should
+    requirements: [REQ-009]
+    given: a review handoff with a finding marked outside_change without follow_up, and one with follow_up
+    when: the review gate and `change status` run
+    then: the first fails naming the finding; the second passes and appears as a follow-up advisory
+    verified_by: []
+  - id: AC-012
+    tier: should
+    requirements: [REQ-010]
+    given: a low-risk new-rules record with skipped_phases empty and run_phases naming attack
+    when: the waivers check runs and threat_model is sealed
+    then: the check reports discover, specify, threat_model, plan and learn as default waivers; attack is required; a legacy low-risk record is unchanged
+    verified_by: []
+  - id: AC-013
+    tier: should
+    requirements: [REQ-011]
+    given: a record with no scope whose diff since the plan touches only README.md, docs/ and its own record
+    when: "`soft-foundry change size --phase verify` and `--phase attack` run"
+    then: each reports the smaller size and names the documentation-only rule; adding a lib/ path reports the larger size
+    verified_by: []
+  - id: AC-014
+    tier: should
+    requirements: [REQ-012]
+    given: a judged new-rules record within the round cap
+    when: "`soft-foundry phase reopen remediate --docs-only --reason TEXT` runs"
+    then: remediate, document, index, observe, review, judge and learn are reset; verify, evaluate and attack stay complete; the phase_reopenings entry records docs_only
+    verified_by: []
+  - id: AC-015
+    tier: must
+    requirements: [REQ-012, REQ-017]
+    given: a documentation-only reopen followed by a committed change to lib/
+    when: "`soft-foundry phase seal remediate` runs"
+    then: the seal is refused naming the lib/ path and telling the person to reopen without --docs-only; with only README.md changed the seal succeeds
+    verified_by: []
+  - id: AC-016
+    tier: should
+    requirements: [REQ-013]
+    given: the skill files after this change
+    when: specification, product-documentation, evaluation, adversarial-testing, review, final-judgment and remediation SKILL.md are read
+    then: each states the rule REQ-013 assigns to it
+    verified_by: []
+  - id: AC-017
+    tier: must
+    requirements: [REQ-014]
+    given: the branch at the evidence commit
+    when: Gate::CHECKS, `soft-foundry eval` and the user documentation are compared with the list of new checks
+    then: every new check has a CHECKS entry, a passing harness-eval gate case and a documentation line
+    verified_by: []
+  - id: AC-018
+    tier: must
+    requirements: [REQ-015]
+    given: the branch at the evidence commit, provider keys and SOFT_FOUNDRY_PHASE unset
+    when: the full suite and `soft-foundry ci` run
+    then: both pass with every existing record unchanged
+    verified_by: []
+  - id: AC-019
+    tier: should
+    requirements: [REQ-016]
+    given: each new refusal, warning and advisory line
+    when: it is printed with NO_COLOR set and its non-ASCII characters stripped
+    then: the outcome word, the prefix and the next action survive
+    verified_by: []
+
+# Checks only a person can make. Not criteria; carried as release items.
+person_checks:
+  - id: PC-001
+    description: The maintainer runs one real change under the new rules after merge and confirms it reaches judgment within two remediation rounds or parks with a clear decision to make.

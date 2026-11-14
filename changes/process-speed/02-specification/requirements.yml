@@ -1,0 +1,88 @@
+# Implementation-independent requirements. IDs are stable and referenced by
+# acceptance criteria, tests, evaluation journeys, and attack cases.
+requirements:
+  - id: REQ-001
+    category: data
+    statement: A change record created after this change declares that the new rules apply to it (a rules version written by `change new`). A record without the declaration is a legacy record, and every rule this change adds reports skip on it with the reason "legacy record", so records already in flight keep the outcomes they have today.
+    rationale: readme-workflow-visuals and release-0-23-0 are in flight with untiered criteria and no approval; applying the new checks to them would fail them retroactively.
+    source: 00-intake/request.md (outcome 8)
+  - id: REQ-002
+    category: functional
+    statement: A remediation round is one seal of the remediation phase. When a change has two sealed remediation rounds, a request to reopen remediation (or any reopen whose reset would include remediation) is refused without resetting anything, the change's status becomes awaiting_human, and the refusal names the three decisions a person may record (accept the open findings as residual risk, narrow the claim through a recorded requirement change, reject). The round limit is read from .ai/workflow.yml.
+    rationale: The maintainer set two rounds as the most a change may loop without a person.
+    source: 00-intake/request.md (outcome 1)
+  - id: REQ-003
+    category: functional
+    statement: A person's decision is recorded under human_decisions with boundary "remediation cap", a decision of accept_residual, narrow or reject, and the round count it answers. With such an entry for the current round count, reopening remediation is permitted for one more round, and the review and judgment gates accept a record whose round count exceeds the limit. Without one, those gates fail.
+    rationale: The cap must hold at the gate as well as at reopen, so a hand-edited record cannot skip it, and a person's decision must be the only way past it.
+    source: 00-intake/request.md (outcome 1)
+  - id: REQ-004
+    category: functional
+    statement: On a record with the new rules, each acceptance criterion carries tier must or should. The number of must criteria may not exceed the cap .ai/workflow.yml sets for the change's declared risk (starting values low 3, medium 8, high 15).
+    rationale: A criterion's tier decides whether missing it can block; the cap forces a choice about what the change promises.
+    source: 00-intake/request.md (outcome 2)
+  - id: REQ-005
+    category: functional
+    statement: The specification cannot be sealed until human_decisions holds an entry with boundary "must criteria approval" whose criteria list is exactly the set of must criterion ids in the specification.
+    rationale: A person, not the evidence phases, decides what the change promises and therefore what is evaluated.
+    source: 00-intake/request.md (outcome 2)
+  - id: REQ-006
+    category: functional
+    statement: At judgment, every must criterion must be covered by a verification check or evaluation journey, or set aside with a reason, as the criteria check requires of every criterion today. An uncovered should criterion is reported as a warning, not a failure.
+    rationale: Only promises the person approved bind the change.
+    source: 00-intake/request.md (outcome 2)
+  - id: REQ-007
+    category: functional
+    statement: Checks only a person can make are listed under person_checks in acceptance-criteria.yml, not as criteria. No gate check counts them as criteria, and `change release` carries each one as a release item unless the person names it already.
+    rationale: Two of readme-workflow-visuals' nine criteria could only be met by a person, which guaranteed a BLOCKED judgment.
+    source: 00-intake/request.md (outcome 3)
+  - id: REQ-008
+    category: functional
+    statement: On a record with the new rules, a BLOCKED judgment names in 14-judgment/evidence.yml what blocks it, and each entry is either an unmet must criterion or a review finding with severity blocking and a failure. A BLOCKED judgment that names nothing, names a should criterion, or names a finding marked outside the change fails the judgment gate.
+    rationale: Judgment blocked readme-workflow-visuals on a sentence no criterion asked for.
+    source: 00-intake/request.md (outcomes 2 and 6)
+  - id: REQ-009
+    category: functional
+    statement: A review or attack finding about behavior in code the change does not modify may be marked outside_change, and then names a follow_up. Such a finding is never counted as blocking for this change and is listed as a follow-up in the change's advisories.
+    rationale: Attack's findings about the guard were charged to a README change.
+    source: 00-intake/request.md (outcome 4)
+  - id: REQ-010
+    category: functional
+    statement: On a low-risk record with the new rules, the phases .ai/workflow.yml lets low risk waive are stepped over by default. A record that wants one of them run names it under run_phases. The waivers check reports the defaults so the record shows what was skipped.
+    rationale: Waivers were opt-in and a low-risk docs change ran every phase.
+    source: 00-intake/request.md (outcome 5)
+  - id: REQ-011
+    category: performance
+    statement: When every path a change modifies is documentation (the DOCS path group, Markdown files at the repository root, and the change's own record), check sizing computes the smaller size for verify, evaluate and attack even when the record declares no scope.
+    rationale: An empty scope sized a README change at full route sweep.
+    source: 00-intake/request.md (outcome 5)
+  - id: REQ-012
+    category: functional
+    statement: A person may reopen remediation as documentation-only. That reopen resets remediation and the phases after attack (documentation through learning) but keeps verify, evaluate and attack complete. Sealing that remediation is refused if any path outside documentation changed since the reopen, and the refusal says to reopen without the documentation-only option.
+    rationale: A one-sentence wording fix reran six fresh sessions.
+    source: 00-intake/request.md (outcome 5)
+  - id: REQ-013
+    category: operations
+    statement: The skills say how to use the new rules. Specification writes tiers, keeps person-only checks out of the criteria, writes no catch-all rule that makes every statement binding, and writes bounded claims. Documentation writes bounded claims. Evaluation and attack aim their cases at the approved must criteria and report everything else as advisory. Review and attack mark findings outside the change. Judgment blocks only per REQ-008. Remediation fixes blocking and major findings and carries minor ones forward.
+    rationale: The judgment and remediation skills are two lines each and set no threshold.
+    source: 00-intake/request.md (outcomes 3 and 6)
+  - id: REQ-014
+    category: operations
+    statement: Every gate check this change adds has an entry in Gate::CHECKS, a harness-eval gate case that plants the defect it refuses, and a line in the user documentation. The README describes the round cap, tiers, the approval, person checks and the documentation-only reopen.
+    rationale: Existing practice for every gate change.
+    source: 00-intake/request.md (outcome 7)
+  - id: REQ-015
+    category: operations
+    statement: soft-foundry ci passes on this branch with every existing record unchanged, and the full suite passes with provider keys and SOFT_FOUNDRY_PHASE unset.
+    rationale: History stays green.
+    source: 00-intake/request.md (outcome 8)
+  - id: REQ-016
+    category: accessibility
+    statement: Every new refusal, warning and advisory line follows the command-line rules in .ai/rules/accessibility.md - a word carries the outcome, a stable prefix, plain language naming what to do next, and no meaning carried by color or glyph alone.
+    rationale: surfaces.accessibility is true; the new messages are read by agents, CI logs and people.
+    source: .ai/rules/accessibility.md
+  - id: REQ-017
+    category: security
+    statement: No rule this change adds removes or weakens a check that refuses fabricated, stale or hollow evidence; review and judgment stay unwaivable; a final judgment is still required to close; the round cap and the approval can be passed only by a human_decisions entry, never by a flag or option an agent session sets.
+    rationale: The approved loosening is bounded to what blocks, not to evidence integrity.
+    source: 00-intake/request.md (constraints); metadata.yml human_decisions
