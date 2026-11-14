@@ -1,0 +1,30 @@
+# Phase handoff. One per phase directory. The gate checker validates this file.
+phase: 15-learning
+skill: learning
+status: complete
+commit_sha: 843979ae7882a68cd9dc576e3e44d41b57da06b0
+started_at: '2026-11-14T23:54:20Z'
+completed_at: '2026-11-14T23:54:20Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-2
+outputs:
+  - findings.md
+  - proposed-rules.md
+  - proposed-evals.md
+  - instincts.yml
+blocking: []
+findings:
+  - id: LRN-001
+    severity: minor
+    summary: Attack and review need a named attacker (an outside party using the feature); proposed wording is in proposed-rules.md.
+  - id: LRN-002
+    severity: minor
+    summary: REV-004 and REV-005 are unfixed and carried to the next change; REV-001, REV-002 and REV-003 are residual risk recorded against the guard follow-up.
+  - id: LRN-003
+    severity: minor
+    summary: The tool's own changes need a light track; this change took most of a day in evidence phases after its code passed.
+next: done
+notes: "Written by the session that implemented the change, not a fresh session. The guard blocks writes outside the repository, so the maintainer's restated purpose is recorded here and not in the session's memory store."
+executed_by: null
