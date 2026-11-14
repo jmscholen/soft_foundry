@@ -39,7 +39,7 @@ List in `14-judgment/evidence.yml` `blocked_by:` the must criteria or blocking r
 Mark the finding `outside_change: true` with `paths: [...]` and `follow_up: <where it goes>`. It appears as a `follow-up` advisory in `change status` and never blocks. The `outside-change findings` check refuses the mark when one of the paths changed in this change.
 
 ## A lighter loop
-- At low risk, the phases low risk may waive are stepped over unless listed under `run_phases:` in `metadata.yml`; `waivers permitted` lists them.
+- At low risk, the phases low risk may waive are stepped over unless listed under `run_phases:` in `metadata.yml`, except the specification, so a person still approves the must list; `waivers permitted` lists them.
 - A diff that changes only documentation (the `DOCS` group, top-level Markdown, the change's own record; never `.ai/`) is sized small by `soft-foundry change size`.
 - `soft-foundry phase reopen remediate --docs-only --reason TEXT` keeps verification, evaluation and attack evidence; `phase seal remediate` then refuses if any path outside documentation changed since the reopen.
 

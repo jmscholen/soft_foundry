@@ -168,7 +168,8 @@ tracks:
 #   each declared risk may promise; only must criteria can block, and a
 #   person approves the list before the specification seals (boundary
 #   "must criteria approval").
-# default_waivers: risks whose waivable_by_risk phases are stepped over
+# default_waivers: risks whose waivable_by_risk phases (never specify, where a
+#   person approves the must list) are stepped over
 #   unless the record names them under run_phases.
 remediation:
   max_rounds: 2

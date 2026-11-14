@@ -171,12 +171,17 @@ module SoftFoundry
 
     def run_phases = Array(@record.metadata["run_phases"]).map(&:to_s)
 
+    # The specification is where a person approves the must list; it is
+    # never stepped over by default (an explicit skipped_phases entry with
+    # a rationale still waives it).
+    NEVER_DEFAULT_WAIVED = %w[specify].freeze
+
     # The phases stepped over by default for this record's risk.
     def default_waivers
       return [] unless applies?
       risk = @record.metadata["risk"].to_s.strip.downcase
       return [] unless self.class.default_waiver_risks(@plane).include?(risk)
-      @plane.waivable_by_risk(risk) - run_phases
+      @plane.waivable_by_risk(risk) - NEVER_DEFAULT_WAIVED - run_phases
     end
 
     # --- documentation-only paths -----------------------------------------

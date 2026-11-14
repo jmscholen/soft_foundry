@@ -67,7 +67,7 @@ Created from `.ai/templates/handoff.yml`. Field semantics:
 - `blocked basis` (judge): a BLOCKED judgment's `blocked_by` names only must criteria or review findings of severity blocking with a failure, not marked `outside_change`.
 - `outside-change findings` (attack, review): a finding marked `outside_change` names a `follow_up` and `paths`, none changed in the change's diff since the plan commit. Such findings are listed as follow-up advisories.
 - `criteria covered` at judgment fails only for an uncovered must criterion; an uncovered should criterion warns.
-- Default waivers: at a risk in `default_waivers`, the phases `waivable_by_risk` lists are stepped over unless named in `run_phases`; `waivers permitted` lists them.
+- Default waivers: at a risk in `default_waivers`, the phases `waivable_by_risk` lists, except `specify` (where the must list is approved), are stepped over unless named in `run_phases`; `waivers permitted` lists them.
 - Sizing: when every changed path is documentation (the `DOCS` group, Markdown at the repository root, or the change's own record; never `.ai/`), verify, evaluate and attack get the smaller size.
 - `phase reopen remediate --docs-only` keeps verify, evaluate and attack complete; the remediation seal then refuses any path outside documentation changed since the reopen.
 

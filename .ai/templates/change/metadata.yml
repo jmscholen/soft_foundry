@@ -66,6 +66,7 @@ skipped_phases: []
 
 # Convergence rules (`rules:` above, written by `change new`). At a risk
 # listed in .ai/workflow.yml default_waivers, the phases that risk may waive
+# (never specify)
 # are stepped over unless named here.
 run_phases: []
 # - attack
