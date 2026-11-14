@@ -1,0 +1,37 @@
+---
+change:
+  id: process-speed
+  title: process-speed
+git:
+  worktree: "/Users/jscholen-iou/dev/soft_foundry/.claude/worktrees/process-speed"
+  branch: change/process-speed
+type: feature
+risk: high
+track: gated
+status: in_progress
+current_phase: discover
+created_at: 2026-11-14 01:51:41.000000000 Z
+scope: []
+surfaces:
+  application: true
+  database: false
+  infrastructure: false
+  security: true
+  accessibility: true
+  observability: false
+  policy: false
+human_decisions:
+- boundary: changes that intentionally weaken required controls
+  subject: process-speed loosens what blocks (remediation cap with human park, must/should
+    criterion tiers, person-only checks as release items, findings outside the change
+    as follow-ups, default low-risk waivers, lighter reruns after docs-only remediation,
+    judgment and remediation thresholds), as scoped in 00-intake/request.md
+  decided_by: Jeff Scholen
+  decided_at: 2026-11-13
+  decision: approved
+  note: Given in the Claude Code session that opened this change, answering the question
+    whether to record the approval.
+vetted:
+reopenings: []
+phase_reopenings: []
+skipped_phases: []
