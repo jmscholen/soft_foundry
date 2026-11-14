@@ -355,6 +355,19 @@ class ProcessSpeedTest < Minitest::Test
     end
   end
 
+  # The specification is where a person approves the must list, so it is
+  # never a default waiver; it can still be waived explicitly with a rationale.
+  def test_specify_is_never_a_default_waiver
+    with_lifecycle_record(complete: []) do |dir, record|
+      new_rules!(record, risk: "low")
+      p = plane(dir)
+      refute record.skippable?(p.phase("specify"))
+      refute_includes SoftFoundry::ProcessRules.new(record).default_waivers, "specify"
+      record.update_metadata { |m| m["skipped_phases"] = [{ "phase" => "specify", "rationale" => "intake states the criteria" }] }
+      assert record.skippable?(p.phase("specify"))
+    end
+  end
+
   # --- REQ-011 documentation-only sizing ---------------------------------------
 
   def test_documentation_paths
