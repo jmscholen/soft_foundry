@@ -1,0 +1,63 @@
+---
+phase: 14-judgment
+skill: final-judgment
+status: complete
+commit_sha: ea2c20aa89febc98db05fffd6eb17d2ad2962a19
+started_at: '2026-11-14T23:43:45Z'
+completed_at: '2026-11-14T23:52:22Z'
+resolved_model:
+  profile: judgment_high
+  provider: xai
+  model: grok-4.7
+outputs:
+- final.md
+- residual-risk.md
+- evidence.yml
+blocking: []
+findings:
+- id: JDG-001
+  severity: major
+  summary: Accepted residual. Deleting rules from metadata after intake disarms the
+    cap at reopen and at the remediation seal. Only the intake gate's rules kept check
+    fails (REV-001, ATK-F2, ATK-F3). Jeff Scholen accepted this on 2026-11-14 as a
+    guard follow-up, with REV-002 and REV-003.
+  failure: 'Two Record remediate commits with rules 2, then rules deleted and committed:
+    phase seal remediate returns sealed. After the intake seal, deleting rules permits
+    phase reopen remediate at the cap (ATTACK-008a).'
+- id: JDG-002
+  severity: major
+  summary: Accepted residual for the next change. outside_change compares paths as
+    raw strings (REV-004, ATK-F5), and an unsealed remediation counts as a sealed
+    round and the message says sealed (REV-005, ATK-F1).
+  failure: 'A finding with outside_change true and paths ./lib/app.rb passes when
+    the diff contains lib/app.rb (ATTACK-007). One sealed round, a documentation-only
+    reopen, a lib fix, a refused seal, then another reopen: the next seal is refused
+    at the cap and the message says two rounds were sealed (ATTACK-005f).'
+- id: JDG-003
+  severity: minor
+  summary: 'Should-criterion and documentation gaps carried forward: AC-012 narrowed
+    by DEV-004 so specify is not a default waiver (REV-008); the attack skill does
+    not say other findings are advisory (REV-009); user docs do not name rules kept
+    (REV-010); the cap refusal is one long line and a later parked reopen omits the
+    three decisions (REV-012, REV-014).'
+next: learn
+notes: 'Legacy record: no rules version, so the new checks skip it. Code at ea2c20a
+  matches implementation a37d580 for lib, exe, test, .ai, docs, and README.md. The
+  2026-11-14 human decision that REV-001, REV-002, and REV-003 do not block is in
+  the worktree metadata.yml and was not written by this phase; sealing commits that
+  file with this directory. Optional document, index, and observe phases are pending.
+  User text is the committed README and docs/user/converging-changes.md. Observability
+  is the record, as the specification says. Implementation ran on anthropic; this
+  judgment ran on xai. Remediation has not run. Bash is checked against deny sets
+  only; the git reads stayed inside the allowed trees and wrote nothing.'
+executed_by:
+  runner: soft-foundry phase run
+  shell: grok
+  fresh_context: true
+  started_at: '2026-11-14T23:43:45Z'
+  finished_at: '2026-11-14T23:52:54Z'
+  exit_status: 0
+  previous_phase: judge
+  session_id: 7883231f-8de3-4e29-9a0c-97d5d069249a
+  cwd: "/Users/jscholen-iou/dev/soft_foundry/.claude/worktrees/process-speed"
+branch_resolved: true

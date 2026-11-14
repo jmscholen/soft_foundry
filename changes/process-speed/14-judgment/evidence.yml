@@ -1,0 +1,155 @@
+commit_judged: ea2c20aa89febc98db05fffd6eb17d2ad2962a19
+# lib, exe, test, .ai, docs, and README.md match implementation a37d580
+# through this commit. current is true on that basis: the evidence describes
+# the judged code. The handoff SHAs differ because later commits are the record.
+phases:
+  - phase: 06-verification
+    commit_sha: 9473ac341f075abcf3b65ac2723da9ed541cda15
+    current: true
+    result: pass
+  - phase: 07-evaluation
+    commit_sha: 0c213b4c26aca56a5a4f686bfc4ebf0018be4297
+    current: true
+    result: pass
+  - phase: 08-attack
+    commit_sha: 46201881662c294728a2fc94d268b6cfadd4cb59
+    current: true
+    result: complete with violations
+  - phase: 13-review
+    commit_sha: d6ed77b077bbbe8a9963f082cfad89706e920ad3
+    current: true
+    result: complete with open findings
+# Every criterion AC-001 through AC-019 is named by a verification check.
+# Journeys name the same set except AC-016 and AC-017, which verification names.
+criteria_not_covered: []
+# PC-001 is a person_check. change release copies it. It is not a criterion
+# waiting on a repository fact.
+undischarged: []
+discharged: []
+unresolved_findings:
+  - id: REV-001
+    severity: blocking
+    source: 13-review
+    also: [ATK-F2, ATK-F3]
+    disposition: accepted_residual_risk
+    accepted_by: Jeff Scholen, 2026-11-14, guard follow-up
+    summary: Deleting rules from metadata.yml disarms the remediation cap at reopen and at the remediation seal. rules kept fails only on the intake gate.
+  - id: REV-002
+    severity: major
+    source: 13-review
+    also: [ATK-F4]
+    disposition: accepted_residual_risk
+    accepted_by: Jeff Scholen, 2026-11-14, guard follow-up
+    summary: Round commits are counted from branch_tip of metadata git.branch, so pointing that field at another branch lowers the count and permits the reopen.
+  - id: REV-003
+    severity: major
+    source: 13-review
+    also: [ATK-F9]
+    disposition: accepted_residual_risk
+    accepted_by: Jeff Scholen, 2026-11-14, guard follow-up
+    summary: A risk lowered in a commit after the intake seal is never named, and default waivers then include threat_model and attack.
+  - id: REV-004
+    severity: major
+    source: 13-review
+    also: [ATK-F5]
+    disposition: accepted_residual_risk
+    accepted_by: Jeff Scholen, 2026-11-14, next change
+    summary: outside-change findings compares paths as raw strings, so other spellings of a modified file pass.
+  - id: REV-005
+    severity: major
+    source: 13-review
+    also: [ATK-F1, EVA-002]
+    disposition: accepted_residual_risk
+    accepted_by: Jeff Scholen, 2026-11-14, next change
+    summary: A reopen of a complete remediation that was never sealed counts as a sealed round, and the refusal says so.
+  - id: REV-006
+    severity: minor
+    source: 13-review
+    also: [ATK-F6]
+    disposition: accepted_residual_risk
+    summary: While the remediate handoff is pending, the advised reopen leaves a documentation-only refusal in force.
+  - id: REV-007
+    severity: minor
+    source: 13-review
+    also: [ATK-F8]
+    disposition: accepted_residual_risk
+    summary: A malformed remediation-cap entry fails closed without naming rounds or decision.
+  - id: REV-008
+    severity: minor
+    source: 13-review
+    also: [VER-002]
+    disposition: accepted_deviation
+    accepted_by: Jeff Scholen, 2026-11-13, DEV-004
+    summary: AC-012 lists specify as a default waiver. The code never waives specify by default.
+  - id: REV-009
+    severity: minor
+    source: 13-review
+    also: [VER-004]
+    disposition: accepted_residual_risk
+    summary: adversarial-testing/SKILL.md does not say that findings other than the must criteria are advisory.
+  - id: REV-010
+    severity: minor
+    source: 13-review
+    also: [VER-001]
+    disposition: accepted_residual_risk
+    summary: User documentation does not name rules kept. CHECKS and the harness-eval case for that check exist.
+  - id: REV-011
+    severity: minor
+    source: 13-review
+    also: [EVA-001]
+    disposition: accepted_residual_risk
+    summary: The follow-up advisory is printed even when the outside-change check rejects the finding.
+  - id: REV-012
+    severity: minor
+    source: 13-review
+    also: [EVA-007, VER-003]
+    disposition: accepted_residual_risk
+    summary: The cap refusal is one line of 506 characters.
+  - id: REV-013
+    severity: minor
+    source: 13-review
+    disposition: accepted_residual_risk
+    summary: Git#count_subject returns 0 when git log fails, which can allow another remediation round.
+  - id: REV-014
+    severity: minor
+    source: 13-review
+    also: [EVA-003]
+    disposition: accepted_residual_risk
+    summary: A reopen on a change already awaiting_human does not repeat the three decisions.
+  - id: REV-015
+    severity: minor
+    source: 13-review
+    also: [ATK-F10]
+    disposition: accepted_residual_risk
+    summary: A must-criteria approval committed before the specify seal prints no hand-edited-keys note. THREAT-001 remains the accepted residual for the forgery.
+  - id: REV-016
+    severity: minor
+    source: 13-review
+    outside_change: true
+    disposition: follow_up
+    summary: The repository publishes no security policy. This change does not modify that profile.
+  - id: ATK-F7
+    severity: minor
+    source: 08-attack
+    disposition: accepted_as_specified
+    summary: Top-level Markdown, including AGENTS.md and CLAUDE.md, counts as documentation, as REQ-011 requires.
+  - id: EVA-004
+    severity: minor
+    source: 07-evaluation
+    disposition: accepted_as_specified
+    summary: A specification with no must criteria still needs an approval entry whose criteria list is empty. That matches REQ-005.
+  - id: EVA-005
+    severity: minor
+    source: 07-evaluation
+    disposition: accepted_as_specified
+    summary: blocked basis accepts any must id and does not check that it is unmet. The gate is structural. This judgment compared the evidence with the criteria.
+  - id: EVA-006
+    severity: minor
+    source: 07-evaluation
+    disposition: closed
+    summary: The outside-change check requires paths. docs/user/converging-changes.md states paths.
+  - id: IMPL-002
+    severity: major
+    source: 05-implementation
+    disposition: accepted_residual_risk
+    summary: A shell redirection wrote the control plane while the guard was in block mode. Same guard follow-up as REV-001.

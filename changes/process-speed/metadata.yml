@@ -8,8 +8,8 @@ git:
 type: feature
 risk: high
 track: gated
-status: in_progress
-current_phase: judge
+status: judged
+current_phase: learn
 created_at: 2026-11-14 01:51:41.000000000 Z
 scope: []
 surfaces:
@@ -50,6 +50,18 @@ human_decisions:
   decided_by: Jeff Scholen
   decided_at: 2026-11-13
   decision: approved
+- boundary: changes that intentionally weaken required controls
+  subject: review findings REV-001, REV-002 and REV-003 (a party with write access
+    to the repository editing rules, risk or git.branch in metadata.yml) are outside
+    the attack and review threat model, which is an outside party using the feature.
+    They do not block this change and are carried to the guard follow-up. REV-004
+    and REV-005 are carried as follow-ups to the next change. No remediation round
+    is run; the change goes to judgment as reviewed at ea2c20a.
+  decided_by: Jeff Scholen
+  decided_at: 2026-11-14
+  decision: approved
+  note: Given in the Claude Code session, choosing "judge now, fix the bugs next"
+    after restating the repository's purpose.
 vetted:
 reopenings: []
 phase_reopenings:
