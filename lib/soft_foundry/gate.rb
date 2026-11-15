@@ -324,7 +324,7 @@ module SoftFoundry
       limit = process_rules.max_rounds
       unanswered = process_rules.unanswered_rounds(rounds)
       return Check.new(CAP_CHECK, :pass, "#{rounds} remediation #{rounds == 1 ? 'round' : 'rounds'} (limit #{limit}#{rounds > limit ? ', beyond it by a person\'s decision' : ''})") if unanswered.empty?
-      Check.new(CAP_CHECK, :fail, "#{rounds} remediation rounds sealed, beyond the limit of #{limit}, with no decision for #{unanswered.map { |k| "round #{k + 1}" }.join(', ')}; a person records boundary: #{ProcessRules::CAP_BOUNDARY}, rounds: #{unanswered.first}, decision: accept_residual or narrow")
+      Check.new(CAP_CHECK, :fail, "#{rounds} remediation rounds, beyond the limit of #{limit}, with no decision for #{unanswered.map { |k| "round #{k + 1}" }.join(', ')}; a person records boundary: #{ProcessRules::CAP_BOUNDARY}, rounds: #{unanswered.first}, decision: accept_residual or narrow")
     rescue TargetError => e
       Check.new(CAP_CHECK, :fail, e.message)
     end
@@ -373,8 +373,15 @@ module SoftFoundry
         next "#{id} names no follow_up" if f["follow_up"].to_s.strip.empty?
         paths = Array(f["paths"]).map(&:to_s).reject(&:empty?)
         next "#{id} names no paths (the code it concerns)" if paths.empty?
+        # Paths are compared after normalization, so another spelling of a
+        # modified file is still that file (process-speed REV-004).
+        refused = paths.reject { |p| ProcessRules.normalize_path(p) }
+        next "#{id} names #{refused.map(&:strip).join(', ')}, which is not a path inside the repository (absolute, leaving the repository, or a glob); name each file or directory relative to the repository root" unless refused.empty?
         next "#{id}: cannot measure this change's diff, so outside_change cannot be confirmed" if changed.nil?
-        inside = paths.select { |p| changed.any? { |c| c == p || c.start_with?("#{p.chomp('/')}/") } }
+        inside = paths.select do |p|
+          n = ProcessRules.normalize_path(p)
+          changed.any? { |c| c == n || c.start_with?("#{n}/") }
+        end
         "#{id} concerns #{inside.join(', ')}, which this change modified; it is this change's finding" unless inside.empty?
       end
       return Check.new(OUTSIDE_CHECK, :fail, problems.join("; ")) unless problems.empty?

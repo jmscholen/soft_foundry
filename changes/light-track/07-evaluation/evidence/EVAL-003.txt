@@ -1,0 +1,96 @@
+# EVAL-003 at 119e431770bbdddc4048eb625672ee358405fe77
+$ soft-foundry change new c1 --track light
+  (5 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal intake
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal specify
+  (3 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal implement
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal verify
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal review
+  (2 lines, not shown)
+  [exit 0]
+assert pass: the record is under the new rules (rules: 2)
+
+## A review finding marked outside_change names the modified file in six spellings
+$ soft-foundry gate review
+  (19 lines, not shown)
+  [exit 2]
+  ✗ fail outside-change findings: REV-001 concerns ./lib/app.rb, which this change modified; it is this change's finding
+assert pass: "./lib/app.rb": gate review exits 2, outside-change findings fails and names the path
+$ soft-foundry gate review
+  (19 lines, not shown)
+  [exit 2]
+  ✗ fail outside-change findings: REV-001 concerns lib//app.rb, which this change modified; it is this change's finding
+assert pass: "lib//app.rb": gate review exits 2, outside-change findings fails and names the path
+$ soft-foundry gate review
+  (19 lines, not shown)
+  [exit 2]
+  ✗ fail outside-change findings: REV-001 concerns lib/./app.rb, which this change modified; it is this change's finding
+assert pass: "lib/./app.rb": gate review exits 2, outside-change findings fails and names the path
+$ soft-foundry gate review
+  (19 lines, not shown)
+  [exit 2]
+  ✗ fail outside-change findings: REV-001 concerns lib/x/../app.rb, which this change modified; it is this change's finding
+assert pass: "lib/x/../app.rb": gate review exits 2, outside-change findings fails and names the path
+$ soft-foundry gate review
+  (19 lines, not shown)
+  [exit 2]
+  ✗ fail outside-change findings: REV-001 names <repo>/lib/app.rb, which is not a path inside the repository (absolute, leaving the repository, or a glob); name each file or directory relative to the repository root
+assert pass: "<repo>/lib/app.rb": gate review exits 2, outside-change findings fails and names the path
+$ soft-foundry gate review
+  (19 lines, not shown)
+  [exit 2]
+  ✗ fail outside-change findings: REV-001 names lib/*.rb, which is not a path inside the repository (absolute, leaving the repository, or a glob); name each file or directory relative to the repository root
+assert pass: "lib/*.rb": gate review exits 2, outside-change findings fails and names the path
+
+## A path the change did not modify
+$ soft-foundry gate review
+  (19 lines, not shown)
+  [exit 0]
+  ✓ pass outside-change findings: 1 finding carried as follow-ups: REV-001
+assert pass: "lib/other.rb": outside-change findings passes and gate review exits 0
+$ soft-foundry gate review
+  (19 lines, not shown)
+  [exit 0]
+  ✓ pass outside-change findings: 1 finding carried as follow-ups: REV-001
+assert pass: "./lib/other.rb": outside-change findings passes and gate review exits 0
+
+## Spellings the criterion does not list (reported, not asserted as criteria)
+$ soft-foundry gate review
+  (19 lines, not shown)
+  [exit 2]
+  "lib/app.rb": exit 2: ✗ fail outside-change findings: REV-001 concerns lib/app.rb, which this change modified; it is this change's finding
+$ soft-foundry gate review
+  (19 lines, not shown)
+  [exit 2]
+  "lib/app.rb ": exit 2: ✗ fail outside-change findings: REV-001 concerns lib/app.rb , which this change modified; it is this change's finding
+$ soft-foundry gate review
+  (19 lines, not shown)
+  [exit 2]
+  "../outside.rb": exit 2: ✗ fail outside-change findings: REV-001 names ../outside.rb, which is not a path inside the repository (absolute, leaving the repository, or a glob); name each file or directory relative to the repository root
+$ soft-foundry gate review
+  (19 lines, not shown)
+  [exit 2]
+  "lib/../../x.rb": exit 2: ✗ fail outside-change findings: REV-001 names lib/../../x.rb, which is not a path inside the repository (absolute, leaving the repository, or a glob); name each file or directory relative to the repository root
+$ soft-foundry gate review
+  (19 lines, not shown)
+  [exit 2]
+  "lib/app.r?": exit 2: ✗ fail outside-change findings: REV-001 names lib/app.r?, which is not a path inside the repository (absolute, leaving the repository, or a glob); name each file or directory relative to the repository root
+$ soft-foundry gate review
+  (19 lines, not shown)
+  [exit 0]
+  "LIB/app.rb": exit 0: ✓ pass outside-change findings: 1 finding carried as follow-ups: REV-001
+$ soft-foundry gate review
+  (19 lines, not shown)
+  [exit 0]
+  "lib\\app.rb": exit 0: ✓ pass outside-change findings: 1 finding carried as follow-ups: REV-001
+
+summary: EVAL-003: 9 assertions, 0 failed

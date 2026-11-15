@@ -1,0 +1,52 @@
+## 1. change new --track nosuch
+unknown track 'nosuch'; .ai/workflow.yml defines: gated, iterative, light
+[exit 1]
+## 2. change new --track light
+created changes/p1 with 16 phase directories
+branch: change/p1
+track: light
+billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+         set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+[exit 0]
+10:track: light            # gated | iterative | light (.ai/workflow.yml tracks:); set by `change new --track`
+## 3. change status, colour off, non-ASCII removed
+p1: p1  [status: intake, phase: intake, risk: TBD]
+  track: light
+  00-intake              pending
+  01-discovery           pending      optional on the light track
+  02-specification       pending
+  03-threat-model        pending      optional on the light track
+  04-plan                pending      optional on the light track
+  05-implementation      pending
+  06-verification        pending
+  07-evaluation          pending      optional on the light track
+  08-attack              pending      optional on the light track
+  09-remediation         pending      optional
+  10-user-documentation  pending      optional
+  11-faq-index           pending      optional
+  12-observability       pending      optional
+  13-review              pending
+  14-judgment            pending
+  15-learning            pending      optional on the light track
+[exit 0]
+## 4. text-only diff: change size --phase verify
+phase: verify
+size: targeted_plus_full_before_merge
+scope: whole repository
+base: 500915501970b04c5be6f3c7538dd38cdcbf0bb1
+reason: documentation-only diff: every changed path is documentation or Markdown prose in the control plane; run `soft-foundry check` and `soft-foundry eval` as well
+[exit 0]
+## 5. same plus a path under lib/
+phase: verify
+size: full_at_verify
+scope: whole repository
+base: 500915501970b04c5be6f3c7538dd38cdcbf0bb1
+reason: no scope declared: whole-repository scope is sized at the largest size
+[exit 0]
+## 6. control-plane settings file instead of lib/ (must not be text)
+phase: verify
+size: full_at_verify
+scope: whole repository
+base: 500915501970b04c5be6f3c7538dd38cdcbf0bb1
+reason: no scope declared: whole-repository scope is sized at the largest size
+[exit 0]

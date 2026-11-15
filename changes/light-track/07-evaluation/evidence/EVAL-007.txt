@@ -1,0 +1,30 @@
+# EVAL-007 at 119e431770bbdddc4048eb625672ee358405fe77
+
+## soft-foundry help
+$ soft-foundry help
+  (163 lines, not shown)
+  [exit 1]
+    soft-foundry change new <slug> [--track gated|iterative|light]
+  (help exits 1; the gem installed before this change exits the same, so the exit status is not this change's)
+assert pass: help names the light track
+assert FAIL: help names the light track's required phases
+assert FAIL: help names the locks the light track keeps
+assert FAIL: help names the high-risk exclusion
+
+## .ai/workflow.yml tracks section
+    light:
+      description: Specification, implementation, verification, one review and judgment. For changes that do not need threat modeling, evaluation or attack, such as changes to Soft Foundry itself.
+      # Not required on this track; a change may still run them. The
+      # specification lock, the must-criteria approval, the remediation cap,
+      # review and judgment apply as on the gated track. A high risk change
+      # cannot use it (forced_by_risk below).
+      optional: [discover, threat_model, plan, evaluate, attack, learn]
+    # A change's declared risk can force a track regardless of what
+    # `change new --track` asked for; the gate reports the conflict.
+    forced_by_risk:
+      high: gated
+assert pass: workflow.yml names the phases the track leaves optional (the rest are required)
+assert pass: workflow.yml names the locks kept
+assert pass: workflow.yml names the high-risk exclusion
+
+summary: EVAL-007: 7 assertions, 3 failed

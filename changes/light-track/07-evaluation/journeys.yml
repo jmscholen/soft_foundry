@@ -1,0 +1,152 @@
+commit_sha: 119e431770bbdddc4048eb625672ee358405fe77
+size: full_route_sweep
+journeys:
+  - id: EVAL-001
+    criteria: [AC-001]
+    persona: maintainer and agent
+    starting_state: a new repository with the control plane installed, on branch change/l1
+    steps:
+      - "soft-foundry change new l1 --track light; risk recorded as medium"
+      - "work and soft-foundry phase seal each of intake, specify, implement, verify, review, judge"
+      - "soft-foundry gate all on the branch"
+      - "merge into main, soft-foundry gate all --change l1, soft-foundry change close l1"
+      - "the same six phases complete on a record created with --track gated: phase seal specify, gate all, change close"
+    assertions:
+      - each seal exits 0 and current_phase moves to specify, implement, verify, review, judge in turn, stepping over the optional phases
+      - gate all exits 0 before and after merge with no failing check; discovery, threat model, plan, evaluation, attack and learning are pending and skipped
+      - change close exits 0 and the record shows closed on the light track
+      - on the gated track phase seal specify exits 2 on predecessor complete, gate all exits 2 with only predecessor complete failures naming pending phases, and change close exits 1
+    evidence: [evidence/EVAL-001.txt]
+    result: pass
+  - id: EVAL-002
+    criteria: [AC-002]
+    persona: maintainer and agent
+    starting_state: a light record and a gated record, each sealed through judgment (lock, approval) or through review (remediation cap), and a light record declared high risk
+    steps:
+      - "remove the must-criteria approval from metadata.yml; soft-foundry gate specify"
+      - "edit and commit specification.md after its seal; soft-foundry gate specify"
+      - "seal two remediation rounds with verification and review redone; soft-foundry phase reopen remediate; record a third round with no cap decision; soft-foundry gate review"
+      - "declare risk high on a light record; soft-foundry gate intake; soft-foundry phase seal intake"
+    assertions:
+      - "light and gated both exit 2 on must criteria approved"
+      - "light and gated both exit 2 on specification locked"
+      - "light and gated both refuse the third reopen at the cap, park the change awaiting_human, and exit 2 on remediation within cap once a third round is recorded"
+      - "the high-risk light record exits 2 on track permitted, naming the gated track, and phase seal commits nothing; a gated record at high risk passes that check"
+    evidence: [evidence/EVAL-002.txt]
+    result: pass
+  - id: EVAL-003
+    criteria: [AC-003]
+    persona: agent reviewing, maintainer reading the gate
+    starting_state: a light record under rules 2 sealed through review, whose change modified lib/app.rb
+    steps:
+      - "record a review finding marked outside_change with paths ./lib/app.rb, lib//app.rb, lib/./app.rb, lib/x/../app.rb, the absolute path, and lib/*.rb in turn; soft-foundry gate review after each"
+      - "the same finding with lib/other.rb and ./lib/other.rb"
+      - "seven spellings the criterion does not list, recorded without assertion"
+    assertions:
+      - "gate review exits 2 six times; outside-change findings fails and names the path as written"
+      - "with a path the change did not modify, outside-change findings passes and gate review exits 0"
+    evidence: [evidence/EVAL-003.txt]
+    result: pass
+  - id: EVAL-004
+    criteria: [AC-004]
+    persona: agent and maintainer
+    starting_state: a light record under rules 2 sealed through review
+    steps:
+      - "seal one remediation; soft-foundry phase reopen remediate"
+      - "start a remediation (in_progress) and soft-foundry phase reopen remediate before it completes"
+      - "seal a second remediation, redo and seal verification and review; soft-foundry gate review"
+      - "soft-foundry phase reopen remediate"
+    assertions:
+      - both reopens before the cap are allowed
+      - gate review counts 2 remediation rounds, not 3, so the unfinished remediation is not a round
+      - "the refusal at the cap says '2 remediation rounds', does not say sealed, and parks the change awaiting_human"
+    evidence: [evidence/EVAL-004.txt]
+    result: pass
+  - id: EVAL-005
+    criteria: [AC-005]
+    persona: agent sizing verification
+    starting_state: a light record with intake and specification sealed by soft-foundry phase seal
+    steps:
+      - "commit changes to README.md, docs/guide.md, the record's 05-implementation/log.md and .ai/skills/review/SKILL.md"
+      - "soft-foundry change size --phase verify"
+      - "control: delete the ignored .soft-foundry/ directory that phase seal wrote and run it again"
+      - "control: change lib/app.rb and run it again"
+      - "the same text-only change in a second repository with --since"
+    assertions:
+      - "the smaller verify size is reported with a documentation-only reason (FAILS: full_at_verify is reported, with and without --since)"
+      - "control: with .soft-foundry/ deleted the smaller size and the reason are reported"
+      - "control: a path under lib/ returns the largest size"
+    evidence: [evidence/EVAL-005.txt]
+    result: fail
+  - id: EVAL-006
+    criteria: [AC-006]
+    persona: reader
+    starting_state: the repository at the evaluated commit
+    steps:
+      - read .ai/skills/review/SKILL.md
+      - read .ai/skills/adversarial-testing/SKILL.md
+    assertions:
+      - the review skill separates a weakness that needs repository write access from an alteration actually observed in the record
+      - the attack skill names rules, risk and track in metadata.yml as a gap tracked as guard work
+    evidence: [evidence/EVAL-006.txt]
+    result: pass
+  - id: EVAL-007
+    criteria: [AC-007]
+    persona: reader
+    starting_state: the repository at the evaluated commit
+    steps:
+      - "soft-foundry help"
+      - read the tracks section of .ai/workflow.yml
+    assertions:
+      - "help names the light track (passes: only as a value of --track)"
+      - "help names its required phases, the locks it keeps and the high-risk exclusion (FAILS: none of the three)"
+      - .ai/workflow.yml names the optional phases, the locks kept and the high-risk exclusion
+      - README.md and docs/user/ are outside this skill's read set and were not evaluated
+    evidence: [evidence/EVAL-007.txt]
+    result: fail
+  - id: EVAL-008
+    criteria: [AC-008]
+    persona: maintainer, including one reading with a screen reader or in a log
+    starting_state: a light record with intake, specification and implementation sealed
+    steps:
+      - "soft-foundry change status c1 with NO_COLOR=1 and no terminal"
+      - remove every non-ASCII character from the output
+      - "soft-foundry change status c1 --json"
+    assertions:
+      - no escape sequence is emitted and the track line reads 'track: light'
+      - each of the six stepped-over phases reads 'optional on the light track'; phases optional on every track read 'optional'; required pending phases carry no label
+      - one phase per line, each beginning with its directory name
+      - "--json carries track.name light and skip_reason track for a stepped-over phase"
+    evidence: [evidence/EVAL-008.txt]
+    result: pass
+  - id: EVAL-009
+    criteria: [AC-009]
+    persona: maintainer
+    starting_state: a new repository with the control plane installed
+    steps:
+      - "soft-foundry change new n1 --track nosuch"
+      - "soft-foundry change new n1 with no --track; soft-foundry change new i1 --track iterative"
+      - a gated record worked and sealed through all twelve phases, gated, merged and closed
+      - a record with no rules line and no track line, status and gate intake
+      - "soft-foundry ci in this worktree"
+    assertions:
+      - "the unknown track is refused, nothing is created, and the message lists gated, iterative and light"
+      - the default is still gated and no phase of a gated record is labelled optional on a track; the iterative record starts exploring
+      - the gated record passes gate all with twelve complete phases and closes
+      - the older record shows status and passes gate intake
+      - ci exits 0 (control plane check, every harness eval, every open record's gates)
+    evidence: [evidence/EVAL-009.txt, evidence/worktree-ci.txt]
+    result: pass
+  - id: EVAL-010
+    criteria: [AC-001, AC-009]
+    persona: maintainer
+    starting_state: one repository holding a closed, merged light record and an open light record with three phases sealed
+    steps:
+      - "soft-foundry check, change list, change list --json, scan"
+      - "soft-foundry gate all, gate evaluate, change size --phase evaluate"
+      - "soft-foundry phase run verify --dry-run, soft-foundry ci"
+    assertions:
+      - every command exits 0 except gate evaluate, which exits 3 (pending, nothing to pass) and not 2
+      - ci passes with light records present
+    evidence: [evidence/EVAL-010.txt]
+    result: pass

@@ -1,0 +1,93 @@
+---
+phase: 07-evaluation
+skill: evaluation
+status: complete
+commit_sha: 119e431770bbdddc4048eb625672ee358405fe77
+started_at: '2026-11-15T05:50:13Z'
+completed_at: '2026-11-15T06:01:44Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-2
+outputs:
+- evaluation-plan.md
+- journeys.yml
+- results.md
+- evidence/manifest.yml
+- evidence/EVAL-001.txt
+- evidence/EVAL-002.txt
+- evidence/EVAL-003.txt
+- evidence/EVAL-004.txt
+- evidence/EVAL-005.txt
+- evidence/EVAL-006.txt
+- evidence/EVAL-007.txt
+- evidence/EVAL-008.txt
+- evidence/EVAL-009.txt
+- evidence/EVAL-010.txt
+- evidence/worktree-ci.txt
+- evidence/lib.rb
+- evidence/journeys.rb
+blocking: []
+findings:
+- id: EVL-001
+  severity: major
+  summary: 'EVAL-005 fails for AC-005 (should, not blocking): on a light record sealed
+    with `soft-foundry phase seal`, a change to README.md, docs/, the record and .ai/skills/review/SKILL.md
+    is sized full_at_verify, with and without --since. `phase seal` writes .soft-foundry/locks/<slug>.lock;
+    the diff sizing reads includes git-ignored paths, so .soft-foundry/ counts as
+    a changed path that is not text. With that directory deleted the same command
+    reports targeted_plus_full_before_merge. Any repository where a phase was sealed
+    or the guard ran has the directory, so REQ-007 is not reached in practice; the
+    unit test and verification probe never created it.'
+- id: EVL-002
+  severity: minor
+  summary: 'EVAL-007 fails for AC-007 (should): `soft-foundry help` names the light
+    track only as a value of --track, not its required phases, the locks it keeps
+    or the high-risk exclusion (confirms VER-002). .ai/workflow.yml names all of them.
+    README.md and docs/user/ are outside evaluation''s read set and were not evaluated;
+    review should check them.'
+- id: EVL-003
+  severity: minor
+  summary: 'After `phase seal judge` on a light record, current_phase is learn and
+    `change status` reads phase: learn, although learning is optional on the light
+    track. The record still passes gate all and closes (EVAL-001). Advisory.'
+- id: EVL-004
+  severity: minor
+  summary: Through the gate, an outside_change finding spelled LIB/app.rb or lib\app.rb
+    passes as outside a change that modified lib/app.rb (confirms VER-004). AC-003
+    does not list these spellings; its six all fail as required (EVAL-003). Advisory.
+- id: EVL-005
+  severity: info
+  summary: The must criteria AC-001, AC-002 and AC-003 pass as journeys driven through
+    the CLI, including `phase seal` on a light record, which closes the coverage gap
+    VER-003 noted. AC-004, AC-006, AC-008 and AC-009 pass. `soft-foundry ci` on the
+    worktree exits 0.
+next: attack
+notes: 'Size full_route_sweep (no scope declared): every acceptance criterion run
+  as a journey plus an app-wide smoke; commands not swept are listed in results.md.
+  Journeys drive the worktree CLI as a separate process in throwaway repositories;
+  work inside a phase is planted with the phase-completion fixture in lib/soft_foundry/harness_eval.rb
+  (application code, not the denied .ai/harness-evals directory) and each phase is
+  then sealed by the real command. `soft-foundry ci` executes the harness evals without
+  this session reading them. Two things for the record. (1) Twice a shell command
+  of this session left its working directory inside 07-evaluation/; the PostToolUse
+  guard hook then ran from there, found no baseline, wrote a copy of the committed
+  enforcement policy and a guard log under 07-evaluation/(evidence/).ai and .soft-foundry,
+  and reported a restore. Those stray directories were deleted both times; the repository
+  .ai/ has no diff and the worktree-root .soft-foundry/enforcement.yml is unchanged.
+  (2) The guard checks Bash against deny sets only; this session read lib/, exe/,
+  test/, .ai/ (not harness-evals), and 02-specification, 03-threat-model and 06-verification
+  of this record, plus the root .gitignore (five lines, to learn that .soft-foundry/
+  is ignored) and metadata.yml as the bootstrap contract requires. README.md and docs/
+  were not read.'
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-11-15T05:50:13Z'
+  finished_at: '2026-11-15T06:01:58Z'
+  exit_status: 0
+  previous_phase: evaluate
+  session_id: 8fe45d24-2bbb-43ec-9b93-9eef938556c9
+  cwd: "/Users/jscholen-iou/dev/soft_foundry/.claude/worktrees/light-track"
+branch_resolved: true

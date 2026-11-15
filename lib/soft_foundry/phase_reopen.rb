@@ -112,7 +112,11 @@ module SoftFoundry
     def previous(phase)
       h = @record.handoff(phase) || {}
       by = h["executed_by"].is_a?(Hash) ? h["executed_by"] : {}
-      { "status" => h["status"], "commit_sha" => h["commit_sha"], "completed_at" => time_text(h["completed_at"]), "session_id" => by["session_id"] }
+      entry = { "status" => h["status"], "commit_sha" => h["commit_sha"], "completed_at" => time_text(h["completed_at"]), "session_id" => by["session_id"] }
+      # Whether the remediation being reset was recorded in git: only a
+      # sealed remediation counts as a round (ProcessRules#reopened_rounds).
+      entry["sealed"] = !@record.recorded_commit(phase, git: @git).nil? if phase.id == ProcessRules::REMEDIATE
+      entry
     end
 
     def time_text(value)

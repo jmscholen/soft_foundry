@@ -6,7 +6,7 @@ git:
   branch: ${BRANCH}
 type: TBD                  # feature | fix | refactor | docs | infrastructure | security | chore
 risk: TBD                  # low | medium | high; a high risk change is always on the gated track (.ai/workflow.yml tracks.forced_by_risk)
-track: ${TRACK}            # gated | iterative (.ai/workflow.yml tracks:); set by `change new --track`
+track: ${TRACK}            # gated | iterative | light (.ai/workflow.yml tracks:); set by `change new --track`
 status: ${STATUS}          # intake | exploring | in_progress | awaiting_human | judged | released | closed (released: finished and approved, owing the items in `release:`; closed stays the only end state)
 current_phase: ${CURRENT_PHASE}
 created_at: ${CREATED_AT}

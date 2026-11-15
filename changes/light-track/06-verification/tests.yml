@@ -1,0 +1,84 @@
+commit_sha: 4988779139bf6c8d60fdb9b985a55254b0659d1a
+size: full_at_verify
+full_suite:
+  tree: 68e021fc2b4b01b05cf610e4a34447a448c9aeaf
+  command: env -u SOFT_FOUNDRY_PHASE -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u XAI_API_KEY -u GROK_API_KEY -u GEMINI_API_KEY bundle exec rake test
+  outcome: passed
+checks:
+  - id: CHECK-001
+    kind: tests
+    command: env -u SOFT_FOUNDRY_PHASE -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u XAI_API_KEY -u GROK_API_KEY -u GEMINI_API_KEY bundle exec rake test
+    result: pass
+    evidence: evidence/full-suite.txt
+    criteria: [AC-009]
+    note: Full suite on the evidence commit, 951 runs, 6990 assertions, 0 failures, 0 errors, 0 skips. Provider keys and SOFT_FOUNDRY_PHASE unset.
+  - id: CHECK-002
+    kind: tests
+    command: bundle exec ruby -Ilib -Itest test/light_track_test.rb -v
+    result: pass
+    evidence: evidence/light-track-tests.txt
+    criteria: [AC-001, AC-002, AC-003, AC-004, AC-005, AC-008]
+    red_commit: a53ec004f3a9cad3d577563c3b116c562e455579
+    test_path: test/light_track_test.rb
+    note: 16 runs, 106 assertions, 0 failures. The RED commit adds only this file; the GREEN commit c6bf4eb adds two lines of setup to one test (DEV-002) and no assertion.
+  - id: CHECK-003
+    kind: tests
+    command: bundle exec ruby -Ilib -Itest test/lifecycle_tracks_test.rb
+    result: pass
+    evidence: evidence/lifecycle-tracks-tests.txt
+    criteria: [AC-009]
+    note: 25 runs, 0 failures. Gated and iterative track behaviour; holds the one changed assertion (CHECK-009).
+  - id: CHECK-004
+    kind: custom
+    command: bundle exec ruby -Ilib exe/soft-foundry check
+    result: pass
+    evidence: evidence/control-plane-check.txt
+    criteria: []
+  - id: CHECK-005
+    kind: custom
+    command: bundle exec ruby -Ilib exe/soft-foundry ci
+    result: pass
+    evidence: evidence/ci.txt
+    criteria: [AC-009]
+    note: Control plane check, harness evals (gate cases, 35 passed, 0 failed, 0 errors, 1 skipped by the tool) and the gate of every open record, exit 0. This is the command the CI workflow runs after the tests.
+  - id: CHECK-006
+    kind: static_analysis
+    command: ruby -wc on each Ruby file the change modified under lib/ and test/
+    result: pass
+    evidence: evidence/ruby-syntax.txt
+    criteria: []
+  - id: CHECK-007
+    kind: custom
+    command: sh evidence/cli-probe.sh <repository root>
+    result: pass
+    evidence: evidence/cli-probe.txt
+    criteria: [AC-005, AC-008, AC-009]
+    note: The worktree's CLI against a throwaway repository. Unknown track refused listing gated, iterative, light; status with colour off and non-ASCII removed shows the track and labels each optional phase in words; a text-only diff gets targeted_plus_full_before_merge with a documentation-only reason; adding lib/ or a control-plane .yml returns full_at_verify. Sizing was run with --since because the throwaway record has no sealed phase.
+  - id: CHECK-008
+    kind: custom
+    command: bundle exec ruby -Ilib evidence/normalize-probe.rb
+    result: pass
+    evidence: evidence/normalize-probe.txt
+    criteria: [AC-003]
+    note: ProcessRules.normalize_path on the six spellings of AC-003 and fifteen more. Every AC-003 spelling resolves to lib/app.rb or is refused. A backslash-separated path and a different letter case are returned unchanged (VER-004).
+  - id: CHECK-009
+    kind: custom
+    command: git diff --stat <change base> HEAD -- test .ai/harness-evals; git diff a53ec00 c6bf4eb -- test
+    result: fail
+    evidence: evidence/existing-tests-diff.txt
+    criteria: [AC-009]
+    note: AC-009 asks that every existing test pass without its assertions being changed. One existing assertion was changed (test/lifecycle_tracks_test.rb line 51, the declared track list now includes light; implementation DEV-003). No other existing test file and no harness-eval file changed. See VER-001.
+  - id: CHECK-010
+    kind: custom
+    command: grep of `soft-foundry help`, the tracks section of .ai/workflow.yml, .ai/README.md, and git diff of .ai/skills
+    result: pass
+    evidence: evidence/documentation-probe.txt
+    criteria: [AC-006]
+    note: The review skill separates a weakness needing repository write access from an observed alteration; the attack skill names the metadata.yml gap (rules, risk and track).
+  - id: CHECK-011
+    kind: custom
+    command: grep of `soft-foundry help` and the tracks section of .ai/workflow.yml for the light track, its required phases, its locks and the high-risk exclusion
+    result: fail
+    evidence: evidence/documentation-probe.txt
+    criteria: [AC-007]
+    note: .ai/workflow.yml names the track, the optional phases, the locks and the high-risk exclusion. `soft-foundry help` names the track only as a value of --track; it does not name the required phases, the locks or the high-risk exclusion. README.md and docs/user/ are outside verification's read set and were not checked as evidence here. See VER-002.

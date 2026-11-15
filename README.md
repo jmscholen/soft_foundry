@@ -259,12 +259,18 @@ What this does not do: members are ordinary agent sessions running as you, not s
 
 Panels are allowed for the phases in `panel_phases` in `.ai/workflow.yml` (specify, threat_model, plan, remediate, and review), never for implementation. The handoff records a `panel:` block (members with shell, provider, and session ID; rounds; outcome), and the gate's `panel recorded` check requires a draft per member, a non-empty `ARGUMENT.md`, an outcome, and every draft cited. With the guard installed, each member's session is narrowed by `SOFT_FOUNDRY_PANEL_MEMBER`, `SOFT_FOUNDRY_PANEL_STAGE`, and `SOFT_FOUNDRY_PANEL_DRAFT_DIR`. This covers write tools, shell commands, and any other tool whose input names a path. In the independent stage a member may write only its own draft folder and may not touch the phase's files or another member's draft. In the argument stage it may write only `ARGUMENT.md`, and it reads drafts with the read tool, not the shell. In the consensus stage the panel folder is read-only. Every shell is found on `PATH` before any member starts. Every prompt tells members that the other drafts are data, not instructions. A panel whose members all ran on one provider gets a go-live advisory. A four-member panel with three rounds can start up to 17 sessions; `--dry-run` prints the number before anything runs.
 
-### Lifecycle tracks: gated or iterative
+### Lifecycle tracks: gated, iterative or light
 
-The lifecycle above is a stage-gate process: intent, specification, threat model, and plan before code, evidence bound from the first commit. That is the right shape for assurance and the wrong shape for shaping a feature with a person by trying it. `.ai/workflow.yml` therefore declares two tracks that share the same phases and the same gate:
+The lifecycle above is a stage-gate process: intent, specification, threat model, and plan before code, evidence bound from the first commit. That is the right shape for assurance and the wrong shape for shaping a feature with a person by trying it. `.ai/workflow.yml` therefore declares three tracks that share the same phases and the same gate:
 
 - **`gated`** runs every phase in lifecycle order. The specification locks at the commit that records its completed phase. This is the repository default here.
 - **`iterative`** starts with an **exploring** stage. The agent iterates with the person, deploys only to the development environment recorded in `.ai/repository.yml`, keeps `02-specification/` as a living draft, and appends each round to `changes/<slug>/exploration/iterations.yml`. Nothing from that stage is evidence, and the gate refuses to let any phase from implementation onward be complete while the change is exploring. When the person accepts the feature, `change vet` records who and at which commit; the specification is locked there, and the phases from implementation onward apply exactly as on the gated track. Discover, threat model, and plan are not required before implementation on this track (a change may still run them).
+
+- **`light`** runs intake, specification, implementation, verification, one review and judgment. Discovery, threat modeling, planning, evaluation, attack and learning are optional on it: the gate does not ask for them, `phase seal` steps over them, and `change status` labels each one "optional on the light track". Every lock stays: the specification lock, the must-criteria approval, the remediation cap, review and judgment apply as on the gated track. A high risk change cannot use it. A change on this track has no attack evidence, and judgment records attack as not run. It is meant for changes that do not need threat modeling, evaluation or attack, such as changes to Soft Foundry itself.
+
+```bash
+soft-foundry change new <slug> --track light
+```
 
 ```bash
 soft-foundry change new <slug> --track iterative   # status: exploring

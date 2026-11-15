@@ -1,0 +1,234 @@
+# EVAL-010 at 119e431770bbdddc4048eb625672ee358405fe77
+$ soft-foundry change new done1 --track light
+  (5 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal intake
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal specify
+  (3 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal implement
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal verify
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal review
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal judge
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry change close done1
+  (3 lines, not shown)
+  [exit 0]
+$ soft-foundry change new open1 --track light
+  (5 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal intake
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal specify
+  (3 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal implement
+  (2 lines, not shown)
+  [exit 0]
+
+## Commands that read every record, with one closed and one open light-track record
+$ soft-foundry check
+  ✓ pass control plane: 16 phases, 17 skills, no errors
+  [exit 0]
+assert pass: check exits 0
+$ soft-foundry change list
+  done1
+  open1
+  [exit 0]
+assert pass: change list exits 0 and lists both records
+$ soft-foundry change list --json
+  (321 lines, not shown)
+  [exit 0]
+assert pass: change list --json parses
+$ soft-foundry scan
+  (1 lines, not shown)
+  [exit 0]
+assert pass: scan exits 0
+$ soft-foundry gate all
+  00-intake  complete  PASS
+    ✓ pass handoff identity
+    ✓ pass track permitted: light
+    ✓ pass waivers permitted: nothing waived
+    ✓ pass rules kept: rules 2
+    ✓ pass required files present: request.md, assumptions.md, handoff.yml
+    ✓ pass structured files parse: handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 8715f89d8197599e946935c33dcb7523d98aa9e8
+    ✓ pass commit lineage: reaches HEAD 1b6a384f3de2; recorded with this commit_sha
+    ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+    ✓ pass predecessor complete: first phase
+    ✓ pass content clean
+  01-discovery  pending  SKIP
+    - skip phase pending: not started
+  02-specification  complete  PASS
+    ✓ pass handoff identity
+    ✓ pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+    ✓ pass structured files parse: requirements.yml, acceptance-criteria.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: ef123414aeb120ba6621077779bc0e1610938054
+    ✓ pass commit lineage: descends from 00-intake at 8715f89d8197; reaches HEAD 1b6a384f3de2; recorded with this commit_sha
+    ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+    ✓ pass predecessor complete: 00-intake
+    ✓ pass specification locked: locked at 93f8d220fbdf, the commit that recorded it
+    ✓ pass criteria tiered: 1 must, 0 should (cap 8 at risk medium)
+    ✓ pass must criteria approved: 1 must criterion approved by harness
+    ✓ pass content clean
+  03-threat-model  pending  SKIP
+    - skip phase pending: not started
+  04-plan  pending  SKIP
+    - skip phase pending: not started
+  05-implementation  complete  PASS
+    ✓ pass handoff identity
+    ✓ pass required files present: log.md, decisions.md, deviations.md, handoff.yml
+    ✓ pass structured files parse: handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 93f8d220fbdf3e16d2f096d7048b4f6ad8c56ef4
+    ✓ pass commit lineage: descends from 02-specification at ef123414aeb1; reaches HEAD 1b6a384f3de2; recorded with this commit_sha
+    ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+    ✓ pass predecessor complete: 02-specification
+    ✓ pass content clean
+  06-verification  pending  SKIP
+    - skip phase pending: not started
+  07-evaluation  pending  SKIP
+    - skip phase pending: not started
+  08-attack  pending  SKIP
+    - skip phase pending: not started
+  09-remediation  pending  SKIP
+    - skip phase pending: not started
+  10-user-documentation  pending  SKIP
+    - skip phase pending: not started
+  11-faq-index  pending  SKIP
+    - skip phase pending: not started
+  12-observability  pending  SKIP
+    - skip phase pending: not started
+  13-review  pending  SKIP
+    - skip phase pending: not started
+  14-judgment  pending  SKIP
+    - skip phase pending: not started
+  15-learning  pending  SKIP
+    - skip phase pending: not started
+  [exit 0]
+assert pass: gate all on the open record exits 0: complete phases pass, pending ones are skipped
+$ soft-foundry gate evaluate
+  07-evaluation  pending  SKIP
+    - skip phase pending: not started
+  [exit 3]
+assert pass: gate evaluate on a pending track-optional phase exits 3 (nothing to pass), not 2
+$ soft-foundry change size --phase evaluate
+  phase: evaluate
+  size: full_route_sweep
+  scope: whole repository
+  reason: no scope declared: whole-repository scope is sized at the largest size
+  [exit 0]
+assert pass: change size --phase evaluate still answers on a light record
+$ soft-foundry phase run verify --dry-run
+  (14 lines, not shown)
+  [exit 0]
+  ! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the verification skill's permissions (`soft-fo
+assert pass: phase run verify --dry-run accepts the next required phase
+$ soft-foundry ci
+  ✓ pass control plane: 16 phases, 17 skills, no errors
+  ✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
+  ✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
+  ✓ pass eval blocked-judgment-without-basis: judge blocked basis fail, as expected
+  ✓ pass eval commit-sha-older-than-predecessor: discover commit lineage fail, as expected
+  ✓ pass eval control-well-formed: verify pass, as expected
+  ✓ pass eval criteria-uncovered-at-judgment: judge criteria covered fail, as expected
+  ✓ pass eval criteria-untiered-at-specify: specify criteria tiered fail, as expected
+  ✓ pass eval evidence-manifest-digest-mismatch: verify evidence manifest verified fail, as expected
+  ✓ pass eval evidence-manifest-path-escapes-phase: verify evidence manifest verified fail, as expected
+  ✓ pass eval evidence-stale-after-code-change: verify evidence current fail, as expected
+  ✓ pass eval full-suite-record-names-wrong-tree: verify full-suite run recorded (record check, not a test result) fail, as expected
+  ✓ pass eval hardening-while-exploring: implement not exploring fail, as expected
+  ✓ pass eval invisible-text-in-evidence: verify content clean fail, as expected
+  ✓ pass eval judgment-waived: intake waivers permitted fail, as expected
+  ✓ pass eval must-criteria-over-risk-cap: specify criteria tiered fail, as expected
+  ✓ pass eval must-criteria-unapproved: specify must criteria approved fail, as expected
+  ✓ pass eval outside-change-finding-without-follow-up: review outside-change findings fail, as expected
+  ✓ pass eval placeholder-left-in-evidence: verify no placeholders fail, as expected
+  ✓ pass eval predecessor-complete-but-unrecorded: discover predecessor complete fail, as expected
+  ✓ pass eval red-commit-is-the-green-commit: verify red evidence fail, as expected
+  ✓ pass eval released-record-is-not-regated: specify pass, as expected
+  ✓ pass eval remediation-over-cap-without-decision: review remediation within cap fail, as expected
+  ✓ pass eval review-finding-without-failure: review findings explained fail, as expected
+  ✓ pass eval review-without-fresh-session-in-block-mode: review fresh session recorded fail, as expected
+  ✓ pass eval rules-version-dropped-after-intake: intake rules kept fail, as expected
+  ✓ pass eval scope-narrowed-after-evidence-stales-record: verify evidence current fail, as expected
+  ✓ pass eval scoped-change-claimed-by-other-record-stays-current: verify evidence current pass, as expected
+  ✓ pass eval scoped-change-in-scope-stales-record: verify evidence current fail, as expected
+  ✓ pass eval scoped-unclaimed-code-change-stales-record: verify evidence current fail, as expected
+  ✓ pass eval secret-shape-in-evidence: verify content clean fail, as expected
+  ✓ pass eval shared-core-change-stales-scoped-record: verify evidence current fail, as expected
+  ✓ pass eval specification-does-not-parse: specify structured files parse fail, as expected
+  ✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
+  ✓ pass eval test-result-fail-unacknowledged: verify test results recorded fail, as expected
+  ✓ pass eval verdict-unfilled: judge verdict recorded fail, as expected
+  ✓ pass eval: 35 passed, 0 failed, 0 errors, 1 skipped
+  
+  change done1 (closed, skipped)
+  
+  change open1
+  00-intake  complete  PASS
+    ✓ pass handoff identity
+    ✓ pass track permitted: light
+    ✓ pass waivers permitted: nothing waived
+    ✓ pass rules kept: rules 2
+    ✓ pass required files present: request.md, assumptions.md, handoff.yml
+    ✓ pass structured files parse: handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 8715f89d8197599e946935c33dcb7523d98aa9e8
+    ✓ pass commit lineage: reaches HEAD 1b6a384f3de2; recorded with this commit_sha
+    ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+    ✓ pass predecessor complete: first phase
+    ✓ pass content clean
+  02-specification  complete  PASS
+    ✓ pass handoff identity
+    ✓ pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+    ✓ pass structured files parse: requirements.yml, acceptance-criteria.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: ef123414aeb120ba6621077779bc0e1610938054
+    ✓ pass commit lineage: descends from 00-intake at 8715f89d8197; reaches HEAD 1b6a384f3de2; recorded with this commit_sha
+    ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+    ✓ pass predecessor complete: 00-intake
+    ✓ pass specification locked: locked at 93f8d220fbdf, the commit that recorded it
+    ✓ pass criteria tiered: 1 must, 0 should (cap 8 at risk medium)
+    ✓ pass must criteria approved: 1 must criterion approved by harness
+    ✓ pass content clean
+  05-implementation  complete  PASS
+    ✓ pass handoff identity
+    ✓ pass required files present: log.md, decisions.md, deviations.md, handoff.yml
+    ✓ pass structured files parse: handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 93f8d220fbdf3e16d2f096d7048b4f6ad8c56ef4
+    ✓ pass commit lineage: descends from 02-specification at ef123414aeb1; reaches HEAD 1b6a384f3de2; recorded with this commit_sha
+    ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+    ✓ pass predecessor complete: 02-specification
+    ✓ pass content clean
+  
+  ✓ ci passed
+  [exit 0]
+assert pass: ci exits 0 with light records present
+
+## What the JSON form says of a stepped-over phase (observation)
+$ soft-foundry change status open1 --json
+  (641 lines, not shown)
+  [exit 0]
+  01-discovery in --json: {"phase"=>"discover", "output"=>"01-discovery", "skill"=>"repository-discovery", "status"=>"pending", "state"=>"pending", "skip_reason"=>"track", "skip_rationale"=>nil, "started_at"=>nil, "completed_at"=>nil, "commit_sha"=>nil, "executed_by"=>nil, "blocking"=>[], "findings"=>[], "checks"=>[{"name"=>"phase pending", "outcome"=>"skip", "detail"=>"not started"}]}
+
+summary: EVAL-010: 9 assertions, 0 failed

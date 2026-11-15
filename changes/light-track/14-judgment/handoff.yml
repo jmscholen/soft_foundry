@@ -1,0 +1,70 @@
+---
+phase: 14-judgment
+skill: final-judgment
+status: complete
+commit_sha: '056098511f3b570ad79648123d9e534cbdbc106d'
+started_at: '2026-11-15T06:08:42Z'
+completed_at: '2026-11-15T06:11:24Z'
+resolved_model:
+  profile: judgment_high
+  provider: anthropic
+  model: claude-fable-5-2
+outputs:
+- final.md
+- residual-risk.md
+- evidence.yml
+blocking: []
+findings:
+- id: JUDGE-001
+  severity: minor
+  summary: Outcome APPROVED_WITH_RESIDUAL_RISK at 0560985. AC-001, AC-002 and AC-003
+    (must) are met and review recorded no blocking finding. AC-005 (should) is unmet
+    in practice, AC-007 and AC-009 (should) are met in part. Eight residual risks
+    are listed in residual-risk.md (R-1 to R-8).
+- id: JUDGE-002
+  severity: minor
+  summary: 'For the maintainer on acceptance: decide whether REV-001 (round count
+    fixed for a first round only) and REV-002 (text-only verify size not reached where
+    .soft-foundry/ exists) are follow-ups or remediated here; confirm the two human_decisions
+    entries, which the agent session typed; rebuild and install the gem locally after
+    merge, then do PC-001.'
+- id: JUDGE-003
+  severity: minor
+  summary: Attack and threat modeling were not run (stepped over by default at risk
+    low). Judgment records attack as not run, not as a pass. The final-judgment skill
+    and template still do not instruct this (REV-005).
+- id: JUDGE-004
+  severity: minor
+  summary: 'For learning or a follow-up change: REV-003, REV-004, REV-006 to REV-009,
+    REV-012, REV-013 as one wording and minor-code change; REV-010 and REV-011 to
+    the guard follow-up.'
+next: learn
+notes: 'Judged from the record; no evidence was created or repaired. Currency checks
+  run by this session with the worktree''s code: `gate all` (verification, evaluation
+  and review pass; no code change since 4988779), and test/light_track_test.rb (16
+  runs, 0 failures), neither recorded as evidence. Provider: this judgment ran on
+  Anthropic, the provider that implemented the change, by the maintainer''s instruction
+  of 2026-11-14 that evidence phases run on Claude; the skill prefers a different
+  one. Guard: one shell command of this session left its working directory in changes/light-track/.
+  The PostToolUse hook then ran from there and reported that .ai/policies/enforcement.yml
+  had changed and was restored and that the machine-local override was removed. It
+  had written changes/light-track/.ai/policies/enforcement.yml (identical to the committed
+  policy) and changes/light-track/.soft-foundry/ (a baseline and a log). Both stray
+  directories were looked at and deleted; they are outside this skill''s write set,
+  and nothing else outside 14-judgment/ was written. The repository .ai/ has no diff.
+  This session did not read the worktree-root .soft-foundry/enforcement.yml, so whether
+  the local override is still in place is for the maintainer to check; it did read
+  the last lines of the worktree-root .soft-foundry/guard.log once, which the guard
+  treats as its own configuration. See REV-011 and R-8. The guard checks Bash against
+  deny sets only. No harness-eval content was read.'
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-11-15T06:08:42Z'
+  finished_at: '2026-11-15T06:11:35Z'
+  exit_status: 0
+  previous_phase: judge
+  session_id: 76e49fd1-1818-44ad-a581-90a073c40c30
+  cwd: "/Users/jscholen-iou/dev/soft_foundry/.claude/worktrees/light-track"
+branch_resolved: true

@@ -1,0 +1,21 @@
+Run options: --seed 56573
+
+# Running:
+
+PROBE-3 normalize_path("app/[id]/page.tsx") => nil
+PROBE-3 normalize_path("src/routes/[slug].svelte") => nil
+PROBE-3 normalize_path("docs/what?.md") => nil
+PROBE-3 normalize_path("LIB/app.rb") => "LIB/app.rb"
+PROBE-3 normalize_path("lib\\app.rb") => "lib\\app.rb"
+PROBE-3 normalize_path("lib/app.rb/") => "lib/app.rb"
+PROBE-3 normalize_path(".") => nil
+PROBE-3 normalize_path("lib/..") => nil
+.PROBE-2 first unsealed reopen previous: {"status"=>"complete", "sealed"=>false}  remediation_rounds: 0
+.PROBE-1 first reopen previous:  {"status"=>"complete", "sealed"=>true}
+PROBE-1 second reopen previous: {"status"=>"complete", "sealed"=>true} (remediation never sealed in round two)
+PROBE-1 Record-commits: 1  reopened_rounds: 2  remediation_rounds: 2  another_round_allowed?: false
+.
+
+Finished in 2.046164s, 1.4662 runs/s, 0.0000 assertions/s.
+
+3 runs, 0 assertions, 0 failures, 0 errors, 0 skips

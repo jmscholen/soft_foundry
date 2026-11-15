@@ -1,0 +1,155 @@
+# EVAL-009 at 119e431770bbdddc4048eb625672ee358405fe77
+
+## An unknown track name
+$ soft-foundry change new n1 --track nosuch
+  unknown track 'nosuch'; .ai/workflow.yml defines: gated, iterative, light
+  [exit 1]
+assert pass: change new --track nosuch is refused
+assert pass: the message lists gated, iterative and light
+
+## No --track: the default track is unchanged
+$ soft-foundry change new n1
+  created changes/n1 with 16 phase directories
+  branch: change/n1
+  track: gated
+  billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+           set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+  [exit 0]
+assert pass: the record is on the gated track
+$ soft-foundry change status n1
+  n1: n1  [status: intake, phase: intake, risk: TBD]
+    track: gated
+    00-intake              pending
+    01-discovery           pending
+    02-specification       pending
+    03-threat-model        pending
+    04-plan                pending
+    05-implementation      pending
+    06-verification        pending
+    07-evaluation          pending
+    08-attack              pending
+    09-remediation         pending      optional
+    10-user-documentation  pending      optional
+    11-faq-index           pending      optional
+    12-observability       pending      optional
+    13-review              pending
+    14-judgment            pending
+    15-learning            pending
+  [exit 0]
+assert pass: no phase of a gated record is labelled optional on a track
+
+## The iterative track still starts in exploring
+$ soft-foundry change new i1 --track iterative
+  created changes/i1 with 16 phase directories
+  branch: change/i1
+  track: iterative (exploring; 0 iterations recorded; run `soft-foundry change vet` when the person has accepted the feature)
+  billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+           set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+  [exit 0]
+assert pass: the record is on the iterative track
+$ soft-foundry change status i1
+  i1: i1  [status: exploring, phase: implement, risk: TBD]
+    track: iterative (exploring; 0 iterations recorded; run `soft-foundry change vet` when the person has accepted the feature)
+    00-intake              pending
+    01-discovery           pending      optional on the iterative track
+    02-specification       pending
+    03-threat-model        pending      optional on the iterative track
+    04-plan                pending      optional on the iterative track
+    05-implementation      pending
+    06-verification        pending
+    07-evaluation          pending
+    08-attack              pending
+    09-remediation         pending      optional
+    10-user-documentation  pending      optional
+    11-faq-index           pending      optional
+    12-observability       pending      optional
+    13-review              pending
+    14-judgment            pending
+    15-learning            pending
+  [exit 0]
+assert pass: its status is exploring
+
+## A gated record still runs its whole lifecycle and closes
+$ soft-foundry change new g1 --track gated
+  (5 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal intake
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal discover
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal specify
+  (3 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal threat_model
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal plan
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal implement
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal verify
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal evaluate
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal attack
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal review
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal judge
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal learn
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry gate all
+  (173 lines, not shown)
+  [exit 0]
+assert pass: gate all exits 0 with no failing check
+assert pass: current_phase walked every phase in order (no phase was stepped over that the gated track requires)
+$ soft-foundry change close g1
+  advisory: 1 issue to address before g1 goes live (informational, does not block the gate)
+    ! warn verification: no check in 06-verification/tests.yml records a red_commit, so the failing-test-first evidence .ai/rules/testing.md asks for is not demonstrable for this feature
+  g1: closed
+  [exit 0]
+assert pass: change close exits 0
+
+## A record created before this change (no rules line, no track line)
+$ soft-foundry change new old
+  (5 lines, not shown)
+  [exit 0]
+$ soft-foundry change status old
+  old: old  [status: intake, phase: intake, risk: TBD]
+    track: gated
+    00-intake              pending
+    01-discovery           pending
+    02-specification       pending
+    03-threat-model        pending
+    04-plan                pending
+    05-implementation      pending
+    06-verification        pending
+    07-evaluation          pending
+    08-attack              pending
+    09-remediation         pending      optional
+    10-user-documentation  pending      optional
+    11-faq-index           pending      optional
+    12-observability       pending      optional
+    13-review              pending
+    14-judgment            pending
+    15-learning            pending
+  [exit 0]
+assert pass: status works and no phase is labelled optional on a track
+$ soft-foundry gate intake
+  (14 lines, not shown)
+  [exit 0]
+  ✓ pass track permitted: gated
+assert pass: gate intake passes
+
+summary: EVAL-009: 11 assertions, 0 failed

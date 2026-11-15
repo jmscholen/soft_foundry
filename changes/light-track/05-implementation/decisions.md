@@ -1,0 +1,10 @@
+# Implementation Decisions
+
+| Decision | Alternatives considered | Reason | Consequence |
+| --- | --- | --- | --- |
+| The light track is a `tracks:` entry with an `optional:` list; no new gate code | A new code path for the track | `ChangeRecord#skippable?` already honours a track's optional phases in the gate, the seal, the runner and `change close` (built for the iterative track) | The track is configuration; the tests prove the existing mechanism covers it |
+| An unsealed remediation is told apart by a `sealed` key that `PhaseReopen` writes into the reopen entry | Count only `Record <slug> remediate` commits and drop the reopen count | The reopen count still catches a round whose commit is not on the measured branch; the key keeps that and fixes REV-005 | A reopen entry written before this change has no key and counts as it did |
+| Text-only sizing for verification uses a new `text_only_path?`; `documentation_path?` is unchanged | Widen `documentation_path?` to include `.ai/**/*.md` | The documentation-only remediation seal uses `documentation_path?` and must keep refusing control-plane edits | Skill text is "text" for the verify size only; attack and evaluation sizes keep the stricter rule |
+| With no plan commit, the sizing diff base falls back to the first recorded phase | Require `--since` | Planning is stepped over at low risk and optional on the light track, so the plan commit often does not exist; the gate's outside-change check already uses this fallback | `change size` works on such records without `--since` |
+| A path that cannot be normalized (absolute, leaving the repository, a glob) fails the outside-change check | Resolve absolute paths against the repository root | A finding should name files the way git does; resolving absolute paths depends on the machine | The message names the path and says how to write it |
+| `change status` prints the reason a pending phase may stay pending | A separate column or symbol | Words read correctly with colour off and symbols removed (REQ-010) | Lines for pending required phases are unchanged |

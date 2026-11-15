@@ -1,0 +1,33 @@
+# Phase handoff. One per phase directory. The gate checker validates this file.
+phase: 05-implementation
+skill: implementation
+status: complete
+commit_sha: c6bf4eb22062953fbefa2c1b629e5537a98e8a71
+# Written by `soft-foundry phase seal` on a commit-bound phase: whether
+# metadata.git.branch resolved to a ref when the phase was sealed. False
+# means the checked-out HEAD, not a branch created later, is the measure
+# for "evidence current". Never written by the agent.
+# branch_resolved: true
+started_at: "2026-11-15T05:29:56Z"
+completed_at: "2026-11-15T05:29:56Z"
+resolved_model:
+  profile: coding_high
+  provider: anthropic
+  model: claude-fable-5-2
+outputs: [log.md, decisions.md, deviations.md]
+blocking: []               # unresolved blocking conditions; must be empty when complete
+findings:
+  - id: IMPL-001
+    severity: minor
+    summary: The full suite was run before a one-line test correction (951 runs, 1 failure, the track-list assertion of DEV-003) and not rerun after it; verification runs it on the final commit.
+  - id: IMPL-002
+    severity: minor
+    summary: AC-009 is met except for one existing assertion that lists the declared tracks (DEV-003).
+next: verify
+notes: ""
+# Written by `soft-foundry phase run`, never by the agent: how this phase was
+# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
+# session_id, cwd).
+# A review or judgment phase completed without it is advised as having been
+# performed by whatever session was already open.
+executed_by: null

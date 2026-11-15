@@ -18,7 +18,7 @@ Attack the code the change added or modified. Try each class that applies to it:
 8. Data exposure.
 9. Resource exhaustion.
 
-Out of scope: a party with write access to the repository editing the change record, the control plane or git history. The runtime guard and the specification lock cover that, not this phase. If you notice such a weakness, note it as a follow-up in the handoff `notes`. Do not record it as an attack result and do not give it a severity.
+Out of scope: a party with write access to the repository editing the change record, the control plane or git history. That is handled by the runtime guard and the specification lock, not by this phase. They do not close it completely: `rules`, `risk` and `track` in a record's `metadata.yml` can still be edited by a party with write access, and that gap is tracked as guard work. If you notice such a weakness, note it as a follow-up in the handoff `notes`. Do not record it as an attack result and do not give it a severity.
 
 ## Authorization and scope
 

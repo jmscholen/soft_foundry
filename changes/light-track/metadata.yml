@@ -1,0 +1,50 @@
+---
+change:
+  id: light-track
+  title: light-track
+git:
+  worktree: "/Users/jscholen-iou/dev/soft_foundry/.claude/worktrees/light-track"
+  branch: change/light-track
+rules: 2
+type: feature
+risk: low
+track: gated
+status: judged
+current_phase: learn
+created_at: 2026-11-15 04:46:56.000000000 Z
+scope: []
+surfaces:
+  application: true
+  database: false
+  infrastructure: false
+  security: false
+  accessibility: true
+  observability: false
+  policy: false
+human_decisions:
+- boundary: changes that intentionally weaken required controls
+  subject: a change on the light track runs no threat modeling, evaluation or attack
+    phase (and no discovery, planning or learning); the specification lock, must-criteria
+    approval, remediation cap, review and judgment stay; high risk cannot use the
+    track; as scoped in 00-intake/request.md. Risk low confirmed for this change.
+  decided_by: Jeff Scholen
+  decided_at: 2026-11-14
+  decision: approved
+  note: Given in the Claude Code session that wrote the specification, replying approved
+    to the three decisions put to him. Typed by the agent under the maintainer local
+    warn override.
+- boundary: must criteria approval
+  subject: the must criteria of 02-specification/acceptance-criteria.yml
+  criteria:
+  - AC-001
+  - AC-002
+  - AC-003
+  decided_by: Jeff Scholen
+  decided_at: 2026-11-14
+  decision: approved
+  note: Given in the same reply.
+vetted:
+reopenings: []
+phase_reopenings: []
+skipped_phases: []
+run_phases: []

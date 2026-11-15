@@ -1,0 +1,276 @@
+# EVAL-002 at 119e431770bbdddc4048eb625672ee358405fe77
+$ soft-foundry change new c1 --track light
+  (5 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal intake
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal specify
+  (3 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal implement
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal verify
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal review
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal judge
+  (2 lines, not shown)
+  [exit 0]
+
+## light: must criteria with no approval
+$ soft-foundry gate specify
+  (16 lines, not shown)
+  [exit 2]
+  ✗ fail must criteria approved: no approval of the must criteria is recorded; a person records under human_decisions: boundary: must criteria approval, criteria: [AC-001], decision: approved
+
+## light: specification edited after its seal
+$ soft-foundry gate specify
+  (16 lines, not shown)
+  [exit 2]
+  ✗ fail specification locked: changed since the specification was recorded at 71cb99acfefc: changes/c1/02-specification/specification.md; a specification change after the lock is a recorded requirement change: rerun the specification phase (its handoff re-binds the lock), after which every commit-bound phase is stale and must be redone against the new criteria
+$ soft-foundry change new c2 --track light
+  (5 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal intake
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal specify
+  (3 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal implement
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal verify
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal review
+  (2 lines, not shown)
+  [exit 0]
+
+## light: round 1 sealed, then review sends it back
+$ soft-foundry phase seal remediate
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase reopen remediate --reason review found more
+  phase reopen: reopened remediate (manual)
+  phase reopen: reset verify
+  phase reopen: reset remediate
+  phase reopen: reset review
+  [exit 0]
+assert pass: light: reopen after one round is allowed
+
+## light: round 2 sealed, verification and review redone
+$ soft-foundry phase seal remediate
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal verify
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal review
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry gate review
+  (18 lines, not shown)
+  [exit 0]
+  ✓ pass remediation within cap: 2 remediation rounds (limit 2)
+assert pass: light: gate review passes and counts 2 remediation rounds (limit 2)
+
+## light: a reset that includes remediation is requested at the cap
+$ soft-foundry phase reopen remediate --reason third try
+  soft-foundry: c2 has run 2 remediation rounds, the limit in .ai/workflow.yml (remediation.max_rounds: 2); another round needs a person's decision. The change is parked: status is awaiting_human. A person records under human_decisions in metadata.yml: boundary: remediation cap, rounds: 2, decision: accept_residual (judge with the open findings as residual risk), narrow (record a requirement change that narrows the claim, then remediate once more) or reject (judge it REJECTED); then sets status back to in_progress
+  [exit 1]
+assert pass: light: the reopen is refused
+assert pass: light: the message says remediation cap and '2 remediation rounds', and does not say sealed
+  status is now: awaiting_human
+assert pass: light: the change is parked awaiting_human
+
+## light: a third round is recorded anyway, with no cap decision
+$ soft-foundry gate review
+  (19 lines, not shown)
+  [exit 2]
+  ✗ fail remediation within cap: 3 remediation rounds, beyond the limit of 2, with no decision for round 3; a person records boundary: remediation cap, rounds: 2, decision: accept_residual or narrow
+assert pass: light: gate review fails on remediation within cap
+$ soft-foundry change new c1 --track gated
+  (5 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal intake
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal discover
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal specify
+  (3 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal threat_model
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal plan
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal implement
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal verify
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal evaluate
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal attack
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal review
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal judge
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal learn
+  (2 lines, not shown)
+  [exit 0]
+
+## gated: must criteria with no approval
+$ soft-foundry gate specify
+  (16 lines, not shown)
+  [exit 2]
+  ✗ fail must criteria approved: no approval of the must criteria is recorded; a person records under human_decisions: boundary: must criteria approval, criteria: [AC-001], decision: approved
+
+## gated: specification edited after its seal
+$ soft-foundry gate specify
+  (16 lines, not shown)
+  [exit 2]
+  ✗ fail specification locked: changed since the specification was recorded at caaf7c016621: changes/c1/02-specification/specification.md; a specification change after the lock is a recorded requirement change: rerun the specification phase (its handoff re-binds the lock), after which every commit-bound phase is stale and must be redone against the new criteria
+$ soft-foundry change new c2 --track gated
+  (5 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal intake
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal discover
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal specify
+  (3 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal threat_model
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal plan
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal implement
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal verify
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal evaluate
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal attack
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal review
+  (2 lines, not shown)
+  [exit 0]
+
+## gated: round 1 sealed, then review sends it back
+$ soft-foundry phase seal remediate
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase reopen remediate --reason review found more
+  phase reopen: reopened remediate (manual)
+  phase reopen: reset verify
+  phase reopen: reset evaluate
+  phase reopen: reset attack
+  phase reopen: reset remediate
+  phase reopen: reset review
+  [exit 0]
+assert pass: gated: reopen after one round is allowed
+
+## gated: round 2 sealed, verification and review redone
+$ soft-foundry phase seal remediate
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal verify
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal review
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry gate review
+  (18 lines, not shown)
+  [exit 0]
+  ✓ pass remediation within cap: 2 remediation rounds (limit 2)
+assert pass: gated: gate review passes and counts 2 remediation rounds (limit 2)
+
+## gated: a reset that includes remediation is requested at the cap
+$ soft-foundry phase reopen remediate --reason third try
+  soft-foundry: c2 has run 2 remediation rounds, the limit in .ai/workflow.yml (remediation.max_rounds: 2); another round needs a person's decision. The change is parked: status is awaiting_human. A person records under human_decisions in metadata.yml: boundary: remediation cap, rounds: 2, decision: accept_residual (judge with the open findings as residual risk), narrow (record a requirement change that narrows the claim, then remediate once more) or reject (judge it REJECTED); then sets status back to in_progress
+  [exit 1]
+assert pass: gated: the reopen is refused
+assert pass: gated: the message says remediation cap and '2 remediation rounds', and does not say sealed
+  status is now: awaiting_human
+assert pass: gated: the change is parked awaiting_human
+
+## gated: a third round is recorded anyway, with no cap decision
+$ soft-foundry gate review
+  (19 lines, not shown)
+  [exit 2]
+  ✗ fail remediation within cap: 3 remediation rounds, beyond the limit of 2, with no decision for round 3; a person records boundary: remediation cap, rounds: 2, decision: accept_residual or narrow
+assert pass: gated: gate review fails on remediation within cap
+
+assert pass: light: approval state fails its check with exit 2
+assert pass: gated: approval state fails the same check
+assert pass: light: lock state fails its check with exit 2
+assert pass: gated: lock state fails the same check
+
+## risk high on the light track
+$ soft-foundry change new h1 --track light
+  (5 lines, not shown)
+  [exit 0]
+$ soft-foundry gate intake
+  (14 lines, not shown)
+  [exit 2]
+  ✗ fail track permitted: risk high forces the gated track (.ai/workflow.yml tracks.forced_by_risk) but the change is on light
+assert pass: gate intake exits 2 on track permitted, naming gated
+$ soft-foundry phase seal intake
+  (15 lines, not shown)
+  [exit 2]
+  h1: 00-intake is not sealed: its gate fails; nothing was committed
+assert pass: phase seal intake commits nothing
+$ soft-foundry change status h1
+  h1: h1  [status: intake, phase: intake, risk: high]
+    track: light
+    00-intake              complete     FAIL: track permitted
+    01-discovery           pending      optional on the light track
+    02-specification       pending
+    03-threat-model        pending      optional on the light track
+    04-plan                pending      optional on the light track
+    05-implementation      pending
+    06-verification        pending
+    07-evaluation          pending      optional on the light track
+    08-attack              pending      optional on the light track
+    09-remediation         pending      optional
+    10-user-documentation  pending      optional
+    11-faq-index           pending      optional
+    12-observability       pending      optional
+    13-review              pending
+    14-judgment            pending
+    15-learning            pending      optional on the light track
+  [exit 2]
+$ soft-foundry change new h2 --track gated
+  (5 lines, not shown)
+  [exit 0]
+$ soft-foundry gate intake
+  (14 lines, not shown)
+  [exit 0]
+  ✓ pass track permitted: gated
+assert pass: a gated record at high risk passes track permitted
+
+summary: EVAL-002: 19 assertions, 0 failed

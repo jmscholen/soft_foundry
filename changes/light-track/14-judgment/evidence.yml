@@ -1,0 +1,121 @@
+commit_judged: 056098511f3b570ad79648123d9e534cbdbc106d
+phases:
+  - phase: 06-verification
+    commit_sha: 4988779139bf6c8d60fdb9b985a55254b0659d1a
+    current: true
+    result: complete with two acknowledged failures
+    note: "No code change since 4988779. 9 of 11 checks pass, including the full suite (951 runs, 0 failures). CHECK-009 (AC-009, should) and CHECK-011 (AC-007, should) fail. Must criteria AC-001, AC-002, AC-003 pass."
+  - phase: 07-evaluation
+    commit_sha: 119e431770bbdddc4048eb625672ee358405fe77
+    current: true
+    result: complete with two failed journeys
+    note: "8 of 10 journeys pass, including the three must journeys. EVAL-005 (AC-005, should) and EVAL-007 (AC-007, should) fail."
+  - phase: 08-attack
+    commit_sha: null
+    current: true
+    result: not run
+    note: "Stepped over by default at risk low (default_waivers); 08-attack/handoff.yml is pending. Not run, not a pass. No threat model either (03-threat-model pending)."
+  - phase: 13-review
+    commit_sha: 2bd8a36ebac217d90174639deddb292765665b07
+    current: true
+    result: complete with open findings
+    note: "No blocking finding. Two major (REV-001, REV-002) and eleven minor findings."
+blocked_by: []
+unresolved_findings:
+  - id: REV-001
+    severity: major
+    source: 13-review
+    disposition: residual_risk
+    accepted_by: not yet accepted; needs the maintainer
+    risk: R-1
+    summary: A later remediation completed in its handoff but never sealed is counted as a round once an earlier round was sealed; the change parks one round early. REQ-006 is fixed for a first round only.
+  - id: REV-002
+    severity: major
+    source: 13-review
+    also: [EVL-001]
+    disposition: residual_risk
+    accepted_by: not yet accepted; needs the maintainer
+    risk: R-2
+    summary: The text-only verify size is not reached where .soft-foundry/ exists, because sizing reads git-ignored paths. AC-005 (should) is unmet in practice and the reason printed does not name the cause.
+  - id: REV-003
+    severity: minor
+    source: 13-review
+    disposition: follow_up
+    risk: R-7
+    summary: A file with a glob character in its name cannot be named in an outside-change finding. Specified behavior; a point for a later specification.
+  - id: REV-004
+    severity: minor
+    source: 13-review
+    also: [VER-002, EVL-002]
+    disposition: follow_up
+    risk: R-7
+    summary: soft-foundry help names the light track only as a --track value. AC-007 (should) met in part.
+  - id: REV-005
+    severity: minor
+    source: 13-review
+    disposition: follow_up
+    risk: R-3
+    summary: Nothing in the final-judgment skill or its template tells judgment to record attack as not run. This judgment records it; the instruction is still owed.
+  - id: REV-006
+    severity: minor
+    source: 13-review
+    disposition: follow_up
+    risk: R-7
+    summary: A reopen entry carries previous.remediate.sealed, which .ai/schemas.md does not describe.
+  - id: REV-007
+    severity: minor
+    source: 13-review
+    also: [EVL-003]
+    disposition: follow_up
+    risk: R-7
+    summary: current_phase is learn after judgment on a light record.
+  - id: REV-008
+    severity: minor
+    source: 13-review
+    also: [VER-004, EVL-004]
+    disposition: follow_up
+    risk: R-7
+    summary: Letter case and backslash spellings pass the outside-change check. AC-003 does not list them.
+  - id: REV-009
+    severity: minor
+    source: 13-review
+    disposition: follow_up
+    risk: R-7
+    summary: README.md track list is split into two lists (WCAG 1.3.1).
+  - id: REV-010
+    severity: minor
+    source: 13-review
+    outside_change: true
+    disposition: follow_up
+    risk: R-3
+    summary: check does not refuse a track whose optional list names review, specify, implement or verify. Guard and lint follow-up.
+  - id: REV-011
+    severity: minor
+    source: 13-review
+    outside_change: true
+    disposition: follow_up
+    risk: R-8
+    summary: The guard's after-call hook writes stray directories and reports a restore when run from inside the record. Seen again in the judgment session.
+  - id: REV-012
+    severity: minor
+    source: 13-review
+    also: [VER-005]
+    disposition: follow_up
+    risk: R-7
+    summary: Version not raised; the installed gem reports 0.23.0 and does not have the track. Rebuild and install locally after merge.
+  - id: REV-013
+    severity: minor
+    source: 13-review
+    disposition: follow_up
+    risk: R-7
+    summary: Two skip-reason functions with different vocabularies.
+  - id: VER-001
+    severity: minor
+    source: 06-verification
+    also: [IMPL-002]
+    disposition: follow_up
+    risk: R-7
+    summary: One existing assertion (the declared track list) was changed; AC-009 (should) met except for it (DEV-003).
+criteria_not_covered: []
+undischarged: []
+discharged: []

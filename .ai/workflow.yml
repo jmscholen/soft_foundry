@@ -149,6 +149,13 @@ tracks:
     output: exploration         # changes/<slug>/exploration/, scaffolded from the skill's templates
     vet_requires: [intake, specify]   # must be complete, with passing gates, before `change vet`
     optional: [discover, threat_model, plan]   # not required before implementation on this track; a change may still run them
+  light:
+    description: Specification, implementation, verification, one review and judgment. For changes that do not need threat modeling, evaluation or attack, such as changes to Soft Foundry itself.
+    # Not required on this track; a change may still run them. The
+    # specification lock, the must-criteria approval, the remediation cap,
+    # review and judgment apply as on the gated track. A high risk change
+    # cannot use it (forced_by_risk below).
+    optional: [discover, threat_model, plan, evaluate, attack, learn]
   # A change's declared risk can force a track regardless of what
   # `change new --track` asked for; the gate reports the conflict.
   forced_by_risk:

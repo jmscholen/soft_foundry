@@ -1,0 +1,47 @@
+$ git diff --stat c0315624171b8d8f378e2c5882263a51775e9997 HEAD -- test .ai/harness-evals   # c0315624171b8d8f378e2c5882263a51775e9997 is the parent of the commit that recorded this change's intake
+ test/lifecycle_tracks_test.rb |   2 +-
+ test/light_track_test.rb      | 248 ++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 249 insertions(+), 1 deletion(-)
+$ git diff c0315624171b8d8f378e2c5882263a51775e9997 HEAD -- test/lifecycle_tracks_test.rb
+diff --git a/test/lifecycle_tracks_test.rb b/test/lifecycle_tracks_test.rb
+index 82f3cda..2b725dc 100644
+--- a/test/lifecycle_tracks_test.rb
++++ b/test/lifecycle_tracks_test.rb
+@@ -48,7 +48,7 @@ class LifecycleTracksTest < Minitest::Test
+ 
+   def test_repository_declares_both_tracks_with_gated_as_default
+     plane = SoftFoundry::ControlPlane.new(REPO_ROOT)
+-    assert_equal %w[gated iterative], plane.track_names
++    assert_equal %w[gated iterative light], plane.track_names
+     assert_equal "gated", plane.default_track
+     refute plane.track("gated").exploring?
+     iterative = plane.track("iterative")
+$ git show --stat --format="%H %s" a53ec00
+a53ec004f3a9cad3d577563c3b116c562e455579 RED: light track, normalized outside-change paths, round count, text-only verify size
+
+ test/light_track_test.rb | 246 +++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 246 insertions(+)
+$ git diff --stat a53ec00 c6bf4eb -- test lib exe
+ lib/soft_foundry/change_record.rb | 10 +++++++++
+ lib/soft_foundry/cli.rb           |  8 +++++--
+ lib/soft_foundry/gate.rb          | 11 ++++++++--
+ lib/soft_foundry/phase_reopen.rb  |  6 +++++-
+ lib/soft_foundry/process_rules.rb | 44 ++++++++++++++++++++++++++++++++++-----
+ lib/soft_foundry/sizing.rb        | 14 ++++++++++---
+ test/lifecycle_tracks_test.rb     |  2 +-
+ test/light_track_test.rb          |  2 ++
+ 8 files changed, 83 insertions(+), 14 deletions(-)
+$ git diff a53ec00 c6bf4eb -- test/light_track_test.rb
+diff --git a/test/light_track_test.rb b/test/light_track_test.rb
+index 3c4c31c..8360581 100644
+--- a/test/light_track_test.rb
++++ b/test/light_track_test.rb
+@@ -117,6 +117,8 @@ class LightTrackTest < Minitest::Test
+         SoftFoundry::PhaseReopen.new(dir, plane: p, git: git(dir), record: record).call(p.phase("remediate"), reason: "more findings", source: "manual", env: {})
+       end
+       assert_includes error.message, "remediation cap"
++      # The gate fails once a round beyond the limit exists with no decision.
++      sealed_rounds!(dir, record, 1)
+       assert_equal :fail, check(gate(dir, record, "review"), "remediation within cap").outcome
+     end
+   end
