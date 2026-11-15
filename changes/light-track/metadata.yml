@@ -9,8 +9,8 @@ rules: 2
 type: feature
 risk: low
 track: gated
-status: released
-current_phase: learn
+status: closed
+current_phase: done
 created_at: 2026-11-15 04:46:56.000000000 Z
 scope: []
 surfaces:
@@ -56,3 +56,10 @@ release:
     description: The maintainer creates one change with --track light after merge
       and confirms it reaches judgment without evaluation, attack or threat modeling
       being asked for.
+    discharged_at: '2026-11-15T20:26:07Z'
+    discharge_commit: dc1e1266839dd481cdd2549189943a4cfc7be22d
+    discharge_note: Maintainer asked on 2026-11-15, after merging PR 65, to close
+      this record. A change was created with --track light from the merged code (light-track-fixes);
+      its status lists evaluation, attack and threat modeling as optional on the light
+      track. That change was not taken to judgment; reaching judgment without those
+      phases rests on the suite test for AC-001, not on a live run.
