@@ -1,0 +1,18 @@
+EVAL-007 note: the `update` route in the sweep (route-sweep.txt) exited 1 with
+"could not check for a new version (HTTP 403 from GitHub)". The same route
+rerun from the sweep's scratch repository with the session's full environment
+(the cloud session's proxy injects placeholder tokens such as GH_TOKEN=proxy-injected):
+
+== update route again, with the session's full environment (GH_TOKEN and proxy settings as the session has them):
+update: could not check for a new version (HTTP 401 from GitHub)
+exit=1
+
+GitHub itself is reachable from this session: `gh api
+repos/jmscholen/soft_foundry/releases/latest --jq .tag_name` printed v0.23.0
+(exit 0) and a raw `curl` of the same API URL through the proxy returned
+HTTP 200. The 403 (clean environment, no token) and 401 (placeholder token)
+are this sandbox's proxy policy for an unauthenticated or placeholder-
+authenticated Ruby HTTP client, not the command: the route's own error path
+reported the status and exited non-zero without crash text. release-0-23-0's
+evaluation ran the same route for real on a maintainer's machine. Nothing in
+this change touches `update`.

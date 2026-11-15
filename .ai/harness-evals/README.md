@@ -71,3 +71,9 @@ expect:
 ```
 
 `eval --live --shell <shell>` runs `phase run <phase> --shell <shell>` in the scratch repository (arguments after `--` go to the shell) and records the shell and the `resolved_model` the session wrote. A session that exits non-zero is an error; a session that completes the phase without a matching finding is a fail (the miss is the measurement). Live sessions run as you, in the scratch repository, with the host's own permission mode: there is no sandbox beyond the directory.
+
+An unattended Claude Code session cannot answer a permission prompt, so with no arguments after `--` the reviewer cannot write the phase directory and the case fails with no findings recorded. Pass the tools and mode the phase needs:
+
+```bash
+soft-foundry eval --live --shell claude -- --allowedTools "Bash,Read,Write,Edit,MultiEdit,Glob,Grep" --permission-mode acceptEdits
+```

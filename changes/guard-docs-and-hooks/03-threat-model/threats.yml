@@ -1,0 +1,11 @@
+threats:
+  - id: THREAT-001
+    requirements: [REQ-001]
+    category: authorization   # authentication | authorization | isolation | injection | xss | csrf | ssrf | file | secrets | replay | concurrency | resource_exhaustion | dependency | infrastructure
+    attacker: TBD
+    goal: TBD
+    vector: TBD
+    impact: TBD
+    likelihood: TBD
+    mitigation: MIT-001
+    attack_case_required: true

@@ -1,0 +1,10 @@
+.claude/settings.json: matches a fresh `soft-foundry hooks install`
+  PreToolUse matcher=Edit|Write|MultiEdit|NotebookEdit|Read|Grep|Glob|Bash command=# soft-foundry:guard
+  PostToolUse matcher=Bash command=# soft-foundry:guard-after
+.codex/hooks.json: matches a fresh `soft-foundry hooks install`
+  PreToolUse matcher=Bash|apply_patch|Edit|Write command=# soft-foundry:guard
+GUARD_MATCHER=Edit|Write|MultiEdit|NotebookEdit|Read|Grep|Glob|Bash
+CODEX_GUARD_MATCHER=Bash|apply_patch|Edit|Write
+claude_installed? "/home/user/soft_foundry/.claude/settings.json"
+codex_installed? "/home/user/soft_foundry/.codex/hooks.json"
+exit=0
