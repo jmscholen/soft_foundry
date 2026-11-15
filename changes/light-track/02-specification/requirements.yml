@@ -2,7 +2,62 @@
 # acceptance criteria, tests, evaluation journeys, and attack cases.
 requirements:
   - id: REQ-001
-    category: functional   # functional | accessibility | security | policy | data | failure | performance | operations | infrastructure | observability
-    statement: TBD
-    rationale: TBD
+    category: functional
+    statement: "A lifecycle track named light exists. `soft-foundry change new <slug> --track light` creates a record on it. On the light track the required phases are intake, specify, implement, verify, review and judge; discover, threat_model, plan, evaluate, attack and learn are optional, in addition to the phases that are optional on every track."
+    rationale: Maintainer's decision of 2026-11-14 that the tool's own changes run specification, implementation, the test suite and one review.
+    source: 00-intake/request.md
+  - id: REQ-002
+    category: functional
+    statement: "On a light-track record, a pending optional phase does not fail any gate, `phase seal` advances past it to the next required phase, and `change close` does not ask for it. A record on the gated track in the same state fails as it does today."
+    rationale: A track that names phases optional but still gates on them would not be lighter.
+    source: 00-intake/request.md
+  - id: REQ-003
+    category: security
+    statement: "The light track keeps every lock: the specification lock, the must-criteria tiers, cap and approval, the remediation cap, the review gate and the judgment gate apply to a light-track record exactly as to a gated one."
+    rationale: "The maintainer stated that the agent may not change the specification it is working to. The track removes phases, not locks."
+    source: 00-intake/request.md
+  - id: REQ-004
+    category: security
+    statement: "A record whose declared risk is high cannot be on the light track: the existing forced_by_risk rule reports the conflict and the gate fails."
+    rationale: High-risk changes keep the full lifecycle.
+    source: 00-intake/request.md
+  - id: REQ-005
+    category: functional
+    statement: "The paths of a finding marked outside_change are normalized before they are compared with the paths the change modified: a leading ./, repeated slashes and . or .. segments are resolved. A path that is absolute, that leaves the repository after normalization, or that contains a glob character is refused by the outside-change findings check with a message naming the path."
+    rationale: process-speed REV-004. Six spellings of a modified file passed as outside the change.
+    source: 00-intake/request.md
+  - id: REQ-006
+    category: functional
+    statement: "A remediation that was reopened before it completed is not counted as a remediation round. The refusal and gate messages at the cap say rounds, not sealed rounds, and give the count."
+    rationale: process-speed REV-005. A change could park one round early with a message that misdescribed the count.
+    source: 00-intake/request.md
+  - id: REQ-007
+    category: performance
+    statement: "When every path a change modified is documentation, the change's own record, or Markdown prose under the control plane, `soft-foundry change size --phase verify` reports the smaller verify size and gives the reason. The control plane check and the harness evals still run in that case."
+    rationale: purpose-and-scope ran the 21-minute suite twice for four text files.
+    source: 00-intake/request.md
+  - id: REQ-008
+    category: functional
+    statement: "The review skill distinguishes a weakness that would need repository write access (never blocking or major) from an alteration of evidence the reviewer actually observes in the record under review (graded on its merits). The adversarial-testing skill says the guard and the specification lock are where repository-write tampering is handled, and names the known gap that rules and risk in metadata.yml remain editable."
+    rationale: purpose-and-scope residual risks R-1 and R-2.
+    source: 00-intake/request.md
+  - id: REQ-009
+    category: operations
+    statement: "The light track is documented where a user chooses a track: the help text of `change new`, the tracks comment in .ai/workflow.yml, README.md, and a user guide page. Each says which phases are required, which locks stay, and that high risk cannot use it."
+    rationale: A track nobody can find is not used.
+    source: 00-intake/request.md
+  - id: REQ-010
+    category: accessibility
+    statement: "New and changed command output and documentation follow .ai/rules/accessibility.md: messages read correctly with colour off and symbols removed, headings are in order, and no meaning rests on colour or a symbol alone."
+    rationale: surfaces.accessibility is true.
+    source: 00-intake/assumptions.md
+  - id: REQ-011
+    category: failure
+    statement: "Records on the gated and iterative tracks, and records created before this change, gate exactly as before. An unknown track name is refused by `change new` with a message listing the defined tracks."
+    rationale: The change must not alter existing lifecycles.
+    source: 00-intake/request.md
+  - id: REQ-012
+    category: observability
+    statement: "`soft-foundry change status` shows the track of a record, and a phase stepped over because the track makes it optional is shown as such, not as missing."
+    rationale: A person must be able to see why a phase did not run.
     source: 00-intake/request.md

@@ -5,15 +5,71 @@
 # under human_decisions) or should (reported, never blocking).
 criteria:
   - id: AC-001
-    tier: TBD
-    requirements: [REQ-001]
-    given: TBD
-    when: TBD
-    then: TBD
-    verified_by: []   # test names, EVAL IDs, or ATTACK IDs, filled by later phases
+    tier: must
+    requirements: [REQ-001, REQ-002]
+    given: a record created with `change new --track light` at medium risk, whose intake, specify, implement, verify, review and judge phases are complete and sealed and whose discover, threat_model, plan, evaluate, attack and learn phases are pending
+    when: "`soft-foundry gate all` and `soft-foundry change close` run on it after merge"
+    then: no check fails for a pending optional phase and the change closes; the same record with track gated fails on the pending phases
+    verified_by: []
+  - id: AC-002
+    tier: must
+    requirements: [REQ-003, REQ-004]
+    given: light-track records in four states (specification edited after its seal; must criteria with no approval; a third remediation round with no cap decision; risk high)
+    when: the gate runs on each
+    then: each fails with the same check that fails a gated record in that state (specification locked, must criteria approved, remediation within cap), and the high-risk record fails on the track conflict
+    verified_by: []
+  - id: AC-003
+    tier: must
+    requirements: [REQ-005]
+    given: a new-rules record whose change modified lib/app.rb and whose review has a finding marked outside_change
+    when: the finding's paths are ./lib/app.rb, lib//app.rb, lib/./app.rb, lib/x/../app.rb, an absolute path, and lib/*.rb in turn
+    then: the outside-change findings check fails in every case, naming the path; with a path the change did not modify it passes
+    verified_by: []
+  - id: AC-004
+    tier: should
+    requirements: [REQ-006]
+    given: a new-rules record with one completed remediation and one remediation reopened before it completed
+    when: a reset that includes remediation is requested
+    then: the count is 1, the reset is allowed, and at the cap the message says rounds and gives the count
+    verified_by: []
+  - id: AC-005
+    tier: should
+    requirements: [REQ-007]
+    given: a change whose modified paths are README.md, a file under docs/, its own record and .ai/skills/review/SKILL.md
+    when: "`soft-foundry change size --phase verify` runs"
+    then: it reports the smaller verify size with a reason naming a documentation-only diff; adding a path under lib/ returns the size it reports today
+    verified_by: []
+  - id: AC-006
+    tier: should
+    requirements: [REQ-008]
+    given: the repository at the change's final commit
+    when: a reader opens the review and adversarial-testing skills
+    then: the review skill separates a weakness needing repository write access from an observed alteration of evidence, and the attack skill names the metadata.yml gap
+    verified_by: []
+  - id: AC-007
+    tier: should
+    requirements: [REQ-009]
+    given: the repository at the change's final commit
+    when: a reader looks at `soft-foundry help`, the tracks section of .ai/workflow.yml, README.md and the user guide
+    then: each names the light track, its required phases, the locks it keeps, and the high-risk exclusion
+    verified_by: []
+  - id: AC-008
+    tier: should
+    requirements: [REQ-010, REQ-012]
+    given: a light-track record with pending optional phases
+    when: "`soft-foundry change status` runs with colour off"
+    then: the track is shown, each stepped-over phase is labelled in words as optional on the track, and the lines read correctly with symbols removed
+    verified_by: []
+  - id: AC-009
+    tier: should
+    requirements: [REQ-011]
+    given: the test suite and the harness evals as they are on main
+    when: they run on the change's final commit
+    then: every existing test and case passes without its assertions being changed, and `change new --track nosuch` is refused with a message listing gated, iterative and light
+    verified_by: []
 
 # Checks only a person can make (open a published page, look at a render).
 # Not criteria; `change release` carries each as a release item.
-person_checks: []
-# - id: PC-001
-#   description: what the person checks, and where
+person_checks:
+  - id: PC-001
+    description: The maintainer creates one change with --track light after merge and confirms it reaches judgment without evaluation, attack or threat modeling being asked for.
