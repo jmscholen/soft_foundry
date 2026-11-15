@@ -1,0 +1,40 @@
+commit_sha: TBD
+# Optional. The check size computed by `soft-foundry change size --phase verify`.
+# A scoped change must record a size at least as large as the computed one.
+# size: TBD
+# Optional full-suite run, keyed by the git tree hash of the evidence commit
+# (`git rev-parse <commit_sha>^{tree}`), or a citation of another record's run
+# for the same tree. This is a record: Soft Foundry never runs the suite.
+# full_suite:
+#   tree: TBD
+#   command: TBD
+#   outcome: passed
+# full_suite:
+#   cite: <slug of another change record>
+# The gate reads every check (`test results recorded`): id, kind, command,
+# and a result of pass | fail | error | skipped. A check whose result is
+# fail or error, or skipped while naming criteria, must be named by id in
+# the handoff's `blocking` list or in a finding, or the phase does not
+# pass. Every acceptance criterion should appear in some check's
+# `criteria` (`criteria covered` warns here and fails at judgment unless
+# an evaluation journey covers it or the judgment sets it aside with a
+# reason). The manifest under evidence/ is recomputed (`evidence manifest
+# verified`): list each file with its SHA-256 after it is final.
+checks:
+  - id: CHECK-001
+    kind: tests   # tests | lint | static_analysis | security_scan | iac_validate | migration_check | custom
+    command: TBD
+    result: TBD   # pass | fail | error | skipped
+    evidence: evidence/TBD
+    criteria: [AC-001]
+    # Optional, per check: the commit at which this test existed and failed
+    # (RED) and the test file. The gate verifies red_commit is a commit that
+    # precedes commit_sha, holds test_path, and that APP or INFRA code changed
+    # after it. A feature, fix, or refactor with no red_commit on any check is
+    # advised as having no failing-test-first evidence.
+    # red_commit: TBD
+    # test_path: TBD
+    # Optional, per check, where the change touches a path the repository
+    # profile lists under access_control (.ai/rules/access-control-parity.md):
+    # protection: in_force   # in_force | disabled | not_applicable
+    # protection_note: why the protection was disabled (required when disabled)
