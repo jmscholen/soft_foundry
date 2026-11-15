@@ -1,0 +1,15 @@
+EVAL-007 (baseline): the two entry commands that exit non-zero at the commit, run at the intake commit
+Same clean clone, detached at 49b2ae54676d6619ae07f93be10eb89695968fb4, SOFT_FOUNDRY_PHASE unset.
+Commands: ruby -Ilib exe/soft-foundry help ; ruby -Ilib exe/soft-foundry doctor
+
+help at intake: exit 1
+doctor at intake, failing lines:
+fail .ai/manifest.yml
+fail pre-commit hook
+fail local runtime
+doctor at intake: exit 2
+
+Reading: both commands behave the same before and after the change. `help` exits 1 at both
+commits. `doctor` fails on three machine-local items a fresh clone does not have (the install
+manifest, the pre-commit hook, the local runtime file). Neither is an effect of this change.
+The clone was returned to change/purpose-and-scope at d272a5f538034b51e0e7264a4b2e81aadce1c87e afterwards.

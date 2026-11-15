@@ -1,29 +1,77 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 07-evaluation
 skill: evaluation
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-# Written by `soft-foundry phase seal` on a commit-bound phase: whether
-# metadata.git.branch resolved to a ref when the phase was sealed. False
-# means the checked-out HEAD, not a branch created later, is the measure
-# for "evidence current". Never written by the agent.
-# branch_resolved: true
-started_at: null
-completed_at: null
+status: complete
+commit_sha: d272a5f538034b51e0e7264a4b2e81aadce1c87e
+started_at: '2026-11-15T04:05:54Z'
+completed_at: '2026-11-15T04:11:09Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-fable-5-2
+outputs:
+- evaluation-plan.md
+- journeys.yml
+- results.md
+- evidence/manifest.yml
+- evidence/reader_journeys.sh
+- evidence/tool_smoke.sh
+- evidence/eval-001-readme.txt
+- evidence/eval-002-ai-readme.txt
+- evidence/eval-003-attack-skill.txt
+- evidence/eval-004-review-skill.txt
+- evidence/eval-005-consistency.txt
+- evidence/eval-006-accessibility.txt
+- evidence/eval-007-diff.txt
+- evidence/eval-007-tool-smoke.txt
+- evidence/eval-007-baseline.txt
+blocking: []
+findings:
+- id: EVAL-F1
+  severity: minor
+  summary: Advisory, no criterion unmet. README.md Purpose says a person steps in
+    at three points and that everything in between runs without them, but the same
+    file and the human-boundaries policy describe other stops where a change waits
+    for a person (panel split, policy text owed, budget cap, deploy beyond development,
+    weakening a control). The closing sentence overstates; .ai/README.md does not
+    carry it.
+- id: EVAL-F2
+  severity: minor
+  summary: Advisory, no criterion unmet. The attack skill does not say whether the
+    nine classes are the full list; its opening paragraph and the section Purpose
+    of ATTACK still name replay, concurrency, malformed input and dependency failures,
+    so a fresh attack session can read the scope either way.
+- id: EVAL-F3
+  severity: minor
+  summary: Advisory, no criterion unmet. README.md now opens with two descriptions
+    of Soft Foundry four lines apart (control plane with eventually enforced orchestration,
+    then autonomous software factory).
+- id: EVAL-F4
+  severity: minor
+  summary: Not caused by this change and not fixed here; same as VER-001. The worktree
+    still holds .ai/policies/enforcement.yml and .claude/settings.json modified against
+    HEAD (older text; settings.json without the PostToolUse hook entry and without
+    Grep|Glob in the PreToolUse matcher; guard.mode still block). They were so when
+    this session started. A person should put both back to HEAD before any later commit.
 next: attack
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: 'All seven journeys pass; AC-001 to AC-006 met. Size full_route_sweep, read
+  as the four edited documents plus every read-only entry command of the tool (evaluation-plan.md
+  lists the commands not run). Documents were read with git show at the commit and
+  the tool ran in a clean clone, because of EVAL-F4. Guard limitations met: the guard
+  refused shell commands that named files under .ai/policies, so the human-boundaries
+  policy was read with the file tool instead; the read list is advisory to the guard
+  and README.md is in no path group, so it was read with git show; the guard wrote
+  an ignored .soft-foundry folder under 07-evaluation/evidence/ when a command ran
+  from that folder, which is not evidence and was left alone. The temporary clone
+  was removed.'
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-11-15T04:05:54Z'
+  finished_at: '2026-11-15T04:11:54Z'
+  exit_status: 0
+  previous_phase: evaluate
+  session_id: a4ebe1b1-3467-420a-845b-89856cecf957
+  cwd: "/Users/jscholen-iou/dev/soft_foundry/.claude/worktrees/purpose-and-scope"
+branch_resolved: true

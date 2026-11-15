@@ -1,12 +1,108 @@
-commit_sha: TBD
+commit_sha: d272a5f538034b51e0e7264a4b2e81aadce1c87e
+size: full_route_sweep   # soft-foundry change size --phase evaluate: no scope declared, whole repository
 journeys:
   - id: EVAL-001
-    criteria: [AC-001]
-    persona: TBD
-    starting_state: TBD
+    criteria: [AC-001, AC-004]
+    persona: A person adopting Soft Foundry, deciding what it is for
+    starting_state: README.md at the commit, opened at line 1, nothing else read
     steps:
-      - TBD
+      - Read README.md from the title downwards and stop at the first section that describes commands or layout
+      - Note what has been learned by that point
+      - List the rendered heading outline to see where Purpose sits among the sections
     assertions:
-      - TBD
-    evidence: [evidence/TBD]
-    result: TBD   # pass | fail | blocked
+      - "The section 'Purpose' (line 5) comes before the first section holding a command ('Agent: next implementation milestone', line 13) and before every later section"
+      - "Line 7 says Soft Foundry is an autonomous software factory"
+      - "Line 9 says what each gate checks is locked once a person approves it"
+      - "Line 10 says the evidence phases look at the feature from the outside, and names verification, evaluation and attack"
+      - "Line 9 says the lock is lock and detect; line 11 names the three points where a person steps in (approves the specification, accepts or rejects the result, decides at the remediation cap)"
+    evidence: [evidence/eval-001-readme.txt]
+    result: pass
+  - id: EVAL-002
+    criteria: [AC-001]
+    persona: An agent starting a change, told by AGENTS.md to read .ai/README.md first
+    starting_state: .ai/README.md at the commit, opened at line 1
+    steps:
+      - Read .ai/README.md from the title downwards and stop at the first section that describes skills or layout
+      - Note what has been learned by that point
+    assertions:
+      - "The section 'Purpose' (line 5) comes before 'Skills and modes' (line 13) and 'Layout'"
+      - "Lines 7, 9 and 10 hold the same three statements as README.md: autonomous software factory, locked once a person approves it, evidence phases look from the outside"
+      - "The former opening text on skills now sits under its own heading 'Skills and modes'; nothing was lost from it"
+    evidence: [evidence/eval-002-ai-readme.txt]
+    result: pass
+  - id: EVAL-003
+    criteria: [AC-002]
+    persona: A fresh attack session that has only its skill file
+    starting_state: .ai/skills/adversarial-testing/SKILL.md at the commit, nothing else read
+    steps:
+      - Read the file from the top
+      - "Answer from the text alone: who is the attacker, what do I try, and what do I do with a weakness that needs write access to the repository"
+      - Read the rest of the file for anything that contradicts those answers
+    assertions:
+      - "Line 7 names the attacker as an outside party who reaches the change through what it exposes, and lists requests, parameters, uploads, jobs, webhooks, command arguments"
+      - "Lines 11 to 19 list nine classes in REQ-002's order: injection, cross-site scripting, broken authorization, identifier substitution, mass assignment, path traversal, server-side request forgery, data exposure, resource exhaustion"
+      - "Line 21 puts a party with write access to the repository editing the change record, the control plane or git history out of scope, and says to note such a weakness as a follow-up in the handoff notes, not as an attack result and without a severity"
+      - "Nothing later in the file brings repository-write tampering back into scope"
+    evidence: [evidence/eval-003-attack-skill.txt]
+    result: pass
+  - id: EVAL-004
+    criteria: [AC-003]
+    persona: A fresh review session that has only its skill file
+    starting_state: .ai/skills/review/SKILL.md at the commit, nothing else read
+    steps:
+      - Read the file from the top
+      - "Answer from the text alone: how do I grade a finding that needs write access to the repository"
+      - Follow the one path the paragraph names and see that it exists at the commit
+    assertions:
+      - "Line 17 says findings are graded against the attack threat model and that a finding which needs write access to the repository is never graded blocking or major and is recorded as a follow-up"
+      - "The paragraph sits beside the other severity rules (lines 13 and 15) and does not contradict them"
+      - "The file it points to, .ai/skills/adversarial-testing/SKILL.md, exists at the commit"
+    evidence: [evidence/eval-004-review-skill.txt]
+    result: pass
+  - id: EVAL-005
+    criteria: [AC-001, AC-002, AC-003]
+    persona: A reader who goes from one of the four documents to another
+    starting_state: All four edited documents at the commit
+    steps:
+      - Compare the Purpose section of README.md with that of .ai/README.md line by line
+      - Compare what both say about the threat model with the two skill files
+      - Resolve every path the added text names
+      - Check the one claim about the workflow that a reader can look up (the remediation cap) against .ai/workflow.yml
+    assertions:
+      - "The two Purpose sections differ in two sentences only, and neither difference changes a statement: README.md adds an example (SQL injection through a new controller action) and the sentence 'Everything in between runs without them'; .ai/README.md adds the two skill paths"
+      - "Both README files, the attack skill and the review skill say the same thing about a party with write access to the repository: outside the threat model"
+      - "skills/adversarial-testing/SKILL.md and skills/review/SKILL.md, named relative to .ai/, both exist"
+      - "The remediation cap the Purpose text names exists in .ai/workflow.yml (remediation.max_rounds)"
+    evidence: [evidence/eval-005-consistency.txt]
+    result: pass
+  - id: EVAL-006
+    criteria: [AC-005]
+    persona: A reader without sight of layout, colour or glyphs (screen reader, plain-text terminal)
+    starting_state: The four edited documents at the commit, and the lines added since the intake commit 49b2ae5
+    steps:
+      - List each file's heading levels in rendered order
+      - Search the added lines for bytes outside printable ASCII, for links, images and tables, and for colour words
+      - Convert each added section to plain text with all markup removed and read it for meaning that was lost
+    assertions:
+      - "Each of the four files has one level-1 heading and skips no level; the new headings ('Purpose', 'Skills and modes', 'The attacker') are level 2 directly under the title"
+      - "Every added byte is printable ASCII: no hidden or control character, no glyph"
+      - "No link, image or table was added, so there is no link text or alternative text to judge"
+      - "No colour word was added"
+      - "With markup removed the text reads the same: the bold lead-ins are full sentences, the nine classes are numbered in words a reader hears in order, and 'Out of scope' is stated in words"
+    evidence: [evidence/eval-006-accessibility.txt]
+    result: pass
+  - id: EVAL-007
+    criteria: [AC-006]
+    persona: The maintainer, running the tool after the edit
+    starting_state: A clean clone of the commit in a temporary folder, no uncommitted paths, provider keys unset
+    steps:
+      - List the paths that differ from the intake commit
+      - "Run each read-only entry command once: version, help, check, doctor, scan, change list, change status, change size, ci"
+      - For any command that exits non-zero, run it at the intake commit and compare
+    assertions:
+      - "Outside changes/ only the four edited files differ; no path under lib/, exe/ or test/ differs"
+      - "soft-foundry check exits 0: control plane, 16 phases, 17 skills, no errors"
+      - "soft-foundry ci exits 0"
+      - "help (exit 1) and doctor (exit 2, three machine-local items a clone lacks) behave the same at the intake commit, so neither is an effect of the change"
+    evidence: [evidence/eval-007-diff.txt, evidence/eval-007-tool-smoke.txt, evidence/eval-007-baseline.txt]
+    result: pass

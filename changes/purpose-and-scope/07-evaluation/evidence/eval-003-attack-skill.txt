@@ -1,0 +1,34 @@
+EVAL-003: a fresh attack session reads only .ai/skills/adversarial-testing/SKILL.md
+commit: d272a5f538034b51e0e7264a4b2e81aadce1c87e
+
+--- section 'The attacker' ---
+   5  ## The attacker
+   6  
+   7  The attacker is an outside party who reaches the change through what it exposes: requests, parameters, uploads, jobs, webhooks, command arguments. That covers a visitor who is not signed in, a signed-in user acting beyond their permissions, and another system calling the feature.
+   8  
+   9  Attack the code the change added or modified. Try each class that applies to it:
+  10  
+  11  1. Injection (SQL, command, template).
+  12  2. Cross-site scripting.
+  13  3. Broken authorization.
+  14  4. Identifier substitution (reaching another party's record by changing an identifier).
+  15  5. Mass assignment.
+  16  6. Path traversal.
+  17  7. Server-side request forgery.
+  18  8. Data exposure.
+  19  9. Resource exhaustion.
+  20  
+  21  Out of scope: a party with write access to the repository editing the change record, the control plane or git history. The runtime guard and the specification lock cover that, not this phase. If you notice such a weakness, note it as a follow-up in the handoff `notes`. Do not record it as an attack result and do not give it a severity.
+  22  
+
+--- heading outline (rendered) ---
+h1: Adversarial Testing
+h2: The attacker
+h2: Authorization and scope
+h2: Model-provider behavior
+h2: Purpose of ATTACK
+
+--- other lines in the file that say what to attack (for agreement with the section) ---
+3:Try to make the implementation violate its intent. Use real UI, HTTP/API, job, file-processing, data, and infrastructure surfaces as applicable. Attempt unauthorized state changes, identifier substitution, malformed/large input, replay, concurrency, injection, XSS, SSRF, path traversal, resource exhaustion, and dependency failures. Report findings; do not repair them.
+43:ATTACK is broader than penetration testing. It attempts to disprove implementation assumptions across security, authorization, reliability, concurrency, integrity, resource abuse, malformed inputs, dependency failures, retry behavior, and operational boundaries.
+50:On a record under the convergence rules, direct the attack at what the change modified and at its must acceptance criteria. A weakness in code the change did not modify is still worth reporting: mark the finding `outside_change: true`, name the `paths` it concerns and a `follow_up`, and it is carried as a follow-up instead of blocking this change (the gate's `outside-change findings` check refuses the mark on a path this change modified).

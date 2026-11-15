@@ -1,0 +1,10 @@
+EVAL-004: a fresh review session reads only .ai/skills/review/SKILL.md
+commit: d272a5f538034b51e0e7264a4b2e81aadce1c87e
+
+--- the grading paragraph and its neighbours ---
+13:Every finding states the failure it prevents: the concrete input or state, and the wrong result it leads to. A finding that cannot name one is minor at most. Every finding above minor carries it in the handoff as `failure:`, whatever its severity word, and the gate's `findings explained` check fails without it. Findings that only ask for defensive additions are not blocking or major by default: extra validation, rescues, retries, or nil checks for states the code cannot reach. A reviewer who wants one anyway names the input that reaches the state. A reviewer will always find something; the point is the failures that would happen, not the code that could be more cautious.
+15:On a record under the convergence rules, severity blocking is for an unmet must criterion or a failure in what this change modified. A finding about code the change did not modify is marked `outside_change: true` with the `paths` it concerns and a `follow_up`; it never blocks this change. Do not treat a statement the specification never asked for as blocking.
+17:Grade findings against the attack threat model in `.ai/skills/adversarial-testing/SKILL.md`: the attacker is an outside party who reaches the change through what it exposes. A finding that needs write access to the repository (editing the change record, the control plane or git history) is never graded blocking or major. Record it as a follow-up.
+
+--- the file the paragraph points to exists at the commit ---
+pass: .ai/skills/adversarial-testing/SKILL.md exists

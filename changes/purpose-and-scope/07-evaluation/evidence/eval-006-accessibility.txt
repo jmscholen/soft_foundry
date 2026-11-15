@@ -1,0 +1,80 @@
+EVAL-006: the added text read without sight of layout, colour or glyphs
+commit: d272a5f538034b51e0e7264a4b2e81aadce1c87e    intake commit: 49b2ae54676d6619ae07f93be10eb89695968fb4
+
+=== README.md ===
+--- heading levels in order (rendered); a jump of more than one level down is reported ---
+pass: 39 headings, 1 at level 1, no level skipped = yes
+--- lines the change added: count, and any byte outside printable ASCII ---
+added non-blank lines: 5
+pass: every added byte is printable ASCII
+--- added lines: links, images, tables, colour words ---
+pass: no link, image or table added
+pass: no colour word added
+
+=== .ai/README.md ===
+--- heading levels in order (rendered); a jump of more than one level down is reported ---
+pass: 6 headings, 1 at level 1, no level skipped = yes
+--- lines the change added: count, and any byte outside printable ASCII ---
+added non-blank lines: 6
+pass: every added byte is printable ASCII
+--- added lines: links, images, tables, colour words ---
+pass: no link, image or table added
+pass: no colour word added
+
+=== .ai/skills/adversarial-testing/SKILL.md ===
+--- heading levels in order (rendered); a jump of more than one level down is reported ---
+pass: 5 headings, 1 at level 1, no level skipped = yes
+--- lines the change added: count, and any byte outside printable ASCII ---
+added non-blank lines: 13
+pass: every added byte is printable ASCII
+--- added lines: links, images, tables, colour words ---
+pass: no link, image or table added
+pass: no colour word added
+
+=== .ai/skills/review/SKILL.md ===
+--- heading levels in order (rendered); a jump of more than one level down is reported ---
+pass: 1 headings, 1 at level 1, no level skipped = yes
+--- lines the change added: count, and any byte outside printable ASCII ---
+added non-blank lines: 1
+pass: every added byte is printable ASCII
+--- added lines: links, images, tables, colour words ---
+pass: no link, image or table added
+pass: no colour word added
+
+=== the added sections as plain text (pandoc -t plain): what is left when all markup is removed ===
+--- README.md, Purpose ---
+Purpose
+
+Soft Foundry is an autonomous software factory. An agent builds a feature in an application by passing through gated phases, and each gate checks the work against what was asked for.
+
+- The specification is locked. What each gate checks is locked once a person approves it. The agent may not change the specification it is working to. The lock is lock and detect: the gate fails when a locked file changes. No phase searches for ways around the lock.
+- The evidence phases look at the feature from the outside. Verification and evaluation ask what a legitimate user expects of the feature. Attack asks what a bad actor would try through it, for example SQL injection through a new controller action. A party with write access to the repository editing a change record is outside that threat model.
+- A person steps in at three points. A person approves the specification before work starts, accepts or rejects the result at the end, and decides what happens when a change reaches the remediation cap. Everything in between runs without them.
+--- .ai/README.md, Purpose ---
+Purpose
+
+Soft Foundry is an autonomous software factory. An agent builds a feature in an application by passing through gated phases, and each gate checks the work against what was asked for.
+
+- The specification is locked. What each gate checks is locked once a person approves it. The agent may not change the specification it is working to. The lock is lock and detect: the gate fails when a locked file changes. No phase searches for ways around the lock.
+- The evidence phases look at the feature from the outside. Verification and evaluation ask what a legitimate user expects of the feature. Attack asks what a bad actor would try through it. A party with write access to the repository editing a change record is outside that threat model (skills/adversarial-testing/SKILL.md, skills/review/SKILL.md).
+- A person steps in at three points. A person approves the specification before work starts, accepts or rejects the result at the end, and decides what happens when a change reaches the remediation cap.
+--- adversarial-testing SKILL.md, The attacker ---
+The attacker
+
+The attacker is an outside party who reaches the change through what it exposes: requests, parameters, uploads, jobs, webhooks, command arguments. That covers a visitor who is not signed in, a signed-in user acting beyond their permissions, and another system calling the feature.
+
+Attack the code the change added or modified. Try each class that applies to it:
+
+1.  Injection (SQL, command, template).
+2.  Cross-site scripting.
+3.  Broken authorization.
+4.  Identifier substitution (reaching another party's record by changing an identifier).
+5.  Mass assignment.
+6.  Path traversal.
+7.  Server-side request forgery.
+8.  Data exposure.
+9.  Resource exhaustion.
+
+Out of scope: a party with write access to the repository editing the change record, the control plane or git history. The runtime guard and the specification lock cover that, not this phase. If you notice such a weakness, note it as a follow-up in the handoff notes. Do not record it as an attack result and do not give it a severity.
+--- review SKILL.md, grading paragraph ---
+Grade findings against the attack threat model in .ai/skills/adversarial-testing/SKILL.md: the attacker is an outside party who reaches the change through what it exposes. A finding that needs write access to the repository (editing the change record, the control plane or git history) is never graded blocking or major. Record it as a follow-up.
