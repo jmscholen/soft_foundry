@@ -1,0 +1,14 @@
+# EVAL-006 at 119e431770bbdddc4048eb625672ee358405fe77
+
+## Review skill
+.ai/skills/review/SKILL.md: 1 matching line(s)
+  17: Grade findings against the attack threat model in `.ai/skills/adversarial-testing/SKILL.md`: the attacker is an outside party who reaches the change through what it exposes. A weakness that would need write access to the repository to use (someone could edit the change record, the control plane or git history) is never graded blocking or major. Record it as a follow-up. That rule is about what could be done. An alteration you actually observe in the record under review (evidence that does not match its manifest, a handoff changed after its seal, a result rewritten) is a finding about this change and is graded on its merits.
+assert pass: the review skill speaks of a weakness needing repository write access
+assert pass: the review skill speaks separately of an observed alteration of evidence
+
+## Adversarial-testing skill
+.ai/skills/adversarial-testing/SKILL.md: 1 matching line(s)
+  21: Out of scope: a party with write access to the repository editing the change record, the control plane or git history. That is handled by the runtime guard and the specification lock, not by this phase. They do not close it completely: `rules`, `risk` and `track` in a record's `metadata.yml` can still be edited by a party with write access, and that gap is tracked as guard work. If you notice such a weakness, note it as a follow-up in the handoff `notes`. Do not record it as an attack result and do not give it a severity.
+assert pass: the attack skill names the metadata.yml gap
+
+summary: EVAL-006: 3 assertions, 0 failed

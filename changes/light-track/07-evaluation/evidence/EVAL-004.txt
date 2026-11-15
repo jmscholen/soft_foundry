@@ -1,0 +1,72 @@
+# EVAL-004 at 119e431770bbdddc4048eb625672ee358405fe77
+$ soft-foundry change new c1 --track light
+  (5 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal intake
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal specify
+  (3 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal implement
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal verify
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal review
+  (2 lines, not shown)
+  [exit 0]
+
+## light: round 1 sealed, then review sends it back
+$ soft-foundry phase seal remediate
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase reopen remediate --reason review found more
+  phase reopen: reopened remediate (manual)
+  phase reopen: reset verify
+  phase reopen: reset remediate
+  phase reopen: reset review
+  [exit 0]
+assert pass: light: reopen after one round is allowed
+
+## light: a remediation is started and reopened before it completes
+$ soft-foundry phase reopen remediate --reason started over before finishing
+  phase reopen: reopened remediate (manual)
+  phase reopen: reset remediate
+  [exit 0]
+assert pass: light: reopening the unfinished remediation is allowed
+
+## light: round 2 sealed, verification and review redone
+$ soft-foundry phase seal remediate
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal verify
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal review
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry gate review
+  (18 lines, not shown)
+  [exit 0]
+  ✓ pass remediation within cap: 2 remediation rounds (limit 2)
+assert pass: light: gate review passes and counts 2 remediation rounds (limit 2)
+
+## light: a reset that includes remediation is requested at the cap
+$ soft-foundry phase reopen remediate --reason third try
+  soft-foundry: c1 has run 2 remediation rounds, the limit in .ai/workflow.yml (remediation.max_rounds: 2); another round needs a person's decision. The change is parked: status is awaiting_human. A person records under human_decisions in metadata.yml: boundary: remediation cap, rounds: 2, decision: accept_residual (judge with the open findings as residual risk), narrow (record a requirement change that narrows the claim, then remediate once more) or reject (judge it REJECTED); then sets status back to in_progress
+  [exit 1]
+assert pass: light: the reopen is refused
+assert pass: light: the message says remediation cap and '2 remediation rounds', and does not say sealed
+  status is now: awaiting_human
+assert pass: light: the change is parked awaiting_human
+
+## light: a third round is recorded anyway, with no cap decision
+$ soft-foundry gate review
+  (19 lines, not shown)
+  [exit 2]
+  ✗ fail remediation within cap: 3 remediation rounds, beyond the limit of 2, with no decision for round 3; a person records boundary: remediation cap, rounds: 2, decision: accept_residual or narrow
+assert pass: light: gate review fails on remediation within cap
+
+summary: EVAL-004: 7 assertions, 0 failed

@@ -1,0 +1,357 @@
+# EVAL-001 at 119e431770bbdddc4048eb625672ee358405fe77
+
+## Maintainer creates a change on the light track at medium risk; the agent works and seals only the required phases
+$ soft-foundry change new l1 --track light
+  created changes/l1 with 16 phase directories
+  branch: change/l1
+  track: light
+  billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+           set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+  [exit 0]
+assert pass: change new --track light exits 0 and says track: light
+$ soft-foundry phase seal intake
+  note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/
+  sealed 00-intake at 6b722091d57a
+  [exit 0]
+  current_phase is now: specify
+$ soft-foundry phase seal specify
+  note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/
+  note: metadata.yml also carries uncommitted edits to human_decisions, which this seal commits; the gate honours them from now on (ATK-007)
+  sealed 02-specification at 45a3b0e33ffc
+  [exit 0]
+  current_phase is now: implement
+$ soft-foundry phase seal implement
+  note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/
+  sealed 05-implementation at 15afb1c7728b
+  [exit 0]
+  current_phase is now: verify
+$ soft-foundry phase seal verify
+  note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/
+  sealed 06-verification at 80525fc351de
+  [exit 0]
+  current_phase is now: review
+$ soft-foundry phase seal review
+  note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/
+  sealed 13-review at 16a21e98da25
+  [exit 0]
+  current_phase is now: judge
+$ soft-foundry phase seal judge
+  note: left uncommitted (outside this phase and the record's metadata): .soft-foundry/
+  sealed 14-judgment at 24c157f422d2
+  [exit 0]
+  current_phase is now: learn
+assert pass: every required phase sealed (exit 0)
+assert pass: each seal advanced straight to the next required phase, stepping over the optional ones (specify, implement, verify, review, judge)
+assert pass: after judgment the record is judged
+  24c157f Record l1 judge
+  16a21e9 Record l1 review
+  80525fc Record l1 verify
+  15afb1c Record l1 implement
+  45a3b0e Record l1 specify
+  6b72209 Record l1 intake
+  67850cd record
+  7ec800d initial
+
+## Gate every phase on the branch
+$ soft-foundry gate all
+  00-intake  complete  PASS
+    ✓ pass handoff identity
+    ✓ pass track permitted: light
+    ✓ pass waivers permitted: nothing waived
+    ✓ pass rules kept: rules 2
+    ✓ pass required files present: request.md, assumptions.md, handoff.yml
+    ✓ pass structured files parse: handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 67850cd7b2adf1cd7d2a012896a3071a0a77553a
+    ✓ pass commit lineage: reaches HEAD 24c157f422d2; recorded with this commit_sha
+    ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+    ✓ pass predecessor complete: first phase
+    ✓ pass content clean
+  01-discovery  pending  SKIP
+    - skip phase pending: not started
+  02-specification  complete  PASS
+    ✓ pass handoff identity
+    ✓ pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+    ✓ pass structured files parse: requirements.yml, acceptance-criteria.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 6b722091d57a3785fbf7cf93fbfc3a08943cad98
+    ✓ pass commit lineage: descends from 00-intake at 67850cd7b2ad; reaches HEAD 24c157f422d2; recorded with this commit_sha
+    ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+    ✓ pass predecessor complete: 00-intake
+    ✓ pass specification locked: locked at 45a3b0e33ffc, the commit that recorded it
+    ✓ pass criteria tiered: 1 must, 0 should (cap 8 at risk medium)
+    ✓ pass must criteria approved: 1 must criterion approved by harness
+    ✓ pass content clean
+  03-threat-model  pending  SKIP
+    - skip phase pending: not started
+  04-plan  pending  SKIP
+    - skip phase pending: not started
+  05-implementation  complete  PASS
+    ✓ pass handoff identity
+    ✓ pass required files present: log.md, decisions.md, deviations.md, handoff.yml
+    ✓ pass structured files parse: handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 45a3b0e33ffcda3797d7ab6a0dce2e59cd80cecc
+    ✓ pass commit lineage: descends from 02-specification at 6b722091d57a; reaches HEAD 24c157f422d2; recorded with this commit_sha
+    ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+    ✓ pass predecessor complete: 02-specification
+    ✓ pass content clean
+  06-verification  complete  PASS
+    ✓ pass handoff identity
+    ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 15afb1c7728bccc21c862fb9fc8e02ff8643d699
+    ✓ pass commit lineage: descends from 05-implementation at 45a3b0e33ffc; reaches HEAD 24c157f422d2; recorded with this commit_sha
+    ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+    ✓ pass predecessor complete: 05-implementation
+    ✓ pass evidence current: no code changes since 15afb1c7728b; specification unchanged since 45a3b0e33ffc
+    - skip red evidence: no check records a red_commit
+    - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+    - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+    - skip protection stated: the repository profile declares no access_control
+    ✓ pass test results recorded: 1 check, 1 pass
+    ✓ pass criteria covered: 1 criterion named by verification checks
+    ✓ pass evidence manifest verified: 1 artifact matches
+    ✓ pass content clean
+  07-evaluation  pending  SKIP
+    - skip phase pending: not started
+  08-attack  pending  SKIP
+    - skip phase pending: not started
+  09-remediation  pending  SKIP
+    - skip phase pending: not started
+  10-user-documentation  pending  SKIP
+    - skip phase pending: not started
+  11-faq-index  pending  SKIP
+    - skip phase pending: not started
+  12-observability  pending  SKIP
+    - skip phase pending: not started
+  13-review  complete  PASS
+    ✓ pass handoff identity
+    ✓ pass required files present: functional.md, architecture.md, security.md, accessibility.md, policy-conformance.md, infrastructure.md, operations.md, consolidated.md, handoff.yml
+    ✓ pass structured files parse: handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 80525fc351de9fc3a716e52518106b02dea2e490
+    ✓ pass commit lineage: descends from 06-verification at 15afb1c7728b; reaches HEAD 24c157f422d2; recorded with this commit_sha
+    ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+    ✓ pass predecessor complete: 06-verification
+    ✓ pass evidence current: no code changes since 80525fc351de; specification unchanged since 45a3b0e33ffc
+    ✓ pass remediation within cap: 0 remediation rounds (limit 2)
+    ✓ pass outside-change findings: no finding marked outside_change
+    ✓ pass fresh session recorded: soft-foundry phase run (harness)
+    ✓ pass findings explained: no findings above minor
+    ✓ pass content clean
+  14-judgment  complete  PASS
+    ✓ pass handoff identity
+    ✓ pass required files present: final.md, residual-risk.md, evidence.yml, handoff.yml
+    ✓ pass structured files parse: evidence.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 16a21e98da25ffd6905d8b080c4fbadca21ed457
+    ✓ pass commit lineage: descends from 13-review at 80525fc351de; reaches HEAD 24c157f422d2; recorded with this commit_sha
+    ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+    ✓ pass predecessor complete: 13-review
+    ✓ pass evidence current: no code changes since 16a21e98da25; specification unchanged since 45a3b0e33ffc
+    ✓ pass remediation within cap: 0 remediation rounds (limit 2)
+    ✓ pass blocked basis: judgment is APPROVED
+    ✓ pass criteria covered: 1 criterion: 1 covered
+    ✓ pass verdict recorded: APPROVED
+    ✓ pass fresh session recorded: soft-foundry phase run (harness)
+    ✓ pass content clean
+  15-learning  pending  SKIP
+    - skip phase pending: not started
+  advisory: 1 issue to address before l1 goes live (informational, does not block the gate)
+    ! warn verification: no check in 06-verification/tests.yml records a red_commit, so the failing-test-first evidence .ai/rules/testing.md asks for is not demonstrable for this feature
+  [exit 0]
+assert pass: gate all exits 0
+assert pass: no check fails
+assert pass: the six track-optional phases are pending and skipped, not failed
+
+## Merge, then gate and close on main
+$ soft-foundry gate all --change l1
+  (113 lines, not shown)
+  [exit 0]
+assert pass: gate all after merge exits 0 with no failing check
+$ soft-foundry change close l1
+  advisory: 1 issue to address before l1 goes live (informational, does not block the gate)
+    ! warn verification: no check in 06-verification/tests.yml records a red_commit, so the failing-test-first evidence .ai/rules/testing.md asks for is not demonstrable for this feature
+  l1: closed
+  [exit 0]
+assert pass: change close exits 0 and reports closed
+$ soft-foundry change status l1
+  l1: l1  [status: closed, phase: done, risk: medium]
+    track: light
+    00-intake              complete     ok
+    01-discovery           pending      optional on the light track
+    02-specification       complete     ok
+    03-threat-model        pending      optional on the light track
+    04-plan                pending      optional on the light track
+    05-implementation      complete     ok
+    06-verification        complete     ok
+    07-evaluation          pending      optional on the light track
+    08-attack              pending      optional on the light track
+    09-remediation         pending      optional
+    10-user-documentation  pending      optional
+    11-faq-index           pending      optional
+    12-observability       pending      optional
+    13-review              complete     ok
+    14-judgment            complete     ok
+    15-learning            pending      optional on the light track
+  advisory: 1 issue to address before l1 goes live (informational, does not block the gate)
+    ! warn verification: no check in 06-verification/tests.yml records a red_commit, so the failing-test-first evidence .ai/rules/testing.md asks for is not demonstrable for this feature
+  [exit 0]
+assert pass: status after close shows closed on the light track
+
+## The same record on the gated track
+$ soft-foundry change new g1 --track gated
+  (5 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal intake
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal specify
+  02-specification  complete  FAIL
+    ✓ pass handoff identity
+    ✓ pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+    ✓ pass structured files parse: requirements.yml, acceptance-criteria.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 10431c1d826480dbf55ab95b97e4aef37f54a4eb
+    ✓ pass commit lineage: reaches HEAD 10431c1d8264
+    ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+    ✗ fail predecessor complete: 01-discovery is pending
+    ! warn specification locked: not yet locked: the completed specification is not committed; the lock takes effect at the commit that records 02-specification/handoff.yml as complete
+    ✓ pass criteria tiered: 1 must, 0 should (cap 8 at risk medium)
+    ✓ pass must criteria approved: 1 must criterion approved by harness
+    ✓ pass content clean
+  g1: 02-specification is not sealed: its gate fails; nothing was committed
+  [exit 2]
+assert pass: phase seal specify is refused on the gated track while discovery is pending
+$ soft-foundry gate all
+  00-intake  complete  PASS
+    ✓ pass handoff identity
+    ✓ pass track permitted: gated
+    ✓ pass waivers permitted: nothing waived
+    ✓ pass rules kept: rules 2
+    ✓ pass required files present: request.md, assumptions.md, handoff.yml
+    ✓ pass structured files parse: handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 55f98d99cf3ecd8da82f6573c5d81554fecdecbf
+    ✓ pass commit lineage: reaches HEAD 4c6bf2ad558f; recorded with this commit_sha
+    ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+    ✓ pass predecessor complete: first phase
+    ✓ pass content clean
+  01-discovery  pending  SKIP
+    - skip phase pending: not started
+  02-specification  complete  FAIL
+    ✓ pass handoff identity
+    ✓ pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+    ✓ pass structured files parse: requirements.yml, acceptance-criteria.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 10431c1d826480dbf55ab95b97e4aef37f54a4eb
+    ✓ pass commit lineage: reaches HEAD 4c6bf2ad558f; recorded with this commit_sha
+    ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+    ✗ fail predecessor complete: 01-discovery is pending
+    ✓ pass specification locked: locked at 4c6bf2ad558f, the commit that recorded it
+    ✓ pass criteria tiered: 1 must, 0 should (cap 8 at risk medium)
+    ✓ pass must criteria approved: 1 must criterion approved by harness
+    ✓ pass content clean
+  03-threat-model  pending  SKIP
+    - skip phase pending: not started
+  04-plan  pending  SKIP
+    - skip phase pending: not started
+  05-implementation  complete  FAIL
+    ✓ pass handoff identity
+    ✓ pass required files present: log.md, decisions.md, deviations.md, handoff.yml
+    ✓ pass structured files parse: handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 10431c1d826480dbf55ab95b97e4aef37f54a4eb
+    ✓ pass commit lineage: reaches HEAD 4c6bf2ad558f; recorded with this commit_sha
+    ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+    ✗ fail predecessor complete: 04-plan is pending
+    ✓ pass content clean
+  06-verification  complete  PASS
+    ✓ pass handoff identity
+    ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 10431c1d826480dbf55ab95b97e4aef37f54a4eb
+    ✓ pass commit lineage: descends from 05-implementation at 10431c1d8264; reaches HEAD 4c6bf2ad558f; recorded with this commit_sha
+    ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+    ✓ pass predecessor complete: 05-implementation
+    ✓ pass evidence current: no code changes since 10431c1d8264; specification unchanged since 4c6bf2ad558f
+    - skip red evidence: no check records a red_commit
+    - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+    - skip full-suite run recorded (record check, not a test result): none recorded; no scope is declared, so nothing is asked of this record
+    - skip protection stated: the repository profile declares no access_control
+    ✓ pass test results recorded: 1 check, 1 pass
+    ✓ pass criteria covered: 1 criterion named by verification checks
+    ✓ pass evidence manifest verified: 1 artifact matches
+    ✓ pass content clean
+  07-evaluation  pending  SKIP
+    - skip phase pending: not started
+  08-attack  pending  SKIP
+    - skip phase pending: not started
+  09-remediation  pending  SKIP
+    - skip phase pending: not started
+  10-user-documentation  pending  SKIP
+    - skip phase pending: not started
+  11-faq-index  pending  SKIP
+    - skip phase pending: not started
+  12-observability  pending  SKIP
+    - skip phase pending: not started
+  13-review  complete  FAIL
+    ✓ pass handoff identity
+    ✓ pass required files present: functional.md, architecture.md, security.md, accessibility.md, policy-conformance.md, infrastructure.md, operations.md, consolidated.md, handoff.yml
+    ✓ pass structured files parse: handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 10431c1d826480dbf55ab95b97e4aef37f54a4eb
+    ✓ pass commit lineage: reaches HEAD 4c6bf2ad558f; recorded with this commit_sha
+    ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+    ✗ fail predecessor complete: 08-attack is pending
+    ✓ pass evidence current: no code changes since 10431c1d8264; specification unchanged since 4c6bf2ad558f
+    ✓ pass remediation within cap: 0 remediation rounds (limit 2)
+    ✓ pass outside-change findings: no finding marked outside_change
+    ✓ pass fresh session recorded: soft-foundry phase run (harness)
+    ✓ pass findings explained: no findings above minor
+    ✓ pass content clean
+  14-judgment  complete  PASS
+    ✓ pass handoff identity
+    ✓ pass required files present: final.md, residual-risk.md, evidence.yml, handoff.yml
+    ✓ pass structured files parse: evidence.yml, handoff.yml
+    ✓ pass no placeholders
+    ✓ pass no blocking conditions
+    ✓ pass commit_sha recorded: 10431c1d826480dbf55ab95b97e4aef37f54a4eb
+    ✓ pass commit lineage: descends from 13-review at 10431c1d8264; reaches HEAD 4c6bf2ad558f; recorded with this commit_sha
+    ✓ pass completed_at recorded: 2026-01-01T00:00:00Z
+    ✓ pass predecessor complete: 13-review
+    ✓ pass evidence current: no code changes since 10431c1d8264; specification unchanged since 4c6bf2ad558f
+    ✓ pass remediation within cap: 0 remediation rounds (limit 2)
+    ✓ pass blocked basis: judgment is APPROVED
+    ✓ pass criteria covered: 1 criterion: 1 covered
+    ✓ pass verdict recorded: APPROVED
+    ✓ pass fresh session recorded: soft-foundry phase run (harness)
+    ✓ pass content clean
+  15-learning  pending  SKIP
+    - skip phase pending: not started
+  advisory: 1 issue to address before g1 goes live (informational, does not block the gate)
+    ! warn verification: no check in 06-verification/tests.yml records a red_commit, so the failing-test-first evidence .ai/rules/testing.md asks for is not demonstrable for this feature
+  [exit 2]
+assert pass: gate all exits 2 on the gated record
+assert pass: the failures are predecessor complete, naming a pending phase
+$ soft-foundry change close g1
+  g1: has not reached the end of its lifecycle yet (a required phase is still pending and not skipped-with-rationale), so there is nothing to confirm as merged; pass --force to close anyway
+  [exit 1]
+assert pass: change close refuses the gated record
+
+summary: EVAL-001: 14 assertions, 0 failed

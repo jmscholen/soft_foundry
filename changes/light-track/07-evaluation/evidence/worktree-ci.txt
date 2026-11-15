@@ -1,0 +1,201 @@
+✓ pass control plane: 16 phases, 17 skills, no errors
+✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
+✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
+✓ pass eval blocked-judgment-without-basis: judge blocked basis fail, as expected
+✓ pass eval commit-sha-older-than-predecessor: discover commit lineage fail, as expected
+✓ pass eval control-well-formed: verify pass, as expected
+✓ pass eval criteria-uncovered-at-judgment: judge criteria covered fail, as expected
+✓ pass eval criteria-untiered-at-specify: specify criteria tiered fail, as expected
+✓ pass eval evidence-manifest-digest-mismatch: verify evidence manifest verified fail, as expected
+✓ pass eval evidence-manifest-path-escapes-phase: verify evidence manifest verified fail, as expected
+✓ pass eval evidence-stale-after-code-change: verify evidence current fail, as expected
+✓ pass eval full-suite-record-names-wrong-tree: verify full-suite run recorded (record check, not a test result) fail, as expected
+✓ pass eval hardening-while-exploring: implement not exploring fail, as expected
+✓ pass eval invisible-text-in-evidence: verify content clean fail, as expected
+✓ pass eval judgment-waived: intake waivers permitted fail, as expected
+✓ pass eval must-criteria-over-risk-cap: specify criteria tiered fail, as expected
+✓ pass eval must-criteria-unapproved: specify must criteria approved fail, as expected
+✓ pass eval outside-change-finding-without-follow-up: review outside-change findings fail, as expected
+✓ pass eval placeholder-left-in-evidence: verify no placeholders fail, as expected
+✓ pass eval predecessor-complete-but-unrecorded: discover predecessor complete fail, as expected
+✓ pass eval red-commit-is-the-green-commit: verify red evidence fail, as expected
+✓ pass eval released-record-is-not-regated: specify pass, as expected
+✓ pass eval remediation-over-cap-without-decision: review remediation within cap fail, as expected
+✓ pass eval review-finding-without-failure: review findings explained fail, as expected
+✓ pass eval review-without-fresh-session-in-block-mode: review fresh session recorded fail, as expected
+✓ pass eval rules-version-dropped-after-intake: intake rules kept fail, as expected
+✓ pass eval scope-narrowed-after-evidence-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-change-claimed-by-other-record-stays-current: verify evidence current pass, as expected
+✓ pass eval scoped-change-in-scope-stales-record: verify evidence current fail, as expected
+✓ pass eval scoped-unclaimed-code-change-stales-record: verify evidence current fail, as expected
+✓ pass eval secret-shape-in-evidence: verify content clean fail, as expected
+✓ pass eval shared-core-change-stales-scoped-record: verify evidence current fail, as expected
+✓ pass eval specification-does-not-parse: specify structured files parse fail, as expected
+✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
+✓ pass eval test-result-fail-unacknowledged: verify test results recorded fail, as expected
+✓ pass eval verdict-unfilled: judge verdict recorded fail, as expected
+✓ pass eval: 35 passed, 0 failed, 0 errors, 1 skipped
+
+change accessibility-advisory (closed, skipped)
+
+change budget-and-openrouter (closed, skipped)
+
+change budget-billing-awareness (closed, skipped)
+
+change change-close-command (closed, skipped)
+
+change control-plane-scan (closed, skipped)
+
+change cross-cli-hooks (closed, skipped)
+
+change cross-provider-review (closed, skipped)
+
+change factory-readiness (closed, skipped)
+
+change gate-hardening (released, not re-gated)
+  released: gate-hardening: 2 open item(s): ATK-014, FOLLOWUP-1
+advisory: gate-hardening is released with 2 open item(s) to discharge before it is closed (informational, does not block the gate)
+  ! warn owed ATK-014: accepted as residual risk by the maintainer: the Record <slug> <phase> seal subject can be forged by a committer; the pre-change gate allowed the same hand commit; discharge when a tool-written seal trailer lands
+  ! warn owed FOLLOWUP-1: follow-up change: ATK-016 malformed enforcement.yml crash, ATK-017 already-sealed after a hand commit, seal trailer, VER-002 lint test, VER-003 suite temp-dir isolation, docs/user coverage of phase seal
+
+change guard-docs-and-hooks (released, not re-gated)
+  released: guard-docs-and-hooks: 4 open item(s): GDH-4, GDH-1, GDH-2, GDH-3
+advisory: guard-docs-and-hooks is released with 4 open item(s) to discharge before it is closed (informational, does not block the gate)
+  ! warn owed GDH-4: Merge change/guard-docs-and-hooks to main through PR and confirm ci is green on main after the merge
+  ! warn owed GDH-1: REQ-GDH-003 read by the maintainer at merge: the six lines b9f4d7c added to .ai/harness-evals/README.md say an unattended Claude Code live eval needs shell arguments to write the phase directory, and give the invocation (eval --live --shell claude --case <case> -- --allowedTools "Read Write Edit Glob Grep Bash" --permission-mode acceptEdits). No skill in the lifecycle may read the file.
+  ! warn owed GDH-2: The off-mode override text corrected, or made true by code first (REV-GDH-001). In README.md "Mode" and "The post-call restore" and in docs/user/guard-hook.md "Change the mode on your machine": say the file override cannot hold off while the hook is installed, because the first shell command's post-call check removes it and reports a tamper; give SOFT_FOUNDRY_GUARD=off, with no override file present and no uncommitted edit of .ai/policies/enforcement.yml, as the way, noting both are removed or reverted under it; keep mode: "warn" in the file as working; say the post-call restore runs on every branch and the pre-call guard disengages at status judged (REV-GDH-002); hedge the Grok post-call sentence (REV-GDH-004). Alternatively, land the code fix first (record the baseline in off mode, or skip the post-call check in off mode, in cli.rb guard and guard_after) and describe that behaviour. FAQ-GDH-002 in 10-user-documentation/ repeats the instruction; the index phase runs after this. A documentation-phase reopen or a later record may do the text; remediation cannot (its write set is code and denies docs/).
+  ! warn owed GDH-3: Maintainer edit of the header of .ai/policies/enforcement.yml (protected policy, REQ-GDH-002): say off must be quoted in a file because a bare off is YAML's boolean false and the file is then ignored (EVAL-F-001, REV-GDH-005); replace "outside a change branch nothing is guarded" with where the post-call restore runs (every branch) and when the pre-call guard disengages (status judged) (REV-GDH-002); and describe the off-mode behaviour as it stands once GDH-2 is settled.
+
+change init-command (closed, skipped)
+
+change learning-instincts (closed, skipped)
+
+change lifecycle-tracks (closed, skipped)
+
+change light-track
+00-intake  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass waivers permitted: default waivers at risk low: discover, threat_model, plan, attack, learn (name a phase under run_phases to run it)
+  ✓ pass rules kept: rules 2
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: c0315624171b8d8f378e2c5882263a51775e9997
+  ✓ pass commit lineage: reaches HEAD 119e431770bb; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-11-15T04:50:20Z
+  ✓ pass predecessor complete: first phase
+  ✓ pass content clean
+02-specification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+  ✓ pass structured files parse: requirements.yml, acceptance-criteria.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: cd9f726bc27ea1615e605f43cf6eb13235f96684
+  ✓ pass commit lineage: descends from 00-intake at c0315624171b; reaches HEAD 119e431770bb; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-11-15T04:52:51Z
+  ✓ pass predecessor complete: 00-intake
+  ✓ pass specification locked: locked at 04ef4b2812b3, the commit that recorded it
+  ✓ pass criteria tiered: 3 must, 6 should (cap 3 at risk low)
+  ✓ pass must criteria approved: 3 must criteria approved by Jeff Scholen
+  ✓ pass content clean
+05-implementation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: c6bf4eb22062953fbefa2c1b629e5537a98e8a71
+  ✓ pass commit lineage: descends from 02-specification at cd9f726bc27e; reaches HEAD 119e431770bb; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-11-15T05:29:56Z
+  ✓ pass predecessor complete: 02-specification
+  ✓ pass content clean
+06-verification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 4988779139bf6c8d60fdb9b985a55254b0659d1a
+  ✓ pass commit lineage: descends from 05-implementation at c6bf4eb22062; reaches HEAD 119e431770bb; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-11-15T05:50:00Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since 4988779139bf; specification unchanged since 04ef4b2812b3
+  ✓ pass red evidence: CHECK-002: a53ec004f3a9 -> 4988779139bf (test/light_track_test.rb)
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 68e021fc2b4b, outcome passed (a record, not a test result)
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass test results recorded: 11 checks, 9 pass; acknowledged: CHECK-009 (fail), CHECK-011 (fail)
+  ✓ pass criteria covered: 9 criteria named by verification checks
+  ✓ pass evidence manifest verified: 12 artifacts match
+  ✓ pass content clean
+07-evaluation  in_progress  PASS
+  ✓ pass handoff identity
+  ! warn phase in progress: not yet gated
+advisory: 1 issue to address before light-track goes live (informational, does not block the gate)
+  ! warn accessibility: the accessibility review (13-review/accessibility.md) has not run yet
+
+change maturity-onboarding (closed, skipped)
+
+change maturity-report (closed, skipped)
+
+change observability-standard-dashboard (closed, skipped)
+
+change panel-phases (closed, skipped)
+
+change phase-lifecycle-controls (closed, skipped)
+
+change phase-runner (closed, skipped)
+
+change policy-conformance (closed, skipped)
+
+change process-speed (closed, skipped)
+
+change purpose-and-scope (closed, skipped)
+
+change red-green-evidence (closed, skipped)
+
+change release-0-23-0 (released, not re-gated)
+  released: release-0-23-0: 4 open item(s): REL-005, REL-002, REL-003, REL-004
+advisory: release-0-23-0 is released with 4 open item(s) to discharge before it is closed (informational, does not block the gate)
+  ! warn owed REL-005: Confirm ci is green on main after the merge and after the tag
+  ! warn owed REL-002: Merge change/release-0-23-0 to main through a pull request. Push the commit that seals 14-judgment. A clean checkout of 72cc1e9 alone fails ci because 14-judgment/handoff.yml is absent. GitHub Actions has not run on this branch.
+  ! warn owed REL-003: Tag v0.23.0 on the merged commit so the release workflow publishes a GitHub release whose asset is soft_foundry-0.23.0.gem. Latest release on 2026-11-04 is v0.17.0. The rehearsal stopped before gh release create and ran on macOS.
+  ! warn owed REL-004: Run soft-foundry update --yes outside any bundle exec session. The installed gem must be 0.23.0 and must contain lib/soft_foundry/phase_seal.rb. The rehearsal stubbed GitHub. Inside bundle exec, version can print the worktree's 0.23.0 while the installed gem is still 0.22.0.
+
+change runtime-guard (closed, skipped)
+
+change scoped-verification (closed, skipped)
+
+change security-policy-not-applicable (closed, skipped)
+
+change self-update (closed, skipped)
+
+change session-id-quoting (closed, skipped)
+
+change session-ledger (closed, skipped)
+
+change small-process-fixes (closed, skipped)
+
+change ui-explainer-timeline (closed, skipped)
+
+change ui-links (closed, skipped)
+
+change ui-processes (closed, skipped)
+
+change ui-repositories (closed, skipped)
+
+change ui-server (closed, skipped)
+
+change ui-snapshot (closed, skipped)
+
+change update-from-github (closed, skipped)
+
+change update-release-asset-name (closed, skipped)
+
+change upstream-failure-reporting (closed, skipped)
+
+✓ ci passed
+[exit 0]

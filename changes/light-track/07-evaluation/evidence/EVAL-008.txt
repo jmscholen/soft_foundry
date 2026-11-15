@@ -1,0 +1,80 @@
+# EVAL-008 at 119e431770bbdddc4048eb625672ee358405fe77
+$ soft-foundry change new c1 --track light
+  (5 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal intake
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal specify
+  (3 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal implement
+  (2 lines, not shown)
+  [exit 0]
+
+## change status, colour off, not a terminal
+$ soft-foundry change status c1
+  c1: c1  [status: in_progress, phase: verify, risk: medium]
+    track: light
+    00-intake              complete     ok
+    01-discovery           pending      optional on the light track
+    02-specification       complete     ok
+    03-threat-model        pending      optional on the light track
+    04-plan                pending      optional on the light track
+    05-implementation      complete     ok
+    06-verification        pending
+    07-evaluation          pending      optional on the light track
+    08-attack              pending      optional on the light track
+    09-remediation         pending      optional
+    10-user-documentation  pending      optional
+    11-faq-index           pending      optional
+    12-observability       pending      optional
+    13-review              pending
+    14-judgment            pending
+    15-learning            pending      optional on the light track
+  [exit 0]
+assert pass: no escape sequence is emitted
+
+## the same output with every non-ASCII character removed
+  c1: c1  [status: in_progress, phase: verify, risk: medium]
+    track: light
+    00-intake              complete     ok
+    01-discovery           pending      optional on the light track
+    02-specification       complete     ok
+    03-threat-model        pending      optional on the light track
+    04-plan                pending      optional on the light track
+    05-implementation      complete     ok
+    06-verification        pending
+    07-evaluation          pending      optional on the light track
+    08-attack              pending      optional on the light track
+    09-remediation         pending      optional
+    10-user-documentation  pending      optional
+    11-faq-index           pending      optional
+    12-observability       pending      optional
+    13-review              pending
+    14-judgment            pending
+    15-learning            pending      optional on the light track
+assert pass: the track is shown
+assert pass: 01-discovery is labelled in words as optional on the light track
+assert pass: 03-threat-model is labelled in words as optional on the light track
+assert pass: 04-plan is labelled in words as optional on the light track
+assert pass: 07-evaluation is labelled in words as optional on the light track
+assert pass: 08-attack is labelled in words as optional on the light track
+assert pass: 15-learning is labelled in words as optional on the light track
+assert pass: phases optional on every track are labelled optional, without the track
+assert pass: required pending phases carry no optional label
+assert pass: one phase per line, each starting with its directory name
+
+## machine-readable form
+$ soft-foundry change status c1 --json
+  (641 lines, not shown)
+  [exit 0]
+  track in --json: {"name"=>"light", "defined"=>true, "exploring_stage"=>false, "exploring"=>false, "iterations"=>0, "last_deployed"=>nil, "vetted"=>nil, "forced_by_risk"=>nil}
+assert pass: --json carries the track by name
+
+## change list
+$ soft-foundry change list
+  c1
+  [exit 0]
+
+summary: EVAL-008: 12 assertions, 0 failed

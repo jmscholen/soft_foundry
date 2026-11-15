@@ -1,5 +1,41 @@
-commit_sha: TBD
+commit_sha: 119e431770bbdddc4048eb625672ee358405fe77
 artifacts:
-  - path: TBD
+  - path: evidence/EVAL-001.txt
     journey: EVAL-001
-    sha256: TBD
+    sha256: e7962a82a4432c9abe5491b42b543467cb8c9e7ccf2685fcee7f0eef4ea6c0eb
+  - path: evidence/EVAL-002.txt
+    journey: EVAL-002
+    sha256: 199f2f6bc19d15cd73ff928484248eea34882979f44f148137d0920a47d6c8c6
+  - path: evidence/EVAL-003.txt
+    journey: EVAL-003
+    sha256: 0f0d021d6dffedfa4f69e0419fe7a7ac479deabe9392eabb59a47805bc0ee423
+  - path: evidence/EVAL-004.txt
+    journey: EVAL-004
+    sha256: 7e425586e698fb0633ef7df7a5fdf3828c11116064d9d8778b11d6e3bc9b1dde
+  - path: evidence/EVAL-005.txt
+    journey: EVAL-005
+    sha256: d916fb47678221c501c000dbe2803222fc47c11e52d77d0651f3ac6d3ecbc163
+  - path: evidence/EVAL-006.txt
+    journey: EVAL-006
+    sha256: 26bac734f3682936204adea0e84f863b0b51aa9beecf320a055abf15a23247f2
+  - path: evidence/EVAL-007.txt
+    journey: EVAL-007
+    sha256: 259342e78db5e4267048e8272b35a52e987e5cb3d1723bc7da9e2a8e2d971322
+  - path: evidence/EVAL-008.txt
+    journey: EVAL-008
+    sha256: 0d358deb764ddcf3a539efc65e989c684fa490c078482563d5f8a5b4df7e33c6
+  - path: evidence/EVAL-009.txt
+    journey: EVAL-009
+    sha256: eb13d1a14a36e410b4241450e0ef5902489536f544de0f5cec9399d1b3649009
+  - path: evidence/EVAL-010.txt
+    journey: EVAL-010
+    sha256: c705d4f82c1a63055bf162004123485651f5598ebaecd2c72509fb012a281e31
+  - path: evidence/worktree-ci.txt
+    journey: EVAL-009
+    sha256: de43d4d265ddcb8b5b42aa86b7833f79fdf33456a2788f6aeeee9ce94274a034
+  - path: evidence/lib.rb
+    journey: all
+    sha256: c99e50b7af4c0a3352fb3008116359fd32b231b9d93d8bd0aac62ada42794818
+  - path: evidence/journeys.rb
+    journey: all
+    sha256: 65fbca833bb147a09416860b96d60717291d0b97df0c97b98ae464eacfe1b537

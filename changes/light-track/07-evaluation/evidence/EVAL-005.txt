@@ -1,0 +1,65 @@
+# EVAL-005 at 119e431770bbdddc4048eb625672ee358405fe77
+$ soft-foundry change new c1 --track light
+  (5 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal intake
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal specify
+  (3 lines, not shown)
+  [exit 0]
+
+## The change modifies README.md, docs/, its own record and a control-plane skill's prose
+  changed: .ai/skills/review/SKILL.md
+  changed: README.md
+  changed: changes/c1/05-implementation/log.md
+  changed: docs/guide.md
+  git status --short --ignored: "!! .soft-foundry/"
+$ soft-foundry change size --phase verify
+  phase: verify
+  size: full_at_verify
+  scope: whole repository
+  reason: no scope declared: whole-repository scope is sized at the largest size
+  [exit 0]
+assert FAIL: the smaller verify size is reported with a documentation-only reason
+
+## Control: the same repository with the tool's ignored machine-local directory (.soft-foundry/, written by phase seal) removed
+$ soft-foundry change size --phase verify
+  phase: verify
+  size: targeted_plus_full_before_merge
+  scope: whole repository
+  base: f3d679f22d2f9dd6ee084bd86eb5c041888c195b
+  reason: documentation-only diff: every changed path is documentation or Markdown prose in the control plane; run `soft-foundry check` and `soft-foundry eval` as well
+  [exit 0]
+assert pass: control: the smaller verify size is reported with a documentation-only reason
+assert pass: control: the reason still asks for the control plane check and the harness evals
+
+## Control: adding a path under lib/
+$ soft-foundry change size --phase verify
+  phase: verify
+  size: full_at_verify
+  scope: whole repository
+  reason: no scope declared: whole-repository scope is sized at the largest size
+  [exit 0]
+assert pass: the largest verify size is reported again
+
+## The same text-only change with --since, in a repository where any command has taken the record lock
+$ soft-foundry change new c1 --track light
+  (5 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal intake
+  (2 lines, not shown)
+  [exit 0]
+$ soft-foundry phase seal specify
+  (3 lines, not shown)
+  [exit 0]
+$ soft-foundry change size --phase verify --since f5893d26672188546f2be72856821709f44e19cb
+  phase: verify
+  size: full_at_verify
+  scope: whole repository
+  base: f5893d26672188546f2be72856821709f44e19cb
+  reason: no scope declared: whole-repository scope is sized at the largest size
+  [exit 0]
+assert FAIL: with --since: the smaller verify size is reported
+
+summary: EVAL-005: 5 assertions, 2 failed
