@@ -88,10 +88,10 @@ module SoftFoundry
 
     # --- remediation rounds ---------------------------------------------
 
-    # Sealed remediation rounds: the larger of the `Record <slug> remediate`
+    # Remediation rounds: the larger of the `Record <slug> remediate`
     # commits reachable from the record's branch (or HEAD) and the reopen
-    # entries that reset a complete remediation. Git history and the
-    # record must both be rewritten to lower it (THREAT-002).
+    # entries that reset a complete, sealed remediation. A remediation
+    # reopened before it was sealed is not a round (process-speed REV-005).
     def remediation_rounds = [sealed_round_commits, reopened_rounds].max
 
     def sealed_round_commits
@@ -105,7 +105,10 @@ module SoftFoundry
         next false unless entry.is_a?(Hash) && Array(entry["reset"]).map(&:to_s).include?(REMEDIATE)
         previous = entry["previous"].is_a?(Hash) ? entry["previous"][REMEDIATE] : nil
         status = previous.is_a?(Hash) ? previous["status"] : previous
-        status.to_s == "complete"
+        # `sealed` is written by PhaseReopen; an entry without it predates
+        # the key and counts as before.
+        sealed = previous.is_a?(Hash) && previous.key?("sealed") ? previous["sealed"] == true : true
+        status.to_s == "complete" && sealed
       end
     end
 
@@ -140,7 +143,7 @@ module SoftFoundry
       head = if rejected
                "#{@record.slug} was rejected at the remediation cap (#{rounds} rounds); judge it REJECTED instead of remediating again"
              else
-               "#{@record.slug} has sealed #{rounds} remediation #{rounds == 1 ? 'round' : 'rounds'}, the limit in .ai/workflow.yml (remediation.max_rounds: #{max_rounds}); another round needs a person's decision"
+               "#{@record.slug} has run #{rounds} remediation #{rounds == 1 ? 'round' : 'rounds'}, the limit in .ai/workflow.yml (remediation.max_rounds: #{max_rounds}); another round needs a person's decision"
              end
       "#{head}. The change is parked: status is awaiting_human. A person records under human_decisions in metadata.yml: " \
         "boundary: #{CAP_BOUNDARY}, rounds: #{rounds}, decision: accept_residual (judge with the open findings as residual risk), " \
@@ -195,6 +198,37 @@ module SoftFoundry
       return true if path.start_with?("changes/#{slug}/")
       return true if !path.include?("/") && path.downcase.end_with?(".md")
       ControlPlane.match_any?(path, Array(plane.path_groups["DOCS"]))
+    end
+
+    # Text for sizing verification: documentation, plus Markdown prose in
+    # the control plane (skill instructions, READMEs, schemas). Settings
+    # (.yml) and harness evals are never text; `check` and the harness
+    # evals still run on a text-only diff. The documentation-only
+    # remediation seal keeps the stricter documentation_path?.
+    def self.text_only_path?(plane, path, slug)
+      return true if documentation_path?(plane, path, slug)
+      path = path.to_s.delete_prefix("./")
+      return false unless path.start_with?(".ai/") && path.downcase.end_with?(".md")
+      !ControlPlane.match_any?(path, Array(plane.path_groups["HARNESS_EVALS"])) && !path.start_with?(".ai/harness-evals/")
+    end
+
+    # A repository-relative path with ./, repeated slashes and . or ..
+    # segments resolved, or nil when the path is empty, absolute, leaves
+    # the repository, or contains a glob character.
+    def self.normalize_path(path)
+      text = path.to_s.strip
+      return nil if text.empty? || text.start_with?("/", "~") || text.match?(/[*?\[\]{}]/) || text.match?(/\A[A-Za-z]:[\\\/]/)
+      parts = []
+      text.split("/").each do |segment|
+        next if segment.empty? || segment == "."
+        if segment == ".."
+          return nil if parts.empty?
+          parts.pop
+        else
+          parts << segment
+        end
+      end
+      parts.empty? ? nil : parts.join("/")
     end
 
     private

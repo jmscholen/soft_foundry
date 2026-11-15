@@ -14,7 +14,7 @@ Every finding states the failure it prevents: the concrete input or state, and t
 
 On a record under the convergence rules, severity blocking is for an unmet must criterion or a failure in what this change modified. A finding about code the change did not modify is marked `outside_change: true` with the `paths` it concerns and a `follow_up`; it never blocks this change. Do not treat a statement the specification never asked for as blocking.
 
-Grade findings against the attack threat model in `.ai/skills/adversarial-testing/SKILL.md`: the attacker is an outside party who reaches the change through what it exposes. A finding that needs write access to the repository (editing the change record, the control plane or git history) is never graded blocking or major. Record it as a follow-up.
+Grade findings against the attack threat model in `.ai/skills/adversarial-testing/SKILL.md`: the attacker is an outside party who reaches the change through what it exposes. A weakness that would need write access to the repository to use (someone could edit the change record, the control plane or git history) is never graded blocking or major. Record it as a follow-up. That rule is about what could be done. An alteration you actually observe in the record under review (evidence that does not match its manifest, a handoff changed after its seal, a result rewritten) is a finding about this change and is graded on its merits.
 
 Prefer to review on a different provider from the one that implemented or remediated the change (`prefer_different_provider_from` in `skill.yml`). `soft-foundry phase run review` chooses one when `--shell` is not given.
 

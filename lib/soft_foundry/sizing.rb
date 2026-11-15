@@ -98,11 +98,19 @@ module SoftFoundry
     # path is not documentation; the rules below then decide.
     def documentation_only(phase, small, since)
       return nil unless ProcessRules.new(@record).applies?
-      base = since || @scope.change_base
+      # With no plan commit (planning stepped over or track-optional), the
+      # diff is measured from the first recorded phase.
+      base = since || @scope.change_base || @record.recorded_commit(@plane.phases.first, git: @git)
       return nil unless base
       paths = @git.diff_paths(base)
-      return nil if paths.empty? || !paths.all? { |p| ProcessRules.documentation_path?(@plane, p, @record.slug) }
-      Result.new(phase:, size: small, applied: Scope::WHOLE_REPOSITORY, base: base, reasons: ["documentation-only diff: every changed path is documentation (DOCS, top-level Markdown, or this record)"])
+      return nil if paths.empty?
+      if paths.all? { |p| ProcessRules.documentation_path?(@plane, p, @record.slug) }
+        return Result.new(phase:, size: small, applied: Scope::WHOLE_REPOSITORY, base: base, reasons: ["documentation-only diff: every changed path is documentation (DOCS, top-level Markdown, or this record)"])
+      end
+      # Verification only: Markdown prose in the control plane is text too.
+      # Attack and evaluation keep the stricter rule.
+      return nil unless phase == "verify" && paths.all? { |p| ProcessRules.text_only_path?(@plane, p, @record.slug) }
+      Result.new(phase:, size: small, applied: Scope::WHOLE_REPOSITORY, base: base, reasons: ["documentation-only diff: every changed path is documentation or Markdown prose in the control plane; run `soft-foundry check` and `soft-foundry eval` as well"])
     rescue GitError
       nil
     end

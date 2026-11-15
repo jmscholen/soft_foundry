@@ -283,6 +283,16 @@ module SoftFoundry
         ProcessRules.new(self).default_waivers.include?(phase.id)
     end
 
+    # Why a pending phase may stay pending for this change, in words, or
+    # nil when it may not (REQ-012: a person can see why a phase did not run).
+    def skip_reason(phase)
+      return "waived: named in skipped_phases" if skipped_with_rationale.include?(phase.id)
+      return "optional on the #{track} track" if Array(track_definition&.optional).include?(phase.id)
+      return "stepped over by default at #{metadata["risk"]} risk" if ProcessRules.new(self).default_waivers.include?(phase.id)
+      return "optional" if phase.optional
+      nil
+    end
+
     # The commit_sha of the most-recently-completed phase, or nil if none
     # has run.
     def last_commit_sha

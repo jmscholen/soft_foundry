@@ -643,7 +643,11 @@ module SoftFoundry
         @out.puts "  released: #{slug}: #{open.size} open item(s)#{open.empty? ? '' : ": #{open.map { |i| i['id'] }.join(', ')}"}"
       end
       results = Gate.new(record, git: git).evaluate_all
-      results.each { |r| @out.puts format("  %-22s %-12s %s", r.phase.output, r.status, summarize(r)) }
+      results.each do |r|
+        note = summarize(r)
+        note = record.skip_reason(r.phase).to_s if note.empty? && r.status.to_s == "pending"
+        @out.puts format("  %-22s %-12s %s", r.phase.output, r.status, note).rstrip
+      end
       print_advisories(record)
       results.any?(&:failed?) ? 2 : 0
     end
@@ -1823,7 +1827,7 @@ module SoftFoundry
               --maturity scan|deep|off (default scan)  --reassess
           soft-foundry doctor                     validate repository bootstrap
           soft-foundry check                      lint the .ai/ control plane
-          soft-foundry change new <slug> [--track gated|iterative]
+          soft-foundry change new <slug> [--track gated|iterative|light]
                                                   create changes/<slug>/ from phase templates; the track
                                                   defaults to .ai/workflow.yml tracks.default
           soft-foundry change status [slug] [--json]

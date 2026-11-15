@@ -48,7 +48,7 @@ class LifecycleTracksTest < Minitest::Test
 
   def test_repository_declares_both_tracks_with_gated_as_default
     plane = SoftFoundry::ControlPlane.new(REPO_ROOT)
-    assert_equal %w[gated iterative], plane.track_names
+    assert_equal %w[gated iterative light], plane.track_names
     assert_equal "gated", plane.default_track
     refute plane.track("gated").exploring?
     iterative = plane.track("iterative")

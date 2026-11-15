@@ -25,7 +25,7 @@ Canonical source templates under `.ai/skills/*/template/` and `.ai/templates/` a
 
 | Path | Purpose |
 | --- | --- |
-| `workflow.yml` | Lifecycle phases, non-linear `transitions`, global rules, permitted judgments, `isolated_phases` (phases that may run side by side), `waivable_by_risk` (which phases a change of each declared risk may name in `skipped_phases`; review and judgment never), and the lifecycle `tracks` (`gated`: every phase in order; `iterative`: an exploring stage with a person first, then `change vet`, then the same hardening phases). |
+| `workflow.yml` | Lifecycle phases, non-linear `transitions`, global rules, permitted judgments, `isolated_phases` (phases that may run side by side), `waivable_by_risk` (which phases a change of each declared risk may name in `skipped_phases`; review and judgment never), and the lifecycle `tracks` (`gated`: every phase in order; `light`: intake, specify, implement, verify, review and judge, with every lock kept; `iterative`: an exploring stage with a person first, then `change vet`, then the same hardening phases). |
 | `paths.yml` | Named path groups (`APP`, `TESTS`, `INFRA`, `DOCS`, `CONTROL_PLANE`, `HARNESS_EVALS`) that skill permissions reference as `${GROUP}`. `repository.yml` may override a group with the repository's real layout. |
 | `skills/<name>/` | One declarative skill per phase: contract files plus `template/` holding every file its completion gate requires. `skills/exploration/` is a stage skill, not a phase: it is loaded while a change on the iterative track is `exploring`, and `check` verifies it can write no commit-bound evidence. |
 | `templates/` | Shared templates: the phase `handoff.yml` and the change `metadata.yml`. |

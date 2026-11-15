@@ -117,6 +117,8 @@ class LightTrackTest < Minitest::Test
         SoftFoundry::PhaseReopen.new(dir, plane: p, git: git(dir), record: record).call(p.phase("remediate"), reason: "more findings", source: "manual", env: {})
       end
       assert_includes error.message, "remediation cap"
+      # The gate fails once a round beyond the limit exists with no decision.
+      sealed_rounds!(dir, record, 1)
       assert_equal :fail, check(gate(dir, record, "review"), "remediation within cap").outcome
     end
   end
