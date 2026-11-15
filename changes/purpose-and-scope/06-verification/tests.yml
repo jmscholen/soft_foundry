@@ -1,0 +1,42 @@
+commit_sha: 4b693c70bf13d79ba2e35d4bab6d8483421ba582   # HEAD, "Record purpose-and-scope implement"; outside changes/ it is identical to the implementation commit d944d07
+size: full_at_verify   # computed by `soft-foundry change size --phase verify`: no scope declared, whole-repository scope is sized at the largest size
+full_suite:
+  tree: abc470e31ae1e67b54f4e57ca7adb2e57e4642ae   # git rev-parse 4b693c7^{tree}
+  command: bundle exec rake test (in a clean clone of the commit; ANTHROPIC_API_KEY, OPENAI_API_KEY, XAI_API_KEY, GEMINI_API_KEY, MAILTRAP_API_KEY, PERSONAL_SENDGRID_API_KEY, SOFT_FOUNDRY_PHASE unset)
+  outcome: passed   # 935 runs, 6880 assertions, 0 failures, 0 errors, 0 skips (evidence/rake-test.txt)
+# No check carries red_commit: the change is text only (type docs), no test was
+# written for it and no file under lib/, exe/ or test/ changed.
+checks:
+  - id: CHECK-001
+    kind: custom
+    command: ruby changes/purpose-and-scope/06-verification/evidence/content_checks.rb 4b693c70bf13d79ba2e35d4bab6d8483421ba582 49b2ae54676d6619ae07f93be10eb89695968fb4
+    result: pass   # 45 assertions, 0 failed. Reads each file with `git show <commit>:<path>`, not from the working tree.
+    evidence: evidence/content-checks.txt
+    criteria: [AC-001, AC-002, AC-003, AC-004, AC-005, AC-006]
+    # AC-001: in README.md and .ai/README.md, "## Purpose" is the first section after the title and holds the three statements
+    # AC-002: outside-party attacker, six exposure kinds, nine numbered classes in REQ-002's order, out-of-scope sentence, follow-up not attack result
+    # AC-003: graded against the attack threat model; never blocking or major; recorded as a follow-up
+    # AC-004: README.md Purpose names the three points and "lock and detect"
+    # AC-005: heading order and hidden/control characters in the four files; added lines are ASCII, name no colour, carry no vague link text
+    # AC-006 (diff part): 75 paths differ from the intake commit 49b2ae5, none under lib/, exe/ or test/
+  - id: CHECK-002
+    kind: static_analysis
+    command: ruby -Ilib exe/soft-foundry check
+    result: pass   # control plane: 16 phases, 17 skills, no errors (includes the content scan of .ai/ and the pointer files)
+    evidence: evidence/check.txt
+    criteria: [AC-005, AC-006]
+  - id: CHECK-003
+    kind: custom
+    command: ruby -Ilib exe/soft-foundry ci
+    result: pass   # harness eval 35 passed, 0 failed, 0 errors, 1 skipped; every record passes; exit 0
+    evidence: evidence/ci.txt
+    criteria: [AC-006]
+    # A first run of this command in the clone exited 2 for a reason that is the
+    # clone's, not the change's; it is kept as evidence/ci-clone-default-branch-artifact.txt
+    # and explained in results.md under Failures.
+  - id: CHECK-004
+    kind: tests
+    command: bundle exec rake test   # full suite
+    result: pass   # 935 runs, 6880 assertions, 0 failures, 0 errors, 0 skips; 1288.8 s
+    evidence: evidence/rake-test.txt
+    criteria: [AC-006]

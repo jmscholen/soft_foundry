@@ -1,0 +1,46 @@
+commit_sha: d272a5f538034b51e0e7264a4b2e81aadce1c87e
+artifacts:
+  - path: evidence/reader_journeys.sh
+    journey: EVAL-001
+    produced_by: written by the evaluation session; produces the transcripts of EVAL-001 to EVAL-006 and the diff part of EVAL-007, reading every file with git show at the commit
+    sha256: 06a714a1fca8f624cd3d72302818d03175a328388345cdc3be59077938a4dbb0
+  - path: evidence/eval-001-readme.txt
+    journey: EVAL-001
+    produced_by: sh evidence/reader_journeys.sh d272a5f 49b2ae5 evidence
+    sha256: 762b2fe0f6352c79373ed510a428b8ed248981e83aca8a67c0155ba32e124fcb
+  - path: evidence/eval-002-ai-readme.txt
+    journey: EVAL-002
+    produced_by: sh evidence/reader_journeys.sh d272a5f 49b2ae5 evidence
+    sha256: 767fe38deda56f1ddd3c6b3fdcb2f14137890b5db001475f87df120f0c55ac31
+  - path: evidence/eval-003-attack-skill.txt
+    journey: EVAL-003
+    produced_by: sh evidence/reader_journeys.sh d272a5f 49b2ae5 evidence
+    sha256: 8e021a28314984559a9e5b56d51ce561b01751498fe762080efdc83051cae173
+  - path: evidence/eval-004-review-skill.txt
+    journey: EVAL-004
+    produced_by: sh evidence/reader_journeys.sh d272a5f 49b2ae5 evidence
+    sha256: cb1bd553530db46e82894362d3beefc65af3d45a2313b352cbac19a4ebf632fe
+  - path: evidence/eval-005-consistency.txt
+    journey: EVAL-005
+    produced_by: sh evidence/reader_journeys.sh d272a5f 49b2ae5 evidence
+    sha256: 7df45bc2fb6adc4a903d4ac98b641042993cab2ac4c2a720df8343ddc238bc1e
+  - path: evidence/eval-006-accessibility.txt
+    journey: EVAL-006
+    produced_by: sh evidence/reader_journeys.sh d272a5f 49b2ae5 evidence (heading outline and plain-text render by pandoc)
+    sha256: ede99f370610b8473bef823b763b6642f76e172e7d298aa606e1a4af5506ed9b
+  - path: evidence/eval-007-diff.txt
+    journey: EVAL-007
+    produced_by: sh evidence/reader_journeys.sh d272a5f 49b2ae5 evidence
+    sha256: bad2063e90793ae87d0677031ccf2ec17110012cddca8f5ac2e843ea22d98947
+  - path: evidence/tool_smoke.sh
+    journey: EVAL-007
+    produced_by: written by the evaluation session; runs the tool's read-only entry commands in a clean clone
+    sha256: e1368ac1ce13d653819e03d5cd4c86f2602b8e629eae58f127105f0471b4d845
+  - path: evidence/eval-007-tool-smoke.txt
+    journey: EVAL-007
+    produced_by: sh evidence/tool_smoke.sh <clean clone of d272a5f, no origin/HEAD ref, local main 3fd048c> <scratch file>; long output cut to first and last 8 lines
+    sha256: 77a58b4af3ff3c9bdd14cb4796013f2291bd55968f29d315ad98745f05cb4ff5
+  - path: evidence/eval-007-baseline.txt
+    journey: EVAL-007
+    produced_by: help and doctor run in the same clone detached at the intake commit 49b2ae5; results typed into the file by the evaluation session from the command output
+    sha256: 1fdc8c0118c9e46da362df4548718c1899294b7974e3260c667259da73e52add

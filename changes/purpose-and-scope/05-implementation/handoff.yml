@@ -1,0 +1,30 @@
+# Phase handoff. One per phase directory. The gate checker validates this file.
+phase: 05-implementation
+skill: implementation
+status: complete
+commit_sha: d944d075648ee041063f8de19752e2b9c6297a74
+# Written by `soft-foundry phase seal` on a commit-bound phase: whether
+# metadata.git.branch resolved to a ref when the phase was sealed. False
+# means the checked-out HEAD, not a branch created later, is the measure
+# for "evidence current". Never written by the agent.
+# branch_resolved: true
+started_at: "2026-11-15T03:18:02Z"
+completed_at: "2026-11-15T03:18:02Z"
+resolved_model:
+  profile: coding_high
+  provider: anthropic
+  model: claude-fable-5-2
+outputs: [log.md, decisions.md, deviations.md]
+blocking: []               # unresolved blocking conditions; must be empty when complete
+findings:
+  - id: IMPL-001
+    severity: minor
+    summary: README.md still carries the section "Agent - next implementation milestone" naming the init-command change, which is long finished; out of scope here, for a later documentation change.
+next: verify
+notes: ""
+# Written by `soft-foundry phase run`, never by the agent: how this phase was
+# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
+# session_id, cwd).
+# A review or judgment phase completed without it is advised as having been
+# performed by whatever session was already open.
+executed_by: null

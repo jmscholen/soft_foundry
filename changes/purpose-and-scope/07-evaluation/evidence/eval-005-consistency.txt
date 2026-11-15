@@ -1,0 +1,26 @@
+EVAL-005: the four documents agree with each other
+commit: d272a5f538034b51e0e7264a4b2e81aadce1c87e
+
+--- Purpose section: README.md (<) against .ai/README.md (>) ---
+5,6c5,6
+< - **The evidence phases look at the feature from the outside.** Verification and evaluation ask what a legitimate user expects of the feature. Attack asks 
+what a bad actor would try through it, for example SQL injection through a new controller action. A party with write access to the repository editing a change 
+record is outside that threat model.
+< - **A person steps in at three points.** A person approves the specification before work starts, accepts or rejects the result at the end, and decides what 
+happens when a change reaches the remediation cap. Everything in between runs without them.
+---
+> - **The evidence phases look at the feature from the outside.** Verification and evaluation ask what a legitimate user expects of the feature. Attack asks 
+what a bad actor would try through it. A party with write access to the repository editing a change record is outside that threat model 
+(`skills/adversarial-testing/SKILL.md`, `skills/review/SKILL.md`).
+> - **A person steps in at three points.** A person approves the specification before work starts, accepts or rejects the result at the end, and decides what 
+happens when a change reaches the remediation cap.
+(diff exit status: 1; 1 means the wording differs, lines above)
+
+--- paths named in the added text resolve at the commit ---
+pass: .ai/skills/adversarial-testing/SKILL.md exists
+pass: .ai/skills/review/SKILL.md exists
+
+--- the claims the Purpose text makes about the workflow, against .ai/workflow.yml at the commit ---
+165:#   "remediation cap", the round count, and accept_residual, narrow or
+174:remediation:
+175:  max_rounds: 2

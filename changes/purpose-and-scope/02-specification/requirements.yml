@@ -1,0 +1,33 @@
+# Implementation-independent requirements. IDs are stable and referenced by
+# acceptance criteria, tests, evaluation journeys, and attack cases.
+requirements:
+  - id: REQ-001
+    category: functional
+    statement: "README.md and .ai/README.md each state the repository's purpose near the top: Soft Foundry is an autonomous software factory in which an agent builds a feature in an application by passing through gated phases; what each gate checks is locked once a person approves it; verification, evaluation and attack look at the feature from the outside (what a legitimate user expects and what a bad actor would try through it)."
+    rationale: The maintainer restated the purpose on 2026-11-14; neither file says it today.
+    source: 00-intake/request.md
+  - id: REQ-002
+    category: security
+    statement: "The adversarial-testing skill names the attacker as an outside party who reaches the change through what it exposes (requests, parameters, uploads, jobs, webhooks, command arguments), lists the attack classes to try against code the change added or modified (injection, cross-site scripting, broken authorization, identifier substitution, mass assignment, path traversal, server-side request forgery, data exposure, resource exhaustion), and states that a party with write access to the repository editing the change record, the control plane or git history is out of scope and is noted as a follow-up, not recorded as an attack result."
+    rationale: Without a named attacker the attack phase of process-speed spent its time editing the change record (REV-001, REV-002, REV-003).
+    source: 00-intake/request.md
+  - id: REQ-003
+    category: security
+    statement: "The review skill states that findings are graded against the attack threat model, and that a finding which needs write access to the repository is never graded blocking or major and is recorded as a follow-up."
+    rationale: Review graded a record-editing finding blocking in process-speed.
+    source: 00-intake/request.md
+  - id: REQ-004
+    category: functional
+    statement: "The purpose text states where a person steps in (approves the specification before work starts, accepts or rejects the result at the end, decides at the remediation cap) and that the specification lock is lock and detect: the gate fails when locked files change, and no phase searches for ways around the lock."
+    rationale: Maintainer's decisions of 2026-11-14.
+    source: 00-intake/request.md
+  - id: REQ-005
+    category: accessibility
+    statement: "The added text follows .ai/rules/accessibility.md for documents: headings in order, no meaning carried by colour or symbol alone, plain link text, and no hidden or control characters."
+    rationale: surfaces.accessibility is true; the result is documents a person reads.
+    source: 00-intake/assumptions.md
+  - id: REQ-006
+    category: failure
+    statement: "No file under lib/, exe/ or test/ changes, and `soft-foundry check` and `soft-foundry ci` pass after the edits."
+    rationale: The change is text only; skill text that breaks the control plane check would stop every later change.
+    source: 00-intake/request.md

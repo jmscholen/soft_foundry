@@ -1,0 +1,4 @@
+clean clone of commit 4b693c70bf13d79ba2e35d4bab6d8483421ba582, tree abc470e31ae1e67b54f4e57ca7adb2e57e4642ae, branch change/purpose-and-scope, 0 uncommitted paths; unset: ANTHROPIC_API_KEY OPENAI_API_KEY XAI_API_KEY GEMINI_API_KEY MAILTRAP_API_KEY PERSONAL_SENDGRID_API_KEY SOFT_FOUNDRY_PHASE; ruby 3.3.1 (2024-04-23 revision c56cd86388) [arm64-darwin23]
+$ ruby -Ilib exe/soft-foundry check
+✓ pass control plane: 16 phases, 17 skills, no errors
+exit: 0

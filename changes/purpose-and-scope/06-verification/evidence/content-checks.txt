@@ -1,0 +1,52 @@
+$ ruby changes/purpose-and-scope/06-verification/evidence/content_checks.rb 4b693c70bf13d79ba2e35d4bab6d8483421ba582 49b2ae54676d6619ae07f93be10eb89695968fb4
+info AC-001 README.md first headings: ["# Soft Foundry", "## Purpose", "## Agent: next implementation milestone", "## Install from this repository"]
+pass AC-001 README.md: Purpose is the first section after the title
+pass AC-001 README.md: states autonomous software factory
+pass AC-001 README.md: states what each gate checks is locked once a person approves it
+pass AC-001 README.md: states the evidence phases look at the feature from the outside
+pass AC-004 README.md: names the three points where a person steps in
+pass AC-004 README.md: says the specification lock is lock and detect
+info AC-001 .ai/README.md first headings: ["# `.ai/` Control Plane", "## Purpose", "## Skills and modes", "## Layout"]
+pass AC-001 .ai/README.md: Purpose is the first section after the title
+pass AC-001 .ai/README.md: states autonomous software factory
+pass AC-001 .ai/README.md: states what each gate checks is locked once a person approves it
+pass AC-001 .ai/README.md: states the evidence phases look at the feature from the outside
+info AC-004 .ai/README.md: three points present, lock and detect present
+pass AC-002 names the attacker as an outside party reaching the change through what it exposes
+pass AC-002 exposure list names requests
+pass AC-002 exposure list names parameters
+pass AC-002 exposure list names uploads
+pass AC-002 exposure list names jobs
+pass AC-002 exposure list names webhooks
+pass AC-002 exposure list names command arguments
+pass AC-002 numbered list has exactly nine attack classes (found 9)
+pass AC-002 attack class 1: Injection
+pass AC-002 attack class 2: Cross-site scripting
+pass AC-002 attack class 3: Broken authorization
+pass AC-002 attack class 4: Identifier substitution
+pass AC-002 attack class 5: Mass assignment
+pass AC-002 attack class 6: Path traversal
+pass AC-002 attack class 7: Server-side request forgery
+pass AC-002 attack class 8: Data exposure
+pass AC-002 attack class 9: Resource exhaustion
+pass AC-002 repository-write tampering is out of scope
+pass AC-002 it is noted as a follow-up, not recorded as an attack result
+pass AC-003 findings are graded against the attack threat model
+pass AC-003 a finding needing repository write access is never graded blocking or major
+pass AC-003 it is recorded as a follow-up
+pass AC-005 README.md: starts with one level-1 heading and skips no level (39 headings, 0 skips)
+pass AC-005 README.md: valid UTF-8 with no hidden or control characters (found 0)
+pass AC-005 .ai/README.md: starts with one level-1 heading and skips no level (6 headings, 0 skips)
+pass AC-005 .ai/README.md: valid UTF-8 with no hidden or control characters (found 0)
+pass AC-005 .ai/skills/adversarial-testing/SKILL.md: starts with one level-1 heading and skips no level (5 headings, 0 skips)
+pass AC-005 .ai/skills/adversarial-testing/SKILL.md: valid UTF-8 with no hidden or control characters (found 0)
+pass AC-005 .ai/skills/review/SKILL.md: starts with one level-1 heading and skips no level (1 headings, 0 skips)
+pass AC-005 .ai/skills/review/SKILL.md: valid UTF-8 with no hidden or control characters (found 0)
+info AC-005 added lines in the four files: 38
+pass AC-005 added text is plain ASCII: no glyph or emoji stands in for a word (non-ASCII: [])
+pass AC-005 added text makes no reference to colour (0 lines)
+pass AC-005 added text has no vague link text (0 links, 0 vague)
+info AC-006 paths changed outside changes/: [".ai/README.md", ".ai/skills/adversarial-testing/SKILL.md", ".ai/skills/review/SKILL.md", "README.md"]
+pass AC-006 no path under lib/, exe/ or test/ in the diff from 49b2ae5 (75 paths, 0 under code)
+summary: 0 failed
+exit: 0

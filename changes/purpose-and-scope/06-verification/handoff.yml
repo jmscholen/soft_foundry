@@ -1,0 +1,64 @@
+---
+phase: 06-verification
+skill: verification
+status: complete
+commit_sha: 4b693c70bf13d79ba2e35d4bab6d8483421ba582
+started_at: '2026-11-15T03:18:36Z'
+completed_at: '2026-11-15T04:04:59Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-2
+outputs:
+- results.md
+- tests.yml
+- evidence/manifest.yml
+- evidence/content_checks.rb
+- evidence/content-checks.txt
+- evidence/check.txt
+- evidence/ci.txt
+- evidence/ci-clone-default-branch-artifact.txt
+- evidence/rake-test.txt
+blocking: []
+findings:
+- id: VER-001
+  severity: minor
+  summary: 'Not caused by this change and not fixed here. After the first shell command
+    of this session (read-only) the guard post-call hook reported a tamper and a restore,
+    and the worktree now holds .ai/policies/enforcement.yml and .claude/settings.json
+    modified against HEAD with an older text: settings.json loses the PostToolUse
+    hook entry and Grep|Glob in the PreToolUse matcher; guard.mode is still block.
+    Verification may not write either file. The evidence came from a clean clone of
+    the commit and does not depend on them. A person should put both back to HEAD
+    before any later commit and look at the guard baseline that produced an older
+    file.'
+- id: VER-002
+  severity: minor
+  summary: The size is full_at_verify only because metadata.yml declares no scope;
+    the full suite took 1288.8 s for a change of four text files.
+- id: VER-003
+  severity: minor
+  summary: 'AC-005: heading order, hidden characters, ASCII-only added text, no colour
+    word and no link were checked by script. Whether any meaning rests on a symbol
+    alone is a reading judgment left to the accessibility review.'
+next: evaluate
+notes: 'Checks ran in a clean clone of 4b693c7 in a temporary directory because the
+  worktree differs from HEAD in two control-plane files (VER-001). A first ci run
+  in the clone exited 2 on a clone-only default-branch ref; it is preserved in evidence
+  and explained in results.md. A first full-suite run was stopped by the session time
+  limit and rerun to completion. Guard limitations met: the guard refused a shell
+  command that named .soft-foundry/guard.log, so the tamper log was not read; it wrote
+  an ignored .soft-foundry/ folder under 06-verification/evidence/ that this skill
+  may not remove from the shell. The read list is advisory to the guard; README.md
+  is in no path group and was read with git show.'
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-11-15T03:18:36Z'
+  finished_at: '2026-11-15T04:05:31Z'
+  exit_status: 0
+  previous_phase: verify
+  session_id: 31a9488d-7c00-40e4-b971-e4ec4416c1fa
+  cwd: "/Users/jscholen-iou/dev/soft_foundry/.claude/worktrees/purpose-and-scope"
+branch_resolved: true

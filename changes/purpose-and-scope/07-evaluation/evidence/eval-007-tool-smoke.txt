@@ -1,0 +1,127 @@
+EVAL-007 (tool part): the tool's entry commands in a clean clone of the commit
+commit: d272a5f538034b51e0e7264a4b2e81aadce1c87e   branch: change/purpose-and-scope   uncommitted paths: 0
+local main: 3fd048c2202dc009afcb04371437719fd0dd3144   origin/HEAD ref removed (see 06-verification/results.md, Failures)
+provider keys and SOFT_FOUNDRY_PHASE unset; ruby 3.3.1
+Long output is cut to its first and last 8 lines; the exit status is always shown.
+
+$ soft-foundry version
+0.23.0
+exit status: 0
+
+$ soft-foundry help
+Soft Foundry 0.23.0
+
+Usage:
+  soft-foundry init [options]             install the control plane into this repository, then onboard
+      --dry-run  --force  --no-onboard  --root PATH  --allow-non-git
+      --maturity scan|deep|off (default scan)  --reassess
+  soft-foundry onboard [options]           discover providers, repair agent adapters, assess maturity
+      --maturity scan|deep|off (default scan)  --reassess
+[... 147 lines not shown ...]
+  soft-foundry update [--yes]             check the GitHub repository for a newer release; --yes installs
+                                          it under the Ruby that runs soft-foundry (the gem is not on
+                                          RubyGems; a release is a v<version> tag with the gem attached)
+  soft-foundry models                     show locally accessible models
+  soft-foundry shell claude|codex|grok    launch a coding shell in this repository
+  soft-foundry version
+
+`AGENTS.md` and `.ai/` are canonical. Vendor files such as `CLAUDE.md` only point to them.
+exit status: 1
+
+$ soft-foundry check
+✓ pass control plane: 16 phases, 17 skills, no errors
+exit status: 0
+
+$ soft-foundry doctor
+✓ pass git repository
+✓ pass AGENTS.md
+✓ pass .ai/README.md
+✓ pass .ai/workflow.yml
+✓ pass .ai/paths.yml
+✓ pass control plane check
+✗ fail .ai/manifest.yml
+✗ fail pre-commit hook
+✓ pass guard hook (claude: installed, codex: installed; mode: block, repository policy (.ai/policies/enforcement.yml))
+✗ fail local runtime
+✓ pass session hook (installed for claude, codex, grok; ledger: ~/.soft-foundry/sessions.jsonl)
+exit status: 2
+
+$ soft-foundry scan
+! warning changes/control-plane-scan/07-evaluation/evidence/journey-transcript.log:12 override: instruction-override phrase (a rule quoting an attack may add the allow marker)
+! warning changes/control-plane-scan/07-evaluation/evidence/journey-transcript.log:18 fetch_exec: fetches and executes remote code (a rule quoting an attack may add the allow marker)
+! warning changes/control-plane-scan/07-evaluation/evidence/journey-transcript.log:66 override: instruction-override phrase (a rule quoting an attack may add the allow marker)
+! warning changes/init-command/03-threat-model/attack-surface.md:53 fetch_exec: fetches and executes remote code (a rule quoting an attack may add the allow marker)
+! warning changes/init-command/08-attack/previous/06a4830966d3/evidence/ATTACK-012-marker-spoofing.log:71 fetch_exec: fetches and executes remote code (a rule quoting an attack may add the allow marker)
+! warning changes/phase-lifecycle-controls/07-evaluation/evidence/j5-consumers.sh:14 fetch_exec: fetches and executes remote code (a rule quoting an attack may add the allow marker)
+! warn scan: 0 errors, 6 warnings in 3947 files
+exit status: 0
+
+$ soft-foundry change list
+accessibility-advisory
+budget-and-openrouter
+budget-billing-awareness
+change-close-command
+control-plane-scan
+cross-cli-hooks
+cross-provider-review
+factory-readiness
+[... 24 lines not shown ...]
+ui-links
+ui-processes
+ui-repositories
+ui-server
+ui-snapshot
+update-from-github
+update-release-asset-name
+upstream-failure-reporting
+exit status: 0
+
+$ soft-foundry change status purpose-and-scope
+purpose-and-scope: purpose-and-scope  [status: in_progress, phase: evaluate, risk: low]
+  track: gated
+  00-intake              complete     ok
+  01-discovery           pending      
+  02-specification       complete     ok
+  03-threat-model        pending      
+  04-plan                pending      
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-evaluation          pending      
+  08-attack              pending      
+  09-remediation         pending      
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              pending      
+  14-judgment            pending      
+  15-learning            pending      
+advisory: 1 issue to address before purpose-and-scope goes live (informational, does not block the gate)
+  ! warn accessibility: the accessibility review (13-review/accessibility.md) has not run yet
+exit status: 0
+
+$ soft-foundry change size --phase evaluate
+phase: evaluate
+size: full_route_sweep
+scope: whole repository
+reason: no scope declared: whole-repository scope is sized at the largest size
+exit status: 0
+
+$ soft-foundry ci
+✓ pass control plane: 16 phases, 17 skills, no errors
+✓ pass eval attack-waived-at-medium-risk: intake waivers permitted fail, as expected
+✓ pass eval blocked-but-complete: verify no blocking conditions fail, as expected
+✓ pass eval blocked-judgment-without-basis: judge blocked basis fail, as expected
+✓ pass eval commit-sha-older-than-predecessor: discover commit lineage fail, as expected
+✓ pass eval control-well-formed: verify pass, as expected
+✓ pass eval criteria-uncovered-at-judgment: judge criteria covered fail, as expected
+✓ pass eval criteria-untiered-at-specify: specify criteria tiered fail, as expected
+[... 344 lines not shown ...]
+
+change update-from-github (closed, skipped)
+
+change update-release-asset-name (closed, skipped)
+
+change upstream-failure-reporting (closed, skipped)
+
+✓ ci passed
+exit status: 0

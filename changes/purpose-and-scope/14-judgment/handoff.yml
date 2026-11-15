@@ -1,0 +1,63 @@
+---
+phase: 14-judgment
+skill: final-judgment
+status: complete
+commit_sha: 7296946d07a4e382622604fd652deb4d97f7eb06
+started_at: '2026-11-15T04:26:13Z'
+completed_at: '2026-11-15T04:28:19Z'
+resolved_model:
+  profile: judgment_high
+  provider: anthropic
+  model: claude-fable-5-2
+outputs:
+- final.md
+- residual-risk.md
+- evidence.yml
+blocking: []
+findings:
+- id: JUDGE-001
+  severity: minor
+  summary: Outcome APPROVED_WITH_RESIDUAL_RISK at 7296946. AC-001, AC-002 and AC-003
+    (must) and AC-004 to AC-006 (should) are met; no blocking or major review finding.
+    Six residual risks are listed in residual-risk.md (R-1 to R-6).
+- id: JUDGE-002
+  severity: minor
+  summary: 'For the maintainer on acceptance: confirm the two human_decisions entries,
+    which the agent session typed in (R-4, REV-008), and check the local guard override
+    and the guard log after the anomalies the evidence sessions met (R-6, REV-007,
+    VER-001, EVAL-F4).'
+- id: JUDGE-003
+  severity: minor
+  summary: 'Follow-ups owed in later changes: one sentence in the review skill separating
+    an observed alteration of the record from a repository-write weakness (REV-001);
+    reword the attack skill claim that the guard and the lock cover repository-write
+    tampering (REV-003); one documentation change for REV-002, REV-004, REV-005 and
+    REV-006.'
+- id: JUDGE-004
+  severity: minor
+  summary: The globally installed soft-foundry 0.23.0 does not know the default waivers
+    and reports predecessor complete failures for specification, implementation and
+    review on this record; the tool in this worktree (ruby -Ilib exe/soft-foundry)
+    gates every completed phase ok. Reinstall after the stacked branches merge.
+next: learn
+notes: 'Judged from the record and the diff from the intake commit (38 added lines
+  in four files), which this session read in full. No evidence was created or repaired
+  and no check was rerun; gate state was read with soft-foundry change status and
+  soft-foundry gate. Attack did not run (default waiver at risk low) and is recorded
+  in evidence.yml as not_run, not as a pass. This judgment ran on the same provider
+  and model as the implementation, so the different-provider preference of the skill
+  was not met (R-5). Guard limitations met: Bash is checked against deny sets only,
+  so the read list was followed as policy; other change records and .ai/harness-evals
+  were not read. No guard report appeared during this session and the worktree holds
+  no modified file outside 14-judgment.'
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-11-15T04:26:13Z'
+  finished_at: '2026-11-15T04:28:43Z'
+  exit_status: 0
+  previous_phase: judge
+  session_id: 817e60f2-9337-49b8-b20e-ffaba43382b0
+  cwd: "/Users/jscholen-iou/dev/soft_foundry/.claude/worktrees/purpose-and-scope"
+branch_resolved: true

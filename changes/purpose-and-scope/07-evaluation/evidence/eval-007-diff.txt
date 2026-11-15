@@ -1,0 +1,14 @@
+EVAL-007 (diff part): paths that differ between the intake commit and the commit
+commit: d272a5f538034b51e0e7264a4b2e81aadce1c87e    intake commit: 49b2ae54676d6619ae07f93be10eb89695968fb4
+
+--- outside changes/ ---
+M	.ai/README.md
+M	.ai/skills/adversarial-testing/SKILL.md
+M	.ai/skills/review/SKILL.md
+M	README.md
+
+--- under lib/, exe/ or test/ ---
+pass: 0 paths under lib/, exe/ or test/
+
+--- all paths that differ: count ---
+81 paths

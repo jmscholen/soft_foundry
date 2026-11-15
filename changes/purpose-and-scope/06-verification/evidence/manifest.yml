@@ -1,0 +1,24 @@
+commit_sha: 4b693c70bf13d79ba2e35d4bab6d8483421ba582
+artifacts:
+- path: evidence/content_checks.rb
+  produced_by: written by the verification session; the script CHECK-001 runs
+  sha256: 7add286173b822bc4cdb8405aeb428226b2edd5ccbf7dd4bad3b2cbacecc434a
+- path: evidence/content-checks.txt
+  produced_by: ruby evidence/content_checks.rb 4b693c7 49b2ae5 (reads files with git
+    show at the commit)
+  sha256: ad5fd2f1ad7c6908003cb268cad8a51d4ac39378a44bf4341557416dfb2e5a01
+- path: evidence/check.txt
+  produced_by: ruby -Ilib exe/soft-foundry check (clean clone of 4b693c7)
+  sha256: ebb7309be27a5f1f8742465c619c1123647c9f416d81d3593515eb28dd37da18
+- path: evidence/ci.txt
+  produced_by: ruby -Ilib exe/soft-foundry ci (clean clone of 4b693c7, no origin/HEAD
+    ref, local main as in the worktree)
+  sha256: '0791a06e465cba786be1a4966b00b0b3c85930d15504a9b7052aba4808d91244'
+- path: evidence/ci-clone-default-branch-artifact.txt
+  produced_by: 'ruby -Ilib exe/soft-foundry ci, first run in the clone: exit 2 because
+    the clone origin/HEAD named this branch as default; kept as a preserved failure'
+  sha256: 9a362a418cbd8df96fbff3cb054b84f7af7246cf5817cc327262ad7f890c8382
+- path: evidence/rake-test.txt
+  produced_by: bundle exec rake test (full suite, clean clone of 4b693c7, keys and
+    SOFT_FOUNDRY_PHASE unset)
+  sha256: 53c91d8db0c561e2b2ad43290a88230332983adbfff40c1114bab34f807b6a69

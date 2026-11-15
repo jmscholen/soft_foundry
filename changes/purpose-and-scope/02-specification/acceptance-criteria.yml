@@ -1,0 +1,52 @@
+# Each criterion must be testable and map to at least one requirement.
+# Criteria are locked once specification completes; changing them requires a
+# recorded requirement change, never a downstream edit.
+# tier: must (a promise; can block; capped by risk; approved by a person
+# under human_decisions) or should (reported, never blocking).
+criteria:
+  - id: AC-001
+    tier: must
+    requirements: [REQ-001]
+    given: the repository at the change's final commit
+    when: a reader opens README.md and .ai/README.md
+    then: each file states, before its first section that describes commands or layout, that Soft Foundry is an autonomous software factory, that what each gate checks is locked once a person approves it, and that verification, evaluation and attack look at the feature from the outside
+    verified_by: []
+  - id: AC-002
+    tier: must
+    requirements: [REQ-002]
+    given: the repository at the change's final commit
+    when: a reader opens .ai/skills/adversarial-testing/SKILL.md
+    then: the file names the attacker as an outside party reaching the change through what it exposes, lists the nine attack classes of REQ-002, and states that a party with write access to the repository editing the change record, the control plane or git history is out of scope and is noted as a follow-up
+    verified_by: []
+  - id: AC-003
+    tier: must
+    requirements: [REQ-003]
+    given: the repository at the change's final commit
+    when: a reader opens .ai/skills/review/SKILL.md
+    then: the file states that a finding which needs write access to the repository is never graded blocking or major and is recorded as a follow-up
+    verified_by: []
+  - id: AC-004
+    tier: should
+    requirements: [REQ-004]
+    given: the repository at the change's final commit
+    when: a reader opens README.md
+    then: the purpose text names the three points where a person steps in and says the specification lock is lock and detect
+    verified_by: []
+  - id: AC-005
+    tier: should
+    requirements: [REQ-005]
+    given: the files this change edits
+    when: their added text is read against .ai/rules/accessibility.md
+    then: headings are in order, no meaning rests on colour or a symbol alone, and the content scan reports no hidden or control characters
+    verified_by: []
+  - id: AC-006
+    tier: should
+    requirements: [REQ-006]
+    given: the change's final commit
+    when: the diff from the intake commit is listed and `soft-foundry check` and `soft-foundry ci` are run
+    then: no path under lib/, exe/ or test/ appears in the diff and both commands pass
+    verified_by: []
+
+# Checks only a person can make (open a published page, look at a render).
+# Not criteria; `change release` carries each as a release item.
+person_checks: []

@@ -1,0 +1,119 @@
+---
+phase: 13-review
+skill: review
+status: complete
+commit_sha: 58447638713364d48123cc4b810febff909b52a3
+started_at: '2026-11-15T04:12:16Z'
+completed_at: '2026-11-15T04:27:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-2
+outputs:
+- functional.md
+- architecture.md
+- security.md
+- accessibility.md
+- policy-conformance.md
+- infrastructure.md
+- operations.md
+- consolidated.md
+blocking: []
+findings:
+- id: REV-001
+  severity: minor
+  summary: The sentence added to .ai/skills/review/SKILL.md (a finding that needs
+    write access to the repository is never blocking or major) does not separate a
+    weakness someone could use from an alteration a reviewer actually sees in the
+    record under review. This is the residual risk of the narrowing the maintainer
+    approved under human_decisions; AC-003 asks for the sentence as written.
+  failure: An implementing session rewrites 06-verification/results.md to say a failed
+    check passed; the reviewer sees the edit in git history, grades it minor as the
+    sentence directs, and judgment under the convergence rules cannot rest BLOCKED
+    on it.
+  follow_up: In a later change add one sentence to the review skill saying an alteration
+    observed in the record under review is graded on what it changed, not by this
+    rule.
+- id: REV-002
+  severity: minor
+  summary: README.md line 11 says "Everything in between runs without them"; the human-boundaries
+    policy and README.md lines 258 and 364 describe other stops where a change waits
+    for a person. The sentence goes beyond REQ-004 and .ai/README.md does not carry
+    it. Confirms EVAL-F1.
+  follow_up: Drop the sentence or point to .ai/policies/human-boundaries.yml for the
+    other stops, in a later documentation change.
+- id: REV-003
+  severity: minor
+  summary: ".ai/skills/adversarial-testing/SKILL.md line 21 says the runtime guard
+    and the specification lock cover repository-write tampering. The guard is per
+    host and checks shell commands against deny sets only, the lock covers 02-specification
+    only, and the specification of this change records that rules and risk in metadata.yml
+    are not covered."
+  follow_up: Reword to say those controls are where that work belongs, and name the
+    open gap, in the guard follow-up change.
+- id: REV-004
+  severity: minor
+  summary: The attack skill does not say whether the nine classes are the whole list;
+    its opening paragraph and Purpose of ATTACK still name replay, concurrency, malformed
+    or large input, retry behavior and dependency failures. Confirms EVAL-F2.
+  follow_up: Say in the attacker section that the list is a minimum, in a later documentation
+    change.
+- id: REV-005
+  severity: minor
+  summary: Attack records a repository-write weakness in the handoff notes with no
+    severity; review is told to record it as a follow-up with no place named, and
+    the structured outside_change field is refused for a path the change modified.
+  follow_up: Name one place for such follow-ups in both skills.
+- id: REV-006
+  severity: minor
+  summary: README.md opens with two descriptions four lines apart (control plane with
+    eventually enforced orchestration, then autonomous software factory) and still
+    carries the finished init-command milestone section. Not asked for by the specification.
+    Confirms EVAL-F3 and IMPL-001.
+  follow_up: A later documentation change.
+- id: REV-007
+  severity: minor
+  summary: Not caused by this change; needs a person. The two guard configuration
+    files VER-001 and EVAL-F4 found modified were still modified when this session
+    started and clean a few commands later, with no action by this session. Later
+    the guard post-call hook reported a tamper after a command that ran from 13-review
+    and wrote only review files, said the pre-call baseline was missing and that it
+    removed the machine-local override, and wrote an untracked copy of the enforcement
+    policy under 13-review/.ai/policies, which this session removed so the seal would
+    not commit it. The hook resolves its paths from the working directory.
+  follow_up: Check that the maintainer's local override is still in place, read the
+    guard log, and fix the hook's use of the working directory in the guard follow-up
+    change.
+- id: REV-008
+  severity: minor
+  summary: Both human_decisions entries in metadata.yml were typed in by the agent
+    session under the maintainer's local override, as their notes say. The gate checks
+    that an entry exists, not who wrote it. Needs repository write access, so a follow-up
+    under the rule this change adds.
+  follow_up: The maintainer confirms both approvals when accepting the result.
+next: judge
+notes: 'No blocking or major finding. AC-001, AC-002 and AC-003 (must) and AC-004
+  to AC-006 (should) are met at 5844763, which outside changes/ is identical to the
+  implementation commit d944d07. Accessibility conforms; policy conformance N/A with
+  the patch read in full; no policy text change owed and no human decision requested.
+  Attack did not run (stepped over by default at low risk), so there was no attack
+  evidence to review. This session reran soft-foundry check (pass) and its own byte
+  scan and heading outline; it did not rerun ci or the full suite. The review ran
+  on the same provider and model as the implementation, so the different-provider
+  preference was not met. Guard limitations met: Bash is checked against deny sets
+  only, so the read list was followed as policy; the guard refused a shell command
+  that named its own configuration, so the diff of the two files in REV-007 was not
+  read and the policies were read with the file tool; a shell command run from inside
+  13-review made the hook write an ignored .soft-foundry folder there (left alone)
+  and an untracked .ai folder there (removed by this session, see REV-007).'
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-11-15T04:20:35Z'
+  finished_at: '2026-11-15T04:25:50Z'
+  exit_status: 0
+  previous_phase: review
+  session_id: 59afc195-8eb0-42e9-92e6-c59ef6425770
+  cwd: "/Users/jscholen-iou/dev/soft_foundry/.claude/worktrees/purpose-and-scope"
+branch_resolved: true
