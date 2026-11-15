@@ -1,0 +1,32 @@
+commit_sha: 6af71429ad5313d70abe93aa0978a40d5a17d966
+artifacts:
+  - path: evidence/full-suite.txt
+    produced_by: "CHECK-001: the full suite, clean environment, run alone"
+    sha256: bb01a0d882122bdd4d385fbfc773fba6e9554a89d573e174cef8a90851d6391a
+  - path: evidence/check.txt
+    produced_by: "CHECK-002: the control-plane check command"
+    sha256: c98e264e0085e400807e333e583511ececb1c644295049873e2a0295a66b27b9
+  - path: evidence/eval.txt
+    produced_by: "CHECK-003: the harness eval command"
+    sha256: 143f6874cc4cb7f39c07536863aaf1e3254ada8ef220aa6e1fc7160a7f0f0c15
+  - path: evidence/ci.txt
+    produced_by: "CHECK-004: the ci command"
+    sha256: 1fce7fe6967bb2f44d3ab6753458b5c90b0ae5c0393ad80ada613a2f615cbbad
+  - path: evidence/doctor.txt
+    produced_by: "CHECK-005: the doctor command (exit 2, machine-local failures; the guard-hook line passes)"
+    sha256: 6a7455a9801c1cec09fe964eb688b761f4be8f396fc0f008f8c3e07386b1912f
+  - path: evidence/hooks-match.rb
+    produced_by: "CHECK-006: the read-only comparison script, written by this phase"
+    sha256: 3c59b2d626bf6c306e39eedac458176af784cb5cc4fcbd43d0aae03e1e225fb9
+  - path: evidence/hooks-match.txt
+    produced_by: "CHECK-006: output of hooks-match.rb against this checkout"
+    sha256: aaaa8a25f6b7f9686286f0b4f1b5fa55047d6e6e30e140c40542a009f6be4e45
+  - path: evidence/guard-live.txt
+    produced_by: "CHECK-007: the guard hook's refusals in this session, copied verbatim"
+    sha256: 0e1b4c8de487f21caf99be8181c5b6d671441a32f7666762444679a8dd3a9b09
+  - path: evidence/diff.txt
+    produced_by: "CHECK-008: git diff main and git status outside this record"
+    sha256: 38af4b02b2719b3d981e9ba4b81d701e42bf19d36c026c1b42167f438eb96643
+  - path: evidence/enforcement-header.txt
+    produced_by: "CHECK-009: the enforcement.yml header claims matched to code and live behaviour"
+    sha256: fb9ec8c98a03ea01658b50986a99c88ed0b60f1f02a1b74184e0b44a47960b9e

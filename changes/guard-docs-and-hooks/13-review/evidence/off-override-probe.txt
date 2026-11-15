@@ -1,0 +1,39 @@
+scratch repository: policy mode "block", committed
+
+== case A: override written as the README says (mode: "off", quoted); a Bash call on main
+mode before: ["off", "machine-local override (.soft-foundry/enforcement.yml)"]
+PreToolUse guard: rc=0 stdout="" stderr=""
+baseline recorded by the PreToolUse call: false
+PostToolUse guard --after: rc=2 stdout=""
+  stderr: ✗ fail guard: .soft-foundry/enforcement.yml changed during the tool call and was restored to the state before it; the pre-call baseline was missing, so the committed policy was used and the machine-local override removed (tamper logged to .soft-foundry/guard.log; mode: block)
+override still present after the check: false
+mode after: ["block", "repository policy (.ai/policies/enforcement.yml)"]
+guard.log: 2026-11-06T13:19:05Z tamper restored=.soft-foundry/enforcement.yml (no baseline; committed policy used)
+
+== case B: SOFT_FOUNDRY_GUARD=off in the environment, override file says mode: "warn"
+mode before: ["warn", "machine-local override (.soft-foundry/enforcement.yml)"] (file) / env off
+PreToolUse guard: rc=0 stderr=""
+baseline recorded: false
+PostToolUse guard --after: rc=0
+  stderr: ! warn guard: .soft-foundry/enforcement.yml changed during the tool call and was restored to the state before it; the pre-call baseline was missing, so the committed policy was used and the machine-local override removed (tamper logged to .soft-foundry/guard.log; mode: warn)
+override still present after the check: false
+
+== case C: SOFT_FOUNDRY_GUARD=off, no override, an uncommitted hand edit to the policy header
+PreToolUse guard: rc=0; baseline recorded: false
+PostToolUse guard --after: rc=0
+  stderr: ! warn guard: .ai/policies/enforcement.yml changed during the tool call and was restored to the state before it; the pre-call baseline was missing, so the committed policy was used and the machine-local override removed (tamper logged to .soft-foundry/guard.log; mode: warn)
+policy edit survived the check: false
+
+== case D (control): override mode: "warn", no environment variable
+PreToolUse guard: rc=0; baseline recorded: true
+PostToolUse guard --after: rc=0 stderr=""
+override still present after the check: true
+baseline consumed: true
+
+== case E (control): override mode: "off", but a baseline from an earlier warn-mode call still present (< 30 min)
+PreToolUse guard (off): rc=0
+PostToolUse guard --after: rc=0
+  stderr: ! warn guard: .soft-foundry/enforcement.yml changed during the tool call and was restored to the state before it (tamper logged to .soft-foundry/guard.log; mode: warn)
+override content after the check: "guard:\n  mode: \"warn\""
+
+probe exit=0

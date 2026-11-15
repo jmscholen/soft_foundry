@@ -1,0 +1,189 @@
+library: 0.23.0 from /home/user/soft_foundry
+== top-level
+ok             rc=0 expect=0 | soft-foundry version
+      0.23.0
+ok             rc=0 expect=0 | soft-foundry --version
+      0.23.0
+ok             rc=0 expect=0 | soft-foundry -v
+      0.23.0
+ok             rc=1 expect=nz | soft-foundry help
+      Soft Foundry 0.23.0
+      
+ok             rc=1 expect=nz | soft-foundry not-a-command
+      Soft Foundry 0.23.0
+      
+== bootstrap
+ok             rc=0 expect=0 | soft-foundry init --dry-run
+      root: /tmp/sf-eval-sweep-HYdM/app
+      mode: dry run, nothing written
+ok             rc=0 expect=0 | soft-foundry init
+      root: /tmp/sf-eval-sweep-HYdM/app
+      created   .gitignore
+ok             rc=0 expect=0 | soft-foundry onboard --maturity off
+      billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment); no budget applies
+               set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+UNEXPECTED     rc=2 expect=0 | soft-foundry doctor
+      ✓ pass git repository
+      ✓ pass AGENTS.md
+ok             rc=0 expect=0 | soft-foundry check
+      ✓ pass control plane: 16 phases, 17 skills, no errors
+ok             rc=0 expect=0 | soft-foundry models
+      openai:
+        (not configured)
+On branch main
+nothing to commit, working tree clean
+== hooks
+ok             rc=0 expect=0 | soft-foundry hooks install
+      installed .git/hooks/pre-commit
+ok             rc=0 expect=0 | soft-foundry hooks install --claude --local
+      installed guard hook in .claude/settings.local.json (PreToolUse: Edit|Write|MultiEdit|NotebookEdit|Read|Grep|Glob|Bash)
+      installed post-call check in .claude/settings.local.json (PostToolUse: Bash; restores the guard's own configuration if a command changed it)
+ok             rc=0 expect=0 | soft-foundry hooks uninstall --claude --local
+      removed guard hook from .claude/settings.local.json
+ok             rc=0 expect=0 | soft-foundry hooks install --codex
+      installed guard hook in .codex/hooks.json (PreToolUse: Bash|apply_patch|Edit|Write)
+      codex runs a project hook only after you review and trust it: open codex in this repository and run /hooks
+ok             rc=0 expect=0 | soft-foundry hooks install --sessions
+      installed session hook in ~/.claude/settings.json (UserPromptSubmit, claude)
+      installed session hook in ~/.codex/hooks.json (UserPromptSubmit, codex)
+ok             rc=0 expect=0 | soft-foundry hooks uninstall --sessions
+      removed session hook from ~/.claude/settings.json
+      removed session hook from ~/.codex/hooks.json
+ok             rc=0 expect=0 | soft-foundry doctor
+      ✓ pass git repository
+      ✓ pass AGENTS.md
+== change
+ok             rc=0 expect=0 | soft-foundry change new demo
+      created changes/demo with 16 phase directories
+      branch: change/demo
+ok             rc=1 expect=nz | soft-foundry change new demo
+      soft-foundry: change record already exists: /tmp/sf-eval-sweep-HYdM/app/changes/demo
+ok             rc=0 expect=0 | soft-foundry change status
+      demo: demo  [status: intake, phase: intake, risk: TBD]
+        track: gated
+ok             rc=0 expect=0 | soft-foundry change status demo --json
+      {
+        "slug": "demo",
+ok             rc=0 expect=0 | soft-foundry change summary
+      change: demo
+      phase: intake (status: intake, risk: TBD, track: gated)
+ok             rc=0 expect=0 | soft-foundry change list
+      demo
+ok             rc=0 expect=0 | soft-foundry change list --json
+      {
+        "version": 1,
+ok             rc=0 expect=0 | soft-foundry change size --phase verify
+      phase: verify
+      size: full_at_verify
+ok             rc=0 expect=0 | soft-foundry change size --phase evaluate
+      phase: evaluate
+      size: full_route_sweep
+ok             rc=0 expect=0 | soft-foundry change new demo2 --track iterative
+      created changes/demo2 with 16 phase directories
+      branch: change/demo
+ok             rc=1 expect=nz | soft-foundry change new bad --track nonsense
+      unknown track 'nonsense'; .ai/workflow.yml defines: gated, iterative
+ok             rc=1 expect=nz | soft-foundry change vet demo
+      demo: track 'gated' has no exploring stage, so there is nothing to vet; the phases apply in order
+ok             rc=1 expect=nz | soft-foundry change reopen demo --reason test
+      demo: track 'gated' has no exploring stage to reopen into
+ok             rc=1 expect=nz | soft-foundry change release demo --item A=b
+      soft-foundry: cannot release demo: 14-judgment is pending; a release rests on a complete final judgment (run `soft-foundry phase run judge`)
+ok             rc=1 expect=nz | soft-foundry change discharge A --note x --change demo
+      soft-foundry: demo is intake, not released; only a released change has items to discharge (release it with `soft-foundry change release`)
+ok             rc=1 expect=nz | soft-foundry change close demo
+      demo: cannot close: 14-judgment is pending; a change is complete only with a final judgment (.ai/workflow.yml rules.final_judgment_required), so run t
+UNEXPECTED     rc=0 expect=nz | soft-foundry change request-discharge demo --pr 1
+      demo: nothing undischarged
+== gate/phase
+ok             rc=3 expect=nz | soft-foundry gate intake --change demo
+      00-intake  pending  SKIP
+        - skip phase pending: not started
+UNEXPECTED     rc=0 expect=nz | soft-foundry gate all --change demo
+      00-intake  pending  SKIP
+        - skip phase pending: not started
+ok             rc=1 expect=nz | soft-foundry phase seal intake --change demo
+      demo: cannot seal intake: 00-intake/handoff.yml says status pending; set it complete (with commit_sha, completed_at, and outputs) when the phase's wor
+ok             rc=1 expect=nz | soft-foundry phase reopen intake --reason test --change demo
+      soft-foundry: nothing to reset: intake and every phase after it are already pending; run `soft-foundry phase run intake` instead
+ok             rc=0 expect=0 | soft-foundry phase run intake --change demo --dry-run
+      ! warn guard: the guard hook is not installed for claude, so the session's tool calls will not be checked against the intake skill's permissions (`sof
+      would run intake of demo with: claude -p --session-id 994dc093-1d62-4300-8abe-3fdda18336bb --name demo/intake <prompt>
+UNEXPECTED     rc=1 expect=0 | soft-foundry phase run evaluate attack --parallel --change demo --dry-run
+      demo: cannot run evaluate: 07-evaluation cannot start: its predecessor 06-verification is pending
+ok             rc=1 expect=nz | soft-foundry phase run not-a-phase --change demo --dry-run
+      soft-foundry: unknown phase 'not-a-phase'; lifecycle phases: intake, discover, specify, threat_model, plan, implement, verify, evaluate, attack, remed
+== content/learning
+ok             rc=0 expect=0 | soft-foundry scan
+      ✓ pass scan: 368 files, no findings
+ok             rc=0 expect=0 | soft-foundry scan lib
+      ✓ pass scan: 1 files, no findings
+ok             rc=0 expect=0 | soft-foundry learn list
+      no instincts recorded; the learning phase writes them to 15-learning/instincts.yml
+ok             rc=0 expect=0 | soft-foundry learn promote --dry-run
+      
+== budget
+ok             rc=0 expect=0 | soft-foundry budget status --change demo
+      change: demo  risk: unset
+      billing: subscription (no provider API key (OPENAI_API_KEY, ANTHROPIC_API_KEY, XAI_API_KEY, OPENROUTER_API_KEY) in the environment)
+ok             rc=0 expect=0 | soft-foundry budget record --phase intake --provider anthropic --model claude-opus-5-5 --tokens-in 1 --tokens-out 1 --usd 0.01 --change demo
+      recorded: intake anthropic/claude-opus-5-5 1in/1out $0.01
+ok             rc=0 expect=0 | soft-foundry budget threshold
+      warns every $10.00 of recorded spend (next warning at $10.00)
+      source: .ai/policies/budget.yml
+ok             rc=0 expect=0 | soft-foundry budget threshold 5
+      warns every $5.00 of recorded spend (next warning at $5.00)
+      source: .soft-foundry/budget.yml (machine-local, gitignored)
+ok             rc=0 expect=0 | soft-foundry budget threshold default
+      warns every $10.00 of recorded spend (next warning at $10.00)
+      source: .ai/policies/budget.yml
+== live state
+ok             rc=0 expect=0 | soft-foundry ps
+      running: 1 soft-foundry process
+        pid 11578  phase run evaluate  change guard-docs-and-hooks  shell claude (session pid 11602)  in /home/user/soft_foundry  since 2026-11-06T12:39:22Z
+ok             rc=0 expect=0 | soft-foundry ps --json
+      {
+        "version": 1,
+ok             rc=0 expect=0 | soft-foundry sessions
+      sessions: none found
+      sessions: no ledger at ~/.soft-foundry/sessions.jsonl yet; record every coding session with `soft-foundry hooks install --sessions`
+ok             rc=0 expect=0 | soft-foundry sessions --json
+      [
+      
+ok             rc=1 expect=nz | soft-foundry resume demo
+      resume: no recorded session for change demo; list what is recorded with `soft-foundry sessions --change demo`
+ok-if-0 rc=0 | soft-foundry session log --shell claude: []
+ok             rc=0 expect=0 | soft-foundry sessions hello
+      sessions: 1 recorded session matches (ledger: ~/.soft-foundry/sessions.jsonl)
+      session: 2026-11-06 12:48 UTC claude resumable
+ok             rc=0 expect=0 | soft-foundry resume demo
+      cd /tmp/sf-eval-sweep-HYdM/app && claude --resume x
+== guard (the hook itself, fed a payload on stdin; the record is at intake)
+rc=0 | soft-foundry guard (allowed read): []
+rc=2 (expect 2) | soft-foundry guard (intake writing lib): [✗ fail guard: Write lib/app.rb is in intake's deny_write set; the intake skill's permissions.yml does not allow it (mode: block, .ai/policies/enforc]
+rc=0 (expect 0) | soft-foundry guard (pre-call): []
+rc=0 (expect 0) | soft-foundry guard --after (nothing changed): []
+== harness
+ok             rc=0 expect=0 | soft-foundry eval --json
+      {
+eval summary: ✓ pass eval: 28 passed, 0 failed, 0 errors, 1 skipped
+ci rc=0 (demo records are unfinished on a change branch): ✓ ci passed
+== update (read-only, real GitHub through the proxy)
+UNEXPECTED     rc=1 expect=0 | soft-foundry update
+      update: could not check for a new version (HTTP 403 from GitHub)
+== shell (claude stubbed; no session starts)
+ok             rc=0 expect=0 | soft-foundry shell claude --stub-arg
+      billing: subscription (no ANTHROPIC_API_KEY in the environment, so claude bills to its own login); no budget applies
+               set SOFT_FOUNDRY_BILLING=api if usage here is actually metered
+ok             rc=1 expect=nz | soft-foundry shell not-a-shell
+      soft-foundry: Unknown shell 'not-a-shell'. Supported: claude, codex, grok
+== ui
+ui line: ui: serving http://127.0.0.1:48791/#token=<redacted> (read-only; press Ctrl-C to stop)
+GET / no token: 200
+GET /api/workflow no token: 401 | with token: 200
+GET /api/changes no token: 401 | with token: 200
+GET /api/processes no token: 401 | with token: 200
+GET /api/repositories no token: 401 | with token: 200
+ui stopped: 0 left
+SUMMARY pass=57 unexpected=5
+script exit=0

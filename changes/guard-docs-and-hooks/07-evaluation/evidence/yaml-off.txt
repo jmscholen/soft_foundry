@@ -1,0 +1,9 @@
+YAML.safe_load("guard:\n  mode: off\n") => {"guard"=>{"mode"=>false}}
+policy unquoted off                          => ["warn", "default"]
+policy quoted "off"                          => ["off", "repository policy (.ai/policies/enforcement.yml)"]
+policy warn, override unquoted off           => ["warn", "repository policy (.ai/policies/enforcement.yml)"]
+policy block, override unquoted off          => ["block", "repository policy (.ai/policies/enforcement.yml)"]
+policy block, override quoted "off"          => ["off", "machine-local override (.soft-foundry/enforcement.yml)"]
+policy block, override unquoted on (not a mode) => ["block", "repository policy (.ai/policies/enforcement.yml)"]
+policy block, SOFT_FOUNDRY_GUARD=off         => ["off", "SOFT_FOUNDRY_GUARD environment variable"]
+exit=0

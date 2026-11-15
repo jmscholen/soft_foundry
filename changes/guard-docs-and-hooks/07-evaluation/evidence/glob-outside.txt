@@ -1,0 +1,36 @@
+scratch repository: /tmp/sf-eval-guard-iE7t/app, branch change/demo, mode: mode: block
+== globs inside the root
+decided   rc=0 | ls lib/*
+decided   rc=0 | ls lib/*.rb && cat lib/app.rb
+decided   rc=0 | ls no-such-dir/*
+== globs outside the root, absolute
+decided   rc=0 | ls /tmp/sf-eval-globdir-*
+decided   rc=0 | cd /tmp/sf-eval-globdir-* && ls
+decided   rc=0 | cd /tmp/sf-eval-globdir-one && ls
+decided   rc=0 | cd /tmp/sf-eval-globdir-*/sub && ls
+decided   rc=0 | cd /tmp/no-such-prefix-*/app && ls
+UNDECIDED rc=2 | cd /tmp/no-such-prefix-*/app 2>/dev/null && ls
+      ✗ fail guard: Bash could not be decided (NoMethodError: undefined method `empty?' for nil); refusing it; the guard refuses what it cannot decide (mode: block, .ai/policies/enforcement.yml; a maintai
+decided   rc=0 | cat /etc/host*
+decided   rc=0 | ls /tmp/*
+decided   rc=0 | ls /nonexistent/*
+== globs outside the root after a cd
+decided   rc=0 | cd /tmp && ls sf-eval-globdir-*
+decided   rc=0 | cd /tmp && cd sf-eval-globdir-* && ls
+decided   rc=0 | cd /tmp && cd no-such-prefix-* && ls
+== a cd out of the root followed by more tokens in the same segment (shell_paths computes base once per segment, then reads cwd.empty? after cd set cwd to nil)
+UNDECIDED rc=2 | cd /tmp 2>/dev/null && ls
+      ✗ fail guard: Bash could not be decided (NoMethodError: undefined method `empty?' for nil); refusing it; the guard refuses what it cannot decide (mode: block, .ai/policies/enforcement.yml; a maintai
+UNDECIDED rc=2 | cd /tmp/sf-eval-globdir-one 2>/dev/null && ls
+      ✗ fail guard: Bash could not be decided (NoMethodError: undefined method `empty?' for nil); refusing it; the guard refuses what it cannot decide (mode: block, .ai/policies/enforcement.yml; a maintai
+UNDECIDED rc=2 | pushd /tmp >/dev/null && ls
+      ✗ fail guard: Bash could not be decided (NoMethodError: undefined method `empty?' for nil); refusing it; the guard refuses what it cannot decide (mode: block, .ai/policies/enforcement.yml; a maintai
+decided   rc=0 | cd /tmp && ls
+decided   rc=0 | cd /tmp; ls
+decided   rc=0 | cd lib 2>/dev/null && ls
+UNDECIDED rc=2 | cd .. 2>/dev/null && ls
+      ✗ fail guard: Bash could not be decided (NoMethodError: undefined method `empty?' for nil); refusing it; the guard refuses what it cannot decide (mode: block, .ai/policies/enforcement.yml; a maintai
+== the session's own command, as refused in this repository
+UNDECIDED rc=2 | cd /tmp/sf-eval-sweep-*/app 2>/dev/null && echo x
+      ✗ fail guard: Bash could not be decided (NoMethodError: undefined method `empty?' for nil); refusing it; the guard refuses what it cannot decide (mode: block, .ai/policies/enforcement.yml; a maintai
+script exit=0

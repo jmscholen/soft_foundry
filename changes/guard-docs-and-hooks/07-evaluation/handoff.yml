@@ -1,0 +1,114 @@
+---
+phase: 07-evaluation
+skill: evaluation
+status: complete
+commit_sha: 2af76ba9b26be41af5bcafa12ee56eda635f6c77
+started_at: '2026-11-06T12:39:23Z'
+completed_at: '2026-11-06T12:55:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-1
+outputs:
+- evaluation-plan.md
+- journeys.yml
+- results.md
+- evidence/manifest.yml
+- evidence/guard-live.txt
+- evidence/doctor.txt
+- evidence/hooks-match.txt
+- evidence/hooks-upgrade.txt
+- evidence/guard-claims.txt
+- evidence/glob-outside.txt
+- evidence/yaml-off.txt
+- evidence/readme-state.txt
+- evidence/route-sweep.txt
+- evidence/update-route.txt
+- evidence/check-eval-ci.txt
+- evidence/scripts/hooks-upgrade.sh
+- evidence/scripts/guard-claims.sh
+- evidence/scripts/glob-outside.sh
+- evidence/scripts/yaml-off.rb
+- evidence/scripts/sweep.sh
+blocking: []
+findings:
+- id: EVAL-F-001
+  severity: minor
+  summary: 'EVAL-005 fails: `mode: off` written unquoted in .ai/policies/enforcement.yml
+    or .soft-foundry/enforcement.yml is read by the YAML parser as the boolean false,
+    which Guard.mode ignores, so the mode falls through (a policy saying off reports
+    warn by default; an override saying off under a block policy reports block). `mode:
+    "off"` quoted and SOFT_FOUNDRY_GUARD=off work. The header lists off among the
+    file''s values without saying so (REQ-GDH-002), and the README''s existing text
+    does the same. The documentation phase should say the value must be quoted (or
+    that off is for the variable), the header fix is a maintainer edit to protected
+    policy, and a later code record could accept the YAML boolean. Fails toward the
+    stricter mode, so nothing is exposed.'
+- id: EVAL-F-002
+  severity: minor
+  summary: 'Code defect met on the way, out of this change''s scope (REQ-GDH-005 forbids
+    code): Guard#shell_paths raises NoMethodError (undefined method empty? for nil)
+    when a cd or pushd that leaves the root is followed by another token in the same
+    segment, typically a redirection (`cd /tmp 2>/dev/null && ls`, `pushd /tmp >/dev/null
+    && ls`, `cd .. 2>/dev/null && ls`); base is computed once per segment and cwd.empty?
+    is read after cd set cwd to nil (lib/soft_foundry/guard.rb lines 486 to 505).
+    The guard fails closed and refuses the command as undecidable, so a legitimate
+    command is refused rather than anything let through; it refused one of this session''s
+    own commands. Evidence: evidence/glob-outside.txt. For a later record; the README
+    text on how a shell command is read may say such a command is refused today.'
+- id: EVAL-F-003
+  severity: info
+  summary: 'REQ-GDH-004 could not be evaluated: README.md is written by the documentation
+    phase, which follows this one. evidence/readme-state.txt records what the README
+    lacks today (no mention of Grep, Glob, guard --after, PostToolUse, an interrupted
+    command, how a shell command is read, an undecidable call, or the live-eval shell
+    arguments; the guard section still says Bash "passes everything else"). Review
+    must read the README the documentation phase writes against each item of REQ-GDH-004
+    and against EVAL-F-001 and EVAL-F-002; a DOCS edit does not stale this evidence
+    (VER-003).'
+- id: EVAL-F-004
+  severity: info
+  summary: REQ-GDH-003 (.ai/harness-evals/README.md) is in this skill's deny_read
+    set, as in verification's, review's and judgment's (VER-002). Nobody in the lifecycle
+    reads it; judgment should name it as a condition it could not check, for the maintainer
+    at merge.
+- id: EVAL-F-005
+  severity: info
+  summary: 'No journey names AC-001: it is the unfilled template in 02-specification
+    and the specify phase is waived (VER-004). Journeys map to REQ-GDH-001..005 from
+    00-intake/request.md. The judgment must set AC-001 aside in evidence.yml criteria_not_covered
+    with that reason, or the criteria covered check fails there.'
+- id: EVAL-F-006
+  severity: info
+  summary: 'An Edit whose old_string does not occur in the file never reaches the
+    guard: Claude Code validates the Edit before PreToolUse hooks run, so it fails
+    in the host and leaves no guard log line. Nothing is written and a Write that
+    can apply is refused, so this is not a bypass; the README''s description of what
+    the guard sees may say the hook runs after the host''s own validation.'
+next: attack
+notes: All journeys ran against this checkout's library (ruby -I<repo>/lib <repo>/exe/soft-foundry),
+  in this session or in scratch repositories under the system temp directory created
+  by the evidence scripts and removed afterwards; the Write tool refused the scratchpad
+  (evidence/guard-live.txt item 5), so the scripts live under evidence/scripts/. This
+  repository's own guard configuration was read with the Read tool only and never
+  named in a shell command or written; the two shell commands that did name it were
+  refused by the hook and are the first two items of guard-live.txt. 00-intake/request.md
+  and assumptions.md were read for REQ-GDH-001..005 because the specify phase is waived
+  and 02-specification holds only the template; intake is outside this skill's read
+  list but in no deny set, as verification noted. README.md and other records' evaluation
+  files were read for the README state and for format; README.md is outside the read
+  list and in no deny set. The route sweep's update route could not reach GitHub through
+  this sandbox's proxy (evidence/update-route.txt). Bash is checked against deny sets
+  only, so the read and write limits were otherwise followed as policy. The guard
+  ran in block mode throughout.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-11-06T12:39:23Z'
+  finished_at: '2026-11-06T12:57:08Z'
+  exit_status: 0
+  previous_phase: evaluate
+  session_id: 770691df-b954-4bce-a4c3-b2e55761324c
+  cwd: "/home/user/soft_foundry"
+branch_resolved: true

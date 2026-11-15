@@ -1,0 +1,21 @@
+== soft-foundry check
+✓ pass control plane: 16 phases, 17 skills, no errors
+exit=0
+== soft-foundry eval
+✓ pass eval shared-core-change-stales-scoped-record: verify evidence current fail, as expected
+✓ pass eval specification-does-not-parse: specify structured files parse fail, as expected
+✓ pass eval specification-edited-after-lock: specify specification locked fail, as expected
+✓ pass eval test-result-fail-unacknowledged: verify test results recorded fail, as expected
+✓ pass eval verdict-unfilled: judge verdict recorded fail, as expected
+✓ pass eval: 28 passed, 0 failed, 0 errors, 1 skipped
+exit=0
+== soft-foundry ci
+
+change update-from-github (closed, skipped)
+
+change update-release-asset-name (closed, skipped)
+
+change upstream-failure-reporting (closed, skipped)
+
+✓ ci passed
+exit=0
