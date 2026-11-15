@@ -1,0 +1,29 @@
+---
+change:
+  id: purpose-and-scope
+  title: purpose-and-scope
+git:
+  worktree: "/Users/jscholen-iou/dev/soft_foundry/.claude/worktrees/purpose-and-scope"
+  branch: change/purpose-and-scope
+rules: 2
+type: docs
+risk: low
+track: gated
+status: in_progress
+current_phase: specify
+created_at: 2026-11-15 02:49:59.000000000 Z
+scope: []
+surfaces:
+  application: false
+  database: false
+  infrastructure: false
+  security: false
+  accessibility: true
+  observability: false
+  policy: false
+human_decisions: []
+vetted:
+reopenings: []
+phase_reopenings: []
+skipped_phases: []
+run_phases: []
