@@ -3,18 +3,18 @@
 Standard: `.ai/rules/policy-conformance.md`. Cite the policy document and clause, or a rule from that file, in every finding.
 
 ## Documents checked
-TBD: the privacy policy, security policy, and terms recorded under `policies:` in `.ai/repository.yml`, each with the path or URL and the version or date examined; or a statement that the application publishes none and that this is itself a go-live gap.
+None exist to check. `.ai/repository.yml` records `policies.privacy` and `policies.security` as `NOT_APPLICABLE` with rationales: a library gem that holds no users' data, and the maintainer's decision of 2026-09-15 (`changes/security-policy-not-applicable`) that the tool publishes no security policy. That is the recorded state of the repository, not a gap raised by this change.
 
 ## Scope reviewed
-TBD
+`surfaces.policy` is false. To confirm that is right, the full patch of d944d07 was read: 38 lines of prose in two README files and two skill instruction files. It adds no code, no outbound call, no stored field, no log line and no configuration. Nothing under `lib/`, `exe/` or `test/` differs from the intake commit. The text makes no promise to a user about their data; it describes how the tool's own phases are scoped.
 
 ## Findings
 | ID | Severity | Location | Finding | Failure it prevents | Policy clause or rule |
 | --- | --- | --- | --- | --- | --- |
-| REV-TBD | blocking / major / minor | TBD | TBD | TBD: the concrete input or state and the wrong result (required for blocking and major) | TBD |
+| none | n/a | n/a | No policy finding. | n/a | `.ai/rules/policy-conformance.md` |
 
 ## Policy text changes required
-TBD: None, or one line per clause that must be published before this change goes live. Publishing a change to a privacy policy, security policy, or terms is a legal commitment under `.ai/policies/human-boundaries.yml`: park the change with `status: awaiting_human` in `metadata.yml` and record the person's decision under `human_decisions` there.
+None.
 
 ## Conformance
-TBD: conforms / conforms with advisories / does not conform / N/A. N/A is valid only when `surfaces.policy` is false and this section says what was examined to conclude the change alters nothing the application collects, shares, retains, protects, or promises.
+N/A. `surfaces.policy` is false, and the patch was read in full to conclude that the change alters nothing the application collects, shares, retains, protects, or promises.
