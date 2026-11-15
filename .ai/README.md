@@ -2,6 +2,16 @@
 
 `.ai/` defines HOW engineering work is performed. It contains lifecycle orchestration, skill contracts, policies, model profiles, maturity policy, repository capability assessment, runtime configuration, and deterministic checks. It should not become a duplicate home for product/domain documentation; canonical human/agent product documentation belongs under `docs/`.
 
+## Purpose
+
+Soft Foundry is an autonomous software factory. An agent builds a feature in an application by passing through gated phases, and each gate checks the work against what was asked for.
+
+- **The specification is locked.** What each gate checks is locked once a person approves it. The agent may not change the specification it is working to. The lock is lock and detect: the gate fails when a locked file changes. No phase searches for ways around the lock.
+- **The evidence phases look at the feature from the outside.** Verification and evaluation ask what a legitimate user expects of the feature. Attack asks what a bad actor would try through it. A party with write access to the repository editing a change record is outside that threat model (`skills/adversarial-testing/SKILL.md`, `skills/review/SKILL.md`).
+- **A person steps in at three points.** A person approves the specification before work starts, accepts or rejects the result at the end, and decides what happens when a change reaches the remediation cap.
+
+## Skills and modes
+
 A skill is a declarative agent definition. The harness loads its instructions, model profile, permissions, required inputs, template-derived working artifacts, tools, and completion gate into an isolated execution context.
 
 The host may operate in either mode:

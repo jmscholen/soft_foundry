@@ -2,6 +2,24 @@
 
 Try to make the implementation violate its intent. Use real UI, HTTP/API, job, file-processing, data, and infrastructure surfaces as applicable. Attempt unauthorized state changes, identifier substitution, malformed/large input, replay, concurrency, injection, XSS, SSRF, path traversal, resource exhaustion, and dependency failures. Report findings; do not repair them.
 
+## The attacker
+
+The attacker is an outside party who reaches the change through what it exposes: requests, parameters, uploads, jobs, webhooks, command arguments. That covers a visitor who is not signed in, a signed-in user acting beyond their permissions, and another system calling the feature.
+
+Attack the code the change added or modified. Try each class that applies to it:
+
+1. Injection (SQL, command, template).
+2. Cross-site scripting.
+3. Broken authorization.
+4. Identifier substitution (reaching another party's record by changing an identifier).
+5. Mass assignment.
+6. Path traversal.
+7. Server-side request forgery.
+8. Data exposure.
+9. Resource exhaustion.
+
+Out of scope: a party with write access to the repository editing the change record, the control plane or git history. The runtime guard and the specification lock cover that, not this phase. If you notice such a weakness, note it as a follow-up in the handoff `notes`. Do not record it as an attack result and do not give it a severity.
+
 ## Authorization and scope
 
 Adversarial testing is authorized engineering validation, not unrestricted offensive activity. Before execution, the harness must establish the target, environment, ownership/authorization, permitted surfaces, prohibited surfaces, data constraints, network constraints, and whether destructive actions are allowed.
