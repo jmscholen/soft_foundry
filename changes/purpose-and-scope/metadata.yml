@@ -10,7 +10,7 @@ type: docs
 risk: low
 track: gated
 status: in_progress
-current_phase: specify
+current_phase: implement
 created_at: 2026-11-15 02:49:59.000000000 Z
 scope: []
 surfaces:
@@ -21,7 +21,28 @@ surfaces:
   accessibility: true
   observability: false
   policy: false
-human_decisions: []
+human_decisions:
+- boundary: changes that intentionally weaken required controls
+  subject: the adversarial-testing and review skills stop reporting anything that
+    needs write access to the repository (editing the change record, the control plane
+    or git history); attack and review look at an outside party using the feature,
+    as scoped in 00-intake/request.md
+  decided_by: Jeff Scholen
+  decided_at: 2026-11-14
+  decision: approved
+  note: Given in the Claude Code session that wrote the specification, answering the
+    request to approve the narrowing. Written by the agent under the maintainer local
+    warn override.
+- boundary: must criteria approval
+  subject: the must criteria of 02-specification/acceptance-criteria.yml
+  criteria:
+  - AC-001
+  - AC-002
+  - AC-003
+  decided_by: Jeff Scholen
+  decided_at: 2026-11-14
+  decision: approved
+  note: Given in the same session, answering the request to approve the must list.
 vetted:
 reopenings: []
 phase_reopenings: []
