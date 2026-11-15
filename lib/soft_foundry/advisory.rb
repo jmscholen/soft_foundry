@@ -4,6 +4,9 @@ require_relative "text"
 require_relative "control_plane"
 require_relative "phase_provider"
 require_relative "git"
+require_relative "display"
+require_relative "errors"
+require_relative "process_rules"
 
 module SoftFoundry
   # Go-live advisories for one change record: things a person should know
@@ -64,7 +67,33 @@ module SoftFoundry
       notices.concat(environment_notices)
       notices.concat(accessibility_notices)
       notices.concat(policy_notices)
+      notices.concat(follow_up_notices)
+      notices.concat(cap_notices)
       notices
+    end
+
+    # REQ-009: a review or attack finding marked outside_change is this
+    # change's follow-up, never its blocker; the advisory keeps it visible.
+    def follow_up_notices
+      %w[attack review].flat_map do |id|
+        phase = @plane.phase(id)
+        h = phase && @record.handoff(phase)
+        Array(h.is_a?(Hash) ? h["findings"] : nil).filter_map do |f|
+          next unless f.is_a?(Hash) && f["outside_change"] == true
+          Notice.new("follow-up", "#{Display.safe(f['id'].to_s)} (#{phase.output}) concerns code outside this change: #{Display.safe(f['summary'].to_s)}; carried to #{Display.safe(f['follow_up'].to_s.empty? ? '(no follow_up named)' : f['follow_up'].to_s)}")
+        end
+      end
+    rescue RecordFileError, Psych::Exception
+      []
+    end
+
+    # A change parked at the remediation cap says what a person decides.
+    def cap_notices
+      rules = ProcessRules.new(@record, git: @git)
+      return [] unless rules.applies? && @record.metadata["status"].to_s == "awaiting_human" && !rules.another_round_allowed?
+      [Notice.new("remediation", rules.cap_refusal)]
+    rescue TargetError
+      []
     end
 
     # The development environment recorded in .ai/repository.yml, or nil.

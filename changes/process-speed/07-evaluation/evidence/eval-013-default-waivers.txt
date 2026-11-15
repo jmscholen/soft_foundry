@@ -1,0 +1,36 @@
+## AC-012: low risk, skipped_phases empty, run_phases [attack]
+03-threat-model  complete  PASS
+c5: c5  [status: in_progress, phase: judge, risk: low]
+  track: gated
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                pending      
+  05-implementation      pending      
+  06-verification        pending      
+  07-evaluation          pending      
+  08-attack              pending      
+  09-remediation         pending      
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              pending      
+  14-judgment            pending      
+  15-learning            pending      
+  ✓ pass waivers permitted: default waivers at risk low: discover, threat_model, plan, learn (name a phase under run_phases to run it)
+## what the waivable_by_risk list says for low
+waivable_by_risk:
+  low: [discover, specify, threat_model, plan, attack, learn]
+  medium: [discover, plan]
+  high: []
+
+judgments:
+  - APPROVED
+  - APPROVED_WITH_RESIDUAL_RISK
+  - BLOCKED
+--
+## threat_model sealed? (was completed by the fixture before run_phases was set); predecessor of implement:
+05-implementation  pending  SKIP
+## legacy low-risk record (main's code and plane, nothing skipped)
+  ✓ pass waivers permitted: nothing waived

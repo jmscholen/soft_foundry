@@ -1,0 +1,104 @@
+# Threats to the rules REQ-001 to REQ-017 add. The attacker is a session or a
+# committer that wants a change to finish (pass a gate, avoid a person) or a
+# record to look as though a person decided something they did not.
+threats:
+  - id: THREAT-001
+    requirements: [REQ-003, REQ-005, REQ-017]
+    category: authorization
+    attacker: "an agent session outside `phase run` (an open interactive session)"
+    goal: "write a human_decisions entry (must criteria approval or remediation cap) the person never made, so the specify seal or the cap passes"
+    vector: "a shell write to metadata.yml (ruby -i, sed); the guard checks Bash against deny sets only, and metadata.yml is in no deny set"
+    impact: "high: the human checkpoint this change exists for is bypassed"
+    likelihood: "medium: it is the shortest path past a refusal, and the guard already refused the Edit-tool form in this change's own specify phase"
+    mitigation: MIT-001
+    attack_case_required: true
+  - id: THREAT-002
+    requirements: [REQ-002, REQ-003]
+    category: replay
+    attacker: "a session or committer"
+    goal: "reset the round count so a fourth round needs no person"
+    vector: "delete remediate entries from phase_reopenings, or reach remediation without a reopen (reopen verify, leave remediate pending, seal it)"
+    impact: "high: the cap does not hold"
+    likelihood: "medium"
+    mitigation: MIT-002
+    attack_case_required: true
+  - id: THREAT-003
+    requirements: [REQ-002, REQ-003]
+    category: authorization
+    attacker: "a session or committer"
+    goal: "leave awaiting_human without a decision"
+    vector: "edit status from awaiting_human to in_progress by hand and continue"
+    impact: "high: parking is advisory only"
+    likelihood: "medium"
+    mitigation: MIT-003
+    attack_case_required: true
+  - id: THREAT-004
+    requirements: [REQ-012, REQ-017]
+    category: authorization
+    attacker: "a session doing remediation"
+    goal: "change code under a documentation-only reopen so verify, evaluate and attack are never rerun"
+    vector: "commit a lib/ change after `phase reopen remediate --docs-only`, before or after sealing remediation; or edit .ai/ (control plane) and call it documentation"
+    impact: "high: untested code reaches judgment"
+    likelihood: "medium"
+    mitigation: MIT-004
+    attack_case_required: true
+  - id: THREAT-005
+    requirements: [REQ-004, REQ-005]
+    category: authorization
+    attacker: "a session after approval"
+    goal: "demote an approved must criterion to should once it proves hard to meet"
+    vector: "edit tier in acceptance-criteria.yml after specify is sealed, or rewrite the approval entry's criteria list to match"
+    impact: "high: the promise the person approved is withdrawn without them"
+    likelihood: "medium: this is the 'redefine success because implementation failed' pattern"
+    mitigation: MIT-005
+    attack_case_required: true
+  - id: THREAT-006
+    requirements: [REQ-008, REQ-009]
+    category: authorization
+    attacker: "a review or attack session, or the implementing session"
+    goal: "drop a real in-change finding from what blocks by marking it outside_change"
+    vector: "set outside_change: true with a follow_up on a finding about code this change modified"
+    impact: "high: a defect in the change is carried as someone else's follow-up"
+    likelihood: "medium"
+    mitigation: MIT-006
+    attack_case_required: true
+  - id: THREAT-007
+    requirements: [REQ-001]
+    category: authorization
+    attacker: "a session or committer"
+    goal: "escape every new rule by making a new record look legacy"
+    vector: "delete the rules version from metadata.yml after `change new` wrote it"
+    impact: "high: tiers, approval and the cap all report skip"
+    likelihood: "medium"
+    mitigation: MIT-007
+    attack_case_required: true
+  - id: THREAT-008
+    requirements: [REQ-010, REQ-011]
+    category: authorization
+    attacker: "a session at intake"
+    goal: "get default waivers and small check sizes for a change that is not low risk or not documentation"
+    vector: "declare risk low for a gate change; list only documentation paths while the diff is larger"
+    impact: "medium: phases skipped and checks sized down"
+    likelihood: "low for the diff (computed, never declared); medium for the risk word, which is declared today as before"
+    mitigation: MIT-008
+    attack_case_required: true
+  - id: THREAT-009
+    requirements: [REQ-002, REQ-012]
+    category: concurrency
+    attacker: "two sessions, or a person and the runner"
+    goal: "a reopen that both counts and resets twice, or a refusal that leaves status changed with handoffs partly reset"
+    vector: "two `phase reopen remediate` calls at once; a kill between the refusal decision and the metadata write"
+    impact: "medium: a record that disagrees with itself"
+    likelihood: "low"
+    mitigation: MIT-009
+    attack_case_required: false
+  - id: THREAT-010
+    requirements: [REQ-002, REQ-003]
+    category: resource_exhaustion
+    attacker: "a long-lived record"
+    goal: "make each gate run slow"
+    vector: "round counting that walks the full git history on every check"
+    impact: "low: slower gates, which this change exists to avoid"
+    likelihood: "low"
+    mitigation: MIT-010
+    attack_case_required: false

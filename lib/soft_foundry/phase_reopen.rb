@@ -27,28 +27,37 @@ module SoftFoundry
     # `source` is "manual" (the command) or "auto" (the runner, before a
     # session starts). Only a manual reopen is refused inside a phase-run
     # session, so a phase cannot reset another phase's handoff.
-    def call(phase, reason:, source: "manual", env: ENV, now: Time.now)
+    # `docs_only` (a person's choice, remediation only) keeps verify,
+    # evaluate and attack complete; the remediation seal then refuses any
+    # path that is not documentation (PhaseSeal).
+    def call(phase, reason:, source: "manual", env: ENV, now: Time.now, docs_only: false)
       reason = Text.free_text!(reason, "--reason")
       refuse_marker!(env) if source == "manual"
-      @record.locked { reopen(phase, reason, source, now) }
+      if docs_only && phase.id != ProcessRules::REMEDIATE
+        raise TargetError, "--docs-only applies to `phase reopen remediate` only: it keeps verification, evaluation and attack evidence for a remediation that changes documentation alone"
+      end
+      @record.locked { reopen(phase, reason, source, now, docs_only) }
     end
 
     private
 
-    def reopen(phase, reason, source, now)
+    def reopen(phase, reason, source, now, docs_only)
       meta = @record.metadata
       status = meta["status"].to_s
       refuse_status!(status)
       reset = ([phase] + @plane.downstream(phase)).sort_by { |p| @plane.phases.index(p) }.select { |p| @record.phase_status(p) != "pending" }
+      reset -= ProcessRules::DOCS_ONLY_KEPT.filter_map { |id| @plane.phase(id) } if docs_only
       if reset.empty?
         raise TargetError, "nothing to reset: #{phase.id} and every phase after it are already pending; run `soft-foundry phase run #{phase.id}` instead"
       end
+      refuse_over_cap!(reset)
       stamp = now.utc.iso8601
       commit = @git.repository? ? @git.head_sha : nil
       entry = {
         "at" => stamp, "phase" => phase.id, "reset" => reset.map(&:id), "from_commit" => commit,
         "reason" => reason, "source" => source, "previous" => reset.to_h { |p| [p.id, previous(p)] }
       }
+      entry["docs_only"] = true if docs_only
       @record.transaction do |tx|
         tx.metadata do |m|
           m["phase_reopenings"] = Array(m["phase_reopenings"]) + [entry]
@@ -68,6 +77,19 @@ module SoftFoundry
         end
       end
       Result.new(phase: phase, reset: reset, entry: entry)
+    end
+
+    # A reset that would start another remediation round past the cap
+    # (ProcessRules) parks the change instead: status becomes
+    # awaiting_human, nothing else is written, and the refusal says what a
+    # person records. Applies to manual and automatic reopens alike.
+    def refuse_over_cap!(reset)
+      return unless reset.any? { |p| p.id == ProcessRules::REMEDIATE }
+      rules = ProcessRules.new(@record, git: @git)
+      return unless rules.applies?
+      return if rules.another_round_allowed?
+      @record.transaction { |tx| tx.metadata { |m| m["status"] = "awaiting_human" } }
+      raise TargetError, rules.cap_refusal
     end
 
     def refuse_marker!(env)

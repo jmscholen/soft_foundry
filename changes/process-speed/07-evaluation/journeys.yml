@@ -1,0 +1,215 @@
+commit_sha: 0c213b4c26aca56a5a4f686bfc4ebf0018be4297
+size: full_route_sweep   # soft-foundry change size --phase evaluate: no scope declared
+journeys:
+  - id: EVAL-001
+    criteria: [AC-005]
+    persona: maintainer
+    starting_state: new-rules record from `change new demo` (rules 2), risk low, specification marked complete with AC-001 lacking tier and AC-002 tier "maybe"
+    steps:
+      - soft-foundry gate specify
+    assertions:
+      - criteria tiered fails naming AC-001 (no tier) and AC-002 (tier maybe) and the allowed tiers must | should
+    evidence: [evidence/eval-001-tiers.txt]
+    result: pass
+  - id: EVAL-002
+    criteria: [AC-006]
+    persona: maintainer
+    starting_state: the same record with four, then three, must criteria at risk low; four at risk medium
+    steps:
+      - soft-foundry gate specify (four must, low)
+      - soft-foundry gate specify (three must, low)
+      - soft-foundry gate specify (four must, medium)
+    assertions:
+      - four must at low fails naming 4, the cap 3 and .ai/workflow.yml must_criteria_cap
+      - three must at low passes the tier check
+      - four must at medium passes (cap 8)
+    evidence: [evidence/eval-002-must-cap.txt]
+    result: pass
+  - id: EVAL-003
+    criteria: [AC-007]
+    persona: maintainer
+    starting_state: new-rules specification whose must ids are AC-001 and AC-002
+    steps:
+      - soft-foundry gate specify and soft-foundry phase seal specify with no approval entry
+      - the same with an entry listing only AC-001
+      - gate with an entry listing AC-001, AC-002, AC-003
+      - gate with an entry listing exactly AC-001, AC-002
+    assertions:
+      - no entry fails and the seal exits 2, committing nothing
+      - AC-001 only fails naming "not approved AC-002", and the seal exits 2
+      - an extra id fails naming "approved but not must AC-003"
+      - the exact list passes "2 must criteria approved by Maintainer"
+    evidence: [evidence/eval-003-approval.txt]
+    result: pass
+  - id: EVAL-004
+    criteria: [AC-002]
+    persona: maintainer
+    starting_state: new-rules high-risk record; two remediation rounds sealed by real `phase seal remediate` (two `Record c1 remediate` commits); downstream phases rerun; final.md BLOCKED
+    steps:
+      - soft-foundry phase reopen remediate --reason "judgment blocked a third time"
+      - soft-foundry phase run review --shell claude --dry-run
+    assertions:
+      - exits 1
+      - every handoff.yml byte-identical; metadata.yml diff is the status line only
+      - status awaiting_human
+      - output names boundary remediation cap, rounds 2, accept_residual, narrow and reject
+      - phase run on the parked change refuses and names awaiting_human
+    evidence: [evidence/eval-004-cap-refusal.txt]
+    result: pass
+  - id: EVAL-005
+    criteria: [AC-003]
+    persona: phase-run session (runner)
+    starting_state: EVAL-004 record with status set back to in_progress without a decision; lib/app.rb changed and committed so verify is stale
+    steps:
+      - PATH=<stand-in claude> soft-foundry phase run verify --shell claude
+    assertions:
+      - the automatic reopen (its reset includes remediate) is refused with the cap message
+      - the stand-in claude was never executed
+      - status awaiting_human
+    evidence: [evidence/eval-005-auto-reopen.txt]
+    result: pass
+  - id: EVAL-006
+    criteria: [AC-004]
+    persona: maintainer
+    starting_state: EVAL-004 record; maintainer records boundary remediation cap, rounds 2, decision narrow, status in_progress
+    steps:
+      - soft-foundry phase reopen remediate (third round), remediate, phase seal remediate
+      - soft-foundry gate review and gate judge with the decision
+      - the same gates with the decision removed
+      - soft-foundry phase reopen remediate (fourth round) with only the rounds-2 decision
+    assertions:
+      - the third round is permitted and seals
+      - with the decision, both gates pass remediation within cap ("3 rounds, limit 2, beyond it by a person's decision")
+      - without it, both gates fail naming boundary remediation cap and rounds 2
+      - the fourth reopen is refused asking for rounds 3
+    evidence: [evidence/eval-006-cap-decision.txt]
+    result: pass
+  - id: EVAL-007
+    criteria: [AC-008]
+    persona: maintainer
+    starting_state: judged medium-risk new-rules record; AC-001 must covered by CHECK-001 and EVAL-001; AC-002 should named by nothing
+    steps:
+      - soft-foundry gate judge
+      - add must criterion AC-003 named by nothing; soft-foundry gate judge
+    assertions:
+      - with only AC-002 uncovered the judgment passes and criteria covered warns naming AC-002
+      - with AC-003 uncovered criteria covered fails naming AC-003
+    evidence: [evidence/eval-007-tier-coverage.txt]
+    result: pass
+  - id: EVAL-008
+    criteria: [AC-009]
+    persona: maintainer
+    starting_state: judged medium-risk new-rules record whose specification, locked before the downstream phases, holds person_checks PC-001 and PC-002, named by no criterion
+    steps:
+      - soft-foundry gate verify; soft-foundry gate judge
+      - soft-foundry change release c3 (no --item)
+    assertions:
+      - neither criteria check counts PC-001 or PC-002 (1 criterion each)
+      - release succeeds and metadata release.items holds PC-001 and PC-002 with from person_check; status released
+    evidence: [evidence/eval-008-person-checks-release.txt]
+    result: pass
+  - id: EVAL-009
+    criteria: [AC-010]
+    persona: maintainer
+    starting_state: judged new-rules record; final.md BLOCKED; review finding REV-001 severity blocking, outside_change true with follow_up and paths
+    steps:
+      - soft-foundry gate judge with blocked_by [], [AC-002 (should)], [REV-001], [AC-001 (must)]
+    assertions:
+      - empty fails ("names nothing")
+      - should fails ("should criterion, which never blocks")
+      - outside_change finding fails ("a follow-up, not a reason to block")
+      - must criterion passes the blocked-basis check
+    evidence: [evidence/eval-009-blocked-basis.txt]
+    result: pass
+  - id: EVAL-010
+    criteria: [AC-011]
+    persona: maintainer
+    starting_state: EVAL-009 record
+    steps:
+      - soft-foundry gate review and change status with REV-001 outside_change, follow_up and paths [vendor/old.rb]
+      - the same with follow_up removed
+      - the same with paths naming lib/app.rb after the branch modified it
+    assertions:
+      - with follow_up the review passes and change status lists REV-001 as a follow-up advisory
+      - without follow_up the review fails naming REV-001
+      - a path the change modified fails ("it is this change's finding")
+    evidence: [evidence/eval-010-outside-change.txt]
+    result: pass
+  - id: EVAL-011
+    criteria: [AC-014, AC-015]
+    persona: maintainer
+    starting_state: judged high-risk new-rules record with one sealed remediation round
+    steps:
+      - soft-foundry phase reopen remediate --docs-only --reason TEXT; change status
+      - commit lib/app.rb; remediate; soft-foundry phase seal remediate
+      - instead commit only README.md; remediate; soft-foundry phase seal remediate
+    assertions:
+      - remediate, document, index, observe, review, judge and learn reset; verify, evaluate and attack stay complete; the reopen entry has docs_only true
+      - the seal with lib/ changed exits 1, names lib/app.rb and says to reopen without --docs-only
+      - the seal with only README.md changed succeeds (Record c4 remediate)
+    evidence: [evidence/eval-011-docs-only.txt]
+    result: pass
+  - id: EVAL-012
+    criteria: [AC-013]
+    persona: maintainer
+    starting_state: high-risk record with no scope; diff since the plan touches only README.md and its own record
+    steps:
+      - soft-foundry change size --phase verify, evaluate, attack
+      - commit a lib/ change; repeat verify and attack
+    assertions:
+      - docs only gives targeted_plus_full_before_merge (verify) and touched_doors_plus_smoke (evaluate, attack), naming the documentation-only rule
+      - with lib/ it gives full_at_verify and full_route_sweep
+    evidence: [evidence/eval-012-docs-sizing.txt]
+    result: pass
+  - id: EVAL-013
+    criteria: [AC-012]
+    persona: maintainer
+    starting_state: low-risk new-rules record, skipped_phases empty, run_phases [attack], threat_model complete
+    steps:
+      - soft-foundry gate intake (waivers permitted); gate threat_model
+    assertions:
+      - default waivers at risk low are discover, threat_model, plan and learn; attack is not waived (named in run_phases); specify is not waived (DEV-004)
+      - a legacy low-risk record reports "nothing waived"
+    evidence: [evidence/eval-013-default-waivers.txt]
+    result: pass   # behaviour matches DEV-004; AC-012's wording still lists specify (VER-002)
+  - id: EVAL-014
+    criteria: [AC-001, AC-018]
+    persona: legacy record owner
+    starting_state: record L1 built with main's code and control plane (no rules key), every phase complete
+    steps:
+      - soft-foundry gate all with main's code
+      - copy the branch's .ai/ in; soft-foundry gate all with the branch's code
+      - change new on the branch writes rules 2 (record c1)
+    assertions:
+      - phase outcome lines identical
+      - the only new lines are skips naming "legacy record" (rules kept, criteria tiered, must criteria approved, outside-change findings, remediation within cap, blocked basis), plus commit-lineage lines that differ only by the new HEAD sha
+      - the new record declares rules 2
+    evidence: [evidence/eval-014-legacy-record.txt]
+    result: pass
+  - id: EVAL-015
+    criteria: [AC-018]
+    persona: maintainer
+    starting_state: the worktree's control plane; a scratch copy with malformed convergence keys
+    steps:
+      - soft-foundry check (worktree)
+      - soft-foundry check with remediation.max_rounds 0 and default_waivers "low"
+      - soft-foundry gate review with max_rounds 0
+      - soft-foundry help; change status --json on the parked record
+    assertions:
+      - check passes on the branch (16 phases, 17 skills, no errors)
+      - check names both malformed keys
+      - the review gate fails closed naming max_rounds
+      - help lists --docs-only; status --json reports awaiting_human
+    evidence: [evidence/eval-015-smoke.txt]
+    result: pass
+  - id: EVAL-016
+    criteria: [AC-019]
+    persona: maintainer using a screen reader or a no-colour terminal
+    starting_state: every transcript from EVAL-001 to EVAL-015, captured with NO_COLOR=1
+    steps:
+      - count escape sequences; list every line containing non-ASCII with the non-ASCII stripped
+    assertions:
+      - zero escape sequences
+      - the only non-ASCII is the existing check glyph; the outcome word, prefix and next action survive on every new refusal, warning and advisory line
+    evidence: [evidence/eval-016-no-color-ascii.txt]
+    result: pass

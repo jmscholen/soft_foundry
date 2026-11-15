@@ -84,6 +84,7 @@ module SoftFoundry
           File.write(path, SoftFoundry.read_text(path).gsub(/\bTBD\b/, "recorded"))
         end
         fill_structured!(dir, sha)
+        fill_tiers!(record, dir) if phase.id == "specify"
       end
       h = record.handoff(phase) || {}
       h.merge!("status" => "complete", "commit_sha" => sha, "started_at" => now, "completed_at" => now,
@@ -124,6 +125,25 @@ module SoftFoundry
       final = File.join(dir, "final.md")
       return unless File.file?(final)
       File.write(final, SoftFoundry.read_text(final).sub(/^## Outcome[ \t]*\n.*?(?=^## |\z)/m, "## Outcome\nAPPROVED\n\n"))
+    end
+
+    # A planted specification on a record under the convergence rules:
+    # an untiered or placeholder criterion becomes must, and the planted
+    # approval names exactly the must criteria (decided_by: harness), so
+    # the specify gate accepts the plant as it accepts filled evidence.
+    def self.fill_tiers!(record, dir)
+      return unless ProcessRules.applies?(record.metadata)
+      path = File.join(dir, "acceptance-criteria.yml")
+      return unless File.file?(path)
+      data = YAML.safe_load_file(path, permitted_classes: [Time, Date], aliases: true)
+      return unless data.is_a?(Hash) && data["criteria"].is_a?(Array)
+      data["criteria"].each { |c| c["tier"] = "must" if c.is_a?(Hash) && !ProcessRules::TIERS.include?(c["tier"].to_s) }
+      File.write(path, YAML.dump(data))
+      musts = data["criteria"].filter_map { |c| c["id"].to_s if c.is_a?(Hash) && c["tier"] == "must" }
+      record.update_metadata do |m|
+        decisions = Array(m["human_decisions"]).reject { |d| d.is_a?(Hash) && d["boundary"] == ProcessRules::APPROVAL_BOUNDARY }
+        m["human_decisions"] = decisions + [{ "boundary" => ProcessRules::APPROVAL_BOUNDARY, "criteria" => musts, "decided_by" => "harness", "decided_at" => FIXTURE_STAMP, "decision" => "approved" }]
+      end
     end
 
     Case = Data.define(:id, :kind, :description, :phase, :record, :repository, :application, :profile, :expect, :path)
@@ -191,6 +211,9 @@ module SoftFoundry
           problems << "record.handoff.#{id} must be a mapping" unless value.is_a?(Hash)
         end
         problems.concat(scope_problems("record.scope", record["scope"])) if record.key?("scope")
+        %w[metadata later_metadata].each do |key|
+          problems << "record.#{key} must be a mapping of metadata.yml keys" if record.key?(key) && !record[key].is_a?(Hash)
+        end
         if record.key?("siblings")
           siblings = record["siblings"]
           if siblings.is_a?(Array)
@@ -446,11 +469,13 @@ module SoftFoundry
           File.write(record.handoff_path(phase), YAML.dump(h.merge(substitute(merge, tokens))))
         end
         Hash(spec["files"]).each { |rel, content| write_file(record.dir, rel, substitute(content, tokens), app_file: app_file) }
+        merge_metadata!(record, substitute(spec["metadata"], tokens)) if spec.key?("metadata")
         unless spec["commit"] == false
           git(scratch, "add", "-A")
           git(scratch, "commit", "-q", "-m", "record #{slug} phases", "--allow-empty")
         end
         Hash(spec["later_files"]).each { |rel, content| write_file(record.dir, rel, substitute(content, tokens), app_file: app_file) }
+        merge_metadata!(record, substitute(spec["later_metadata"], tokens)) if spec.key?("later_metadata")
         repo_files = Hash(kase.repository["files"])
         repo_files.each { |rel, content| write_file(scratch, rel, substitute(content, tokens), app_file: app_file) }
         if kase.repository["commit"] == true && !repo_files.empty?
@@ -461,6 +486,14 @@ module SoftFoundry
       end
 
       def complete_phase!(record, phase, sha) = HarnessEval.complete_phase!(record, phase, sha)
+
+      # record.metadata / record.later_metadata: keys merged into the
+      # planted metadata.yml; a null value removes the key.
+      def merge_metadata!(record, keys)
+        record.update_metadata do |m|
+          Hash(keys).each { |k, v| v.nil? ? m.delete(k.to_s) : m[k.to_s] = v }
+        end
+      end
 
       def substitute(value, tokens)
         case value

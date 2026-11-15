@@ -11,6 +11,9 @@ require_human_approval:
   - exceeding a change's declared budget cap in .ai/policies/budget.yml (a financial commitment)
   - deploying to any environment other than the development environment recorded under environments in .ai/repository.yml (staging and production deploys are a person's call, on either lifecycle track)
   - a panel that did not agree (panel split): a person decides between the positions the panel recorded; recorded under human_decisions with boundary: panel split
+  - a change that reached the remediation cap (.ai/workflow.yml remediation.max_rounds): a person decides accept_residual, narrow or reject for that round count; recorded under human_decisions with boundary: remediation cap, rounds, decision
+  - what a change promises (its must acceptance criteria): a person approves the exact list before the specification seals; recorded under human_decisions with boundary: must criteria approval, criteria, decision: approved
+  - reopening remediation as documentation-only (phase reopen remediate --docs-only): a person's choice that verification, evaluation and attack evidence stands; the remediation seal refuses any path outside documentation
 never_autonomous:
   - bypassing access controls
   - fabricating evidence

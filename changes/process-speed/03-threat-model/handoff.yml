@@ -1,0 +1,27 @@
+# Phase handoff. One per phase directory. The gate checker validates this file.
+phase: 03-threat-model
+skill: threat-modeling
+status: complete
+commit_sha: 38fdc4c7769f5c081c342cfd09341c79bd27b9ba
+started_at: '2026-11-14T02:45:00Z'
+completed_at: '2026-11-14T02:51:02Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+  - attack-surface.md
+  - trust-boundaries.md
+  - threats.yml
+  - mitigations.md
+blocking: []
+findings:
+  - id: TM-001
+    severity: major
+    summary: THREAT-001 is mitigated only in part. An open agent session can shell-write a human_decisions entry; the guard checks Bash against deny sets only. This change relies on the never_autonomous policy, the seal's hand-edited-keys note and review. Judgment carries it as residual risk unless the plan adds a stronger control.
+  - id: TM-002
+    severity: minor
+    summary: MIT-006 adds a paths field to outside_change findings and MIT-007 compares the rules version with the intake commit; both extend the specification's data model (requirements.yml, Data and consistency) as mitigations, within REQ-009 and REQ-001.
+next: plan
+notes: "Threat model by the session that opened the change."
+executed_by: null

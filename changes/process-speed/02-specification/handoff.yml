@@ -1,0 +1,27 @@
+# Phase handoff. One per phase directory. The gate checker validates this file.
+phase: 02-specification
+skill: specification
+status: complete
+commit_sha: 6f2a29777e26d91b0720d9da4d6177b011026d55
+started_at: '2026-11-14T02:16:00Z'
+completed_at: '2026-11-14T02:40:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+  - specification.md
+  - requirements.yml
+  - acceptance-criteria.yml
+  - readiness.md
+blocking: []
+findings:
+  - id: SPEC-001
+    severity: minor
+    summary: This specification applies the tiers, the must cap and the person_checks list ahead of the rule it builds. The gate on main reads only criterion ids, so the extra fields are inert for this record; the maintainer's must-list approval is recorded under human_decisions anyway.
+  - id: SPEC-002
+    severity: minor
+    summary: Plan must pick the round-counting source (Record <slug> remediate commits or remediate entries in phase_reopenings) and test it against readme-workflow-visuals' history, where both should yield eight rounds.
+next: threat_model
+notes: "Specification written by the session that opened the change. The maintainer approved the twelve must criteria and the caps before sealing."
+executed_by: null

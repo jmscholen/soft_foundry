@@ -1,0 +1,25 @@
+# Phase handoff. One per phase directory. The gate checker validates this file.
+phase: 00-intake
+skill: intake
+status: complete
+commit_sha: 3fd048c2202dc009afcb04371437719fd0dd3144
+started_at: '2026-11-14T01:51:41Z'
+completed_at: '2026-11-14T01:58:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+  - request.md
+  - assumptions.md
+blocking: []
+findings:
+  - id: INT-001
+    severity: minor
+    summary: The guard refused an analysis read of .ai/policies from the main checkout, whose active record (readme-workflow-visuals) is at evaluate. The analysis and this change moved to a separate worktree from origin/main so the tabled record stays untouched.
+  - id: INT-002
+    severity: minor
+    summary: Discovery must establish how remediation rounds can be counted from the record (phase_reopenings entries, Record <slug> remediate commits) and how gate.rb reads acceptance criteria today, before specification fixes the round-cap and tier requirements.
+next: discover
+notes: "Intake performed by the session that opened the change. Risk, scope, the round cap and the approval to loosen blocking controls were decided by the maintainer in that session and are recorded in metadata.yml and assumptions.md."
+executed_by: null

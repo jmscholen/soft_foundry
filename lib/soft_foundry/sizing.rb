@@ -80,6 +80,8 @@ module SoftFoundry
     def compute(phase, since: nil)
       raise TargetError, "unknown phase '#{phase}'; use one of: #{PHASES.join(', ')}" unless PHASES.include?(phase)
       small, large = sizes(phase)
+      docs = documentation_only(phase, small, since)
+      return docs if docs
       return Result.new(phase:, size: large, applied: Scope::WHOLE_REPOSITORY, base: since, reasons: ["no scope declared: whole-repository scope is sized at the largest size"]) unless @scope.scoped?
       base = since || @scope.change_base
       raise TargetError, "cannot size #{@record.slug}: the plan phase is not recorded as complete in a commit, so there is no diff base; pass --since <commit>" unless base
@@ -89,6 +91,21 @@ module SoftFoundry
     end
 
     private
+
+    # REQ-011: a diff that changes documentation alone (ProcessRules
+    # .documentation_path?) is sized small, with or without a declared
+    # scope. Nil when the rule does not apply, cannot be measured, or any
+    # path is not documentation; the rules below then decide.
+    def documentation_only(phase, small, since)
+      return nil unless ProcessRules.new(@record).applies?
+      base = since || @scope.change_base
+      return nil unless base
+      paths = @git.diff_paths(base)
+      return nil if paths.empty? || !paths.all? { |p| ProcessRules.documentation_path?(@plane, p, @record.slug) }
+      Result.new(phase:, size: small, applied: Scope::WHOLE_REPOSITORY, base: base, reasons: ["documentation-only diff: every changed path is documentation (DOCS, top-level Markdown, or this record)"])
+    rescue GitError
+      nil
+    end
 
     def verify(small, large, base, measured)
       # A path claimed by another record is that record's business here, as

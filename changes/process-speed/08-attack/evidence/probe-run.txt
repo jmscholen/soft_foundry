@@ -1,0 +1,134 @@
+Run options: -v --seed 1
+
+# Running:
+
+ProcessSpeedAttackProbe#test_attack_007_outside_change_path_spelling = 
+[ATTACK-007] {"lib/app.rb"=>:fail, "./lib/app.rb"=>:pass, "lib/app.rb "=>:pass, "lib/*.rb"=>:pass, "lib//app.rb"=>:pass, "LIB/app.rb"=>:pass, "lib/"=>:fail}
+2.21 s = F
+ProcessSpeedAttackProbe#test_attack_006_demote_must_after_specify_seal = 
+[ATTACK-006] seal=sealed; specification locked=fail (changed since the specification was recorded at 00fbf04d726c: changes/c1/02-specification/acceptance-criteria.yml; a spe); approved=pass
+1.09 s = .
+ProcessSpeedAttackProbe#test_attack_009_mixed_diff_sizes_large = 
+[ATTACK-009] size=full_route_sweep reasons=["no scope declared: whole-repository scope is sized at the largest size"]
+0.68 s = .
+ProcessSpeedAttackProbe#test_attack_002c_review_rerun_under_redirect = 
+[ATTACK-002c] cap=pass; non-passing=[]
+1.13 s = F
+ProcessSpeedAttackProbe#test_attack_013_committed_fabricated_approval_escapes_seal_note = 
+[ATTACK-013] gate failing=[]; metadata.yml dirty before seal=no; seal outcome=already_sealed; must criteria approved=pass; lines=["already sealed at cd2a072f244d (02-specification and metadata.yml are unchanged since)"]
+0.93 s = F
+ProcessSpeedAttackProbe#test_attack_005d_code_after_docs_only_seal_stales_verify = 
+[ATTACK-005d] docs-only seal=sealed; verify evidence current=fail (STALE: code changed since 27d27d9f6d85: lib/app.rb)
+1.45 s = .
+ProcessSpeedAttackProbe#test_attack_010_malformed_cap_decision = 
+[ATTACK-010] cap=fail; detail=3 remediation rounds sealed, beyond the limit of 2, with no decision for round 3; a person records boundary: remediation cap, rounds: 2, decision: accept_residual or narrow
+1.08 s = .
+ProcessSpeedAttackProbe#test_attack_011_escape_in_follow_up = 
+[ATTACK-011] follow-up notices=1; raw ESC present=false; BEL present=false
+0.65 s = .
+ProcessSpeedAttackProbe#test_attack_002d_redirect_end_to_end = 
+[ATTACK-002d] reopen under redirect reset=["verify", "evaluate", "attack", "remediate", "review", "judge"], status=in_progress; seal remediate after restoring branch=refused (c1: cannot seal remediate: c1 has sealed 2 remediation rounds, the limit in .ai/workflow.yml (remediation.max_); seal remediate under redirect=refused (c1: cannot seal remediate: the checked-out branch is change/c1, not the record's main; check out main (or its worktree) to seal)
+1.02 s = .
+ProcessSpeedAttackProbe#test_attack_002b_review_gate_after_branch_redirect = 
+[ATTACK-002b] cap=pass (0 remediation rounds (limit 2)); other non-passing: ["evidence current=fail: STALE: declaration changed: git.branch since c0dfd51871b7; rerun this phase"]
+0.92 s = F
+ProcessSpeedAttackProbe#test_attack_012_delete_reopen_entries = 
+[ATTACK-012] phase_reopenings emptied and committed; rounds counted=2; reopen refused; status=awaiting_human
+0.84 s = .
+ProcessSpeedAttackProbe#test_attack_004_status_edited_back_without_decision = 
+[ATTACK-004] review=fail, judge=fail; reopen refused; status=awaiting_human
+1.49 s = .
+ProcessSpeedAttackProbe#test_attack_005a_control_plane_under_docs_only = 
+[ATTACK-005a] seal outcome=refused; c1: cannot seal remediate: remediation was reopened as documentation-only, but paths outside documentation changed since 45c9d8716a9f: .ai/workflow.yml; reopen remediate without --docs-only so verific
+1.12 s = .
+ProcessSpeedAttackProbe#test_attack_014_risk_lowered_by_hand_commit = 
+[ATTACK-014] intake seal=sealed; default waivers before=[] after=["discover", "threat_model", "plan", "attack", "learn"]; discover seal=sealed lines=["sealed 01-discovery at 1647b1748ad2"]; intake gate waivers permitted=pass (default waivers at risk low: discover, threat_model, plan, attack, learn (name a phase under run_phases to run it))
+1.10 s = F
+ProcessSpeedAttackProbe#test_attack_002_round_count_via_git_branch_redirect = 
+[ATTACK-002] git.branch=main; rounds before=2 after=0; reopen PERMITTED (third round started with no decision)
+0.83 s = F
+ProcessSpeedAttackProbe#test_attack_008b_rules_dropped_before_intake_seal = 
+[ATTACK-008b] intake seal=sealed; lines=note: metadata.yml also carries uncommitted edits to rules, which this seal commits; the gate honours them from now on (ATK-007) | sealed 00-intake at 3c690ab868cd; rules kept=skip (legacy record: created before the convergence rules (no `rules: 2` in metadata.yml))
+0.85 s = .
+ProcessSpeedAttackProbe#test_attack_001_fabricated_approval_is_named_at_seal = 
+[ATTACK-001] seal outcome=sealed; lines=["note: metadata.yml also carries uncommitted edits to human_decisions, which this seal commits; the gate honours them from now on (ATK-007)", "sealed 02-specification at 16dcd955cc4f"]
+0.91 s = .
+ProcessSpeedAttackProbe#test_attack_008a_rules_dropped_after_intake_disarms_cap = 
+[ATTACK-008a] intake seal=sealed; after dropping rules: reopen PERMITTED; three rounds sealed; review cap=skip, judge cap=skip; intake gate rules kept=fail
+1.56 s = F
+ProcessSpeedAttackProbe#test_attack_016_outside_change_absolute_path = 
+[ATTACK-016] absolute path of the modified file => pass
+0.87 s = F
+ProcessSpeedAttackProbe#test_attack_015_stale_cap_decision = 
+[ATTACK-015] review=fail, judge=fail
+1.13 s = .
+ProcessSpeedAttackProbe#test_attack_005c_agents_md_under_docs_only = 
+[ATTACK-005c] seal outcome=sealed; AGENTS.md classified documentation=true
+1.11 s = .
+ProcessSpeedAttackProbe#test_attack_005b_uncommitted_code_under_docs_only = 
+[ATTACK-005b] seal outcome=refused; c1: cannot seal remediate: uncommitted application, test, or infrastructure paths: lib/app.rb; commit the code first, since commit_sha describes committed code
+0.84 s = .
+ProcessSpeedAttackProbe#test_attack_005f_docs_only_escape_when_handoff_complete = 
+[ATTACK-005f] first seal=refused; reopen remediate reset=["verify", "evaluate", "attack", "remediate"]; rounds counted before second seal=2; seal after=refused: c1: cannot seal remediate: c1 has sealed 2 remediation rounds, the limit in .ai/workflow.yml (remediation.max_rounds: 2); another round needs a person's decision. The change is parked: status is awaiting_human. A person 
+1.18 s = F
+ProcessSpeedAttackProbe#test_attack_005e_docs_only_refusal_has_a_way_out = 
+[ATTACK-005e] first seal=refused; advised `phase reopen remediate`: reopen permitted, reset=["verify", "evaluate", "attack"]; reopen verify refused: nothing to reset: verify and every phase after it are already pending; run `soft-foundry phase run verify` instead; seal after that=refused: c1: cannot seal remediate: remediation was reopened as documentation-only, but paths outside documentation changed since ecd53bffa652: lib/app.rb; reopen remedi
+1.11 s = F
+ProcessSpeedAttackProbe#test_attack_003_third_round_without_reopen = 
+[ATTACK-003] seal outcome=refused; status=awaiting_human
+0.88 s = .
+
+Finished in 26.974766s, 0.9268 runs/s, 1.4829 assertions/s.
+
+  1) Failure:
+ProcessSpeedAttackProbe#test_attack_007_outside_change_path_spelling [changes/process-speed/08-attack/evidence/attack_probe_test.rb:278]:
+a spelling of the modified path lib/app.rb passed the outside-change check: ["./lib/app.rb", "lib/app.rb ", "lib/*.rb", "lib//app.rb", "LIB/app.rb"].
+Expected ["./lib/app.rb", "lib/app.rb ", "lib/*.rb", "lib//app.rb", "LIB/app.rb"] to be empty.
+
+  2) Failure:
+ProcessSpeedAttackProbe#test_attack_002c_review_rerun_under_redirect [changes/process-speed/08-attack/evidence/attack_probe_test.rb:387]:
+the review gate must not pass with three unanswered rounds.
+Expected [] to not be empty.
+
+  3) Failure:
+ProcessSpeedAttackProbe#test_attack_013_committed_fabricated_approval_escapes_seal_note [changes/process-speed/08-attack/evidence/attack_probe_test.rb:474]:
+a decision that first appears in a hand commit should still be named at the seal.
+Expected "already sealed at cd2a072f244d (02-specification and metadata.yml are unchanged since)" to include "human_decisions".
+
+  4) Failure:
+ProcessSpeedAttackProbe#test_attack_002b_review_gate_after_branch_redirect [changes/process-speed/08-attack/evidence/attack_probe_test.rb:118]:
+the review cap check must fail at 3 rounds without a decision.
+Expected: :fail
+  Actual: :pass
+
+  5) Failure:
+ProcessSpeedAttackProbe#test_attack_014_risk_lowered_by_hand_commit [changes/process-speed/08-attack/evidence/attack_probe_test.rb:494]:
+a risk lowered after intake should be named somewhere a person sees it (MIT-008).
+Expected "sealed 01-discovery at 1647b1748ad2" to include "risk".
+
+  6) Failure:
+ProcessSpeedAttackProbe#test_attack_002_round_count_via_git_branch_redirect [changes/process-speed/08-attack/evidence/attack_probe_test.rb:102]:
+editing git.branch must not lower the sealed round count.
+Expected: 2
+  Actual: 0
+
+  7) Failure:
+ProcessSpeedAttackProbe#test_attack_008a_rules_dropped_after_intake_disarms_cap [changes/process-speed/08-attack/evidence/attack_probe_test.rb:307]:
+dropping rules: after intake must not disarm the reopen refusal.
+Expected: "reopen refused"
+  Actual: "reopen PERMITTED"
+
+  8) Failure:
+ProcessSpeedAttackProbe#test_attack_016_outside_change_absolute_path [changes/process-speed/08-attack/evidence/attack_probe_test.rb:524]:
+Expected :pass to not be equal to :pass.
+
+  9) Failure:
+ProcessSpeedAttackProbe#test_attack_005f_docs_only_escape_when_handoff_complete [changes/process-speed/08-attack/evidence/attack_probe_test.rb:406]:
+Expected :refused to not be equal to :refused.
+
+ 10) Failure:
+ProcessSpeedAttackProbe#test_attack_005e_docs_only_refusal_has_a_way_out [changes/process-speed/08-attack/evidence/attack_probe_test.rb:241]:
+after following the refusal's advice, a non-documentation remediation must be sealable.
+Expected :refused to not be equal to :refused.
+
+25 runs, 40 assertions, 10 failures, 0 errors, 0 skips

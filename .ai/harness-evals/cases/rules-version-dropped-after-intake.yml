@@ -1,0 +1,12 @@
+id: rules-version-dropped-after-intake
+kind: gate
+description: A record whose intake was sealed under the convergence rules and whose metadata later drops rules fails the first phase (rules kept, MIT-007).
+record:
+  risk: high
+  complete: [intake]
+  later_metadata:
+    rules: null
+expect:
+  phase: intake
+  check: rules kept
+  outcome: fail

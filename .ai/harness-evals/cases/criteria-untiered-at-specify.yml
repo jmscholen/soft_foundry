@@ -1,0 +1,19 @@
+id: criteria-untiered-at-specify
+kind: gate
+description: Under the convergence rules, an acceptance criterion with no tier fails the specification (criteria tiered, REQ-004).
+record:
+  risk: high
+  complete: [intake, discover, specify]
+  files:
+    02-specification/acceptance-criteria.yml: |
+      criteria:
+        - id: AC-001
+          requirements: [REQ-001]
+          given: recorded
+          when: recorded
+          then: recorded
+          verified_by: []
+expect:
+  phase: specify
+  check: criteria tiered
+  outcome: fail

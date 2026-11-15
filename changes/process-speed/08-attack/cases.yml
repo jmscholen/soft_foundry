@@ -1,0 +1,300 @@
+commit_sha: 46201881662c294728a2fc94d268b6cfadd4cb59
+authorization_envelope:
+  target: "soft-foundry at 4620188 (code identical to 0c213b4 and a37d580; branch change/process-speed): the convergence rules in lib/soft_foundry (process_rules, gate, phase_reopen, phase_seal, sizing, advisory, git, release)"
+  environment: local
+  authorized_by: "the maintainer's `soft-foundry phase run attack` of this change (gated track, risk high, surfaces.security true); local synthetic fixtures only"
+  allowed_surfaces:
+    - "PhaseReopen, PhaseSeal, Gate, Sizing and Advisory, called in-process the way the CLI calls them"
+    - "throwaway git repositories under the system temp directory, built by test/lifecycle_fixture.rb"
+    - "read-only `soft-foundry change size --phase attack` on this worktree"
+  prohibited_surfaces:
+    - "this repository's own change records, code, tests, docs and control plane (no writes outside changes/process-speed/08-attack/)"
+    - ".ai/harness-evals/ (read denied)"
+    - "other worktrees, other repositories, remotes, GitHub, any network service"
+    - "git commit, staging or stash in this worktree"
+  data_constraints: "synthetic fixture records only; no real decisions, people or credentials; provider keys and SOFT_FOUNDRY_PHASE unset while the probes ran"
+  network_constraints: "none used; every probe is local git and Ruby"
+  destructive_actions: prohibited   # outside the temp fixtures, which are deleted after each test
+cases:
+  - id: ATTACK-001
+    threat: THREAT-001
+    violation_attempted: an open session writes a must criteria approval into metadata.yml itself and seals specify
+    starting_privilege: a session with shell write access to metadata.yml; specify complete, no approval recorded
+    steps:
+      - write a human_decisions entry (boundary must criteria approval, decision approved) into uncommitted metadata.yml
+      - phase seal specify
+    expected_safe_behavior: "MIT-001: the seal names human_decisions as a hand-edited key; the forgery itself is residual risk by design (gate scope is structural)"
+    observed: "sealed, with the note: metadata.yml also carries uncommitted edits to human_decisions, which this seal commits"
+    result: denied
+    evidence: [evidence/probe-run.txt, evidence/attack_probe_test.rb]
+  - id: ATTACK-002
+    threat: THREAT-002
+    violation_attempted: lower the sealed round count without rewriting history by pointing metadata git.branch at another existing branch (main)
+    starting_privilege: a session that can edit metadata.yml; two remediation rounds sealed
+    steps:
+      - set git.branch to main in metadata.yml
+      - phase reopen remediate
+    expected_safe_behavior: the count stays 2 and the reopen is refused, parking the change
+    observed: "the count dropped from 2 to 0 and the reopen was PERMITTED: remediate, review and judge reset, status stayed in_progress, nothing parked"
+    result: violated
+    evidence: [evidence/probe-run.txt, evidence/attack_probe_test.rb]
+  - id: ATTACK-002b
+    threat: THREAT-002
+    violation_attempted: with three rounds sealed, redirect git.branch and run the review gate
+    starting_privilege: as ATTACK-002, three rounds sealed
+    steps:
+      - set git.branch to main
+      - gate review
+    expected_safe_behavior: the review gate fails
+    observed: "remediation within cap passed (0 rounds); the gate failed anyway, because evidence current reports STALE: declaration changed: git.branch"
+    result: denied
+    evidence: [evidence/probe-run.txt]
+  - id: ATTACK-002c
+    threat: THREAT-002
+    violation_attempted: keep git.branch redirected, commit it, rerun the stale review at a new commit, and gate review
+    starting_privilege: as ATTACK-002b
+    steps:
+      - commit the redirected metadata
+      - complete review at the new HEAD and commit
+      - gate review
+    expected_safe_behavior: the review gate fails on the cap
+    observed: "every review check passed, including remediation within cap, with three rounds and no decision"
+    result: violated
+    evidence: [evidence/probe-run.txt]
+  - id: ATTACK-002d
+    threat: THREAT-002
+    violation_attempted: "end to end: redirect only for the reopen, restore git.branch, do round three, seal it; then try sealing while the branch is redirected"
+    starting_privilege: two rounds sealed
+    steps:
+      - redirect git.branch, phase reopen remediate (permitted), restore git.branch
+      - complete remediate, phase seal remediate
+      - redirect again, phase seal remediate
+    expected_safe_behavior: round three cannot be sealed
+    observed: "seal refused at the cap once the branch was restored; seal refused under redirect because the checked-out branch is not the record's. The gate-level pass in ATTACK-002c cannot be sealed for the same reason."
+    result: denied
+    evidence: [evidence/probe-run.txt]
+  - id: ATTACK-003
+    threat: THREAT-002
+    violation_attempted: reach a third remediation without a reopen and seal it
+    starting_privilege: two sealed rounds, remediate complete again by hand
+    steps:
+      - phase seal remediate
+    expected_safe_behavior: seal refused and status awaiting_human
+    observed: refused; status awaiting_human
+    result: denied
+    evidence: [evidence/probe-run.txt]
+  - id: ATTACK-004
+    threat: THREAT-003
+    violation_attempted: set status back to in_progress by hand after parking, with no decision
+    starting_privilege: three sealed rounds
+    steps:
+      - set status in_progress
+      - gate review, gate judge, phase reopen remediate
+    expected_safe_behavior: both gates fail the cap and the reopen is refused
+    observed: review=fail, judge=fail; reopen refused and status set back to awaiting_human
+    result: denied
+    evidence: [evidence/probe-run.txt]
+  - id: ATTACK-005a
+    threat: THREAT-004
+    violation_attempted: change .ai/workflow.yml under a documentation-only reopen and seal remediation
+    starting_privilege: one sealed round, phase reopen remediate --docs-only
+    steps:
+      - commit an edit to .ai/workflow.yml
+      - phase seal remediate
+    expected_safe_behavior: seal refused, naming the path
+    observed: refused, naming .ai/workflow.yml and advising a reopen without --docs-only
+    result: denied
+    evidence: [evidence/probe-run.txt]
+  - id: ATTACK-005b
+    threat: THREAT-004
+    violation_attempted: leave a lib/ change uncommitted under a documentation-only reopen and seal
+    starting_privilege: as ATTACK-005a
+    steps:
+      - write lib/app.rb without committing
+      - phase seal remediate
+    expected_safe_behavior: seal refused
+    observed: refused (uncommitted application paths; the documentation-only diff also includes worktree status)
+    result: denied
+    evidence: [evidence/probe-run.txt]
+  - id: ATTACK-005c
+    threat: THREAT-004
+    violation_attempted: change AGENTS.md, the agent bootstrap contract, under a documentation-only reopen
+    starting_privilege: as ATTACK-005a
+    steps:
+      - commit a changed line in AGENTS.md
+      - phase seal remediate
+    expected_safe_behavior: "per REQ-011, top-level Markdown is documentation, so the seal is allowed; recorded to show that agent instruction files are treated as documentation"
+    observed: sealed; AGENTS.md classified as documentation
+    result: denied   # behaves as specified; reported as ATK-F7
+    evidence: [evidence/probe-run.txt]
+  - id: ATTACK-005d
+    threat: THREAT-004
+    violation_attempted: commit lib/ after a documentation-only remediation is sealed, keeping verify complete
+    starting_privilege: a documentation-only remediation sealed with README.md only
+    steps:
+      - commit lib/app.rb
+      - gate verify
+    expected_safe_behavior: verify evidence goes stale
+    observed: "evidence current fail: STALE: code changed since ...: lib/app.rb"
+    result: denied
+    evidence: [evidence/probe-run.txt]
+  - id: ATTACK-005e
+    threat: THREAT-004
+    violation_attempted: "liveness: after a documentation-only seal is refused for code, follow the advice (reopen remediate without --docs-only) while the remediation handoff is pending"
+    starting_privilege: docs-only reopen, lib/ fix committed, seal refused, remediation handoff pending
+    steps:
+      - phase reopen remediate
+      - phase reopen verify
+      - complete remediate, phase seal remediate
+    expected_safe_behavior: the advised reopen ends documentation-only mode and the remediation can be sealed
+    observed: "reopen remediate reset only verify, evaluate and attack (remediate was pending, so it was not in the reset and the docs_only entry stayed the latest remediate reopen); the seal was refused again as documentation-only"
+    result: violated
+    evidence: [evidence/probe-run.txt]
+  - id: ATTACK-005f
+    threat: THREAT-002
+    violation_attempted: "the realistic way out of a documentation-only refusal (remediation handoff complete, seal refused, phase reopen remediate) — check whether the round count is honest"
+    starting_privilege: one sealed round, docs-only reopen, lib/ fix committed, remediation complete but not sealed
+    steps:
+      - phase seal remediate (refused, documentation-only)
+      - phase reopen remediate
+      - complete remediate, phase seal remediate
+    expected_safe_behavior: "one round is sealed, so the count is 1 and round two seals"
+    observed: "the count was 2 (the refused, never-sealed remediation counted as a round through its phase_reopenings entry); the seal was refused at the cap, saying 'has sealed 2 remediation rounds', and the change was parked"
+    result: violated
+    evidence: [evidence/probe-run.txt]
+  - id: ATTACK-006
+    threat: THREAT-005
+    violation_attempted: demote an approved must to should after the specify seal and rewrite the approval to match
+    starting_privilege: specify sealed with AC-001 and AC-002 must and approved
+    steps:
+      - set AC-002 tier should, set the approval criteria to [AC-001]
+      - gate specify
+    expected_safe_behavior: specification locked fails
+    observed: specification locked fail (acceptance-criteria.yml changed since the seal); approval check alone passes
+    result: denied
+    evidence: [evidence/probe-run.txt]
+  - id: ATTACK-007
+    threat: THREAT-006
+    violation_attempted: mark a finding about lib/app.rb (modified by the change) outside_change, spelling the path so the string comparison misses it
+    starting_privilege: a review session writing its own handoff findings
+    steps:
+      - "paths: each of lib/app.rb, ./lib/app.rb, 'lib/app.rb ' (trailing space), lib/*.rb, lib//app.rb, LIB/app.rb, lib/"
+      - gate review
+    expected_safe_behavior: every spelling of the modified file fails outside-change findings
+    observed: "lib/app.rb and lib/ fail; ./lib/app.rb, 'lib/app.rb ', lib/*.rb, lib//app.rb and LIB/app.rb pass"
+    result: violated
+    evidence: [evidence/probe-run.txt]
+  - id: ATTACK-008a
+    threat: THREAT-007
+    violation_attempted: delete rules from metadata.yml after the intake seal, then go past the cap
+    starting_privilege: a session that can edit metadata.yml; intake sealed with rules 2; two sealed rounds
+    steps:
+      - delete rules
+      - phase reopen remediate
+      - seal a third round; gate review, gate judge, gate intake
+    expected_safe_behavior: the reopen is refused, or every cap check still applies
+    observed: "reopen PERMITTED; review and judge remediation within cap report skip (legacy record); only the intake gate's rules kept fails. By the code, remediation_refusal in phase_seal.rb returns nil when rules do not apply, so the remediation seal refusal is disarmed as well. Release (evaluate_all) and ci gate every phase and would surface the intake failure."
+    result: violated
+    evidence: [evidence/probe-run.txt]
+  - id: ATTACK-008b
+    threat: THREAT-007
+    violation_attempted: delete rules after change new wrote it but before the intake seal
+    starting_privilege: the intake session, which writes metadata.yml
+    steps:
+      - delete rules
+      - phase seal intake
+      - gate intake
+    expected_safe_behavior: the seal is refused, or the record is still held to the rules
+    observed: "sealed, with only the hand-edited-keys note naming rules; rules kept then reports skip and the record is legacy for good: every new check skips"
+    result: violated
+    evidence: [evidence/probe-run.txt]
+  - id: ATTACK-009
+    threat: THREAT-008
+    violation_attempted: get the small size for a diff of README.md plus a .rb file under another record's directory (changes/c1-evil/)
+    starting_privilege: a session at intake choosing paths
+    steps:
+      - commit README.md and changes/c1-evil/x.rb
+      - change size --phase attack --since base
+    expected_safe_behavior: the larger size
+    observed: full_route_sweep; the documentation-only rule did not apply
+    result: denied
+    evidence: [evidence/probe-run.txt]
+  - id: ATTACK-010
+    threat: THREAT-003
+    violation_attempted: answer the cap with a malformed decision (rounds "2" as a string, decision Accept_Residual)
+    starting_privilege: three sealed rounds
+    steps:
+      - record the malformed entry
+      - gate review
+    expected_safe_behavior: "the check fails and, per the specification's failure behaviour, names the malformed fields"
+    observed: "the check fails (denied), but the detail says only that no decision exists for round 3; it does not name rounds or decision as malformed"
+    result: denied   # reported as ATK-F8 for the message
+    evidence: [evidence/probe-run.txt]
+  - id: ATTACK-011
+    threat: THREAT-006
+    violation_attempted: terminal escape sequences (ESC [2J, OSC title, BEL; built in the script as \u001b and \u0007 escapes) in an outside_change finding's summary and follow_up
+    starting_privilege: an attack session writing its own handoff findings
+    steps:
+      - write the finding
+      - read Advisory notices
+    expected_safe_behavior: the follow-up advisory carries no raw ESC or BEL
+    observed: one follow-up notice; no ESC, no BEL
+    result: denied
+    evidence: [evidence/probe-run.txt]
+  - id: ATTACK-012
+    threat: THREAT-002
+    violation_attempted: reset the round count by deleting the remediate entries from phase_reopenings (the threat's first vector)
+    starting_privilege: a session or committer that can edit and commit metadata.yml; two remediation rounds sealed
+    steps:
+      - set phase_reopenings to [] and commit
+      - phase reopen remediate
+    expected_safe_behavior: "MIT-002: rounds are counted from Record <slug> remediate commits, so the count stays 2 and the reopen is refused"
+    observed: "rounds counted 2; reopen refused; status awaiting_human"
+    result: denied
+    evidence: [evidence/probe-run.txt, evidence/attack_probe_test.rb]
+  - id: ATTACK-013
+    threat: THREAT-001
+    violation_attempted: the forged must criteria approval of ATTACK-001, committed by hand in an innocuous commit before the seal, so metadata.yml is clean when the seal runs
+    starting_privilege: an open session with shell write and commit access; specify complete
+    steps:
+      - write a human_decisions must criteria approval the person never gave
+      - git commit -am wording
+      - phase seal specify
+    expected_safe_behavior: "MIT-001: the seal names human_decisions as hand-edited, so a person sees it"
+    observed: "metadata.yml clean before the seal; gate passes with must criteria approved=pass; no note names human_decisions (hand_edited_metadata_keys compares only uncommitted metadata against HEAD). The fixture's records predate tool seals, so the seal reports already_sealed through the legacy recorded_commit fallback; on a real record the seal would run and still print no note, because the key list is empty when metadata.yml is clean"
+    result: violated   # detection gap in MIT-001; the forgery itself is residual by design (TM-001)
+    evidence: [evidence/probe-run.txt, evidence/attack_probe_test.rb]
+  - id: ATTACK-014
+    threat: THREAT-008
+    violation_attempted: lower the declared risk from high to low in a hand commit after the intake seal, so default waivers step over threat_model and attack
+    starting_privilege: a session or committer that can commit metadata.yml; intake sealed at risk high
+    steps:
+      - set risk low in metadata.yml and commit it as tidy
+      - phase seal discover
+      - gate intake (waivers permitted)
+    expected_safe_behavior: "MIT-008: a risk changed after intake is named by the seal's hand-edited-keys note"
+    observed: "default waivers went from [] to [discover, threat_model, plan, attack, learn]; discover sealed with no note; intake gate waivers permitted=pass naming the new default waivers. No check compares risk with the intake seal (as rules kept does for rules)"
+    result: violated
+    evidence: [evidence/probe-run.txt, evidence/attack_probe_test.rb]
+  - id: ATTACK-015
+    threat: THREAT-003
+    violation_attempted: reuse one cap decision for a further round (decision recorded at rounds 2; four rounds sealed)
+    starting_privilege: four sealed rounds, one accept_residual decision at rounds 2
+    steps:
+      - gate review
+      - gate judge
+    expected_safe_behavior: both cap checks fail, since round 4 needs a decision at rounds 3
+    observed: review=fail, judge=fail
+    result: denied
+    evidence: [evidence/probe-run.txt]
+  - id: ATTACK-016
+    threat: THREAT-006
+    violation_attempted: mark a finding about the modified lib/app.rb outside_change, naming it by absolute path
+    starting_privilege: a review session writing its own findings
+    steps:
+      - write the finding with paths [<fixture root>/lib/app.rb]
+      - gate review (outside-change findings)
+    expected_safe_behavior: the check fails, since the path names a modified file
+    observed: pass
+    result: violated   # extends ATK-F5
+    evidence: [evidence/probe-run.txt]

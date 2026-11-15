@@ -1,0 +1,34 @@
+## Exploratory run before EVAL-004. Remediation was completed but never sealed: the first seal failed commit lineage because no evidence file changed. Afterwards git log shows no 'Record c1 remediate' commit, yet the round-2 seal is refused as 'has sealed 2 remediation rounds' (counted from phase_reopenings entries that reset a complete remediation). Finding EVA-002.
+## round 1: maintainer reopens remediation after a BLOCKED judgment
+phase reopen: reopened remediate (manual)
+phase reopen: reset verify
+phase reopen: reset evaluate
+phase reopen: reset attack
+phase reopen: reset remediate
+phase reopen: reset review
+phase reopen: reset judge
+exit=0
+  ✓ pass content clean
+c1: 09-remediation is not sealed: its gate fails; nothing was committed
+seal exit=0
+## round 2: maintainer reopens remediation after a BLOCKED judgment
+phase reopen: reopened remediate (manual)
+phase reopen: reset remediate
+exit=0
+c1: cannot seal remediate: c1 has sealed 2 remediation rounds, the limit in .ai/workflow.yml (remediation.max_rounds: 2); another round needs a person's decision. The change is parked: status is awaiting_human. A person records under human_decisions in metadata.yml: boundary: remediation cap, rounds: 2, decision: accept_residual (judge with the open findings as residual risk), narrow (record a requirement change that narrows the claim, then remediate once more) or reject (judge it REJECTED); then sets status back to in_progress
+seal exit=0
+7451be1 phases complete
+c7377dc record
+4ae3919 initial
+## round 3 attempted: two rounds sealed
+soft-foundry: c1 is awaiting_human, so a phase cannot be reopened: a person must record the decision under human_decisions in metadata.yml first
+exit=1
+handoffs unchanged: yes
+12:status: awaiting_human
+ M changes/c1/06-verification/handoff.yml
+ M changes/c1/07-evaluation/handoff.yml
+ M changes/c1/08-attack/handoff.yml
+ M changes/c1/09-remediation/handoff.yml
+ M changes/c1/13-review/handoff.yml
+ M changes/c1/14-judgment/handoff.yml
+ M changes/c1/metadata.yml

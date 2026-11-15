@@ -1,0 +1,14 @@
+02-specification  complete  FAIL
+  ✓ pass handoff identity
+  ✓ pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+  ✓ pass structured files parse: requirements.yml, acceptance-criteria.yml, handoff.yml
+  ✗ fail no placeholders: TBD remains in: specification.md, requirements.yml, readiness.md
+  ✓ pass no blocking conditions
+  ✗ fail commit_sha recorded: missing or malformed
+  - skip commit lineage: commit_sha is not a commit here (see commit_sha recorded)
+  ✗ fail completed_at recorded
+  ✗ fail predecessor complete: 00-intake is pending
+  ! warn specification locked: not yet locked: the completed specification is not committed; the lock takes effect at the commit that records 02-specification/handoff.yml as complete
+  ✗ fail criteria tiered: AC-001 (no tier), AC-002 (tier maybe): every criterion carries tier must or should (must | should)
+  ✗ fail must criteria approved: no approval of the must criteria is recorded; a person records under human_decisions: boundary: must criteria approval, criteria: [], decision: approved
+  ✓ pass content clean

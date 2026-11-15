@@ -12,6 +12,8 @@ require_relative "content_scan"
 require_relative "scope"
 require_relative "sizing"
 require_relative "full_suite"
+require_relative "process_rules"
+require_relative "display"
 
 module SoftFoundry
   # Deterministic completion gate for one lifecycle phase of a change record.
@@ -38,6 +40,15 @@ module SoftFoundry
     MANIFEST_CHECK = "evidence manifest verified"
     VERDICT_CHECK = "verdict recorded"
     FRESH_CHECK = "fresh session recorded"
+    # The convergence rules (ProcessRules, changes/process-speed). Each
+    # reports skip on a legacy record.
+    RULES_KEPT_CHECK = "rules kept"
+    TIERED_CHECK = "criteria tiered"
+    APPROVED_CHECK = "must criteria approved"
+    CAP_CHECK = "remediation within cap"
+    BLOCKED_BASIS_CHECK = "blocked basis"
+    OUTSIDE_CHECK = "outside-change findings"
+    PROCESS_CHECKS = [RULES_KEPT_CHECK, TIERED_CHECK, APPROVED_CHECK, CAP_CHECK, BLOCKED_BASIS_CHECK, OUTSIDE_CHECK].freeze
     RESULT_WORDS = %w[pass fail error skipped].freeze
     # The two names the runner writes into executed_by.runner; any other
     # string, prefix or not, is not the runner's (ATK-009).
@@ -80,7 +91,13 @@ module SoftFoundry
       "instincts valid" => "The instincts the learning phase recorded are well formed.",
       "findings explained" => "Every review finding above minor names the failure it prevents.",
       "panel recorded" => "A phase run as a panel has a draft per member, a non-empty ARGUMENT.md, an outcome, and every draft cited in its outputs.",
-      "content clean" => "The phase's files carry no invisible text or secret-shaped strings."
+      "content clean" => "The phase's files carry no invisible text or secret-shaped strings.",
+      RULES_KEPT_CHECK => "A record whose intake was sealed declaring the convergence rules (rules: 2) still declares them, so a new record cannot be made to look legacy.",
+      TIERED_CHECK => "Under the convergence rules, every acceptance criterion carries tier must or should, and the must count is within .ai/workflow.yml must_criteria_cap for the declared risk.",
+      APPROVED_CHECK => "Under the convergence rules, human_decisions holds a 'must criteria approval' entry, decision approved, whose criteria are exactly the specification's must criteria. The entry is read, not who wrote it.",
+      CAP_CHECK => "Under the convergence rules, every sealed remediation round beyond .ai/workflow.yml remediation.max_rounds is answered by a 'remediation cap' decision under human_decisions (accept_residual or narrow) for that round count.",
+      BLOCKED_BASIS_CHECK => "Under the convergence rules, a BLOCKED judgment lists in 14-judgment/evidence.yml blocked_by what blocks it: must criteria, or review findings of severity blocking that name a failure and are not marked outside_change.",
+      OUTSIDE_CHECK => "Under the convergence rules, a finding marked outside_change names a follow_up and the paths it concerns, and none of those paths changed in this change's diff."
     }.freeze
 
     # The checks a complete `phase` is put through, in the order `evaluate`
@@ -90,10 +107,15 @@ module SoftFoundry
       names = ["handoff identity"]
       names << "track permitted" if plane.phases.first == phase
       names << "waivers permitted" if plane.phases.first == phase
+      names << RULES_KEPT_CHECK if plane.phases.first == phase
       names << "not exploring" if plane.hardening_phase?(phase)
       names += ["required files present", STRUCTURED_CHECK, "no placeholders", "no blocking conditions", "commit_sha recorded", LINEAGE_CHECK, "completed_at recorded", "predecessor complete"]
       names << "evidence current" if plane.skill(phase.skill).commit_bound?
       names << "specification locked" if phase.id == "specify"
+      names += [TIERED_CHECK, APPROVED_CHECK] if phase.id == "specify"
+      names << CAP_CHECK if %w[review judge].include?(phase.id)
+      names << BLOCKED_BASIS_CHECK if phase.id == "judge"
+      names << OUTSIDE_CHECK if %w[attack review].include?(phase.id)
       names += ["red evidence", SIZE_CHECK, PROTECTION_CHECK, FULL_SUITE_CHECK, RESULTS_CHECK, CRITERIA_CHECK] if phase.id == "verify"
       names << MANIFEST_CHECK if manifest_phase?(plane, phase)
       names += [CRITERIA_CHECK, VERDICT_CHECK] if phase.id == "judge"
@@ -144,6 +166,7 @@ module SoftFoundry
       checks << identity_check(phase, skill, handoff)
       checks << track_check if @plane.phases.first == phase
       checks << waivers_check if @plane.phases.first == phase
+      checks << rules_kept_check if @plane.phases.first == phase
       blocking = Array(handoff["blocking"])
 
       case status
@@ -163,6 +186,10 @@ module SoftFoundry
         checks << predecessor_check(phase)
         checks << staleness_check(phase, handoff) if skill.commit_bound?
         checks << specification_lock_check(phase) if phase.id == "specify"
+        checks.concat([tiered_check, approved_check]) if phase.id == "specify"
+        checks << cap_check if %w[review judge].include?(phase.id)
+        checks << blocked_basis_check if phase.id == "judge"
+        checks << outside_change_check(handoff) if %w[attack review].include?(phase.id)
         checks << red_evidence_check(phase, handoff) if phase.id == "verify"
         checks.concat(scoped_verification_checks(phase, handoff)) if phase.id == "verify"
         checks << protection_check(phase) if phase.id == "verify"
@@ -221,8 +248,148 @@ module SoftFoundry
         next "#{id} cannot be waived until the risk is classified (metadata.yml risk: #{risk.empty? ? 'unset' : risk})" unless classified
         "#{id} cannot be waived at risk #{risk.downcase} (waivable: #{allowed.empty? ? 'none' : allowed.join(', ')}; .ai/workflow.yml waivable_by_risk)"
       end
-      return Check.new("waivers permitted", :pass, Array(@record.metadata["skipped_phases"]).empty? ? "nothing waived" : "risk #{risk.downcase}") if problems.empty?
+      if problems.empty?
+        defaults = process_rules.default_waivers
+        detail = Array(@record.metadata["skipped_phases"]).empty? ? "nothing waived" : "risk #{risk.downcase}"
+        detail = "#{detail == 'nothing waived' ? '' : "#{detail}; "}default waivers at risk #{risk.downcase}: #{defaults.join(', ')} (name a phase under run_phases to run it)" unless defaults.empty?
+        return Check.new("waivers permitted", :pass, detail)
+      end
       Check.new("waivers permitted", :fail, problems.join("; "))
+    end
+
+    # --- convergence rules (ProcessRules) --------------------------------
+
+    def process_rules = (@process_rules ||= ProcessRules.new(@record, git: @git))
+
+    # Skip on a closed or released record, then on a legacy one; nil when
+    # the rule applies.
+    def process_skip(name)
+      historical_skip(name) || (process_rules.applies? ? nil : Check.new(name, :skip, ProcessRules::LEGACY))
+    end
+
+    # MIT-007: the rules version the intake seal committed cannot be
+    # dropped later to make the record legacy.
+    def rules_kept_check
+      return historical_skip(RULES_KEPT_CHECK) if historical_skip(RULES_KEPT_CHECK)
+      return Check.new(RULES_KEPT_CHECK, :pass, "rules #{@record.metadata['rules']}") if process_rules.applies?
+      intake = @plane.phases.first
+      sha = intake && @git.repository? ? recorded_commit(intake) : nil
+      return Check.new(RULES_KEPT_CHECK, :skip, ProcessRules::LEGACY) unless sha
+      sealed = YAML.safe_load(@git.blob(sha, "changes/#{@record.slug}/metadata.yml").to_s, permitted_classes: [Time, Date], aliases: true)
+      return Check.new(RULES_KEPT_CHECK, :skip, ProcessRules::LEGACY) unless ProcessRules.applies?(sealed)
+      Check.new(RULES_KEPT_CHECK, :fail, "metadata.yml declared rules: #{sealed['rules']} when #{intake.output} was sealed at #{sha[0, 12]} and no longer does; restore it (a record cannot be made legacy after it starts)")
+    rescue Psych::Exception, GitError
+      Check.new(RULES_KEPT_CHECK, :skip, ProcessRules::LEGACY)
+    end
+
+    def tiered_check
+      return process_skip(TIERED_CHECK) if process_skip(TIERED_CHECK)
+      criteria = process_rules.criteria
+      return Check.new(TIERED_CHECK, :fail, "02-specification/acceptance-criteria.yml lists no criteria") if criteria.empty?
+      bad = criteria.reject { |c| ProcessRules::TIERS.include?(process_rules.tier(c)) }.map { |c| "#{c['id']} (#{c['tier'].nil? ? 'no tier' : "tier #{c['tier'].to_s[0, 20]}"})" }
+      return Check.new(TIERED_CHECK, :fail, "#{bad.join(', ')}: every criterion carries tier must or should (#{ProcessRules::TIERS.join(' | ')})") unless bad.empty?
+      risk = @record.metadata["risk"].to_s.strip.downcase
+      cap = process_rules.must_cap(risk)
+      musts = process_rules.must_ids
+      # An unclassified risk has no cap: every must stays binding, the
+      # strict side, as an unclassified risk may waive nothing.
+      return Check.new(TIERED_CHECK, :warn, "#{musts.size} must, #{process_rules.should_ids.size} should; risk '#{risk.empty? ? 'unset' : risk}' has no cap in .ai/workflow.yml must_criteria_cap, so none is applied; classify the risk") unless cap
+      if musts.size > cap
+        return Check.new(TIERED_CHECK, :fail, "#{musts.size} must criteria, more than the #{cap} .ai/workflow.yml must_criteria_cap allows at risk #{risk}; move the rest to should, or raise the risk")
+      end
+      Check.new(TIERED_CHECK, :pass, "#{musts.size} must, #{process_rules.should_ids.size} should (cap #{cap} at risk #{risk})")
+    rescue TargetError => e
+      Check.new(TIERED_CHECK, :fail, e.message)
+    end
+
+    def approved_check
+      return process_skip(APPROVED_CHECK) if process_skip(APPROVED_CHECK)
+      musts = process_rules.must_ids.sort
+      entry = process_rules.approval
+      fix = "a person records under human_decisions: boundary: #{ProcessRules::APPROVAL_BOUNDARY}, criteria: [#{musts.join(', ')}], decision: approved"
+      return Check.new(APPROVED_CHECK, :fail, "no approval of the must criteria is recorded; #{fix}") unless entry
+      approved = Array(entry["criteria"]).map(&:to_s).sort
+      missing = musts - approved
+      extra = approved - musts
+      return Check.new(APPROVED_CHECK, :pass, "#{musts.size} must #{musts.size == 1 ? 'criterion' : 'criteria'} approved by #{Display.safe(entry['decided_by'].to_s)}") if missing.empty? && extra.empty?
+      parts = []
+      parts << "not approved: #{missing.join(', ')}" unless missing.empty?
+      parts << "approved but not must: #{extra.join(', ')}" unless extra.empty?
+      Check.new(APPROVED_CHECK, :fail, "the approval does not match the must criteria (#{parts.join('; ')}); #{fix}")
+    end
+
+    def cap_check
+      return process_skip(CAP_CHECK) if process_skip(CAP_CHECK)
+      rounds = process_rules.remediation_rounds
+      limit = process_rules.max_rounds
+      unanswered = process_rules.unanswered_rounds(rounds)
+      return Check.new(CAP_CHECK, :pass, "#{rounds} remediation #{rounds == 1 ? 'round' : 'rounds'} (limit #{limit}#{rounds > limit ? ', beyond it by a person\'s decision' : ''})") if unanswered.empty?
+      Check.new(CAP_CHECK, :fail, "#{rounds} remediation rounds sealed, beyond the limit of #{limit}, with no decision for #{unanswered.map { |k| "round #{k + 1}" }.join(', ')}; a person records boundary: #{ProcessRules::CAP_BOUNDARY}, rounds: #{unanswered.first}, decision: accept_residual or narrow")
+    rescue TargetError => e
+      Check.new(CAP_CHECK, :fail, e.message)
+    end
+
+    def blocked_basis_check
+      return process_skip(BLOCKED_BASIS_CHECK) if process_skip(BLOCKED_BASIS_CHECK)
+      outcome = begin
+        @record.judgment_outcome
+      rescue RecordFileError
+        nil
+      end
+      return Check.new(BLOCKED_BASIS_CHECK, :pass, "judgment is #{outcome || 'not stated'}") unless outcome == "BLOCKED"
+      named = Array(judgment_evidence_safe["blocked_by"]).map(&:to_s).reject(&:empty?)
+      return Check.new(BLOCKED_BASIS_CHECK, :fail, "BLOCKED names nothing in 14-judgment/evidence.yml blocked_by; list the must criteria or blocking review findings it rests on") if named.empty?
+      musts = process_rules.must_ids
+      shoulds = process_rules.should_ids
+      findings = review_findings.to_h { |f| [f["id"].to_s, f] }
+      problems = named.filter_map do |id|
+        next if musts.include?(id)
+        next "#{id} is a should criterion, which never blocks" if shoulds.include?(id)
+        f = findings[id]
+        next "#{id} is neither a must criterion nor a review finding" unless f
+        next "#{id} is marked outside_change, so it is a follow-up, not a reason to block" if f["outside_change"] == true
+        next "#{id} has severity #{f['severity'].to_s.empty? ? '(none)' : f['severity']}, not blocking" unless f["severity"].to_s.strip.downcase == "blocking"
+        next "#{id} names no failure" if f["failure"].to_s.strip.empty?
+      end
+      return Check.new(BLOCKED_BASIS_CHECK, :fail, "#{problems.join('; ')}; a BLOCKED judgment rests on must criteria or blocking findings") unless problems.empty?
+      Check.new(BLOCKED_BASIS_CHECK, :pass, "BLOCKED by #{named.join(', ')}")
+    end
+
+    def review_findings
+      review = @plane.phase("review")
+      h = review && @record.handoff(review)
+      Array(h.is_a?(Hash) ? h["findings"] : nil).select { |f| f.is_a?(Hash) }
+    rescue RecordFileError, Psych::Exception
+      []
+    end
+
+    def outside_change_check(handoff)
+      return process_skip(OUTSIDE_CHECK) if process_skip(OUTSIDE_CHECK)
+      marked = Array(handoff["findings"]).select { |f| f.is_a?(Hash) && f["outside_change"] == true }
+      return Check.new(OUTSIDE_CHECK, :pass, "no finding marked outside_change") if marked.empty?
+      changed = change_diff_paths
+      problems = marked.filter_map do |f|
+        id = f["id"] || "(no id)"
+        next "#{id} names no follow_up" if f["follow_up"].to_s.strip.empty?
+        paths = Array(f["paths"]).map(&:to_s).reject(&:empty?)
+        next "#{id} names no paths (the code it concerns)" if paths.empty?
+        next "#{id}: cannot measure this change's diff, so outside_change cannot be confirmed" if changed.nil?
+        inside = paths.select { |p| changed.any? { |c| c == p || c.start_with?("#{p.chomp('/')}/") } }
+        "#{id} concerns #{inside.join(', ')}, which this change modified; it is this change's finding" unless inside.empty?
+      end
+      return Check.new(OUTSIDE_CHECK, :fail, problems.join("; ")) unless problems.empty?
+      Check.new(OUTSIDE_CHECK, :pass, "#{marked.size} #{marked.size == 1 ? 'finding' : 'findings'} carried as follow-ups: #{marked.map { |f| f['id'] }.join(', ')}")
+    end
+
+    # Paths this change modified since its diff base (the plan's commit,
+    # or the first recorded phase), or nil when git cannot say.
+    def change_diff_paths
+      return nil unless @git.repository?
+      base = Scope.new(@record, git: @git).change_base || recorded_commit(@plane.phases.first)
+      return nil unless base
+      @git.diff_paths(base)
+    rescue GitError
+      nil
     end
 
     # The exploring stage produces a journal, never evidence: nothing from
@@ -577,8 +744,15 @@ module SoftFoundry
       unknown = aside_ids - ids
       return Check.new(CRITERIA_CHECK, :fail, "criteria_not_covered names #{unknown.join(', ')}, which #{unknown.size == 1 ? 'is not a criterion' : 'are not criteria'} in 02-specification/acceptance-criteria.yml") unless unknown.empty?
       missing = ids - covered - aside_ids
+      # Under the convergence rules only a must criterion binds; an
+      # uncovered should criterion is reported, never a failure (REQ-006).
+      should_missing = process_rules.applies? ? missing & process_rules.should_ids : []
+      missing -= should_missing
       unless missing.empty?
         return Check.new(CRITERIA_CHECK, :fail, "#{missing.join(', ')} named by no verification check or evaluation journey and not set aside in 14-judgment/evidence.yml criteria_not_covered with a reason")
+      end
+      unless should_missing.empty?
+        return Check.new(CRITERIA_CHECK, :warn, "should #{should_missing.size == 1 ? 'criterion' : 'criteria'} #{should_missing.join(', ')} named by no verification check or evaluation journey; reported, not blocking (every must criterion is covered)")
       end
       Check.new(CRITERIA_CHECK, :pass, "#{ids.size} #{ids.size == 1 ? 'criterion' : 'criteria'}: #{(ids & covered).size} covered#{aside_ids.empty? ? '' : ", #{aside_ids.size} set aside with a reason (#{aside_ids.join(', ')})"}")
     end

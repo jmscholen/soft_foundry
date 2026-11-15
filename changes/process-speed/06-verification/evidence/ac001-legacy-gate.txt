@@ -1,0 +1,240 @@
+### AC-001 legacy leg: gate all --change readme-workflow-visuals in its own checkout (3aa69a7), with that branch's code (exe/soft-foundry) and with process-speed's code at 9473ac3
+### --- branch's own code
+00-intake  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass waivers permitted: nothing waived
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: f6f01c135c3829454e3be49848ed776fd45b58a9
+  ✓ pass commit lineage: reaches HEAD 3aa69a78f846; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-11-04 14:46:00 UTC
+  ✓ pass predecessor complete: first phase
+  ✓ pass content clean
+01-discovery  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: repository-context.md, affected-components.md, dependencies.md, unknowns.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 400d40d68c9cfc5e870d9fa182c22b6264fccf90
+  ✓ pass commit lineage: descends from 00-intake at f6f01c135c38; reaches HEAD 3aa69a78f846; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-11-05 20:33:32 UTC
+  ✓ pass predecessor complete: 00-intake
+  ✓ pass content clean
+02-specification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+  ✓ pass structured files parse: requirements.yml, acceptance-criteria.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 15c2bd169e8d898bf0e95dacc7a40866cc40f2b5
+  ✓ pass commit lineage: descends from 01-discovery at 400d40d68c9c; reaches HEAD 3aa69a78f846; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-11-05 20:34:26 UTC
+  ✓ pass predecessor complete: 01-discovery
+  ✓ pass specification locked: locked at 8968f17fbfaa, the commit that recorded it
+  ✓ pass content clean
+03-threat-model  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: attack-surface.md, trust-boundaries.md, threats.yml, mitigations.md, handoff.yml
+  ✓ pass structured files parse: threats.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 8968f17fbfaaf8fa26c6b3816ab5544ae50c94c0
+  ✓ pass commit lineage: descends from 02-specification at 15c2bd169e8d; reaches HEAD 3aa69a78f846; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-11-05 20:35:19 UTC
+  ✓ pass predecessor complete: 02-specification
+  ✓ pass content clean
+04-plan  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: implementation.md, testing.md, rollout.md, rollback.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 9655f9b141feecccaddde3e7d967406b6de3df0d
+  ✓ pass commit lineage: descends from 03-threat-model at 8968f17fbfaa; reaches HEAD 3aa69a78f846; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-11-06 00:20:28 UTC
+  ✓ pass predecessor complete: 03-threat-model
+  ✓ pass content clean
+05-implementation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 4c726fa8013ddf544e8a9ea4c7f794934dd20b9c
+  ✓ pass commit lineage: descends from 04-plan at 9655f9b141fe; reaches HEAD 3aa69a78f846; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-11-06 03:55:00 UTC
+  ✓ pass predecessor complete: 04-plan
+  ! warn content clean: decisions.md:6 override (instruction-override phrase (a rule quoting an attack may add the allow marker))
+06-verification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: adcf2279535bee329de275db26701497a8964b47
+  ✓ pass commit lineage: descends from 05-implementation at 4c726fa8013d; reaches HEAD 3aa69a78f846; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-11-13T17:44:55Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since adcf2279535b; specification unchanged since 8968f17fbfaa
+  - skip red evidence: no check records a red_commit
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 6be2f32fc5d1, outcome passed (a record, not a test result)
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass test results recorded: 21 checks, 16 pass; acknowledged: CHECK-013 (skipped), CHECK-016 (fail), CHECK-017 (fail), CHECK-019 (skipped), CHECK-020 (fail)
+  ✓ pass criteria covered: 9 criteria named by verification checks
+  ✓ pass evidence manifest verified: 275 artifacts match
+  ✓ pass content clean
+07-evaluation  in_progress  PASS
+  ✓ pass handoff identity
+  ! warn phase in progress: not yet gated
+08-attack  pending  SKIP
+  - skip phase pending: not started
+09-remediation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: summary.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7f153ae959b14759535777562f7d0a6b4fcfbb07
+  ✓ pass commit lineage: descends from 05-implementation at 4c726fa8013d; reaches HEAD 3aa69a78f846; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-11-13 17:35:00 UTC
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass content clean
+10-user-documentation  pending  SKIP
+  - skip phase pending: not started
+11-faq-index  pending  SKIP
+  - skip phase pending: not started
+12-observability  pending  SKIP
+  - skip phase pending: not started
+13-review  pending  SKIP
+  - skip phase pending: not started
+14-judgment  pending  SKIP
+  - skip phase pending: not started
+15-learning  pending  SKIP
+  - skip phase pending: not started
+exit=0
+### --- process-speed code
+00-intake  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass track permitted: gated
+  ✓ pass waivers permitted: nothing waived
+  - skip rules kept: legacy record: created before the convergence rules (no `rules: 2` in metadata.yml)
+  ✓ pass required files present: request.md, assumptions.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: f6f01c135c3829454e3be49848ed776fd45b58a9
+  ✓ pass commit lineage: reaches HEAD 3aa69a78f846; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-11-04 14:46:00 UTC
+  ✓ pass predecessor complete: first phase
+  ✓ pass content clean
+01-discovery  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: repository-context.md, affected-components.md, dependencies.md, unknowns.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 400d40d68c9cfc5e870d9fa182c22b6264fccf90
+  ✓ pass commit lineage: descends from 00-intake at f6f01c135c38; reaches HEAD 3aa69a78f846; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-11-05 20:33:32 UTC
+  ✓ pass predecessor complete: 00-intake
+  ✓ pass content clean
+02-specification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: specification.md, requirements.yml, acceptance-criteria.yml, readiness.md, handoff.yml
+  ✓ pass structured files parse: requirements.yml, acceptance-criteria.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 15c2bd169e8d898bf0e95dacc7a40866cc40f2b5
+  ✓ pass commit lineage: descends from 01-discovery at 400d40d68c9c; reaches HEAD 3aa69a78f846; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-11-05 20:34:26 UTC
+  ✓ pass predecessor complete: 01-discovery
+  ✓ pass specification locked: locked at 8968f17fbfaa, the commit that recorded it
+  - skip criteria tiered: legacy record: created before the convergence rules (no `rules: 2` in metadata.yml)
+  - skip must criteria approved: legacy record: created before the convergence rules (no `rules: 2` in metadata.yml)
+  ✓ pass content clean
+03-threat-model  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: attack-surface.md, trust-boundaries.md, threats.yml, mitigations.md, handoff.yml
+  ✓ pass structured files parse: threats.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 8968f17fbfaaf8fa26c6b3816ab5544ae50c94c0
+  ✓ pass commit lineage: descends from 02-specification at 15c2bd169e8d; reaches HEAD 3aa69a78f846; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-11-05 20:35:19 UTC
+  ✓ pass predecessor complete: 02-specification
+  ✓ pass content clean
+04-plan  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: implementation.md, testing.md, rollout.md, rollback.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 9655f9b141feecccaddde3e7d967406b6de3df0d
+  ✓ pass commit lineage: descends from 03-threat-model at 8968f17fbfaa; reaches HEAD 3aa69a78f846; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-11-06 00:20:28 UTC
+  ✓ pass predecessor complete: 03-threat-model
+  ✓ pass content clean
+05-implementation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: log.md, decisions.md, deviations.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 4c726fa8013ddf544e8a9ea4c7f794934dd20b9c
+  ✓ pass commit lineage: descends from 04-plan at 9655f9b141fe; reaches HEAD 3aa69a78f846; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-11-06 03:55:00 UTC
+  ✓ pass predecessor complete: 04-plan
+  ! warn content clean: decisions.md:6 override (instruction-override phrase (a rule quoting an attack may add the allow marker))
+06-verification  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: results.md, tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass structured files parse: tests.yml, evidence/manifest.yml, handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: adcf2279535bee329de275db26701497a8964b47
+  ✓ pass commit lineage: descends from 05-implementation at 4c726fa8013d; reaches HEAD 3aa69a78f846; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-11-13T17:44:55Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass evidence current: no code changes since adcf2279535b; specification unchanged since 8968f17fbfaa
+  - skip red evidence: no check records a red_commit
+  - skip check size matches diff: no scope declared: the whole repository is sized at the largest size
+  ✓ pass full-suite run recorded (record check, not a test result): recorded run on tree 6be2f32fc5d1, outcome passed (a record, not a test result)
+  - skip protection stated: the repository profile declares no access_control
+  ✓ pass test results recorded: 21 checks, 16 pass; acknowledged: CHECK-013 (skipped), CHECK-016 (fail), CHECK-017 (fail), CHECK-019 (skipped), CHECK-020 (fail)
+  ✓ pass criteria covered: 9 criteria named by verification checks
+  ✓ pass evidence manifest verified: 275 artifacts match
+  ✓ pass content clean
+07-evaluation  in_progress  PASS
+  ✓ pass handoff identity
+  ! warn phase in progress: not yet gated
+08-attack  pending  SKIP
+  - skip phase pending: not started
+09-remediation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: summary.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: 7f153ae959b14759535777562f7d0a6b4fcfbb07
+  ✓ pass commit lineage: descends from 05-implementation at 4c726fa8013d; reaches HEAD 3aa69a78f846; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-11-13 17:35:00 UTC
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass content clean
+10-user-documentation  pending  SKIP
+  - skip phase pending: not started
+11-faq-index  pending  SKIP
+  - skip phase pending: not started
+12-observability  pending  SKIP
+  - skip phase pending: not started
+13-review  pending  SKIP
+  - skip phase pending: not started
+14-judgment  pending  SKIP
+  - skip phase pending: not started
+15-learning  pending  SKIP
+  - skip phase pending: not started
+exit=0

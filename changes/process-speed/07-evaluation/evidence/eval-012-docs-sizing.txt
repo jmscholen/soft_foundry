@@ -1,0 +1,30 @@
+## AC-013: diff since the plan touches only README.md and the change record
+phase: verify
+size: targeted_plus_full_before_merge
+scope: whole repository
+base: 96d08772a3d335a5644d0cc1b1be6acd6349fb12
+reason: documentation-only diff: every changed path is documentation (DOCS, top-level Markdown, or this record)
+
+phase: evaluate
+size: touched_doors_plus_smoke
+scope: whole repository
+base: 96d08772a3d335a5644d0cc1b1be6acd6349fb12
+reason: documentation-only diff: every changed path is documentation (DOCS, top-level Markdown, or this record)
+
+phase: attack
+size: touched_doors_plus_smoke
+scope: whole repository
+base: 96d08772a3d335a5644d0cc1b1be6acd6349fb12
+reason: documentation-only diff: every changed path is documentation (DOCS, top-level Markdown, or this record)
+
+## AC-013: add a lib/ path
+phase: verify
+size: full_at_verify
+scope: whole repository
+reason: no scope declared: whole-repository scope is sized at the largest size
+
+phase: attack
+size: full_route_sweep
+scope: whole repository
+reason: no scope declared: whole-repository scope is sized at the largest size
+

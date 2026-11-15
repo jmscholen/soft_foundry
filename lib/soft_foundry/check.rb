@@ -31,6 +31,7 @@ module SoftFoundry
       findings.concat(check_policy_standard)
       findings.concat(check_path_groups)
       findings.concat(check_transitions)
+      findings.concat(ProcessRules.lint(@plane).map { |message| Finding.new(:error, message) })
       findings.concat(check_tracks)
       findings.concat(check_waivers)
       findings.concat(check_vocabulary)

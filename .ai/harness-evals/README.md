@@ -34,6 +34,8 @@ record:                       # the planted change record
     06-verification/tests.yml: "..."
   commit: true                # false leaves the record uncommitted
   later_files:                # files written into the record after the commit (uncommitted edits)
+  metadata:                   # optional; keys merged into metadata.yml before the commit (null removes a key)
+  later_metadata:             # optional; keys merged into metadata.yml after the commit
   scope: ["${APP_FILE}"]       # optional; the record's scope globs
   siblings:                   # optional; other active records that claim paths
     - {slug: eval-sibling, scope: ["${APP_FILE}"]}

@@ -1,0 +1,32 @@
+# Instincts: what this change taught, as reusable one-line triggers with an
+# action, a confidence score, and evidence in this record.
+instincts:
+  - id: attack-outside-party-only
+    trigger: when planning or grading an attack on a change
+    action: attack as an outside party using what the change exposes, and record anything that needs write access to the repository as a follow-up, not a finding
+    confidence: 0.9
+    domain: security
+    evidence:
+      - finding: REV-001
+      - path: metadata.yml
+  - id: accept-residual-before-another-round
+    trigger: when review leaves findings and a fix would make evaluation and attack stale
+    action: ask the person whether to accept the findings as residual risk before starting a remediation round
+    confidence: 0.7
+    domain: review
+    evidence:
+      - phase: 14-judgment
+  - id: normalize-paths-before-comparing
+    trigger: when a check compares a path a person or agent wrote with paths from git
+    action: normalize both paths before comparing them
+    confidence: 0.8
+    domain: testing
+    evidence:
+      - finding: REV-004
+  - id: evidence-phases-one-at-a-time
+    trigger: when running evaluation and attack on a repository whose pre-commit hook runs ci
+    action: run the phases one after another, not with --parallel
+    confidence: 0.7
+    domain: git
+    evidence:
+      - path: metadata.yml

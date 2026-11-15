@@ -1,0 +1,156 @@
+---
+phase: '08-attack'
+skill: adversarial-testing
+status: complete
+commit_sha: 46201881662c294728a2fc94d268b6cfadd4cb59
+started_at: '2026-11-14T14:48:13Z'
+completed_at: '2026-11-14T14:53:21Z'
+resolved_model:
+  profile: adversarial_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+- attack-plan.md
+- cases.yml
+- results.md
+- evidence/manifest.yml
+- evidence/attack_probe_test.rb
+- evidence/probe-run.txt
+- evidence/change-size.txt
+blocking: []
+findings:
+- id: ATK-F1
+  severity: minor
+  summary: A remediation that was refused at the seal and never sealed counts as a
+    round. ProcessRules#reopened_rounds counts any reopen that reset a complete remediation
+    handoff. So after a documentation-only refusal, the advised reopen raises the
+    count to 2 with one round sealed. The seal is refused at the cap, saying "has
+    sealed 2 remediation rounds", and the change parks early. This is contrary to
+    REQ-002 (a round is one seal). Rated minor in the rerun (was major) because it
+    fails toward a person; EVA-002 reads the conservative count as intended, so review
+    settles it against REQ-002 wording.
+  failure: 'One sealed round, phase reopen remediate --docs-only, a lib/ fix committed,
+    remediate complete, seal refused (documentation-only), phase reopen remediate,
+    seal again: refused at the cap with count 2 and status awaiting_human (ATTACK-005f).'
+  paths:
+  - lib/soft_foundry/process_rules.rb
+- id: ATK-F2
+  severity: major
+  summary: Deleting rules from metadata.yml after the intake seal disarms the cap.
+    The reopen refusal and PhaseSeal#remediation_refusal read current metadata, and
+    review and judge report remediation within cap as skip. Only the intake gate (rules
+    kept) fails, and only release and ci gate intake. These enforcement points should
+    read the version from the intake seal.
+  failure: 'Intake sealed with rules 2, two rounds sealed, rules deleted: phase reopen
+    remediate is permitted, and gate review and gate judge report the cap as skip
+    with three rounds (ATTACK-008a).'
+  paths:
+  - lib/soft_foundry/process_rules.rb
+  - lib/soft_foundry/phase_reopen.rb
+  - lib/soft_foundry/phase_seal.rb
+  - lib/soft_foundry/gate.rb
+- id: ATK-F3
+  severity: major
+  summary: Deleting rules before the intake seal (THREAT-007's own vector) makes the
+    record legacy for good. The seal only notes rules as a hand-edited key, rules
+    kept skips, and every new check skips. MIT-007 does not cover this. Either state
+    it as residual like THREAT-001, or have the intake seal compare against the change
+    new commit.
+  failure: change new writes rules 2, the intake session deletes it, and phase seal
+    intake succeeds with a note. gate intake then reports rules kept as skip (legacy
+    record) (ATTACK-008b).
+  paths:
+  - lib/soft_foundry/gate.rb
+  - lib/soft_foundry/phase_seal.rb
+- id: ATK-F4
+  severity: minor
+  summary: Round commits are counted from branch_tip(metadata git.branch). Pointing
+    git.branch at main lowers the count to 0, and the reopen at the cap is permitted
+    without parking. A rerun review gate also passes with three rounds and no decision.
+    End to end the remediation and review seals still refused (cap once restored;
+    branch mismatch while redirected). MIT-002's claim that only a history rewrite
+    can lower the count is inaccurate. Count from HEAD too and take the larger.
+  paths:
+  - lib/soft_foundry/process_rules.rb
+- id: ATK-F5
+  severity: minor
+  summary: outside-change findings compares paths as raw strings. ./lib/app.rb, a
+    trailing space, lib//app.rb, LIB/app.rb the glob lib/*.rb and the absolute path
+    (ATTACK-016) all name a modified file and all pass (ATTACK-007). Normalise the
+    paths and refuse globs.
+  paths:
+  - lib/soft_foundry/gate.rb
+- id: ATK-F6
+  severity: minor
+  summary: After a documentation-only refusal with the remediation handoff pending,
+    the advised phase reopen remediate leaves remediate out of the reset (pending
+    phases are excluded). The docs_only entry stays the newest remediate reopen, and
+    the next seal is refused again (ATTACK-005e). A way out exists (complete the handoff
+    and reopen again), but the refusal's advice does not lead to it in this state.
+  paths:
+  - lib/soft_foundry/phase_seal.rb
+  - lib/soft_foundry/phase_reopen.rb
+- id: ATK-F7
+  severity: minor
+  summary: As REQ-011 specifies, every top-level .md counts as documentation, including
+    AGENTS.md and CLAUDE.md, the agent bootstrap contract that check content-scans
+    as instructions. A documentation-only remediation can change them while verify,
+    evaluate and attack keep their evidence (ATTACK-005c). This conflicts with the
+    reasoning that keeps .ai/ out. It is for review or judgment to weigh, not a defect
+    against the specification.
+  paths:
+  - lib/soft_foundry/process_rules.rb
+- id: ATK-F8
+  severity: minor
+  summary: A malformed remediation cap entry (rounds "2", decision Accept_Residual)
+    is correctly not accepted. The failure does not name the malformed field, as the
+    specification's failure behaviour requires; it says only that no decision exists
+    for round 3 (ATTACK-010). The approval check behaves the same way for a mis-cased
+    decision.
+  paths:
+  - lib/soft_foundry/gate.rb
+  - lib/soft_foundry/process_rules.rb
+- id: ATK-F9
+  severity: major
+  summary: A risk lowered in a hand commit after the intake seal is never named, so
+    MIT-008 is inaccurate. hand_edited_metadata_keys sees only uncommitted metadata.
+    Nothing compares risk with the intake seal, as rules kept does for rules. Default
+    waivers grow from none to discover, threat_model, plan, attack and learn, and
+    waivers permitted passes. A high-risk change can step over its threat model and
+    attack. Compare the declared risk with the intake-sealed metadata (fail, or park
+    for a person, when it was lowered).
+  failure: Intake sealed at risk high; risk set to low and committed as "tidy"; phase
+    seal discover prints no note; gate intake waivers permitted=pass listing default
+    waivers discover, threat_model, plan, attack, learn (ATTACK-014).
+  paths:
+  - lib/soft_foundry/phase_seal.rb
+  - lib/soft_foundry/gate.rb
+  - lib/soft_foundry/process_rules.rb
+- id: ATK-F10
+  severity: minor
+  summary: MIT-001's only visible signal (the seal's hand-edited human_decisions note)
+    is avoided by committing the forged approval by hand before phase seal specify,
+    because the note compares against HEAD. THREAT-001 stays residual (TM-001). Compare
+    against the last Record commit instead of HEAD.
+  failure: Forged must criteria approval committed as "wording"; metadata.yml clean
+    at seal; no note; must criteria approved=pass (ATTACK-013).
+  paths:
+  - lib/soft_foundry/phase_seal.rb
+next: remediate
+notes: |-
+  Rerun after the 2026-11-14T14:47:44Z manual reopen (seal ordering only). The code at 4620188 is identical to 0c213b4 and a37d580: only 07-evaluation and metadata.yml changed. All twenty first-run probes were executed again, and every observation matched. Five cases were added (ATTACK-012..016). In total: 25 cases, 15 denied, 10 violated (ATTACK-002, 002c, 005e, 005f, 007, 008a, 008b, 013, 014, 016), none blocked. Findings ATK-F1..F8 were reproduced; ATK-F9 and ATK-F10 are new. ATK-F1 was re-rated minor.
+  Local fixtures only. Every probe builds a temp-directory git repository with test/lifecycle_fixture.rb and calls PhaseReopen, PhaseSeal, Gate, Sizing and Advisory in-process. Nothing outside 08-attack/ was written in this repository, and there was no commit, staging or stash. Provider keys and SOFT_FOUNDRY_PHASE were unset. lib/, test/, .ai/ and exe/ were clean at 4620188.
+  The seal-refusal part of ATK-F2 is from reading phase_seal.rb, not from a probe. In ATTACK-013 the fixture seal reported already_sealed through the legacy recorded_commit fallback, which predates this change and is not a finding. The no-note conclusion holds from the code, because the key list is empty whenever metadata.yml is clean.
+  No finding is marked outside_change. AC-003 and the CLI parked-run refusal were not attacked again; the CLI tests cover them.
+  The guard checks Bash against deny sets only, so the write boundary was kept by policy for shell commands. One read-only grep under lib/ was refused by the guard, because its pattern matched the guard-configuration name; the same read was done with a narrower command.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-11-14T14:48:13Z'
+  finished_at: '2026-11-14T14:53:33Z'
+  exit_status: 0
+  previous_phase: attack
+  session_id: 1ead5efe-9730-4881-8722-7b1e678975d2
+  cwd: "/Users/jscholen-iou/dev/soft_foundry/.claude/worktrees/process-speed"
+branch_resolved: true

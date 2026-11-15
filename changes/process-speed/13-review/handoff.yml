@@ -1,0 +1,196 @@
+---
+phase: 13-review
+skill: review
+status: complete
+commit_sha: d6ed77b077bbbe8a9963f082cfad89706e920ad3
+started_at: '2026-11-14T14:54:03Z'
+completed_at: '2026-11-14T16:54:13Z'
+resolved_model:
+  profile: reasoning_high
+  provider: xai
+  model: grok-4.7
+outputs:
+- functional.md
+- architecture.md
+- security.md
+- accessibility.md
+- policy-conformance.md
+- infrastructure.md
+- operations.md
+- consolidated.md
+blocking: []
+findings:
+- id: REV-001
+  severity: blocking
+  summary: Deleting rules from metadata.yml disarms the remediation cap. phase seal
+    remediate is refused at two Record commits while rules is 2, and returns sealed
+    after that key is deleted and committed. remediation_refusal returns before the
+    cap when applies? is false, and the remediate gate does not run the cap check.
+    rules kept runs only on the intake gate. A deletion committed before the intake
+    seal makes the record legacy with no note.
+  failure: 'Two Record c1 remediate commits on change/c1 with rules 2: phase seal
+    remediate is refused with the cap message. Delete rules, commit, complete the
+    remediate handoff at that HEAD: phase seal remediate returns sealed (throwaway
+    repository, 2026-11-14). ATTACK-008a: after the intake seal, deleting rules permits
+    phase reopen remediate at the cap, and review and judge report remediation within
+    cap as skip. ATTACK-008b: deleting rules before the intake seal makes every new
+    check skip.'
+  paths:
+  - lib/soft_foundry/phase_seal.rb
+  - lib/soft_foundry/phase_reopen.rb
+  - lib/soft_foundry/gate.rb
+  - lib/soft_foundry/process_rules.rb
+- id: REV-002
+  severity: major
+  summary: Round commits are counted from branch_tip of metadata git.branch. Pointing
+    it at main lowers the count without rewriting history, so reopen at the cap is
+    permitted and a rerun review gate can pass the cap check. The seal is still refused
+    while the checked-out branch differs. MIT-002's claim that only a history rewrite
+    lowers the count is not accurate.
+  failure: 'Two sealed rounds, git.branch set to main: phase reopen remediate resets
+    handoffs instead of parking (ATTACK-002). With the redirect committed, remediation
+    within cap passes with three rounds and no decision (ATTACK-002c). phase seal
+    stays refused on the change branch (ATTACK-002d). A throwaway main checkout with
+    rules 2 and git.branch main counted 0 rounds; the seal then failed commit lineage,
+    so this review does not claim that checkout seals.'
+  paths:
+  - lib/soft_foundry/process_rules.rb
+- id: REV-003
+  severity: major
+  summary: A risk lowered in a commit after the intake seal is never named. hand_edited_metadata_keys
+    sees only uncommitted metadata. Default waivers then include threat_model and
+    attack, and waivers permitted passes. MIT-008 said the seal note would name the
+    change.
+  failure: Intake sealed at risk high; risk set to low and committed as tidy; phase
+    seal discover prints no note; gate intake waivers permitted passes listing discover,
+    threat_model, plan, attack, learn (ATTACK-014).
+  paths:
+  - lib/soft_foundry/phase_seal.rb
+  - lib/soft_foundry/process_rules.rb
+  - lib/soft_foundry/gate.rb
+- id: REV-004
+  severity: major
+  summary: outside-change findings compares paths as raw strings. ./lib/app.rb, a
+    trailing space, lib//app.rb, a glob, and the absolute path of a modified file
+    all pass, so a finding about code this change modified is carried as a follow-up
+    and cannot block.
+  failure: Diff contains lib/app.rb. A finding with outside_change true, a follow_up,
+    and paths ./lib/app.rb or lib//app.rb or lib/*.rb or the absolute path passes
+    outside-change findings (ATTACK-007, ATTACK-016).
+  paths:
+  - lib/soft_foundry/gate.rb
+- id: REV-005
+  severity: major
+  summary: reopened_rounds counts a reopen of a complete remediation that was never
+    sealed. The cap message says those rounds were sealed. After a documentation-only
+    refusal, the advised reopen parks the change at the cap with one round actually
+    sealed. REQ-002 defines a round as one seal.
+  failure: 'One sealed round, phase reopen remediate --docs-only, a lib/ fix, remediate
+    completed, seal refused, phase reopen remediate, seal again: refused at the cap,
+    count 2, status awaiting_human, message says two rounds were sealed (ATTACK-005f).'
+  paths:
+  - lib/soft_foundry/process_rules.rb
+- id: REV-006
+  severity: minor
+  summary: While the remediate handoff is pending, the advised phase reopen remediate
+    does not include remediate in the reset, so the docs-only entry stays the newest
+    one that does and the next seal is refused again. Completing the handoff and reopening
+    again clears it.
+  paths:
+  - lib/soft_foundry/phase_seal.rb
+  - lib/soft_foundry/phase_reopen.rb
+- id: REV-007
+  severity: minor
+  summary: A malformed remediation-cap entry is rejected without naming rounds or
+    decision. The failure prose says round 3 while the field it asks for is rounds
+    2. A mis-cased approval decision is reported as no approval. The specification
+    says the failure names the field.
+  paths:
+  - lib/soft_foundry/gate.rb
+  - lib/soft_foundry/process_rules.rb
+- id: REV-008
+  severity: minor
+  summary: AC-012 lists specify among the default waivers. DEV-004, the maintainer's
+    decision on 2026-11-13, excludes specify so the must-list approval still happens.
+    The locked then-clause is not what the code does. Do not start waiving specify.
+  paths:
+  - lib/soft_foundry/process_rules.rb
+- id: REV-009
+  severity: minor
+  summary: adversarial-testing/SKILL.md does not say that findings other than the
+    approved must criteria are advisory. The other skills named in REQ-013 state their
+    rules. AC-016 is a should criterion.
+  paths:
+  - ".ai/skills/adversarial-testing/SKILL.md"
+- id: REV-010
+  severity: minor
+  summary: rules kept has a CHECKS entry and a passing harness-eval case. README.md
+    and docs/user/converging-changes.md never name it and do not say that dropping
+    rules after the intake seal fails the first phase. The other five new checks are
+    named in the user doc.
+  paths:
+  - README.md
+  - docs/user/converging-changes.md
+- id: REV-011
+  severity: minor
+  summary: The follow-up advisory is printed for every outside_change finding, including
+    one the check rejects, and it says the finding concerns code outside this change.
+  paths:
+  - lib/soft_foundry/advisory.rb
+- id: REV-012
+  severity: minor
+  summary: The cap refusal is one line of 506 characters. Outcome words are present
+    and do not depend on color. The command-line rule asks for one fact per line.
+  paths:
+  - lib/soft_foundry/process_rules.rb
+- id: REV-013
+  severity: minor
+  summary: Git#count_subject returns 0 when git log fails. With no qualifying phase_reopenings
+    entry the round count becomes 0 and another remediation round is allowed.
+  paths:
+  - lib/soft_foundry/git.rb
+- id: REV-014
+  severity: minor
+  summary: phase reopen on a change that is already awaiting_human does not repeat
+    the remediation-cap boundary, the round count, or the three decisions. The change
+    status advisory still has them.
+  paths:
+  - lib/soft_foundry/phase_reopen.rb
+- id: REV-015
+  severity: minor
+  summary: A must-criteria approval committed by hand before phase seal specify prints
+    no hand-edited-keys note, because the note compares only uncommitted metadata.
+    THREAT-001 stays the accepted residual. The note is skipped by committing first.
+  paths:
+  - lib/soft_foundry/phase_seal.rb
+- id: REV-016
+  severity: minor
+  outside_change: true
+  follow_up: a documentation change that adds a security-policy file, or that reaffirms
+    the NOT_APPLICABLE rationale
+  summary: The repository profile records privacy, security, and terms as NOT_APPLICABLE
+    and publishes no security policy. This change does not modify that profile and
+    does not close the gap.
+  paths:
+  - ".ai/repository.yml"
+next: remediate
+notes: 'Blocking REV-001 returns the change to remediate (workflow transitions review.on_blocking_findings).
+  This record has no rules: 2, so those new checks do not gate this record. Implementation
+  ran on anthropic; this review ran on xai. Remediation has not run, so there is no
+  remediate provider to differ from. Throwaway probes under /tmp confirmed the seal
+  outcome in REV-001 and the zero round count in REV-002; they did not write this
+  repository. Bash is checked against deny sets only; the probes stayed in temp directories.
+  The product-documentation, FAQ, and observability phase directories are still unused
+  templates and were not reviewed as evidence. Full suite was not re-run; AC-018 rests
+  on verification.'
+executed_by:
+  runner: soft-foundry phase run
+  shell: grok
+  fresh_context: true
+  started_at: '2026-11-14T16:38:33Z'
+  finished_at: '2026-11-14T16:59:19Z'
+  exit_status: 0
+  previous_phase: review
+  session_id: 37974697-ad4d-4bda-9d48-07db7a0733ef
+  cwd: "/Users/jscholen-iou/dev/soft_foundry/.claude/worktrees/process-speed"
+branch_resolved: true

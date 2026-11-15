@@ -1,0 +1,21 @@
+## AC-009: verify and judgment criteria checks
+  ✓ pass criteria covered: 1 criterion named by verification checks
+  ✓ pass criteria covered: 1 criterion: 1 covered
+## AC-009: change release with no --item, two person_checks
+c3: released
+released: c3: 2 open item(s): PC-001, PC-002
+released: c3: recorded at 2026-11-14T05:06:04Z (commit 556fedc9fd00)
+advisory: 1 issue to address before c3 goes live (informational, does not block the gate)
+  ! warn verification: no check in 06-verification/tests.yml records a red_commit, so the failing-test-first evidence .ai/rules/testing.md asks for is not demonstrable for this feature
+exit=0
+release:
+  at: '2026-11-14T05:06:04Z'
+  commit: 556fedc9fd006b96a3aa1e77be8138dd4bc104e1
+  items:
+  - id: PC-001
+    description: the maintainer opens the published page and reads it
+    from: person_check
+  - id: PC-002
+    description: the maintainer runs one real change under the new rules
+    from: person_check
+12:status: released

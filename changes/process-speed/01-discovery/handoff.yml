@@ -1,0 +1,33 @@
+# Phase handoff. One per phase directory. The gate checker validates this file.
+phase: 01-discovery
+skill: repository-discovery
+status: complete
+commit_sha: 623a98c9d456f8c4b4e37c44cc79de8268ec5f4d
+started_at: '2026-11-14T01:59:00Z'
+completed_at: '2026-11-14T02:15:00Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+  - repository-context.md
+  - affected-components.md
+  - dependencies.md
+  - unknowns.md
+blocking: []
+findings:
+  - id: DISC-001
+    severity: minor
+    summary: Baseline at 623a98c with provider keys and SOFT_FOUNDRY_PHASE unset - bundle exec rake test, 902 runs, 6653 assertions, 0 failures, 0 errors, 0 skips, in 1095 s (about 18 minutes). The suite's wall time is itself a cost every verify and remediation round pays; the check-catalog follow-up should consider a targeted subset, and this change should not add slow fixtures.
+  - id: DISC-002
+    severity: minor
+    summary: Remediation routing is not in code. transitions on_blocking_findings and on_blocked are read only by check and ControlPlane#downstream; agents enter a round with `phase reopen remediate`, which resets the full downstream tail. The cap and the documentation-only reopen both belong in PhaseReopen, with the remediate seal covering a first round reached without a reopen.
+  - id: DISC-003
+    severity: minor
+    summary: Staleness reads only APP, TESTS and INFRA paths, so a README or docs edit never stales evidence; README.md is outside the DOCS group (docs/**), so a documentation-only rule must name top-level Markdown explicitly.
+  - id: DISC-004
+    severity: minor
+    summary: The guard refused a discovery read of the harness-eval cases (correct, denied by design) and refused one shell heredoc it could not parse (a tilde followed by digits read as a home-directory path); the files were written with the Write tool instead.
+next: specify
+notes: "Discovery performed by the session that opened the change. .ai/repository.yml is unchanged: the stack, path groups and published-policy entries it records still match the repository at 623a98c."
+executed_by: null

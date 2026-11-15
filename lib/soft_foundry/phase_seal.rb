@@ -36,7 +36,7 @@ module SoftFoundry
 
     def call(phase)
       phase = @plane.phase(phase.to_s) || raise(TargetError, "unknown phase '#{phase}'; lifecycle phases: #{@plane.phases.map(&:id).join(', ')}") unless phase.is_a?(ControlPlane::Phase)
-      if (why = refusal(phase))
+      if (why = refusal(phase) || remediation_refusal(phase))
         return Result.new(outcome: :refused, sha: nil, lines: ["#{@record.slug}: cannot seal #{phase.id}: #{why}"], gate: nil)
       end
       stamp_branch_resolved!(phase) if @plane.skill(phase.skill).commit_bound?
@@ -117,6 +117,34 @@ module SoftFoundry
       nil
     rescue GitError => e
       e.message
+    end
+
+    # Sealing a remediation round under the convergence rules: a round past
+    # the cap parks the change (a round reached without a reopen counts
+    # the same, THREAT-002), and a round opened as documentation-only may
+    # carry documentation changes alone (THREAT-004).
+    def remediation_refusal(phase)
+      return nil unless phase.id == ProcessRules::REMEDIATE
+      rules = ProcessRules.new(@record, git: @git)
+      return nil unless rules.applies?
+      unless rules.another_round_allowed?
+        @record.update_metadata { |m| m["status"] = "awaiting_human" }
+        return rules.cap_refusal
+      end
+      docs_only_refusal
+    end
+
+    def docs_only_refusal
+      entry = Array(@record.metadata["phase_reopenings"]).reverse.find { |e| e.is_a?(Hash) && Array(e["reset"]).map(&:to_s).include?(ProcessRules::REMEDIATE) }
+      return nil unless entry && entry["docs_only"] == true
+      from = entry["from_commit"].to_s
+      return "the documentation-only reopen recorded no from_commit, so the change since it cannot be measured; reopen remediate without --docs-only" unless from.match?(/\A[0-9a-f]{7,40}\z/) && @git.commit?(from)
+      paths = @git.diff_paths(from)
+      code = paths.reject { |p| ProcessRules.documentation_path?(@plane, p, @record.slug) }
+      return nil if code.empty?
+      "remediation was reopened as documentation-only, but paths outside documentation changed since #{from[0, 12]}: #{code.first(5).join(', ')}#{code.size > 5 ? " (and #{code.size - 5} more)" : ''}; reopen remediate without --docs-only so verification, evaluation and attack run again"
+    rescue GitError => e
+      "the change since the documentation-only reopen cannot be measured (#{e.message}); reopen remediate without --docs-only"
     end
 
     # Whether metadata.git.branch resolved when this evidence was sealed:

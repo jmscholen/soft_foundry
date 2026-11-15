@@ -1,0 +1,8 @@
+## BLOCKED, blocked_by: []
+  ✗ fail blocked basis: BLOCKED names nothing in 14-judgment/evidence.yml blocked_by; list the must criteria or blocking review findings it rests on
+## BLOCKED, blocked_by: [AC-002]
+  ✗ fail blocked basis: AC-002 is a should criterion, which never blocks; a BLOCKED judgment rests on must criteria or blocking findings
+## BLOCKED, blocked_by: [REV-001]
+  ✗ fail blocked basis: REV-001 is marked outside_change, so it is a follow-up, not a reason to block; a BLOCKED judgment rests on must criteria or blocking findings
+## BLOCKED, blocked_by: [AC-001]
+  ✓ pass blocked basis: BLOCKED by AC-001

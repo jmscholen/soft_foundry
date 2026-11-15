@@ -1,0 +1,62 @@
+## AC-014: docs-only reopen on a judged record within the cap
+phase reopen: reopened remediate (manual, documentation-only: verify, evaluate and attack evidence kept; the remediation seal refuses any path outside documentation)
+phase reopen: reset remediate
+phase reopen: reset document
+phase reopen: reset index
+phase reopen: reset observe
+phase reopen: reset review
+phase reopen: reset judge
+phase reopen: reset learn
+exit=0
+  track: gated
+  00-intake              complete     ok
+  01-discovery           complete     ok
+  02-specification       complete     ok
+  03-threat-model        complete     ok
+  04-plan                complete     ok
+  05-implementation      complete     ok
+  06-verification        complete     ok
+  07-evaluation          complete     ok
+  08-attack              complete     ok
+  09-remediation         pending      
+  10-user-documentation  pending      
+  11-faq-index           pending      
+  12-observability       pending      
+  13-review              pending      
+  14-judgment            pending      
+  15-learning            pending      
+advisory: 1 issue to address before c4 goes live (informational, does not block the gate)
+  ! warn verification: no check in 06-verification/tests.yml records a red_commit, so the failing-test-first evidence .ai/rules/testing.md asks for is not demonstrable for this feature
+  phase: remediate
+  reset:
+  - remediate
+  - document
+  - index
+  - observe
+  - review
+  - judge
+  - learn
+  from_commit: 492c024b8148c6b01b33a6d3d7e6c5cb1271d859
+  docs_only: true
+## AC-015: remediation changes lib/ after the docs-only reopen
+c4: cannot seal remediate: remediation was reopened as documentation-only, but paths outside documentation changed since 492c024b8148: lib/app.rb; reopen remediate without --docs-only so verification, evaluation and attack run again
+seal exit=1
+a6ba695 remediation touching code
+983c7f2 docs-only reopen
+## AC-015: same, but only README.md changed
+already sealed at 8ef04553faad (09-remediation and metadata.yml are unchanged since)
+seal exit=0
+bc19613 remediation, docs only
+983c7f2 docs-only reopen
+## AC-015 (redone): only README.md committed after the docs-only reopen; remediation files left for the seal to commit
+sealed 09-remediation at 5b696936c432
+seal exit=0
+5b69693 Record c4 remediate
+bce26ac README wording
+983c7f2 docs-only reopen
+## AC-015 (redone, negative): lib/ committed, remediation files left for the seal
+983c7f2 docs-only reopen
+c4: cannot seal remediate: remediation was reopened as documentation-only, but paths outside documentation changed since 492c024b8148: lib/app.rb; reopen remediate without --docs-only so verification, evaluation and attack run again
+seal exit=1
+d762538 code change
+983c7f2 docs-only reopen
