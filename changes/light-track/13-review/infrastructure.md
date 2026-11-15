@@ -1,12 +1,12 @@
 # Infrastructure Review
 
 ## Scope reviewed
-TBD
+`surfaces.infrastructure` is false. The diff from e3004a2 to HEAD was listed: it touches nothing under `infra/`, `.github/`, the gemspec, the Gemfile or the Rakefile, and adds no dependency. `.ai/rules/infrastructure.md` therefore has nothing to evaluate.
 
 ## Findings
 | ID | Severity | Location | Finding | Failure it prevents | Rule or requirement |
 | --- | --- | --- | --- | --- | --- |
-| REV-TBD | blocking / major / minor | TBD | TBD | TBD: the concrete input or state and the wrong result (required for blocking and major) | TBD |
+| None | | | | | |
 
 ## Conformance
-TBD or N/A with justification
+N/A. No Infrastructure as Code is present in or modified by this change.

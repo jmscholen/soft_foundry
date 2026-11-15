@@ -3,18 +3,18 @@
 Standard: `.ai/rules/policy-conformance.md`. Cite the policy document and clause, or a rule from that file, in every finding.
 
 ## Documents checked
-TBD: the privacy policy, security policy, and terms recorded under `policies:` in `.ai/repository.yml`, each with the path or URL and the version or date examined; or a statement that the application publishes none and that this is itself a go-live gap.
+`.ai/repository.yml` records `policies.privacy` and `policies.security` as NOT_APPLICABLE, each with a rationale: Soft Foundry is a library gem that holds no users' data, and the maintainer decided on 2026-09-15 (changes/security-policy-not-applicable) that the tool needs no security policy. There is no published privacy policy, security policy or terms to compare against.
 
 ## Scope reviewed
-TBD
+`surfaces.policy` is false. To confirm that, the whole diff was read for anything the tool collects, sends, stores or promises: the change adds a track name, a path comparison, a round count, a sizing rule and status text. It adds no outbound call, no stored data about a person, no credential handling and no retention. The one new stored value is `previous.remediate.sealed` (true or false) in a record's `phase_reopenings`.
 
 ## Findings
 | ID | Severity | Location | Finding | Failure it prevents | Policy clause or rule |
 | --- | --- | --- | --- | --- | --- |
-| REV-TBD | blocking / major / minor | TBD | TBD | TBD: the concrete input or state and the wrong result (required for blocking and major) | TBD |
+| None | | | | | |
 
 ## Policy text changes required
-TBD: None, or one line per clause that must be published before this change goes live. Publishing a change to a privacy policy, security policy, or terms is a legal commitment under `.ai/policies/human-boundaries.yml`: park the change with `status: awaiting_human` in `metadata.yml` and record the person's decision under `human_decisions` there.
+None.
 
 ## Conformance
-TBD: conforms / conforms with advisories / does not conform / N/A. N/A is valid only when `surfaces.policy` is false and this section says what was examined to conclude the change alters nothing the application collects, shares, retains, protects, or promises.
+N/A. `surfaces.policy` is false, and the diff examined above alters nothing the application collects, shares, retains, protects or promises.
