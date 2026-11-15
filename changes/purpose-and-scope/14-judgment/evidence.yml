@@ -1,37 +1,55 @@
-commit_judged: TBD
+commit_judged: 7296946d07a4e382622604fd652deb4d97f7eb06   # HEAD; outside changes/ identical to the implementation commit d944d07
 phases:
   - phase: 06-verification
-    commit_sha: TBD
-    current: TBD   # true when commit_sha matches the judged commit for all code paths
-    result: TBD
+    commit_sha: 4b693c70bf13d79ba2e35d4bab6d8483421ba582
+    current: true   # no file outside changes/ differs between this commit and the judged commit
+    result: pass    # CHECK-001 to CHECK-004 pass; full suite 935 runs, 0 failures
   - phase: 07-evaluation
-    commit_sha: TBD
-    current: TBD
-    result: TBD
+    commit_sha: d272a5f538034b51e0e7264a4b2e81aadce1c87e
+    current: true
+    result: pass    # EVAL-001 to EVAL-007 pass; four minor advisory findings
   - phase: 08-attack
-    commit_sha: TBD
-    current: TBD
-    result: TBD
+    commit_sha: null
+    current: not_applicable
+    result: not_run   # stepped over by default at risk low (.ai/workflow.yml default_waivers); no attack evidence exists; residual risk R-3
   - phase: 13-review
-    commit_sha: TBD
-    current: TBD
-    result: TBD
-unresolved_findings: []
+    commit_sha: 58447638713364d48123cc4b810febff909b52a3
+    current: true
+    result: pass    # no blocking or major finding; eight minor findings
+# None is blocking or major. Each is carried in residual-risk.md or as a follow-up.
+unresolved_findings:
+  - id: REV-001
+    severity: minor
+    disposition: residual risk R-1; follow-up sentence in the review skill
+  - id: REV-002
+    severity: minor
+    disposition: follow-up, later documentation change (confirms EVAL-F1)
+  - id: REV-003
+    severity: minor
+    disposition: residual risk R-2; guard follow-up change
+  - id: REV-004
+    severity: minor
+    disposition: follow-up, later documentation change (confirms EVAL-F2)
+  - id: REV-005
+    severity: minor
+    disposition: follow-up, name one place for repository-write follow-ups in both skills
+  - id: REV-006
+    severity: minor
+    disposition: follow-up, later documentation change (confirms EVAL-F3 and IMPL-001)
+  - id: REV-007
+    severity: minor
+    disposition: residual risk R-6; needs a person; not caused by this change (same matter as VER-001 and EVAL-F4)
+  - id: REV-008
+    severity: minor
+    disposition: residual risk R-4; the maintainer confirms both approvals on acceptance
+  - id: VER-002
+    severity: minor
+    disposition: process observation; declare a scope on later text-only changes
 # Acceptance criteria named by no verification check's `criteria` and no
-# evaluation journey's `criteria`, each set aside with a reason. The gate's
-# `criteria covered` check fails the judgment for any criterion that is
-# neither covered nor listed here with a non-blank reason, e.g.:
-#   - id: AC-012
-#     reason: needs a production observation; carried as release item OBS-1
+# evaluation journey's `criteria`, each set aside with a reason. None here:
+# AC-001 to AC-006 are each named by CHECK-001 and by at least one journey.
 criteria_not_covered: []
-# Acceptance criteria or judgment conditions left unsatisfied pending a
-# real-world event (production observation, etc.) rather than more
-# repository evidence, e.g.:
-#   - id: AC-060
-#     description: each fix observed corrected on production
-# `soft-foundry change close` refuses to close this change while any id
-# here lacks a human confirmation - via --confirm ID, or a PR comment
-# reading "CONFIRMED: <id>" (see `soft-foundry change request-discharge`)
-# - and then moves it into `discharged` with the confirmation source.
+# Nothing waits on a real-world event. The confirmations asked of the
+# maintainer (R-4, R-6) are residual risk, made when the result is accepted.
 undischarged: []
 discharged: []
