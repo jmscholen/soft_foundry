@@ -1,0 +1,8 @@
+lib/soft_foundry/change_record.rb: Syntax OK
+lib/soft_foundry/cli.rb: Syntax OK
+lib/soft_foundry/gate.rb: Syntax OK
+lib/soft_foundry/phase_reopen.rb: Syntax OK
+lib/soft_foundry/process_rules.rb: Syntax OK
+lib/soft_foundry/sizing.rb: Syntax OK
+test/lifecycle_tracks_test.rb: Syntax OK
+test/light_track_test.rb: Syntax OK

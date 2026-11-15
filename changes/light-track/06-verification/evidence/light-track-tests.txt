@@ -1,0 +1,25 @@
+Run options: -v --seed 3341
+
+# Running:
+
+LightTrackTest#test_a_light_record_needs_the_must_list_approved = 0.90 s = .
+LightTrackTest#test_help_names_the_light_track = 0.33 s = .
+LightTrackTest#test_an_unsealed_remediation_is_not_a_round = 0.94 s = .
+LightTrackTest#test_the_same_record_on_the_gated_track_is_not_finished = 0.96 s = .
+LightTrackTest#test_a_light_record_keeps_the_specification_lock = 0.82 s = .
+LightTrackTest#test_a_text_only_diff_gets_the_smaller_verify_size_without_a_plan = 0.79 s = .
+LightTrackTest#test_the_cap_message_says_rounds_and_gives_the_count = 0.85 s = .
+LightTrackTest#test_a_high_risk_record_cannot_be_light = 0.61 s = .
+LightTrackTest#test_control_plane_settings_are_not_text = 0.33 s = .
+LightTrackTest#test_status_names_the_track_and_labels_stepped_over_phases_in_words = 1.35 s = .
+LightTrackTest#test_an_unknown_track_is_refused_with_the_defined_tracks = 0.40 s = .
+LightTrackTest#test_a_light_record_passes_its_gates_and_closes_without_the_optional_phases = 2.09 s = .
+LightTrackTest#test_outside_change_paths_are_normalized_before_comparison = 3.06 s = .
+LightTrackTest#test_a_light_record_is_held_to_the_remediation_cap = 1.14 s = .
+LightTrackTest#test_a_reopen_records_whether_the_remediation_was_sealed = 0.89 s = .
+LightTrackTest#test_light_track_names_its_optional_phases = 0.33 s = .
+
+Finished in 15.799231s, 1.0127 runs/s, 6.7092 assertions/s.
+
+16 runs, 106 assertions, 0 failures, 0 errors, 0 skips
+exit=0

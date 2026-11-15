@@ -1,0 +1,52 @@
+$ soft-foundry help | grep -n -i "light|high risk|high-risk|lock"
+11:  soft-foundry change new <slug> [--track gated|iterative|light]
+22:                                          explored feature, lock the specification at HEAD, and
+47:                                          named is pending, in progress, or blocked (nothing to pass)
+154:                                          refuse it in block mode; mode from .ai/policies/enforcement.yml,
+155:                                          .soft-foundry/enforcement.yml, or SOFT_FOUNDRY_GUARD=warn|block|off
+$ sed -n 152,165p .ai/workflow.yml
+  light:
+    description: Specification, implementation, verification, one review and judgment. For changes that do not need threat modeling, evaluation or attack, such as changes to Soft Foundry itself.
+    # Not required on this track; a change may still run them. The
+    # specification lock, the must-criteria approval, the remediation cap,
+    # review and judgment apply as on the gated track. A high risk change
+    # cannot use it (forced_by_risk below).
+    optional: [discover, threat_model, plan, evaluate, attack, learn]
+  # A change's declared risk can force a track regardless of what
+  # `change new --track` asked for; the gate reports the conflict.
+  forced_by_risk:
+    high: gated
+
+# Convergence rules (changes/process-speed). They apply to a record that
+# declares `rules: 2` in its metadata.yml (written by `change new`); a
+$ grep -n -i light .ai/README.md
+28:| `workflow.yml` | Lifecycle phases, non-linear `transitions`, global rules, permitted judgments, `isolated_phases` (phases that may run side by side), `waivable_by_risk` (which phases a change of each declared risk may name in `skipped_phases`; review and judgment never), and the lifecycle `tracks` (`gated`: every phase in order; `light`: intake, specify, implement, verify, review and judge, with every lock kept; `iterative`: an exploring stage with a person first, then `change vet`, then the same hardening phases). |
+$ grep -n -i light .ai/templates/change/metadata.yml
+9:track: ${TRACK}            # gated | iterative | light (.ai/workflow.yml tracks:); set by `change new --track`
+$ git diff 04ef4b2 HEAD -- .ai/skills
+diff --git a/.ai/skills/adversarial-testing/SKILL.md b/.ai/skills/adversarial-testing/SKILL.md
+index 421a2d3..e1c9716 100644
+--- a/.ai/skills/adversarial-testing/SKILL.md
++++ b/.ai/skills/adversarial-testing/SKILL.md
+@@ -18,7 +18,7 @@ Attack the code the change added or modified. Try each class that applies to it:
+ 8. Data exposure.
+ 9. Resource exhaustion.
+ 
+-Out of scope: a party with write access to the repository editing the change record, the control plane or git history. The runtime guard and the specification lock cover that, not this phase. If you notice such a weakness, note it as a follow-up in the handoff `notes`. Do not record it as an attack result and do not give it a severity.
++Out of scope: a party with write access to the repository editing the change record, the control plane or git history. That is handled by the runtime guard and the specification lock, not by this phase. They do not close it completely: `rules`, `risk` and `track` in a record's `metadata.yml` can still be edited by a party with write access, and that gap is tracked as guard work. If you notice such a weakness, note it as a follow-up in the handoff `notes`. Do not record it as an attack result and do not give it a severity.
+ 
+ ## Authorization and scope
+ 
+diff --git a/.ai/skills/review/SKILL.md b/.ai/skills/review/SKILL.md
+index 7cb0302..62ff3e7 100644
+--- a/.ai/skills/review/SKILL.md
++++ b/.ai/skills/review/SKILL.md
+@@ -14,7 +14,7 @@ Every finding states the failure it prevents: the concrete input or state, and t
+ 
+ On a record under the convergence rules, severity blocking is for an unmet must criterion or a failure in what this change modified. A finding about code the change did not modify is marked `outside_change: true` with the `paths` it concerns and a `follow_up`; it never blocks this change. Do not treat a statement the specification never asked for as blocking.
+ 
+-Grade findings against the attack threat model in `.ai/skills/adversarial-testing/SKILL.md`: the attacker is an outside party who reaches the change through what it exposes. A finding that needs write access to the repository (editing the change record, the control plane or git history) is never graded blocking or major. Record it as a follow-up.
++Grade findings against the attack threat model in `.ai/skills/adversarial-testing/SKILL.md`: the attacker is an outside party who reaches the change through what it exposes. A weakness that would need write access to the repository to use (someone could edit the change record, the control plane or git history) is never graded blocking or major. Record it as a follow-up. That rule is about what could be done. An alteration you actually observe in the record under review (evidence that does not match its manifest, a handoff changed after its seal, a result rewritten) is a finding about this change and is graded on its merits.
+ 
+ Prefer to review on a different provider from the one that implemented or remediated the change (`prefer_different_provider_from` in `skill.yml`). `soft-foundry phase run review` chooses one when `--shell` is not given.
+ 

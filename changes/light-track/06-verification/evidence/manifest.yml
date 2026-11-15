@@ -1,5 +1,38 @@
-commit_sha: TBD
+commit_sha: 4988779139bf6c8d60fdb9b985a55254b0659d1a
 artifacts:
-  - path: TBD
-    produced_by: TBD
-    sha256: TBD
+  - path: evidence/full-suite.txt
+    produced_by: CHECK-001
+    sha256: 0ae5aaa5055f038650e03cffe82583fd6e592e2c06f3d10ee8deff6952c37d0e
+  - path: evidence/light-track-tests.txt
+    produced_by: CHECK-002
+    sha256: 6e73c8affcab662d07b4a7b9a0b8f62de4ac5dd537c7f259c2e7f9472fe8d92d
+  - path: evidence/lifecycle-tracks-tests.txt
+    produced_by: CHECK-003
+    sha256: ae2f08cd9198203c8649863643a676d276ca2984f76fb2aa6ac90c606d656021
+  - path: evidence/control-plane-check.txt
+    produced_by: CHECK-004
+    sha256: b187f92e8fb8fa649980f39a10bc13376df0e77b6a37211ff689aee4e20b15a1
+  - path: evidence/ci.txt
+    produced_by: CHECK-005
+    sha256: 730eeee57d7ae65b8638641af55522d8ab9faa9ad7e787126ed4f177ca217adb
+  - path: evidence/ruby-syntax.txt
+    produced_by: CHECK-006
+    sha256: d873e41f09dffa90ea5f66f5b274dc3eb270ca95f08875f2d63817358720674a
+  - path: evidence/cli-probe.sh
+    produced_by: CHECK-007
+    sha256: 6a32cf67fa67877e0d602e96e65664982baca5143c10600c58b59d5b9d168862
+  - path: evidence/cli-probe.txt
+    produced_by: CHECK-007
+    sha256: 1cb37c65315edd6e8c1706369696d4598aad7cfd52e9b1aaa1c94c9d21460466
+  - path: evidence/normalize-probe.rb
+    produced_by: CHECK-008
+    sha256: 90e6f179fb7a53c45e458fad8e377752880266743e4db0b834119fcc4916a53e
+  - path: evidence/normalize-probe.txt
+    produced_by: CHECK-008
+    sha256: f54ded81e6eb62cd9074acdb6d4a216905cc324f75378e4738f1ca56e0145c89
+  - path: evidence/existing-tests-diff.txt
+    produced_by: CHECK-009
+    sha256: 04a943151ee6daa851d7589bc211e9d504e54329ee916cdefdda324e5bcb2584
+  - path: evidence/documentation-probe.txt
+    produced_by: CHECK-010, CHECK-011
+    sha256: 6ae87f2b5be5433f79d53e23fbd4470a49d6616afb3f125511e666c6cf24940d
