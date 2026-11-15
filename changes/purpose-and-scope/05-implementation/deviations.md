@@ -1,5 +1,3 @@
 # Deviations From Plan
 
-None / TBD
-
-Each deviation records: what changed, why the plan could not be followed, which requirements are affected, and who must approve it.
+None. There was no plan phase (stepped over by default at low risk), and the specification was followed as written.
