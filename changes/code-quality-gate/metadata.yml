@@ -10,7 +10,7 @@ type: feature
 risk: medium
 track: light
 status: in_progress
-current_phase: specify
+current_phase: implement
 created_at: 2026-11-17 02:08:53.000000000 Z
 scope: []
 surfaces:
@@ -21,7 +21,17 @@ surfaces:
   accessibility: false
   observability: false
   policy: false
-human_decisions: []
+human_decisions:
+- boundary: must criteria approval
+  subject: the must criteria of 02-specification/acceptance-criteria.yml
+  criteria:
+  - AC-001
+  - AC-002
+  - AC-003
+  - AC-004
+  decided_by: Jeff Scholen
+  decided_at: 2026-11-16
+  decision: approved
 vetted:
 reopenings: []
 phase_reopenings: []

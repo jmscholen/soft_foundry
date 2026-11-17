@@ -2,7 +2,72 @@
 # acceptance criteria, tests, evaluation journeys, and attack cases.
 requirements:
   - id: REQ-001
-    category: functional   # functional | accessibility | security | policy | data | failure | performance | operations | infrastructure | observability
-    statement: TBD
-    rationale: TBD
+    category: functional
+    statement: "The lifecycle has a phase with id quality, skill code-quality and directory 06a-code-quality, placed after verify and before evaluate. `soft-foundry change new` scaffolds its directory from the skill's templates, and `soft-foundry check` accepts the control plane with it."
+    rationale: "Maintainer, 2026-11-15: a staff software engineer review for code quality, after verify."
+    source: 00-intake/request.md
+  - id: REQ-002
+    category: functional
+    statement: "The code-quality skill instructs the reviewer to act as a staff software engineer and to answer six questions from the code and the specification: whether the solution meets the stated need without building more than was asked; whether it is the simplest design that meets it and fits the conventions of the surrounding code; whether it repeats logic that already exists in the repository or within the change; whether it has a performance or resource problem on a path the feature exercises; whether it stays correct under concurrent requests, retries and a failure part-way through (transactions, uniqueness, idempotency, external calls); and whether names, structure and tests let the next engineer change it safely. The reviewer starts at the changed lines and traces callers, data writes and side effects; establishes what must stay true from the specification, database constraints, tests and callers; and separates what the change introduced from what was already there. Each finding gives a file and line, the scenario that triggers it, the evidence, the smallest remedy and how to verify it. When nothing actionable is found the reviewer says so and names what was and was not examined."
+    rationale: "Maintainer, 2026-11-15: best implementation, meets the needs, DRY, performance. Method and reporting from the maintainer's review-and-refactor text of 2026-11-16."
+    source: 00-intake/request.md
+  - id: REQ-003
+    category: security
+    statement: "The quality phase may write only its own directory. It may read application code, tests, infrastructure, documentation, the control plane and the change record, and may not read harness evals. It does not repair code."
+    rationale: A reviewer that edits what it reviews is no longer independent; rework is remediation's job.
+    source: 00-intake/request.md
+  - id: REQ-004
+    category: functional
+    statement: "The quality phase is optional unless the repository turns it on. `.ai/repository.yml` records the setting (`quality_gate.enabled`, false when absent); onboarding sets it to true when the repository's detected languages include Ruby, Python, JavaScript, TypeScript or PHP, and a person may set it either way. Where it is on, the phase is required on the gated and iterative tracks at medium and high risk, stepped over by default at low risk, and optional on the light track. Where it is off, no change is asked for it. In either case a change may run it by naming it under run_phases. A record created before this change (its rules number is lower than the one `change new` writes from this change on, or absent) is never asked for it."
+    rationale: "Maintainer, 2026-11-16, revising the answer of 2026-11-15: an optional gate, on by language (Ruby and similar scripting languages). Existing records must gate as they do today."
+    source: 00-intake/request.md
+  - id: REQ-005
+    category: functional
+    statement: "A quality finding of severity blocking must name its class (duplication, performance, simpler_design, unmet_need or reliability) and the concrete cost in `failure`. The quality gate fails a handoff whose blocking finding lacks either or names another class. A finding above minor carries `failure`, as in review."
+    rationale: "Maintainer, 2026-11-15: block on serious only, where serious means a concrete cost in a named class. reliability is added from the maintainer's text of 2026-11-16, which treats it as a review subject of the same weight as performance."
+    source: 00-intake/request.md
+  - id: REQ-006
+    category: functional
+    statement: "When the quality phase has a blocking finding, the change goes to remediation, the round counts toward the remediation cap, and after remediation the change returns to verify and then to quality. With no blocking finding the change proceeds to evaluate (or the next required phase), and the non-blocking findings stay in the handoff for review and judgment."
+    rationale: Same loop as a blocking review finding, under the same cap.
+    source: 00-intake/request.md
+  - id: REQ-007
+    category: functional
+    statement: "Quality evidence is bound to a commit like verification's: a later change to application code makes it stale, and a phase reopened at or before quality resets it."
+    rationale: A review of code that has since changed is not a review of the change.
+    source: 00-intake/request.md
+  - id: REQ-008
+    category: functional
+    statement: "The quality gate carries the fresh-session check that review carries, and `soft-foundry phase run quality` without --shell prefers a provider other than the one that implemented or remediated the change."
+    rationale: The implementing session should not grade its own code.
+    source: 00-intake/request.md
+  - id: REQ-009
+    category: functional
+    statement: "The review skill says code quality is the quality phase's subject when that phase ran, and tells review to read its findings instead of repeating it. The judgment skill lists the quality phase among the evidence it weighs and records it as not run when it did not run."
+    rationale: Two phases should not do the same reading, and a phase that did not run is not a pass.
+    source: 00-intake/request.md
+  - id: REQ-010
+    category: operations
+    statement: "`soft-foundry change status` shows the quality phase in lifecycle order with its state, or the reason it may stay pending. README.md, .ai/README.md, AGENTS.md, a page under docs/user/ and `soft-foundry help` describe the phase: what it asks, when it is required, what can block."
+    rationale: A person operating the tool must be able to see the phase and why it did or did not run.
+    source: 00-intake/request.md
+  - id: REQ-011
+    category: accessibility
+    statement: "Command output about the phase is plain text whose meaning does not depend on colour or symbols, and the documentation uses ordered headings and real lists and tables."
+    rationale: .ai/rules/accessibility.md.
+    source: 00-intake/request.md
+  - id: REQ-012
+    category: functional
+    statement: "Every record in this repository gates as it did before this change, and every existing test passes; an existing assertion that counts or lists the lifecycle's phases or skills may be updated to include the new one."
+    rationale: Adding a phase must not disturb work in flight.
+    source: 00-intake/request.md
+  - id: REQ-013
+    category: functional
+    statement: "The quality phase loads the rule files that apply to the repository's languages and frameworks, as implementation and review do. `.ai/rules/rails.md` gains a review section with the four decisions of the maintainer's text: associations and data modeling, object design, performance, and reliability. The skill itself names no framework."
+    rationale: "The tool serves any software (maintainer, 2026-11-14); framework detail belongs in rule files the repository profile selects."
+    source: 00-intake/request.md
+  - id: REQ-014
+    category: functional
+    statement: "The remediation skill states how a quality finding is repaired: define the observable contract at each affected entry point; write or extend a behavioral check before editing (for a pure refactor it passes against the original code, for a fix it fails against the original code for the intended reason); make the smallest coherent edit across all affected callers; rerun the same checks, then the affected suite; and report what was run and what was skipped."
+    rationale: "The refactor half of the maintainer's text. The quality phase does not edit code, so the discipline belongs to the phase that does."
     source: 00-intake/request.md
