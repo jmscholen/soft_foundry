@@ -1,29 +1,67 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 06-verification
 skill: verification
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-# Written by `soft-foundry phase seal` on a commit-bound phase: whether
-# metadata.git.branch resolved to a ref when the phase was sealed. False
-# means the checked-out HEAD, not a branch created later, is the measure
-# for "evidence current". Never written by the agent.
-# branch_resolved: true
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 03a184bd1c611572f0ab14601406b250a9d1cc85
+started_at: '2026-11-18T02:49:34Z'
+completed_at: '2026-11-18T03:34:00Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+- results.md
+- tests.yml
+- evidence/manifest.yml
+- evidence/full-suite.log
+- evidence/code-quality-gate-test.log
+- evidence/check.log
+- evidence/ci.log
+- evidence/existing-test-edits.txt
+- evidence/red-commit.txt
+blocking: []
+findings:
+- id: VER-001
+  severity: minor
+  summary: AC-008 (a third remediation round after a blocking quality finding is refused
+    with the cap message) is covered only by structure. test_the_quality_gate_carries_the_checks_review_carries
+    asserts that the quality gate includes the remediation-cap check, but no test
+    drives a third round after a blocking quality finding. Review and judgment should
+    weigh it as partial coverage of a should criterion.
+- id: VER-002
+  severity: minor
+  summary: 'The globally installed soft-foundry (asdf Ruby 3.3.1) predates this branch.
+    Its `change status` reports `06a-code-quality missing FAIL: handoff present` for
+    this record, while the worktree''s lib reports it pending, not part of this record.
+    Every check here used `ruby -Ilib exe/soft-foundry`. Later gates should use the
+    worktree''s lib, or the branch should be installed locally first.'
+- id: VER-003
+  severity: minor
+  summary: Running the full suite takes about 21 minutes (1258 s for 978 runs), longer
+    than a 10-minute background limit; the first run was killed by that limit with
+    no failures printed. Later phases that rerun the suite need a longer limit.
+- id: VER-004
+  severity: minor
+  summary: As in the implementation log, a shell call whose working directory was
+    left inside the phase directory made the guard's after-call hook write a stray
+    .ai/policies/enforcement.yml and .soft-foundry/ there and log a tamper restore.
+    They were deleted before the handoff. The repository's .ai/ and its .soft-foundry/
+    override were unchanged. The hook resolves paths relative to the shell's working
+    directory instead of the repository root.
 next: evaluate
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+notes: Full suite, check and ci were run with provider keys and SOFT_FOUNDRY_PHASE
+  unset, on HEAD 03a184b (tree fc6e9cc). The existing-test edits match DEV-004; the
+  rules-number assertion (IMPL-003) is the one that is not a count or list of phases.
+  The guard checks Bash against deny sets only; the read and write boundaries of permissions.yml
+  were followed as policy.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-11-18T02:49:34Z'
+  finished_at: '2026-11-18T03:33:32Z'
+  exit_status: 0
+  previous_phase: verify
+  session_id: 7b4e931d-add7-487b-bfcd-8d9a26aeb105
+  cwd: "/Users/jscholen-iou/dev/soft_foundry/.claude/worktrees/code-quality-gate"
+branch_resolved: true

@@ -1,0 +1,56 @@
+# git diff f508df2 03a184b -- test ':!test/code_quality_gate_test.rb' (changed lines only)
+ test/cli_change_json_test.rb          |  2 +-
+ test/control_plane_downstream_test.rb |  4 ++--
+ test/control_plane_test.rb            |  2 +-
+ test/factory_readiness_test.rb        | 10 +++++-----
+ test/light_track_test.rb              |  2 +-
+ test/process_speed_test.rb            |  2 +-
+ test/snapshot_test.rb                 | 10 +++++-----
+ test/ui_server_test.rb                |  6 +++---
+ 8 files changed, 19 insertions(+), 19 deletions(-)
++++ b/test/cli_change_json_test.rb
+-      assert_equal 16, board["changes"].first["cells"].size
++      assert_equal 17, board["changes"].first["cells"].size
++++ b/test/control_plane_downstream_test.rb
+-    assert_equal %w[evaluate attack remediate document index observe review judge learn], ids("verify")
++    assert_equal %w[quality evaluate attack remediate document index observe review judge learn], ids("verify")
+-    assert_equal %w[verify evaluate attack document index observe review judge learn], ids("remediate")
++    assert_equal %w[verify quality evaluate attack document index observe review judge learn], ids("remediate")
++++ b/test/control_plane_test.rb
+-    assert_equal 16, @plane.phases.size
++    assert_equal 17, @plane.phases.size
++++ b/test/factory_readiness_test.rb
+-      plane.phases.take(9).each { |p| complete_phase!(record, p.id, sha: head(dir), runner: false) } # intake..attack, in session
++      plane.phases.take(10).each { |p| complete_phase!(record, p.id, sha: head(dir), runner: false) } # intake..attack, in session
+-      assert_equal %w[verification evaluation attack], notices.map(&:area)
++      assert_equal ["verification", "code quality", "evaluation", "attack"], notices.map(&:area)
+-      assert_includes notices[2].message, "08-attack"
++      assert_includes notices[3].message, "08-attack"
+-      assert_equal %w[evaluation attack], notices.map(&:area)
++      assert_equal ["code quality", "evaluation", "attack"], notices.map(&:area)
+-    assert_equal %w[discover specify threat_model plan attack learn], plane.waivable_by_risk("low")
++    assert_equal %w[discover specify threat_model plan quality attack learn], plane.waivable_by_risk("low")
++++ b/test/light_track_test.rb
+-  LIGHT_OPTIONAL = %w[discover threat_model plan evaluate attack learn].freeze
++  LIGHT_OPTIONAL = %w[discover threat_model plan quality evaluate attack learn].freeze
++++ b/test/process_speed_test.rb
+-      assert_equal 2, meta["rules"]
++      assert_equal 3, meta["rules"]
++++ b/test/snapshot_test.rb
+-      assert_equal 16, workflow["phases"].size
++      assert_equal 17, workflow["phases"].size
+-      assert_equal 16, change["gates"].size
++      assert_equal 17, change["gates"].size
+-      assert_equal 16, board["phases"].size
++      assert_equal 17, board["phases"].size
+-      assert_equal 16, row["cells"].size
++      assert_equal 17, row["cells"].size
+-      assert_equal 16, rows.find { |c| c["slug"] == record.slug }["cells"].size
++      assert_equal 17, rows.find { |c| c["slug"] == record.slug }["cells"].size
++++ b/test/ui_server_test.rb
+-      assert_equal 16, JSON.parse(workflow.body)["phases"].size
++      assert_equal 17, JSON.parse(workflow.body)["phases"].size
+-      assert_equal 16, change["gates"].size
++      assert_equal 17, change["gates"].size
+-        assert_equal 16, JSON.parse(get(port, "/api/workflow?repo=#{there['id']}").body)["phases"].size
++        assert_equal 17, JSON.parse(get(port, "/api/workflow?repo=#{there['id']}").body)["phases"].size

@@ -1,0 +1,6 @@
+# git show --stat c8d5a66 (RED) and files changed in lib/.ai after it
+c8d5a66b8a486849e008a7cf66e902c8c1659c08 RED: code-quality gate tests (phase, applicability, blocking classes, permissions, profile switch)
+
+ test/code_quality_gate_test.rb | 368 +++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 368 insertions(+)
+ 38 files changed, 420 insertions(+), 22 deletions(-)

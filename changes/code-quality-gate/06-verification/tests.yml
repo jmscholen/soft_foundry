@@ -1,40 +1,45 @@
-commit_sha: TBD
-# Optional. The check size computed by `soft-foundry change size --phase verify`.
-# A scoped change must record a size at least as large as the computed one.
-# size: TBD
-# Optional full-suite run, keyed by the git tree hash of the evidence commit
-# (`git rev-parse <commit_sha>^{tree}`), or a citation of another record's run
-# for the same tree. This is a record: Soft Foundry never runs the suite.
-# full_suite:
-#   tree: TBD
-#   command: TBD
-#   outcome: passed
-# full_suite:
-#   cite: <slug of another change record>
-# The gate reads every check (`test results recorded`): id, kind, command,
-# and a result of pass | fail | error | skipped. A check whose result is
-# fail or error, or skipped while naming criteria, must be named by id in
-# the handoff's `blocking` list or in a finding, or the phase does not
-# pass. Every acceptance criterion should appear in some check's
-# `criteria` (`criteria covered` warns here and fails at judgment unless
-# an evaluation journey covers it or the judgment sets it aside with a
-# reason). The manifest under evidence/ is recomputed (`evidence manifest
-# verified`): list each file with its SHA-256 after it is final.
+commit_sha: 03a184bd1c611572f0ab14601406b250a9d1cc85
+# `soft-foundry change size --phase verify` (worktree lib): full_at_verify,
+# whole repository, no scope declared.
+size: full_at_verify
+full_suite:
+  tree: fc6e9ccbe9ab62080b39d757645cb2d7c597bce5
+  command: env -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u XAI_API_KEY -u GROK_API_KEY -u GEMINI_API_KEY -u SOFT_FOUNDRY_PHASE bundle exec rake test
+  outcome: passed
 checks:
   - id: CHECK-001
-    kind: tests   # tests | lint | static_analysis | security_scan | iac_validate | migration_check | custom
-    command: TBD
-    result: TBD   # pass | fail | error | skipped
-    evidence: evidence/TBD
+    kind: tests
+    command: env -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u XAI_API_KEY -u SOFT_FOUNDRY_PHASE ruby -Ilib -Itest test/code_quality_gate_test.rb -v
+    result: pass
+    evidence: evidence/code-quality-gate-test.log
+    criteria: [AC-001, AC-002, AC-003, AC-004, AC-005, AC-006, AC-007, AC-008, AC-009, AC-011, AC-012]
+    red_commit: c8d5a66b8a486849e008a7cf66e902c8c1659c08
+    test_path: test/code_quality_gate_test.rb
+    notes: 27 runs, 218 assertions, 0 failures. AC-008 is covered only structurally (the quality gate carries the remediation-cap check); no test drives a third remediation round after a blocking quality finding (VER-001).
+  - id: CHECK-002
+    kind: tests
+    command: env -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u XAI_API_KEY -u GROK_API_KEY -u GEMINI_API_KEY -u SOFT_FOUNDRY_PHASE bundle exec rake test
+    result: pass
+    evidence: evidence/full-suite.log
+    criteria: [AC-010]
+    notes: 978 runs, 7287 assertions, 0 failures, 0 errors, 0 skips, 1258 s. An earlier identical run was killed by the session's 10-minute background limit, not by a failure (no F or E had been printed).
+  - id: CHECK-003
+    kind: static_analysis
+    command: ruby -Ilib exe/soft-foundry check
+    result: pass
+    evidence: evidence/check.log
     criteria: [AC-001]
-    # Optional, per check: the commit at which this test existed and failed
-    # (RED) and the test file. The gate verifies red_commit is a commit that
-    # precedes commit_sha, holds test_path, and that APP or INFRA code changed
-    # after it. A feature, fix, or refactor with no red_commit on any check is
-    # advised as having no failing-test-first evidence.
-    # red_commit: TBD
-    # test_path: TBD
-    # Optional, per check, where the change touches a path the repository
-    # profile lists under access_control (.ai/rules/access-control-parity.md):
-    # protection: in_force   # in_force | disabled | not_applicable
-    # protection_note: why the protection was disabled (required when disabled)
+  - id: CHECK-004
+    kind: custom
+    command: ruby -Ilib exe/soft-foundry ci
+    result: pass
+    evidence: evidence/ci.log
+    criteria: [AC-002, AC-010]
+    notes: Every record in the repository gates; this record (rules 2) is not asked for the quality phase.
+  - id: CHECK-005
+    kind: custom
+    command: git diff f508df2 03a184b -- test ':!test/code_quality_gate_test.rb'
+    result: pass
+    evidence: evidence/existing-test-edits.txt
+    criteria: [AC-010]
+    notes: Every edited existing assertion counts or lists phases or follows from the phase list, except process_speed_test's rules number 2 to 3, already disclosed as DEV-004 and IMPL-003.

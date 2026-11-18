@@ -1,5 +1,20 @@
-commit_sha: TBD
+commit_sha: 03a184bd1c611572f0ab14601406b250a9d1cc85
 artifacts:
-  - path: TBD
-    produced_by: TBD
-    sha256: TBD
+  - path: evidence/full-suite.log
+    produced_by: "bundle exec rake test with provider keys and SOFT_FOUNDRY_PHASE unset"
+    sha256: 00dcc5324af3aad8cf738de81d276a48ba3ebfa15ebadf5ee584d4933d188953
+  - path: evidence/code-quality-gate-test.log
+    produced_by: "ruby -Ilib -Itest test/code_quality_gate_test.rb -v with provider keys and SOFT_FOUNDRY_PHASE unset"
+    sha256: 74c4db1d3f3d933b374476cf81bf113482e41be401a264b36fcb401fe81a2f2a
+  - path: evidence/check.log
+    produced_by: "ruby -Ilib exe/soft-foundry check"
+    sha256: 199d8287ab79f172ed5d73a232c91c36dc1817a4aa33ea7c79e98de4ad545532
+  - path: evidence/ci.log
+    produced_by: "ruby -Ilib exe/soft-foundry ci"
+    sha256: 108903cd523877408f891b553a264260ce0c1379fb2dc9206d42e7b767c33443
+  - path: evidence/existing-test-edits.txt
+    produced_by: "git diff f508df2 03a184b -- test excluding test/code_quality_gate_test.rb"
+    sha256: 2212f18cbd10c8c68f834211bbb052fff387a3edae942cccc2e6cb8f08779bb3
+  - path: evidence/red-commit.txt
+    produced_by: "git show --stat c8d5a66; git diff --stat c8d5a66 4666f07 -- lib .ai"
+    sha256: 8be5165b8c50d56e1523106999069c6921ea1f1a467b577f17ec9b3032d9bd5e
