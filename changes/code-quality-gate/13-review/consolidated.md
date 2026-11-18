@@ -1,20 +1,28 @@
 # Consolidated Review
 
-Commit reviewed: `276dc8d611cbf6ae2456ea99061cd7ce9ba9932c`. The code is unchanged since `03a184b`, the commit the verification evidence describes. Rules loaded: `.ai/rules/accessibility.md`, `.ai/rules/policy-conformance.md`, `.ai/rules/rails.md` (read as changed content, not applied; this repository is not Rails), `.ai/rules/infrastructure.md` (nothing to apply).
+Commit reviewed: `1650d932b6c0ca5d4d27bcbeeda7f5a00471af77`. This is the second review, after remediation round 1 (REV-001). The code is the GREEN commit `b118833`, which the verification at `459fa86` describes. Rules loaded:
+- `.ai/rules/accessibility.md`;
+- `.ai/rules/policy-conformance.md`;
+- `.ai/rules/rails.md`: read as changed content, not applied, because this repository is not Rails;
+- `.ai/rules/infrastructure.md`: nothing to apply.
 
-Code-quality phase: did not run for this change. The record carries `rules: 2`, which predates the phase; it is on the light track, where the phase is optional; and this repository's profile sets `quality_gate.enabled: false`. Design, duplication and clarity are covered in `architecture.md` and `functional.md`.
+Code-quality phase: it did not run for this change. The record carries `rules: 2`, which predates the phase. It is on the light track, where the phase is optional. This repository's profile sets `quality_gate.enabled: false`. Design, duplication and clarity are covered in `architecture.md` and `functional.md`.
+
+Provider: implementation, remediation and this review all ran on Anthropic models. The maintainer runs evidence phases on Claude.
 
 ## Functional
-Does not conform. REV-001 (blocking): `soft-foundry init` leaves `quality_gate.enabled: false` in a Ruby repository. The template's `set_by: null` reads to the scan as a person's choice, so onboarding never turns the gate on in a new install. Reproduced on a scratch repository. Everything else in REQ-001 to REQ-014 is met as far as this reading and the 27 passing tests go. REV-002 (AC-008 structural only) and REV-003 (rules-number assertion) are minor.
+Conforms. REV-001 is fixed. `init --maturity scan` turns the gate on in a new Ruby repository, a blank or whitespace-only `set_by` is treated as unset, and a person's value is kept. This session confirmed each case through the CLI on scratch repositories, and 29 + 11 targeted tests pass. Still open, minor: REV-002 (AC-008 covered structurally only) and REV-003 (the rules-number assertion, required by REQ-004).
 
 ## Architecture
-Conforms with minors. The data-driven applicability and `CURRENT` alongside `VERSION` are sound. REV-004: the UI's separate `skip_reason` gives no reason for a not-asked phase. REV-005: check lists are duplicated between `checks_for` and `evaluate`.
+Conforms with minor findings. The fix is a small named predicate. Still open, minor: REV-004 (the UI's separate `skip_reason`) and REV-005 (check lists repeated in `checks_for` and `evaluate`).
 
 ## Security
-Conforms. The quality phase writes only its own directory and cannot read harness evals (AC-004 tested). REV-006 (outside this change): the guard's after-hook writes stray policy copies when the shell's working directory is a subdirectory.
+Conforms.
+- REV-006 is outside this change: the guard's after-hook writes stray policy copies from a subdirectory working directory.
+- REV-009 is minor and new: remediation made a comment-only edit to `.ai/templates/repository.yml`, outside its write set. It was disclosed and made under the maintainer's warn override.
 
 ## Accessibility
-Conforms. Status reasons, gate messages, help and the user page are plain words with structured headings, lists and tables.
+Conforms. No user-perceived output changed in the remediation.
 
 ## Policy conformance
 N/A. Nothing collected, shared, retained, protected or promised changes. No policy text change is owed.
@@ -23,11 +31,11 @@ N/A. Nothing collected, shared, retained, protected or promised changes. No poli
 N/A. No infrastructure is present or modified.
 
 ## Operations
-Conforms with minors. REV-007: no harness eval case for the new check. REV-008: the installed binary predates the branch, so gate with the worktree's `lib/`.
+Conforms with minor findings. REV-007: there is no harness eval case for the new check. REV-008: the installed binary predates the branch.
 
 ## Blocking findings
-- REV-001 (`unmet_need`-shaped; functional): onboarding never enables the gate in a newly initialized repository. Remedy: let the scan replace a value whose `set_by` is blank, or remove the block from the template. Then add a test that runs `init` on a Ruby fixture. Goes to remediation, then verify and review again.
+None.
 
 ## Residual concerns
 - AC-008 is covered structurally only (VER-001, REV-002).
-- Two untracked files left by the guard hook in this session, `.ai/skills/review/.ai/policies/enforcement.yml` and `changes/code-quality-gate/.ai/policies/enforcement.yml`, need to be deleted by the maintainer before anything is committed with `git add -A`.
+- One untracked file left by the guard hook remains: `changes/code-quality-gate/.ai/policies/enforcement.yml` (REV-006). The maintainer must delete it before any `git add -A`. The copies left earlier under `.ai/skills/review/` and `.ai/skills/verification/` are already gone.

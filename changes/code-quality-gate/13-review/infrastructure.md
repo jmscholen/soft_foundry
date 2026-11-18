@@ -1,7 +1,7 @@
 # Infrastructure Review
 
 ## Scope reviewed
-The diff `f508df2..276dc8d` for Infrastructure as Code, CI workflows, deployment configuration and state. Nothing under `.github/`, no Terraform, OpenTofu or Pulumi, and no deployment files changed. `.ai/rules/infrastructure.md` has nothing to apply to.
+The diff `f508df2..1650d93` (remediation included) for Infrastructure as Code, CI workflows, deployment configuration and state. Nothing under `.github/`, no Terraform, OpenTofu or Pulumi, and no deployment files changed. `.ai/rules/infrastructure.md` has nothing to apply to.
 
 ## Findings
 | ID | Severity | Location | Finding | Failure it prevents | Rule or requirement |

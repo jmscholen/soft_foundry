@@ -1,13 +1,20 @@
 # Operations Review
 
 ## Scope reviewed
-What a person operating the tool sees and runs. That covers `change status` (checked live on this record), the `phase run quality` help text, `soft-foundry ci` on existing records (verification CHECK-004 passed), and the upgrade path for repositories already initialized. `.ai/repository.yml` is "state" to the installer and is never overwritten on update. A repository without `quality_gate` reads as off until `onboard --reassess`, which then sets it from languages (the `nil` key path, tested). Also: the full-suite runtime (VER-003) and the installed-binary skew (VER-002).
+What a person operating the tool sees and runs:
+- `change status`;
+- the `phase run quality` help text;
+- `soft-foundry ci` on existing records;
+- the upgrade path for repositories already initialized;
+- the new-install path, now fixed.
+
+On a new install, `init --maturity scan` in a Ruby repository writes `quality_gate.enabled: true`. This session reproduced it on a scratch repository. A repository that is already initialized and still carries the template's `set_by: null` gets the gate set on its next `onboard --reassess`. A person's `set_by` is never touched. The full-suite runtime is about 21 minutes (VER-003).
 
 ## Findings
 | ID | Severity | Location | Finding | Failure it prevents | Rule or requirement |
 | --- | --- | --- | --- | --- | --- |
-| REV-007 | minor | `.ai/harness-evals/` (not read) | No harness eval case covers the new `quality findings classed` check (DEV-003). The implementation skill could not write one. | A later regression in the check is caught only by the unit tests, not by `soft-foundry eval`. | Follow-up |
-| REV-008 | minor | local install | The globally installed `soft-foundry` predates this branch and reports `06a-code-quality missing FAIL` for this record (VER-002). Gate and seal this record with the worktree's `lib/`, or install the branch locally first. | A seal run with the old binary refuses this record for a reason that is not real. | Operations |
+| REV-007 | minor | `.ai/harness-evals/` (not read) | Still open. No harness eval case covers the new `quality findings classed` check (DEV-003). | A later regression is caught only by the unit tests, not by `soft-foundry eval`. | Follow-up |
+| REV-008 | minor | local install | Still open. The globally installed `soft-foundry` predates this branch (VER-002). Gate and seal with `ruby -Ilib exe/soft-foundry`, or install the branch first. | A seal with the old binary refuses this record for a reason that is not real. | Operations |
 
 ## Conformance
-Conforms with minor findings. PC-001 (the maintainer's post-merge check) will not see the phase *required* in a freshly initialized repository until REV-001 is fixed. The phase is still listed, with the reason "the quality gate is off".
+Conforms with minor findings. PC-001 (the maintainer's post-merge check) should now see the phase required at medium risk in a freshly initialized Ruby repository.

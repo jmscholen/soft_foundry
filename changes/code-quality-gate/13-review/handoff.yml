@@ -2,9 +2,9 @@
 phase: 13-review
 skill: review
 status: complete
-commit_sha: 276dc8d611cbf6ae2456ea99061cd7ce9ba9932c
-started_at: '2026-11-18T03:34:08Z'
-completed_at: '2026-11-18T03:38:03Z'
+commit_sha: 1650d932b6c0ca5d4d27bcbeeda7f5a00471af77
+started_at: '2026-11-18T04:06:23Z'
+completed_at: '2026-11-18T04:08:55Z'
 resolved_model:
   profile: reasoning_high
   provider: anthropic
@@ -21,22 +21,11 @@ outputs:
 blocking: []
 findings:
 - id: REV-001
-  severity: blocking
-  summary: soft-foundry init writes .ai/repository.yml from the template, whose quality_gate
-    block is enabled false with set_by null. The onboarding scan (maturity_scan.rb
-    quality_gate) treats a set_by that does not start with its own prefix as a person's
-    choice, and nil.to_s is empty, so it keeps the gate off. Onboarding therefore
-    never turns the gate on in a newly initialized repository, contrary to REQ-004,
-    AC-012 and docs/user/code-quality-review.md. The AC-012 tests delete the key before
-    scanning, so the init path is untested.
-  failure: soft-foundry init --root <repo> --maturity scan on a git repository with
-    a Gemfile and Ruby code writes technology.languages [ruby] and quality_gate enabled
-    false, set_by null (reproduced in this session). A medium-risk gated change there
-    is never asked for the quality phase.
-  paths:
-  - ".ai/templates/repository.yml"
-  - lib/soft_foundry/maturity_scan.rb
-  - test/code_quality_gate_test.rb
+  severity: minor
+  summary: Resolved at b118833. A blank or whitespace-only set_by now counts as unset,
+    so init --maturity scan turns the gate on in a new Ruby repository. Confirmed
+    through the CLI on scratch repositories, and a person's set_by is kept on onboard
+    --reassess.
 - id: REV-002
   severity: minor
   summary: AC-008 is covered by structure only (VER-001). The gate carries the shared
@@ -60,8 +49,9 @@ findings:
   severity: minor
   outside_change: true
   summary: When the shell's working directory is a subdirectory, the guard's PostToolUse
-    hook writes a stray .ai/policies/enforcement.yml there and logs a false tamper
-    (seen again in this session; see VER-004).
+    hook writes a stray .ai/policies/enforcement.yml there and logs a false tamper.
+    It happened again in this session, and untracked changes/code-quality-gate/.ai/policies/enforcement.yml
+    remains for the maintainer to delete.
   paths:
   - lib/soft_foundry/hooks.rb
   follow_up: Resolve the repository root (git rev-parse --show-toplevel) before the
@@ -74,25 +64,31 @@ findings:
   severity: minor
   summary: The globally installed soft-foundry predates this branch (VER-002). Gate
     and seal with ruby -Ilib exe/soft-foundry, or install the branch first.
-next: remediate
-notes: Code-quality phase did not run (rules 2 record, light track, the gate is off
-  in this repository's profile), so architecture.md and functional.md cover its subjects.
-  Checks run by this session with provider keys unset were test/code_quality_gate_test.rb
-  (27 runs, 0 failures), change status with the worktree lib, and a scratch init that
-  reproduces REV-001. The guard checks Bash against deny sets only, so the read and
-  write boundaries were followed as policy. Two shell calls whose working directory
-  was left in a subdirectory made the guard after-hook create untracked .ai/skills/review/.ai/policies/enforcement.yml
-  and changes/code-quality-gate/.ai/policies/enforcement.yml. This session's attempt
-  to delete them was refused, so the maintainer should remove them. The scratch repository
-  is under /tmp/sf-review-*.
+- id: REV-009
+  severity: minor
+  summary: Remediation made a comment-only edit to .ai/templates/repository.yml, a
+    control-plane file its permissions.yml denies. It did so under the maintainer's
+    local warn override and disclosed it in summary.md. No behaviour depends on it.
+next: judge
+notes: 'Second review, after remediation round 1. HEAD is 1650d93; the code is b118833.
+  No blocking findings: REV-001 is fixed, REV-002 to REV-008 are minor and carried
+  forward, and REV-009 is new and minor. The code-quality phase did not run (rules
+  2 record, light track, gate off in this profile). Run by this session with provider
+  keys and SOFT_FOUNDRY_PHASE unset: test/code_quality_gate_test.rb (29 runs, 0 failures);
+  test/maturity_scan_test.rb (11 runs, 0 failures); init --maturity scan and onboard
+  --reassess on scratch Ruby repositories under /tmp/sf-review2-* (gate on after init,
+  whitespace set_by replaced, person value kept). Implementation, remediation and
+  review all ran on Anthropic models. The guard checks Bash against deny sets only,
+  so the read and write boundaries were followed as policy. One cd into the change
+  record made the guard after-hook log a false tamper (REV-006).'
 executed_by:
   runner: soft-foundry phase run
   shell: claude
   fresh_context: true
-  started_at: '2026-11-18T03:34:08Z'
-  finished_at: '2026-11-18T03:38:41Z'
+  started_at: '2026-11-18T04:06:23Z'
+  finished_at: '2026-11-18T04:09:05Z'
   exit_status: 0
   previous_phase: review
-  session_id: 3cae1cf2-c5b1-4f02-ad8b-18850c5a9e0f
+  session_id: 8c61807b-c3f7-42d0-a42c-679d1a2da76d
   cwd: "/Users/jscholen-iou/dev/soft_foundry/.claude/worktrees/code-quality-gate"
 branch_resolved: true
