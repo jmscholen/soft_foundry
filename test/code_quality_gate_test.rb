@@ -334,6 +334,33 @@ class CodeQualityGateTest < Minitest::Test
     end
   end
 
+  # Review REV-001: the profile `init` writes from the template carries
+  # set_by null, which is nobody's choice.
+  def test_onboarding_sets_the_gate_over_the_templates_unset_value
+    with_fixture_repo do |dir|
+      path = File.join(dir, ".ai", "repository.yml")
+      data = YAML.safe_load_file(path, permitted_classes: [Time, Date], aliases: true)
+      data["quality_gate"] = { "enabled" => false, "set_by" => nil }
+      File.write(path, YAML.dump(data))
+      File.write(File.join(dir, "Gemfile"), "source 'https://rubygems.org'\n")
+      assert_equal true, scanned_gate(dir)["enabled"]
+    end
+  end
+
+  def test_init_with_a_scan_turns_the_gate_on_in_a_new_ruby_repository
+    with_target_repo do |dir|
+      File.write(File.join(dir, "Gemfile"), "source 'https://rubygems.org'\n")
+      commit_all(dir, "gemfile")
+      out = StringIO.new
+      code = nil
+      with_env(FoundryFixture::SESSION_ENV) { code = SoftFoundry::CLI.new(["init", "--maturity", "scan"], out: out, err: out, root: dir, source: source).run }
+      assert_equal 0, code, out.string
+      setting = plane(dir).repository_profile["quality_gate"]
+      assert_equal true, setting["enabled"], out.string
+      assert_includes setting["set_by"], "ruby"
+    end
+  end
+
   # --- REQ-002, REQ-009, REQ-010, REQ-013, REQ-014 (AC-005, AC-009, AC-011) ---
 
   def skill_text(name) = File.read(File.join(FoundryFixture::REPO_ROOT, ".ai", "skills", name, "SKILL.md"))
