@@ -16,6 +16,10 @@ module SoftFoundry
   # built on them reports skip with LEGACY.
   class ProcessRules
     VERSION = 2
+    # The number `change new` writes. Above VERSION it marks a record made
+    # after a lifecycle phase was added (a phase's `since_rules` in
+    # .ai/workflow.yml); the convergence rules apply from VERSION up.
+    CURRENT = 3
     LEGACY = "legacy record: created before the convergence rules (no `rules: #{VERSION}` in metadata.yml)"
     DEFAULT_MAX_ROUNDS = 2
     DEFAULT_MUST_CAP = { "low" => 3, "medium" => 8, "high" => 15 }.freeze

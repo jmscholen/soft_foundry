@@ -245,7 +245,7 @@ module SoftFoundry
     # already open, most likely the one that implemented the change; say
     # so, every time the record is gated.
     FRESH_CONTEXT_LABELS = {
-      "verify" => ["verification", "verification"], "evaluate" => ["evaluation", "evaluation"],
+      "verify" => ["verification", "verification"], "quality" => ["code quality", "code-quality review"], "evaluate" => ["evaluation", "evaluation"],
       "attack" => ["attack", "adversarial testing"], "review" => ["review", "independent review"],
       "judge" => ["judgment", "final judgment"]
     }.freeze

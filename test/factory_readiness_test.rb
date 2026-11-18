@@ -151,15 +151,15 @@ class FreshContextAdvisoryTest < Minitest::Test
     with_fixture_repo do |dir|
       plane = SoftFoundry::ControlPlane.new(dir)
       record = SoftFoundry::ChangeRecord.create(dir, "c3", control_plane: plane)
-      plane.phases.take(9).each { |p| complete_phase!(record, p.id, sha: head(dir), runner: false) } # intake..attack, in session
+      plane.phases.take(10).each { |p| complete_phase!(record, p.id, sha: head(dir), runner: false) } # intake..attack, in session
       notices = SoftFoundry::Advisory.new(record).notices.select { |n| n.message.include?("without `soft-foundry phase run`") }
-      assert_equal %w[verification evaluation attack], notices.map(&:area)
+      assert_equal ["verification", "code quality", "evaluation", "attack"], notices.map(&:area)
       assert_includes notices[0].message, "06-verification"
-      assert_includes notices[2].message, "08-attack"
+      assert_includes notices[3].message, "08-attack"
 
       fresh_context!(record, "verify")
       notices = SoftFoundry::Advisory.new(record).notices.select { |n| n.message.include?("without `soft-foundry phase run`") }
-      assert_equal %w[evaluation attack], notices.map(&:area)
+      assert_equal ["code quality", "evaluation", "attack"], notices.map(&:area)
     end
   end
 
@@ -194,7 +194,7 @@ class WaiversByRiskTest < Minitest::Test
 
   def test_the_repository_declares_what_each_risk_may_waive
     plane = SoftFoundry::ControlPlane.new(REPO_ROOT)
-    assert_equal %w[discover specify threat_model plan attack learn], plane.waivable_by_risk("low")
+    assert_equal %w[discover specify threat_model plan quality attack learn], plane.waivable_by_risk("low")
     assert_equal %w[discover plan], plane.waivable_by_risk("medium")
     assert_equal [], plane.waivable_by_risk("high")
     assert_equal [], plane.waivable_by_risk("TBD")

@@ -1874,6 +1874,11 @@ module SoftFoundry
                                                   copy instincts at or above the threshold (.ai/policies/learning.yml,
                                                   default 0.80) into .ai/rules/learned.md through the change
                                                   record on the current branch
+          soft-foundry phase run quality          the code-quality review: a staff software engineer's reading of
+                                                  the change after verification. Asked for only where
+                                                  .ai/repository.yml sets quality_gate.enabled (medium and high
+                                                  risk, gated and iterative tracks); only a classed finding with
+                                                  a concrete cost blocks, and it sends the change to remediation
           soft-foundry phase run <phase> [--change SLUG] [--shell claude|codex|grok] [--dry-run] [-- args...]
                                                   run one phase in a fresh coding-shell session with only its
                                                   skill in the prompt; stamps executed_by in the handoff and

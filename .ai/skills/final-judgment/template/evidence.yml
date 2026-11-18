@@ -4,6 +4,10 @@ phases:
     commit_sha: TBD
     current: TBD   # true when commit_sha matches the judged commit for all code paths
     result: TBD
+  - phase: 06a-code-quality
+    commit_sha: TBD   # null when the phase did not run
+    current: TBD
+    result: TBD       # not_run when the phase did not run; never a pass
   - phase: 07-evaluation
     commit_sha: TBD
     current: TBD

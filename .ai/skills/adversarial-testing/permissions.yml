@@ -18,3 +18,4 @@ deny_write:
   - "${DOCS}"
   - "${CONTROL_PLANE}"
   - "changes/${CHANGE}/07-evaluation/**"
+  - "changes/${CHANGE}/06a-code-quality/**"

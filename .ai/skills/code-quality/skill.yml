@@ -1,0 +1,8 @@
+name: code-quality
+model: reasoning_high
+phase: 06a-code-quality
+outputs: [fit_review, design_review, duplication_review, performance_review, reliability_review, clarity_review]
+evidence: commit_bound
+# Phases whose provider this skill's session should differ from. `phase run`
+# without --shell picks an installed shell on another provider.
+prefer_different_provider_from: [implement, remediate]

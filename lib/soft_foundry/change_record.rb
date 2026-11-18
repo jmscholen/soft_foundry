@@ -75,8 +75,12 @@ module SoftFoundry
       git["branch"].to_s
     end
 
+    # A phase this record is not asked for and has no directory for (a
+    # record made before the phase existed) reads as pending.
     def phase_status(phase)
-      handoff(phase)&.fetch("status", nil)
+      h = handoff(phase)
+      return h.fetch("status", nil) if h
+      asked_for?(phase) ? nil : "pending"
     end
 
     # The lifecycle track this change is on (.ai/workflow.yml tracks:). A
@@ -279,13 +283,31 @@ module SoftFoundry
     # phases its risk may waive unless run_phases asks for them
     # (ProcessRules#default_waivers).
     def skippable?(phase)
-      phase.optional || skipped_with_rationale.include?(phase.id) || Array(track_definition&.optional).include?(phase.id) ||
+      return false if run_phases.include?(phase.id) && phase.conditional? && rules_reach?(phase)
+      phase.optional || !asked_for?(phase) || skipped_with_rationale.include?(phase.id) || Array(track_definition&.optional).include?(phase.id) ||
         ProcessRules.new(self).default_waivers.include?(phase.id)
+    end
+    
+    # Whether this record is asked for a conditional phase at all: the
+    # record is new enough (`since_rules`) and the repository profile turns
+    # the phase on (`enabled_by`). Unconditional phases are always asked for.
+    def asked_for?(phase)
+      return true unless phase.conditional?
+      rules_reach?(phase) && (phase.enabled_by.nil? || profile_enables?(phase.enabled_by))
+    end
+    
+    # Why a conditional phase is not asked of this record, in words, or nil.
+    def not_asked_reason(phase)
+      return nil if asked_for?(phase)
+      return "not part of this record: it was created before the phase existed" unless rules_reach?(phase)
+      "the #{phase.enabled_by.tr('_', ' ')} is off in .ai/repository.yml"
     end
 
     # Why a pending phase may stay pending for this change, in words, or
     # nil when it may not (REQ-012: a person can see why a phase did not run).
     def skip_reason(phase)
+      return nil if !skippable?(phase)
+      return not_asked_reason(phase) if not_asked_reason(phase)
       return "waived: named in skipped_phases" if skipped_with_rationale.include?(phase.id)
       return "optional on the #{track} track" if Array(track_definition&.optional).include?(phase.id)
       return "stepped over by default at #{metadata["risk"]} risk" if ProcessRules.new(self).default_waivers.include?(phase.id)
@@ -424,7 +446,20 @@ module SoftFoundry
       reset.map(&:output)
     end
 
+    # Phases this change asks for by name (`run_phases` in metadata.yml).
+    def run_phases = Array(metadata["run_phases"]).map(&:to_s)
+
     private
+    
+    def rules_reach?(phase)
+      return true if phase.since_rules.nil?
+      metadata["rules"].is_a?(Integer) && metadata["rules"] >= phase.since_rules
+    end
+    
+    def profile_enables?(key)
+      setting = control_plane.repository_profile[key]
+      setting.is_a?(Hash) && setting["enabled"] == true
+    end
 
     def scaffold(title:, branch:, worktree:, track:, now:)
       FileUtils.mkdir_p(dir)
@@ -458,7 +493,7 @@ module SoftFoundry
       path = File.join(dir, "metadata.yml")
       body = SoftFoundry.read_text(path)
       return if body.match?(/^rules:/)
-      line = "rules: #{ProcessRules::VERSION}                # convergence rules (changes/process-speed); a record without it is legacy\n"
+      line = "rules: #{ProcessRules::CURRENT}                # convergence rules (changes/process-speed); a record without it is legacy\n"
       body = body.match?(/^type:/) ? body.sub(/^type:/) { "#{line}type:" } : "#{line}#{body}"
       File.write(path, body)
     end

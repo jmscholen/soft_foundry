@@ -35,7 +35,7 @@ class SnapshotTest < Minitest::Test
       workflow = snapshot.workflow
       assert_plain workflow
       assert_equal 1, workflow["version"]
-      assert_equal 16, workflow["phases"].size
+      assert_equal 17, workflow["phases"].size
 
       intake = workflow["phases"].first
       assert_equal "intake", intake["id"]
@@ -126,7 +126,7 @@ class SnapshotTest < Minitest::Test
       assert_plain change
       assert_equal "c1", change["slug"]
       assert_equal "First change", change["title"]
-      assert_equal 16, change["gates"].size
+      assert_equal 17, change["gates"].size
 
       intake = gate(change, "intake")
       assert_equal "complete", intake["status"]
@@ -329,14 +329,14 @@ class SnapshotTest < Minitest::Test
       assert_plain board
       assert_equal 1, board["version"]
       assert_equal "main", board["default_branch"]
-      assert_equal 16, board["phases"].size
+      assert_equal 17, board["phases"].size
       row = board["changes"].find { |c| c["slug"] == "c1" }
       assert row["evaluated"]
       refute row["closed"]
       refute row["failed"]
       refute row["merged_unclosed"]
       assert_equal "First change", row["title"]
-      assert_equal 16, row["cells"].size
+      assert_equal 17, row["cells"].size
       assert_equal({ "phase" => "intake", "status" => "complete", "state" => "pass", "skip_reason" => nil }, row["cells"].first)
     end
   end
@@ -393,7 +393,7 @@ class SnapshotTest < Minitest::Test
       refute_empty broken["error"]
       refute_includes broken["error"], dir
       refute broken.key?("cells")
-      assert_equal 16, rows.find { |c| c["slug"] == record.slug }["cells"].size
+      assert_equal 17, rows.find { |c| c["slug"] == record.slug }["cells"].size
     end
   end
 

@@ -5,7 +5,13 @@ require "yaml"
 module SoftFoundry
   # Reads the `.ai/` directory: workflow, skills, path groups, profiles.
   class ControlPlane
-    Phase = Data.define(:id, :skill, :output, :optional, :after)
+    # `enabled_by` names a key of .ai/repository.yml whose `enabled: true`
+    # turns the phase on for the repository, and `since_rules` the lowest
+    # metadata.yml rules number a record must carry to be asked for it. A
+    # phase with neither is asked of every record (ChangeRecord#asked_for?).
+    Phase = Data.define(:id, :skill, :output, :optional, :after, :enabled_by, :since_rules) do
+      def conditional? = !enabled_by.nil? || !since_rules.nil?
+    end
     Skill = Data.define(:name, :dir, :definition, :permissions, :requirements, :completion) do
       def template_dir = File.join(dir, "template")
       def profile = definition["model"]
@@ -33,7 +39,8 @@ module SoftFoundry
 
     def phases
       @phases ||= Array(workflow["lifecycle"]).map do |entry|
-        Phase.new(id: entry["id"], skill: entry["skill"], output: entry["output"], optional: entry["optional"] == true, after: entry["after"])
+        Phase.new(id: entry["id"], skill: entry["skill"], output: entry["output"], optional: entry["optional"] == true, after: entry["after"],
+                  enabled_by: entry["enabled_by"]&.to_s, since_rules: entry["since_rules"].is_a?(Integer) ? entry["since_rules"] : nil)
       end
     end
 
