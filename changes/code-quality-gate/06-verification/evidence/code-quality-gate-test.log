@@ -1,35 +1,38 @@
-Run options: -v --seed 29468
+Run options: -v --seed 19652
 
 # Running:
 
-CodeQualityGateTest#test_the_skill_states_the_questions_the_classes_and_its_limits = 0.00 s = .
-CodeQualityGateTest#test_a_blocking_finding_without_a_valid_class_or_cost_fails_the_gate = 2.23 s = .
-CodeQualityGateTest#test_a_repository_that_does_not_name_the_gate_is_not_asked_for_quality = 0.99 s = .
-CodeQualityGateTest#test_quality_without_a_fresh_session_fails_in_block_mode = 1.09 s = .
-CodeQualityGateTest#test_the_quality_gate_carries_the_checks_review_carries = 0.37 s = .
-CodeQualityGateTest#test_the_quality_phase_writes_only_its_own_directory = 0.94 s = .
-CodeQualityGateTest#test_a_repository_with_the_gate_off_is_not_asked_for_quality = 0.95 s = .
-CodeQualityGateTest#test_reopening_verify_resets_quality = 0.36 s = .
-CodeQualityGateTest#test_the_light_track_is_not_asked_for_quality = 0.97 s = .
-CodeQualityGateTest#test_onboarding_keeps_a_setting_a_person_made = 0.45 s = .
-CodeQualityGateTest#test_help_and_documentation_describe_the_phase = 0.00 s = .
-CodeQualityGateTest#test_a_complete_handoff_may_not_carry_a_blocking_finding = 1.03 s = .
-CodeQualityGateTest#test_change_new_scaffolds_the_quality_directory_and_the_new_rules_number = 0.57 s = .
-CodeQualityGateTest#test_sealing_verify_makes_quality_the_current_phase = 1.24 s = .
-CodeQualityGateTest#test_quality_evidence_goes_stale_when_code_changes = 1.31 s = .
-CodeQualityGateTest#test_a_classed_blocking_finding_blocks_the_phase_and_points_to_remediation = 1.57 s = .
-CodeQualityGateTest#test_low_risk_is_not_asked_for_quality = 1.03 s = .
-CodeQualityGateTest#test_onboarding_turns_the_gate_on_for_a_scripting_language = 0.45 s = .
-CodeQualityGateTest#test_a_record_with_the_earlier_rules_number_is_not_asked_for_quality = 1.52 s = .
-CodeQualityGateTest#test_a_record_with_no_rules_number_is_not_asked_for_quality = 1.14 s = .
-CodeQualityGateTest#test_change_status_says_why_quality_may_stay_pending = 1.22 s = .
-CodeQualityGateTest#test_the_lifecycle_places_quality_between_verify_and_evaluate = 0.37 s = .
-CodeQualityGateTest#test_a_handoff_with_findings_of_major_or_lower_can_complete = 1.04 s = .
-CodeQualityGateTest#test_evaluation_waits_for_quality_where_the_gate_is_on = 1.22 s = .
+CodeQualityGateTest#test_the_quality_gate_carries_the_checks_review_carries = 0.39 s = .
+CodeQualityGateTest#test_a_blocking_finding_without_a_valid_class_or_cost_fails_the_gate = 2.46 s = .
+CodeQualityGateTest#test_the_quality_phase_writes_only_its_own_directory = 1.13 s = .
 CodeQualityGateTest#test_review_judgment_remediation_and_the_rails_rules_name_the_phase = 0.00 s = .
-CodeQualityGateTest#test_onboarding_leaves_the_gate_off_for_other_languages = 0.44 s = .
-CodeQualityGateTest#test_a_change_may_ask_for_quality_where_the_gate_is_off = 0.77 s = .
+CodeQualityGateTest#test_init_with_a_scan_turns_the_gate_on_in_a_new_ruby_repository = 0.42 s = .
+CodeQualityGateTest#test_reopening_verify_resets_quality = 0.38 s = .
+CodeQualityGateTest#test_the_light_track_is_not_asked_for_quality = 0.93 s = .
+CodeQualityGateTest#test_the_lifecycle_places_quality_between_verify_and_evaluate = 0.38 s = .
+CodeQualityGateTest#test_a_classed_blocking_finding_blocks_the_phase_and_points_to_remediation = 1.51 s = .
+CodeQualityGateTest#test_low_risk_is_not_asked_for_quality = 1.02 s = .
+CodeQualityGateTest#test_a_record_with_no_rules_number_is_not_asked_for_quality = 1.01 s = .
+CodeQualityGateTest#test_change_new_scaffolds_the_quality_directory_and_the_new_rules_number = 0.60 s = .
+CodeQualityGateTest#test_evaluation_waits_for_quality_where_the_gate_is_on = 1.31 s = .
+CodeQualityGateTest#test_help_and_documentation_describe_the_phase = 0.00 s = .
+CodeQualityGateTest#test_a_record_with_the_earlier_rules_number_is_not_asked_for_quality = 1.59 s = .
+CodeQualityGateTest#test_a_repository_that_does_not_name_the_gate_is_not_asked_for_quality = 1.08 s = .
+CodeQualityGateTest#test_the_skill_states_the_questions_the_classes_and_its_limits = 0.00 s = .
+CodeQualityGateTest#test_quality_without_a_fresh_session_fails_in_block_mode = 1.18 s = .
+CodeQualityGateTest#test_onboarding_turns_the_gate_on_for_a_scripting_language = 0.47 s = .
+CodeQualityGateTest#test_sealing_verify_makes_quality_the_current_phase = 1.21 s = .
+CodeQualityGateTest#test_quality_evidence_goes_stale_when_code_changes = 1.35 s = .
+CodeQualityGateTest#test_a_complete_handoff_may_not_carry_a_blocking_finding = 1.18 s = .
+CodeQualityGateTest#test_onboarding_sets_the_gate_over_the_templates_unset_value = 0.47 s = .
+CodeQualityGateTest#test_onboarding_leaves_the_gate_off_for_other_languages = 0.46 s = .
+CodeQualityGateTest#test_a_handoff_with_findings_of_major_or_lower_can_complete = 1.21 s = .
+CodeQualityGateTest#test_a_change_may_ask_for_quality_where_the_gate_is_off = 0.93 s = .
+CodeQualityGateTest#test_a_repository_with_the_gate_off_is_not_asked_for_quality = 1.06 s = .
+CodeQualityGateTest#test_onboarding_keeps_a_setting_a_person_made = 0.45 s = .
+CodeQualityGateTest#test_change_status_says_why_quality_may_stay_pending = 1.24 s = .
 
-Finished in 23.291485s, 1.1592 runs/s, 9.3596 assertions/s.
+Finished in 25.405496s, 1.1415 runs/s, 8.7776 assertions/s.
 
-27 runs, 218 assertions, 0 failures, 0 errors, 0 skips
+29 runs, 223 assertions, 0 failures, 0 errors, 0 skips
+exit=0

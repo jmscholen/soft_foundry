@@ -1,6 +1,17 @@
-# git show --stat c8d5a66 (RED) and files changed in lib/.ai after it
-c8d5a66b8a486849e008a7cf66e902c8c1659c08 RED: code-quality gate tests (phase, applicability, blocking classes, permissions, profile switch)
+55448aa7e80aef9b35f65231b4f15bb0437a0d79 RED: onboarding leaves the quality gate off over the template's unset value (REV-001)
 
- test/code_quality_gate_test.rb | 368 +++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 368 insertions(+)
- 38 files changed, 420 insertions(+), 22 deletions(-)
+ test/code_quality_gate_test.rb | 27 +++++++++++++++++++++++++++
+ 1 file changed, 27 insertions(+)
+# files changed in lib/.ai after RED (55448aa..b118833)
+ .ai/templates/repository.yml      |  5 +++--
+ lib/soft_foundry/maturity_scan.rb | 14 ++++++++++----
+ 2 files changed, 13 insertions(+), 6 deletions(-)
+
+# the two REV-001 tests run at 55448aa in a temporary detached worktree (removed afterwards)
+  1) Failure:
+CodeQualityGateTest#test_onboarding_sets_the_gate_over_the_templates_unset_value [test/code_quality_gate_test.rb:346]:
+Expected: true
+  2) Failure:
+CodeQualityGateTest#test_init_with_a_scan_turns_the_gate_on_in_a_new_ruby_repository [test/code_quality_gate_test.rb:359]:
+Expected: true
+2 runs, 3 assertions, 2 failures, 0 errors, 0 skips

@@ -1,0 +1,23 @@
+# test/maturity_scan_test.rb
+Run options: --seed 32937
+
+# Running:
+
+...........
+
+Finished in 4.539908s, 2.4230 runs/s, 10.1324 assertions/s.
+
+11 runs, 46 assertions, 0 failures, 0 errors, 0 skips
+exit=0
+
+# test/cli_init_test.rb
+Run options: --seed 44244
+
+# Running:
+
+.................................
+
+Finished in 44.805394s, 0.7365 runs/s, 16.0695 assertions/s.
+
+33 runs, 720 assertions, 0 failures, 0 errors, 0 skips
+exit=0

@@ -55,7 +55,7 @@ change code-quality-gate
   ✓ pass no placeholders
   ✓ pass no blocking conditions
   ✓ pass commit_sha recorded: 98f1ba472926d3975bfb10af4d13a1a18ebe7604
-  ✓ pass commit lineage: reaches HEAD 03a184bd1c61; recorded with this commit_sha
+  ✓ pass commit lineage: reaches HEAD 459fa860a359; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-11-17T02:09:44Z
   ✓ pass predecessor complete: first phase
   ✓ pass content clean
@@ -66,7 +66,7 @@ change code-quality-gate
   ✓ pass no placeholders
   ✓ pass no blocking conditions
   ✓ pass commit_sha recorded: 7238a46de71a032cd1b544b6a56e78cc3e514360
-  ✓ pass commit lineage: descends from 00-intake at 98f1ba472926; reaches HEAD 03a184bd1c61; recorded with this commit_sha
+  ✓ pass commit lineage: descends from 00-intake at 98f1ba472926; reaches HEAD 459fa860a359; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-11-17T02:10:59Z
   ✓ pass predecessor complete: 00-intake
   ✓ pass specification locked: locked at f508df250698, the commit that recorded it
@@ -80,13 +80,26 @@ change code-quality-gate
   ✓ pass no placeholders
   ✓ pass no blocking conditions
   ✓ pass commit_sha recorded: 4666f0776b4e7e1416fbf59c7d683b0dc3dcd144
-  ✓ pass commit lineage: descends from 02-specification at 7238a46de71a; reaches HEAD 03a184bd1c61; recorded with this commit_sha
+  ✓ pass commit lineage: descends from 02-specification at 7238a46de71a; reaches HEAD 459fa860a359; recorded with this commit_sha
   ✓ pass completed_at recorded: 2026-11-18T02:48:59Z
   ✓ pass predecessor complete: 02-specification
   ✓ pass content clean
 06-verification  in_progress  PASS
   ✓ pass handoff identity
   ! warn phase in progress: not yet gated
+09-remediation  complete  PASS
+  ✓ pass handoff identity
+  ✓ pass required files present: summary.md, handoff.yml
+  ✓ pass structured files parse: handoff.yml
+  ✓ pass no placeholders
+  ✓ pass no blocking conditions
+  ✓ pass commit_sha recorded: b1188331f309d37b55b3056f4e0795a6970b2947
+  ✓ pass commit lineage: descends from 05-implementation at 4666f0776b4e; reaches HEAD 459fa860a359; recorded with this commit_sha
+  ✓ pass completed_at recorded: 2026-11-18T03:42:01Z
+  ✓ pass predecessor complete: 05-implementation
+  ✓ pass content clean
+advisory: 1 issue to address before code-quality-gate goes live (informational, does not block the gate)
+  ! warn follow-up: REV-006 (13-review) concerns code outside this change: When the shell's working directory is a subdirectory, the guard's PostToolUse hook writes a stray .ai/policies/enforcement.yml there and logs a false tamper (seen again in this session; see VER-004).; carried to Resolve the repository root (git rev-parse --show-toplevel) before the after-call restore, or cd to it in GUARD_AFTER_COMMAND.
 
 change control-plane-scan (closed, skipped)
 
@@ -179,3 +192,4 @@ change update-release-asset-name (closed, skipped)
 change upstream-failure-reporting (closed, skipped)
 
 ✓ ci passed
+exit=0

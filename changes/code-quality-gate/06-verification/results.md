@@ -1,35 +1,44 @@
 # Verification Results
 
-Commit SHA: 03a184bd1c611572f0ab14601406b250a9d1cc85 (tree fc6e9ccbe9ab62080b39d757645cb2d7c597bce5)
+Commit SHA: 459fa860a35924d47b49b12e507543547768d8ef (tree 281dff35a6680a623ba28cf31100362219ca6054). The code it describes is the remediation's GREEN commit b118833. The commit after that only records the remediation.
 
-Check size: `full_at_verify` (no scope declared). All checks ran with the repository's own `lib/` (`ruby -Ilib exe/soft-foundry`). Provider keys and `SOFT_FOUNDRY_PHASE` were unset.
+Check size: `full_at_verify` (no scope declared). All checks ran with the worktree's own `lib/` (`ruby -Ilib exe/soft-foundry`). Provider keys and `SOFT_FOUNDRY_PHASE` were unset.
+
+This is the rerun after remediation round 1 (REV-001: onboarding left the quality gate off in a newly initialized repository).
 
 ## Deterministic checks
 
 | Check | Command | Result | Criteria |
 | --- | --- | --- | --- |
-| CHECK-001 | `ruby -Ilib -Itest test/code_quality_gate_test.rb` | pass: 27 runs, 218 assertions | AC-001 to AC-009, AC-011, AC-012 |
-| CHECK-002 | `bundle exec rake test` (full suite) | pass: 978 runs, 7287 assertions, 0 failures, 0 errors, 0 skips | AC-010 |
-| CHECK-003 | `soft-foundry check` | pass: 17 phases, 18 skills, no errors | AC-001 |
-| CHECK-004 | `soft-foundry ci` | pass | AC-002, AC-010 |
-| CHECK-005 | diff of existing tests, f508df2 to 03a184b | pass: edits match DEV-004 | AC-010 |
+| CHECK-001 | `ruby -Ilib -Itest test/code_quality_gate_test.rb` | pass: 29 runs, 223 assertions | AC-001 to AC-009, AC-011, AC-012 |
+| CHECK-002 | `bundle exec rake test` (full suite) | pass: 980 runs, 7307 assertions, 0 failures, 0 errors, 0 skips | AC-010 |
+| CHECK-003 | `test/maturity_scan_test.rb`, `test/cli_init_test.rb` | pass: 11 and 33 runs | AC-010, AC-012 |
+| CHECK-004 | `soft-foundry check` | pass: 17 phases, 18 skills, no errors | AC-001 |
+| CHECK-005 | `soft-foundry ci` | pass | AC-002, AC-010 |
+| CHECK-006 | diff of existing tests, f508df2 to b118833 | pass: no new edits; earlier ones match DEV-004 | AC-010 |
+| CHECK-007 | `init --maturity scan` and `onboard` in scratch repositories | pass | AC-012 |
 
-RED evidence: commit `c8d5a66` adds only `test/code_quality_gate_test.rb`. Application and control-plane code changed after it, in `4666f07`, across 38 files.
+RED evidence: commit `55448aa` adds only the two REV-001 tests to `test/code_quality_gate_test.rb`. This session ran both at that commit, in a temporary worktree it then removed, and both failed with `enabled` false where true was expected. The fix (`b118833`) changes `lib/soft_foundry/maturity_scan.rb` and the comment in `.ai/templates/repository.yml`.
+
+## REV-001 from the outside
+
+Scratch repositories, `soft-foundry init --maturity scan`:
+- With a `Gemfile`: `quality_gate` is `enabled: true`, `set_by: soft-foundry (language scan: ruby)`.
+- With no scripting language: `enabled: false`, set by the scan.
+- With a person's `enabled: false` and a name in `set_by`, `soft-foundry onboard` keeps it.
 
 ## Failures
 
 None.
 
-- The first full-suite run was stopped by this session's 10-minute background time limit. It had printed about 900 passing dots and no failures. The identical rerun took 1258 s and passed.
-- The globally installed `soft-foundry` on this machine is older than this branch. `soft-foundry change status` there reports `06a-code-quality missing FAIL: handoff present` for this record. The worktree's own `lib/` reports `pending: not part of this record: it was created before the phase existed`. Every check here used the worktree's `lib/`. See VER-002.
-
 ## Evidence
 
-Listed in `evidence/manifest.yml` with SHA-256 digests: the test logs, the `check` and `ci` output, the diff of existing tests and the RED commit's file list.
+Listed in `evidence/manifest.yml` with SHA-256 digests.
 
 ## Coverage notes
 
-- AC-008 is covered only by structure. The test asserts that the quality gate carries the `remediation within cap` check. No test drives a third remediation round after a blocking quality finding (VER-001).
+- AC-008 is still covered only by structure. No test drives a third remediation round after a blocking quality finding (VER-001, carried forward).
 - AC-005, AC-009 and AC-011 are text criteria. The test file checks them by reading the skill, the documentation and the help output.
+- A `set_by` holding only whitespace counts as unset (`strip` in `set_by_a_person?`). This was read in the code, and no test covers it.
 
 Evidence generated for a different implementation commit is stale.
