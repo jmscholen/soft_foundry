@@ -1,20 +1,20 @@
 # Phase handoff. One per phase directory. The gate checker validates this file.
 phase: 09-remediation
 skill: remediation
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
+status: complete
+commit_sha: b1188331f309d37b55b3056f4e0795a6970b2947
 # Written by `soft-foundry phase seal` on a commit-bound phase: whether
 # metadata.git.branch resolved to a ref when the phase was sealed. False
 # means the checked-out HEAD, not a branch created later, is the measure
 # for "evidence current". Never written by the agent.
 # branch_resolved: true
-started_at: null
-completed_at: null
+started_at: "2026-11-18T03:42:01Z"
+completed_at: "2026-11-18T03:42:01Z"
 resolved_model:
   profile: coding_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
+  provider: anthropic
+  model: claude-fable-5-2
+outputs: [summary.md]                # files produced, relative to this phase directory
 blocking: []               # unresolved blocking conditions; must be empty when complete
 findings: []               # items for downstream phases: {id, severity, summary}; a review's
                            # findings above minor also carry failure: (the concrete input
