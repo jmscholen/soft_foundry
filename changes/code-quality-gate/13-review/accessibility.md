@@ -3,12 +3,12 @@
 Standard: `.ai/rules/accessibility.md` (WCAG 2.2 AA for user interfaces; CLI output, document, and evidence rules). Cite the success criterion or rule in every finding.
 
 ## Scope reviewed
-TBD
+`surfaces.accessibility` is false in metadata.yml. A person does perceive this change's output: the `change status` line for `06a-code-quality`, the new `phase run quality` help text, the gate message of `quality findings classed`, and `docs/user/code-quality-review.md`. I examined each against the command-line and document rules. The status reason is plain words ("the quality gate is off in .ai/repository.yml", "not part of this record: it was created before the phase existed"), with no colour or glyph carrying meaning. The gate message names the finding ID and what is missing. The help text is line-oriented. The user page uses ordered headings (h1, then h2), real Markdown tables and lists, and fenced code blocks with a language.
 
 ## Findings
 | ID | Severity | Location | Finding | Failure it prevents | Rule or requirement |
 | --- | --- | --- | --- | --- | --- |
-| REV-TBD | blocking / major / minor | TBD | TBD | TBD: the concrete input or state and the wrong result (required for blocking and major) | TBD |
+| — | — | — | No findings. | — | — |
 
 ## Conformance
-TBD: conforms / conforms with advisories / does not conform / N/A. N/A is valid only when `surfaces.accessibility` is false and this section says what was examined to conclude nothing a person perceives or operates changed.
+Conforms. Output and documentation meet the command-line rule ("every outcome is conveyed by a word") and REQ-011.

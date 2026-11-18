@@ -1,12 +1,12 @@
 # Infrastructure Review
 
 ## Scope reviewed
-TBD
+The diff `f508df2..276dc8d` for Infrastructure as Code, CI workflows, deployment configuration and state. Nothing under `.github/`, no Terraform, OpenTofu or Pulumi, and no deployment files changed. `.ai/rules/infrastructure.md` has nothing to apply to.
 
 ## Findings
 | ID | Severity | Location | Finding | Failure it prevents | Rule or requirement |
 | --- | --- | --- | --- | --- | --- |
-| REV-TBD | blocking / major / minor | TBD | TBD | TBD: the concrete input or state and the wrong result (required for blocking and major) | TBD |
+| — | — | — | No findings. | — | — |
 
 ## Conformance
-TBD or N/A with justification
+N/A. No infrastructure is present in or modified by this change.

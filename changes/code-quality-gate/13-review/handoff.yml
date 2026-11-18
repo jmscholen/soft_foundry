@@ -1,29 +1,98 @@
-# Phase handoff. One per phase directory. The gate checker validates this file.
+---
 phase: 13-review
 skill: review
-status: pending            # pending | in_progress | complete | blocked
-commit_sha: null           # HEAD of the worktree when this phase's outputs were produced
-# Written by `soft-foundry phase seal` on a commit-bound phase: whether
-# metadata.git.branch resolved to a ref when the phase was sealed. False
-# means the checked-out HEAD, not a branch created later, is the measure
-# for "evidence current". Never written by the agent.
-# branch_resolved: true
-started_at: null
-completed_at: null
+status: complete
+commit_sha: 276dc8d611cbf6ae2456ea99061cd7ce9ba9932c
+started_at: '2026-11-18T03:34:08Z'
+completed_at: '2026-11-18T03:38:03Z'
 resolved_model:
   profile: reasoning_high
-  provider: null
-  model: null
-outputs: []                # files produced, relative to this phase directory
-blocking: []               # unresolved blocking conditions; must be empty when complete
-findings: []               # items for downstream phases: {id, severity, summary}; a review's
-                           # findings above minor also carry failure: (the concrete input
-                           # or state and the wrong result it leads to)
-next: judge
-notes: ""
-# Written by `soft-foundry phase run`, never by the agent: how this phase was
-# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
-# session_id, cwd).
-# A review or judgment phase completed without it is advised as having been
-# performed by whatever session was already open.
-executed_by: null
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+- functional.md
+- architecture.md
+- security.md
+- accessibility.md
+- policy-conformance.md
+- infrastructure.md
+- operations.md
+- consolidated.md
+blocking: []
+findings:
+- id: REV-001
+  severity: blocking
+  summary: soft-foundry init writes .ai/repository.yml from the template, whose quality_gate
+    block is enabled false with set_by null. The onboarding scan (maturity_scan.rb
+    quality_gate) treats a set_by that does not start with its own prefix as a person's
+    choice, and nil.to_s is empty, so it keeps the gate off. Onboarding therefore
+    never turns the gate on in a newly initialized repository, contrary to REQ-004,
+    AC-012 and docs/user/code-quality-review.md. The AC-012 tests delete the key before
+    scanning, so the init path is untested.
+  failure: soft-foundry init --root <repo> --maturity scan on a git repository with
+    a Gemfile and Ruby code writes technology.languages [ruby] and quality_gate enabled
+    false, set_by null (reproduced in this session). A medium-risk gated change there
+    is never asked for the quality phase.
+  paths:
+  - ".ai/templates/repository.yml"
+  - lib/soft_foundry/maturity_scan.rb
+  - test/code_quality_gate_test.rb
+- id: REV-002
+  severity: minor
+  summary: AC-008 is covered by structure only (VER-001). The gate carries the shared
+    remediation-cap check, but no test runs a third round after a blocking quality
+    finding.
+- id: REV-003
+  severity: minor
+  summary: The process_speed_test assertion changed from rules 2 to 3 is not a count
+    or list of phases as REQ-012 words it. REQ-004 requires the change (DEV-004, IMPL-003).
+- id: REV-004
+  severity: minor
+  summary: snapshot.rb has its own skip_reason, which knows nothing of conditional
+    phases. soft-foundry ui shows 06a-code-quality pending with no reason where change
+    status gives one.
+- id: REV-005
+  severity: minor
+  summary: The per-phase check lists are repeated in Gate.checks_for and Gate#evaluate.
+    The quality phase was added to six parallel conditions, and a later edit to one
+    list but not the other would make --explain disagree with the gate.
+- id: REV-006
+  severity: minor
+  outside_change: true
+  summary: When the shell's working directory is a subdirectory, the guard's PostToolUse
+    hook writes a stray .ai/policies/enforcement.yml there and logs a false tamper
+    (seen again in this session; see VER-004).
+  paths:
+  - lib/soft_foundry/hooks.rb
+  follow_up: Resolve the repository root (git rev-parse --show-toplevel) before the
+    after-call restore, or cd to it in GUARD_AFTER_COMMAND.
+- id: REV-007
+  severity: minor
+  summary: No harness eval case covers the quality findings classed check (DEV-003).
+    This is the maintainer's follow-up.
+- id: REV-008
+  severity: minor
+  summary: The globally installed soft-foundry predates this branch (VER-002). Gate
+    and seal with ruby -Ilib exe/soft-foundry, or install the branch first.
+next: remediate
+notes: Code-quality phase did not run (rules 2 record, light track, the gate is off
+  in this repository's profile), so architecture.md and functional.md cover its subjects.
+  Checks run by this session with provider keys unset were test/code_quality_gate_test.rb
+  (27 runs, 0 failures), change status with the worktree lib, and a scratch init that
+  reproduces REV-001. The guard checks Bash against deny sets only, so the read and
+  write boundaries were followed as policy. Two shell calls whose working directory
+  was left in a subdirectory made the guard after-hook create untracked .ai/skills/review/.ai/policies/enforcement.yml
+  and changes/code-quality-gate/.ai/policies/enforcement.yml. This session's attempt
+  to delete them was refused, so the maintainer should remove them. The scratch repository
+  is under /tmp/sf-review-*.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-11-18T03:34:08Z'
+  finished_at: '2026-11-18T03:38:41Z'
+  exit_status: 0
+  previous_phase: review
+  session_id: 3cae1cf2-c5b1-4f02-ad8b-18850c5a9e0f
+  cwd: "/Users/jscholen-iou/dev/soft_foundry/.claude/worktrees/code-quality-gate"
+branch_resolved: true
