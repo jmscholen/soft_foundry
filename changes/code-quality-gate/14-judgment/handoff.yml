@@ -1,0 +1,54 @@
+---
+phase: 14-judgment
+skill: final-judgment
+status: complete
+commit_sha: 79ab0c2f55d1a3a2940b0a201d95f5350b3152d7
+started_at: '2026-11-18T04:09:38Z'
+completed_at: '2026-11-18T04:11:25Z'
+resolved_model:
+  profile: judgment_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+- final.md
+- residual-risk.md
+- evidence.yml
+blocking: []
+findings:
+- id: JUD-001
+  severity: minor
+  summary: APPROVED_WITH_RESIDUAL_RISK. All four must criteria (AC-001 to AC-004)
+    are met; AC-008 (should) is covered by structure only. No blocking review finding;
+    REV-001 resolved in remediation round 1 of 2.
+- id: JUD-002
+  severity: minor
+  summary: 'Follow-ups for the maintainer: REV-004 (UI skip reason), REV-005 (duplicated
+    gate check lists), REV-007 (harness eval case for quality findings classed), a
+    test that drives a third remediation round after a blocking quality finding (AC-008),
+    and REV-006 (guard after-hook path, outside this change).'
+- id: JUD-003
+  severity: minor
+  summary: Untracked changes/code-quality-gate/.ai/ (stray guard policy copy, REV-006)
+    must be deleted before any git add -A. PC-001 is owed by the maintainer after
+    merge and local install.
+next: learn
+notes: 'Judged at HEAD 79ab0c2; the code is b118833 and nothing outside changes/ changed
+  after it. This session reran test/code_quality_gate_test.rb with provider keys and
+  SOFT_FOUNDRY_PHASE unset (29 runs, 223 assertions, 0 failures) and read MaturityScan#quality_gate
+  and #set_by_a_person? at HEAD. Code-quality, evaluation and attack did not run and
+  are recorded not_run. One cd into the change record made the guard after-hook log
+  a false tamper of .ai/policies/enforcement.yml (REV-006); the guard restored the
+  committed policy and the repository policy is unchanged. The guard checks Bash against
+  deny sets only; read and write boundaries of permissions.yml were followed as policy.
+  Use ruby -Ilib exe/soft-foundry to gate and seal (VER-002).'
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-11-18T04:09:38Z'
+  finished_at: '2026-11-18T04:11:49Z'
+  exit_status: 0
+  previous_phase: judge
+  session_id: 91cacacb-ae33-4e59-b5be-edcd5814e7ca
+  cwd: "/Users/jscholen-iou/dev/soft_foundry/.claude/worktrees/code-quality-gate"
+branch_resolved: true

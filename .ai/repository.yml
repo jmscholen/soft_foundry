@@ -26,6 +26,11 @@ technology:
   testing:
   - minitest
   - rake
+# Off for this repository: its own changes run on the light track, where
+# the code-quality phase is optional (maintainer, 2026-11-14 and 2026-11-16).
+quality_gate:
+  enabled: false
+  set_by: maintainer
 infrastructure:
   detected:
   - github-actions

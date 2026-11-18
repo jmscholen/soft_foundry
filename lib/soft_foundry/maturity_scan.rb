@@ -31,6 +31,12 @@ module SoftFoundry
       "csharp" => ["*.csproj", "*.sln"]
     }.freeze
 
+    # Languages whose presence turns the code-quality gate on for the
+    # repository (quality_gate.enabled in .ai/repository.yml): scripting
+    # languages whose applications share the patterns the review reads for.
+    QUALITY_GATE_LANGUAGES = %w[ruby python javascript typescript php].freeze
+    SCAN_SET_BY = "soft-foundry (language scan"
+
     IAC = {
       "terraform_or_opentofu" => ["*.tf"],
       "pulumi" => ["Pulumi.yaml", "Pulumi.yml"],
@@ -72,6 +78,24 @@ module SoftFoundry
         "databases" => [],
         "testing" => TESTING.filter_map { |name, globs| name if any_match?(globs) }.sort
       }
+    end
+
+    # The quality_gate: block of .ai/repository.yml. A setting a person
+    # made (a `set_by` that is not blank and that the scan did not write)
+    # is kept as it is; otherwise
+    # the gate is on when a scripting language is detected.
+    def quality_gate(tech = technology)
+      existing = plane.repository_profile["quality_gate"]
+      return existing if existing.is_a?(Hash) && [true, false].include?(existing["enabled"]) && set_by_a_person?(existing["set_by"])
+      found = tech["languages"] & QUALITY_GATE_LANGUAGES
+      { "enabled" => !found.empty?, "set_by" => "#{SCAN_SET_BY}: #{found.empty? ? 'no scripting language detected' : found.join(', ')})" }
+    end
+
+    # A blank set_by is the profile template's unset value, and one the scan
+    # wrote is the scan's own; neither is a person's choice.
+    def set_by_a_person?(set_by)
+      name = set_by.to_s.strip
+      !name.empty? && !name.start_with?(SCAN_SET_BY)
     end
 
     def infrastructure
@@ -133,6 +157,7 @@ module SoftFoundry
         "version" => 1,
         "repository" => { "assessed" => true, "assessed_at" => now.utc.iso8601, "commit_sha" => commit, "assessed_by" => "soft-foundry (maturity scan)" },
         "technology" => technology,
+        "quality_gate" => quality_gate,
         "infrastructure" => infrastructure,
         "policies" => policies,
         "capabilities" => capabilities.transform_values { |f| { "status" => f.status, "evidence" => f.evidence, "rationale" => f.rationale }.compact },

@@ -1,0 +1,9 @@
+# scratch repositories under /tmp, worktree lib, provider keys unset: init --maturity scan, then a person's value and onboard
+== ruby after init (exit 0):
+{"enabled"=>true, "set_by"=>"soft-foundry (language scan: ruby)"}
+== none after init (exit 0):
+{"enabled"=>false, "set_by"=>"soft-foundry (language scan: no scripting language detected)"}
+== person after init (exit 0):
+{"enabled"=>true, "set_by"=>"soft-foundry (language scan: ruby)"}
+== person after setting false and onboard (exit 0):
+{"enabled"=>false, "set_by"=>"Jeff Scholen"}

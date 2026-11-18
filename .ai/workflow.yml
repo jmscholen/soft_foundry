@@ -23,6 +23,17 @@ lifecycle:
   - id: verify
     skill: verification
     output: 06-verification
+  - id: quality
+    skill: code-quality
+    output: 06a-code-quality
+    # A staff software engineer's review of the change's code. Asked of a
+    # change only where the repository profile turns it on
+    # (.ai/repository.yml quality_gate.enabled) and the record was made
+    # after the phase existed (metadata.yml rules at or above since_rules).
+    # Otherwise it may stay pending; a change can still name it under
+    # run_phases.
+    enabled_by: quality_gate
+    since_rules: 3
   - id: evaluate
     skill: evaluation
     output: 07-evaluation
@@ -59,11 +70,14 @@ lifecycle:
 # Non-linear edges. Every other phase proceeds to the next lifecycle entry.
 # A phase's completion gate requires its predecessor complete; `after`
 # overrides the predecessor and pending `optional` phases are skipped over.
-# Any transition back to `verify` marks verify, evaluate, attack, review, and
-# judge evidence stale for the change.
+# Any transition back to `verify` marks verify, quality, evaluate, attack,
+# review, and judge evidence stale for the change.
 transitions:
   remediate:
     next: verify
+  quality:
+    next: evaluate
+    on_blocking_findings: remediate
   observe:
     next: review
     on_code_change: verify
@@ -109,7 +123,7 @@ isolated_phases: [evaluate, attack]
 # it): a change is complete only with a final judgment. The gate reports
 # the result as `waivers permitted` on the first phase.
 waivable_by_risk:
-  low: [discover, specify, threat_model, plan, attack, learn]
+  low: [discover, specify, threat_model, plan, quality, attack, learn]
   medium: [discover, plan]
   high: []
 
@@ -155,7 +169,7 @@ tracks:
     # specification lock, the must-criteria approval, the remediation cap,
     # review and judgment apply as on the gated track. A high risk change
     # cannot use it (forced_by_risk below).
-    optional: [discover, threat_model, plan, evaluate, attack, learn]
+    optional: [discover, threat_model, plan, quality, evaluate, attack, learn]
   # A change's declared risk can force a track regardless of what
   # `change new --track` asked for; the gate reports the conflict.
   forced_by_risk:

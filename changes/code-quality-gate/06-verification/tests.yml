@@ -1,0 +1,59 @@
+commit_sha: 459fa860a35924d47b49b12e507543547768d8ef
+# `soft-foundry change size --phase verify` (worktree lib): full_at_verify,
+# whole repository, no scope declared.
+size: full_at_verify
+full_suite:
+  tree: 281dff35a6680a623ba28cf31100362219ca6054
+  command: env -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u XAI_API_KEY -u GROK_API_KEY -u GEMINI_API_KEY -u SOFT_FOUNDRY_PHASE bundle exec rake test
+  outcome: passed
+checks:
+  - id: CHECK-001
+    kind: tests
+    command: ruby -Ilib -Itest test/code_quality_gate_test.rb -v (provider keys and SOFT_FOUNDRY_PHASE unset)
+    result: pass
+    evidence: evidence/code-quality-gate-test.log
+    criteria: [AC-001, AC-002, AC-003, AC-004, AC-005, AC-006, AC-007, AC-008, AC-009, AC-011, AC-012]
+    red_commit: 55448aa7e80aef9b35f65231b4f15bb0437a0d79
+    test_path: test/code_quality_gate_test.rb
+    notes: 29 runs, 223 assertions, 0 failures. The RED commit is the remediation's (REV-001); it adds only the two new tests to this file, and both were run at 55448aa and failed with enabled false where true was expected (evidence/red-commit.txt). The original RED commit for the file is c8d5a66. AC-008 is still covered only structurally (VER-001).
+  - id: CHECK-002
+    kind: tests
+    command: env -u ANTHROPIC_API_KEY -u OPENAI_API_KEY -u XAI_API_KEY -u GROK_API_KEY -u GEMINI_API_KEY -u SOFT_FOUNDRY_PHASE bundle exec rake test
+    result: pass
+    evidence: evidence/full-suite.log
+    criteria: [AC-010]
+    notes: 980 runs, 7307 assertions, 0 failures, 0 errors, 0 skips, 1278 s, on tree 281dff3.
+  - id: CHECK-003
+    kind: tests
+    command: ruby -Ilib -Itest test/maturity_scan_test.rb; ruby -Ilib -Itest test/cli_init_test.rb (provider keys unset)
+    result: pass
+    evidence: evidence/targeted-tests.log
+    criteria: [AC-010, AC-012]
+    notes: The existing tests of the file the fix touched and of init; 11 runs and 33 runs, 0 failures.
+  - id: CHECK-004
+    kind: static_analysis
+    command: ruby -Ilib exe/soft-foundry check
+    result: pass
+    evidence: evidence/check.log
+    criteria: [AC-001]
+  - id: CHECK-005
+    kind: custom
+    command: ruby -Ilib exe/soft-foundry ci
+    result: pass
+    evidence: evidence/ci.log
+    criteria: [AC-002, AC-010]
+    notes: Every record gates and every harness eval refuses as expected; this record (rules 2, light track) is not asked for the quality phase.
+  - id: CHECK-006
+    kind: custom
+    command: git diff f508df2 b118833 -- test ':!test/code_quality_gate_test.rb'
+    result: pass
+    evidence: evidence/existing-test-edits.txt
+    criteria: [AC-010]
+    notes: The remediation edited no existing test (03a184b to b118833 touches only test/code_quality_gate_test.rb among tests). The edits from the first implementation are unchanged and match DEV-004 and IMPL-003.
+  - id: CHECK-007
+    kind: custom
+    command: soft-foundry init --maturity scan in new scratch repositories (with a Gemfile, with no language), then a person's set_by and onboard
+    result: pass
+    evidence: evidence/scratch-onboarding.txt
+    criteria: [AC-012]
+    notes: From outside, through the CLI with the worktree lib. Ruby repo gets enabled true; a repo with no scripting language gets false; a person's false survives onboard.

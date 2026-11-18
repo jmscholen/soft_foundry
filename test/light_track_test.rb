@@ -9,7 +9,7 @@ class LightTrackTest < Minitest::Test
   include LifecycleFixture
 
   LIGHT_REQUIRED = %w[intake specify implement verify review judge].freeze
-  LIGHT_OPTIONAL = %w[discover threat_model plan evaluate attack learn].freeze
+  LIGHT_OPTIONAL = %w[discover threat_model plan quality evaluate attack learn].freeze
 
   def plane(dir) = SoftFoundry::ControlPlane.new(dir)
   def git(dir) = SoftFoundry::Git.new(dir)

@@ -22,7 +22,7 @@ class CLIChangeJsonTest < Minitest::Test
       board = JSON.parse(out)
       assert_equal 1, board["version"]
       assert_equal ["c1"], board["changes"].map { |c| c["slug"] }
-      assert_equal 16, board["changes"].first["cells"].size
+      assert_equal 17, board["changes"].first["cells"].size
     end
   end
 

@@ -1,0 +1,77 @@
+---
+phase: 06-verification
+skill: verification
+status: complete
+commit_sha: 459fa860a35924d47b49b12e507543547768d8ef
+started_at: '2026-11-18T03:42:31Z'
+completed_at: '2026-11-18T04:05:40Z'
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-opus-5-5
+outputs:
+- results.md
+- tests.yml
+- evidence/manifest.yml
+- evidence/full-suite.log
+- evidence/code-quality-gate-test.log
+- evidence/targeted-tests.log
+- evidence/check.log
+- evidence/ci.log
+- evidence/existing-test-edits.txt
+- evidence/red-commit.txt
+- evidence/scratch-onboarding.txt
+blocking: []
+findings:
+- id: VER-001
+  severity: minor
+  summary: AC-008 (a third remediation round after a blocking quality finding is refused
+    with the cap message) is still covered only by structure. test_the_quality_gate_carries_the_checks_review_carries
+    asserts that the quality gate includes the remediation-cap check, but no test
+    drives a third round after a blocking quality finding. Review and judgment should
+    weigh it as partial coverage of a should criterion.
+- id: VER-002
+  severity: minor
+  summary: The globally installed soft-foundry predates this branch. Every check here
+    used ruby -Ilib exe/soft-foundry; later gates and seals should too, or the branch
+    should be installed locally first.
+- id: VER-003
+  severity: minor
+  summary: The full suite takes about 21 minutes (1278 s for 980 runs), longer than
+    a 10-minute background or monitor limit. Later phases that rerun it need a longer
+    limit.
+- id: VER-004
+  severity: minor
+  summary: REV-001 is fixed as specified. Through the CLI, init --maturity scan in
+    a new repository with a Gemfile turns the gate on; with no scripting language
+    it stays off; a person's value survives onboard. A set_by of only whitespace counts
+    as unset; no test covers that case.
+- id: VER-005
+  severity: minor
+  summary: The guard's after-call hook resolves paths from the shell's working directory.
+    One shell call in this session left it inside .ai/skills/verification/, and the
+    hook wrote untracked .ai/skills/verification/.ai/policies/enforcement.yml and
+    .ai/skills/verification/.soft-foundry/ there and logged a tamper restore. They
+    are inside the control plane, which this skill may not write, so they were left
+    for the maintainer to delete. The repository's own .ai/policies/enforcement.yml
+    was unchanged.
+next: review
+notes: Rerun after remediation round 1 (REV-001). Full suite, targeted tests, check
+  and ci ran with provider keys and SOFT_FOUNDRY_PHASE unset, on HEAD 459fa86 (tree
+  281dff3); the code it describes is b118833. The RED commit 55448aa was checked out
+  in a temporary detached worktree under /tmp to confirm both new tests fail there;
+  the worktree was removed. Scratch repositories for the outside check are under /tmp/sf-verify-cqg/scratch.
+  Evaluation and attack are optional on the light track and were not run, so next
+  is review. The guard checks Bash against deny sets only; the read and write boundaries
+  of permissions.yml were followed as policy.
+executed_by:
+  runner: soft-foundry phase run
+  shell: claude
+  fresh_context: true
+  started_at: '2026-11-18T03:42:31Z'
+  finished_at: '2026-11-18T04:05:50Z'
+  exit_status: 0
+  previous_phase: verify
+  session_id: 49ab7f79-e0c3-4309-87ce-cd63d09ab0b5
+  cwd: "/Users/jscholen-iou/dev/soft_foundry/.claude/worktrees/code-quality-gate"
+branch_resolved: true

@@ -21,6 +21,7 @@ deny_write:
   - "${CONTROL_PLANE}"
   - "${DOCS}"
   - "changes/${CHANGE}/06-verification/**"
+  - "changes/${CHANGE}/06a-code-quality/**"
   - "changes/${CHANGE}/07-evaluation/**"
   - "changes/${CHANGE}/08-attack/**"
   - "changes/${CHANGE}/13-review/**"

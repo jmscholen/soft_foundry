@@ -1,0 +1,38 @@
+# Phase handoff. One per phase directory. The gate checker validates this file.
+phase: 05-implementation
+skill: implementation
+status: complete
+commit_sha: 4666f0776b4e7e1416fbf59c7d683b0dc3dcd144
+# Written by `soft-foundry phase seal` on a commit-bound phase: whether
+# metadata.git.branch resolved to a ref when the phase was sealed. False
+# means the checked-out HEAD, not a branch created later, is the measure
+# for "evidence current". Never written by the agent.
+# branch_resolved: true
+started_at: "2026-11-18T02:48:59Z"
+completed_at: "2026-11-18T02:48:59Z"
+resolved_model:
+  profile: coding_high
+  provider: anthropic
+  model: claude-fable-5-2
+outputs: [log.md, decisions.md, deviations.md]                # files produced, relative to this phase directory
+blocking: []               # unresolved blocking conditions; must be empty when complete
+findings:
+  - id: IMPL-001
+    severity: minor
+    summary: The full suite was run before the existing assertions were updated (978 runs, 14 failures, all counts or lists of phases or the rules number) and not rerun after; the twelve affected files pass one by one. Verification runs the full suite on the final commit.
+  - id: IMPL-002
+    severity: minor
+    summary: No harness eval case was added for the new gate check; the implementation skill may not read .ai/harness-evals (DEV-003).
+  - id: IMPL-003
+    severity: minor
+    summary: One changed assertion states the rules number (2 to 3), which is not a count or list of phases as REQ-012 words it (DEV-004).
+                           # findings above minor also carry failure: (the concrete input
+                           # or state and the wrong result it leads to)
+next: verify
+notes: ""
+# Written by `soft-foundry phase run`, never by the agent: how this phase was
+# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
+# session_id, cwd).
+# A review or judgment phase completed without it is advised as having been
+# performed by whatever session was already open.
+executed_by: null

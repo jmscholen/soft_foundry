@@ -309,7 +309,7 @@ soft-foundry change discharge OBS-1 --note "dashboard confirmed"
 
 ### Converging: what a change promises, and how many rounds it gets
 
-A record created by `change new` declares `rules: 2`; the rules below apply to it. A record without it (one created before them) keeps the rules it started under, and the new checks report `skip` with "legacy record".
+A record created by `change new` declares `rules: 3` (2 before the code-quality phase existed); the rules below apply from 2 up. A record without it (one created before them) keeps the rules it started under, and the new checks report `skip` with "legacy record".
 
 - **A person decides what is promised.** Each acceptance criterion carries `tier: must` or `tier: should`. Only must criteria can block review or judgment; should criteria are reported. The number of must criteria is capped by risk (`must_criteria_cap` in `.ai/workflow.yml`: low 3, medium 8, high 15), and the specification does not seal until a person records the exact must list under `human_decisions` (boundary `must criteria approval`). Evaluation and attack aim at that list.
 - **Checks only a person can make are not criteria.** List them under `person_checks` in `acceptance-criteria.yml`; `change release` carries each as a release item.
@@ -370,6 +370,17 @@ advisory: 2 issues to address before my-change goes live (informational, does no
 When the review finds that the policy text itself must change for the code to be honest, that is a legal commitment under `.ai/policies/human-boundaries.yml`: the change is parked with `status: awaiting_human` until a person decides, and the decision is recorded under `human_decisions` in `metadata.yml`. Level 5 of the maturity model requires the standard to be in force.
 
 Every line `soft-foundry` prints carries its outcome as a word (`pass`, `fail`, `warn`, `skip`, `created`, `conflict`) so the output means the same thing in a screen reader, a CI log, or a terminal that cannot render the glyph next to it.
+
+### Code-quality review: an optional gate after verification
+
+The `quality` phase is a staff software engineer's reading of the change's code, in a fresh session, after verification and before evaluation. It writes only `changes/<slug>/06a-code-quality/` and does not repair code.
+
+- **What it asks.** Six questions: does the solution meet the stated need without building more; is it the simplest design that does, and does it fit the surrounding code; does it repeat logic that already exists; is there a performance or resource problem on a path the feature exercises; does it stay correct under concurrent requests, retries and a failure part-way through; can the next engineer change it safely. Each finding gives a file and line, its trigger, the evidence, the smallest remedy and how to verify it.
+- **What can block.** Only a finding that names a concrete cost in one of five classes: `duplication`, `performance`, `simpler_design`, `unmet_need` or `reliability`. The gate's `quality findings classed` check fails a blocking finding without a class and a `failure:`. A blocked change goes to remediation, and the round counts toward the remediation cap. Everything else is reported and carried to review and judgment.
+- **Where it is asked for.** Nowhere unless the repository turns it on: `quality_gate.enabled` in `.ai/repository.yml`. Onboarding sets it to true when it detects Ruby, Python, JavaScript, TypeScript or PHP, and keeps a value a person set. Where it is on, the phase is required at medium and high risk on the gated and iterative tracks, stepped over by default at low risk, and optional on the light track. A change can always ask for it by naming `quality` under `run_phases`. A record created before the phase existed is never asked for it.
+- **Framework detail** lives in rule files, not in the skill: `.ai/rules/rails.md` carries the Rails review decisions. The remediation skill says how a quality finding is repaired: contract first, a behavioral check before the edit, the smallest coherent edit, then the same checks again.
+
+See `docs/user/code-quality-review.md`.
 
 ### Scoped verification: re-run only what a change can affect
 

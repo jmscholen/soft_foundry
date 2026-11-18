@@ -10,4 +10,5 @@ When a later change modifies a validated journey, dependent documentation must b
 | --- | --- | --- | --- |
 | [The guard hook](guard-hook.md) | Installing and updating the guard hook, changing its mode on one machine, editing its configuration after an interrupted command, reading a refusal, running a live harness eval unattended | `guard-docs-and-hooks` | `guard-docs-and-hooks` (EVAL-001 to EVAL-005, EVAL-008, EVAL-009; factory-readiness EVAL-004) |
 | [Converging changes](converging-changes.md) | Must and should criteria, the must-list approval, the remediation cap and what a person decides at it, person checks, findings outside the change | `process-speed` | `process-speed` |
+| [The code-quality review](code-quality-review.md) | Turning the gate on or off for a repository, when a change is asked for it, what the reviewer answers, what can block, running it on request | `code-quality-gate` | `code-quality-gate` |
 | [The light track](light-track.md) | Creating a change on the light track, which phases it requires, which locks it keeps, what `change status` shows | `light-track` | `light-track` |

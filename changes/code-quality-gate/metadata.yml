@@ -1,0 +1,60 @@
+---
+change:
+  id: code-quality-gate
+  title: code-quality-gate
+git:
+  worktree: "/Users/jscholen-iou/dev/soft_foundry/.claude/worktrees/code-quality-gate"
+  branch: change/code-quality-gate
+rules: 2
+type: feature
+risk: medium
+track: light
+status: judged
+current_phase: learn
+created_at: 2026-11-17 02:08:53.000000000 Z
+scope: []
+surfaces:
+  application: false
+  database: false
+  infrastructure: false
+  security: false
+  accessibility: false
+  observability: false
+  policy: false
+human_decisions:
+- boundary: must criteria approval
+  subject: the must criteria of 02-specification/acceptance-criteria.yml
+  criteria:
+  - AC-001
+  - AC-002
+  - AC-003
+  - AC-004
+  decided_by: Jeff Scholen
+  decided_at: 2026-11-16
+  decision: approved
+vetted:
+reopenings: []
+phase_reopenings:
+- at: '2026-11-18T03:39:22Z'
+  phase: remediate
+  reset:
+  - verify
+  - review
+  from_commit: 818165ee973c0f8acce3106d1caa30314b4527f0
+  reason: 'REV-001: onboarding never turns the quality gate on in a newly initialized
+    repository, because the profile template''s set_by null is read as a person''s
+    choice'
+  source: manual
+  previous:
+    verify:
+      status: complete
+      commit_sha: 03a184bd1c611572f0ab14601406b250a9d1cc85
+      completed_at: '2026-11-18T03:34:00Z'
+      session_id: 7b4e931d-add7-487b-bfcd-8d9a26aeb105
+    review:
+      status: complete
+      commit_sha: 276dc8d611cbf6ae2456ea99061cd7ce9ba9932c
+      completed_at: '2026-11-18T03:38:03Z'
+      session_id: 3cae1cf2-c5b1-4f02-ad8b-18850c5a9e0f
+skipped_phases: []
+run_phases: []

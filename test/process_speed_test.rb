@@ -77,7 +77,7 @@ class ProcessSpeedTest < Minitest::Test
       sh(dir, "git", "checkout", "-qb", "change/c9")
       cli(dir, "change", "new", "c9")
       meta = YAML.safe_load_file(File.join(dir, "changes", "c9", "metadata.yml"), permitted_classes: [Time, Date])
-      assert_equal 2, meta["rules"]
+      assert_equal 3, meta["rules"]
     end
   end
 

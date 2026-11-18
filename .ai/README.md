@@ -21,6 +21,10 @@ The host may operate in either mode:
 
 Canonical source templates under `.ai/skills/*/template/` and `.ai/templates/` are immutable workflow definitions. Copies under `changes/<change>/` are mutable execution records, created by `soft-foundry change new`. Schemas for the record and its per-phase `handoff.yml` are in `schemas.md`.
 
+## The code-quality phase
+
+`quality` (`skills/code-quality/`, `06a-code-quality/`) runs after verification: a staff software engineer's review of the change's code for fit to need, design, duplication, performance, reliability and clarity. It is optional unless the repository profile turns it on (`quality_gate.enabled` in `repository.yml`; onboarding sets it for Ruby, Python, JavaScript, TypeScript and PHP). Where it is on, it is required at medium and high risk on the gated and iterative tracks. Only a finding with a class (`duplication`, `performance`, `simpler_design`, `unmet_need`, `reliability`) and a concrete `failure:` may block; a blocked change goes to remediation.
+
 ## Layout
 
 | Path | Purpose |

@@ -22,6 +22,7 @@ deny_write:
   - "changes/${CHANGE}/04-plan/**"
   - "changes/${CHANGE}/05-implementation/**"
   - "changes/${CHANGE}/06-verification/**"
+  - "changes/${CHANGE}/06a-code-quality/**"
   - "changes/${CHANGE}/07-evaluation/**"
   - "changes/${CHANGE}/08-attack/**"
   - "changes/${CHANGE}/09-remediation/**"

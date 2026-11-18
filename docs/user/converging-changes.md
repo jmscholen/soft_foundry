@@ -1,6 +1,6 @@
 # Converging changes: promises, rounds and follow-ups
 
-Introduced by `changes/process-speed` (REQ-001 to REQ-017). Applies to records with `rules: 2` in `metadata.yml`, which `soft-foundry change new` writes. Older records keep the rules they started under.
+Introduced by `changes/process-speed` (REQ-001 to REQ-017). Applies to records with `rules: 2` or above in `metadata.yml`, which `soft-foundry change new` writes. Older records keep the rules they started under.
 
 ## Approve what the change promises
 1. Write each acceptance criterion with `tier: must` or `tier: should` in `02-specification/acceptance-criteria.yml`. Must is for what would be a real failure of the change's purpose, security or data.

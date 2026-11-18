@@ -1,0 +1,29 @@
+# Phase handoff. One per phase directory. The gate checker validates this file.
+phase: 02-specification
+skill: specification
+status: complete
+commit_sha: 7238a46de71a032cd1b544b6a56e78cc3e514360
+# Written by `soft-foundry phase seal` on a commit-bound phase: whether
+# metadata.git.branch resolved to a ref when the phase was sealed. False
+# means the checked-out HEAD, not a branch created later, is the measure
+# for "evidence current". Never written by the agent.
+# branch_resolved: true
+started_at: "2026-11-17T02:10:59Z"
+completed_at: "2026-11-17T02:10:59Z"
+resolved_model:
+  profile: reasoning_high
+  provider: anthropic
+  model: claude-fable-5-2
+outputs: [requirements.yml, acceptance-criteria.yml, specification.md, readiness.md]                # files produced, relative to this phase directory
+blocking: []               # unresolved blocking conditions; must be empty when complete
+findings: []               # items for downstream phases: {id, severity, summary}; a review's
+                           # findings above minor also carry failure: (the concrete input
+                           # or state and the wrong result it leads to)
+next: implement
+notes: ""
+# Written by `soft-foundry phase run`, never by the agent: how this phase was
+# executed (runner, shell, fresh_context, started_at, finished_at, exit_status,
+# session_id, cwd).
+# A review or judgment phase completed without it is advised as having been
+# performed by whatever session was already open.
+executed_by: null

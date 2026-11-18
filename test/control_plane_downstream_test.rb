@@ -10,13 +10,13 @@ class ControlPlaneDownstreamTest < Minitest::Test
   def ids(phase_id) = plane.downstream(plane.phase(phase_id)).map(&:id)
 
   def test_downstream_is_every_later_lifecycle_phase_in_order_excluding_the_phase
-    assert_equal %w[evaluate attack remediate document index observe review judge learn], ids("verify")
+    assert_equal %w[quality evaluate attack remediate document index observe review judge learn], ids("verify")
     assert_equal %w[learn], ids("judge")
     assert_equal [], ids("learn")
   end
 
   def test_remediate_follows_its_next_transition_back_to_verify
-    assert_equal %w[verify evaluate attack document index observe review judge learn], ids("remediate")
+    assert_equal %w[verify quality evaluate attack document index observe review judge learn], ids("remediate")
   end
 
   def test_a_phase_reached_only_by_lifecycle_order_does_not_follow_the_loop_back

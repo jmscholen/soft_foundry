@@ -1,0 +1,26 @@
+commit_sha: 459fa860a35924d47b49b12e507543547768d8ef
+artifacts:
+  - path: evidence/full-suite.log
+    produced_by: "bundle exec rake test with provider keys and SOFT_FOUNDRY_PHASE unset"
+    sha256: 8b2be13310b298f46a4f35ecad911194d1d1091e85aa777be0b4f142842b9234
+  - path: evidence/code-quality-gate-test.log
+    produced_by: "ruby -Ilib -Itest test/code_quality_gate_test.rb -v with provider keys and SOFT_FOUNDRY_PHASE unset"
+    sha256: 919a5c7dcc67180ee51b9a7859cbcabe3935229c8da1f512bd5e42ea2d4fd866
+  - path: evidence/targeted-tests.log
+    produced_by: "ruby -Ilib -Itest test/maturity_scan_test.rb and test/cli_init_test.rb with provider keys unset"
+    sha256: 84dec1c07c2af64e9c86d4249ab14cab8c9dff8ddda22d456268fef07b40927f
+  - path: evidence/check.log
+    produced_by: "ruby -Ilib exe/soft-foundry check"
+    sha256: 7a7074f606fedc217a2b1e697604e5bb700c1e86b07c4e8d913409f4d9cad5a5
+  - path: evidence/ci.log
+    produced_by: "ruby -Ilib exe/soft-foundry ci"
+    sha256: 4278be4cbca0103347c1a1a19b858d9fb3d135ce8c8e6a550d985ae7b44d1f2a
+  - path: evidence/existing-test-edits.txt
+    produced_by: "git diff f508df2 b118833 -- test excluding test/code_quality_gate_test.rb"
+    sha256: a1c6f085d6c6039bb202d3d25e31d6e0ae9c6f8ba71de8113677db929d53a1a1
+  - path: evidence/red-commit.txt
+    produced_by: "git show --stat 55448aa; git diff --stat 55448aa b118833 -- lib .ai; the two REV-001 tests run at 55448aa"
+    sha256: 4822267d66930044638661adccb6358ee54f9511294f201b6a07300d7b80a6cc
+  - path: evidence/scratch-onboarding.txt
+    produced_by: "soft-foundry init --maturity scan and onboard in scratch repositories under /tmp, worktree lib"
+    sha256: 4a11eea5a2e9bd53745846ce57bcf82f33d13a33e0826b09df85830bfd5d1c89

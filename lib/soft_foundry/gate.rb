@@ -48,6 +48,11 @@ module SoftFoundry
     CAP_CHECK = "remediation within cap"
     BLOCKED_BASIS_CHECK = "blocked basis"
     OUTSIDE_CHECK = "outside-change findings"
+    # The code-quality phase (changes/code-quality-gate): the classes a
+    # blocking finding may name, and the check that holds it to one.
+    QUALITY = "quality"
+    CLASSED_CHECK = "quality findings classed"
+    QUALITY_CLASSES = %w[duplication performance simpler_design unmet_need reliability].freeze
     PROCESS_CHECKS = [RULES_KEPT_CHECK, TIERED_CHECK, APPROVED_CHECK, CAP_CHECK, BLOCKED_BASIS_CHECK, OUTSIDE_CHECK].freeze
     RESULT_WORDS = %w[pass fail error skipped].freeze
     # The two names the runner writes into executed_by.runner; any other
@@ -97,6 +102,7 @@ module SoftFoundry
       APPROVED_CHECK => "Under the convergence rules, human_decisions holds a 'must criteria approval' entry, decision approved, whose criteria are exactly the specification's must criteria. The entry is read, not who wrote it.",
       CAP_CHECK => "Under the convergence rules, every sealed remediation round beyond .ai/workflow.yml remediation.max_rounds is answered by a 'remediation cap' decision under human_decisions (accept_residual or narrow) for that round count.",
       BLOCKED_BASIS_CHECK => "Under the convergence rules, a BLOCKED judgment lists in 14-judgment/evidence.yml blocked_by what blocks it: must criteria, or review findings of severity blocking that name a failure and are not marked outside_change.",
+      CLASSED_CHECK => "A code-quality finding of severity blocking names its class (#{QUALITY_CLASSES.join(', ')}) and its concrete cost in failure:, and a phase carrying one is blocked, not complete.",
       OUTSIDE_CHECK => "Under the convergence rules, a finding marked outside_change names a follow_up and the paths it concerns, and none of those paths changed in this change's diff."
     }.freeze
 
@@ -113,15 +119,16 @@ module SoftFoundry
       names << "evidence current" if plane.skill(phase.skill).commit_bound?
       names << "specification locked" if phase.id == "specify"
       names += [TIERED_CHECK, APPROVED_CHECK] if phase.id == "specify"
-      names << CAP_CHECK if %w[review judge].include?(phase.id)
+      names << CAP_CHECK if %w[review judge].include?(phase.id) || phase.id == QUALITY
       names << BLOCKED_BASIS_CHECK if phase.id == "judge"
-      names << OUTSIDE_CHECK if %w[attack review].include?(phase.id)
+      names << OUTSIDE_CHECK if %w[attack review].include?(phase.id) || phase.id == QUALITY
       names += ["red evidence", SIZE_CHECK, PROTECTION_CHECK, FULL_SUITE_CHECK, RESULTS_CHECK, CRITERIA_CHECK] if phase.id == "verify"
       names << MANIFEST_CHECK if manifest_phase?(plane, phase)
       names += [CRITERIA_CHECK, VERDICT_CHECK] if phase.id == "judge"
-      names << FRESH_CHECK if %w[review judge].include?(phase.id)
+      names << FRESH_CHECK if %w[review judge].include?(phase.id) || phase.id == QUALITY
       names << "instincts valid" if phase.id == "learn"
-      names << "findings explained" if phase.id == "review"
+      names << "findings explained" if phase.id == "review" || phase.id == QUALITY
+      names << CLASSED_CHECK if phase.id == QUALITY
       names << "panel recorded" if plane.panel_phases.include?(phase)
       names << "content clean"
     end
@@ -155,6 +162,9 @@ module SoftFoundry
       rescue RecordFileError, Psych::Exception => e
         return Result.new(phase:, status: "missing", checks: [Check.new("handoff present", :fail, "#{phase.output}/handoff.yml cannot be read: #{e.message.lines.first.to_s.strip}")])
       end
+      if handoff.nil? && (why = @record.not_asked_reason(phase))
+        return Result.new(phase:, status: "pending", checks: [Check.new("phase pending", :skip, why)])
+      end
       return Result.new(phase:, status: "missing", checks: [Check.new("handoff present", :fail, "#{phase.output}/handoff.yml is missing")]) unless handoff
 
       status = handoff["status"].to_s
@@ -174,6 +184,7 @@ module SoftFoundry
         checks << Check.new("phase in progress", :warn, "not yet gated")
       when "blocked"
         checks << (blocking.empty? ? Check.new("blocking recorded", :fail, "status is blocked but `blocking` is empty") : Check.new("blocking recorded", :warn, blocking.join("; ")))
+        checks << quality_classed_check(handoff, status) if phase.id == QUALITY
       when "complete"
         checks << exploring_check if @record.exploring? && @plane.hardening_phase?(phase)
         checks << required_files_check(phase, skill)
@@ -187,9 +198,9 @@ module SoftFoundry
         checks << staleness_check(phase, handoff) if skill.commit_bound?
         checks << specification_lock_check(phase) if phase.id == "specify"
         checks.concat([tiered_check, approved_check]) if phase.id == "specify"
-        checks << cap_check if %w[review judge].include?(phase.id)
+        checks << cap_check if %w[review judge].include?(phase.id) || phase.id == QUALITY
         checks << blocked_basis_check if phase.id == "judge"
-        checks << outside_change_check(handoff) if %w[attack review].include?(phase.id)
+        checks << outside_change_check(handoff) if %w[attack review].include?(phase.id) || phase.id == QUALITY
         checks << red_evidence_check(phase, handoff) if phase.id == "verify"
         checks.concat(scoped_verification_checks(phase, handoff)) if phase.id == "verify"
         checks << protection_check(phase) if phase.id == "verify"
@@ -198,9 +209,10 @@ module SoftFoundry
         checks << manifest_check(phase) if self.class.manifest_phase?(@plane, phase)
         checks << criteria_check(:judge) if phase.id == "judge"
         checks << verdict_check if phase.id == "judge"
-        checks << fresh_session_check(phase, handoff) if %w[review judge].include?(phase.id)
+        checks << fresh_session_check(phase, handoff) if %w[review judge].include?(phase.id) || phase.id == QUALITY
         checks << instincts_check if phase.id == "learn"
-        checks << findings_explained_check(handoff) if phase.id == "review"
+        checks << findings_explained_check(handoff) if phase.id == "review" || phase.id == QUALITY
+        checks << quality_classed_check(handoff, status) if phase.id == QUALITY
         checks << panel_check(phase, handoff) if handoff["panel"].is_a?(Hash)
         checks << content_check(phase)
       end
@@ -431,6 +443,28 @@ module SoftFoundry
       missing = findings.select { |f| f["failure"].to_s.strip.empty? }.map { |f| f["id"] || "(no id)" }
       return Check.new("findings explained", :fail, "no failure: on #{missing.join(', ')}; every finding above minor names the concrete input or state and the wrong result it leads to, or it is minor") unless missing.empty?
       Check.new("findings explained", :pass, "#{findings.size} #{findings.size == 1 ? 'finding above minor names its' : 'findings above minor name their'} failure")
+    end
+
+    # Only a concrete cost in a named class may block a change on code
+    # quality: each finding of severity blocking names its class and its
+    # failure. A handoff carrying one is blocked, never complete. Structure
+    # only: whether the cost is real is the reviewer's claim.
+    def quality_classed_check(handoff, status)
+      blocking = Array(handoff["findings"]).select { |f| f.is_a?(Hash) && f["severity"].to_s.strip.downcase == "blocking" }
+      return Check.new(CLASSED_CHECK, :pass, "no blocking finding") if blocking.empty?
+      problems = blocking.filter_map do |f|
+        id = f["id"] || "(no id)"
+        klass = f["class"].to_s.strip
+        next "#{id} names no class" if klass.empty?
+        next "#{id} names class '#{klass}', which may not block" unless QUALITY_CLASSES.include?(klass)
+        next "#{id} names no failure (the concrete cost)" if f["failure"].to_s.strip.empty?
+      end
+      unless problems.empty?
+        return Check.new(CLASSED_CHECK, :fail, "#{problems.join('; ')}; a blocking finding names one of #{QUALITY_CLASSES.join(', ')} under class: and its concrete cost under failure:, or it is major at most")
+      end
+      ids = blocking.map { |f| f["id"] || "(no id)" }.join(", ")
+      return Check.new(CLASSED_CHECK, :fail, "status is complete with blocking #{ids}; list them under blocking, set status blocked, and the change goes to remediation") if status == "complete"
+      Check.new(CLASSED_CHECK, :pass, "#{blocking.size} blocking, classed: #{ids}")
     end
 
     # A phase run as a panel (`panel:` in its handoff, written by the

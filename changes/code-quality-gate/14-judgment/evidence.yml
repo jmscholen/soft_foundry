@@ -1,0 +1,50 @@
+commit_judged: 79ab0c2f55d1a3a2940b0a201d95f5350b3152d7
+code_commit: b1188331f309d37b55b3056f4e0795a6970b2947
+phases:
+  - phase: 06-verification
+    commit_sha: 459fa860a35924d47b49b12e507543547768d8ef
+    current: true   # no code changed after b118833, the code this evidence describes
+    result: pass
+  - phase: 06a-code-quality
+    commit_sha: null
+    current: null
+    result: not_run
+    reason: the record predates the phase (rules 2), the light track makes it optional, and the repository profile sets quality_gate.enabled false
+  - phase: 07-evaluation
+    commit_sha: null
+    current: null
+    result: not_run
+    reason: optional on the light track
+  - phase: 08-attack
+    commit_sha: null
+    current: null
+    result: not_run
+    reason: optional on the light track
+  - phase: 09-remediation
+    commit_sha: b1188331f309d37b55b3056f4e0795a6970b2947
+    current: true
+    result: complete
+    reason: round 1 of 2; fixed REV-001
+  - phase: 13-review
+    commit_sha: 1650d932b6c0ca5d4d27bcbeeda7f5a00471af77
+    current: true
+    result: pass
+    reason: no blocking findings; REV-001 resolved
+unresolved_findings:
+  - {id: VER-001, severity: minor, disposition: residual risk (AC-008 structural coverage only)}
+  - {id: REV-002, severity: minor, disposition: residual risk (same as VER-001)}
+  - {id: REV-003, severity: minor, disposition: accepted; REQ-004 requires the rules-number change}
+  - {id: REV-004, severity: minor, disposition: follow-up (UI skip reason)}
+  - {id: REV-005, severity: minor, disposition: follow-up (duplicated check lists)}
+  - {id: REV-006, severity: minor, disposition: follow-up outside this change (guard after-hook path)}
+  - {id: REV-007, severity: minor, disposition: follow-up (harness eval case)}
+  - {id: REV-008, severity: minor, disposition: operational; install the branch locally}
+  - {id: REV-009, severity: minor, disposition: disclosed and made under the maintainer's override; no behaviour}
+  - {id: IMPL-002, severity: minor, disposition: same as REV-007}
+  - {id: VER-002, severity: minor, disposition: same as REV-008}
+  - {id: VER-003, severity: minor, disposition: operational; full suite takes about 21 minutes}
+  - {id: VER-005, severity: minor, disposition: same as REV-006}
+blocked_by: []
+criteria_not_covered: []
+undischarged: []
+discharged: []

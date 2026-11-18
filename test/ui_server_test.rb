@@ -82,12 +82,12 @@ class UIServerTest < Minitest::Test
     with_server do |_dir, port, _server|
       workflow = get(port, "/api/workflow")
       assert_equal "application/json; charset=utf-8", workflow.headers["content-type"]
-      assert_equal 16, JSON.parse(workflow.body)["phases"].size
+      assert_equal 17, JSON.parse(workflow.body)["phases"].size
       board = JSON.parse(get(port, "/api/changes").body)
       assert_equal ["c1"], board["changes"].map { |c| c["slug"] }
       change = JSON.parse(get(port, "/api/change?slug=c1").body)
       assert_equal "First change", change["title"]
-      assert_equal 16, change["gates"].size
+      assert_equal 17, change["gates"].size
     end
   end
 
@@ -158,7 +158,7 @@ class UIServerTest < Minitest::Test
         assert_equal ["c1"], JSON.parse(get(port, "/api/changes?repo=#{home['id']}").body)["changes"].map { |c| c["slug"] }
         assert_equal "Work in another repository", JSON.parse(get(port, "/api/change?repo=#{there['id']}&slug=elsewhere").body)["title"]
         assert_equal 404, get(port, "/api/change?repo=#{there['id']}&slug=c1").status, "a slug belongs to its repository"
-        assert_equal 16, JSON.parse(get(port, "/api/workflow?repo=#{there['id']}").body)["phases"].size
+        assert_equal 17, JSON.parse(get(port, "/api/workflow?repo=#{there['id']}").body)["phases"].size
 
         data = JSON.parse(get(port, "/api/processes").body)
         assert_equal there["id"], data["sessions"].first["repo"]

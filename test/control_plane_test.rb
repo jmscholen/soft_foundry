@@ -10,7 +10,7 @@ class ControlPlaneTest < Minitest::Test
   end
 
   def test_lifecycle_has_sixteen_phases_in_order
-    assert_equal 16, @plane.phases.size
+    assert_equal 17, @plane.phases.size
     assert_equal "intake", @plane.phases.first.id
     assert_equal "learn", @plane.phases.last.id
     assert_equal "verify", @plane.successor(@plane.phase("implement")).id

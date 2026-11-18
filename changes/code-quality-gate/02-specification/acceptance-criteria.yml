@@ -1,0 +1,96 @@
+# Each criterion must be testable and map to at least one requirement.
+# Criteria are locked once specification completes; changing them requires a
+# recorded requirement change, never a downstream edit.
+# tier: must (a promise; can block; capped by risk; approved by a person
+# under human_decisions) or should (reported, never blocking).
+criteria:
+  - id: AC-001
+    tier: must
+    requirements: [REQ-001, REQ-004]
+    given: a repository whose profile has the quality gate on, and a record created by `change new` after this change, on the gated track at medium risk, with verification complete and sealed and the quality phase pending
+    when: "`soft-foundry gate evaluate` runs with evaluation's handoff complete, and `soft-foundry phase seal verify` has just run"
+    then: the evaluate gate fails because its predecessor, quality, is not complete, and after the verify seal the record's current phase is quality; once quality is complete and sealed the evaluate gate's predecessor check passes
+    verified_by: []
+  - id: AC-002
+    tier: must
+    requirements: [REQ-004, REQ-012]
+    given: "five records with verification complete and the quality phase pending. Four are in a repository whose profile has the quality gate on: one at low risk on the gated track, one on the light track at medium risk, one whose metadata carries the earlier rules number, and one with no rules number. The fifth is at medium risk on the gated track in a repository whose profile has the gate off or does not name it"
+    when: the gate runs on the phase after verify for each
+    then: no check fails because of the quality phase, and `change status` gives the reason it may stay pending for the first two and the fifth
+    verified_by: []
+  - id: AC-003
+    tier: must
+    requirements: [REQ-005, REQ-006]
+    given: "quality handoffs with a finding of severity blocking in five forms: class duplication with a failure; class reliability with a failure; no class; class style; class performance with no failure"
+    when: the quality gate runs on each
+    then: the first two are accepted as well-formed blocking findings and the phase is blocked with remediation as the next step; the other three fail the gate with a message naming the finding and what is missing; a handoff whose findings are all major or lower can complete
+    verified_by: []
+  - id: AC-004
+    tier: must
+    requirements: [REQ-003]
+    given: the code-quality skill's permissions
+    when: the guard decides a write by that phase to an application file, to a test file, to another phase's directory, and to its own directory, and a read of a harness eval
+    then: only the write to its own directory is allowed
+    verified_by: []
+  - id: AC-005
+    tier: should
+    requirements: [REQ-002]
+    given: the code-quality skill and its templates
+    when: they are read
+    then: the six questions of REQ-002 each have a section in the templates, the five blocking classes are named with what makes each one blocking, the method and the finding format of REQ-002 are stated, and the skill says the phase does not repair code and names no framework
+    verified_by: []
+  - id: AC-006
+    tier: should
+    requirements: [REQ-007]
+    given: a record with quality complete and sealed
+    when: application code is committed afterwards, and separately when verify is reopened
+    then: the quality gate reports its evidence stale in the first case and the reopen resets quality to pending in the second
+    verified_by: []
+  - id: AC-007
+    tier: should
+    requirements: [REQ-008]
+    given: a quality handoff completed without `executed_by` in a repository whose guard mode is block
+    when: the quality gate runs
+    then: the fresh-session check fails as it does for review
+    verified_by: []
+  - id: AC-008
+    tier: should
+    requirements: [REQ-006]
+    given: a record with two sealed remediation rounds and no cap decision
+    when: a third round is asked for after a blocking quality finding
+    then: it is refused with the remediation cap message
+    verified_by: []
+  - id: AC-009
+    tier: should
+    requirements: [REQ-009, REQ-010, REQ-011]
+    given: the review and judgment skills, README.md, .ai/README.md, AGENTS.md, the docs/user/ page and `soft-foundry help`
+    when: they are read
+    then: each names the quality phase as REQ-009 and REQ-010 state, and `change status` lists the phase between verification and evaluation in words
+    verified_by: []
+  - id: AC-010
+    tier: should
+    requirements: [REQ-012]
+    given: the full test suite with provider keys and SOFT_FOUNDRY_PHASE unset, and `soft-foundry ci` on this repository
+    when: they run at the implementation commit
+    then: both pass; the only existing assertions changed are ones that count or list phases or skills
+    verified_by: []
+  - id: AC-012
+    tier: should
+    requirements: [REQ-004]
+    given: "onboarding run in three repositories: one where Ruby is detected, one where only Go is detected, and one whose profile already sets quality_gate.enabled to false by hand where Ruby is detected"
+    when: the profile is written
+    then: the gate is on in the first, off in the second, and still off in the third
+    verified_by: []
+  - id: AC-011
+    tier: should
+    requirements: [REQ-013, REQ-014]
+    given: .ai/rules/rails.md and the remediation skill
+    when: they are read
+    then: the Rails rule file has the four review decisions of REQ-013, and the remediation skill has the five steps of REQ-014
+    verified_by: []
+
+# Checks only a person can make (open a published page, look at a render).
+# Not criteria; `change release` carries each as a release item.
+person_checks:
+  - id: PC-001
+    description: After merge and local install, the maintainer runs `soft-foundry init` in one application repository, creates a medium risk change, and sees the quality phase listed after verification in `soft-foundry change status`.
