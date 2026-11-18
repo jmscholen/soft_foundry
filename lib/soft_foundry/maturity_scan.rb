@@ -81,15 +81,21 @@ module SoftFoundry
     end
 
     # The quality_gate: block of .ai/repository.yml. A setting a person
-    # made (any `set_by` the scan did not write) is kept as it is; otherwise
+    # made (a `set_by` that is not blank and that the scan did not write)
+    # is kept as it is; otherwise
     # the gate is on when a scripting language is detected.
     def quality_gate(tech = technology)
       existing = plane.repository_profile["quality_gate"]
-      if existing.is_a?(Hash) && [true, false].include?(existing["enabled"]) && !existing["set_by"].to_s.start_with?(SCAN_SET_BY)
-        return existing
-      end
+      return existing if existing.is_a?(Hash) && [true, false].include?(existing["enabled"]) && set_by_a_person?(existing["set_by"])
       found = tech["languages"] & QUALITY_GATE_LANGUAGES
       { "enabled" => !found.empty?, "set_by" => "#{SCAN_SET_BY}: #{found.empty? ? 'no scripting language detected' : found.join(', ')})" }
+    end
+
+    # A blank set_by is the profile template's unset value, and one the scan
+    # wrote is the scan's own; neither is a person's choice.
+    def set_by_a_person?(set_by)
+      name = set_by.to_s.strip
+      !name.empty? && !name.start_with?(SCAN_SET_BY)
     end
 
     def infrastructure

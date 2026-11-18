@@ -17,8 +17,9 @@ technology:
 
 # The code-quality review phase (.ai/skills/code-quality/). Off unless
 # enabled here. Onboarding turns it on when it detects Ruby, Python,
-# JavaScript, TypeScript or PHP, and keeps a value a person set (any
-# set_by it did not write). Where it is on, the phase is required at
+# JavaScript, TypeScript or PHP, and keeps a value a person set (a
+# set_by that is not blank and that it did not write). Where it is on,
+# the phase is required at
 # medium and high risk on the gated and iterative tracks.
 quality_gate:
   enabled: false
